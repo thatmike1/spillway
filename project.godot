@@ -1,0 +1,20 @@
+; Foldrunner prototype. Godot 4.7.2, GDScript, Compatibility renderer.
+config_version=5
+
+[application]
+config/name="Foldrunner"
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.025, 0.035, 0.06, 1)
+
+[physics]
+common/physics_ticks_per_second=60
