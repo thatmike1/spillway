@@ -30,6 +30,8 @@ const CREST_CENTER: Vector3 = Vector3(0, 21, -175)
 const CREST_RADIUS: float = 4.0
 
 var fold: AnimatableBody3D
+var folds: Array[AnimatableBody3D] = []
+var fold_triggers: Array[Dictionary] = []
 var cues: Array[Dictionary] = []
 var checkpoints: Array[Dictionary] = []
 var fold_trigger: Area3D
@@ -41,11 +43,11 @@ var landmarks: Dictionary = {}
 
 var _facades: Array[ShaderMaterial] = []
 var _ta_material: ShaderMaterial
+var _waves: Array[Dictionary] = []
 var _materials: Dictionary = {}
 var _spinners: Array[Dictionary] = []
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _built: bool = false
-var _settled_time: float = 0.0
 
 
 func build() -> void:
@@ -70,15 +72,19 @@ func _process(delta: float) -> void:
 	for spinner: Dictionary in _spinners:
 		var node: Node3D = spinner["node"]
 		node.rotate_object_local(spinner["axis"], float(spinner["speed"]) * delta)
-	if fold != null and _ta_material != null:
-		var warning: float = float(fold.call("get_warning"))
+	for wave: Dictionary in _waves:
+		var block: Node = wave["fold"]
+		var material: ShaderMaterial = wave["material"]
+		var height: float = wave["height"]
+		var warning: float = float(block.call("get_warning"))
 		# floors light up bottom to top during the anticipation beat, stay lit while
-		# the tower turns, then go dark again from the hinge outward once it lands
-		var height: float = -TA_HEIGHT * 0.5 - 2.0 + warning * (TA_HEIGHT + 4.0) if warning > 0.0 else -10000.0
-		_settled_time = _settled_time + delta if bool(fold.call("is_done")) else 0.0
-		var floor_height: float = -TA_HEIGHT * 0.5 - 2.0 + clampf(_settled_time / 1.6, 0.0, 1.0) * (TA_HEIGHT + 4.0)
-		_ta_material.set_shader_parameter("wave_height", height)
-		_ta_material.set_shader_parameter("wave_floor", floor_height if _settled_time > 0.0 else -10000.0)
+		# the block turns, then go dark again from the hinge outward once it lands
+		var top: float = -height * 0.5 - 2.0 + warning * (height + 4.0) if warning > 0.0 else -10000.0
+		wave["settled"] = float(wave["settled"]) + delta if bool(block.call("is_done")) else 0.0
+		var settled: float = wave["settled"]
+		var bottom: float = -height * 0.5 - 2.0 + clampf(settled / 1.6, 0.0, 1.0) * (height + 4.0)
+		material.set_shader_parameter("wave_height", top)
+		material.set_shader_parameter("wave_floor", bottom if settled > 0.0 else -10000.0)
 
 
 ## Closest cue index the player has not yet passed is decided by main; this
@@ -96,8 +102,8 @@ func set_cue_level(index: int, level: float) -> void:
 
 
 func reset_state() -> void:
-	if fold != null:
-		fold.call("reset_fold")
+	for block: AnimatableBody3D in folds:
+		block.call("reset_fold")
 
 
 # ---------------------------------------------------------------- materials
@@ -284,9 +290,10 @@ func _trigger(node_name: String, center: Vector3, size: Vector3) -> Area3D:
 	return area
 
 
-func _checkpoint(center: Vector3, size: Vector3, pose: Transform3D, folded: bool) -> void:
+## folds_down: how many folds, in route order, are already down at this checkpoint.
+func _checkpoint(center: Vector3, size: Vector3, pose: Transform3D, folds_down: int) -> void:
 	var area: Area3D = _trigger("Checkpoint%d" % checkpoints.size(), center, size)
-	checkpoints.append({"area": area, "pose": pose, "folded": folded})
+	checkpoints.append({"area": area, "pose": pose, "folds_down": folds_down})
 
 
 # ---------------------------------------------------------------- sky and light
@@ -366,7 +373,7 @@ func _start_roof() -> void:
 	_cue_strip(edge, self, Vector3(0, 0.03, -47.82), Vector3(11.0, 0.06, 0.3))
 	_cue_strip(edge, self, Vector3(0, -0.25, -48.02), Vector3(11.0, 0.5, 0.06))
 	fold_trigger = _trigger("FoldTrigger", Vector3(0, 2, -6), Vector3(22, 6, 4))
-	checkpoints.append({"area": null, "pose": spawn, "folded": false})
+	checkpoints.append({"area": null, "pose": spawn, "folds_down": 0})
 
 
 func _water_tank(base: Vector3, solid: bool) -> void:
@@ -419,6 +426,9 @@ func _drawbridge_tower() -> void:
 	fold.set("anticipation", 1.2)
 	fold.set("duration", 3.3)
 	add_child(fold)
+	folds.append(fold)
+	fold_triggers.append({"area": fold_trigger, "fold": fold})
+	_waves.append({"fold": fold, "material": _ta_material, "height": TA_HEIGHT, "settled": 0.0})
 	var center: Vector3 = Vector3(0, TA_HEIGHT * 0.5, -TA_DEPTH * 0.5)
 	_mesh(fold, center, Vector3(TA_WIDTH, TA_HEIGHT, TA_DEPTH), _ta_material)
 	_shape(fold, center, Vector3(TA_WIDTH, TA_HEIGHT, TA_DEPTH))
@@ -448,7 +458,7 @@ func _drawbridge_tower() -> void:
 	# the far lip of the road, where you leave it
 	var lip: int = _cue(fold, Vector3(0, TA_HEIGHT, 0), 7.0)
 	_cue_strip(lip, fold, Vector3(0, TA_HEIGHT - 0.15, 0.08), Vector3(9.0, 0.3, 0.12))
-	_checkpoint(Vector3(0, 2.5, -57), Vector3(16, 5, 6), Transform3D(Basis.IDENTITY, Vector3(0, 0.9, -56)), true)
+	_checkpoint(Vector3(0, 2.5, -57), Vector3(16, 5, 6), Transform3D(Basis.IDENTITY, Vector3(0, 0.9, -56)), 1)
 
 
 # ---------------------------------------------------------------- route: R2
@@ -469,27 +479,20 @@ func _roof_two() -> void:
 	_ac_unit(Vector3(7.0, roof_y, -132.5), true)
 	_ac_unit(Vector3(-7.5, roof_y, -119), true)
 	_water_tank(Vector3(8.0, roof_y, -108), true)
-	# a billboard on the left that you can wall-run across the next gap
-	var board_x: float = -9.6
-	_solid(self, Vector3(board_x, roof_y + 3.0, -143.5), Vector3(0.5, 4.4, 14.0), _materials["dark"], "Billboard")
-	_mesh(self, Vector3(board_x + 0.27, roof_y + 3.0, -143.5), Vector3(0.04, 3.6, 13.0), _emissive(Color("#1d4652"), 0.5))
-	for z: float in [-137.5, -149.5]:
-		_mesh(self, Vector3(board_x, roof_y - 2.0, z), Vector3(0.3, 6.0, 0.3), _materials["metal"])
-	var takeoff: int = _cue(self, Vector3(0, roof_y, -139.9), 7.0)
-	_cue_strip(takeoff, self, Vector3(1.0, roof_y + 0.03, -139.82), Vector3(14.0, 0.06, 0.3))
-	_cue_strip(takeoff, self, Vector3(1.0, roof_y - 0.25, -140.02), Vector3(14.0, 0.5, 0.06))
-	_checkpoint(Vector3(0, roof_y + 2.5, -107), Vector3(22, 5, 6), Transform3D(Basis.IDENTITY, Vector3(0, roof_y + 0.9, -106.5)), true)
+	var edge: int = _cue(self, Vector3(0, roof_y, -139.9), 7.0)
+	_cue_strip(edge, self, Vector3(0, roof_y + 0.03, -139.82), Vector3(12.0, 0.06, 0.3))
+	_checkpoint(Vector3(0, roof_y + 2.5, -107), Vector3(22, 5, 6), Transform3D(Basis.IDENTITY, Vector3(0, roof_y + 0.9, -106.5)), 1)
 
 
 # ---------------------------------------------------------------- route: R3 and the bend
 
 func _roof_three_and_bend() -> void:
 	var roof_y: float = -3.0
-	_building(Vector2(0, -154.5), Vector2(20, 21), roof_y, true, _facade(1), false)
-	_parapet(Vector3(0, roof_y, -154.5), Vector2(20, 21), true, [true, true, false, false])
+	# R3 sits across a street from R2; its front skin is the second fold
+	_building(Vector2(0, -160.1), Vector2(20, 9.8), roof_y, true, _facade(1), false)
+	_parapet(Vector3(0, roof_y, -160.1), Vector2(20, 9.8), true, [true, true, false, false])
 	_building(Vector2(0, -168), Vector2(20, 6), roof_y, true, _facade(1), false)
-	var landing: int = _cue(self, Vector3(0, roof_y, -144.5), 6.0)
-	_cue_strip(landing, self, Vector3(0, roof_y + 0.03, -144.4), Vector3(9.0, 0.06, 0.25))
+	_skin_bridge(roof_y)
 	# the roof bends up into the tower: a quarter pipe of gravity-carrying slabs
 	var bend: StaticBody3D = StaticBody3D.new()
 	bend.name = "Bend"
@@ -518,7 +521,52 @@ func _roof_three_and_bend() -> void:
 		collider.transform = Transform3D(slab_basis, point + normal * -thickness * 0.5)
 		if index % 3 == 1:
 			_cue_strip(bend_cue, holder, Vector3(0, 0.02, 0), Vector3(5.0, 0.05, 0.16))
-	_checkpoint(Vector3(0, roof_y + 2.5, -148), Vector3(20, 5, 6), Transform3D(Basis.IDENTITY, Vector3(0, roof_y + 0.9, -148)), true)
+	_checkpoint(Vector3(0, roof_y + 2.5, -159), Vector3(20, 5, 6), Transform3D(Basis.IDENTITY, Vector3(0, roof_y + 0.9, -158.5)), 2)
+
+
+## The front skin of R3 hangs below its roof line facing the street. It swings
+## up toward the runner about its top edge and lands flush with R2's edge as a
+## bridge; its parapet turns into the bridge's last plank against R3's roof.
+func _skin_bridge(roof_y: float) -> void:
+	var width: float = 14.0
+	var drop: float = 14.0
+	var skin: float = 1.2
+	var front_z: float = -154.0
+	# the strip of front wall either side of the skin, and the wall below it
+	for side: float in [-1.0, 1.0]:
+		_solid(self, Vector3(side * (width * 0.5 + 1.5), (roof_y + STREET_Y) * 0.5, front_z - skin * 0.5), Vector3(3.0, roof_y - STREET_Y, skin), _facade(1))
+	_mesh(self, Vector3(0, (roof_y - drop + STREET_Y) * 0.5, front_z - skin * 0.5), Vector3(width, roof_y - drop - STREET_Y, skin), _facade(1))
+	var material: ShaderMaterial = _facade(1).duplicate() as ShaderMaterial
+	material.set_shader_parameter("lit_ratio", 0.08)
+	var block: AnimatableBody3D = FOLD_SCRIPT.new() as AnimatableBody3D
+	block.name = "SkinBridge"
+	block.position = Vector3(0, roof_y, front_z)
+	block.set("axis", Vector3.RIGHT)
+	block.set("angle", -PI / 2.0)
+	block.set("anticipation", 0.6)
+	block.set("duration", 2.1)
+	block.set("settle_time", 0.5)
+	add_child(block)
+	folds.append(block)
+	_waves.append({"fold": block, "material": material, "height": drop, "settled": 0.0})
+	var slab_center: Vector3 = Vector3(0, -drop * 0.5, -skin * 0.5)
+	_mesh(block, slab_center, Vector3(width, drop, skin), material)
+	_shape(block, slab_center, Vector3(width, drop, skin))
+	var parapet_center: Vector3 = Vector3(0, skin * 0.5, -0.15)
+	_mesh(block, parapet_center, Vector3(width, skin, 0.3), _materials["concrete"])
+	_shape(block, parapet_center, Vector3(width, skin, 0.3))
+	for side: float in [-1.0, 1.0]:
+		var pier: Vector3 = Vector3(side * (width * 0.5 - 0.35), -drop * 0.5, 0.15)
+		_mesh(block, pier, Vector3(0.7, drop, 0.3), _materials["concrete"])
+		_shape(block, pier, Vector3(0.7, drop, 0.3))
+	# chevrons point up at the roof now and along the bridge once it lands
+	var chevrons: int = _cue(block, Vector3(0, -drop * 0.5, 0), 9.0)
+	for y_pos: float in [-11.0, -7.0, -3.0]:
+		_chevron(chevrons, block, Vector3(0, y_pos, 0.03), 2.0, 0.0)
+	var hinge: int = _cue(block, Vector3(0, 0, 0), 6.0)
+	_cue_strip(hinge, block, Vector3(0, skin + 0.02, -0.15), Vector3(width - 2.0, 0.05, 0.32))
+	var trigger: Area3D = _trigger("SkinTrigger", Vector3(0, 0.5, -100), Vector3(22, 8, 26))
+	fold_triggers.append({"area": trigger, "fold": block})
 
 
 # ---------------------------------------------------------------- route: TB
@@ -691,12 +739,12 @@ func _city_chunk(origin: Vector3, count: int) -> Node3D:
 func _route_for_bot() -> void:
 	bot_path = [
 		{"point": Vector3(0, 0.9, -5), "look_around": true},
-		{"point": Vector3(0, 0.9, -38), "wait_fold": true},
+		{"point": Vector3(0, 0.9, -38), "wait_fold": 0},
 		{"point": Vector3(0, 0.9, -48.0), "jump": true},
 		{"point": Vector3(0, 0.9, -98.6), "jump": true},
 		{"point": Vector3(4.5, -2.1, -112)},
 		{"point": Vector3(5.0, -2.1, -128)},
-		{"point": Vector3(3.0, -2.1, -139.7), "jump": true},
+		{"point": Vector3(1.5, -2.1, -137.0), "wait_fold": 1},
 		{"point": Vector3(0, -2.1, -160)},
 		{"point": Vector3(0, 2.0, -170.3)},
 		{"point": Vector3(0, 18.0, -170.1)},

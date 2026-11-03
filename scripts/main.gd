@@ -73,16 +73,17 @@ func _ready() -> void:
 	hud.connect("quit_requested", func() -> void: get_tree().quit())
 	hud.connect("setting_changed", _on_setting_changed)
 	hud.call("load_settings", settings)
-	(level.get("fold_trigger") as Area3D).body_entered.connect(_on_fold_trigger)
+	for entry: Dictionary in level.get("fold_triggers"):
+		(entry["area"] as Area3D).body_entered.connect(_on_fold_trigger.bind(entry["fold"]))
 	(level.get("finish_trigger") as Area3D).body_entered.connect(_on_finish)
 	var points: Array = level.get("checkpoints")
 	for index: int in range(points.size()):
 		var area: Area3D = points[index]["area"]
 		if area != null:
 			area.body_entered.connect(_on_checkpoint.bind(index))
-	var fold: Node = level.get("fold")
-	fold.connect("fold_started", func() -> void: audio.call("fold_started", fold))
-	fold.connect("fold_settled", func() -> void: audio.call("fold_settled", fold))
+	for block: Node in level.get("folds"):
+		block.connect("fold_started", func() -> void: audio.call("fold_started", block))
+		block.connect("fold_settled", func() -> void: audio.call("fold_settled", block))
 	_apply_settings()
 	restart_run()
 	var args: PackedStringArray = OS.get_cmdline_user_args()
@@ -132,9 +133,10 @@ func respawn() -> void:
 	respawn_count += 1
 	var points: Array = level.get("checkpoints")
 	var point: Dictionary = points[checkpoint_index]
-	var fold: Node = level.get("fold")
-	if bool(point["folded"]) and not bool(fold.call("is_done")):
-		fold.call("finish_now")
+	var folds: Array = level.get("folds")
+	for index: int in range(folds.size()):
+		if index < int(point["folds_down"]) and not bool(folds[index].call("is_done")):
+			folds[index].call("finish_now")
 	player.call("reset_to", point["pose"], Vector3.UP)
 	hud.call("flash_message", "Back on the last roof")
 
@@ -198,11 +200,10 @@ func _process(delta: float) -> void:
 	_manage_capture(delta)
 
 
-func _on_fold_trigger(body: Node3D) -> void:
+func _on_fold_trigger(body: Node3D, block: Node) -> void:
 	if body != player:
 		return
-	var fold: Node = level.get("fold")
-	fold.call("start_fold")
+	block.call("start_fold")
 
 
 func _on_checkpoint(body: Node3D, index: int) -> void:

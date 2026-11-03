@@ -79,8 +79,8 @@ func _physics_process(delta: float) -> void:
 			pitch_rate = -0.45
 		_mouse(Vector2(-yaw_rate * delta / _sensitivity, -pitch_rate * delta / _sensitivity))
 		return
-	if step.get("wait_fold", false):
-		var fold: Node = level.get("fold")
+	if step.has("wait_fold"):
+		var fold: Node = level.get("folds")[int(step["wait_fold"])]
 		if not bool(fold.call("is_done")) and flat.length() < 6.0:
 			Input.action_release("move_forward")
 			_waiting += delta
