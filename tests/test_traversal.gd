@@ -61,6 +61,8 @@ func _route(no_bank: bool) -> void:
 	check(bool(main.get("finished")), "bot did not finish the route")
 	check(int(main.get("respawn_count")) == 0, "bot fell and respawned")
 	check(saw_fold_done, "fold never completed")
+	for block: Node in main.get("level").get("folds"):
+		check(bool(block.call("is_done")), "%s never landed" % block.name)
 	check(saw_wall, "never ran on the tower face")
 	check(max_up_turn > deg_to_rad(85.0), "gravity never turned to the wall")
 	# 120 Hz physics at ~10 m/s is under 0.1 m a tick; anything big is a teleport
