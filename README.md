@@ -1,6 +1,6 @@
 # Foldrunner
 
-Original first-person parkour slice in Godot 4.7.2 (Compatibility renderer). You run across evening rooftops; a tower ahead tips over and its facade becomes your road; later the roof bends up into a second tower, you run up its face with the city turned on its side, crest over the top and finish under a beam of light. About 25 to 30 seconds for a clean run.
+Original first-person parkour slice in Godot 4.7.2 (Compatibility renderer). You run across evening rooftops; a tower ahead tips over and its facade becomes your road; the front wall of the next building falls toward you across the street and lands as a bridge; then the roof bends up into a second tower, you run up its face with the city turned on its side, crest over the top and finish under a beam of light. About 25 to 30 seconds for a clean run.
 
 All code, geometry and sound are original and generated at load time from primitive meshes and synthesised waveforms. No third-party assets.
 
