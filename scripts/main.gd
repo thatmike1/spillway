@@ -92,6 +92,11 @@ func _ready() -> void:
 		if arg.begins_with("--from="):
 			checkpoint_index = clampi(int(arg.get_slice("=", 1)), 0, (level.get("checkpoints") as Array).size() - 1)
 			respawn()
+			# a fold finished this instant only reaches the physics step after a tick or
+			# two; place the runner again once the road is really there
+			await get_tree().physics_frame
+			await get_tree().physics_frame
+			respawn()
 			respawn_count = 0
 			hud.call("flash_message", "")
 	if args.has("--bot"):

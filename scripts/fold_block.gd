@@ -44,16 +44,14 @@ func start_fold() -> void:
 func finish_now() -> void:
 	phase = Phase.DONE
 	_time = 0.0
-	transform = _pose(1.0, 0.0)
-	_sync_body()
+	_cut_to(_pose(1.0, 0.0))
 
 
 func reset_fold() -> void:
 	phase = Phase.IDLE
 	_time = 0.0
 	if _ready_done:
-		transform = _initial
-		_sync_body()
+		_cut_to(_initial)
 
 
 func is_done() -> bool:
@@ -81,10 +79,14 @@ func get_warning() -> float:
 
 
 # a jump cut must reach the physics server now, not on the next physics tick,
-# or a body placed on the new surface this frame falls through it
-func _sync_body() -> void:
+# or a body placed on the new surface this frame falls through it. with sync on,
+# AnimatableBody3D puts the node back to its last physics pose, so cut with it off
+func _cut_to(target: Transform3D) -> void:
+	sync_to_physics = false
+	transform = target
 	if is_inside_tree():
 		PhysicsServer3D.body_set_state(get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, global_transform)
+	sync_to_physics = true
 
 
 func get_final_transform() -> Transform3D:
