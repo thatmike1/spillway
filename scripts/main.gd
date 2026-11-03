@@ -28,6 +28,8 @@ var cue_progress: int = 0
 var restart_count: int = 0
 var respawn_count: int = 0
 var best_time: float = -1.0
+# bot and checkpoint-start runs are for recording; they never touch saved settings or the best time
+var _persist: bool = true
 var settings: Dictionary = {
 	"sensitivity": 1.0, "fov": 90.0, "bank": 1.0, "speed_fov": true,
 	"head_bob": false, "invert_y": false, "volume": 0.8,
@@ -90,6 +92,7 @@ func _ready() -> void:
 	for arg: String in args:
 		# development aid for recording: start at a checkpoint with the folds in their state there
 		if arg.begins_with("--from="):
+			_persist = false
 			checkpoint_index = clampi(int(arg.get_slice("=", 1)), 0, (level.get("checkpoints") as Array).size() - 1)
 			respawn()
 			# a fold finished this instant only reaches the physics step after a tick or
@@ -106,6 +109,7 @@ func _ready() -> void:
 
 
 func attach_bot(quit_at_end: bool = false, no_bank: bool = false) -> Node:
+	_persist = false
 	bot = BOT_SCRIPT.new()
 	bot.name = "Bot"
 	add_child(bot)
@@ -316,7 +320,7 @@ func _load_settings() -> void:
 
 
 func _save_settings() -> void:
-	if _headless:
+	if _headless or not _persist:
 		return
 	var config: ConfigFile = ConfigFile.new()
 	for key: String in settings.keys():
