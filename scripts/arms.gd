@@ -257,8 +257,13 @@ func _drive_arm(arm: Dictionary, target: Vector3, facing: Basis, curl: float, st
 	var wrist: Vector3 = arm["wrist"]
 	var velocity: Vector3 = arm["wrist_velocity"]
 	var damping: float = 2.0 * sqrt(stiffness) * 0.85
-	velocity += ((target - wrist) * stiffness - velocity * damping) * delta
-	wrist += velocity * delta
+	# explicit springs this stiff blow up at long frames (a hitch, a 15 fps recording),
+	# so integrate in steps of at most 1/120 s
+	var steps: int = maxi(1, ceili(delta * 120.0))
+	var h: float = delta / steps
+	for _step: int in range(steps):
+		velocity += ((target - wrist) * stiffness - velocity * damping) * h
+		wrist += velocity * h
 	arm["wrist"] = wrist
 	arm["wrist_velocity"] = velocity
 	var current: Basis = arm["facing"]
