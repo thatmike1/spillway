@@ -1,55 +1,73 @@
 extends SceneTree
-## Scripted-input route traversal with actual collisions, triggers and portal.
-## No waypoint teleports. Does not validate camera comfort or visual readability.
+## The scripted runner completes the whole route with ordinary inputs only:
+## held W, mouse-motion steering and Space. No waypoint teleports, no respawns.
+## Run once with default comfort settings and once with camera bank off.
 
 var failures: int = 0
+
 
 func _initialize() -> void:
 	_run.call_deferred()
 
+
+func check(value: bool, message: String) -> void:
+	if not value:
+		failures += 1
+		push_error(message)
+
+
 func _run() -> void:
-	var packed: PackedScene = load("res://scenes/main.tscn") as PackedScene
-	var main: Node3D = packed.instantiate() as Node3D
+	for no_bank: bool in [false, true]:
+		await _route(no_bank)
+	print("traversal: %d failures; physics only, feel and visuals need a human" % failures)
+	quit(1 if failures else 0)
+
+
+func _route(no_bank: bool) -> void:
+	var main: Node3D = (load("res://scenes/main.tscn") as PackedScene).instantiate() as Node3D
 	root.add_child(main)
 	await physics_frame
-	await process_frame
-	var player: CharacterBody3D = main.get("player") as CharacterBody3D
-	player.call("set_controls_enabled", true)
-	Input.action_press("move_forward")
-	Input.action_press("sprint")
-	var jumped: bool = false
-	var crossed: bool = false
-	var checkpoint_seen: bool = false
-	for frame: int in range(720):
-		# Deliberate jump across the 2m break between bridge and arrival roof.
-		if not jumped and player.global_position.z < -24.3 and player.global_position.x < 20.0:
-			player.call("queue_jump")
-			jumped = true
+	var player: CharacterBody3D = main.get("player")
+	var bot: Node = main.call("attach_bot", false, no_bank)
+	var fold: Node = main.get("level").get("fold")
+	var previous: Vector3 = player.global_position
+	var max_step: float = 0.0
+	var max_up_turn: float = 0.0
+	var saw_wall: bool = false
+	var saw_fold_done: bool = false
+	var actions: Dictionary = {}
+	player.connect("move_started", func(kind: String) -> void: actions[kind] = true)
+	var ticks: int = 0
+	while ticks < 120 * 75:
 		await physics_frame
-		await process_frame
-		checkpoint_seen = checkpoint_seen or bool(main.get("has_checkpoint"))
-		crossed = crossed or player.global_position.x > 60.0
-		if frame % 90 == 0:
-			print("route tick=%d position=%s up=%s stage=%d" % [frame, player.global_position, player.up_direction, int(main.get("stage"))])
-		if not player.global_position.is_finite() or not player.velocity.is_finite():
-			push_error("Non-finite traversal state")
-			failures += 1
+		ticks += 1
+		var step: float = player.global_position.distance_to(previous)
+		max_step = maxf(max_step, step)
+		previous = player.global_position
+		saw_fold_done = saw_fold_done or bool(fold.call("is_done"))
+		if player.up_direction.dot(Vector3.BACK) > 0.95:
+			saw_wall = true
+		max_up_turn = maxf(max_up_turn, player.up_direction.angle_to(Vector3.UP))
+		if not player.global_position.is_finite():
+			check(false, "non-finite position")
 			break
 		if bool(main.get("finished")):
 			break
+	var elapsed: float = float(main.get("elapsed"))
+	for line: String in bot.get("log_lines"):
+		print("  ", line)
+	print("route (bank %s): finished=%s elapsed=%.2fs respawns=%d max_step=%.3fm actions=%s" % [
+		"off" if no_bank else "on", main.get("finished"), elapsed, int(main.get("respawn_count")), max_step, actions.keys()])
+	check(bool(main.get("finished")), "bot did not finish the route")
+	check(int(main.get("respawn_count")) == 0, "bot fell and respawned")
+	check(saw_fold_done, "fold never completed")
+	check(saw_wall, "never ran on the tower face")
+	check(max_up_turn > deg_to_rad(85.0), "gravity never turned to the wall")
+	# 120 Hz physics at ~10 m/s is under 0.1 m a tick; anything big is a teleport
+	check(max_step < 0.35, "position jumped %.2fm in one tick" % max_step)
+	check(elapsed > 20.0 and elapsed < 60.0, "run length %.1fs outside the 20-60s slice" % elapsed)
+	check(actions.has("vault"), "never vaulted the vent row")
 	Input.action_release("move_forward")
-	Input.action_release("sprint")
-	if not checkpoint_seen:
-		push_error("Scripted traversal failed to reach checkpoint")
-		failures += 1
-	if not crossed:
-		push_error("Scripted traversal failed to cross impossible window")
-		failures += 1
-	if not bool(main.get("finished")):
-		push_error("Scripted traversal failed to finish")
-		failures += 1
-	print("traversal: %d failures, elapsed %.2fs; rendering and feel unverified" % [failures, float(main.get("elapsed"))])
-	paused = false
 	main.queue_free()
 	await process_frame
-	quit(1 if failures else 0)
+	await physics_frame

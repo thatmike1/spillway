@@ -1,201 +1,359 @@
 extends Node3D
-## One owner for run progression, controls, checkpoint/reset and presentation.
+## Owns the run: input bindings, mouse capture, the timer, folds, checkpoints,
+## route cues, falls, restart and settings. The game starts running at once:
+## no click-to-start screen stands between the player and mouse look.
 
 const PLAYER_SCENE: PackedScene = preload("res://scenes/player.tscn")
-const CITY_SCRIPT: Script = preload("res://scripts/city_builder.gd")
+const LEVEL_SCRIPT: Script = preload("res://scripts/level.gd")
 const HUD_SCRIPT: Script = preload("res://scripts/hud.gd")
-const SETTINGS_PATH: String = "user://comfort.cfg"
-const OBJECTIVES: Array[String] = [
-	"Run toward the amber edge. The city will make a way.",
-	"Cross the folding facade. Keep your momentum.",
-	"Follow the amber ribbon. Walls can become floors.",
-	"Through the window. Trust the other skyline.",
-	"Reach the beacon on the final roof.",
-]
+const ARMS_SCRIPT: Script = preload("res://scripts/arms.gd")
+const AUDIO_SCRIPT: Script = preload("res://scripts/audio.gd")
+const BOT_SCRIPT: Script = preload("res://scripts/bot.gd")
+const SETTINGS_PATH: String = "user://settings.cfg"
+const FALL_FLOOR: float = -24.0
 
 var player: CharacterBody3D
-var city: Node3D
+var level: Node3D
 var hud: CanvasLayer
-var route: Dictionary = {}
-var stage: int = 0
+var arms: Node
+var audio: Node
+var bot: Node
+
 var elapsed: float = 0.0
+var timer_running: bool = false
 var finished: bool = false
 var run_paused: bool = false
-var has_checkpoint: bool = false
+var checkpoint_index: int = 0
+var cue_progress: int = 0
 var restart_count: int = 0
-var fold_started: bool = false
-var _saved_comfort: float = 0.65
+var respawn_count: int = 0
+var best_time: float = -1.0
+var settings: Dictionary = {
+	"sensitivity": 1.0, "fov": 90.0, "bank": 1.0, "speed_fov": true,
+	"head_bob": false, "invert_y": false, "volume": 0.8,
+}
+
+var _headless: bool = false
+var _capture_retry: float = 0.0
+var _user_released: bool = false
+var _time: float = 0.0
+var _respawning: float = -1.0
+var _spawn_origin: Vector3 = Vector3.ZERO
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_bind_inputs()
+	_headless = DisplayServer.get_name() == "headless"
+	bind_inputs()
 	_load_settings()
-	city = CITY_SCRIPT.new() as Node3D
-	city.process_mode = Node.PROCESS_MODE_PAUSABLE
-	add_child(city)
-	route = city.call("build") as Dictionary
+	level = LEVEL_SCRIPT.new() as Node3D
+	level.name = "Level"
+	level.process_mode = Node.PROCESS_MODE_PAUSABLE
+	add_child(level)
+	level.call("build")
 	player = PLAYER_SCENE.instantiate() as CharacterBody3D
 	player.process_mode = Node.PROCESS_MODE_PAUSABLE
-	# Register the physics body at its real spawn, never briefly at world origin.
-	player.transform = route.get("spawn", Transform3D.IDENTITY)
+	player.transform = level.get("spawn")
 	add_child(player)
-	player.add_to_group("player")
+	audio = AUDIO_SCRIPT.new()
+	audio.name = "Audio"
+	add_child(audio)
+	audio.call("attach", player, level)
+	if not _headless:
+		arms = ARMS_SCRIPT.new()
+		arms.name = "Arms"
+		arms.process_mode = Node.PROCESS_MODE_PAUSABLE
+		add_child(arms)
+		arms.call("attach", player)
 	hud = HUD_SCRIPT.new() as CanvasLayer
+	hud.name = "Hud"
 	add_child(hud)
-	_connect_hud()
-	_connect_trigger("fold_trigger", _on_fold_trigger)
-	_connect_trigger("checkpoint_trigger", _on_checkpoint_trigger)
-	_connect_trigger("finish_trigger", _on_finish_trigger)
-	var seam: Node = route.get("entry_seam") as Node
-	if seam != null and seam.has_signal("traveler_crossed"):
-		seam.connect("traveler_crossed", _on_portal_crossed)
-	player.set("comfort_roll", _saved_comfort)
-	if hud.has_method("set_comfort"):
-		hud.call("set_comfort", _saved_comfort)
+	hud.connect("resume_requested", func() -> void: set_paused(false))
+	hud.connect("restart_requested", restart_run)
+	hud.connect("quit_requested", func() -> void: get_tree().quit())
+	hud.connect("setting_changed", _on_setting_changed)
+	hud.call("load_settings", settings)
+	(level.get("fold_trigger") as Area3D).body_entered.connect(_on_fold_trigger)
+	(level.get("finish_trigger") as Area3D).body_entered.connect(_on_finish)
+	var points: Array = level.get("checkpoints")
+	for index: int in range(points.size()):
+		var area: Area3D = points[index]["area"]
+		if area != null:
+			area.body_entered.connect(_on_checkpoint.bind(index))
+	var fold: Node = level.get("fold")
+	fold.connect("fold_started", func() -> void: audio.call("fold_started", fold))
+	fold.connect("fold_settled", func() -> void: audio.call("fold_settled", fold))
+	_apply_settings()
 	restart_run()
-	if DisplayServer.get_name() == "headless":
-		player.call("set_controls_enabled", false)
-	else:
-		_set_pause(true)
-		hud.call("show_message", "Click to run. The city is waiting.")
+	var args: PackedStringArray = OS.get_cmdline_user_args()
+	for arg: String in args:
+		# development aid for recording: start at a checkpoint with the folds in their state there
+		if arg.begins_with("--from="):
+			checkpoint_index = clampi(int(arg.get_slice("=", 1)), 0, (level.get("checkpoints") as Array).size() - 1)
+			respawn()
+			respawn_count = 0
+			hud.call("flash_message", "")
+	if args.has("--bot"):
+		attach_bot(args.has("--bot-quit"), args.has("--no-bank"))
+		if checkpoint_index > 0:
+			bot.call("skip_to_nearest")
 
-func _physics_process(delta: float) -> void:
-	if player == null:
-		return
-	if not finished and not run_paused:
-		elapsed += delta
-		if player.global_position.y < -35.0:
-			recover_checkpoint()
-		var finish_pose: Transform3D = route.get("finish", Transform3D.IDENTITY)
-		var entry_seam: Node3D = route.get("entry_seam") as Node3D
-		if stage == 2 and entry_seam != null and player.global_position.distance_to(entry_seam.global_position) < 5.0:
-			stage = 3
-		if stage >= 2 and player.global_position.distance_to(finish_pose.origin) < 18.0:
-			stage = 4
-	var speed: float = float(player.call("get_speed"))
-	hud.call("update_state", speed, OBJECTIVES[mini(stage, OBJECTIVES.size() - 1)], elapsed)
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("restart"):
-		restart_run()
-	elif event.is_action_pressed("pause"):
-		_set_pause(not run_paused)
-	elif event is InputEventMouseButton:
-		var button: InputEventMouseButton = event as InputEventMouseButton
-		if button.pressed and button.button_index == MOUSE_BUTTON_LEFT and run_paused and not finished:
-			_set_pause(false)
+func attach_bot(quit_at_end: bool = false, no_bank: bool = false) -> Node:
+	bot = BOT_SCRIPT.new()
+	bot.name = "Bot"
+	add_child(bot)
+	bot.call("attach", self, player, level, quit_at_end)
+	if no_bank:
+		_on_setting_changed("bank", 0.0)
+	return bot
+
+
+# ---------------------------------------------------------------- run flow
 
 func restart_run() -> void:
-	stage = 0
-	elapsed = 0.0
-	finished = false
-	has_checkpoint = false
-	fold_started = false
 	restart_count += 1
-	var fold: Node = route.get("fold") as Node
-	if fold != null:
-		fold.call("reset_fold")
-	for key: String in ["entry_seam", "exit_seam"]:
-		var seam: Node = route.get(key) as Node
-		if seam != null:
-			seam.call("reset_seam")
-	var spawn: Transform3D = route.get("spawn", Transform3D.IDENTITY)
+	elapsed = 0.0
+	timer_running = false
+	finished = false
+	checkpoint_index = 0
+	cue_progress = 0
+	_respawning = -1.0
+	level.call("reset_state")
+	var spawn: Transform3D = level.get("spawn")
+	_spawn_origin = spawn.origin
 	player.call("reset_to", spawn, Vector3.UP)
-	if hud.has_method("reset_run"):
-		hud.call("reset_run")
-	hud.call("show_message", "Follow the amber route. R restarts your run.")
-	_set_pause(false)
+	hud.call("reset_run", best_time)
+	audio.call("reset")
+	set_paused(false)
 
-func recover_checkpoint() -> void:
-	var key: String = "checkpoint" if has_checkpoint else "spawn"
-	var pose: Transform3D = route.get(key, Transform3D.IDENTITY)
-	player.call("reset_to", pose, Vector3.UP)
-	for seam_key: String in ["entry_seam", "exit_seam"]:
-		var seam: Node = route.get(seam_key) as Node
-		if seam != null:
-			seam.call("reset_seam")
-	stage = 2 if has_checkpoint else (1 if fold_started else 0)
-	hud.call("show_message", "Back on the roof. Keep going." if has_checkpoint else "Try that line again.")
+
+func respawn() -> void:
+	respawn_count += 1
+	var points: Array = level.get("checkpoints")
+	var point: Dictionary = points[checkpoint_index]
+	var fold: Node = level.get("fold")
+	if bool(point["folded"]) and not bool(fold.call("is_done")):
+		fold.call("finish_now")
+	player.call("reset_to", point["pose"], Vector3.UP)
+	hud.call("flash_message", "Back on the last roof")
+
+
+func _physics_process(delta: float) -> void:
+	if player == null or run_paused:
+		return
+	if not finished:
+		if not timer_running and player.global_position.distance_to(_spawn_origin) > 0.6:
+			timer_running = true
+			hud.call("hide_title")
+		if timer_running:
+			elapsed += delta
+	_check_fall(delta)
+	_update_cues()
+
+
+func _check_fall(delta: float) -> void:
+	if _respawning >= 0.0:
+		_respawning += delta
+		if _respawning >= 0.18:
+			_respawning = -1.0
+			respawn()
+		return
+	var falling: bool = player.global_position.y < FALL_FLOOR
+	var air: float = float(player.call("get_air_time"))
+	if air > 3.2 or (air > 1.8 and not player.up_direction.is_equal_approx(Vector3.UP)):
+		falling = true
+	var away: Vector3 = player.global_position
+	if absf(away.x) > 120.0 or away.z > 60.0 or away.z < -260.0 or away.y > 140.0:
+		falling = true
+	if falling:
+		_respawning = 0.0
+		hud.call("fade_blink")
+
+
+func _update_cues() -> void:
+	var count: int = level.get("cues").size()
+	for index: int in range(cue_progress, count):
+		var position: Vector3 = level.call("cue_position", index)
+		var radius: float = float(level.get("cues")[index]["radius"])
+		if player.global_position.distance_to(position) < radius:
+			cue_progress = index + 1
+	var pulse: float = 0.85 + 0.15 * sin(_time * 4.0)
+	for index: int in range(count):
+		var level_value: float = 1.0
+		if index < cue_progress:
+			level_value = 0.3
+		elif index == cue_progress:
+			level_value = 3.4 * pulse
+		elif index == cue_progress + 1:
+			level_value = 2.0
+		level.call("set_cue_level", index, level_value)
+
+
+func _process(delta: float) -> void:
+	_time += delta
+	if player == null:
+		return
+	hud.call("update_state", elapsed, float(player.call("get_speed")))
+	_manage_capture(delta)
+
 
 func _on_fold_trigger(body: Node3D) -> void:
-	if body != player or fold_started:
+	if body != player:
 		return
-	fold_started = true
-	stage = 1
-	var fold: Node = route.get("fold") as Node
-	if fold != null:
-		fold.call("start_fold")
-	hud.call("show_message", "The facade is opening. Find your landing.")
+	var fold: Node = level.get("fold")
+	fold.call("start_fold")
 
-func _on_checkpoint_trigger(body: Node3D) -> void:
-	if body != player or has_checkpoint:
+
+func _on_checkpoint(body: Node3D, index: int) -> void:
+	if body != player or index <= checkpoint_index:
 		return
-	has_checkpoint = true
-	stage = 2
-	hud.call("show_message", "Checkpoint. Follow the ribbon around the sky.")
+	checkpoint_index = index
 
-func _on_portal_crossed(_body: Node3D = null) -> void:
-	stage = 4
-	hud.call("show_message", "Different sky. Same momentum.")
 
-func _on_finish_trigger(body: Node3D) -> void:
+func _on_finish(body: Node3D) -> void:
 	if body != player or finished:
 		return
 	finished = true
-	stage = 4
-	hud.call("set_finished", elapsed)
-	_set_pause(true)
+	timer_running = false
+	var best: bool = best_time < 0.0 or elapsed < best_time
+	if best:
+		best_time = elapsed
+		_save_settings()
+	hud.call("show_finish", elapsed, best_time, best)
+	audio.call("finish")
 
-func _set_pause(value: bool) -> void:
+
+# ---------------------------------------------------------------- pause and mouse
+
+func set_paused(value: bool) -> void:
 	run_paused = value
-	if player != null:
-		player.call("set_controls_enabled", not value and DisplayServer.get_name() != "headless")
-	if hud != null:
-		hud.call("set_paused", value)
-	if DisplayServer.get_name() != "headless":
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if value else Input.MOUSE_MODE_CAPTURED
-	# Pause the actual simulation: folding and timer must stop together.
 	get_tree().paused = value
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	if hud != null:
-		hud.process_mode = Node.PROCESS_MODE_ALWAYS
+	player.call("set_controls_enabled", not value)
+	hud.call("set_paused", value)
+	if value:
+		_release_mouse()
+	else:
+		_user_released = false
+		_capture_retry = 0.0
 
-func _connect_trigger(key: String, callback: Callable) -> void:
-	var area: Area3D = route.get(key) as Area3D
-	if area != null:
-		area.body_entered.connect(callback)
 
-func _connect_hud() -> void:
-	if hud.has_signal("restart_requested"):
-		hud.connect("restart_requested", restart_run)
-	if hud.has_signal("resume_requested"):
-		hud.connect("resume_requested", func() -> void: _set_pause(false))
-	if hud.has_signal("comfort_changed"):
-		hud.connect("comfort_changed", _on_comfort_changed)
+func _manage_capture(delta: float) -> void:
+	if _headless or run_paused or _user_released:
+		return
+	_capture_retry -= delta
+	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED and _capture_retry <= 0.0:
+		_capture_retry = 0.4
+		if DisplayServer.window_is_focused():
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
-func _on_comfort_changed(value: float) -> void:
-	_saved_comfort = clampf(value, 0.0, 1.0)
-	player.set("comfort_roll", _saved_comfort)
-	var config := ConfigFile.new()
-	config.set_value("camera", "roll", _saved_comfort)
-	config.save(SETTINGS_PATH)
+
+func _release_mouse() -> void:
+	if not _headless:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and not run_paused:
+		# any click takes the mouse back, whatever released it
+		_user_released = false
+		if not _headless:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	if event.is_action_pressed("restart"):
+		restart_run()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("pause"):
+		set_paused(not run_paused)
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("fullscreen"):
+		var mode: DisplayServer.WindowMode = DisplayServer.window_get_mode()
+		if mode == DisplayServer.WINDOW_MODE_FULLSCREEN or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED)
+		else:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+		get_viewport().set_input_as_handled()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		_capture_retry = 0.0
+
+
+# ---------------------------------------------------------------- settings
+
+func _on_setting_changed(key: String, value: Variant) -> void:
+	settings[key] = value
+	_apply_settings()
+	_save_settings()
+
+
+func _apply_settings() -> void:
+	if player == null:
+		return
+	player.set("mouse_sensitivity", 0.0022 * float(settings["sensitivity"]))
+	player.set("fov_horizontal", float(settings["fov"]))
+	player.set("bank_amount", float(settings["bank"]))
+	player.set("speed_fov", bool(settings["speed_fov"]))
+	player.set("head_bob_enabled", bool(settings["head_bob"]))
+	player.set("invert_y", bool(settings["invert_y"]))
+	if audio != null:
+		audio.call("set_volume", float(settings["volume"]))
+
 
 func _load_settings() -> void:
-	var config := ConfigFile.new()
-	if config.load(SETTINGS_PATH) == OK:
-		_saved_comfort = clampf(float(config.get_value("camera", "roll", 0.65)), 0.0, 1.0)
+	var config: ConfigFile = ConfigFile.new()
+	if config.load(SETTINGS_PATH) != OK:
+		return
+	for key: String in settings.keys():
+		settings[key] = config.get_value("settings", key, settings[key])
+	best_time = float(config.get_value("run", "best", -1.0))
 
-func _bind_inputs() -> void:
-	var bindings: Dictionary = {
-		"move_forward": [KEY_W, KEY_UP], "move_back": [KEY_S, KEY_DOWN],
-		"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT],
-		"jump": [KEY_SPACE], "sprint": [KEY_SHIFT], "crouch": [KEY_CTRL],
-		"restart": [KEY_R], "pause": [KEY_ESCAPE], "interact": [KEY_E],
+
+func _save_settings() -> void:
+	if _headless:
+		return
+	var config: ConfigFile = ConfigFile.new()
+	for key: String in settings.keys():
+		config.set_value("settings", key, settings[key])
+	config.set_value("run", "best", best_time)
+	config.save(SETTINGS_PATH)
+
+
+# ---------------------------------------------------------------- input map
+
+static func bind_inputs() -> void:
+	var keys: Dictionary = {
+		"move_forward": [KEY_W], "move_back": [KEY_S], "move_left": [KEY_A], "move_right": [KEY_D],
+		"look_left": [KEY_LEFT], "look_right": [KEY_RIGHT], "look_up": [KEY_UP], "look_down": [KEY_DOWN],
+		"jump": [KEY_SPACE], "crouch": [KEY_CTRL, KEY_C], "restart": [KEY_R],
+		"pause": [KEY_ESCAPE], "fullscreen": [KEY_F11],
 	}
-	for action: String in bindings:
-		if not InputMap.has_action(action):
-			InputMap.add_action(action)
-		for code: int in bindings[action]:
-			var key := InputEventKey.new()
+	var axes: Dictionary = {
+		"move_left": [JOY_AXIS_LEFT_X, -1.0], "move_right": [JOY_AXIS_LEFT_X, 1.0],
+		"move_forward": [JOY_AXIS_LEFT_Y, -1.0], "move_back": [JOY_AXIS_LEFT_Y, 1.0],
+		"look_left": [JOY_AXIS_RIGHT_X, -1.0], "look_right": [JOY_AXIS_RIGHT_X, 1.0],
+		"look_up": [JOY_AXIS_RIGHT_Y, -1.0], "look_down": [JOY_AXIS_RIGHT_Y, 1.0],
+		"crouch": [JOY_AXIS_TRIGGER_LEFT, 1.0],
+	}
+	var buttons: Dictionary = {
+		"jump": [JOY_BUTTON_A, JOY_BUTTON_RIGHT_SHOULDER], "crouch": [JOY_BUTTON_B, JOY_BUTTON_LEFT_SHOULDER],
+		"restart": [JOY_BUTTON_BACK], "pause": [JOY_BUTTON_START],
+	}
+	for action: String in keys.keys():
+		if InputMap.has_action(action):
+			InputMap.erase_action(action)
+		InputMap.add_action(action, 0.2)
+		for code: int in keys[action]:
+			var key: InputEventKey = InputEventKey.new()
 			key.physical_keycode = code
 			InputMap.action_add_event(action, key)
+	for action: String in axes.keys():
+		var motion: InputEventJoypadMotion = InputEventJoypadMotion.new()
+		motion.axis = axes[action][0]
+		motion.axis_value = axes[action][1]
+		InputMap.action_add_event(action, motion)
+	for action: String in buttons.keys():
+		for button: int in buttons[action]:
+			var press: InputEventJoypadButton = InputEventJoypadButton.new()
+			press.button_index = button
+			InputMap.action_add_event(action, press)
