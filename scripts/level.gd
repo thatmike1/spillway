@@ -524,48 +524,56 @@ func _roof_three_and_bend() -> void:
 	_checkpoint(Vector3(0, roof_y + 2.5, -159), Vector3(20, 5, 6), Transform3D(Basis.IDENTITY, Vector3(0, roof_y + 0.9, -158.5)), 2)
 
 
-## The front skin of R3 hangs below its roof line facing the street. It swings
-## up toward the runner about its top edge and lands flush with R2's edge as a
-## bridge; its parapet turns into the bridge's last plank against R3's roof.
+## R3's front wall rises a full 15 m above its roof. As you come off the road
+## it falls toward you about its foot and lands across the street as a bridge,
+## flush with R2's edge; its back face, now on top, carries the route marks.
 func _skin_bridge(roof_y: float) -> void:
 	var width: float = 14.0
-	var drop: float = 14.0
+	var rise: float = 15.2
 	var skin: float = 1.2
-	var front_z: float = -154.0
-	# the strip of front wall either side of the skin, and the wall below it
-	for side: float in [-1.0, 1.0]:
-		_solid(self, Vector3(side * (width * 0.5 + 1.5), (roof_y + STREET_Y) * 0.5, front_z - skin * 0.5), Vector3(3.0, roof_y - STREET_Y, skin), _facade(1))
-	_mesh(self, Vector3(0, (roof_y - drop + STREET_Y) * 0.5, front_z - skin * 0.5), Vector3(width, roof_y - drop - STREET_Y, skin), _facade(1))
+	var back_z: float = -155.2
+	# the front wall below the roof line and either side of the falling skin
+	_solid(self, Vector3(0, (roof_y - 0.05 + STREET_Y) * 0.5, back_z + skin * 0.5), Vector3(20.0, roof_y - 0.05 - STREET_Y, skin), _facade(1))
 	var material: ShaderMaterial = _facade(1).duplicate() as ShaderMaterial
-	material.set_shader_parameter("lit_ratio", 0.08)
+	material.set_shader_parameter("lit_ratio", 0.1)
 	var block: AnimatableBody3D = FOLD_SCRIPT.new() as AnimatableBody3D
-	block.name = "SkinBridge"
-	block.position = Vector3(0, roof_y, front_z)
+	block.name = "FallingFront"
+	# the hinge is the skin's inner foot, so the slab lands below it, flush with the roofs
+	block.position = Vector3(0, roof_y, back_z)
 	block.set("axis", Vector3.RIGHT)
-	block.set("angle", -PI / 2.0)
-	block.set("anticipation", 0.6)
-	block.set("duration", 2.1)
+	block.set("angle", PI / 2.0)
+	block.set("anticipation", 0.7)
+	block.set("duration", 2.2)
 	block.set("settle_time", 0.5)
 	add_child(block)
 	folds.append(block)
-	_waves.append({"fold": block, "material": material, "height": drop, "settled": 0.0})
-	var slab_center: Vector3 = Vector3(0, -drop * 0.5, -skin * 0.5)
-	_mesh(block, slab_center, Vector3(width, drop, skin), material)
-	_shape(block, slab_center, Vector3(width, drop, skin))
-	var parapet_center: Vector3 = Vector3(0, skin * 0.5, -0.15)
-	_mesh(block, parapet_center, Vector3(width, skin, 0.3), _materials["concrete"])
-	_shape(block, parapet_center, Vector3(width, skin, 0.3))
+	_waves.append({"fold": block, "material": material, "height": rise, "settled": 0.0})
+	var slab_center: Vector3 = Vector3(0, rise * 0.5, skin * 0.5)
+	_mesh(block, slab_center, Vector3(width, rise, skin), material)
+	_shape(block, slab_center, Vector3(width, rise, skin))
+	_mesh(block, Vector3(0, rise - 0.25, skin * 0.5), Vector3(width + 0.3, 0.5, skin + 0.3), _materials["concrete"])
 	for side: float in [-1.0, 1.0]:
-		var pier: Vector3 = Vector3(side * (width * 0.5 - 0.35), -drop * 0.5, 0.15)
-		_mesh(block, pier, Vector3(0.7, drop, 0.3), _materials["concrete"])
-		_shape(block, pier, Vector3(0.7, drop, 0.3))
-	# chevrons point up at the roof now and along the bridge once it lands
-	var chevrons: int = _cue(block, Vector3(0, -drop * 0.5, 0), 9.0)
-	for y_pos: float in [-11.0, -7.0, -3.0]:
-		_chevron(chevrons, block, Vector3(0, y_pos, 0.03), 2.0, 0.0)
-	var hinge: int = _cue(block, Vector3(0, 0, 0), 6.0)
-	_cue_strip(hinge, block, Vector3(0, skin + 0.02, -0.15), Vector3(width - 2.0, 0.05, 0.32))
-	var trigger: Area3D = _trigger("SkinTrigger", Vector3(0, 0.5, -100), Vector3(22, 8, 26))
+		var pier: Vector3 = Vector3(side * (width * 0.5 - 0.35), rise * 0.5, skin + 0.12)
+		_mesh(block, pier, Vector3(0.7, rise, 0.24), _materials["concrete"])
+	# before: chevrons on the street side point down at the hinge line
+	var front: int = _cue(block, Vector3(0, rise * 0.5, skin), 9.0)
+	for y_pos: float in [4.5, 8.5, 12.5]:
+		var holder: Node3D = Node3D.new()
+		holder.position = Vector3(0, y_pos, skin + 0.04)
+		holder.rotation.z = PI
+		block.add_child(holder)
+		_chevron(front, holder, Vector3.ZERO, 2.0, 0.0)
+	_cue_strip(front, block, Vector3(0, 0.15, skin + 0.06), Vector3(width - 2.0, 0.3, 0.12))
+	# after: the back face is the road, chevrons on it point along the run
+	var road: int = _cue(block, Vector3(0, rise * 0.5, 0), 9.0)
+	for y_pos: float in [3.5, 7.5, 11.5]:
+		var holder: Node3D = Node3D.new()
+		holder.position = Vector3(0, y_pos, -0.04)
+		holder.rotation = Vector3(0, PI, PI)
+		block.add_child(holder)
+		_chevron(road, holder, Vector3.ZERO, 2.0, 0.0)
+	_cue_strip(road, block, Vector3(0, 0.12, -0.05), Vector3(width - 2.0, 0.24, 0.1))
+	var trigger: Area3D = _trigger("FallTrigger", Vector3(0, 0.5, -100), Vector3(22, 8, 26))
 	fold_triggers.append({"area": trigger, "fold": block})
 
 
