@@ -1,80 +1,67 @@
 # Foldrunner
 
-Original first-person parkour prototype: a rooftop facade unfolds into a bridge, a gravity ribbon takes you onto the underside of a roof, and an impossible window connects to another district. Inspired by the folding architecture of Control Resonant / Doctor Strange and Mirror's Edge's traversal rhythm. No extracted game assets or copied game code.
+Original first-person parkour slice in Godot 4.7.2 (Compatibility renderer). You run across evening rooftops; a tower ahead tips over and its facade becomes your road; later the roof bends up into a second tower, you run up its face with the city turned on its side, crest over the top and finish under a beam of light. About 25 to 30 seconds for a clean run.
 
-This is a compact mechanics slice, not a finished game. The scripted sprint route completes in approximately eight seconds. A longer authored route and a visual/feel pass come after this foundation.
+All code, geometry and sound are original and generated at load time from primitive meshes and synthesised waveforms. No third-party assets.
 
-## Play on this Windows machine
+## Play (Linux)
 
-When ready to use the GPU, double-click **Play Foldrunner.cmd** or run:
-
-```powershell
-./tools/run.ps1
+```bash
+./tools/play.sh
 ```
 
-Godot 4.7.2 is installed under `%LOCALAPPDATA%/Foldrunner/tools/godot-4.7.2`, outside the repository. The launcher caps the game at 60 FPS. It does not cap GPU utilization; actual load is unmeasured.
+It imports the project on first run, then starts the game maximised. `GODOT=/path/to/godot ./tools/play.sh` picks another engine binary; extra arguments go to Godot (for example `--fullscreen`, or `--display-driver wayland` to use Godot's native Wayland backend instead of XWayland).
 
-On another machine, run `./tools/setup.ps1` first or pass `-Godot <engine-path>` to the scripts. Setup downloads the pinned official Windows release and verifies its published SHA256 when available.
+The game starts running at once: mouse look is live from the first frame, the mouse is captured as soon as the window has focus, and any click recaptures it. The timer starts on your first step.
 
-Click **Continue** to capture the mouse. Follow the amber marks. Sprint toward the first roof edge; the facade unfolds automatically. Jump the gap near the end of the bridge, follow the curved ribbon onto the ceiling, run through the dark amber-framed window, then reach the green finish strip. Falling returns you to the latest checkpoint. R starts a fresh run.
+| Input | Keyboard and mouse | Gamepad |
+|---|---|---|
+| Look | Mouse, or arrow keys | Right stick |
+| Run | W A S D (speed builds while you keep running forward) | Left stick |
+| Jump | Space | A / Cross, or RB |
+| Slide (at speed), crouch | Ctrl or C | B / Circle, LB or LT |
+| Vault and climb | Automatic: run at a low obstacle, or jump at a ledge | |
+| Wall-run | Jump along a wall while holding forward | |
+| Restart | R | Back / Select |
+| Pause and settings | Esc | Start |
+| Fullscreen | F11 | |
 
-| Input | Action |
-|---|---|
-| WASD / arrows | Move |
-| Mouse | Look |
-| Shift | Sprint; airborne movement beside a wall can wall-run |
-| Space | Jump; vault a nearby low obstacle; jump off a wall |
-| Ctrl | Crouch |
-| R | Restart entire run |
-| Escape | Pause / release mouse |
+Pause holds mouse sensitivity, field of view (80 to 105, set at 16:9; wider screens see more to the sides), camera bank on wall-runs, view widening at speed, head bob (off by default), invert look and volume. Settings and the best time are kept in Godot's user folder.
 
-Pause includes a camera-roll comfort slider. Head bob defaults off. The start roof has a crate and wall for practicing vaults and wall-runs.
+## Checks
 
-## Browser build
-
-The Compatibility-renderer, single-threaded Web export succeeds. The current build is in `builds/web/` (ignored build output). To serve it locally without opening any graphics:
-
-```powershell
-python tools/serve_web.py
+```bash
+./tools/check.sh
 ```
 
-Then open `http://127.0.0.1:1348/index.html` when ready to play. Stop the server with Ctrl+C. Do not open the HTML directly from the filesystem. Browser rendering, pointer lock, audio/browser behavior and performance remain unverified.
+Three headless suites with real physics:
 
-To rebuild:
+- `test_player`: momentum, jump height, coyote time, mouse look without mouse capture, arrow-key look, pitch clamp, vault, climb, slide, wall-run, gravity surfaces, FOV maths for 16:9 and 21:9.
+- `test_integration`: the assembled game starts unpaused with look live, the timer waits for the first step, the fold lands level with the roof, falls respawn at the last checkpoint with the fold intact, restart, pause, finish.
+- `test_traversal`: a scripted runner completes the whole route using only held W, mouse-motion events and Space, with default comfort settings and again with camera bank off. It fails on any respawn or any per-tick jump in position over 0.35 m (no teleports).
 
-```powershell
-./tools/export-web.ps1
+Headless results say nothing about feel. Those need a person playing.
+
+## Recording a run
+
+`main.gd` reads a few user arguments after `--`: `--bot` lets the scripted runner play, `--bot-quit` quits two seconds after the finish, `--no-bank` turns camera bank off, `--from=N` starts at checkpoint N. Movie Maker turns that into frames, for example:
+
+```bash
+xvfb-run -a -s "-screen 0 1280x720x24" godot --path . --audio-driver Dummy --rendering-driver opengl3 \
+  --write-movie /tmp/run/f.png --fixed-fps 30 -- --bot --bot-quit
 ```
 
-The four web templates for Godot 4.7.2 are installed under `%APPDATA%/Godot/export_templates/4.7.2.stable`. For a fresh installation, download the official `Godot_v4.7.2-stable_export_templates.tpz` from https://github.com/godotengine/godot/releases/tag/4.7.2-stable and run `python tools/install_web_templates.py <archive>`.
+`--audio-driver Dummy` matters: without it the process can hang after the last frame.
 
-## Checks without using the GPU
+## Layout
 
-```powershell
-./tools/check.ps1
-```
+- `scripts/main.gd`: run state, input map (keyboard and gamepad), mouse capture, checkpoints, falls, cues, settings.
+- `scripts/player.gd`: movement, gravity surfaces, the camera rig.
+- `scripts/arms.gd`: first-person arms drawn in their own viewport over the scene.
+- `scripts/level.gd`: the route, the city around it and the distant impossible blocks.
+- `scripts/fold_block.gd`: a rigid block that turns about a hinge in three beats (tremble, turn, settle).
+- `scripts/audio.gd`: synthesised footsteps, breath, landings, wind and the fold's groan.
+- `scripts/bot.gd`: the scripted runner used by the traversal test and for recordings.
+- `shaders/facade.gdshader`: procedural window bays laid out in the mesh's own space, so they turn with a fold.
 
-All engine calls in that script use `--headless`, including import. Suites cover:
-
-- Player: 31 assertions on actual physics movement, jumping, vaulting, crouch clearance, wall-running, moving-platform transport, rotated gravity, portal/reset state, camera validity.
-- World: 34 assertions on folding transforms, rigid portal mappings, swept crossings, cooldown/reset, and a real rider on a rotating platform.
-- City: geometry, actual collider normals, route bounds, correct collision layers and actual player overlaps, plus HUD state.
-- Integration: 23 assertions on progression, checkpoint/reset, pause stopping architecture/time, finish, and idle-spawn safety.
-- Traversal: actual scripted forward/sprint/jump input reaches checkpoint, ceiling, portal and finish. No waypoint teleports are used. It validates one ideal line, not every possible player action.
-
-Last first-pass results: all five suites passed; single-threaded Web export passed. **No graphical run was performed because Mike was gaming.** Headless results do not prove visual quality, camera comfort, browser gameplay, or subjective movement feel.
-
-## Known limits / next playtest
-
-- Portal aperture is opaque and hides the spatial transition; there is no visible recursive view into the destination.
-- Foreground anomaly is one unfolding rigid facade plus an authored gravity arc. It is not yet a continuously folding city with arbitrary deforming collision.
-- Vault destinations are for stationary low obstacles; moving obstacles do not update the vault target.
-- No coyote time/jump buffering, visible body, traversal animations, combat, soundscape or save-game progression.
-- Test startup, pause/resume, mouse capture, HUD layout, lighting, route readability and camera roll visually before calling this ready to share.
-- Check GPU/frame times on Mike's RTX 2070 SUPER only after he says the gaming session is over.
-
-## Agent handoff
-
-Read `docs/BRIEF.md`, `docs/CONTRACT.md`, then `AGENTS.md`. Main owns integration; movement/world/city are separate systems with agreed world-space velocity and gravity conventions. Scene geometry is generated from built-in meshes and shapes; the route is authored, not randomly generated.
-
-Tracking: first pass `ccChat-general-9mga`; pending visual QA and expansion are recorded in beads. Never infer permission for GPU rendering from a new background session: the current restriction remains until Mike says he is done gaming.
+`tools/*.ps1` and `Play Foldrunner.cmd` are the earlier Windows helpers; `check.ps1` runs the same three suites.

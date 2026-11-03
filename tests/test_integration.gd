@@ -1,75 +1,129 @@
 extends SceneTree
-## Real combined scene checks. This verifies state flow, not human route traversal.
+## The assembled game: starts unpaused with look live on the first frame, the
+## timer waits for the first step, the fold lands where the road should be,
+## falls respawn at the last checkpoint with the city as it was, restart and
+## pause behave, and the route cues advance.
 
 var failures: int = 0
 var checks: int = 0
+var main: Node3D
+var player: CharacterBody3D
+var level: Node3D
+
 
 func _initialize() -> void:
 	_run.call_deferred()
 
-func _run() -> void:
-	var packed: PackedScene = load("res://scenes/main.tscn") as PackedScene
-	_expect(packed != null, "Main scene loads")
-	if packed == null:
-		quit(1)
-		return
-	var main: Node3D = packed.instantiate() as Node3D
-	root.add_child(main)
-	await physics_frame
-	await process_frame
-	var player: CharacterBody3D = main.get("player") as CharacterBody3D
-	var city: Node3D = main.get("city") as Node3D
-	var route: Dictionary = main.get("route") as Dictionary
-	_expect(player != null and city != null, "Player and city present")
-	_expect(player.global_position.is_finite(), "Initial position finite")
-	_expect(route.has("spawn") and route.has("fold") and route.has("entry_seam"), "Core route fixtures present")
-	_expect(not bool(main.get("finished")), "Starts unfinished")
-	for index: int in range(4):
-		await physics_frame
-	_expect(int(main.get("stage")) == 0, "Idle spawn does not trip roof trigger")
-	var initial: Transform3D = route.get("spawn", Transform3D.IDENTITY)
-	_expect(player.global_position.distance_to(initial.origin) < 0.5, "Player begins at authored spawn")
-	main.call("_on_fold_trigger", player)
-	_expect(int(main.get("stage")) == 1, "Fold trigger advances progression")
-	var fold: Node = route["fold"] as Node
-	_expect(bool(fold.call("is_folding")), "Fold actually begins")
-	for index: int in range(8):
-		await physics_frame
-	_expect(float(fold.call("get_progress")) > 0.0, "Folding advances in combined scene")
-	main.call("_set_pause", true)
-	var paused_progress: float = float(fold.call("get_progress"))
-	var paused_time: float = float(main.get("elapsed"))
-	for index: int in range(5):
-		await physics_frame
-	_expect(is_equal_approx(float(fold.call("get_progress")), paused_progress), "Pause stops architecture")
-	_expect(is_equal_approx(float(main.get("elapsed")), paused_time), "Pause stops run clock")
-	main.call("_set_pause", false)
-	main.call("_on_checkpoint_trigger", player)
-	_expect(bool(main.get("has_checkpoint")), "Checkpoint registered")
-	main.call("recover_checkpoint")
-	var checkpoint: Transform3D = route.get("checkpoint", Transform3D.IDENTITY)
-	_expect(player.global_position.distance_to(checkpoint.origin) < 0.05, "Recovery uses checkpoint pose")
-	_expect(player.velocity.length() < 0.001, "Recovery clears momentum")
-	main.call("_on_portal_crossed", player)
-	_expect(int(main.get("stage")) == 4, "Portal progression advances")
-	main.call("_on_finish_trigger", player)
-	_expect(bool(main.get("finished")) and paused, "Finish stops simulation")
-	main.call("restart_run")
-	_expect(not bool(main.get("finished")) and not paused, "Restart restores running state")
-	_expect(not bool(main.get("has_checkpoint")) and int(main.get("stage")) == 0, "Restart clears progression")
-	_expect(is_zero_approx(float(fold.call("get_progress"))), "Restart restores architecture")
-	_expect(player.global_position.distance_to(initial.origin) < 0.05, "Restart restores spawn")
-	_expect(player.velocity.is_finite() and player.velocity.length() < 0.001, "Restart clears finite velocity")
-	for index: int in range(4):
-		await physics_frame
-	_expect(not bool(main.get("finished")) and int(main.get("stage")) == 0, "Restart stays reset after real physics ticks")
-	main.queue_free()
-	await process_frame
-	print("integration: %d checks, %d failures (state flow; visual/route feel unverified)" % [checks, failures])
-	quit(1 if failures else 0)
 
-func _expect(condition: bool, message: String) -> void:
+func check(value: bool, message: String) -> void:
 	checks += 1
-	if not condition:
+	if not value:
 		failures += 1
 		push_error(message)
+
+
+func ticks(count: int) -> void:
+	for index: int in count:
+		await physics_frame
+
+
+func _run() -> void:
+	main = (load("res://scenes/main.tscn") as PackedScene).instantiate() as Node3D
+	root.add_child(main)
+	await physics_frame
+	player = main.get("player")
+	level = main.get("level")
+	await _test_start()
+	await _test_fold()
+	await _test_fall_and_checkpoint()
+	await _test_restart_and_pause()
+	await _test_finish()
+	print("integration: %d/%d checks passed" % [checks - failures, checks])
+	quit(1 if failures else 0)
+
+
+func _test_start() -> void:
+	check(not paused, "the game is not paused at start")
+	check(bool(player.get("controls_enabled")), "controls are live at start")
+	var before: Vector3 = -player.global_basis.z
+	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
+	motion.screen_relative = Vector2(-150, 0)
+	motion.relative = Vector2(-150, 0)
+	Input.parse_input_event(motion)
+	await ticks(2)
+	check(not before.is_equal_approx(-player.global_basis.z), "mouse look works on the first frames, no click needed")
+	await ticks(60)
+	check(float(main.get("elapsed")) == 0.0, "the timer waits until the runner moves")
+	Input.action_press("move_forward")
+	await ticks(60)
+	Input.action_release("move_forward")
+	check(bool(main.get("timer_running")) and float(main.get("elapsed")) > 0.0, "the timer starts with the first steps")
+
+
+func _test_fold() -> void:
+	var fold: Node = level.get("fold")
+	check(not bool(fold.call("is_done")), "the tower stands before the trigger")
+	player.call("reset_to", Transform3D(Basis.IDENTITY, Vector3(0, 0.9, -6)), Vector3.UP)
+	await ticks(3)
+	check(int(fold.get("phase")) != 0, "walking onto the trigger starts the fold")
+	check(float(fold.call("get_progress")) == 0.0, "it announces itself before it moves")
+	await ticks(120 * 6)
+	check(bool(fold.call("is_done")), "the fold settles within six seconds")
+	var tower: Node3D = fold as Node3D
+	var facade_normal: Vector3 = tower.global_basis * Vector3.BACK
+	check(facade_normal.dot(Vector3.UP) > 0.999, "the facade now faces the sky")
+	var hit: Dictionary = _ray(Vector3(0, 5, -75), Vector3(0, -5, -75))
+	check(not hit.is_empty() and absf(Vector3(hit["position"]).y) < 0.05, "the road surface sits level with the start roof")
+	check(not _ray(Vector3(0, 5, -98.5), Vector3(0, -5, -98.5)).is_empty(), "the road reaches 48 m out")
+
+
+func _test_fall_and_checkpoint() -> void:
+	player.call("reset_to", Transform3D(Basis.IDENTITY, Vector3(0, 0.9, -57)), Vector3.UP)
+	await ticks(3)
+	check(int(main.get("checkpoint_index")) == 1, "standing on the road takes the checkpoint")
+	player.call("reset_to", Transform3D(Basis.IDENTITY, Vector3(30, -25, -70)), Vector3.UP)
+	await ticks(60)
+	check(int(main.get("respawn_count")) == 1, "falling below the roofs respawns")
+	check(player.global_position.distance_to(Vector3(0, 0.9, -56)) < 0.5, "respawn is at the last checkpoint")
+	check(bool(level.get("fold").call("is_done")), "the fold stays folded after a fall")
+
+
+func _test_restart_and_pause() -> void:
+	main.call("restart_run")
+	await ticks(2)
+	var fold: Node = level.get("fold")
+	check(not bool(fold.call("is_done")) and int(fold.get("phase")) == 0, "restart stands the tower back up")
+	check(int(main.get("checkpoint_index")) == 0 and float(main.get("elapsed")) == 0.0, "restart clears checkpoint and timer")
+	check(player.global_position.distance_to(Vector3(0, 0.9, 2)) < 0.3, "restart returns to the first roof")
+	player.call("reset_to", Transform3D(Basis.IDENTITY, Vector3(0, 0.9, -6)), Vector3.UP)
+	await ticks(3)
+	main.call("set_paused", true)
+	var phase: int = int(fold.get("phase"))
+	var progress_marker: Transform3D = (fold as Node3D).transform
+	var elapsed: float = float(main.get("elapsed"))
+	await process_frame
+	await process_frame
+	await process_frame
+	check(paused, "pause stops the tree")
+	check((fold as Node3D).transform.is_equal_approx(progress_marker) and int(fold.get("phase")) == phase, "the fold holds still while paused")
+	check(float(main.get("elapsed")) == elapsed, "the timer holds while paused")
+	main.call("set_paused", false)
+	await ticks(2)
+	check(not paused and bool(player.get("controls_enabled")), "resume gives control back")
+
+
+func _test_finish() -> void:
+	var cues_before: int = int(main.get("cue_progress"))
+	var finish: Vector3 = level.get("finish_point")
+	player.call("reset_to", Transform3D(Basis.IDENTITY, finish + Vector3(0, 0.9, 4)), Vector3.UP)
+	Input.action_press("move_forward")
+	await ticks(120)
+	Input.action_release("move_forward")
+	check(bool(main.get("finished")), "reaching the beam finishes the run")
+	check(float(main.get("best_time")) > 0.0, "a best time is kept")
+	check(int(main.get("cue_progress")) >= cues_before, "cue progress never goes backwards")
+
+
+func _ray(from: Vector3, to: Vector3) -> Dictionary:
+	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(from, to, 1)
+	return player.get_world_3d().direct_space_state.intersect_ray(query)

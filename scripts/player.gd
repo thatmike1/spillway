@@ -412,7 +412,7 @@ func _try_wallrun(lateral: Vector3, forward_input: float) -> bool:
 		return false
 	for side: float in [-1.0, 1.0]:
 		var origin: Vector3 = global_position + up_direction * 0.2
-		var hit: Dictionary = _ray(origin, origin + global_basis.x * side * (RADIUS + 0.55))
+		var hit: Dictionary = _ray(origin, origin + global_basis.x * side * (RADIUS + 0.85))
 		if hit.is_empty():
 			continue
 		var normal: Vector3 = hit["normal"]
@@ -440,7 +440,7 @@ func _step_wallrun(delta: float) -> void:
 	var up: Vector3 = up_direction
 	var vertical: float = velocity.dot(up) - 7.5 * delta
 	var along: Vector3 = velocity.slide(up).slide(_wall_normal)
-	var hit: Dictionary = _ray(global_position, global_position - _wall_normal * (RADIUS + 0.6))
+	var hit: Dictionary = _ray(global_position, global_position - _wall_normal * (RADIUS + 0.9))
 	var keep: bool = not hit.is_empty() and -_input_axis.y > 0.2 and _wall_time < 1.15
 	if _jump_buffer > 0.0:
 		move = Move.AIR

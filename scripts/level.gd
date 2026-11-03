@@ -326,7 +326,7 @@ func _environment() -> void:
 	var sun: DirectionalLight3D = DirectionalLight3D.new()
 	sun.name = "Sun"
 	# low evening sun behind the runner's right shoulder
-	sun.rotation_degrees = Vector3(-14, 28, 0)
+	sun.rotation_degrees = Vector3(-24, 28, 0)
 	sun.light_color = Color("#ffbf8a")
 	sun.light_energy = 1.15
 	sun.shadow_enabled = true
@@ -472,7 +472,7 @@ func _roof_two() -> void:
 	# a billboard on the left that you can wall-run across the next gap
 	var board_x: float = -9.6
 	_solid(self, Vector3(board_x, roof_y + 3.0, -143.5), Vector3(0.5, 4.4, 14.0), _materials["dark"], "Billboard")
-	_mesh(self, Vector3(board_x + 0.27, roof_y + 3.0, -143.5), Vector3(0.04, 3.6, 13.0), _emissive(Color("#2b6f7c"), 0.8))
+	_mesh(self, Vector3(board_x + 0.27, roof_y + 3.0, -143.5), Vector3(0.04, 3.6, 13.0), _emissive(Color("#1d4652"), 0.5))
 	for z: float in [-137.5, -149.5]:
 		_mesh(self, Vector3(board_x, roof_y - 2.0, z), Vector3(0.3, 6.0, 0.3), _materials["metal"])
 	var takeoff: int = _cue(self, Vector3(0, roof_y, -139.9), 7.0)

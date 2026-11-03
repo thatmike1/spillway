@@ -45,6 +45,7 @@ func finish_now() -> void:
 	phase = Phase.DONE
 	_time = 0.0
 	transform = _pose(1.0, 0.0)
+	_sync_body()
 
 
 func reset_fold() -> void:
@@ -52,6 +53,7 @@ func reset_fold() -> void:
 	_time = 0.0
 	if _ready_done:
 		transform = _initial
+		_sync_body()
 
 
 func is_done() -> bool:
@@ -76,6 +78,13 @@ func get_warning() -> float:
 		Phase.ANTICIPATE:
 			return clampf(_time / maxf(anticipation, 0.001), 0.0, 1.0)
 	return 1.0
+
+
+# a jump cut must reach the physics server now, not on the next physics tick,
+# or a body placed on the new surface this frame falls through it
+func _sync_body() -> void:
+	if is_inside_tree():
+		PhysicsServer3D.body_set_state(get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, global_transform)
 
 
 func get_final_transform() -> Transform3D:

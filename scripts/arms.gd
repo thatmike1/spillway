@@ -4,9 +4,9 @@ extends Node
 ## wrists spring toward: low pumping while running, both hands up and out on a
 ## jump, a push down on landing, palms planted on a vault, a hand on the wall.
 
-const SKIN: Color = Color("#b98a6c")
+const SKIN: Color = Color("#c39176")
 const SLEEVE: Color = Color("#1b222c")
-const CUFF: Color = Color("#5d6873")
+const CUFF: Color = Color("#3c4652")
 
 var _player: CharacterBody3D
 var _viewport: SubViewport
@@ -119,28 +119,62 @@ func _build_arm(side: float) -> Dictionary:
 	_capsule(upper, 0.05, 1.0, _materials["sleeve"]).name = "Mesh"
 	var fore: Node3D = Node3D.new()
 	_camera.add_child(fore)
-	_capsule(fore, 0.04, 1.0, _materials["sleeve"]).name = "Mesh"
+	_capsule(fore, 0.042, 1.0, _materials["sleeve"]).name = "Mesh"
 	var hand: Node3D = Node3D.new()
 	_camera.add_child(hand)
-	_box(hand, Vector3(0, 0.0, 0.035), Vector3(0.088, 0.088, 0.05), _materials["cuff"])
-	_box(hand, Vector3(0, 0, -0.045), Vector3(0.082, 0.03, 0.095), _materials["glove"])
+	var cuff: MeshInstance3D = MeshInstance3D.new()
+	var band: CylinderMesh = CylinderMesh.new()
+	band.top_radius = 0.043
+	band.bottom_radius = 0.043
+	band.height = 0.022
+	band.radial_segments = 14
+	cuff.mesh = band
+	cuff.material_override = _materials["cuff"]
+	cuff.rotation_degrees = Vector3(90, 0, 0)
+	cuff.position = Vector3(0, 0, 0.018)
+	hand.add_child(cuff)
+	var palm: MeshInstance3D = MeshInstance3D.new()
+	var ellipsoid: SphereMesh = SphereMesh.new()
+	ellipsoid.radius = 0.5
+	ellipsoid.height = 1.0
+	ellipsoid.radial_segments = 16
+	ellipsoid.rings = 8
+	palm.mesh = ellipsoid
+	palm.material_override = _materials["skin"]
+	palm.scale = Vector3(0.082, 0.034, 0.105)
+	palm.position = Vector3(0, 0, -0.048)
+	hand.add_child(palm)
+	var fingers: Array[Node3D] = []
+	var offsets: Array = [-0.027, -0.009, 0.009, 0.026]
+	var lengths: Array = [0.074, 0.082, 0.077, 0.061]
 	for finger: int in range(4):
-		var x: float = (float(finger) - 1.5) * 0.021
-		var length: float = [0.072, 0.085, 0.08, 0.064][finger]
-		var knuckle: Node3D = Node3D.new()
-		knuckle.position = Vector3(x, 0.0, -0.092)
-		knuckle.name = "Finger%d" % finger
-		hand.add_child(knuckle)
-		var segment: MeshInstance3D = _capsule(knuckle, 0.0095, length, _materials["skin"])
-		segment.position = Vector3(0, 0, -length * 0.5 + 0.006)
+		# index finger sits next to the thumb, on the inside
+		var x: float = float(offsets[finger]) * side * -1.0
+		var length: float = lengths[finger]
+		var root_joint: Node3D = Node3D.new()
+		root_joint.position = Vector3(x, 0.002, -0.094 + absf(float(offsets[finger])) * 0.25)
+		hand.add_child(root_joint)
+		var proximal: float = length * 0.56
+		_capsule(root_joint, 0.0098, proximal + 0.012, _materials["skin"]).position = Vector3(0, 0, -proximal * 0.5)
+		var tip_joint: Node3D = Node3D.new()
+		tip_joint.position = Vector3(0, 0, -proximal)
+		root_joint.add_child(tip_joint)
+		var distal: float = length * 0.44
+		_capsule(tip_joint, 0.0088, distal + 0.01, _materials["skin"]).position = Vector3(0, 0, -distal * 0.5)
+		fingers.append(root_joint)
+		fingers.append(tip_joint)
 	var thumb: Node3D = Node3D.new()
-	thumb.position = Vector3(-side * 0.04, -0.008, -0.03)
-	thumb.rotation_degrees = Vector3(0, side * 38.0, side * 20.0)
-	thumb.name = "Thumb"
+	thumb.position = Vector3(-side * 0.036, -0.008, -0.03)
+	thumb.rotation_degrees = Vector3(0, side * 42.0, side * 25.0)
 	hand.add_child(thumb)
-	_capsule(thumb, 0.011, 0.06, _materials["skin"]).position = Vector3(0, 0, -0.03)
+	_capsule(thumb, 0.0115, 0.042, _materials["skin"]).position = Vector3(0, 0, -0.018)
+	var thumb_tip: Node3D = Node3D.new()
+	thumb_tip.position = Vector3(0, 0, -0.036)
+	thumb_tip.rotation_degrees = Vector3(0, side * -18.0, 0)
+	thumb.add_child(thumb_tip)
+	_capsule(thumb_tip, 0.0102, 0.034, _materials["skin"]).position = Vector3(0, 0, -0.015)
 	return {
-		"side": side, "upper": upper, "fore": fore, "hand": hand,
+		"side": side, "upper": upper, "fore": fore, "hand": hand, "fingers": fingers,
 		"wrist": Vector3(side * 0.24, -0.5, -0.3), "wrist_velocity": Vector3.ZERO,
 		"facing": Basis.IDENTITY, "curl": 0.3,
 	}
@@ -206,16 +240,17 @@ func _process(delta: float) -> void:
 					# airborne: hands come up into view and spread, then lower for the landing
 					var rising: float = clampf(vertical / 6.0, -1.0, 1.0)
 					var reach: float = clampf(0.55 + rising * 0.45 + _jump_kick * 0.3, 0.0, 1.0)
-					target = Vector3(side * lerpf(0.3, 0.21, reach), lerpf(-0.27, -0.1, reach), lerpf(-0.36, -0.44, reach))
-					facing = _hand_basis(side, deg_to_rad(lerpf(-20.0, 55.0, reach)), deg_to_rad(side * lerpf(-25.0, -12.0, reach)))
-					curl = lerpf(0.25, 0.05, reach)
+					target = Vector3(side * lerpf(0.3, 0.2, reach), lerpf(-0.28, -0.08, reach), lerpf(-0.36, -0.42, reach))
+					facing = _hand_basis(side, deg_to_rad(lerpf(-10.0, 72.0, reach)), deg_to_rad(side * lerpf(-30.0, -14.0, reach)))
+					curl = lerpf(0.3, 0.08, reach)
 					stiffness = 170.0
 		_drive_arm(arm, target, facing, curl, stiffness, delta)
 
 
 ## Pitch tips the fingers up (+) or down (-); spread turns them outward.
 func _hand_basis(side: float, pitch: float, spread: float) -> Basis:
-	return Basis(Vector3.UP, spread) * Basis(Vector3.RIGHT, pitch) * Basis(Vector3.BACK, side * deg_to_rad(-12.0))
+	# the slight inward roll keeps the backs of the hands angled toward the eye
+	return Basis(Vector3.UP, spread) * Basis(Vector3.RIGHT, pitch) * Basis(Vector3.BACK, side * deg_to_rad(-18.0))
 
 
 func _drive_arm(arm: Dictionary, target: Vector3, facing: Basis, curl: float, stiffness: float, delta: float) -> void:
@@ -233,9 +268,13 @@ func _drive_arm(arm: Dictionary, target: Vector3, facing: Basis, curl: float, st
 	var side: float = arm["side"]
 	var hand: Node3D = arm["hand"]
 	hand.transform = Transform3D(current, wrist)
-	for finger: int in range(4):
-		var knuckle: Node3D = hand.get_node("Finger%d" % finger)
-		knuckle.rotation = Vector3(-float(arm["curl"]) * 1.4, 0, 0)
+	var joints: Array[Node3D] = arm["fingers"]
+	for index: int in range(joints.size()):
+		# fingers fan out slightly when open and close into a loose fist when curled
+		var finger: int = index / 2
+		var open: float = 1.0 - float(arm["curl"])
+		var fan: float = (float(finger) - 1.5) * 0.09 * open * -side if index % 2 == 0 else 0.0
+		joints[index].rotation = Vector3(-float(arm["curl"]) * (1.25 if index % 2 == 0 else 1.05), fan, 0)
 	var shoulder: Vector3 = Vector3(side * 0.24, -0.42, 0.18)
 	var elbow: Vector3 = shoulder.lerp(wrist, 0.5) + Vector3(side * 0.09, -0.13, 0.06)
 	var wrist_back: Vector3 = wrist + current * Vector3(0, 0, 0.05)
