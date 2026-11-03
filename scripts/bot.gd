@@ -84,8 +84,8 @@ func _physics_process(delta: float) -> void:
 		if not bool(fold.call("is_done")) and flat.length() < 6.0:
 			Input.action_release("move_forward")
 			_waiting += delta
-			_aim_pitch(deg_to_rad(12.0), delta)
-			_turn_toward(Vector3(0, 0, -80), delta, 1.0)
+			_aim_pitch(deg_to_rad(float(step.get("watch_pitch", 12.0))), delta)
+			_turn_toward(step["watch"], delta, 1.0)
 			return
 	Input.action_press("move_forward")
 	_turn_toward(target, delta, 1.0)

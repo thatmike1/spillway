@@ -542,7 +542,7 @@ func _skin_bridge(roof_y: float) -> void:
 	block.position = Vector3(0, roof_y, back_z)
 	block.set("axis", Vector3.RIGHT)
 	block.set("angle", PI / 2.0)
-	block.set("anticipation", 0.7)
+	block.set("anticipation", 0.9)
 	block.set("duration", 2.2)
 	block.set("settle_time", 0.5)
 	add_child(block)
@@ -573,7 +573,7 @@ func _skin_bridge(roof_y: float) -> void:
 		block.add_child(holder)
 		_chevron(road, holder, Vector3.ZERO, 2.0, 0.0)
 	_cue_strip(road, block, Vector3(0, 0.12, -0.05), Vector3(width - 2.0, 0.24, 0.1))
-	var trigger: Area3D = _trigger("FallTrigger", Vector3(0, 0.5, -100), Vector3(22, 8, 26))
+	var trigger: Area3D = _trigger("FallTrigger", Vector3(0, -1.0, -124), Vector3(22, 6, 6))
 	fold_triggers.append({"area": trigger, "fold": block})
 
 
@@ -747,12 +747,12 @@ func _city_chunk(origin: Vector3, count: int) -> Node3D:
 func _route_for_bot() -> void:
 	bot_path = [
 		{"point": Vector3(0, 0.9, -5), "look_around": true},
-		{"point": Vector3(0, 0.9, -38), "wait_fold": 0},
+		{"point": Vector3(0, 0.9, -38), "wait_fold": 0, "watch": Vector3(0, 0, -80)},
 		{"point": Vector3(0, 0.9, -48.0), "jump": true},
 		{"point": Vector3(0, 0.9, -98.6), "jump": true},
 		{"point": Vector3(4.5, -2.1, -112)},
 		{"point": Vector3(5.0, -2.1, -128)},
-		{"point": Vector3(1.5, -2.1, -137.0), "wait_fold": 1},
+		{"point": Vector3(1.5, -2.1, -137.0), "wait_fold": 1, "watch": Vector3(0, 3, -152), "watch_pitch": 18.0},
 		{"point": Vector3(0, -2.1, -160)},
 		{"point": Vector3(0, 2.0, -170.3)},
 		{"point": Vector3(0, 18.0, -170.1)},
