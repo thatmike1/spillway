@@ -209,13 +209,15 @@ func _process(delta: float) -> void:
 	var on_ground: bool = bool(_player.get("grounded"))
 	var up: Vector3 = _player.up_direction
 	var vertical: float = _player.velocity.dot(up)
-	var speed: float = float(_player.call("get_speed"))
+	var speed: float = float(_player.call("get_presentation_speed"))
 	var run: float = clampf(speed / 7.2, 0.0, 1.0)
-	var stride_phase: float = float(_player.call("get_stride")) / 2.2 * PI
+	var stride_phase: float = float(_player.call("get_stride")) / 2.2 * TAU
 	var camera_basis: Basis = main_camera.global_basis
 	var body_basis: Basis = _player.call("get_body_basis")
 	_lower.transform = Transform3D(camera_basis.inverse() * body_basis, camera_basis.inverse() * (_player.global_position - main_camera.global_position))
-	_pelvis.visible = move not in [5, 9]
+	# port choice (P): impact/roll coils the legs below the eye, including release recovery.
+	_lower.visible = move not in [9, 13] and _player._body_recovery <= 0
+	_pelvis.visible = move not in [5, 9, 13]
 	if move == 5:
 		_lower.position += camera_basis.inverse() * up * -1.2
 	if move in [4, 9]:
@@ -228,8 +230,9 @@ func _process(delta: float) -> void:
 		var ankle: Vector3 = Vector3(side * .12, -.83 + maxf(phase, 0) * .15, phase * .28)
 		if move == 5:
 			var progress: float = _player.call("get_climb_progress")
-			knee = Vector3(side * .17, -.28, -.38 - .1 * sin(progress * PI))
-			ankle = Vector3(side * .20, -.48, -.65 + side * .12)
+			var lead: float = sin(clampf(progress * 1.35 + (.22 if side > 0 else -.20), 0, 1) * PI)
+			knee = Vector3(side * .17, -.40 + lead * .22, -.18 - lead * .32)
+			ankle = Vector3(side * .20, -.67 + lead * .26, -.10 - lead * .62)
 		if move == 4:
 			knee = Vector3(side * .13, -.45, -.42)
 			ankle = Vector3(side * .14, -.5, -.78)

@@ -5,7 +5,7 @@ if (-not (Test-Path -LiteralPath $Godot)) { throw 'Godot missing. Run tools/setu
 $importOutput = & $Godot --headless --path $projectPath --editor --import --quit 2>&1
 $importOutput | ForEach-Object { Write-Output $_ }
 if ($LASTEXITCODE -ne 0 -or ($importOutput -join "`n") -match 'SCRIPT ERROR:|ERROR:') { throw 'Headless import failed; see diagnostics above.' }
-foreach ($suite in @('test_spec_ground', 'test_spec_moves', 'test_spec_camera', 'test_body', 'test_runner_vision', 'test_player', 'test_yard', 'test_feel', 'test_integration', 'test_traversal')) {
+foreach ($suite in @('test_spec_ground', 'test_spec_moves', 'test_spec_camera', 'test_body', 'test_runner_vision', 'test_player', 'test_yard', 'test_feel', 'test_presentation', 'test_integration', 'test_traversal')) {
     & $Godot --headless --fixed-fps 120 --path $projectPath --script "res://tests/$suite.gd"
     if ($LASTEXITCODE -ne 0) { throw "$suite failed: $LASTEXITCODE" }
 }

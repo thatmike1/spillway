@@ -10,7 +10,7 @@ const HUD_SCRIPT: Script = preload("res://scripts/hud.gd")
 const ARMS_SCRIPT: Script = preload("res://scripts/arms.gd")
 const AUDIO_SCRIPT: Script = preload("res://scripts/audio.gd")
 const BOT_SCRIPT: Script = preload("res://scripts/bot.gd")
-const SETTINGS_PATH: String = "user://settings_me.cfg"
+const SETTINGS_PATH: String = "user://settings_feel.cfg"
 const FALL_FLOOR: float = -24.0
 
 var city_mode: bool = false
@@ -33,8 +33,8 @@ var best_time: float = -1.0
 # bot and checkpoint-start runs are for recording; they never touch saved settings or the best time
 var _persist: bool = true
 var settings: Dictionary = {
-	"sensitivity": 1.0, "fov": 85.0, "bank": 1.0, "speed_fov": false,
-	"runner_vision": true, "assists": false, "head_bob": false, "invert_y": false, "volume": 0.8,
+	"sensitivity": 1.0, "fov": 85.0, "bank": 1.0, "speed_fov": true,
+	"runner_vision": true, "assists": false, "head_bob": true, "comfort": false, "invert_y": false, "volume": 0.8,
 }
 
 var _quitting: bool = false
@@ -80,6 +80,13 @@ func _ready() -> void:
 	hud.connect("setting_changed", _on_setting_changed)
 	hud.call("load_settings", settings)
 	hud.call("set_course", city_mode)
+	if not _headless:
+		var effects := CanvasLayer.new()
+		effects.layer = 6
+		add_child(effects)
+		var streaks := preload("res://scripts/streaks.gd").new()
+		streaks.player = player
+		effects.add_child(streaks)
 	for entry: Dictionary in level.get("fold_triggers"):
 		(entry["area"] as Area3D).body_entered.connect(_on_fold_trigger.bind(entry["fold"]))
 	(level.get("finish_trigger") as Area3D).body_entered.connect(_on_finish)
@@ -332,6 +339,7 @@ func _apply_settings() -> void:
 	player.set("bank_amount", float(settings["bank"]))
 	player.set("speed_fov", bool(settings["speed_fov"]))
 	player.set("head_bob_enabled", bool(settings["head_bob"]))
+	player.set("comfort_enabled", bool(settings["comfort"]))
 	level.vision.allowed = bool(settings["runner_vision"])
 	player.set("assists_enabled", bool(settings["assists"]))
 	player.set("invert_y", bool(settings["invert_y"]))

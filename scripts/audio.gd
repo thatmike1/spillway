@@ -6,6 +6,7 @@ extends Node
 const RATE: int = 22050
 
 var _enabled: bool = true
+var effects_enabled: bool = true
 var _player: CharacterBody3D
 var _steps: Array[AudioStreamWAV] = []
 var _sounds: Dictionary = {}
@@ -78,10 +79,10 @@ func finish() -> void:
 func _process(delta: float) -> void:
 	if _player == null or _wind == null:
 		return
-	var speed: float = _player.velocity.length()
-	var target: float = clampf((speed - 3.0) / 14.0, 0.0, 1.0)
+	var speed: float = _player.get_presentation_speed()
+	var target: float = clampf(speed / _player.top_speed, 0.0, 1.0)
 	_wind_level = lerpf(_wind_level, target, 1.0 - exp(-3.0 * delta))
-	_wind.volume_db = linear_to_db(maxf(_wind_level * _wind_level * 0.5, 0.0001))
+	_wind.volume_db = linear_to_db(maxf(_wind_level * _wind_level * .8, 0.0001))
 	_wind.pitch_scale = 0.8 + _wind_level * 0.5
 
 
@@ -107,7 +108,7 @@ func _on_move(kind: String) -> void:
 
 
 func _play(stream: AudioStream, volume_db: float, pitch: float) -> void:
-	if not _enabled:
+	if not _enabled or not effects_enabled:
 		return
 	for voice: AudioStreamPlayer in _pool:
 		if not voice.playing:

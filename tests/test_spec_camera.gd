@@ -6,7 +6,7 @@ func _run() -> void:
 	player._update_rig(.016, true)
 	check(absf(player.get_camera().fov - 54.53644224813771) < .1, "85 horizontal converts to about 54.54 vertical")
 	check(player.get_camera().keep_aspect == Camera3D.KEEP_HEIGHT, "ultrawide preserves vertical FOV")
-	check(not player.speed_fov and not player.assists_enabled, "spec baseline disables added FOV and general assists")
+	check(player.speed_fov and player.head_bob_enabled and not player.assists_enabled, "feel defaults enable FOV and gait while general assists remain off")
 	player.look(.5, 0)
 	player._update_rig(.016, false)
 	check(player.get_camera().global_basis.z.dot(player.global_basis.z) > .999, "view yaw responds immediately")

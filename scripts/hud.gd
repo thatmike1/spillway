@@ -250,6 +250,7 @@ func _make_pause(root: Control) -> Control:
 	options.add_child(_slider("Field of view at 16:9", "fov", 80.0, 105.0, 1.0))
 	options.add_child(_slider("Camera bank on wall-runs", "bank", 0.0, 1.0, 0.05))
 	options.add_child(_slider("Volume", "volume", 0.0, 1.0, 0.05))
+	options.add_child(_toggle("Comfort: reduce camera motion and streaks", "comfort"))
 	options.add_child(_toggle("Speed FOV (Foldrunner extension)", "speed_fov"))
 	options.add_child(_toggle("Jump grace (Foldrunner extension)", "assists"))
 	options.add_child(_toggle("Runner vision", "runner_vision"))

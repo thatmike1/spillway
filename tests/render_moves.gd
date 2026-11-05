@@ -8,6 +8,8 @@ var time: float = 0
 var phase: int = -1
 var jumped: bool = false
 var arms: Node
+var audio: Node
+var quitting: bool = false
 var eye_trace: FileAccess
 var fixture_only: int = -1
 
@@ -59,7 +61,7 @@ func _run() -> void:
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-45, -25, 0)
 	world.add_child(sun)
-	box(Vector3(110, -.5, -25), Vector3(300, 1, 90), Color("#53677b"))
+	box(Vector3(130, -.5, -25), Vector3(360, 1, 90), Color("#53677b"))
 	box(Vector3(30, .5, -6), Vector3(5, 1, .6), Color("#c93932"))
 	box(Vector3(150, 1.5, -1), Vector3(6, 3, 2), Color("#c93932"))
 	box(Vector3(180.7, 5, -10), Vector3(.4, 10, 30), Color("#c2c7ca"))
@@ -71,6 +73,17 @@ func _run() -> void:
 	arms = load("res://scripts/arms.gd").new()
 	world.add_child(arms)
 	arms.attach(player)
+	audio = load("res://scripts/audio.gd").new()
+	world.add_child(audio)
+	audio.attach(player, world)
+	if fixture_only == 10:
+		audio.effects_enabled = false
+	var effects := CanvasLayer.new()
+	effects.layer = 6
+	world.add_child(effects)
+	var streaks = load("res://scripts/streaks.gd").new()
+	streaks.player = player
+	effects.add_child(streaks)
 	var layer := CanvasLayer.new()
 	root.add_child(layer)
 	label = Label.new()
@@ -79,25 +92,31 @@ func _run() -> void:
 	layer.add_child(label)
 
 func _physics_process(dt: float) -> bool:
-	if player == null:
+	if player == null or quitting:
 		return false
 	time += dt
 	var next: int = int(time / 3)
-	if next > 8 or (fixture_only >= 0 and next > fixture_only):
-		quit(0)
+	if next > (10 if fixture_only == 10 else 9) or (fixture_only >= 0 and next > fixture_only):
+		quitting = true
+		_finish.call_deferred()
 		return false
 	if next != phase:
 		phase = next
 		jumped = false
 		Input.action_release("move_forward")
 		Input.action_release("crouch")
-		var positions: Array[Vector3] = [Vector3(0, .9, 0), Vector3(30, .9, 0), Vector3(60, 2.0, 0), Vector3(90, 4.9, 0), Vector3(120, .9, 0), Vector3(150, 2.0, .4), Vector3(180, 2.0, 0), Vector3(210, .9, 0), Vector3(240, .9, 0)]
+		var positions: Array[Vector3] = [Vector3(0, .9, 0), Vector3(30, .9, 0), Vector3(60, 2.0, 0), Vector3(90, 4.9, 0), Vector3(120, .9, 0), Vector3(150, 2.0, .4), Vector3(180, 2.0, 0), Vector3(210, .9, 0), Vector3(240, .9, 0), Vector3(270, 6.9, 0), Vector3(0, .9, 0)]
 		player.reset_to(Transform3D(Basis.IDENTITY, positions[phase]))
 		player.look(0, -1.35 if phase == 8 else (.30 if phase == 5 else (-.13 if phase != 3 else -.28)))
-		label.text = ["jump: original hands enter on takeoff", "vault: hands follow the actual red rail", "wall run: left contact, corrected Godot bank", "landing: normal impact and body recovery", "roll: safe retargeted eye, recovered root travel", "grab: two separate planted hands", "wall run: right contact, corrected Godot bank", "turn: angular-rate lazy spring", "look down: articulated legs and shoes"][phase]
+		label.text = ["jump: original hands enter on takeoff", "vault: hands follow the actual red rail", "wall run: left contact, corrected Godot bank", "landing: normal impact and body recovery", "roll: safe retargeted eye, recovered root travel", "grab: two separate planted hands", "wall run: right contact, corrected Godot bank", "turn: angular-rate lazy spring", "look down: articulated legs and shoes", "hard landing: impact, release and ten-frame body recovery", "wind isolation: steady 7.2 m/s, effects muted"][phase]
 		print("visual fixture ", phase, " begins at movie t=", time)
 	var t: float = fmod(time, 3)
 	match phase:
+		10:
+			Input.action_press("move_forward")
+			if not jumped:
+				player.velocity = Vector3(0, 0, -7.2)
+				jumped = true
 		0:
 			Input.action_press("move_forward")
 			if t > .65 and not jumped:
@@ -153,3 +172,9 @@ func _process(_dt: float) -> bool:
 		var clearance: float = (eye - Vector3(hit.position)).dot(player.up_direction) if not hit.is_empty() else -100
 		eye_trace.store_csv_line([time, phase, eye.x, eye.y, eye.z, clearance, rad_to_deg(player._roll), player.move, player.is_low(), arms._arms[0].wrist, arms._arms[1].wrist, player.get_hand_weight(-1), arms._arms[0].hand.global_position.distance_to(player.get_hand_target(-1)) if player.get_hand_target(-1).is_finite() else -1])
 	return false
+
+func _finish() -> void:
+	audio.stop_all()
+	for i: int in 8:
+		await process_frame
+	quit()

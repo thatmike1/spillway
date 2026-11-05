@@ -26,9 +26,12 @@ var gravity_strength: float:
 @export var stick_look_speed: float = 3.2
 @export var invert_y: bool = false
 @export var fov_horizontal: float = 85.0
-@export var speed_fov: bool = false
+@export var speed_fov: bool = true
 @export_range(0.0, 1.0) var bank_amount: float = 1.0
-@export var head_bob_enabled: bool = false
+@export var head_bob_enabled: bool = true
+@export var comfort_enabled: bool = false
+var sprint_effect: float = 0
+var _step_distance: float = 0
 
 var landing = preload("res://scripts/moves/landing.gd").new()
 var vault = preload("res://scripts/moves/vault.gd").new()
@@ -132,6 +135,10 @@ func get_speed() -> float:
 	return velocity.slide(up_direction).length()
 
 
+func get_presentation_speed() -> float:
+	return displacement_velocity.slide(up_direction).length()
+
+
 func get_pitch() -> float:
 	return _pitch
 
@@ -210,6 +217,9 @@ func reset_to(spawn: Transform3D, up: Vector3 = Vector3.UP) -> void:
 	velocity = Vector3.ZERO
 	displacement_velocity = Vector3.ZERO
 	travel_distance = 0
+	sprint_effect = 0
+	_step_distance = 0
+	_fov_extra = 0
 	_stride = 0
 	_landing_elapsed = 100
 	_body_recovery = 0
@@ -306,7 +316,16 @@ func _physics_process(delta: float) -> void:
 		Move.STEP: step_up.step(self, delta)
 		_: _step_free(delta, crouch_held)
 	displacement_velocity = (global_position - motion_origin) / delta
-	travel_distance += displacement_velocity.slide(up_direction).length() * delta
+	var distance: float = get_presentation_speed() * delta
+	travel_distance += distance
+	_stride = fmod(travel_distance, 2.2)
+	if grounded and move == Move.GROUND:
+		_step_distance += distance
+		if _step_distance >= 1.1:
+			_step_distance = fmod(_step_distance, 1.1)
+			footstep.emit(clampf(get_presentation_speed() / top_speed, .2, 1))
+	var streak_target: float = clampf((get_presentation_speed() - 6.1) / .7, 0, 1)
+	sprint_effect = lerpf(sprint_effect, streak_target, 1 - exp(-delta * (8 if streak_target > sprint_effect else .8)))
 	_jump_buffer = maxf(0, _jump_buffer - delta)
 	_camera_turn_target = clampf((_yaw_input / maxf(delta, .00001)) * tuning.turn_lag_multiplier * tuning.turn_lag_projection, -PI / 4, PI / 4) * clampf((get_speed() - 1) / 3, 0, 1)
 	_yaw_input = 0
@@ -353,7 +372,6 @@ func _step_free(delta: float, crouch_held: bool) -> void:
 			lateral = velocity.slide(up) + _continuation_direction * tuning.acceleration_limit * delta
 			_landing_continuation = false
 		vertical = minf(vertical, -1.5)
-		_stride += lateral.length() * delta
 		momentum = clampf((lateral.length() - base_speed) / (top_speed - base_speed), 0.0, 1.0)
 	else:
 		# weak acceleration changes the trajectory; it never assigns a new heading.
@@ -424,11 +442,6 @@ func _after_move(was_grounded: bool, pre_velocity: Vector3) -> void:
 				soft = body is Node and body.get_meta("soft_landing", false)
 			landing.start(self, impact, soft)
 		_fall_origin = global_position.dot(up_direction)
-	if grounded and now_grounded:
-		var stride_length: float = 2.2
-		if _stride >= stride_length:
-			_stride = fmod(_stride, stride_length)
-			footstep.emit(clampf(get_speed() / top_speed, 0.2, 1.0))
 
 
 func _do_jump(new_velocity: Vector3) -> void:
@@ -675,17 +688,15 @@ func _update_rig(delta: float, snap: bool) -> void:
 		_nod += _nod_velocity * h
 	var target_roll: float = 0
 	var local_eye: Vector3 = Vector3.ZERO
-	var speed: float = get_speed()
-	var cycle: float = tuning.sprint_cycle if speed >= 6.3 else tuning.run_cycle
-	var rate: float = clampf(speed / (6.0 if speed >= 6.3 else 5.0), .2, 1.4)
-	_animation_phase += delta * rate / cycle * TAU
+	var speed: float = get_presentation_speed()
+	_animation_phase = travel_distance / 2.2 * TAU
 	if move == Move.WALLRUN:
 		target_roll = -deg_to_rad(tuning.wall_left_tilt if _wall_side < 0 else tuning.wall_right_tilt) # ue left-handed roll mapped to Godot
 		var extent: Vector2 = tuning.wall_left_eye_range if _wall_side < 0 else tuning.wall_right_eye_range
 		local_eye = Vector3(sin(_animation_phase * 1.4) * extent.x / 2, sin(_animation_phase * 2.8) * extent.y / 2, 0)
 	elif grounded and head_bob_enabled and move == Move.GROUND:
 		var extent: Vector2 = tuning.sprint_eye_range if speed >= 6.3 else tuning.run_eye_range
-		local_eye = Vector3(sin(_animation_phase) * extent.x / 2, sin(_animation_phase * 2) * extent.y / 2, 0)
+		local_eye = Vector3(sin(_animation_phase) * extent.x / 2, sin(_animation_phase * 2) * extent.y / 2, 0) * (.2 if comfort_enabled else 1.0)
 	var anim_pitch: float = 0
 	if move == Move.VAULT:
 		var f: float = get_climb_progress()
@@ -694,7 +705,8 @@ func _update_rig(delta: float, snap: bool) -> void:
 		var plant: float = smoothstep(0, .16, f) * (1 - smoothstep(.52, .90, f))
 		var over_rail: float = (global_position + up_direction * _eye_height - _climb_hand).dot(up_direction)
 		local_eye.y -= maxf(0, over_rail - tuning.vault_eye_above_contact) * plant
-		anim_pitch = -.80 * sin(f * PI) # port choice (P): see the planted hand and rail through push-off
+		target_roll = .10 * sin(f * PI) # port choice (P): plant-side body lean.
+		anim_pitch = -.62 * sin(f * PI) # port choice (P): see the planted hand and rail through push-off
 	elif move == Move.PULLUP:
 		local_eye.y -= .35 * sin(get_climb_progress() * PI)
 	elif move == Move.ROLL:
@@ -713,7 +725,7 @@ func _update_rig(delta: float, snap: bool) -> void:
 		var amount: float = clampf(pow(landing.impact / 8.0, 2), .15, 1)
 		local_eye.y -= tuning.normal_landing_compression * amount * sin(_landing_elapsed / tuning.normal_landing_recovery * PI)
 	_turn_lag = lerpf(_turn_lag, _camera_turn_target, minf(1, delta / tuning.turn_lag_time))
-	_roll = lerpf(_roll, target_roll * bank_amount + _turn_lag, 1 - exp(-8 * delta))
+	_roll = lerpf(_roll, (target_roll * bank_amount + _turn_lag) * (.2 if comfort_enabled else 1.0), 1 - exp(-8 * delta))
 	var fraction: float = Engine.get_physics_interpolation_fraction()
 	var eye: Vector3 = _curr_eye if snap else _prev_eye.lerp(_curr_eye, fraction)
 	var view_basis: Basis = Basis(_view_q)
@@ -731,8 +743,8 @@ func _update_rig(delta: float, snap: bool) -> void:
 		view_basis * Basis(Vector3.RIGHT, _pitch + _nod + anim_pitch) * Basis(Vector3.BACK, _roll),
 		_resolve_eye(eye + view_basis * (local_eye + Vector3(0, _dip, 0)))
 	)
-	# foldrunner extension, explicitly optional; baseline has a fixed lens.
-	var widen: float = 5 * clampf(inverse_lerp(base_speed + .5, top_speed, speed), 0, 1) if speed_fov else 0.0
+	# foldrunner extension (P): continuous displacement-driven lens; default on.
+	var widen: float = 5 * pow(clampf(speed / top_speed, 0, 1), 2) * (.25 if comfort_enabled else 1.0) if speed_fov else 0.0
 	_fov_extra = lerpf(_fov_extra, widen, 1 - exp(-3 * delta)) if not snap else widen
 	_camera.fov = vertical_fov(fov_horizontal + _fov_extra)
 
