@@ -670,7 +670,7 @@ func _extended_district() -> void:
 	_route_lip(Vector3(0, 29.8, -224.1))
 	_checkpoint(Vector3(0, 27, -208), Vector3(18, 4, 6), Transform3D(Basis.IDENTITY, Vector3(0, 25.9, -207)), 2)
 	# this high service wall demands the slower high-vault contract; a side lane stays open.
-	var high := _solid(self, Vector3(-1, 30.65, -234.5), Vector3(11, 1.7, .65), _materials["metal"], "HighVaultRail")
+	var high := _solid(self, Vector3(0, 30.65, -234.5), Vector3(11, 1.7, .65), _materials["metal"], "HighVaultRail")
 	# open hardware exposes the footplants beyond it. retain the recovered move's
 	# authored 1.7m top and .65m depth, with collision on the actual rails/posts.
 	(high.get_child(0) as MeshInstance3D).visible = false
@@ -683,18 +683,20 @@ func _extended_district() -> void:
 		_mesh(high, Vector3(post_x, -.09, 0), Vector3(.12, 1.52, .18), _materials["metal"])
 		_shape(high, Vector3(post_x, -.09, 0), Vector3(.12, 1.52, .18))
 	_mark_object(high)
+	# port choice (P): the shorter-flight street is 3m wide; its 2.2m lower roof makes
+	# the springboard landing a real >2m roll opportunity, rather than an apex artefact.
 	# paired footplants: a springboard takes you across the street below.
 	var spring_a := _solid(self, Vector3(0, 30.12, -243), Vector3(5, .64, .5), _materials["metal"], "FirstFootplant")
 	var spring_b := _solid(self, Vector3(0, 30.4, -244.12), Vector3(5, 1.2, .5), _materials["metal"], "SecondFootplant")
 	_mark_object(spring_a, "footplants")
 	_mark_object(spring_b, "footplants")
-	_building(Vector2(0, -267), Vector2(18, 28), 29.8, true, _facade(5), false)
-	_route_lip(Vector3(0, 29.8, -258.1))
-	_route_lip(Vector3(0, 29.8, -280.8))
-	_checkpoint(Vector3(0, 32, -268), Vector3(18, 5, 6), Transform3D(Basis.IDENTITY, Vector3(0, 30.7, -267)), 2)
+	_building(Vector2(0, -265.5), Vector2(18, 31), 27.6, true, _facade(5), false)
+	_route_lip(Vector3(0, 27.6, -250.1))
+	_route_lip(Vector3(0, 27.6, -280.8))
+	_checkpoint(Vector3(0, 29.6, -268), Vector3(18, 5, 6), Transform3D(Basis.IDENTITY, Vector3(0, 28.5, -267)), 2)
 	# a wall carries you across the next cut. the street is visible beneath your feet.
-	var wall := _solid(self, Vector3(-.72, 33.8, -285), Vector3(.4, 8, 16), _facade(1), "WallRunFacade")
-	var contact := _solid(self, Vector3(-.495, 32, -285), Vector3(.05, .25, 15.8), _materials["concrete"], "WallHandRail")
+	var wall := _solid(self, Vector3(-.72, 32.7, -285), Vector3(.4, 10.2, 16), _facade(1), "WallRunFacade")
+	var contact := _solid(self, Vector3(-.495, 29.8, -285), Vector3(.05, .25, 15.8), _materials["concrete"], "WallHandRail")
 	contact.set_meta("exclude_feet", true)
 	_mark_object(contact)
 	_building(Vector2(0, -309), Vector2(18, 36), 29.8, true, _facade(0), false)
@@ -906,12 +908,12 @@ func _route_for_bot() -> void:
 		{"point": Vector3(0, 2, -170.3)},
 		{"point": Vector3(0, 18, -170.1)},
 		{"point": Vector3(0, 25.9, -180)},
-		{"point": Vector3(0, 25.9, -219.5), "jump": true},
+		{"point": Vector3(0, 25.9, -221.5), "jump": true},
 		{"point": Vector3(0, 30.7, -229)},
-		{"point": Vector3(0, 30.7, -232.6), "jump": true},
+		{"point": Vector3(0, 30.7, -233.4), "jump": true},
 		{"point": Vector3(0, 30.7, -239.0), "jump": true},
-		{"point": Vector3(0, 30.7, -270), "roll": true},
-		{"point": Vector3(0, 30.7, -279), "jump": true},
+		{"point": Vector3(0, 28.5, -270), "roll": true},
+		{"point": Vector3(0, 28.5, -279), "jump": true},
 		{"point": Vector3(0, 32, -286.5), "wall_jump": true},
 		{"point": Vector3(1.5, 30.7, -301)},
 		{"point": Vector3(1.5, 30.7, -320), "turn": true},

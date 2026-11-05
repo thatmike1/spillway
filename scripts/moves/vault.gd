@@ -51,6 +51,9 @@ func start(p, edge: Dictionary, high: bool, onto: bool = false) -> void:
 	# zero authored up time still needs collision clearance: fold the lift into over.
 	var lift: Vector3 = p.global_position + p.up_direction * (top - (p.global_position - p.up_direction * .9)).dot(p.up_direction)
 	lift += p.up_direction * t.vault_clearance
+	if high:
+		# port choice (P): approach while rising, within the capsule-front clearance.
+		lift += forward * clampf((top - p.global_position).dot(forward) - t.radius - .12, .1, .65)
 	var crest: Vector3 = top + p.up_direction * (.9 + t.vault_clearance) + forward * (float(edge.depth) + t.radius)
 	var end: Vector3 = crest + forward * saved_speed * down_time - p.up_direction * t.vault_clearance
 	if not onto:
