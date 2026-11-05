@@ -97,3 +97,7 @@ Mike authorizes autonomous decisions and a sustained build run until at least **
 Use GPT execution freely and at most one Opus 5.5 consultation per hour on the most consequential current code or rendered artifact. This planning consultation began around 16:42 CET; the next must start no earlier than **17:45 CET**. Later slots should inspect the first slice, the complete route and final weak spots as artifacts become available. They are opportunities for real code/design help, not a score ritual. If a provider fails, disclose it and continue independent authorized work without claiming its review.
 
 Keep a concise decision/evidence trail and a durable next-action checkpoint for capacity errors or context loss. Make all choices yourself. This council-plan handoff is authorized, but it does not itself satisfy the runtime build goal.
+
+## Overnight extension, 5 November 23:54 CET
+
+Mike explicitly extended this run through at least **08:00 Europe/Prague on 6 November 2026**. This supersedes the earlier minimum stopping time. Keep the pushed R10 delivery as a working checkpoint and use the additional run to improve the playable game. The one-Opus-consultation-per-hour limit still holds; Mike reports its quota resets around 00:35 CET, so the next consultation may begin no earlier than 00:42 CET after the previous 23:41 CET review. Make decisions autonomously and retain the same rendered verification, honest evidence and delivery requirements.
