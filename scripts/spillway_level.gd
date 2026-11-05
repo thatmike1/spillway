@@ -45,6 +45,7 @@ func build() -> void:
 		preload("res://scripts/spillway_course.gd").new().build(self)
 		routes["brake"].append_array(routes["safe"].slice(12))
 		_make_finish_portal()
+	preload("res://scripts/spillway_art.gd").new().apply(self)
 	if not OS.get_cmdline_user_args().has("--no-batch"):
 		_batch_static_boxes()
 
@@ -340,13 +341,9 @@ func _make_flowing_spill() -> void:
 	water_regions.append({"bounds": AABB(Vector3(6.94, 6.5, -23.7), Vector3(3.12, 6.5, 23.7)), "depth": 0.12})
 
 func _make_finish_portal() -> void:
-	for x: float in [19.3, 28.7]:
-		_solid("PumpApronPortal", Vector3(x, -0.7, -66.0), Vector3(0.3, 4.6, 0.35), "steel")
-	_box(Vector3(24.0, 1.65, -66.0), Vector3(10.1, 0.35, 1.4), "terracotta")
-	_box(Vector3(24.0, 1.43, -65.25), Vector3(10.1, 0.12, 0.14), "ochre")
-
-	_finish_wheel = _wheel(Vector3(24.0, -1.0, -68.7), 1.6, "ochre")
-	_cylinder(Vector3(24.0, -1.0, -69.5), Vector3(24.0, -1.0, -68.5), 0.24, "steel")
+	# p / the control wheel sits beside its larger drive, with an open view from the apron.
+	_finish_wheel = _wheel(Vector3(28.0, -1.2, -68.7), 0.7, "ochre")
+	_cylinder(Vector3(28.0, -1.2, -69.5), Vector3(28.0, -1.2, -68.5), 0.15, "steel")
 
 func splash_at(feet: Vector3) -> void:
 	if DisplayServer.get_name() == "headless":
@@ -413,8 +410,11 @@ func _make_architecture() -> void:
 	# large pipes and a tower keep the dam legible from the very first view.
 	for x: float in [11.5, 14.0]:
 		_cylinder(Vector3(x, 10.0, 5.0), Vector3(x, -3.0, -18.0), 0.55, "pipe")
-		_cylinder(Vector3(x, -3.0, -18.0), Vector3(x, -3.0, -69.0), 0.55, "pipe")
-		for z: float in [-23.0, -39.0, -53.0, -66.0]:
+		# p / the pressure main dives below the basin before the walkable loading apron.
+		_cylinder(Vector3(x, -3.0, -18.0), Vector3(x, -3.0, -55.0), 0.55, "pipe")
+		_cylinder(Vector3(x, -3.0, -55.0), Vector3(x, -7.0, -60.0), 0.55, "pipe")
+		_cylinder(Vector3(x, -7.0, -60.0), Vector3(x, -7.0, -71.0), 0.55, "pipe")
+		for z: float in [-23.0, -39.0, -53.0]:
 			_solid("PenstockSaddle", Vector3(x, -4.4, z), Vector3(1.65, 1.8, 1.15), "old_concrete")
 	_solid("PumpTowerFoundation", Vector3(24.0, -6.0, -78.0), Vector3(17.0, 6.0, 20.0), "old_concrete")
 	_solid("PumpTower", Vector3(24.0, 5.0, -79.0), Vector3(8.0, 22.0, 10.0), "terracotta")

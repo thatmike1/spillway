@@ -36,13 +36,15 @@ void fragment() {
 	float board_edge = 1.0 - smoothstep(0.008, 0.023, abs(fract(world_position.y / 0.27) - 0.5));
 	float board_tone = hash21(vec2(floor(world_position.y / 0.27), floor(wall_uv.x / 3.6)));
 	vec2 joint_uv = abs(fract(world_position.xz / vec2(4.8, 3.6)) - 0.5);
-	float deck_joint = 1.0 - smoothstep(0.001, 0.004, min(joint_uv.x, joint_uv.y));
+	float joint_distance = min(joint_uv.x, joint_uv.y);
+	float joint_softness = max(fwidth(joint_distance), 0.0015);
+	float deck_joint = 1.0 - smoothstep(0.0015, 0.0015 + joint_softness, joint_distance);
 	vec3 base = mix(wall_color.rgb, deck_color.rgb, horizontal);
 	base *= 0.97 + grain * 0.025 + clouds * 0.035;
 	base *= mix(0.87, 1.0, horizontal);
 	base *= world_normal.y < -0.3 ? 0.72 : 1.0;
 	base *= 1.0 - (1.0 - horizontal) * (board_edge * 0.10 + board_tone * 0.028 + streak * weathering);
-	base *= 1.0 - deck_joint * horizontal * 0.045;
+	base *= 1.0 - deck_joint * horizontal * 0.24;
 	float damp = (1.0 - smoothstep(waterline + 0.02, waterline + 0.65, world_position.y));
 	damp *= mix(1.0, 1.0 - smoothstep(0.06, 0.16, abs(world_position.y - waterline)), horizontal);
 	damp *= 0.65 + noise21(wall_uv * vec2(2.0, 4.0)) * 0.35;
