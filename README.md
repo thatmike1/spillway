@@ -1,76 +1,21 @@
-# Foldrunner
+# Spillway
 
-**Reboot planned, runtime unchanged:** Mike's Linux playtest rejected this build's feel. The current design is [Spillway](docs/reboot/BRIEF.md), a new controller and one finished dam-descent level. [The council](docs/reboot/COUNCIL.md) explains the decision; [the goal prompt](docs/reboot/GOAL.txt) starts the autonomous build. Everything below describes the pre-reboot game, not a completed Spillway build.
+Spillway is a first-person downhill parkour game in Godot4.7.2. **The reboot is in progress: the current build contains the playable Crest slice, not the completed three-part level.** The current contract and checkpoint are [BRIEF.md](docs/reboot/BRIEF.md) and [STATUS.md](docs/reboot/STATUS.md).
 
-A first-person parkour game in Godot 4.7.2. It opens in an original training yard; Tab switches to the folding-city route, whose clean scripted run takes about 84 seconds. Speed builds quickly into a run, then slowly toward 7.2m/s. Footage-first jumps take about .79 seconds and rise 1.27 metres. Landings, vaults, grabs, rolls and wall jumps have separate momentum contracts. All geometry, body animation, materials and synthesized sound are original.
+Run, jump, slide down the dry chute, carry speed across the channel, or take the switchback stairs. A missed shortcut lands in shallow water with a walking way out. The new motor always enables jump buffering/coyote time, keeps ordinary landing momentum, and lets you correct in the air. An optional airborne mantle requires held forward+jump and cancels on jump release or backward input.
 
-## Play on Windows
+## Play
 
-From this folder, double-click **Play Foldrunner.cmd**, or run it from PowerShell:
+Linux, from this folder: `./tools/play.sh`. It uses the pinned engine at `~/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64`; set `GODOT` for another engine path.
 
-```powershell
-.\Play Foldrunner.cmd
-```
+Windows: double-click `Play Foldrunner.cmd`. The launcher installs the pinned official engine into `%LOCALAPPDATA%\Foldrunner\tools\godot-4.7.2` if needed, imports this project and starts Spillway. Native Windows gameplay remains untested.
 
-The launcher installs the pinned official Windows engine into `%LOCALAPPDATA%\Foldrunner\tools\godot-4.7.2` if needed, checks the release checksum when supplied, imports the project, then launches it. Git and PowerShell are the only checkout prerequisites. First setup downloads about 86MB. To use an existing engine:
+WASD runs. Mouse looks. Space jumps. Ctrl/C crouches and slides. R starts a clean run. F restarts the segment for practice. Esc opens pause/settings. F11 toggles fullscreen. Clicking captures the mouse. Left/right gamepad sticks move/look; A jumps and LB crouches. Physical gamepad hardware is untested.
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\run.ps1 -Godot C:\Godot\Godot_v4.7.2-stable_win64_console.exe
-```
-
-## Play on Linux
-
-```bash
-./tools/play.sh
-```
-
-The helper expects the pinned engine at `~/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64`. Set `GODOT` to use another location. Add `--display-driver wayland` to use native Wayland, or `--fullscreen`; F11 also toggles fullscreen.
-
-The training yard opens unpaused, with free look immediately. It has a 1m grid, a 2.1m doorway, dimensioned obstacles/gaps/drops, a 75m sprint lane and a chain loop. Every obstacle has a bypass. Tab switches to the city; F3 toggles speed, state and landing metrics. Clicking recaptures the mouse. The timer waits for your first step. R restarts; falls return to the last reached roof with completed folds preserved.
-
-| Action | Keyboard/mouse | Gamepad |
-|---|---|---|
-| Look | Mouse / arrow keys | Right stick |
-| Run | WASD, continuous forward input earns speed | Left stick |
-| Jump / contextual springboard | Space | A / Cross or RB |
-| Slide / crouch; fresh press before landing to roll | Ctrl / C | B / Circle, LB or LT |
-| 180 turn | Q | Y / Triangle |
-| Restart | R | Back / Select |
-| Pause and settings | Esc | Start |
-| Switch yard / city | Tab | |
-| Movement metrics | F3 | |
-| Fullscreen | F11 | |
-
-Vaults, grabs/pull-ups and wall climbs select from suitable geometry and forward intent. Jump along a wall to wall-run, then press jump to leave it. A roll needs a fresh crouch press within .2s before impact after a fall greater than 2m; holding crouch does not refresh it. Step toward taller steps slowly to step up, or carry speed to vault them.
-
-## The route
-
-Low roof vault; a connected block folds into a road; slide under its gantry; drop onto the second roof and choose either side of the stair housing; cross a falling facade; run the gravity bend and crest; climb/grab/pull onto the upper district; high vault; paired springboard into a roll; wall run and jump across a street; turn at the water tank; take the east cross street; slow terrace step; finish shelter. Small red hardware marks usable rails, lips, pipes and footplants through proximity/direction/fade rules. A street district turns its road toward the upper route; a continuous mirrored city spans overhead.
-
-Pause settings include sensitivity, FOV, bank, volume and runner vision. Gait motion, up to +5° speed FOV, peripheral streaks and audible wind default on. One comfort option reduces camera motion and streaks. General jump grace remains a Foldrunner extension, off by default. Settings/best time are in Godot's `user://settings_feel.cfg`; scripted runs do not save them.
+Settings include sensitivity, horizontal FOV, volume and comfort camera. The fresh profile is `user://spillway_v1.cfg`. Practice and checkpoint respawn cannot overwrite clean full-run records. Bot runs never persist settings/records.
 
 ## Verify
 
-```bash
-./tools/check.sh
-```
+`./tools/check.sh` runs the new behavioral collision suite. `./tools/check-spillway.sh --play-routes --seed=0 --evidence-dir=/absolute/path/outside/git` also plays the authored safe, fast and recovery routes using real input events. Windows uses `tools/check.ps1` with the pinned engine. [VERIFICATION.md](docs/reboot/VERIFICATION.md) explicitly records which old reconstruction tests are retired.
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\check.ps1
-```
-
-The twelve headless suites cover numeric traces, per-tick move handoffs and release frames, displacement-driven presentation, camera/body contact, runner vision, yard geometry/input and chain lap, controls/gravity surfaces, integration and two full city traversals. `tests/test_interface.gd` separately checks real UI input/layout in a rendered engine. Measured feel results are in [docs/FEEL-RESULTS.md](docs/FEEL-RESULTS.md). Predictions, tolerances and port choices are in [docs/VERIFICATION.md](docs/VERIFICATION.md). Runtime ownership is in [docs/CONTRACT.md](docs/CONTRACT.md). Tuning is SI in `data/movement.tres` and its script.
-
-## Record
-
-From this folder:
-
-```bash
-GODOT="$HOME/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64"
-xvfb-run -a -s '-screen 0 1280x720x24' "$GODOT" --path . --audio-driver Dummy --rendering-driver opengl3 \
-  --write-movie /tmp/foldrunner/run.png --fixed-fps 10 -- --city --bot --bot-quit
-```
-
-Create the output folder first. Keep the virtual display at 1280×720: a taller maximized window causes Movie Maker to crop the foreground body. `--audio-driver Dummy` permits clean capture shutdown. Movie Maker's frame rate changes recording/input delivery, not the movement constants; 10fps permits all twelve 120Hz physics ticks per recorded frame. Captures and spec/reference files stay outside Git. Omit `--city` to record the yard chain. Useful user arguments: `--city`, `--no-hud`, `--no-bank`, `--detour`, `--from=N`, `--trace-run=/absolute/run.csv`. The bot supplies ordinary held inputs, mouse motion and action presses, flushing injected actions before the next physics substep; it never assigns route positions or velocity. `tests/render_moves.gd`, `tests/render_review.gd` and `tests/render_folds.gd` are labelled visual fixtures that reset between episodes, separate from route proof.
-
-Windows script flow was tested in PowerShell on Linux with official archive/checksum validation and Linux Godot for execution. Native Windows gameplay and real controller hardware remain untested. Automated targets and two self-review render passes are evidence for this build, not a claim that a person has accepted its feel.
+Captures, original private reference material and external game specs stay outside Git. All current geometry, shaders and synthesized audio are original. Passing tests and scripted runs do not establish that a human enjoys the game.

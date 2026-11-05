@@ -1,0 +1,238 @@
+extends Node3D
+## p / run provenance is separate from movement and presentation.
+
+const BUILD_ID := "spillway-2026.11.05-a"
+const SAVE_PATH := "user://spillway_v1.cfg"
+var player: CharacterBody3D
+var level: Node3D
+var hud: CanvasLayer
+var audio: Node
+var bot: Node
+var elapsed: float = 0.0
+var finished: bool = false
+var checkpoint_index: int = 0
+var respawn_count: int = 0
+var clean_eligible: bool = true
+var splits: Array[float] = []
+var best_splits: Array[float] = []
+var best_segments: Array[float] = []
+var split_deltas: Array[float] = []
+var best_time: float = -1.0
+var settings: Dictionary = {"sensitivity": 1.0, "fov": 90.0, "volume": 0.70, "comfort": false}
+var paused: bool = false
+var _started: bool = false
+var _spawn_origin: Vector3
+var _persist: bool = true
+var _recovery_time: float = 0.0
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	bind_inputs()
+	_persist = not OS.get_cmdline_user_args().has("--bot") and DisplayServer.get_name() != "headless"
+	_load()
+	level = preload("res://scripts/spillway_level.gd").new()
+	level.name = "Spillway"
+	add_child(level)
+	level.call("build")
+	player = preload("res://scripts/spillway_player.gd").new()
+	player.name = "Runner"
+	add_child(player)
+	hud = preload("res://scripts/spillway_hud.gd").new()
+	add_child(hud)
+	hud.call("attach", self)
+	audio = preload("res://scripts/spillway_audio.gd").new()
+	add_child(audio)
+	audio.call("attach", player, level)
+	_apply_settings()
+	restart_run()
+	var args := OS.get_cmdline_user_args()
+	if args.has("--no-hud"):
+		hud.hide()
+	if args.has("--verify-startup"):
+		print("startup: Spillway; build=%s; renderer=%s" % [BUILD_ID, RenderingServer.get_current_rendering_method()])
+		await get_tree().physics_frame
+		await get_tree().physics_frame
+		get_tree().quit()
+	if args.has("--bot"):
+		bot = preload("res://tests/spillway_driver.gd").new()
+		add_child(bot)
+		bot.call("attach", self)
+
+func restart_run() -> void:
+	elapsed = 0.0
+	finished = false
+	checkpoint_index = 0
+	respawn_count = 0
+	clean_eligible = true
+	splits.clear()
+	split_deltas.clear()
+	_started = false
+	_recovery_time = 0.0
+	_spawn_origin = level.get("spawn").origin
+	player.call("reset_to", level.get("spawn"))
+	if level.has_method("reset_state"):
+		level.call("reset_state")
+	set_paused(false)
+	if hud != null:
+		hud.call("notify", "")
+
+func practice_restart() -> void:
+	clean_eligible = false
+	finished = false
+	splits.resize(checkpoint_index)
+	_restore_checkpoint()
+	hud.call("notify", "Segment practice · R starts a clean run")
+
+func respawn() -> void:
+	respawn_count += 1
+	clean_eligible = false
+	finished = false
+	splits.resize(checkpoint_index)
+	_restore_checkpoint()
+	hud.call("notify", "Back on solid ground · practice attempt")
+
+func _restore_checkpoint() -> void:
+	var points: Array = level.get("checkpoints")
+	var pose: Transform3D = level.get("spawn")
+	if checkpoint_index < points.size():
+		pose = points[checkpoint_index]["pose"]
+	player.call("reset_to", pose)
+	_recovery_time = 0.0
+
+func _physics_process(delta: float) -> void:
+	if player == null or paused:
+		return
+	if not _started and player.global_position.distance_to(_spawn_origin) > 0.5:
+		_started = true
+	if _started and not finished:
+		elapsed += delta
+	var water := false
+	for region: Dictionary in level.get("water_regions"):
+		if (region["bounds"] as AABB).has_point(player.global_position):
+			water = true
+	player.set("in_water", water)
+	if player.global_position.y < -25.0 or absf(player.global_position.x) > 180.0 or player.global_position.z < -400.0 or player.global_position.z > 60.0:
+		_recovery_time += delta
+		if _recovery_time > 0.12:
+			respawn()
+	else:
+		_recovery_time = 0.0
+	if finished:
+		return
+	var points: Array = level.get("checkpoints")
+	var next := checkpoint_index + 1
+	if next < points.size():
+		var point: Dictionary = points[next]
+		var position: Vector3 = (point["pose"] as Transform3D).origin
+		var radius := float(point.get("radius", 5.0))
+		if player.global_position.distance_to(position) < radius:
+			checkpoint_index = next
+			splits.append(elapsed)
+			hud.call("notify", point.get("title", "Next segment"))
+	if player.global_position.distance_to(level.get("finish_position")) < float(level.get("finish_radius")):
+		if checkpoint_index == points.size() - 1:
+			_finish()
+
+func _finish() -> void:
+	finished = true
+	splits.append(elapsed)
+	var is_best := false
+	if clean_eligible and checkpoint_index == 2 and splits.size() == 3:
+		var previous: float = 0.0
+		for i: int in splits.size():
+			var segment_time := splits[i] - previous
+			previous = splits[i]
+			split_deltas.append(segment_time - best_segments[i] if i < best_segments.size() else INF)
+			if i >= best_segments.size():
+				best_segments.append(segment_time)
+			else:
+				best_segments[i] = minf(best_segments[i], segment_time)
+		is_best = best_time < 0.0 or elapsed < best_time
+		if is_best:
+			best_time = elapsed
+			best_splits = splits.duplicate()
+		_save()
+	if level.has_method("start_wheel"):
+		level.call("start_wheel")
+	audio.call("finish")
+	hud.call("show_finish", is_best)
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("restart"):
+		restart_run()
+	elif event.is_action_pressed("practice"):
+		practice_restart()
+	elif event.is_action_pressed("pause"):
+		set_paused(not paused)
+	elif event.is_action_pressed("fullscreen"):
+		var is_full := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if is_full else DisplayServer.WINDOW_MODE_FULLSCREEN)
+	elif event is InputEventMouseButton and event.pressed and not paused and DisplayServer.get_name() != "headless":
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+func set_paused(value: bool) -> void:
+	paused = value
+	get_tree().paused = value
+	if player != null:
+		player.set("input_enabled", not value)
+	if hud != null:
+		hud.call("set_paused", value)
+	if DisplayServer.get_name() != "headless":
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if value else Input.MOUSE_MODE_CAPTURED
+
+func change_setting(key: String, value: Variant) -> void:
+	settings[key] = value
+	_apply_settings()
+	_save()
+
+func _apply_settings() -> void:
+	player.set("mouse_sensitivity", 0.0022 * float(settings.sensitivity))
+	player.set("fov_horizontal", float(settings.fov))
+	player.set("comfort", bool(settings.comfort))
+	if audio != null:
+		audio.call("set_volume", float(settings.volume))
+
+func _load() -> void:
+	var config := ConfigFile.new()
+	if config.load(SAVE_PATH) != OK:
+		return
+	for key: String in settings:
+		settings[key] = config.get_value("settings", key, settings[key])
+	best_time = float(config.get_value("records", "clean_best", -1.0))
+	var saved: Array = config.get_value("records", "clean_splits", [])
+	for value: Variant in saved:
+		best_splits.append(float(value))
+	for value: Variant in config.get_value("records", "clean_segments", []):
+		best_segments.append(float(value))
+
+func _save() -> void:
+	if not _persist:
+		return
+	var config := ConfigFile.new()
+	for key: String in settings:
+		config.set_value("settings", key, settings[key])
+	config.set_value("records", "clean_best", best_time)
+	config.set_value("records", "clean_splits", best_splits)
+	config.set_value("records", "clean_segments", best_segments)
+	config.save(SAVE_PATH)
+
+static func bind_inputs() -> void:
+	var keys := {"move_forward": [KEY_W], "move_back": [KEY_S], "move_left": [KEY_A], "move_right": [KEY_D], "look_left": [KEY_LEFT], "look_right": [KEY_RIGHT], "look_up": [KEY_UP], "look_down": [KEY_DOWN], "jump": [KEY_SPACE], "crouch": [KEY_CTRL, KEY_C], "restart": [KEY_R], "practice": [KEY_F], "pause": [KEY_ESCAPE], "fullscreen": [KEY_F11]}
+	for action: String in keys:
+		if InputMap.has_action(action):
+			InputMap.erase_action(action)
+		InputMap.add_action(action, 0.18)
+		for code: int in keys[action]:
+			var event := InputEventKey.new()
+			event.physical_keycode = code
+			InputMap.action_add_event(action, event)
+	var axes := {"move_left": [JOY_AXIS_LEFT_X, -1.0], "move_right": [JOY_AXIS_LEFT_X, 1.0], "move_forward": [JOY_AXIS_LEFT_Y, -1.0], "move_back": [JOY_AXIS_LEFT_Y, 1.0], "look_left": [JOY_AXIS_RIGHT_X, -1.0], "look_right": [JOY_AXIS_RIGHT_X, 1.0], "look_up": [JOY_AXIS_RIGHT_Y, -1.0], "look_down": [JOY_AXIS_RIGHT_Y, 1.0]}
+	for action: String in axes:
+		var event := InputEventJoypadMotion.new()
+		event.axis = axes[action][0]
+		event.axis_value = axes[action][1]
+		InputMap.action_add_event(action, event)
+	for action: String in {"jump": JOY_BUTTON_A, "crouch": JOY_BUTTON_LEFT_SHOULDER, "pause": JOY_BUTTON_START}:
+		var event := InputEventJoypadButton.new()
+		event.button_index = {"jump": JOY_BUTTON_A, "crouch": JOY_BUTTON_LEFT_SHOULDER, "pause": JOY_BUTTON_START}[action]
+		InputMap.action_add_event(action, event)

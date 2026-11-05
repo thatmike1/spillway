@@ -2,10 +2,9 @@ param([string]$Godot = "$env:LOCALAPPDATA/Foldrunner/tools/godot-4.7.2/Godot_v4.
 $ErrorActionPreference = 'Stop'
 $projectPath = Split-Path $PSScriptRoot -Parent
 if (-not (Test-Path -LiteralPath $Godot)) { throw 'Godot missing. Run tools/setup.ps1 first, or pass -Godot with your engine path.' }
-$importOutput = & $Godot --headless --path $projectPath --editor --import --quit 2>&1
-$importOutput | ForEach-Object { Write-Output $_ }
-if ($LASTEXITCODE -ne 0 -or ($importOutput -join "`n") -match 'SCRIPT ERROR:|ERROR:') { throw 'Headless import failed; see diagnostics above.' }
-foreach ($suite in @('test_spec_ground', 'test_spec_moves', 'test_spec_camera', 'test_body', 'test_runner_vision', 'test_player', 'test_yard', 'test_yard_run', 'test_feel', 'test_presentation', 'test_integration', 'test_traversal')) {
-    & $Godot --headless --fixed-fps 120 --path $projectPath --script "res://tests/$suite.gd"
-    if ($LASTEXITCODE -ne 0) { throw "$suite failed: $LASTEXITCODE" }
+# spillway replaces the retired reconstruction suites documented in docs/reboot/VERIFICATION.md.
+foreach ($arguments in @(@('--headless', '--path', $projectPath, '--editor', '--import', '--quit'), @('--headless', '--fixed-fps', '120', '--path', $projectPath, '--script', 'res://tests/test_spillway.gd'))) {
+    $output = & $Godot @arguments 2>&1
+    $output | ForEach-Object { Write-Output $_ }
+    if ($LASTEXITCODE -ne 0 -or ($output -join "`n") -match 'SCRIPT ERROR:|ERROR:') { throw 'Spillway verification failed; see diagnostics above.' }
 }
