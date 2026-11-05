@@ -74,6 +74,8 @@ func _process(delta: float) -> void:
 	status.modulate.a = _title_alpha
 	speed_label.text = "%02d  km/h%s" % [roundi(speed * 3.6), "  /  SLIDE" if game.player.mode == "slide" else ""]
 	timing.text = "PRACTICE · R starts a clean run" if not game.clean_eligible else ("BEST  %s" % _time(game.best_time) if game.best_time > 0.0 else "")
+	if game.finish_kind == "exploration":
+		timing.text = "EXPLORATION · R starts a clean run"
 	_message_time = maxf(0.0, _message_time - delta)
 	message.modulate.a = minf(1.0, _message_time)
 	if not game.finished:
@@ -85,13 +87,22 @@ func notify(text: String) -> void:
 
 func show_finish(is_best: bool) -> void:
 	var text := "WATER RUNNING.  %s" % _time(game.elapsed)
-	text += "\nNEW CLEAN BEST" if is_best else ("\nPRACTICE FINISH" if not game.clean_eligible else "\nRUN COMPLETE")
+	if game.finish_kind == "exploration":
+		text += "\nEXPLORATION FINISH · NOT RECORDED"
+	else:
+		text += "\nNEW CLEAN BEST" if is_best else ("\nPRACTICE FINISH" if not game.clean_eligible else "\nRUN COMPLETE")
 	var last: float = 0.0
 	for i: int in game.splits.size():
 		text += "\n%s   %s" % [["Crest", "Sluice yard", "Outflow"][mini(i, 2)], _time(game.splits[i] - last)]
 		if i < game.split_deltas.size() and is_finite(game.split_deltas[i]):
 			text += "   %+.2f vs segment best" % game.split_deltas[i]
 		last = game.splits[i]
+	# p / skipped stages are named plainly instead of receiving invented splits.
+	var points: Array = game.level.get("checkpoints")
+	for i: int in range(game.checkpoint_index + 1, points.size()):
+		text += "\nSkipped %s · %s" % [points[i].get("title", "a stage"), points[i].get("hint", "no split")]
+	if game.finish_kind == "exploration":
+		text += "\nUnrecorded: no best saved, no split for a skipped stage"
 	text += "\n\nR to take another line · keep moving to explore"
 	finish_label.text = text
 

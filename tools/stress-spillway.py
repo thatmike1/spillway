@@ -26,7 +26,7 @@ def main():
         parser.error('evidence must be outside Git')
     output.mkdir(parents=True, exist_ok=True)
     before = source_hashes()
-    cases = [(f'baseline-{route}-{seed}', route, seed, []) for route in ['safe', 'fast', 'recovery', 'brake', 'safe_corner', 'fast_housing_turn'] for seed in range(5)]
+    cases = [(f'baseline-{route}-{seed}', route, seed, []) for route in ['safe', 'fast', 'recovery', 'brake', 'safe_corner', 'fast_housing_turn', 'rail_hop_recovery'] for seed in range(5)]
     cases += [(f'{label}-fast-{seed}', 'fast', seed, [f'--jump-delay={delay}', '--aim-deg=2']) for label, delay in [('early', '-0.08'), ('late', '0.08')] for seed in range(1, 4)]
     rows = []
     for name, route, seed, extra in cases:

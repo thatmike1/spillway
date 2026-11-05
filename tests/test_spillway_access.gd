@@ -1,6 +1,7 @@
 extends SceneTree
 ## actual-level input fixtures for admission, edge guarding and optional roof access.
 ## reset_to supplies each documented starting pose; no episode writes velocity or yaw.
+## fixtures marked "seeded" start from a placed pose; progress then comes only from input.
 var game: Node3D
 var player: CharacterBody3D
 var checks := 0
@@ -98,6 +99,8 @@ func housing_toward_tower() -> void:
 		if player.global_position.y > 2.6 and player.is_on_floor():
 			break
 	action("jump", false)
+	check(player.global_position.y < 2.85 and int(game.get("checkpoint_index")) == 1,
+		"landing on the low housing is still Yard; height alone does not admit Outflow: %s" % player.global_position)
 	await walk(Vector3(-16, 2.5, -98.6), 240)
 	await walk(Vector3(-6, .1, -95.3), 240)
 	check(int(game.get("checkpoint_index")) == 2 and int(game.get("respawn_count")) == 0,
@@ -130,11 +133,107 @@ func finished_exploration() -> void:
 	action("move_forward", false)
 	await ticks(10)
 	check(fell and returned, "episode falls out of bounds and returns near the wheel")
-	check(bool(game.get("finished")) and is_equal_approx(float(game.get("elapsed")), time),
-		"a genuine post-finish fall retains the result and frozen clock")
+	check(bool(game.get("finished")) and is_equal_approx(float(game.get("elapsed")), time) and str(game.get("finish_kind")) != "exploration",
+		"a genuine post-finish fall retains the result, its kind and frozen clock")
 	check(game.get("splits") == splits and bool(game.get("clean_eligible")) == clean and int(game.get("respawn_count")) == 0,
 		"post-finish recovery does not turn the completed run into practice")
 	check(not str(game.get("hud").get("finish_label").text).is_empty(), "result remains visible after exploration")
+
+func hop(at: Vector3, toward: Vector3, axis: int, past: float, direction: float) -> void:
+	# one ordinary running jump: hold forward, press jump once past a takeoff line, land.
+	aim(toward)
+	action("move_forward", true)
+	for i: int in 240:
+		await ticks(1)
+		if (player.global_position[axis] - past) * direction > 0:
+			break
+	action("jump", true)
+	await ticks(12)
+	action("jump", false)
+	for i: int in 240:
+		await ticks(1)
+		if player.is_on_floor():
+			break
+	action("move_forward", false)
+	# the run loop reads a landing on the physics frame after it happens.
+	await ticks(3)
+
+func floor_name() -> String:
+	for i: int in player.get_slide_collision_count():
+		var contact: KinematicCollision3D = player.get_slide_collision(i)
+		if contact.get_normal().y > .6:
+			return str((contact.get_collider() as Node).name)
+	return "-"
+
+func deck_progress() -> void:
+	# r10: the r9 rail-hop repro; progress follows the deck actually reached.
+	await fixture("apron rail hop onto the run-up", Vector3(-14, 1.55, -94))
+	var jumps: int = player.get("jump_count")
+	await hop(Vector3(-14, 1.55, -94), Vector3(-14, 1.5, -102), 2, -94.4, -1)
+	check(floor_name() == "OutflowRunup" and int(game.get("checkpoint_index")) == 2 and int(game.get("respawn_count")) == 0,
+		"one jump over the apron rail lands on the run-up and admits Outflow: %s on %s" % [player.global_position, floor_name()])
+	check(int(player.get("jump_count")) == jumps + 1, "the rail hop is a single ordinary jump")
+	for target: Vector3 in [Vector3(-6, .1, -95.3), Vector3(-7, -6, -91), Vector3(-10, -6, -82), Vector3(-10, -3, -63.5), Vector3(15, -3, -65), Vector3(23.8, -3, -68.8)]:
+		if bool(game.get("finished")):
+			break
+		await walk(target, 900)
+	check(bool(game.get("finished")) and str(game.get("finish_kind")) == "clean" and game.get("splits").size() == 3 and int(game.get("respawn_count")) == 0,
+		"walking on through basin recovery finishes the run as an ordered result")
+	check(float(game.get("best_time")) > 0.0 and not "EXPLORATION" in str(game.get("hud").get("finish_label").text), "the ordered rail-hop finish is recorded")
+	await fixture("apron corner hop onto the run-up", Vector3(-14, 1.55, -92))
+	await hop(Vector3(-14, 1.55, -92), Vector3(-6, 1.5, -97), 0, -12.2, 1)
+	check(floor_name() == "OutflowRunup" and int(game.get("checkpoint_index")) == 2, "a diagonal hop off the apron corner also lands on the run-up and admits Outflow")
+	# hops from the yard crossing reach finale decks; those stay catches, never entries.
+	for hop_case: Array in [["crossing hop onto first support", Vector3(2, 4.05, -74), Vector3(2, 4, -90), 2, -76.4, -1.0],
+			["crossing hop into basin", Vector3(7, 4.05, -74), Vector3(7, 4, -90), 2, -76.4, -1.0],
+			["entry ramp hop onto loading apron", Vector3(10, 4.05, -66), Vector3(20, 4, -66), 0, 12.3, 1.0],
+			["apron east hop into basin", Vector3(-13.5, 1.55, -82), Vector3(0, 1.5, -82), 0, -11.6, 1.0]]:
+		await fixture(hop_case[0], hop_case[1])
+		await hop(hop_case[1], hop_case[2], hop_case[3], hop_case[4], hop_case[5])
+		check(player.global_position.y < 0.0 and int(game.get("checkpoint_index")) == 1 and int(game.get("respawn_count")) == 0,
+			"the hop lands below the yard without claiming Outflow: %s on %s" % [player.global_position, floor_name()])
+	# the last hop left the runner in the basin; the wheel still runs, unrecorded.
+	var best: float = game.get("best_time")
+	var best_splits: Array = game.get("best_splits").duplicate()
+	for target: Vector3 in [Vector3(-10, -6, -80), Vector3(-10, -3, -63.5), Vector3(15, -3, -65), Vector3(23.8, -3, -68.8)]:
+		if bool(game.get("finished")):
+			break
+		await walk(target, 900)
+	var text: String = game.get("hud").get("finish_label").text
+	check(bool(game.get("finished")) and str(game.get("finish_kind")) == "exploration" and bool(game.get("level").get("_wheel_running")),
+		"physical arrival after skipping Outflow starts the wheel as an exploration finish")
+	check(float(game.get("best_time")) == best and game.get("best_splits") == best_splits and game.get("splits").size() == 1,
+		"the exploration finish keeps the earlier best and records only the measured Crest split")
+	check("EXPLORATION FINISH" in text and "Skipped Outflow" in text and not "CLEAN BEST" in text, "the result names the skipped Outflow and is not a record")
+	action("restart", true)
+	await ticks(2)
+	action("restart", false)
+	await ticks(2)
+	check(not bool(game.get("finished")) and str(game.get("finish_kind")).is_empty() and int(game.get("checkpoint_index")) == 0 and bool(game.get("clean_eligible")),
+		"R after the exploration finish starts a fresh clean attempt")
+	# seeded: decks admit only the next stage, from the crest as well.
+	await fixture("seeded crest pose on the run-up", Vector3(-12, 2.4, -98.2), false)
+	await ticks(30)
+	check(floor_name() == "OutflowRunup" and int(game.get("checkpoint_index")) == 0, "an Outflow deck cannot skip an unvisited yard")
+	await fixture("seeded crest pose on the lower yard", Vector3(-25, 1.55, -76), false)
+	await ticks(30)
+	check(floor_name() == "SluiceYardApron" and int(game.get("checkpoint_index")) == 1 and game.get("splits").size() == 1, "standing on the lower yard apron admits the yard")
+	await walk(Vector3(-25, 1.5, -88), 300)
+	check(int(game.get("checkpoint_index")) == 1, "walking across the lower yard stays Yard")
+	# cached contacts from the last deck cannot grant progress at the reset destination.
+	action("restart", true)
+	await ticks(1)
+	action("restart", false)
+	check(int(game.get("checkpoint_index")) == 0, "R from a tagged yard deck keeps Crest progress at spawn")
+	await ticks(4)
+	check(int(game.get("checkpoint_index")) == 0, "old yard contact cannot advance the fresh run")
+	await fixture("restart after tagged Outflow contact", Vector3(-14, 1.55, -94))
+	await hop(Vector3(-14, 1.55, -94), Vector3(-14, 1.5, -102), 2, -94.4, -1)
+	check(floor_name() == "OutflowRunup" and int(game.get("checkpoint_index")) == 2, "restart starts with a real Outflow floor contact")
+	game.call("restart_run")
+	await ticks(3)
+	check(int(game.get("checkpoint_index")) == 0 and player.global_position.distance_to(game.get("level").get("spawn").origin) < .2, "R from Outflow leaves no stale stage admission")
+
 
 func run() -> void:
 	game = load("res://scripts/spillway_main.gd").new()
@@ -189,6 +288,7 @@ func run() -> void:
 		await walk(Vector3(23.8, -3, -68.8))
 		check(bool(game.get("finished")), "walking directly to the wheel finishes from either side")
 	await housing_toward_tower()
+	await deck_progress()
 	await finished_exploration()
 	for key: String in ["move_forward", "move_back", "jump", "crouch"]:
 		action(key, false)

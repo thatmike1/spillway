@@ -576,8 +576,8 @@ func _point(pos: Vector3, radius: float = 1.0, crouch: bool = false, jump: bool 
 	return {"pos": pos, "radius": radius, "crouch": crouch, "jump": jump}
 
 
-func _slab(node_name: String, top: Vector3, size: Vector2, thickness: float, material: String = "concrete") -> void:
-	_solid(node_name, top - Vector3.UP * thickness * 0.5, Vector3(size.x, thickness, size.y), material)
+func _slab(node_name: String, top: Vector3, size: Vector2, thickness: float, material: String = "concrete") -> StaticBody3D:
+	var body: StaticBody3D = _solid(node_name, top - Vector3.UP * thickness * 0.5, Vector3(size.x, thickness, size.y), material)
 	# p / profiled edges and a recessed shadow line give concrete a made surface.
 	if material in ["concrete", "old_concrete"]:
 		for side: float in [-1.0, 1.0]:
@@ -585,6 +585,7 @@ func _slab(node_name: String, top: Vector3, size: Vector2, thickness: float, mat
 			_box(top + Vector3(side * size.x * 0.5, -0.055, 0.0), Vector3(0.13, 0.11, size.y), material)
 			_box(top + Vector3(0.0, -0.16, side * (size.y * 0.5 + 0.002)), Vector3(size.x, 0.035, 0.025), "shadow")
 			_box(top + Vector3(side * (size.x * 0.5 + 0.002), -0.16, 0.0), Vector3(0.025, 0.035, size.y), "shadow")
+	return body
 
 
 func _solid(node_name: String, center: Vector3, size: Vector3, material: String) -> StaticBody3D:

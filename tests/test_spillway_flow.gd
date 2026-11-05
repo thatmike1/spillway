@@ -32,6 +32,21 @@ class FlowLevel:
 		body.position = Vector3(0, 99.5, -16)
 		body.add_child(collision)
 		add_child(body)
+		# tagged pieces for deck admission: a yard wall, a yard deck and an outflow deck.
+		_tagged(Vector3(-20, 101, -35), Vector3(4, 2, 1), 1)
+		_tagged(Vector3(-30, 100.2, -30), Vector3(4, .4, 4), 1)
+		_tagged(Vector3(-40, 100.2, -30), Vector3(4, .4, 4), 2)
+
+	func _tagged(center: Vector3, size: Vector3, stage: int) -> void:
+		var body := StaticBody3D.new()
+		var collision := CollisionShape3D.new()
+		var shape := BoxShape3D.new()
+		shape.size = size
+		collision.shape = shape
+		body.position = center
+		body.set_meta("progress_stage", stage)
+		body.add_child(collision)
+		add_child(body)
 
 func _initialize() -> void:
 	_run.call_deferred()
@@ -143,6 +158,7 @@ func _run() -> void:
 	action("move_forward", false)
 	check(float(game.get("elapsed")) > 0.0, "real movement away from spawn starts timer")
 	await ordered_checkpoints()
+	await deck_admission()
 	await clean_records()
 	await practice_records()
 	await recovery_records()
@@ -161,29 +177,83 @@ func _run() -> void:
 
 func ordered_checkpoints() -> void:
 	await restart("ordered checkpoints")
+	var titles: Array[String] = []
+	for point: Dictionary in game.get("level").get("checkpoints"):
+		titles.append(str(point.title))
 	await visit(checkpoint_position(2), 3.0)
 	check(int(game.get("checkpoint_index")) == 0 and game.get("splits").is_empty(), "visiting checkpoint two first grants no split")
+	# r10 retires the r9 refusal ("finish cannot bypass ... checkpoints" and the "Pump feed closed"
+	# hint): physical wheel arrival always finishes, and skipped stages only withhold the record.
+	var before := records()
 	await visit(game.get("level").get("finish_position"), 5.0)
-	check(not bool(game.get("finished")) and float(game.get("best_time")) < 0.0, "finish cannot bypass both ordered checkpoints")
-	check(str(game.get("level").get("checkpoints")[1].title) in str(game.get("hud").get("message").text), "finish hint names the actually missing first segment")
+	var text: String = game.get("hud").get("finish_label").text
+	check(bool(game.get("finished")) and str(game.get("finish_kind")) == "exploration", "wheel arrival with both segments skipped still finishes, as exploration")
+	check(records() == before and game.get("splits").is_empty() and game.get("split_deltas").is_empty(), "exploration finish saves no best and invents no splits")
+	check("EXPLORATION FINISH" in text and "NOT RECORDED" in text and not "CLEAN BEST" in text and not "RUN COMPLETE" in text, "exploration result is plainly labelled unrecorded")
+	check(("Skipped " + titles[1]) in text and ("Skipped " + titles[2]) in text, "exploration result names both actually skipped segments")
+	await ticks(10)
+	check(records() == before and game.get("splits").is_empty(), "standing at the wheel after exploration adds nothing")
+	# flow fixture: a genuine out-of-bounds body pose after an exploration finish.
+	game.get("player").call("reset_to", Transform3D(Basis.IDENTITY, Vector3(0, -30, -8)))
+	await ticks(24)
+	check(bool(game.get("finished")) and str(game.get("finish_kind")) == "exploration" and int(game.get("respawn_count")) == 0 and game.get("hud").get("finish_label").text == text,
+		"post-finish fall keeps the exploration result and its label")
+	await restart("R after exploration")
+	check(not bool(game.get("finished")) and str(game.get("finish_kind")).is_empty() and bool(game.get("clean_eligible")) and int(game.get("checkpoint_index")) == 0,
+		"R clears exploration provenance and starts a clean attempt")
 	await visit(checkpoint_position(1), 10.0)
 	check(int(game.get("checkpoint_index")) == 1 and game.get("splits").size() == 1, "checkpoint one records exactly one split")
 	await visit(game.get("level").get("finish_position"), 12.0)
-	check(not bool(game.get("finished")), "finish cannot bypass checkpoint two")
-	check(str(game.get("level").get("checkpoints")[2].title) in str(game.get("hud").get("message").text), "finish hint names the actually missing second segment")
+	text = game.get("hud").get("finish_label").text
+	check(bool(game.get("finished")) and str(game.get("finish_kind")) == "exploration" and game.get("splits").size() == 1 and records() == before,
+		"skipping only the second segment finishes as exploration with its one measured split")
+	check(("Skipped " + titles[2]) in text and not ("Skipped " + titles[1]) in text, "exploration result names only the actually missing second segment")
+	await restart("ordered traversal")
+	await visit(checkpoint_position(1), 10.0)
 	await visit(checkpoint_position(1), 14.0)
 	check(game.get("splits").size() == 1, "revisiting a checkpoint cannot duplicate a split")
 	await visit(checkpoint_position(2), 25.0)
 	await visit(game.get("level").get("finish_position"), 45.0)
-	check(bool(game.get("finished")) and game.get("splits").size() == 3, "ordered traversal finishes with three splits")
+	check(bool(game.get("finished")) and game.get("splits").size() == 3 and str(game.get("finish_kind")) == "clean", "ordered traversal finishes clean with three splits")
 	var previous := records()
 	await ticks(10)
 	check(game.get("splits").size() == 3 and records() == previous, "standing at finish cannot append splits or replace records repeatedly")
 
+func deck_admission() -> void:
+	# isolated fixture for the deck rule; the real decks are exercised in test_spillway_access.
+	await restart("tagged wall contact")
+	await visit(Vector3(-20, 100.025, -31), 1.0)
+	var wall_contact := false
+	action("move_forward", true)
+	for tick: int in 90:
+		await ticks(1)
+		for i: int in game.get("player").get_slide_collision_count():
+			wall_contact = wall_contact or game.get("player").get_slide_collision(i).get_normal().z > .9
+	action("move_forward", false)
+	check(wall_contact and int(game.get("checkpoint_index")) == 0, "running into a tagged yard wall cannot admit the yard")
+	await restart("airborne above a tagged deck")
+	game.get("player").call("reset_to", Transform3D(Basis.IDENTITY, Vector3(-40, 103.5, -30)))
+	await ticks(2)
+	check(int(game.get("checkpoint_index")) == 0, "hanging in the air above an outflow deck admits nothing")
+	await ticks(120)
+	check(game.get("player").is_on_floor() and int(game.get("checkpoint_index")) == 0, "standing on the outflow deck before the yard cannot skip ahead")
+	await visit(Vector3(-30, 103.5, -30), 4.0)
+	check(int(game.get("checkpoint_index")) == 0, "falling toward the yard deck admits nothing before contact")
+	await ticks(120)
+	check(int(game.get("checkpoint_index")) == 1 and game.get("splits").size() == 1, "landing on the yard deck admits the yard with one split")
+	await visit(Vector3(-40, 100.45, -30), 9.0)
+	check(int(game.get("checkpoint_index")) == 2 and game.get("splits").size() == 2, "standing on the outflow deck after the yard admits Outflow")
+	await visit(game.get("level").get("finish_position"), 20.0)
+	check(bool(game.get("finished")) and str(game.get("finish_kind")) == "clean" and game.get("splits").size() == 3, "deck-ordered run finishes as a full ordered result")
+	# the record cases below start from no records, as the profile setup does.
+	game.set("best_time", -1.0)
+	game.get("best_splits").clear()
+	game.get("best_segments").clear()
+
 func clean_records() -> void:
 	await restart("clean record improvements")
 	await finish_run([10.0, 25.0, 45.0])
-	check(absf(float(game.get("best_time")) - 45.0) < 0.1, "clean finish establishes full-run best near controlled 45s")
+	check(absf(float(game.get("best_time")) - 45.0) < 0.1 and str(game.get("finish_kind")) == "clean", "clean finish establishes full-run best near controlled 45s")
 	var first := records()
 	check(first.splits.size() == 3 and first.segments.size() == 3, "clean finish establishes all three cumulative and segment records")
 	if first.segments.size() == 3:
@@ -220,10 +290,10 @@ func practice_records() -> void:
 			await visit(checkpoint_position(2), 2.0)
 		await visit(game.get("level").get("finish_position"), 3.0)
 		check(bool(game.get("finished")) and records() == before, "faster practice finish preserves clean best, splits and every segment record")
-		check("PRACTICE FINISH" in game.get("hud").get("finish_label").text, "practice result visibly identifies assistance")
+		check("PRACTICE FINISH" in game.get("hud").get("finish_label").text and str(game.get("finish_kind")) == "practice", "practice result visibly identifies assistance")
 		await restart("R after assisted finish")
-		check(bool(game.get("clean_eligible")) and not bool(game.get("finished")) and int(game.get("checkpoint_index")) == 0,
-			"R restores eligibility and returns to first segment")
+		check(bool(game.get("clean_eligible")) and not bool(game.get("finished")) and int(game.get("checkpoint_index")) == 0 and str(game.get("finish_kind")).is_empty(),
+			"R restores eligibility, clears finish provenance and returns to first segment")
 		check(game.get("splits").is_empty() and game.get("split_deltas").is_empty() and int(game.get("respawn_count")) == 0,
 			"R clears attempt splits, comparisons and respawn count")
 		check(float(game.get("elapsed")) == 0.0 and records() == before, "R clears timer while preserving clean records")
@@ -428,7 +498,7 @@ func authored_roof_checkpoint() -> void:
 	await visit(Vector3(-21, 3.04, -101), 10.0)
 	check(int(game.get("checkpoint_index")) == 2, "east mantle landing advances checkpoint without crossing roof centre")
 	await visit(authored.get("finish_position"), 20.0)
-	check(bool(game.get("finished")), "valid east-roof approach can finish the actual level")
+	check(bool(game.get("finished")) and str(game.get("finish_kind")) == "clean", "valid east-roof approach finishes the actual level as an ordered result")
 	await restart("yard below roof cannot advance checkpoint")
 	await visit((points[1].pose as Transform3D).origin, 5.0)
 	await visit(Vector3(-21, 1.5, -98), 10.0)

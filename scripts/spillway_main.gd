@@ -1,7 +1,7 @@
 extends Node3D
 ## p / run provenance is separate from movement and presentation.
 
-const BUILD_ID := "spillway-2026.11.05-r9"
+const BUILD_ID := "spillway-2026.11.05-r10"
 const SAVE_PATH := "user://spillway_v1.cfg"
 var player: CharacterBody3D
 var level: Node3D
@@ -10,6 +10,8 @@ var audio: Node
 var bot: Node
 var elapsed: float = 0.0
 var finished: bool = false
+## finish kinds are clean, practice or exploration; empty during a run.
+var finish_kind: String = ""
 var checkpoint_index: int = 0
 var respawn_count: int = 0
 var clean_eligible: bool = true
@@ -25,7 +27,6 @@ var _spawn_origin: Vector3
 var _persist: bool = true
 var _recovery_time: float = 0.0
 var _quitting: bool = false
-var _finish_hint: bool = false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -67,13 +68,13 @@ func _ready() -> void:
 func restart_run() -> void:
 	elapsed = 0.0
 	finished = false
+	finish_kind = ""
 	checkpoint_index = 0
 	respawn_count = 0
 	clean_eligible = true
 	splits.clear()
 	split_deltas.clear()
 	_started = false
-	_finish_hint = false
 	_recovery_time = 0.0
 	_spawn_origin = level.get("spawn").origin
 	player.call("reset_to", level.get("spawn"))
@@ -86,6 +87,7 @@ func restart_run() -> void:
 func practice_restart() -> void:
 	clean_eligible = false
 	finished = false
+	finish_kind = ""
 	splits.resize(checkpoint_index)
 	# p / practice starts a fresh segment clock; a fall respawn still keeps its penalty.
 	elapsed = splits[-1] if not splits.is_empty() else 0.0
@@ -100,6 +102,7 @@ func respawn() -> void:
 	hud.call("blink")
 	clean_eligible = false
 	finished = false
+	finish_kind = ""
 	splits.resize(checkpoint_index)
 	_restore_checkpoint()
 	hud.call("notify", "Back on solid ground · practice attempt")
@@ -149,7 +152,7 @@ func _physics_process(delta: float) -> void:
 		var position: Vector3 = (point["pose"] as Transform3D).origin
 		var radius := float(point.get("radius", 5.0))
 		var reached := (point["bounds"] as AABB).has_point(player.global_position) if point.get("bounds") is AABB else player.global_position.distance_to(position) < radius
-		if reached:
+		if reached or _stands_on_stage(next):
 			checkpoint_index = next
 			splits.append(elapsed)
 			hud.call("notify", point.get("title", "Next segment"))
@@ -157,20 +160,44 @@ func _physics_process(delta: float) -> void:
 	var finish_box := AABB(finish_center - Vector3(2.0, 0.3, 0.8), Vector3(4.0, 3.0, 1.6))
 	var at_finish: bool = level.call("is_finish_at", player.global_position) if level.has_method("is_finish_at") else finish_box.has_point(player.global_position)
 	if at_finish:
-		if checkpoint_index == points.size() - 1:
-			_finish()
-		elif not _finish_hint:
-			var missing: Dictionary = points[mini(checkpoint_index + 1, points.size() - 1)]
-			hud.call("notify", "Pump feed closed · reach %s first" % missing.get("hint", missing.get("title", "the next platform")))
-			_finish_hint = true
-	else:
-		_finish_hint = false
+		# p / physical arrival always starts the wheel; skipped stages only withhold the record.
+		_finish(checkpoint_index == points.size() - 1)
 
-func _finish() -> void:
+func _stands_on_stage(stage: int) -> bool:
+	# p / progress follows decks the runner actually stands on, never side-wall contact.
+	if not player.is_on_floor():
+		return false
+	var feet: Vector3 = player.global_position
+	for i: int in player.get_slide_collision_count():
+		var contact: KinematicCollision3D = player.get_slide_collision(i)
+		if contact.get_normal().y < cos(player.floor_max_angle) - 0.01:
+			continue
+		# contacts left over from before a reset or respawn are not under the feet.
+		var point: Vector3 = contact.get_position()
+		if absf(point.y - feet.y) > 0.3 or Vector2(point.x - feet.x, point.z - feet.z).length() > 0.8:
+			continue
+		var body := contact.get_collider() as Node
+		if body == null or int(body.get_meta("progress_stage", -1)) != stage:
+			continue
+		# where a later deck overlaps an earlier one (the run-up wedge pokes up to ~0.3 m
+		# through the guarded apron corner), the runner is still standing in the earlier stage.
+		var query := PhysicsRayQueryParameters3D.create(point + Vector3.UP * 0.05, point + Vector3.DOWN * 0.6)
+		query.exclude = [contact.get_collider_rid()]
+		var under: Dictionary = player.get_world_3d().direct_space_state.intersect_ray(query)
+		var under_stage: int = int((under.collider as Node).get_meta("progress_stage", -1)) if not under.is_empty() and under.collider is Node else -1
+		if under_stage < 0 or under_stage >= stage:
+			return true
+	return false
+
+func _finish(ordered: bool) -> void:
 	finished = true
-	splits.append(elapsed)
+	finish_kind = "exploration" if not ordered else ("clean" if clean_eligible else "practice")
+	# an exploration finish keeps only splits actually measured; skipped stages get none.
+	if ordered:
+		splits.append(elapsed)
 	var is_best := false
-	if clean_eligible and checkpoint_index == 2 and splits.size() == 3:
+	var stages: int = (level.get("checkpoints") as Array).size()
+	if finish_kind == "clean" and splits.size() == stages:
 		var previous: float = 0.0
 		for i: int in splits.size():
 			var segment_time := splits[i] - previous

@@ -194,7 +194,8 @@ func _physics_process(delta: float) -> void:
 		# the authored finish volume may trigger before the last point radius.
 		if index == _route.size() - 1:
 			_advance("finish volume")
-		_complete(index >= _route.size(), "finish" if index >= _route.size() else "finish before all waypoints")
+		var exploration := str(main.get("finish_kind")) == "exploration"
+		_complete(index >= _route.size() and not exploration, "exploration finish is not an ordered route" if exploration else ("finish" if index >= _route.size() else "finish before all waypoints"))
 		return
 	if time > 150:
 		_complete(false, "150s timeout")
@@ -309,7 +310,7 @@ func _sample(kind: String) -> Dictionary:
 		"yaw": player.get("yaw"), "pitch": player.get("pitch"), "grounded": player.is_on_floor(),
 		"water": player.get("in_water"), "crouched": player.get("crouched"), "jumps": player.get("jump_count"), "mantles": player.get("mantle_count"),
 		"landings": player.get("land_count"), "last_impact": player.get("last_impact"),
-		"elapsed": main.get("elapsed"), "checkpoint": main.get("checkpoint_index"),
+		"elapsed": main.get("elapsed"), "checkpoint": main.get("checkpoint_index"), "finish_kind": main.get("finish_kind"),
 		"respawns": main.get("respawn_count"), "clean_eligible": main.get("clean_eligible"),
 		"max_step_m": _max_step, "max_speed_mps": _max_speed, "water_time_s": _water_time,
 		"ordered_checkpoints": _ordered_checkpoints.duplicate(), "aim_bias_deg": rad_to_deg(_yaw_bias),
