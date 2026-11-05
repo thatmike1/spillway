@@ -80,8 +80,9 @@ func _make_yard() -> void:
 		_level.call("_cylinder", Vector3(-35, 2.7, z), Vector3(-35, 3.7, z), .3, "pipe")
 		_level.call("_wheel", Vector3(-35, 3.8, z), .9, "ochre", true)
 	# p / the low apron does not feed the high outflow run-up; its edge is guarded.
-	_level.call("_rail", Vector3(-19, 1.5, -96.9), Vector3(-11, 1.5, -96.9))
+	_level.call("_rail", Vector3(-19, 1.5, -96.9), Vector3(-13, 1.5, -96.9))
 	_level.call("_rail", Vector3(-19, 1.5, -96.9), Vector3(-19, 1.5, -99))
+	_level.call("_rail", Vector3(-13, 1.5, -96.9), Vector3(-11, 1.5, -93))
 	_level.call("_rail", Vector3(-11, 1.5, -78), Vector3(-11, 1.5, -93))
 	_level.call("_rail", Vector3(-40, 1.5, -72), Vector3(-40, 1.5, -85))
 	# visible water works continue under the apron, with foundation-depth openings.

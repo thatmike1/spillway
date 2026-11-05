@@ -91,6 +91,11 @@ func run() -> void:
 		action("move_forward", true)
 		await ticks(300)
 		check(player.global_position.z > -97.0 and int(game.get("checkpoint_index")) == 1, "ordinary running cannot step from the low apron onto the finale run-up")
+	await fixture("guarded diagonal junction", Vector3(-14, 1.55, -90))
+	await walk(Vector3(-12, 1.5, -96.2), 240)
+	await walk(Vector3(-5, 0, -95), 300)
+	check(player.global_position.x < -11.2 and player.global_position.y >= 1.35 and int(game.get("checkpoint_index")) == 1,
+		"the east opening is guarded too; ordinary diagonal running stays on the apron: %s" % player.global_position)
 	await fixture("continuous housing line", Vector3(-21, 1.54, -90))
 	var jumps: int = player.get("jump_count")
 	await approach_roof(-21, -93.2)
