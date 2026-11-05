@@ -29,6 +29,7 @@ func ticks(count: int) -> void:
 
 func _run() -> void:
 	main = (load("res://scenes/main.tscn") as PackedScene).instantiate() as Node3D
+	main.city_mode = true
 	root.add_child(main)
 	await physics_frame
 	player = main.get("player")

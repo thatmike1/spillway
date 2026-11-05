@@ -10,6 +10,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	main = load("res://scenes/main.tscn").instantiate()
+	main.city_mode = true
 	root.add_child(main)
 	await physics_frame
 	var layer := CanvasLayer.new()

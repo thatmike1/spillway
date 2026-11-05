@@ -5,6 +5,7 @@ extends Node3D
 
 const PLAYER_SCENE: PackedScene = preload("res://scenes/player.tscn")
 const LEVEL_SCRIPT: Script = preload("res://scripts/level.gd")
+const YARD_SCRIPT: Script = preload("res://scripts/yard.gd")
 const HUD_SCRIPT: Script = preload("res://scripts/hud.gd")
 const ARMS_SCRIPT: Script = preload("res://scripts/arms.gd")
 const AUDIO_SCRIPT: Script = preload("res://scripts/audio.gd")
@@ -12,6 +13,7 @@ const BOT_SCRIPT: Script = preload("res://scripts/bot.gd")
 const SETTINGS_PATH: String = "user://settings_me.cfg"
 const FALL_FLOOR: float = -24.0
 
+var city_mode: bool = false
 var player: CharacterBody3D
 var level: Node3D
 var hud: CanvasLayer
@@ -49,7 +51,8 @@ func _ready() -> void:
 	_headless = DisplayServer.get_name() == "headless"
 	bind_inputs()
 	_load_settings()
-	level = LEVEL_SCRIPT.new() as Node3D
+	city_mode = bool(get_tree().get_meta("foldrunner_city", city_mode or OS.get_cmdline_user_args().has("--city")))
+	level = (LEVEL_SCRIPT if city_mode else YARD_SCRIPT).new() as Node3D
 	level.name = "Level"
 	level.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(level)
@@ -76,6 +79,7 @@ func _ready() -> void:
 	hud.connect("quit_requested", request_quit)
 	hud.connect("setting_changed", _on_setting_changed)
 	hud.call("load_settings", settings)
+	hud.call("set_course", city_mode)
 	for entry: Dictionary in level.get("fold_triggers"):
 		(entry["area"] as Area3D).body_entered.connect(_on_fold_trigger.bind(entry["fold"]))
 	(level.get("finish_trigger") as Area3D).body_entered.connect(_on_finish)
@@ -202,6 +206,7 @@ func _process(delta: float) -> void:
 	if player == null:
 		return
 	hud.call("update_state", elapsed, float(player.call("get_speed")))
+	hud.call("update_metrics", player)
 	_manage_capture(delta)
 
 
@@ -276,7 +281,13 @@ func _input(event: InputEvent) -> void:
 		_user_released = false
 		if not _headless:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	if event.is_action_pressed("restart"):
+	if event.is_action_pressed("course"):
+		switch_course()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("metrics"):
+		hud.call("toggle_metrics")
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("restart"):
 		restart_run()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("pause"):
@@ -289,6 +300,15 @@ func _input(event: InputEvent) -> void:
 		else:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 		get_viewport().set_input_as_handled()
+
+
+func switch_course() -> void:
+	get_tree().set_meta("foldrunner_city", not city_mode)
+	set_paused(false)
+	audio.call("stop_all")
+	for i: int in 8:
+		await get_tree().process_frame
+	get_tree().change_scene_to_file("res://scenes/main.tscn")
 
 
 func _notification(what: int) -> void:
@@ -345,7 +365,7 @@ static func bind_inputs() -> void:
 		"move_forward": [KEY_W], "move_back": [KEY_S], "move_left": [KEY_A], "move_right": [KEY_D],
 		"look_left": [KEY_LEFT], "look_right": [KEY_RIGHT], "look_up": [KEY_UP], "look_down": [KEY_DOWN],
 		"jump": [KEY_SPACE], "crouch": [KEY_CTRL, KEY_C], "restart": [KEY_R],
-		"turn": [KEY_Q], "pause": [KEY_ESCAPE], "fullscreen": [KEY_F11],
+		"course": [KEY_TAB], "metrics": [KEY_F3], "turn": [KEY_Q], "pause": [KEY_ESCAPE], "fullscreen": [KEY_F11],
 	}
 	var axes: Dictionary = {
 		"move_left": [JOY_AXIS_LEFT_X, -1.0], "move_right": [JOY_AXIS_LEFT_X, 1.0],

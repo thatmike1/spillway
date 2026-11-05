@@ -11,6 +11,8 @@ const AMBER: Color = Color("#F3AE52")
 const TEXT: Color = Color(0.92, 0.95, 0.98)
 const PANEL_BG: Color = Color(0.047, 0.067, 0.094, 0.94)
 
+var _course: Label
+var _metrics: Label
 var _timer: Label
 var _best: Label
 var _message: Label
@@ -65,6 +67,13 @@ func _ready() -> void:
 	_message.size = Vector2(800, 32)
 	_message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	root.add_child(_message)
+	_course = _label("", 16)
+	_course.position = Vector2(24, 20)
+	root.add_child(_course)
+	_metrics = _label("", 18)
+	_metrics.position = Vector2(24, 52)
+	_metrics.visible = false
+	root.add_child(_metrics)
 	_title = _make_title(root)
 	_pause = _make_pause(root)
 	_finish = _make_finish(root)
@@ -91,6 +100,18 @@ func _process(delta: float) -> void:
 
 
 # ---------------------------------------------------------------- called by main
+
+func set_course(city: bool) -> void:
+	_course.text = ("City route  ·  Tab: training yard" if city else "Training yard  ·  Tab: city route") + "  ·  F3: metrics  ·  R: reset"
+
+
+func toggle_metrics() -> void:
+	_metrics.visible = not _metrics.visible
+
+
+func update_metrics(player) -> void:
+	_metrics.text = "%.2f m/s  ·  %s\nLast landing: %s  ·  %.2f m" % [player.get_speed(), player.Move.keys()[player.move], player.landing.kind, player.landing.height]
+
 
 func update_state(elapsed: float, _speed: float) -> void:
 	if not _finished:

@@ -33,6 +33,7 @@ func _run() -> void:
 			output = arg.trim_prefix("--output=")
 	DirAccess.make_dir_recursive_absolute(output)
 	main = load("res://scenes/main.tscn").instantiate()
+	main.city_mode = true
 	root.add_child(main)
 	main._persist = false
 	main.hud.hide()

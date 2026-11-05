@@ -25,6 +25,7 @@ func _run() -> void:
 
 func _route(no_bank: bool) -> void:
 	var main: Node3D = (load("res://scenes/main.tscn") as PackedScene).instantiate() as Node3D
+	main.city_mode = true
 	root.add_child(main)
 	await physics_frame
 	var player: CharacterBody3D = main.get("player")
