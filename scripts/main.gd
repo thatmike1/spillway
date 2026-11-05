@@ -1,5 +1,5 @@
 extends Node3D
-## Owns the run: input bindings, mouse capture, the timer, folds, checkpoints,
+## owns the run: input bindings, mouse capture, the timer, folds, checkpoints,
 ## route cues, falls, restart and settings. The game starts running at once:
 ## no click-to-start screen stands between the player and mouse look.
 
@@ -35,6 +35,7 @@ var settings: Dictionary = {
 	"runner_vision": true, "assists": false, "head_bob": false, "invert_y": false, "volume": 0.8,
 }
 
+var _quitting: bool = false
 var _headless: bool = false
 var _capture_retry: float = 0.0
 var _user_released: bool = false
@@ -72,7 +73,7 @@ func _ready() -> void:
 	add_child(hud)
 	hud.connect("resume_requested", func() -> void: set_paused(false))
 	hud.connect("restart_requested", restart_run)
-	hud.connect("quit_requested", func() -> void: get_tree().quit())
+	hud.connect("quit_requested", request_quit)
 	hud.connect("setting_changed", _on_setting_changed)
 	hud.call("load_settings", settings)
 	for entry: Dictionary in level.get("fold_triggers"):
@@ -225,6 +226,17 @@ func _on_finish(body: Node3D) -> void:
 		_save_settings()
 	hud.call("show_finish", elapsed, best_time, best)
 	audio.call("finish")
+
+
+func request_quit() -> void:
+	if _quitting:
+		return
+	_quitting = true
+	audio.call("stop_all")
+	# let the audio server release playback references before engine cleanup.
+	for i: int in 8:
+		await get_tree().process_frame
+	get_tree().quit()
 
 
 # ---------------------------------------------------------------- pause and mouse

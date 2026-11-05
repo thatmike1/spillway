@@ -1,5 +1,5 @@
 extends SceneTree
-## The assembled game: starts unpaused with look live on the first frame, the
+## the assembled game: starts unpaused with look live on the first frame, the
 ## timer waits for the first step, the fold lands where the road should be,
 ## falls respawn at the last checkpoint with the city as it was, restart and
 ## pause behave, and the route cues advance.

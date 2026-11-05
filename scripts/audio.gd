@@ -1,5 +1,5 @@
 extends Node
-## Every sound is synthesised at load time from noise and sine waves: no files,
+## every sound is synthesised at load time from noise and sine waves: no files,
 ## no third-party assets. Footsteps, breath on the jump, landings, wind that
 ## grows with speed, and the low structural groan that announces a fold.
 
@@ -221,7 +221,7 @@ func _wind_loop(seconds: float) -> PackedFloat32Array:
 	return samples
 
 
-## The fold's voice: a deep groan that swells through the anticipation, steel
+## the fold's voice: a deep groan that swells through the anticipation, steel
 ## creaks while the block turns, fading as it lands.
 func _groan(seconds: float) -> PackedFloat32Array:
 	var samples: PackedFloat32Array = _buffer(seconds)
@@ -255,3 +255,20 @@ func _chime() -> PackedFloat32Array:
 		var second: float = maxf(t - 0.14, 0.0)
 		samples[index] = sin(TAU * 660.0 * t) * exp(-t * 3.0) * 0.35 + sin(TAU * 990.0 * second) * exp(-second * 2.6) * 0.3 * float(t > 0.14)
 	return samples
+
+
+func stop_all() -> void:
+	# release active playback before the audio server tears down.
+	for voice: AudioStreamPlayer in _pool:
+		voice.stop()
+		voice.stream = null
+	if _wind != null:
+		_wind.stop()
+		_wind.stream = null
+	if _rumble != null:
+		_rumble.stop()
+		_rumble.stream = null
+
+
+func _exit_tree() -> void:
+	stop_all()

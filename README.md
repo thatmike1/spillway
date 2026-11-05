@@ -1,67 +1,72 @@
 # Foldrunner
 
-Original first-person parkour slice in Godot 4.7.2 (Compatibility renderer). You run across evening rooftops; a tower ahead tips over and its facade becomes your road; the front wall of the next building falls toward you across the street and lands as a bridge; then the roof bends up into a second tower, you run up its face with the city turned on its side, crest over the top and finish under a beam of light. About 25 to 30 seconds for a clean run.
+A first-person parkour run through a folding city, built in Godot 4.7.2. The clean scripted route takes about 84 seconds. Speed builds quickly into a run, then slowly toward 7.2m/s. Jump trajectory, landing costs, vaults, grabs, rolls and wall jumps have separate momentum contracts. All geometry, body animation, materials and synthesized sound are original.
 
-All code, geometry and sound are original and generated at load time from primitive meshes and synthesised waveforms. No third-party assets.
+## Play on Windows
 
-## Play (Linux)
+From this folder, double-click **Play Foldrunner.cmd**, or run it from PowerShell:
+
+```powershell
+.\Play Foldrunner.cmd
+```
+
+The launcher installs the pinned official Windows engine into `%LOCALAPPDATA%\Foldrunner\tools\godot-4.7.2` if needed, checks the release checksum when supplied, imports the project, then launches it. Git and PowerShell are the only checkout prerequisites. First setup downloads about 86MB. To use an existing engine:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\run.ps1 -Godot C:\Godot\Godot_v4.7.2-stable_win64_console.exe
+```
+
+## Play on Linux
 
 ```bash
 ./tools/play.sh
 ```
 
-It imports the project on first run, then starts the game maximised. `GODOT=/path/to/godot ./tools/play.sh` picks another engine binary; extra arguments go to Godot (for example `--fullscreen`, or `--display-driver wayland` to use Godot's native Wayland backend instead of XWayland).
+The helper expects the pinned engine at `~/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64`. Set `GODOT` to use another location. Add `--display-driver wayland` to use native Wayland, or `--fullscreen`; F11 also toggles fullscreen.
 
-The game starts running at once: mouse look is live from the first frame, the mouse is captured as soon as the window has focus, and any click recaptures it. The timer starts on your first step.
+The game starts unpaused, with free look immediately. Clicking recaptures the mouse. The timer waits for your first step. R restarts; falls return to the last reached roof with completed folds preserved.
 
-| Input | Keyboard and mouse | Gamepad |
+| Action | Keyboard/mouse | Gamepad |
 |---|---|---|
-| Look | Mouse, or arrow keys | Right stick |
-| Run | W A S D (speed builds while you keep running forward) | Left stick |
-| Jump | Space | A / Cross, or RB |
-| Slide (at speed), crouch | Ctrl or C | B / Circle, LB or LT |
-| Vault and climb | Automatic: run at a low obstacle, or jump at a ledge | |
-| Wall-run | Jump along a wall while holding forward | |
+| Look | Mouse / arrow keys | Right stick |
+| Run | WASD, continuous forward input earns speed | Left stick |
+| Jump / contextual springboard | Space | A / Cross or RB |
+| Slide / crouch; fresh press before landing to roll | Ctrl / C | B / Circle, LB or LT |
+| 180 turn | Q | Y / Triangle |
 | Restart | R | Back / Select |
 | Pause and settings | Esc | Start |
 | Fullscreen | F11 | |
 
-Pause holds mouse sensitivity, field of view (80 to 105, set at 16:9; wider screens see more to the sides), camera bank on wall-runs, view widening at speed, head bob (off by default), invert look and volume. Settings and the best time are kept in Godot's user folder.
+Vaults, grabs/pull-ups and wall climbs select from suitable geometry and forward intent. Jump along a wall to wall-run, then press jump to leave it. A roll needs a fresh crouch press within .2s before impact after a fall greater than 2m; holding crouch does not refresh it. Step toward taller steps slowly to step up, or carry speed to vault them.
 
-## Checks
+## The route
+
+Low roof vault; a connected block folds into a road; slide under its gantry; drop onto the second roof and choose either side of the stair housing; cross a falling facade; run the gravity bend and crest; climb/grab/pull onto the upper district; high vault; paired springboard into a roll; wall run and jump across a street; turn at the water tank; take the east cross street; slow terrace step; finish beam. Red geometry marks authored traversal objects through proximity/direction/fade rules. A whole street district folds beside the upper route.
+
+Pause settings include sensitivity, FOV, bank, volume and runner vision. Head bob defaults off. Speed FOV and general jump grace are explicitly labelled Foldrunner extensions and default off. Settings/best time are in Godot's `user://settings_me.cfg`; scripted runs do not save them.
+
+## Verify
 
 ```bash
 ./tools/check.sh
 ```
 
-Three headless suites with real physics:
-
-- `test_player`: momentum, jump height, coyote time, mouse look without mouse capture, arrow-key look, pitch clamp, vault, climb, slide, wall-run, gravity surfaces, FOV maths for 16:9 and 21:9.
-- `test_integration`: the assembled game starts unpaused with look live, the timer waits for the first step, the fold lands level with the roof, falls respawn at the last checkpoint with the fold intact, restart, pause, finish.
-- `test_traversal`: a scripted runner completes the whole route using only held W, mouse-motion events and Space, with default comfort settings and again with camera bank off. It fails on any respawn or any per-tick jump in position over 0.35 m (no teleports).
-
-Headless results say nothing about feel. Those need a person playing.
-
-## Recording a run
-
-`main.gd` reads a few user arguments after `--`: `--bot` lets the scripted runner play, `--bot-quit` quits two seconds after the finish, `--no-bank` turns camera bank off, `--from=N` starts at checkpoint N. Movie Maker turns that into frames, for example:
-
-```bash
-xvfb-run -a -s "-screen 0 1280x720x24" godot --path . --audio-driver Dummy --rendering-driver opengl3 \
-  --write-movie /tmp/run/f.png --fixed-fps 30 -- --bot --bot-quit
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\check.ps1
 ```
 
-`--audio-driver Dummy` matters: without it the process can hang after the last frame.
+The seven headless suites cover spec traces, move contracts, camera, runner vision, controls/gravity surfaces, integration and two full traversals. `tests/test_interface.gd` separately checks real UI input/layout in a rendered engine. Predictions, tolerances and port choices are in [docs/VERIFICATION.md](docs/VERIFICATION.md). Runtime ownership is in [docs/CONTRACT.md](docs/CONTRACT.md). Tuning is SI in `data/movement.tres` and its script.
 
-## Layout
+## Record
 
-- `scripts/main.gd`: run state, input map (keyboard and gamepad), mouse capture, checkpoints, falls, cues, settings.
-- `scripts/player.gd`: movement, gravity surfaces, the camera rig.
-- `scripts/arms.gd`: first-person arms drawn in their own viewport over the scene.
-- `scripts/level.gd`: the route, the city around it and the distant impossible blocks.
-- `scripts/fold_block.gd`: a rigid block that turns about a hinge in three beats (tremble, turn, settle).
-- `scripts/audio.gd`: synthesised footsteps, breath, landings, wind and the fold's groan.
-- `scripts/bot.gd`: the scripted runner used by the traversal test and for recordings.
-- `shaders/facade.gdshader`: procedural window bays laid out in the mesh's own space, so they turn with a fold.
+From this folder:
 
-`tools/*.ps1` and `Play Foldrunner.cmd` are the earlier Windows helpers; `check.ps1` runs the same three suites.
+```bash
+GODOT="$HOME/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64"
+xvfb-run -a -s '-screen 0 1280x720x24' "$GODOT" --path . --audio-driver Dummy --rendering-driver opengl3 \
+  --write-movie /tmp/foldrunner/run.png --fixed-fps 10 -- --bot --bot-quit
+```
+
+Create the output folder first. `--audio-driver Dummy` permits clean capture shutdown. Movie Maker's frame rate changes recording/input delivery, not the movement constants; 10fps permits all twelve 120Hz physics ticks per recorded frame. Captures and spec/reference files stay outside Git. Useful user arguments: `--no-bank`, `--detour`, `--from=N`, `--trace-run=/absolute/run.csv`. The bot supplies ordinary held inputs, mouse motion and action presses; it never assigns route positions or velocity. `tests/render_moves.gd` and `tests/render_folds.gd` are labelled visual fixtures that reset between episodes, separate from route proof.
+
+Windows script flow was tested in PowerShell on Linux with official archive/checksum validation and Linux Godot for execution. Native Windows gameplay, real controller hardware and subjective feel still need a person playing.

@@ -1,12 +1,12 @@
 extends Node3D
-## The authored slice. Run direction is -Z. All geometry is original and built
+## the authored slice. Run direction is -Z. All geometry is original and built
 ## from primitive meshes at load time.
 ##
-##  S   start roof, y 0, z 8..-48        a normal roof to look around and learn on
-##  TA  drawbridge tower, hinge z -51    tips away; its facade becomes the road
-##  R2  roof, y -3, z -103..-140         drop, vaults, a choice of lanes
-##  R3  roof, y -3, z -144..-165         bends up into TB's facade
-##  TB  tower, facade z -171, roof y 25  run up the wall, over the crest, finish
+##  s   start roof, y 0, z 8..-48        a normal roof to look around and learn on
+##  tA  drawbridge tower, hinge z -51    tips away; its facade becomes the road
+##  r2  roof, y -3, z -103..-140         drop, vaults, a choice of lanes
+##  r3  roof, y -3, z -144..-165         bends up into TB's facade
+##  tB  tower, facade z -171, roof y 25  run up the wall, over the crest, finish
 
 const FOLD_SCRIPT: Script = preload("res://scripts/fold_block.gd")
 const FACADE_SHADER: Shader = preload("res://shaders/facade.gdshader")
@@ -89,7 +89,7 @@ func _process(delta: float) -> void:
 		material.set_shader_parameter("wave_floor", bottom if settled > 0.0 else -10000.0)
 
 
-## Closest cue index the player has not yet passed is decided by main; this
+## closest cue index the player has not yet passed is decided by main; this
 ## only reports where each cue sits right now (cues on the fold move with it).
 func cue_position(index: int) -> Vector3:
 	var cue: Dictionary = cues[index]
@@ -216,7 +216,7 @@ func _cylinder(parent: Node3D, center: Vector3, radius: float, height: float, ma
 	return instance
 
 
-## A building from street level to roof_y with a facade material, solid if near the route.
+## a building from street level to roof_y with a facade material, solid if near the route.
 func _building(center_xz: Vector2, footprint: Vector2, roof_y: float, solid: bool, material: Material = null, parapet: bool = true) -> Node3D:
 	if material == null:
 		material = _facade()
@@ -233,7 +233,7 @@ func _building(center_xz: Vector2, footprint: Vector2, roof_y: float, solid: boo
 	return node
 
 
-## Low walls with a lit concrete cap on the chosen sides: [+x, -x, +z, -z].
+## low walls with a lit concrete cap on the chosen sides: [+x, -x, +z, -z].
 func _parapet(top_center: Vector3, footprint: Vector2, solid: bool, sides: Array) -> void:
 	var height: float = 0.75
 	var thick: float = 0.3
@@ -256,7 +256,7 @@ func _parapet(top_center: Vector3, footprint: Vector2, solid: bool, sides: Array
 			_mesh(self, center, size, _materials["concrete"])
 
 
-## Registers an amber route cue. Meshes added with cue_strip() share its material.
+## registers an amber route cue. Meshes added with cue_strip() share its material.
 func _cue(anchor: Node3D, local: Vector3, radius: float) -> int:
 	var material: StandardMaterial3D = StandardMaterial3D.new()
 	material.albedo_color = AMBER
@@ -273,7 +273,7 @@ func _cue_strip(index: int, parent: Node3D, center: Vector3, size: Vector3) -> M
 	return _mesh(parent, center, size, cues[index]["material"])
 
 
-## A chevron of two bars in the parent's local XY plane, pointing along +Y.
+## a chevron of two bars in the parent's local XY plane, pointing along +Y.
 func _chevron(index: int, parent: Node3D, center: Vector3, width: float, normal_offset: float) -> void:
 	for side: float in [-1.0, 1.0]:
 		var bar: MeshInstance3D = _cue_strip(index, parent, center + Vector3(side * width * 0.25, 0, normal_offset), Vector3(width * 0.62, 0.22, 0.06))
@@ -497,7 +497,7 @@ func _roof_two() -> void:
 
 func _roof_three_and_bend() -> void:
 	var roof_y: float = -3.0
-	# R3 sits across a street from R2; its front skin is the second fold
+	# r3 sits across a street from R2; its front skin is the second fold
 	_building(Vector2(0, -160.1), Vector2(20, 9.8), roof_y, true, _facade(1), false)
 	_parapet(Vector3(0, roof_y, -160.1), Vector2(20, 9.8), true, [true, true, false, false])
 	_building(Vector2(0, -168), Vector2(20, 6), roof_y, true, _facade(1), false)
@@ -533,7 +533,7 @@ func _roof_three_and_bend() -> void:
 	_checkpoint(Vector3(0, roof_y + 2.5, -159), Vector3(20, 5, 6), Transform3D(Basis.IDENTITY, Vector3(0, roof_y + 0.9, -158.5)), 2)
 
 
-## R3's front wall rises a full 15 m above its roof. As you come off the road
+## r3's front wall rises a full 15 m above its roof. As you come off the road
 ## it falls toward you about its foot and lands across the street as a bridge,
 ## flush with R2's edge; its back face, now on top, carries the route marks.
 func _skin_bridge(roof_y: float) -> void:
@@ -797,7 +797,7 @@ func _street_lights(pitch: float) -> void:
 	add_child(lights)
 
 
-## Coherent pieces of city doing impossible things far away: never random rubble.
+## coherent pieces of city doing impossible things far away: never random rubble.
 func _spectacle() -> void:
 	# a whole street block hanging on its side to the left, slowly turning
 	var hanging: Node3D = _city_chunk(Vector3(-230, 40, -190), 5)
@@ -842,7 +842,7 @@ func _city_chunk(origin: Vector3, count: int) -> Node3D:
 
 # ---------------------------------------------------------------- bot route
 
-## Waypoints a scripted runner follows with ordinary inputs. "jump" marks a
+## waypoints a scripted runner follows with ordinary inputs. "jump" marks a
 ## takeoff point: the bot presses jump when it gets within reach of it.
 func _route_for_bot() -> void:
 	bot_path = [

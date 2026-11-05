@@ -1,8 +1,8 @@
 extends CharacterBody3D
-## First-person runner. Velocity is world space. "Up" is the body's local +Y:
+## first-person runner. Velocity is world space. "Up" is the body's local +Y:
 ## it stays world up everywhere except on surfaces tagged gravity_surface, where
 ## it follows the floor normal and the velocity turns with it.
-## The camera is a separate top-level rig so mouse look is immediate while
+## the camera is a separate top-level rig so mouse look is immediate while
 ## gravity turns ease visibly and physics steps are interpolated.
 
 signal jumped
@@ -11,12 +11,6 @@ signal footstep(strength: float)
 signal move_started(kind: String)
 
 enum Move { GROUND, AIR, WALLRUN, CLIMB, SLIDE, VAULT, GRAB, PULLUP, WALLCLIMB, ROLL, TURN, SPRINGBOARD, STEP, LANDING }
-
-const STAND_HEIGHT: float = 1.8
-const LOW_HEIGHT: float = 1.22
-const RADIUS: float = 0.30
-const EYE_STAND: float = 0.76
-const EYE_LOW: float = 0.18
 
 @export var tuning: Resource = preload("res://data/movement.tres")
 @export var assists_enabled: bool = false
@@ -74,23 +68,12 @@ var _jump_buffer: float = 0.0
 var _coyote: float = 0.0
 var _since_jump: float = 1.0
 var _air_time: float = 0.0
-var _fall_speed: float = 0.0
 var _stride: float = 0.0
 var _crouched: bool = false
-var _slide_speed: float = 0.0
-var _slide_time: float = 0.0
 var _wall_normal: Vector3 = Vector3.ZERO
 var _wall_side: float = 0.0
-var _wall_time: float = 0.0
-var _last_wall_normal: Vector3 = Vector3.ZERO
-var _climb_from: Vector3 = Vector3.ZERO
-var _climb_to: Vector3 = Vector3.ZERO
-var _climb_time: float = 0.0
-var _climb_duration: float = 0.4
-var _climb_exit: Vector3 = Vector3.ZERO
-var _climb_kind: String = ""
 var _climb_hand: Vector3 = Vector3.ZERO
-var _eye_height: float = EYE_STAND
+var _eye_height: float = tuning.standing_eye
 var _prev_eye: Vector3 = Vector3.ZERO
 var _curr_eye: Vector3 = Vector3.ZERO
 var _view_q: Quaternion = Quaternion.IDENTITY
@@ -100,7 +83,6 @@ var _nod: float = 0.0
 var _nod_velocity: float = 0.0
 var _roll: float = 0.0
 var _fov_extra: float = 0.0
-var _bob_phase: float = 0.0
 var _input_axis: Vector2 = Vector2.ZERO
 var _rig: Node3D
 var _camera: Camera3D
@@ -113,6 +95,7 @@ func _ready() -> void:
 	floor_snap_length = 0.45
 	floor_max_angle = acos(tuning.walkable_normal)
 	(_collider.shape as CapsuleShape3D).radius = tuning.radius
+	(_collider.shape as CapsuleShape3D).height = tuning.standing_height
 	floor_stop_on_slope = true
 	floor_block_on_wall = true
 	max_slides = 6
@@ -238,16 +221,13 @@ func reset_to(spawn: Transform3D, up: Vector3 = Vector3.UP) -> void:
 	_coyote = 0.0
 	_since_jump = 1.0
 	_air_time = 0.0
-	_fall_speed = 0.0
-	_wall_time = 0.0
-	_last_wall_normal = Vector3.ZERO
 	_dip = 0.0
 	_dip_velocity = 0.0
 	_nod = 0.0
 	_nod_velocity = 0.0
 	_roll = 0.0
 	_set_low(false, true)
-	_eye_height = EYE_STAND
+	_eye_height = tuning.standing_eye
 	reset_physics_interpolation()
 	_snap_view()
 
@@ -314,7 +294,7 @@ func _physics_process(delta: float) -> void:
 	_camera_turn_target = clampf(_yaw_input * tuning.turn_lag_multiplier, -PI / 4, PI / 4) * clampf((get_speed() - 1) / 3, 0, 1)
 	_yaw_input = 0
 	_follow_surface()
-	var target_eye: float = EYE_LOW if is_low() else EYE_STAND
+	var target_eye: float = (tuning.standing_eye - tuning.standing_height + tuning.low_height) if is_low() else tuning.standing_eye
 	_eye_height = move_toward(_eye_height, target_eye, delta * (5.5 if target_eye < _eye_height else 3.2))
 	_curr_eye = global_position + up_direction * _eye_height
 
@@ -356,7 +336,7 @@ func _step_free(delta: float, crouch_held: bool) -> void:
 	else:
 		# weak acceleration changes the trajectory; it never assigns a new heading.
 		if wish.length_squared() > .01:
-			var probe: Dictionary = _ray(global_position, global_position + wish * (RADIUS + .1))
+			var probe: Dictionary = _ray(global_position, global_position + wish * (tuning.radius + .1))
 			if probe.is_empty():
 				lateral += wish * tuning.air_control * tuning.acceleration_limit * delta
 		vertical = maxf(vertical - tuning.gravity * delta, -tuning.terminal_speed)
@@ -383,7 +363,7 @@ func _step_free(delta: float, crouch_held: bool) -> void:
 			elif h >= tuning.vault_low_height and h <= tuning.vault_fast_height and (grounded or vertical >= 0) and forward_input > .7:
 				vault.start(self, edge, false, bool(edge.onto))
 				return
-			elif not grounded and h > 1.48 and h < 2.6 and vertical < 4:
+			elif not grounded and h > 1.48 and h < tuning.grab_feet_reach and vertical < 4:
 				ledge.start(self, edge)
 				return
 		if not grounded and _air_time > .04 and try_wall(lateral):
@@ -409,7 +389,6 @@ func _after_move(was_grounded: bool, pre_velocity: Vector3) -> void:
 	var down_speed: float = -pre_velocity.dot(up_direction)
 	if now_grounded and not was_grounded and _since_jump > 0.1:
 		grounded = true
-		_last_wall_normal = Vector3.ZERO
 		wall.consecutive = 0
 		wall.from_jump = false
 		var impact: float = maxf(down_speed, 0.0)
@@ -455,12 +434,12 @@ func sweep_motion(displacement: Vector3) -> KinematicCollision3D:
 func detect_edge(reach: float, max_rise: float) -> Dictionary:
 	var up: Vector3 = up_direction
 	var forward: Vector3 = (-global_basis.z).slide(up).normalized()
-	var feet: Vector3 = global_position - up * .9
+	var feet: Vector3 = global_position - up * (tuning.standing_height * .5)
 	var face: Dictionary = {}
 	for height: float in [.15, .4, .8, 1.25, 1.7, 2.1]:
 		if height > max_rise:
 			break
-		face = _ray(feet + up * height, feet + up * height + forward * (RADIUS + reach))
+		face = _ray(feet + up * height, feet + up * height + forward * (tuning.radius + reach))
 		if not face.is_empty() and absf(Vector3(face.normal).dot(up)) < .3:
 			break
 		face = {}
@@ -498,7 +477,7 @@ func try_springboard() -> bool:
 		return false
 	var into: Vector3 = first.into
 	var probe: Vector3 = Vector3(first.top) + into * tuning.spring_separation
-	var feet: Vector3 = global_position - up_direction * .9
+	var feet: Vector3 = global_position - up_direction * (tuning.standing_height * .5)
 	var hit = _ray(probe + up_direction * 2, probe - up_direction * .2)
 	if hit.is_empty():
 		return false
@@ -519,7 +498,7 @@ func try_wall(lateral: Vector3) -> bool:
 		wall.start_vertical(self, front.normal)
 		return true
 	for side: float in [-1.0, 1.0]:
-		var hit = _ray(global_position, global_position + global_basis.x * side * (RADIUS + tuning.wall_probe))
+		var hit = _ray(global_position, global_position + global_basis.x * side * (tuning.radius + tuning.wall_probe))
 		if hit.is_empty():
 			continue
 		var normal: Vector3 = hit.normal
@@ -530,7 +509,7 @@ func try_wall(lateral: Vector3) -> bool:
 		var body = hit.collider
 		if body is Node and body.get_meta("exclude_feet", false):
 			continue
-		var high_hit = _ray(global_position + up_direction * (tuning.wall_min_height - .9), global_position + up_direction * (tuning.wall_min_height - .9) + global_basis.x * side * (RADIUS + tuning.wall_probe))
+		var high_hit = _ray(global_position + up_direction * (tuning.wall_min_height - .9), global_position + up_direction * (tuning.wall_min_height - .9) + global_basis.x * side * (tuning.radius + tuning.wall_probe))
 		if high_hit.is_empty():
 			continue
 		if lateral.normalized().dot(-global_basis.z) < .5 or lateral.slide(normal).length() < lateral.length() * .54:
@@ -543,8 +522,8 @@ func try_ordinary_step(dt: float) -> bool:
 	if not grounded or get_speed() < .1:
 		return false
 	var motion: Vector3 = velocity.slide(up_direction) * dt
-	var toe: Vector3 = global_position - up_direction * (.9 - .05)
-	var face = _ray(toe, toe + motion.normalized() * (RADIUS + .10))
+	var toe: Vector3 = global_position - up_direction * (tuning.standing_height * .5 - .05)
+	var face = _ray(toe, toe + motion.normalized() * (tuning.radius + .10))
 	if face.is_empty() or absf(Vector3(face.normal).dot(up_direction)) > .3:
 		return false
 	if not test_move(global_transform, motion):
@@ -553,10 +532,10 @@ func try_ordinary_step(dt: float) -> bool:
 	raised.origin += up_direction * tuning.step_height
 	if test_move(global_transform, up_direction * tuning.step_height) or test_move(raised, motion):
 		return false
-	var probe = _ray(raised.origin + motion + motion.normalized() * (RADIUS + .05), raised.origin + motion + motion.normalized() * (RADIUS + .05) - up_direction * 1.3)
+	var probe = _ray(raised.origin + motion + motion.normalized() * (tuning.radius + .05), raised.origin + motion + motion.normalized() * (tuning.radius + .05) - up_direction * 1.3)
 	if probe.is_empty() or Vector3(probe.normal).dot(up_direction) < tuning.walkable_normal:
 		return false
-	var height: float = (Vector3(probe.position) - (global_position - up_direction * .9)).dot(up_direction)
+	var height: float = (Vector3(probe.position) - (global_position - up_direction * (tuning.standing_height * .5))).dot(up_direction)
 	if height < .01 or height > tuning.step_height:
 		return false
 	sweep_motion(up_direction * (height + .03))
@@ -604,8 +583,8 @@ func _ray(from: Vector3, to: Vector3) -> Dictionary:
 func _blocked_at(center: Vector3) -> bool:
 	var query: PhysicsShapeQueryParameters3D = PhysicsShapeQueryParameters3D.new()
 	var capsule: CapsuleShape3D = CapsuleShape3D.new()
-	capsule.radius = RADIUS - 0.02
-	capsule.height = STAND_HEIGHT - 0.06
+	capsule.radius = tuning.radius - 0.02
+	capsule.height = tuning.standing_height - 0.06
 	query.shape = capsule
 	query.transform = Transform3D(global_basis, center)
 	query.collision_mask = collision_mask
@@ -619,14 +598,14 @@ func _can_stand() -> bool:
 
 func _set_low(low: bool, force: bool) -> void:
 	var capsule: CapsuleShape3D = _collider.shape as CapsuleShape3D
-	var want: float = LOW_HEIGHT if low else STAND_HEIGHT
+	var want: float = tuning.low_height if low else tuning.standing_height
 	if is_equal_approx(capsule.height, want):
 		return
 	if not low and not force and not _can_stand():
 		return
 	capsule.height = want
 	# keep the feet where they are: the short capsule sits at the bottom
-	_collider.position = Vector3(0, -(STAND_HEIGHT - want) * 0.5, 0)
+	_collider.position = Vector3(0, -(tuning.standing_height - want) * 0.5, 0)
 
 
 # ---------------------------------------------------------------- camera
@@ -712,7 +691,7 @@ func _update_rig(delta: float, snap: bool) -> void:
 		view_basis * Basis(Vector3.RIGHT, _pitch + _nod + anim_pitch) * Basis(Vector3.BACK, _roll),
 		eye + view_basis * (local_eye + Vector3(0, _dip, 0))
 	)
-	# Foldrunner extension, explicitly optional; baseline has a fixed lens.
+	# foldrunner extension, explicitly optional; baseline has a fixed lens.
 	var widen: float = 5 * clampf(inverse_lerp(base_speed + .5, top_speed, speed), 0, 1) if speed_fov else 0.0
 	_fov_extra = lerpf(_fov_extra, widen, 1 - exp(-3 * delta)) if not snap else widen
 	_camera.fov = vertical_fov(fov_horizontal + _fov_extra)
@@ -725,7 +704,7 @@ func get_hand_target(side: float) -> Vector3:
 		return _climb_hand + global_basis.x * side * .18
 	if move in [Move.WALLRUN, Move.WALLCLIMB]:
 		var origin: Vector3 = global_position + up_direction * .65 - global_basis.z * .65
-		var hit = _ray(origin, origin - _wall_normal * (RADIUS + tuning.wall_probe))
+		var hit = _ray(origin, origin - _wall_normal * (tuning.radius + tuning.wall_probe))
 		if not hit.is_empty():
 			return Vector3(hit.position) + _wall_normal * .025
 	return Vector3.INF
@@ -745,7 +724,7 @@ func get_hand_weight(side: float) -> float:
 	return reach
 
 
-## Horizontal FOV is defined at 16:9. Camera keeps height, so wider screens see more.
+## horizontal FOV is defined at 16:9. Camera keeps height, so wider screens see more.
 static func vertical_fov(horizontal_degrees: float) -> float:
 	var half: float = deg_to_rad(horizontal_degrees) * 0.5
 	return rad_to_deg(2.0 * atan(tan(half) / (16.0 / 9.0)))

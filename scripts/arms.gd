@@ -1,5 +1,5 @@
 extends Node
-## First-person arms, drawn in their own small world on top of the scene so
+## first-person arms, drawn in their own small world on top of the scene so
 ## they never clip into walls. Poses are positions in camera space that the
 ## wrists spring toward: low pumping while running, both hands up and out on a
 ## jump, a push down on landing, palms planted on a vault, a hand on the wall.
@@ -126,7 +126,7 @@ func _box(parent: Node3D, center: Vector3, size: Vector3, material: Material) ->
 	return instance
 
 
-## Hand space: wrist at the origin, fingers along -Z, back of the hand along +Y,
+## hand space: wrist at the origin, fingers along -Z, back of the hand along +Y,
 ## thumb toward the body's centre line.
 func _build_arm(side: float) -> Dictionary:
 	var upper: Node3D = Node3D.new()
@@ -283,7 +283,7 @@ func _process(delta: float) -> void:
 		_drive_arm(arm, target, facing, curl, stiffness, delta)
 
 
-## Pitch tips the fingers up (+) or down (-); spread turns them outward.
+## pitch tips the fingers up (+) or down (-); spread turns them outward.
 func _hand_basis(side: float, pitch: float, spread: float) -> Basis:
 	# the slight inward roll keeps the backs of the hands angled toward the eye
 	return Basis(Vector3.UP, spread) * Basis(Vector3.RIGHT, pitch) * Basis(Vector3.BACK, side * deg_to_rad(-18.0))

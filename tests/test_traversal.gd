@@ -1,7 +1,7 @@
 extends SceneTree
-## The scripted runner completes the whole route with ordinary inputs only:
+## the scripted runner completes the whole route with ordinary inputs only:
 ## held W, mouse-motion steering and Space. No waypoint teleports, no respawns.
-## Run once with default comfort settings and once with camera bank off.
+## run once with default comfort settings and once with camera bank off.
 
 var failures: int = 0
 

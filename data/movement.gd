@@ -175,6 +175,11 @@ extends Resource
 @export var normal_landing_compression: float = .12
 @export var hand_ik_blend: float = .10
 
+# context geometry/vertical native solver unresolved (U); port reach and attraction (P).
+@export var grab_feet_reach: float = 2.6
+@export var climb_attraction: float = 4.0
+@export var wall_contact_press: float = .2
+
 func acceleration(speed: float) -> float:
 	for i: int in range(1, speed_knots.size()):
 		if speed <= speed_knots[i]:

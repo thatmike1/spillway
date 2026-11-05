@@ -1,7 +1,7 @@
 class_name FoldBlock
 extends AnimatableBody3D
-## A rigid piece of city that turns about a hinge. The node origin is the hinge.
-## Three beats: a short tremble that announces it, one continuous turn, and a
+## a rigid piece of city that turns about a hinge. The node origin is the hinge.
+## three beats: a short tremble that announces it, one continuous turn, and a
 ## small settle when it lands in its new role. Collision moves with the mesh.
 
 signal fold_started
@@ -40,7 +40,7 @@ func start_fold() -> void:
 	fold_started.emit()
 
 
-## Jump straight to the folded state, used when a checkpoint lies past the fold.
+## jump straight to the folded state, used when a checkpoint lies past the fold.
 func finish_now() -> void:
 	phase = Phase.DONE
 	_time = 0.0
@@ -80,7 +80,7 @@ func get_warning() -> float:
 
 # a jump cut must reach the physics server now, not on the next physics tick,
 # or a body placed on the new surface this frame falls through it. with sync on,
-# AnimatableBody3D puts the node back to its last physics pose, so cut with it off
+# animatableBody3D puts the node back to its last physics pose, so cut with it off
 func _cut_to(target: Transform3D) -> void:
 	sync_to_physics = false
 	transform = target

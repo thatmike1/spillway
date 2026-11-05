@@ -1,7 +1,7 @@
 extends Node
-## A scripted runner that plays through ordinary inputs only: it holds W, sends
+## a scripted runner that plays through ordinary inputs only: it holds W, sends
 ## mouse-motion events to steer and look, and presses Space at takeoff points.
-## It never moves the player directly. Used by the traversal test and to
+## it never moves the player directly. Used by the traversal test and to
 ## record player-view footage with Movie Maker.
 
 var main: Node
@@ -39,7 +39,7 @@ func attach(owner_main: Node, runner: CharacterBody3D, route: Node3D, quit: bool
 	process_mode = Node.PROCESS_MODE_PAUSABLE
 
 
-## Starts from the first waypoint ahead of the player, for runs that begin at a checkpoint.
+## starts from the first waypoint ahead of the player, for runs that begin at a checkpoint.
 func skip_to_nearest() -> void:
 	var path: Array = level.get("bot_path")
 	index = 0
@@ -73,7 +73,7 @@ func _physics_process(delta: float) -> void:
 				_trace.flush()
 		_turn_toward(Vector3(0, 25, -60), delta, 1.2)
 		if quit_at_end and time - finished_at > 2.5:
-			get_tree().quit(0)
+			main.call("request_quit")
 		return
 	var path: Array = level.get("bot_path")
 	if index >= path.size():

@@ -1,5 +1,5 @@
 extends CanvasLayer
-## Minimal overlay: timer, a reticle dot, a title card that leaves once you
+## minimal overlay: timer, a reticle dot, a title card that leaves once you
 ## move, a pause panel with comfort settings, and the finish card.
 
 signal resume_requested
@@ -193,7 +193,7 @@ func _make_title(root: Control) -> Control:
 	title.add_theme_color_override("font_color", AMBER)
 	box.add_child(title)
 	box.add_child(_label("Look around. Run when you are ready.", 18))
-	var keys: Label = _label("Mouse / arrows look   WASD run   Space jump   Ctrl slide   R restart   Esc pause", 14)
+	var keys: Label = _label("Mouse / arrows look   WASD run   Space jump   Ctrl slide / roll   Q turn   R restart   Esc pause", 14)
 	keys.modulate = Color(1, 1, 1, 0.7)
 	box.add_child(keys)
 	return box
@@ -209,22 +209,31 @@ func _make_pause(root: Control) -> Control:
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	holder.add_child(shade)
-	var column: VBoxContainer = _panel(holder, 460, 560)
+	var column: VBoxContainer = _panel(holder, 520, 650)
 	var heading: Label = _label("Paused", 28)
 	column.add_child(heading)
 	var resume: Button = _button("Resume", func() -> void: resume_requested.emit())
 	_controls["resume"] = resume
 	column.add_child(resume)
-	column.add_child(_button("Restart run   (R)", func() -> void: restart_requested.emit()))
-	column.add_child(_slider("Mouse sensitivity", "sensitivity", 0.3, 3.0, 0.05))
-	column.add_child(_slider("Field of view at 16:9", "fov", 80.0, 105.0, 1.0))
-	column.add_child(_slider("Camera bank on wall-runs", "bank", 0.0, 1.0, 0.05))
-	column.add_child(_slider("Volume", "volume", 0.0, 1.0, 0.05))
-	column.add_child(_toggle("Speed FOV (Foldrunner extension)", "speed_fov"))
-	column.add_child(_toggle("Jump grace (Foldrunner extension)", "assists"))
-	column.add_child(_toggle("Runner vision", "runner_vision"))
-	column.add_child(_toggle("Head bob", "head_bob"))
-	column.add_child(_toggle("Invert look", "invert_y"))
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(440, 360)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.follow_focus = true
+	column.add_child(scroll)
+	var options := VBoxContainer.new()
+	options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	options.add_theme_constant_override("separation", 10)
+	scroll.add_child(options)
+	options.add_child(_button("Restart run   (R)", func() -> void: restart_requested.emit()))
+	options.add_child(_slider("Mouse sensitivity", "sensitivity", 0.3, 3.0, 0.05))
+	options.add_child(_slider("Field of view at 16:9", "fov", 80.0, 105.0, 1.0))
+	options.add_child(_slider("Camera bank on wall-runs", "bank", 0.0, 1.0, 0.05))
+	options.add_child(_slider("Volume", "volume", 0.0, 1.0, 0.05))
+	options.add_child(_toggle("Speed FOV (Foldrunner extension)", "speed_fov"))
+	options.add_child(_toggle("Jump grace (Foldrunner extension)", "assists"))
+	options.add_child(_toggle("Runner vision", "runner_vision"))
+	options.add_child(_toggle("Head bob", "head_bob"))
+	options.add_child(_toggle("Invert look", "invert_y"))
 	column.add_child(_button("Quit", func() -> void: quit_requested.emit()))
 	holder.visible = false
 	return holder

@@ -39,6 +39,12 @@ func _run() -> void:
 	check(absf(left.distance_to(player._climb_hand) - .18) < .001, "hand target belongs to actual world contact")
 	player._climb_hand += Vector3.RIGHT
 	check(absf(player.get_hand_target(-1).distance_to(left) - 1) < .001, "moving contact moves hand target exactly")
+	player.move = player.Move.GROUND
+	player._dip = -.3
+	player._dip_velocity = 2
+	for i: int in 40:
+		player._update_rig(.1, false)
+	check(absf(player._dip) < .001 and absf(player._dip_velocity) < .001, "eye springs settle through 100ms frames")
 	print("spec camera: %d/%d checks passed" % [checks - failures, checks])
 	player.move = player.Move.GROUND
 	fixture.queue_free()

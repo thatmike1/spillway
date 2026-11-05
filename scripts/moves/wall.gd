@@ -72,7 +72,7 @@ func step(p, dt: float) -> void:
 	var tangent: Vector3 = p.velocity.slide(p.up_direction).slide(normal)
 	if not vertical:
 		tangent *= maxf(0, 1 - t.wall_friction * dt)
-	p.velocity = tangent + p.up_direction * vz - normal * (4.0 if vertical else .2)
+	p.velocity = tangent + p.up_direction * vz - normal * (t.climb_attraction if vertical else t.wall_contact_press)
 	p._climb_hand = Vector3(contact.position) + p.up_direction * .4
 	if vz <= (0 if vertical else t.wall_exit_vertical):
 		p.move = p.Move.AIR
