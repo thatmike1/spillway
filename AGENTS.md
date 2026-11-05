@@ -1,9 +1,7 @@
 # Foldrunner
 
-Read docs/CONTRACT.md before changing runtime code. Godot 4.7.2 + GDScript. First-person folding-city parkour, original modular geometry, Compatibility renderer for browser feasibility.
+Read docs/CONTRACT.md before runtime changes. Godot 4.7.2, GDScript, Compatibility renderer. Original first-person parkour through a folding city.
 
-Mike is gaming: ALL engine invocations during this first pass MUST use --headless. No GPU rendering, editor UI, screenshots, Blender, or visible browser previews until Mike says he is done. Headless physics and dummy-renderer web import/export are allowed. Do not launch the game or open run scripts.
+Movement tuning is SI in data/movement.tres and its script. Comments name the supplied movement spec section and confidence H/M/U/P. Keep physical velocity, precise trajectories and original body animation as separate motion owners. Tests and traces verify numbers; rendered Movie Maker frames verify camera, body contacts and route readability. Render and inspect frames on this machine. Keep captures outside the repository.
 
-One owner per runtime system. Agents edit only assigned files; lead owns integration, project.godot, main scene, docs, scripts, and shared spatial math. Agents do not commit or touch beads. Deliver a runnable contribution, tests or precise manual verification, known limitations. No borrowed copyrighted game assets. No emojis in code.
-
-Final visual and subjective movement QA remains pending; headless tests are not evidence of visual quality.
+Use original geometry, sounds and animation. Private reference images and the external movement spec stay outside Git.

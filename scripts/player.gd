@@ -13,21 +13,26 @@ signal move_started(kind: String)
 enum Move { GROUND, AIR, WALLRUN, CLIMB, SLIDE }
 
 const STAND_HEIGHT: float = 1.8
-const LOW_HEIGHT: float = 1.0
-const RADIUS: float = 0.35
-const EYE_STAND: float = 0.72
-const EYE_LOW: float = -0.02
+const LOW_HEIGHT: float = 1.22
+const RADIUS: float = 0.30
+const EYE_STAND: float = 0.76
+const EYE_LOW: float = 0.18
 
-@export var base_speed: float = 6.2
-@export var top_speed: float = 9.6
-@export var momentum_time: float = 1.4
-@export var jump_speed: float = 6.6
-@export var gravity_strength: float = 18.0
+@export var tuning: Resource = preload("res://data/movement.tres")
+@export var assists_enabled: bool = false
+var base_speed: float:
+	get: return tuning.base_speed
+var top_speed: float:
+	get: return tuning.maximum_speed
+var jump_speed: float:
+	get: return tuning.jump_speed
+var gravity_strength: float:
+	get: return tuning.gravity
 @export var mouse_sensitivity: float = 0.0022
 @export var stick_look_speed: float = 3.2
 @export var invert_y: bool = false
-@export var fov_horizontal: float = 90.0
-@export var speed_fov: bool = true
+@export var fov_horizontal: float = 85.0
+@export var speed_fov: bool = false
 @export_range(0.0, 1.0) var bank_amount: float = 1.0
 @export var head_bob_enabled: bool = false
 
@@ -36,6 +41,11 @@ var move: Move = Move.GROUND
 var momentum: float = 0.0
 var grounded: bool = false
 
+var _yaw_input: float = 0.0
+var _pre_jump_speed: float = 0.0
+var _jump_flight: bool = false
+var _fall_origin: float = 0.0
+var last_landing_speed: float = 0.0
 var _pitch: float = 0.0
 var _jump_buffer: float = 0.0
 var _coyote: float = 0.0
@@ -78,7 +88,8 @@ func _ready() -> void:
 	add_to_group("player")
 	_collider.shape = _collider.shape.duplicate()
 	floor_snap_length = 0.45
-	floor_max_angle = deg_to_rad(50.0)
+	floor_max_angle = acos(tuning.walkable_normal)
+	(_collider.shape as CapsuleShape3D).radius = tuning.radius
 	floor_stop_on_slope = true
 	floor_block_on_wall = true
 	max_slides = 6
@@ -156,12 +167,13 @@ func set_controls_enabled(enabled: bool) -> void:
 
 
 func queue_jump() -> void:
-	_jump_buffer = 0.16
+	_jump_buffer = tuning.jump_buffer if assists_enabled else 1.0 / 120.0 + .00001
 
 
 func look(yaw_delta: float, pitch_delta: float) -> void:
 	if not controls_enabled:
 		return
+	_yaw_input += yaw_delta
 	rotate_object_local(Vector3.UP, yaw_delta)
 	_view_q = (_view_q * Quaternion(Vector3.UP, yaw_delta)).normalized()
 	_pitch = clampf(_pitch + pitch_delta, deg_to_rad(-88.0), deg_to_rad(88.0))
@@ -175,6 +187,8 @@ func reset_to(spawn: Transform3D, up: Vector3 = Vector3.UP) -> void:
 	up_direction = up.normalized()
 	velocity = Vector3.ZERO
 	move = Move.GROUND
+	_jump_flight = false
+	_yaw_input = 0.0
 	momentum = 0.0
 	_pitch = 0.0
 	_jump_buffer = 0.0
@@ -206,7 +220,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		var delta: Vector2 = motion.screen_relative
 		look(-delta.x * mouse_sensitivity, -delta.y * mouse_sensitivity * (-1.0 if invert_y else 1.0))
 	elif event.is_action_pressed("jump"):
-		_jump_buffer = 0.16
+		_jump_buffer = tuning.jump_buffer if assists_enabled else 1.0 / 120.0 + .00001
 
 
 func _read_stick_look(delta: float) -> void:
@@ -223,7 +237,6 @@ func _read_stick_look(delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	_prev_eye = _curr_eye
 	_since_jump += delta
-	_jump_buffer = maxf(0.0, _jump_buffer - delta)
 	_input_axis = Vector2.ZERO
 	var crouch_held: bool = false
 	if controls_enabled:
@@ -239,6 +252,8 @@ func _physics_process(delta: float) -> void:
 			_step_slide(delta, crouch_held)
 		_:
 			_step_free(delta, crouch_held)
+	_jump_buffer = maxf(0.0, _jump_buffer - delta)
+	_yaw_input = 0.0
 	_follow_surface()
 	var target_eye: float = EYE_LOW if is_low() else EYE_STAND
 	_eye_height = move_toward(_eye_height, target_eye, delta * (5.5 if target_eye < _eye_height else 3.2))
@@ -257,7 +272,7 @@ func _step_free(delta: float, crouch_held: bool) -> void:
 	var was_grounded: bool = grounded
 	grounded = is_on_floor() and _since_jump > 0.08
 	if grounded:
-		_coyote = 0.13
+		_coyote = tuning.coyote_time if assists_enabled else 0.0
 		_air_time = 0.0
 	else:
 		_coyote = maxf(0.0, _coyote - delta)
@@ -268,34 +283,21 @@ func _step_free(delta: float, crouch_held: bool) -> void:
 	var lateral: Vector3 = velocity - up * vertical
 	var lateral_speed: float = lateral.length()
 
-	if grounded:
-		if forward_input > 0.5 and lateral_speed > base_speed * 0.85:
-			momentum = minf(1.0, momentum + delta / momentum_time)
-		elif _input_axis.length() < 0.1:
-			momentum = maxf(0.0, momentum - delta * 2.0)
-		# running into something bleeds momentum to match the speed you really have
-		momentum = minf(momentum, clampf(inverse_lerp(base_speed, top_speed, lateral_speed + 1.2), 0.0, 1.0))
-	var max_speed: float = lerpf(base_speed, top_speed, momentum)
-	if forward_input < 0.3:
-		max_speed = minf(max_speed, base_speed * 0.85)
-	_crouched = grounded and crouch_held and lateral_speed < 5.0
-	if _crouched:
-		max_speed = 3.0
+	_crouched = grounded and crouch_held and lateral_speed < 3.5
 	_set_low(_crouched, false)
-
 	if grounded:
-		var target: Vector3 = wish * max_speed
-		var rate: float = 34.0 if target.length() >= lateral_speed - 0.1 else 24.0
-		lateral = lateral.move_toward(target, rate * delta)
-		# a light press into the floor keeps contact over convex curves and edges
+		if _jump_buffer <= 0.0:
+			lateral = tuning.ground_velocity(lateral, wish, (-global_basis.z).slide(up).normalized(), _yaw_input / delta, delta, _crouched)
 		vertical = minf(vertical, -1.5)
 		_stride += lateral.length() * delta
+		momentum = clampf((lateral.length() - base_speed) / (top_speed - base_speed), 0.0, 1.0)
 	else:
-		if wish.length_squared() > 0.01:
-			var cap: float = maxf(lateral_speed, base_speed * 0.8)
-			lateral = lateral.move_toward(wish * cap, 9.0 * delta)
-		var g: float = gravity_strength * (1.22 if vertical < 0.0 else 1.0)
-		vertical = maxf(vertical - g * delta, -42.0)
+		# weak acceleration changes the trajectory; it never assigns a new heading.
+		if wish.length_squared() > .01:
+			var probe: Dictionary = _ray(global_position, global_position + wish * (RADIUS + .1))
+			if probe.is_empty():
+				lateral += wish * tuning.air_control * tuning.acceleration_limit * delta
+		vertical = maxf(vertical - tuning.gravity * delta, -tuning.terminal_speed)
 	velocity = lateral + up * vertical
 
 	# actions in order of priority: slide, vault/climb, wall-run, jump
@@ -312,7 +314,12 @@ func _step_free(delta: float, crouch_held: bool) -> void:
 	if not grounded and _air_time > 0.04 and _try_wallrun(lateral, forward_input):
 		return
 	if _jump_buffer > 0.0 and (grounded or _coyote > 0.0):
-		_do_jump(up * jump_speed + lateral * 1.02)
+		_pre_jump_speed = lateral.length()
+		_jump_flight = true
+		var forward: Vector3 = (-global_basis.z).slide(up).normalized()
+		if lateral.dot(forward) > tuning.jump_forward_gate:
+			lateral += forward * tuning.jump_forward
+		_do_jump(up * tuning.jump_speed + lateral)
 		return
 
 	var pre_velocity: Vector3 = velocity
@@ -339,10 +346,11 @@ func _after_move(was_grounded: bool, pre_velocity: Vector3) -> void:
 func _on_land(impact: float) -> void:
 	_dip_velocity -= clampf(impact * 0.11, 0.3, 2.6)
 	_nod_velocity -= clampf(impact * 0.012, 0.0, 0.16)
-	# a very hard landing costs some speed, a normal one keeps it all
-	if impact > 15.0:
-		momentum *= 0.6
-		velocity = velocity * 0.75
+	if _jump_flight:
+		var lateral: Vector3 = velocity.slide(up_direction)
+		velocity = lateral.limit_length(maxf(0.0, _pre_jump_speed - tuning.landing_reduction))
+		_jump_flight = false
+	last_landing_speed = get_speed()
 	landed.emit(impact)
 
 
