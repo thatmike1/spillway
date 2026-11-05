@@ -204,7 +204,11 @@ func practice_records() -> void:
 		if segment >= 2:
 			await visit(checkpoint_position(2), 2.0)
 		var before := records()
+		var segment_base: float = 0.0 if segment == 0 else float(game.get("splits")[segment - 1])
+		game.set("elapsed", float(game.get("elapsed")) + 12.0)
 		await pulse("practice")
+		await ticks(12)
+		check(is_equal_approx(float(game.get("elapsed")), segment_base) and not bool(game.get("_started")), "F resets the current segment clock and waits for movement")
 		check(not bool(game.get("clean_eligible")) and not bool(game.get("finished")), "F immediately invalidates clean eligibility")
 		check(game.get("player").global_position.distance_to(checkpoint_position(segment)) < 0.1, "F restores current segment pose")
 		if segment == 0:

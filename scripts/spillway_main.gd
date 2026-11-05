@@ -1,7 +1,7 @@
 extends Node3D
 ## p / run provenance is separate from movement and presentation.
 
-const BUILD_ID := "spillway-2026.11.05-r3"
+const BUILD_ID := "spillway-2026.11.05-r4"
 const SAVE_PATH := "user://spillway_v1.cfg"
 var player: CharacterBody3D
 var level: Node3D
@@ -87,7 +87,11 @@ func practice_restart() -> void:
 	clean_eligible = false
 	finished = false
 	splits.resize(checkpoint_index)
+	# p / practice starts a fresh segment clock; a fall respawn still keeps its penalty.
+	elapsed = splits[-1] if not splits.is_empty() else 0.0
+	_started = false
 	_restore_checkpoint()
+	_spawn_origin = player.global_position
 	set_paused(false)
 	hud.call("notify", "Segment practice · R starts a clean run")
 
