@@ -1,5 +1,5 @@
 shader_type spatial;
-// Original procedural facade: window bays, floor slabs and a concrete roof, laid
+// original procedural facade: window bays, floor slabs and a concrete roof, laid
 // out in the mesh's own space so the pattern turns with a folding block.
 
 uniform vec3 wall_color : source_color = vec3(0.14, 0.21, 0.29);
@@ -57,9 +57,10 @@ void fragment() {
 		float h = hash12(cell + vec2(seed * 13.1, seed * 7.3));
 		float lit = step(h, lit_ratio);
 		float wave = (1.0 - step(wave_height, uv.y)) * step(wave_floor, uv.y);
-		albedo = mix(wall_color, slab_color, slab * 0.8);
+		float weather = .90 + .10 * hash12(floor(uv * .65) + seed);
+		albedo = mix(wall_color * weather, slab_color, slab * 0.8);
 		albedo = mix(albedo, glass_color, glass);
-		emit = glass * (lit_color * lit * lit_energy * (0.55 + 0.45 * h) + wave_color * wave * 1.5);
+		emit = glass * (lit_color * lit * lit_energy * (0.55 + 0.45 * h) + wave_color * wave * .35);
 		rough = mix(rough, 0.32, glass);
 		metal = mix(0.0, 0.25, glass);
 		// distant facades melt into an average so the grid never shimmers

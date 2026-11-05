@@ -174,7 +174,7 @@ extends Resource
 @export var vault_eye_above_contact: float = .50
 @export var normal_landing_compression: float = .10
 @export var normal_landing_recovery: float = .32
-# P: resynthesis gains for original local eye tracks and unresolved spring transfer.
+# port choice (P): resynthesis gains for original local eye tracks and unresolved spring transfer.
 @export var roll_eye_projection: float = .38
 @export var turn_lag_projection: float = .12
 @export var hand_ik_blend: float = .10

@@ -1,6 +1,6 @@
 extends Node
 ## original foreground body. shares the scene world, lights and environment.
-## P: fixed arm lengths and authored asynchronous poses, with world contact IK.
+## port choice (P): fixed arm lengths and authored asynchronous poses, with world contact IK.
 const BODY_LAYER: int = 1 << 19
 const UPPER_LENGTH: float = .34
 const FORE_LENGTH: float = .34
@@ -274,7 +274,7 @@ func _process(delta: float) -> void:
 					target.y = lerpf(target.y, -.10, _land_kick)
 					target.z = lerpf(target.z, -.48, _land_kick)
 				else:
-					# P: reference 15, low outer hands, backs visible, fingers forward.
+					# port choice (P): reference 15, low outer hands, backs visible, fingers forward.
 					# different phase per hand separates takeoff, flight and recovery.
 					var rising: float = clampf(vertical / 6.3, -1, 1)
 					var reach: float = clampf(.55 + rising * .25 + _jump_kick * (.30 if side < 0 else .1), 0, 1)

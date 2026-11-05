@@ -33,6 +33,14 @@ func _run() -> void:
 	await physics_frame
 	player = main.get("player")
 	level = main.get("level")
+	for index: int in 2:
+		var entry: Dictionary = level.fold_triggers[index]
+		var shape: BoxShape3D = (entry.area.get_child(0) as CollisionShape3D).shape
+		var entry_z: float = entry.area.position.z + shape.size.z / 2
+		var edge_z: float = -48 if index == 0 else -140
+		var arrival: float = (entry_z - edge_z) / player.tuning.maximum_speed
+		var block: Node = entry.fold
+		check(arrival > block.anticipation + block.duration + block.settle_time, "fold %d is settled before even a constant full-speed arrival" % index)
 	await _test_start()
 	await _test_fold()
 	await _test_fall_and_checkpoint()

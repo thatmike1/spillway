@@ -18,7 +18,6 @@ var _turn_wait: float = 0
 var _crouch_sent: bool = false
 var _trace: FileAccess
 var _look_phase: float = 0.0
-var _waiting: float = 0.0
 var _jump_release: int = 0
 var _sensitivity: float = 0.0022
 
@@ -100,14 +99,6 @@ func _physics_process(delta: float) -> void:
 			pitch_rate = -0.45
 		_mouse(Vector2(-yaw_rate * delta / _sensitivity, -pitch_rate * delta / _sensitivity))
 		return
-	if step.has("wait_fold"):
-		var fold: Node = level.get("folds")[int(step["wait_fold"])]
-		if not bool(fold.call("is_done")) and flat.length() < 6.0:
-			Input.action_release("move_forward")
-			_waiting += delta
-			_aim_pitch(deg_to_rad(float(step.get("watch_pitch", 12.0))), delta)
-			_turn_toward(step["watch"], delta, 1.0)
-			return
 	if step.get("turn", false) and (flat.length() < 1.5 or _turn_wait > 0):
 		Input.action_release("move_forward")
 		if _turn_wait == 0:
@@ -131,7 +122,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		Input.action_release("crouch")
 	_turn_toward(target, delta, 1.0)
-	var look_down: float = deg_to_rad(-8.0)
+	var look_down: float = deg_to_rad(15 if player.move == player.Move.GRAB else -8.0)
 	if step.get("jump", false):
 		look_down = deg_to_rad(-4.0)
 	_aim_pitch(look_down, delta)

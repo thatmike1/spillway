@@ -646,7 +646,7 @@ func _update_rig(delta: float, snap: bool) -> void:
 	var rate: float = clampf(speed / (6.0 if speed >= 6.3 else 5.0), .2, 1.4)
 	_animation_phase += delta * rate / cycle * TAU
 	if move == Move.WALLRUN:
-		target_roll = -deg_to_rad(tuning.wall_left_tilt if _wall_side < 0 else tuning.wall_right_tilt) # UE left-handed roll mapped to Godot
+		target_roll = -deg_to_rad(tuning.wall_left_tilt if _wall_side < 0 else tuning.wall_right_tilt) # ue left-handed roll mapped to Godot
 		var extent: Vector2 = tuning.wall_left_eye_range if _wall_side < 0 else tuning.wall_right_eye_range
 		local_eye = Vector3(sin(_animation_phase * 1.4) * extent.x / 2, sin(_animation_phase * 2.8) * extent.y / 2, 0)
 	elif grounded and head_bob_enabled and move == Move.GROUND:
@@ -655,17 +655,17 @@ func _update_rig(delta: float, snap: bool) -> void:
 	var anim_pitch: float = 0
 	if move == Move.VAULT:
 		var f: float = get_climb_progress()
-		# P: crouch the visual body around the planted rail. root capsule clearance
+		# port choice (P): crouch the visual body around the planted rail. root capsule clearance
 		# is independent of this eye curve; collision resolution follows composition.
 		var plant: float = smoothstep(0, .16, f) * (1 - smoothstep(.52, .90, f))
 		var over_rail: float = (global_position + up_direction * _eye_height - _climb_hand).dot(up_direction)
 		local_eye.y -= maxf(0, over_rail - tuning.vault_eye_above_contact) * plant
-		anim_pitch = -.80 * sin(f * PI) # P: see the planted hand and rail through push-off
+		anim_pitch = -.80 * sin(f * PI) # port choice (P): see the planted hand and rail through push-off
 	elif move == Move.PULLUP:
 		local_eye.y -= .35 * sin(get_climb_progress() * PI)
 	elif move == Move.ROLL:
 		var f: float = clampf(landing.time / tuning.roll_duration, 0, 1)
-		# P: local track range is retargeted around the crouched shoulder, not
+		# port choice (P): local track range is retargeted around the crouched shoulder, not
 		# subtracted from the world eye. the physical root still travels 3.13517 m.
 		local_eye.y -= tuning.roll_eye_range.y * tuning.roll_eye_projection * sin(f * PI)
 		local_eye.z += tuning.roll_eye_range.z * sin(f * PI)
@@ -676,7 +676,7 @@ func _update_rig(delta: float, snap: bool) -> void:
 		local_eye.z += tuning.hard_eye_range.z * sin(f * PI)
 		anim_pitch = -.94 * sin(f * PI)
 	elif _landing_elapsed < tuning.normal_landing_recovery:
-		# P: an impact-weighted eye animation, not random or universal shake.
+		# port choice (P): an impact-weighted eye animation, not random or universal shake.
 		var amount: float = clampf(pow(landing.impact / 8.0, 2), .15, 1)
 		local_eye.y -= tuning.normal_landing_compression * amount * sin(_landing_elapsed / tuning.normal_landing_recovery * PI)
 	_turn_lag = lerpf(_turn_lag, _camera_turn_target, minf(1, delta / tuning.turn_lag_time))
@@ -703,7 +703,7 @@ func _update_rig(delta: float, snap: bool) -> void:
 	_fov_extra = lerpf(_fov_extra, widen, 1 - exp(-3 * delta)) if not snap else widen
 	_camera.fov = vertical_fov(fov_horizontal + _fov_extra)
 
-# P: keep the final composed eye on the body side of nearby solid geometry.
+# port choice (P): keep the final composed eye on the body side of nearby solid geometry.
 func _resolve_eye(desired: Vector3) -> Vector3:
 	var hit: Dictionary = _ray(global_position, desired)
 	if not hit.is_empty():
@@ -731,7 +731,7 @@ func get_hand_weight(side: float) -> float:
 	var reach: float = (1 - smoothstep(1.0, 1.7, local.length())) * (1 - smoothstep(-.05, .05, local.z))
 	if move == Move.VAULT:
 		if side > 0:
-			return 0 # P: one planted push-off hand, the other balances.
+			return 0 # port choice (P): one planted push-off hand, the other balances.
 		return reach * minf(1, vault.time / tuning.hand_ik_blend) * minf(1, (vault.duration - vault.time) / tuning.hand_ik_blend)
 	if move == Move.WALLRUN and signf(side) != signf(_wall_side):
 		return 0

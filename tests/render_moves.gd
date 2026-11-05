@@ -115,6 +115,7 @@ func _physics_process(dt: float) -> bool:
 		4:
 			if not jumped:
 				player.move = player.Move.ROLL
+				player._crouched = true
 				player.landing.kind = "roll"
 				player.landing.time = 0
 				player.landing.forward = Vector3.FORWARD
@@ -147,7 +148,8 @@ func _physics_process(dt: float) -> bool:
 func _process(_dt: float) -> bool:
 	if eye_trace != null and player != null:
 		var eye: Vector3 = player.get_camera().global_position
-		var hit: Dictionary = player._ray(eye, eye - player.up_direction * 15)
-		var clearance: float = eye.distance_to(hit.position) if not hit.is_empty() else -1
+		var probe: Vector3 = player.global_position + player.up_direction * .1
+		var hit: Dictionary = player._ray(probe, probe - player.up_direction * 15)
+		var clearance: float = (eye - Vector3(hit.position)).dot(player.up_direction) if not hit.is_empty() else -100
 		eye_trace.store_csv_line([time, phase, eye.x, eye.y, eye.z, clearance, rad_to_deg(player._roll), player.move, player.is_low(), arms._arms[0].wrist, arms._arms[1].wrist, player.get_hand_weight(-1), arms._arms[0].hand.global_position.distance_to(player.get_hand_target(-1)) if player.get_hand_target(-1).is_finite() else -1])
 	return false

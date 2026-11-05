@@ -16,8 +16,8 @@ const CYAN: Color = Color("#6CBFCB")
 const SILHOUETTE: Color = Color("#0C1118")
 const CHARCOAL: Color = Color("#151B24")
 const BLUE_ARCH: Color = Color("#24364B")
-const CONCRETE: Color = Color("#758391")
-const SKY: Color = Color("#A6BBC9")
+const CONCRETE: Color = Color("#67717d")
+const SKY: Color = Color("#596474")
 
 const STREET_Y: float = -30.0
 const TA_HINGE: Vector3 = Vector3(0, 0, -51)
@@ -122,9 +122,12 @@ func _make_materials() -> void:
 		material.set_shader_parameter("slab_color", entry[1])
 		material.set_shader_parameter("roof_color", Color(entry[0]).lerp(CONCRETE, 0.22))
 		material.set_shader_parameter("seed", entry[2])
+		var style: int = _facades.size() % 3
+		material.set_shader_parameter("bay", [Vector2(2.8, 3.4), Vector2(1.8, 3.2), Vector2(4.2, 3.6)][style])
+		material.set_shader_parameter("window_size", [Vector2(.62, .6), Vector2(.75, .83), Vector2(.43, .65)][style])
 		material.set_shader_parameter("lit_ratio", 0.14 + _rng.randf() * 0.12)
-		material.set_shader_parameter("lit_energy", 2.2)
-		material.set_shader_parameter("lit_color", Color("#ffd9a8"))
+		material.set_shader_parameter("lit_energy", 1.25)
+		material.set_shader_parameter("lit_color", Color("#ffc18c"))
 		_facades.append(material)
 	_materials["concrete"] = _standard(CONCRETE, 0.9)
 	_materials["concrete_dark"] = _standard(Color("#4a5662"), 0.92)
@@ -256,28 +259,16 @@ func _parapet(top_center: Vector3, footprint: Vector2, solid: bool, sides: Array
 			_mesh(self, center, size, _materials["concrete"])
 
 
-## registers an amber route cue. Meshes added with cue_strip() share its material.
-func _cue(anchor: Node3D, local: Vector3, radius: float) -> int:
-	var material: StandardMaterial3D = StandardMaterial3D.new()
-	material.albedo_color = AMBER
-	material.emission_enabled = true
-	material.emission = AMBER
-	material.emission_energy_multiplier = 1.0
-	material.roughness = 0.5
-	vision.register(anchor, local, material)
+## port choice (P): authored hardware eligibility, with approach cones and material-matched rest.
+func _cue(anchor: Node3D, local: Vector3, radius: float, distance: float, direction: Vector3) -> int:
+	var material: StandardMaterial3D = _standard(CONCRETE, .65, .15)
+	vision.register(anchor, local, material, {"distance": distance, "direction": direction, "angle": 150.0, "neutral": CONCRETE})
 	cues.append({"anchor": anchor, "local": local, "radius": radius, "material": material})
 	return cues.size() - 1
 
 
 func _cue_strip(index: int, parent: Node3D, center: Vector3, size: Vector3) -> MeshInstance3D:
 	return _mesh(parent, center, size, cues[index]["material"])
-
-
-## a chevron of two bars in the parent's local XY plane, pointing along +Y.
-func _chevron(index: int, parent: Node3D, center: Vector3, width: float, normal_offset: float) -> void:
-	for side: float in [-1.0, 1.0]:
-		var bar: MeshInstance3D = _cue_strip(index, parent, center + Vector3(side * width * 0.25, 0, normal_offset), Vector3(width * 0.62, 0.22, 0.06))
-		bar.rotation.z = side * deg_to_rad(-32.0)
 
 
 func _trigger(node_name: String, center: Vector3, size: Vector3) -> Area3D:
@@ -305,26 +296,27 @@ func _environment() -> void:
 	var environment: Environment = Environment.new()
 	var sky: Sky = Sky.new()
 	var sky_material: ProceduralSkyMaterial = ProceduralSkyMaterial.new()
-	sky_material.sky_top_color = Color("#13233a")
+	sky_material.sky_top_color = Color("#070d1c")
 	sky_material.sky_horizon_color = SKY
-	sky_material.sky_curve = 0.09
-	sky_material.sky_energy_multiplier = 0.9
+	sky_material.sky_curve = 0.28
+	sky_material.sky_energy_multiplier = .55
 	sky_material.ground_bottom_color = SILHOUETTE
-	sky_material.ground_horizon_color = Color("#56697a")
+	sky_material.ground_horizon_color = Color("#29313d")
 	sky_material.sun_angle_max = 6.0
 	sky_material.sun_curve = 0.25
 	sky.sky_material = sky_material
 	environment.background_mode = Environment.BG_SKY
 	environment.sky = sky
-	environment.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	environment.ambient_light_energy = 0.5
+	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	environment.ambient_light_color = Color("#75839d")
+	environment.ambient_light_energy = .23
 	environment.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	environment.tonemap_exposure = 0.95
+	environment.tonemap_exposure = .9
 	environment.fog_enabled = true
-	environment.fog_light_color = Color("#6f8598")
-	environment.fog_density = 0.0019
-	environment.fog_sky_affect = 0.1
+	environment.fog_light_color = Color("#394354")
+	environment.fog_density = .0025
+	environment.fog_sky_affect = .25
 	environment.fog_sun_scatter = 0.15
 	environment.glow_enabled = true
 	environment.glow_intensity = 0.6
@@ -334,12 +326,15 @@ func _environment() -> void:
 	add_child(world)
 	var sun: DirectionalLight3D = DirectionalLight3D.new()
 	sun.name = "Sun"
-	# low evening sun behind the runner's right shoulder
-	sun.rotation_degrees = Vector3(-24, 28, 0)
+	# port choice (P): low sun ahead and across the route, catching edges against the dusk.
+	sun.rotation_degrees = Vector3(-16, -142, 0)
 	sun.light_color = Color("#ffbf8a")
-	sun.light_energy = 1.15
+	sun.light_energy = 1.35
 	sun.shadow_enabled = true
-	sun.directional_shadow_max_distance = 140.0
+	sun.directional_shadow_max_distance = 85.0
+	sun.shadow_normal_bias = 3.5
+	sun.shadow_bias = .15
+	sun.directional_shadow_pancake_size = 80.0
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 	add_child(sun)
 
@@ -361,7 +356,7 @@ func _start_roof() -> void:
 	_mesh(self, Vector3(6.4, 2.45, 0.4), Vector3(0.4, 0.12, 0.12), _materials["warm_light"])
 	# vent row across the middle, open at both ends: vault it or go round
 	var vent: StaticBody3D = _solid(self, Vector3(0, 0.48, -18), Vector3(11, 0.96, 0.9), _materials["metal"], "VentRow")
-	var vent_cue: int = _cue(self, Vector3(0, 0.96, -17.55), 6.0)
+	var vent_cue: int = _cue(self, Vector3(0, 0.96, -17.55), 6.0, 20, Vector3.BACK)
 	_cue_strip(vent_cue, self, Vector3(0, 0.97, -17.56), Vector3(10.6, 0.04, 0.12))
 	for x: float in [-4.0, 0.0, 4.0]:
 		_mesh(vent, Vector3(x, 0.0, 0.47), Vector3(2.4, 0.6, 0.04), _materials["dark"])
@@ -371,7 +366,7 @@ func _start_roof() -> void:
 	_ac_unit(Vector3(7.2, 0, -30.5), true)
 	_skylight(Vector3(-5.5, 0, -8))
 	# the takeoff edge: a lit lip on the part you jump from, nowhere else
-	var edge: int = _cue(self, Vector3(0, 0, -47.9), 7.0)
+	var edge: int = _cue(self, Vector3(0, 0, -47.9), 7.0, 32, Vector3.BACK)
 	_cue_strip(edge, self, Vector3(0, 0.03, -47.82), Vector3(11.0, 0.06, 0.3))
 	_cue_strip(edge, self, Vector3(0, -0.25, -48.02), Vector3(11.0, 0.5, 0.06))
 	fold_trigger = _trigger("FoldTrigger", Vector3(0, 2, -6), Vector3(22, 6, 4))
@@ -455,17 +450,11 @@ func _drawbridge_tower() -> void:
 	_mesh(fold, Vector3(0, TA_HEIGHT + 0.25, -TA_DEPTH * 0.5), Vector3(0.5, 0.5, 0.5), _materials["red_light"])
 	landmarks["tower_crown"] = fold
 	# hinge line, glowing at the foot of the facade before anything moves
-	var hinge: int = _cue(fold, Vector3(0, 0, 0), 8.0)
+	var hinge: int = _cue(fold, Vector3(0, 0, 0), 8.0, 64, Vector3(0, -1, 1))
 	_cue_strip(hinge, fold, Vector3(0, 0.12, 0.08), Vector3(TA_WIDTH - 2.0, 0.24, 0.12))
 	_cue_strip(hinge, self, Vector3(0, -0.1, TA_HINGE.z + 0.2), Vector3(TA_WIDTH - 2.0, 0.2, 0.3))
-	# chevrons up the facade point along the future road
-	var road: int = _cue(fold, Vector3(0, 24, 0), 24.0)
-	var y_pos: float = 6.0
-	while y_pos < TA_HEIGHT - 3.0:
-		_chevron(road, fold, Vector3(0, y_pos, 0.06), 2.4, 0.0)
-		y_pos += 6.8
 	# the far lip of the road, where you leave it
-	var lip: int = _cue(fold, Vector3(0, TA_HEIGHT, 0), 7.0)
+	var lip: int = _cue(fold, Vector3(0, TA_HEIGHT, 0), 7.0, 64, Vector3(0, -1, 1))
 	_cue_strip(lip, fold, Vector3(0, TA_HEIGHT - 0.15, 0.08), Vector3(9.0, 0.3, 0.12))
 	_checkpoint(Vector3(0, 2.5, -57), Vector3(16, 5, 6), Transform3D(Basis.IDENTITY, Vector3(0, 0.9, -56)), 1)
 
@@ -476,10 +465,10 @@ func _roof_two() -> void:
 	var roof_y: float = -3.0
 	_building(Vector2(0, -121.5), Vector2(22, 37), roof_y, true, _facade(3), false)
 	_parapet(Vector3(0, roof_y, -121.5), Vector2(22, 37), true, [true, true, false, false])
-	var landing: int = _cue(self, Vector3(0, roof_y, -103.5), 6.0)
+	var landing: int = _cue(self, Vector3(0, roof_y, -103.5), 6.0, 48, Vector3.BACK)
 	_cue_strip(landing, self, Vector3(0, roof_y + 0.03, -103.4), Vector3(9.0, 0.06, 0.25))
 	# a duct you vault, open on the right
-	var duct: int = _cue(self, Vector3(-3, roof_y + 1.0, -113.5), 6.0)
+	var duct: int = _cue(self, Vector3(-3, roof_y + 1.0, -113.5), 6.0, 26, Vector3.BACK)
 	_solid(self, Vector3(-3.5, roof_y + 0.5, -114), Vector3(15, 1.0, 1.0), _materials["metal"], "DuctRow")
 	_cue_strip(duct, self, Vector3(-3.5, roof_y + 1.01, -113.52), Vector3(14.6, 0.04, 0.1))
 	# a stair housing splits the roof into two lanes
@@ -488,7 +477,7 @@ func _roof_two() -> void:
 	_ac_unit(Vector3(7.0, roof_y, -132.5), true)
 	_ac_unit(Vector3(-7.5, roof_y, -119), true)
 	_water_tank(Vector3(8.0, roof_y, -108), true)
-	var edge: int = _cue(self, Vector3(0, roof_y, -139.9), 7.0)
+	var edge: int = _cue(self, Vector3(0, roof_y, -139.9), 7.0, 28, Vector3.BACK)
 	_cue_strip(edge, self, Vector3(0, roof_y + 0.03, -139.82), Vector3(12.0, 0.06, 0.3))
 	_checkpoint(Vector3(0, roof_y + 2.5, -107), Vector3(22, 5, 6), Transform3D(Basis.IDENTITY, Vector3(0, roof_y + 0.9, -106.5)), 1)
 
@@ -508,7 +497,7 @@ func _roof_three_and_bend() -> void:
 	bend.set_meta("gravity_surface", true)
 	add_child(bend)
 	var steps: int = 14
-	var bend_cue: int = _cue(self, Vector3(0, -1.0, -166.5), 7.0)
+	var bend_cue: int = _cue(self, Vector3(0, -1.0, -166.5), 7.0, 30, Vector3.BACK)
 	for index: int in range(steps):
 		var angle: float = (float(index) + 0.5) / float(steps) * PI * 0.5
 		var half_step: float = PI * 0.25 / float(steps)
@@ -528,8 +517,7 @@ func _roof_three_and_bend() -> void:
 		mesh.name = "BendSlab%02d" % index
 		var collider: CollisionShape3D = _shape(bend, Vector3.ZERO, slab_size)
 		collider.transform = Transform3D(slab_basis, point + normal * -thickness * 0.5)
-		if index % 3 == 1:
-			_cue_strip(bend_cue, holder, Vector3(0, 0.02, 0), Vector3(5.0, 0.05, 0.16))
+		_cue_strip(bend_cue, holder, Vector3(-4.8, .08, 0), Vector3(.1, .12, length))
 	_checkpoint(Vector3(0, roof_y + 2.5, -159), Vector3(20, 5, 6), Transform3D(Basis.IDENTITY, Vector3(0, roof_y + 0.9, -158.5)), 2)
 
 
@@ -539,7 +527,7 @@ func _roof_three_and_bend() -> void:
 func _skin_bridge(roof_y: float) -> void:
 	var width: float = 14.0
 	var rise: float = 15.2
-	var skin: float = 1.2
+	var skin: float = 8.0 # port choice (P): full building depth; the road remains the original back plane.
 	var back_z: float = -155.2
 	# the front wall below the roof line and either side of the falling skin
 	_solid(self, Vector3(0, (roof_y - 0.05 + STREET_Y) * 0.5, back_z + skin * 0.5), Vector3(20.0, roof_y - 0.05 - STREET_Y, skin), _facade(1))
@@ -564,25 +552,16 @@ func _skin_bridge(roof_y: float) -> void:
 	for side: float in [-1.0, 1.0]:
 		var pier: Vector3 = Vector3(side * (width * 0.5 - 0.35), rise * 0.5, skin + 0.12)
 		_mesh(block, pier, Vector3(0.7, rise, 0.24), _materials["concrete"])
-	# before: chevrons on the street side point down at the hinge line
-	var front: int = _cue(block, Vector3(0, rise * 0.5, skin), 9.0)
-	for y_pos: float in [4.5, 8.5, 12.5]:
-		var holder: Node3D = Node3D.new()
-		holder.position = Vector3(0, y_pos, skin + 0.04)
-		holder.rotation.z = PI
-		block.add_child(holder)
-		_chevron(front, holder, Vector3.ZERO, 2.0, 0.0)
-	_cue_strip(front, block, Vector3(0, 0.15, skin + 0.06), Vector3(width - 2.0, 0.3, 0.12))
-	# after: the back face is the road, chevrons on it point along the run
-	var road: int = _cue(block, Vector3(0, rise * 0.5, 0), 9.0)
-	for y_pos: float in [3.5, 7.5, 11.5]:
-		var holder: Node3D = Node3D.new()
-		holder.position = Vector3(0, y_pos, -0.04)
-		holder.rotation = Vector3(0, PI, PI)
-		block.add_child(holder)
-		_chevron(road, holder, Vector3.ZERO, 2.0, 0.0)
-	_cue_strip(road, block, Vector3(0, 0.12, -0.05), Vector3(width - 2.0, 0.24, 0.1))
-	var trigger: Area3D = _trigger("FallTrigger", Vector3(0, -1.0, -124), Vector3(22, 6, 6))
+	# full-depth side facades, roof plant and cornice remain attached through the fold.
+	for side: float in [-1, 1]:
+		_mesh(block, Vector3(side * (width / 2 + .02), rise / 2, skin / 2), Vector3(.18, rise, skin), material)
+		_mesh(block, Vector3(side * 4.6, rise + .6, skin / 2), Vector3(2.0, 1.2, 2.6), _materials["metal"])
+	for floor_y: float in [3.8, 7.6, 11.4]:
+		_mesh(block, Vector3(0, floor_y, skin + .03), Vector3(width, .18, .20), _materials["concrete_dark"])
+	# narrow structural edge caps, visible on the receiving side before takeoff.
+	var front: int = _cue(block, Vector3(0, rise, 0), 9, 48, Vector3(0, -1, 1))
+	_cue_strip(front, block, Vector3(0, rise - .12, -.035), Vector3(width - 2, .24, .07))
+	var trigger: Area3D = _trigger("FallTrigger", Vector3(0, -1.0, -115), Vector3(22, 6, 8))
 	fold_triggers.append({"area": trigger, "fold": block})
 
 
@@ -605,22 +584,17 @@ func _tower_b() -> void:
 	var cap_size: Vector3 = Vector3(20, roof_y - top_y, depth - CREST_RADIUS)
 	var roof_body: StaticBody3D = _solid(self, cap_center, cap_size, _facade(4), "WallTowerRoof")
 	roof_body.set_meta("gravity_surface", false)
-	# chevrons up the face show the wall is the road
-	var wall: int = _cue(self, Vector3(0, 12, face_z), 10.0)
-	var y_pos: float = 6.5
-	while y_pos < top_y - 1.5:
-		var holder: Node3D = Node3D.new()
-		holder.position = Vector3(0, y_pos, face_z + 0.02)
-		add_child(holder)
-		_chevron(wall, holder, Vector3.ZERO, 2.4, 0.04)
-		y_pos += 4.2
+	# a pair of drain pipes follows the bend and facade, rather than painted rungs.
+	var wall: int = _cue(self, Vector3(-4.8, 12, face_z), 10, 40, Vector3(0, -1, 1))
+	for x: float in [-4.8, 4.8]:
+		_cue_strip(wall, self, Vector3(x, 12, face_z + .10), Vector3(.10, 18, .12))
 	# the convex crest over the top, also gravity-carrying
 	var crest: StaticBody3D = StaticBody3D.new()
 	crest.name = "Crest"
 	crest.set_meta("gravity_surface", true)
 	add_child(crest)
 	var steps: int = 10
-	var crest_cue: int = _cue(self, CREST_CENTER + Vector3(0, CREST_RADIUS, 0), 6.0)
+	var crest_cue: int = _cue(self, CREST_CENTER + Vector3(0, CREST_RADIUS, 0), 6.0, 36, Vector3(0, -1, 1))
 	for index: int in range(steps):
 		var angle: float = (float(index) + 0.5) / float(steps) * PI * 0.5
 		var half_step: float = PI * 0.25 / float(steps)
@@ -641,6 +615,20 @@ func _tower_b() -> void:
 		if index == steps - 3:
 			_cue_strip(crest_cue, holder, Vector3(0, 0.02, 0), Vector3(6.0, 0.05, 0.2))
 	_parapet(Vector3(0, roof_y, face_z - depth * 0.5 - CREST_RADIUS * 0.5), Vector2(20, depth - CREST_RADIUS), true, [true, true, false, false])
+	# port choice (P): tower B's crown is visible along the entire wall ascent, not a camera lead.
+	var crown := Node3D.new()
+	crown.name = "CrestCrown"
+	add_child(crown)
+	for side: float in [-1, 1]:
+		_mesh(crown, Vector3(side * 5.4, 30.5, -181), Vector3(2.4, 11, 5), _facade(3))
+		_mesh(crown, Vector3(side * 5.4, 36.2, -181), Vector3(3.2, .45, 5.8), _materials["concrete"])
+	for side: float in [-1, 1]:
+		_mesh(crown, Vector3(side * 5.4, 35.2, -175), Vector3(1.6, 1.8, 14), _materials["metal"])
+	_mesh(crown, Vector3(0, 35.2, -169), Vector3(13, 1.8, 3), _facade(3))
+	_mesh(crown, Vector3(0, 34.2, -167.45), Vector3(8, .12, .12), _materials["warm_light"])
+	for x: float in [-3, 0, 3]:
+		_mesh(crown, Vector3(x, 33.2, -167.4), Vector3(.14, 2, .12), _materials["metal"])
+	landmarks["crest_crown"] = crown
 	# roof overlook: stable foreground from which to read the rising district.
 	_mesh(self, Vector3(7.5, roof_y + .8, -185), Vector3(.25, 1.6, 5), _materials["metal"])
 
@@ -649,14 +637,23 @@ func _tower_b() -> void:
 
 func _mark_object(body: StaticBody3D, group: String = "") -> void:
 	var mesh: MeshInstance3D = body.get_child(0) as MeshInstance3D
-	if mesh == null:
-		return
-	var material := _standard(CONCRETE, .8)
-	mesh.material_override = material
-	vision.register(body, Vector3.ZERO, material, {"group": group})
+	var size: Vector3 = (mesh.mesh as BoxMesh).size
+	var original: StandardMaterial3D = mesh.material_override as StandardMaterial3D
+	var neutral: Color = original.albedo_color if original != null else CONCRETE
+	var material := _standard(neutral, .65, .2)
+	var point := Vector3(0, size.y / 2 + .025, size.z / 2 - .04)
+	if body.name == "WallHandRail":
+		mesh.material_override = material
+		point = Vector3.ZERO
+	elif body.name == "SlideGantry":
+		point.y = -size.y / 2 - .015
+		_mesh(body, point, Vector3(size.x * .9, .05, .10), material)
+	else:
+		_mesh(body, point, Vector3(size.x * .9, .05, .10), material)
+	vision.register(body, point, material, {"group": group, "neutral": neutral, "distance": 28.0, "direction": Vector3.BACK, "angle": 150.0})
 
 func _route_lip(position: Vector3, width: float = 7) -> void:
-	var cue: int = _cue(self, position, 4)
+	var cue: int = _cue(self, position, 4, 40, Vector3.BACK)
 	_cue_strip(cue, self, position + Vector3(0, .025, 0), Vector3(width, .05, .20))
 
 func _extended_district() -> void:
@@ -674,6 +671,17 @@ func _extended_district() -> void:
 	_checkpoint(Vector3(0, 27, -208), Vector3(18, 4, 6), Transform3D(Basis.IDENTITY, Vector3(0, 25.9, -207)), 2)
 	# this high service wall demands the slower high-vault contract; a side lane stays open.
 	var high := _solid(self, Vector3(-1, 30.65, -234.5), Vector3(11, 1.7, .65), _materials["metal"], "HighVaultRail")
+	# open hardware exposes the footplants beyond it. retain the recovered move's
+	# authored 1.7m top and .65m depth, with collision on the actual rails/posts.
+	(high.get_child(0) as MeshInstance3D).visible = false
+	(high.get_child(1) as CollisionShape3D).disabled = true
+	for bar_y: float in [.76, .4]:
+		var size := Vector3(11, .18 if bar_y > .5 else .12, .65 if bar_y > .5 else .12)
+		_mesh(high, Vector3(0, bar_y, 0), size, _materials["metal"])
+		_shape(high, Vector3(0, bar_y, 0), size)
+	for post_x: float in [-5, -2.5, 0, 2.5, 5]:
+		_mesh(high, Vector3(post_x, -.09, 0), Vector3(.12, 1.52, .18), _materials["metal"])
+		_shape(high, Vector3(post_x, -.09, 0), Vector3(.12, 1.52, .18))
 	_mark_object(high)
 	# paired footplants: a springboard takes you across the street below.
 	var spring_a := _solid(self, Vector3(0, 30.12, -243), Vector3(5, .64, .5), _materials["metal"], "FirstFootplant")
@@ -690,7 +698,14 @@ func _extended_district() -> void:
 	contact.set_meta("exclude_feet", true)
 	_mark_object(contact)
 	_building(Vector2(0, -309), Vector2(18, 36), 29.8, true, _facade(0), false)
-	_parapet(Vector3(0, 29.8, -309), Vector2(18, 36), true, [true, true, false, true])
+	_parapet(Vector3(0, 29.8, -309), Vector2(18, 36), true, [false, true, false, true])
+	# the east opening and cross-street parapets expose the continuation after the tank turn.
+	for z: float in [-296, -318]:
+		_solid(self, Vector3(8.85, 30.18, z), Vector3(.3, .75, 10), _materials["concrete_dark"])
+	for z: float in [-299.4, -310.6]:
+		_solid(self, Vector3(20, 30.18, z), Vector3(22, .75, .3), _materials["concrete_dark"])
+	var pipe: int = _cue(self, Vector3(10, 30.65, -310.5), 4, 30, Vector3(-1, 0, -1))
+	_cue_strip(pipe, self, Vector3(14, 30.65, -310.5), Vector3(12, .12, .12))
 	# turn at the water tank, then take the right-hand cross street.
 	_water_tank(Vector3(5.5, 29.8, -321), true)
 	_route_lip(Vector3(0, 29.8, -322))
@@ -698,8 +713,6 @@ func _extended_district() -> void:
 	_building(Vector2(20, -305), Vector2(24, 12), 29.8, true, _facade(3), false)
 	_building(Vector2(30, -327), Vector2(14, 48), 29.8, true, _facade(3), false)
 	_parapet(Vector3(30, 29.8, -327), Vector2(14, 48), true, [true, true, false, false])
-	for z: float in [-309, -321, -333]:
-		_route_lip(Vector3(30, 29.8, z), 5)
 	# slow approach step-up, then a final free run to the finish terrace.
 	var step := _solid(self, Vector3(30, 30.24, -340), Vector3(10, .88, 5), _materials["concrete"], "StepTerrace")
 	_mark_object(step)
@@ -709,29 +722,37 @@ func _extended_district() -> void:
 	var finish_base := Vector3(30, 29.8, -376)
 	finish_point = finish_base
 	_cylinder(self, finish_base + Vector3(0, .06, 0), 2.6, .12, _materials["cyan"])
-	var beam := _cylinder(self, finish_base + Vector3(0, 100, 0), .65, 200, _materials["beam"])
-	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	landmarks["finish_beam"] = beam
 	finish_trigger = _trigger("FinishTrigger", finish_base + Vector3(0, 2, 0), Vector3(8, 4, 5))
 	# one coherent city block folds as a whole, retaining roads, bays and roofs.
 	var district := FOLD_SCRIPT.new() as AnimatableBody3D
 	district.name = "RisingDistrict"
-	district.position = Vector3(-60, 8, -249)
-	district.set("axis", Vector3.FORWARD)
-	district.set("angle", deg_to_rad(68))
-	district.set("anticipation", 1.5)
-	district.set("duration", 7.0)
+	district.position = Vector3(-24, 15, -270)
+	district.set("axis", Vector3.RIGHT)
+	district.set("angle", deg_to_rad(62))
+	district.set("anticipation", .8)
+	district.set("duration", 6.0)
 	add_child(district)
 	var chunk := _city_chunk(Vector3.ZERO, 5)
 	chunk.reparent(district, false)
-	chunk.position = Vector3(-37, 0, 0)
+	chunk.position = Vector3(0, 0, -12)
+	chunk.rotation.y = PI / 2
+	# the street is the top of a full city block, rooted at street grade before folding.
+	_mesh(chunk, Vector3(0, -22.5, 0), Vector3(90, 45, 34), _facade(3))
 	folds.append(district)
-	fold_triggers.append({"area": _trigger("DistrictFoldTrigger", Vector3(0, 27, -202), Vector3(18, 5, 32)), "fold": district})
+	fold_triggers.append({"area": _trigger("DistrictFoldTrigger", Vector3(0, 27, -211), Vector3(18, 5, 10)), "fold": district})
 	# ordinary human-scale details repeat along the cross-street.
 	for x: float in [12, 20]:
 		_ac_unit(Vector3(x, 29.8, -300.5), true)
 	for z: float in [-313, -324, -346, -365]:
-		_mesh(self, Vector3(35, 30.15, z), Vector3(1, .7, 1.8), _materials["metal"])
+		_ac_unit(Vector3(35, 29.8, z), false)
+		_skylight(Vector3(25.5, 29.8, z))
+		for x: float in [24, 36]:
+			_mesh(self, Vector3(x, 30, z - 3), Vector3(.12, .12, 5), _materials["metal"])
+	# finish shelter and a service mast give the destination a human scale.
+	for x: float in [25.5, 34.5]:
+		_mesh(self, Vector3(x, 31.6, -378), Vector3(.18, 3.6, .18), _materials["metal"])
+	_mesh(self, Vector3(30, 33.4, -378), Vector3(10, .25, 4), _materials["metal"])
+	_mesh(self, Vector3(30, 33.2, -376.1), Vector3(4, .10, .08), _materials["warm_light"])
 
 
 
@@ -797,26 +818,47 @@ func _street_lights(pitch: float) -> void:
 	add_child(lights)
 
 
-## coherent pieces of city doing impossible things far away: never random rubble.
+## port choice (P): a continuous second city, mirrored across an overhead street plane.
 func _spectacle() -> void:
-	# a whole street block hanging on its side to the left, slowly turning
-	var hanging: Node3D = _city_chunk(Vector3(-230, 40, -190), 5)
-	hanging.rotation_degrees = Vector3(0, 0, -90)
-	_spinners.append({"node": hanging, "axis": Vector3(0, 1, 0), "speed": 0.018})
-	# an upside-down block overhead and ahead
-	var inverted: Node3D = _city_chunk(Vector3(90, 175, -330), 6)
-	inverted.rotation_degrees = Vector3(180, 20, 0)
-	_spinners.append({"node": inverted, "axis": Vector3(0, 1, 0), "speed": -0.01})
-	# a tower bent over at a hinge, the landmark you see from every roof
-	var base_center: Vector3 = Vector3(-120, STREET_Y, -320)
-	_mesh(self, base_center + Vector3(0, 70, 0), Vector3(26, 140, 26), _facade(5))
-	var hinge: Node3D = Node3D.new()
-	hinge.position = base_center + Vector3(13, 140, 0)
-	hinge.rotation_degrees = Vector3(0, 0, -70)
-	add_child(hinge)
-	_mesh(hinge, Vector3(-13, 45, 0), Vector3(26, 90, 26), _facade(5))
-	_mesh(hinge, Vector3(-13, 91, 0), Vector3(20, 2, 20), _materials["cyan"])
-	landmarks["bent_tower"] = hinge
+	var overhead := Node3D.new()
+	overhead.name = "MirroredCity"
+	overhead.position = Vector3(0, 190, -210)
+	overhead.rotation.z = PI
+	add_child(overhead)
+	# joined street tiles and side streets form one district, with a slit of sky
+	# between their descending roofs and the standing city. no free spinning debris.
+	for row: int in range(-4, 5):
+		for column: int in range(-2, 3):
+			var block := _city_chunk(Vector3.ZERO, 5)
+			block.reparent(overhead, false)
+			block.position = Vector3(column * 90, 0, row * 34)
+	_batch_static(overhead)
+	landmarks["mirrored_city"] = overhead
+	# a single continuously curving tower, with shared ring vertices and smooth
+	# normals. each floor band follows the same bend, rather than a hard hinge.
+	var curve := SurfaceTool.new()
+	curve.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var rings: int = 56
+	var sides: int = 20
+	for ring: int in rings:
+		for side: int in sides:
+			for corner: Vector2i in [Vector2i(0, 0), Vector2i(1, 0), Vector2i(1, 1), Vector2i(0, 0), Vector2i(1, 1), Vector2i(0, 1)]:
+				var t: float = float(ring + corner.x) / rings
+				var angle: float = float(side + corner.y) / sides * TAU
+				var bend: float = t * t * 1.35
+				var centre := Vector3(-124 + 72 * t * t * t, STREET_Y + 205 * t, -330)
+				var radius: float = 16 * (1 - .28 * t)
+				var radial := Vector3(cos(angle), 0, sin(angle)) * radius
+				var point: Vector3 = centre + Basis(Vector3.FORWARD, bend) * radial
+				curve.set_uv(Vector2(float(side + corner.y) / sides, t))
+				curve.add_vertex(point)
+	curve.generate_normals()
+	var tower := MeshInstance3D.new()
+	tower.name = "CurvedTower"
+	tower.mesh = curve.commit()
+	tower.material_override = _facade(5)
+	add_child(tower)
+	landmarks["bent_tower"] = tower
 
 
 func _city_chunk(origin: Vector3, count: int) -> Node3D:
@@ -847,14 +889,14 @@ func _city_chunk(origin: Vector3, count: int) -> Node3D:
 func _route_for_bot() -> void:
 	bot_path = [
 		{"point": Vector3(0, .9, -5), "look_around": true},
-		{"point": Vector3(0, .9, -38), "wait_fold": 0, "watch": Vector3(0, 0, -80)},
+		{"point": Vector3(0, .9, -38)},
 		{"point": Vector3(0, .9, -48), "jump": true},
 		{"point": Vector3(0, .9, -70)},
 		{"point": Vector3(0, .9, -80), "slide": true},
 		{"point": Vector3(0, .9, -98.6)},
 		{"point": Vector3(4.7, -2.1, -112)},
 		{"point": Vector3(5, -2.1, -128)},
-		{"point": Vector3(1.5, -2.1, -137), "wait_fold": 1, "watch": Vector3(0, 3, -152), "watch_pitch": 18},
+		{"point": Vector3(1.5, -2.1, -137)},
 		{"point": Vector3(0, -2.1, -160)},
 		{"point": Vector3(0, 2, -170.3)},
 		{"point": Vector3(0, 18, -170.1)},
@@ -874,3 +916,29 @@ func _route_for_bot() -> void:
 		{"point": Vector3(30, 31.58, -342), "slow": true},
 		{"point": Vector3(30, 30.7, -376)},
 	]
+
+
+# port choice (P): static districts use one surface per material, rather than thousands of draws.
+func _batch_static(branch: Node3D) -> void:
+	var batches: Dictionary = {}
+	for node: Node in branch.find_children("*", "MeshInstance3D", true, false):
+		var instance := node as MeshInstance3D
+		var material: Material = instance.material_override
+		if not batches.has(material):
+			var surface := SurfaceTool.new()
+			surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+			batches[material] = surface
+		var transform_now: Transform3D = branch.global_transform.affine_inverse() * instance.global_transform
+		(batches[material] as SurfaceTool).append_from(instance.mesh, 0, transform_now)
+	for child: Node in branch.get_children():
+		child.queue_free()
+	for material: Material in batches:
+		var merged := MeshInstance3D.new()
+		merged.mesh = (batches[material] as SurfaceTool).commit()
+		var distant_material: Material = material
+		if material is ShaderMaterial:
+			distant_material = material.duplicate()
+			(distant_material as ShaderMaterial).set_shader_parameter("lit_energy", .6)
+			(distant_material as ShaderMaterial).set_shader_parameter("lit_ratio", .10)
+		merged.material_override = distant_material
+		branch.add_child(merged)

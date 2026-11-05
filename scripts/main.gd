@@ -90,6 +90,8 @@ func _ready() -> void:
 	_apply_settings()
 	restart_run()
 	var args: PackedStringArray = OS.get_cmdline_user_args()
+	if args.has("--no-hud"):
+		hud.hide()
 	for arg: String in args:
 		# development aid for recording: start at a checkpoint with the folds in their state there
 		if arg.begins_with("--from="):

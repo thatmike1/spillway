@@ -11,6 +11,7 @@ var allowed: bool = true
 func register(anchor: Node3D, offset: Vector3, material: StandardMaterial3D, options: Dictionary = {}) -> int:
 	objects.append({
 		"anchor": anchor, "offset": offset, "material": material,
+		"neutral": options.get("neutral", material.albedo_color),
 		"eligible": options.get("eligible", true), "distance": options.get("distance", 15.0),
 		"horizontal": options.get("horizontal", false), "direction": options.get("direction", Vector3.BACK),
 		"angle": options.get("angle", 0.0), "proximity_delay": options.get("proximity_delay", 0.0),
@@ -20,7 +21,7 @@ func register(anchor: Node3D, offset: Vector3, material: StandardMaterial3D, opt
 		"hold": 0.0, "level": 0.0, "look_requested": false, "forced": -1,
 	})
 	material.emission_enabled = false
-	material.albedo_color = NEUTRAL
+	material.albedo_color = objects[-1].neutral
 	return objects.size() - 1
 
 func position(index: int) -> Vector3:
@@ -43,7 +44,8 @@ func reset() -> void:
 		obj.level = 0.0
 		obj.forced = -1
 		obj.look_requested = false
-		(obj.material as StandardMaterial3D).albedo_color = NEUTRAL
+		(obj.material as StandardMaterial3D).albedo_color = obj.neutral
+		(obj.material as StandardMaterial3D).emission_enabled = false
 
 func step(player_position: Vector3, dt: float) -> void:
 	var enabled: bool = allowed and (mode != 0 or tutorial) and (difficulty != 2 or tutorial)
@@ -81,4 +83,9 @@ func step(player_position: Vector3, dt: float) -> void:
 		var target: float = 1 if (active or float(obj.hold) > 0) and enabled else 0
 		# recovered fade rates 1 in / 4 out (H/M), independent of camera visibility.
 		obj.level = move_toward(float(obj.level), target, dt * (1 if target > float(obj.level) else 4))
-		(obj.material as StandardMaterial3D).albedo_color = NEUTRAL.lerp(RED, float(obj.level))
+		var material: StandardMaterial3D = obj.material
+		material.albedo_color = Color(obj.neutral).lerp(RED, float(obj.level))
+		# port choice (P): shadow readability on small hardware; below bloom threshold, no halo.
+		material.emission_enabled = float(obj.level) > .001
+		material.emission = RED
+		material.emission_energy_multiplier = .22 * float(obj.level)
