@@ -10,6 +10,8 @@ var timing: Label
 var message: Label
 var finish_label: Label
 var pause_panel: ColorRect
+var _fade: ColorRect
+var _blink_alpha: float = 0.0
 var _message_time: float = 0.0
 var _title_alpha: float = 1.0
 
@@ -41,6 +43,10 @@ func attach(main: Node) -> void:
 	message = _label("", 20, Vector2(42, 572))
 	finish_label = _label("", 27, Vector2(42, 215))
 	_make_pause()
+	_fade = ColorRect.new()
+	_fade.color = Color(0.04, 0.08, 0.09, 0.0)
+	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	overlay.add_child(_fade)
 	get_viewport().size_changed.connect(_layout)
 	_layout()
 
@@ -50,10 +56,13 @@ func _layout() -> void:
 	timing.position.y = size.y - 44.0
 	message.position.y = size.y - 125.0
 	pause_panel.size = size
+	_fade.size = size
 
 func _process(delta: float) -> void:
 	if game == null:
 		return
+	_blink_alpha = move_toward(_blink_alpha, 0.0, delta * 8.0)
+	_fade.color.a = _blink_alpha
 	var speed: float = game.player.get_speed()
 	if game.elapsed < 0.15:
 		_title_alpha = 1.0
@@ -63,7 +72,7 @@ func _process(delta: float) -> void:
 	subtitle.modulate.a = _title_alpha
 	status.modulate.a = _title_alpha
 	speed_label.text = "%02d  km/h%s" % [roundi(speed * 3.6), "  /  SLIDE" if game.player.mode == "slide" else ""]
-	timing.text = "%s · %s" % [game.BUILD_ID, "PRACTICE" if not game.clean_eligible else ("BEST  %s" % _time(game.best_time) if game.best_time > 0.0 else "CREST → PUMP TOWER")]
+	timing.text = "PRACTICE · R starts a clean run" if not game.clean_eligible else ("BEST  %s" % _time(game.best_time) if game.best_time > 0.0 else "")
 	_message_time = maxf(0.0, _message_time - delta)
 	message.modulate.a = minf(1.0, _message_time)
 	if not game.finished:
@@ -102,6 +111,10 @@ func _make_pause() -> void:
 	heading.text = "SPILLWAY / PAUSED"
 	heading.add_theme_font_size_override("font_size", 29)
 	column.add_child(heading)
+	var identity := Label.new()
+	identity.text = game.BUILD_ID
+	identity.add_theme_font_size_override("font_size", 13)
+	column.add_child(identity)
 	for item: Array in [["Mouse sensitivity", "sensitivity", 0.3, 2.5, 0.05], ["Horizontal field of view", "fov", 75.0, 110.0, 1.0], ["Volume", "volume", 0.0, 1.0, 0.05]]:
 		var label := Label.new()
 		label.text = item[0]
@@ -118,7 +131,7 @@ func _make_pause() -> void:
 	comfort_button.button_pressed = game.settings.comfort
 	comfort_button.toggled.connect(func(value: bool) -> void: game.change_setting("comfort", value))
 	column.add_child(comfort_button)
-	for item: Array in [["Resume", func() -> void: game.set_paused(false)], ["Restart clean run", func() -> void: game.restart_run()], ["Quit", func() -> void: get_tree().quit()]]:
+	for item: Array in [["Resume", func() -> void: game.set_paused(false)], ["Restart clean run", func() -> void: game.restart_run()], ["Quit", func() -> void: game.request_quit()]]:
 		var button := Button.new()
 		button.text = item[0]
 		button.pressed.connect(item[1])
@@ -130,3 +143,6 @@ func set_paused(value: bool) -> void:
 
 func _slider_changed(value: float, key: String) -> void:
 	game.change_setting(key, value)
+
+func blink() -> void:
+	_blink_alpha = 1.0

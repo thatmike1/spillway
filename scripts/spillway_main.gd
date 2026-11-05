@@ -1,7 +1,7 @@
 extends Node3D
 ## p / run provenance is separate from movement and presentation.
 
-const BUILD_ID := "spillway-2026.11.05-a"
+const BUILD_ID := "spillway-2026.11.05-r1"
 const SAVE_PATH := "user://spillway_v1.cfg"
 var player: CharacterBody3D
 var level: Node3D
@@ -24,9 +24,11 @@ var _started: bool = false
 var _spawn_origin: Vector3
 var _persist: bool = true
 var _recovery_time: float = 0.0
+var _quitting: bool = false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	get_tree().auto_accept_quit = false
 	bind_inputs()
 	_persist = not OS.get_cmdline_user_args().has("--bot") and DisplayServer.get_name() != "headless"
 	_load()
@@ -37,6 +39,9 @@ func _ready() -> void:
 	player = preload("res://scripts/spillway_player.gd").new()
 	player.name = "Runner"
 	add_child(player)
+	player.connect("landed", func(_impact: float) -> void:
+		if player.in_water and level.has_method("splash_at"):
+			level.call("splash_at", player.global_position))
 	hud = preload("res://scripts/spillway_hud.gd").new()
 	add_child(hud)
 	hud.call("attach", self)
@@ -52,9 +57,9 @@ func _ready() -> void:
 		print("startup: Spillway; build=%s; renderer=%s" % [BUILD_ID, RenderingServer.get_current_rendering_method()])
 		await get_tree().physics_frame
 		await get_tree().physics_frame
-		get_tree().quit()
+		request_quit()
 	if args.has("--bot"):
-		bot = preload("res://tests/spillway_driver.gd").new()
+		bot = preload("res://scripts/spillway_driver.gd").new()
 		add_child(bot)
 		bot.call("attach", self)
 
@@ -81,10 +86,12 @@ func practice_restart() -> void:
 	finished = false
 	splits.resize(checkpoint_index)
 	_restore_checkpoint()
+	set_paused(false)
 	hud.call("notify", "Segment practice · R starts a clean run")
 
 func respawn() -> void:
 	respawn_count += 1
+	hud.call("blink")
 	clean_eligible = false
 	finished = false
 	splits.resize(checkpoint_index)
@@ -111,7 +118,7 @@ func _physics_process(delta: float) -> void:
 		if (region["bounds"] as AABB).has_point(player.global_position):
 			water = true
 	player.set("in_water", water)
-	if player.global_position.y < -25.0 or absf(player.global_position.x) > 180.0 or player.global_position.z < -400.0 or player.global_position.z > 60.0:
+	if player.global_position.y < -8.3 or absf(player.global_position.x) > 180.0 or player.global_position.z < -400.0 or player.global_position.z > 60.0:
 		_recovery_time += delta
 		if _recovery_time > 0.12:
 			respawn()
@@ -129,7 +136,9 @@ func _physics_process(delta: float) -> void:
 			checkpoint_index = next
 			splits.append(elapsed)
 			hud.call("notify", point.get("title", "Next segment"))
-	if player.global_position.distance_to(level.get("finish_position")) < float(level.get("finish_radius")):
+	var finish_center: Vector3 = level.get("finish_position")
+	var finish_box := AABB(finish_center - Vector3(4.5, 0.3, 0.8), Vector3(9.0, 3.0, 1.6))
+	if finish_box.has_point(player.global_position):
 		if checkpoint_index == points.size() - 1:
 			_finish()
 
@@ -179,6 +188,21 @@ func set_paused(value: bool) -> void:
 		hud.call("set_paused", value)
 	if DisplayServer.get_name() != "headless":
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if value else Input.MOUSE_MODE_CAPTURED
+
+func request_quit(exit_code: int = 0) -> void:
+	if _quitting:
+		return
+	_quitting = true
+	if audio != null:
+		audio.call("stop_all")
+	# let the audio server release loop playback before the tree is destroyed.
+	for i: int in 8:
+		await get_tree().process_frame
+	get_tree().quit(exit_code)
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		request_quit()
 
 func change_setting(key: String, value: Variant) -> void:
 	settings[key] = value

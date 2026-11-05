@@ -1,6 +1,6 @@
 extends Node
-## real-input player-view route playback. No pose, velocity, camera or run-state writes.
-## attach(main, route, seed), then use --bot-quit for an exit status. Native PNGs
+## real-input player-view route playback. no pose, velocity, camera or run-state writes.
+## attach(main, route, seed), then use --bot-quit for an exit status. native pngs
 ## require --screenshots and a real display; --capture-every=N throttles them.
 
 const ACTIONS: Array[String] = ["move_forward", "move_back", "move_left", "move_right", "jump", "crouch"]
@@ -38,6 +38,15 @@ var _radius_bias: float = 0
 var _finish_wait: float = 0
 var _sensitivity: float = .0022
 var _run_id: String = ""
+var _jump_delay: float = 0.0
+var _aim_range: float = .012
+var _explicit_aim: bool = false
+var _argument_error: String = ""
+var _pending_jump: Dictionary = {}
+var _max_speed: float = 0.0
+var _water_time: float = 0.0
+var _ordered_checkpoints: Array[int] = []
+var _observed_jumps: int = 0
 
 func attach(owner_main: Node, route: String = "safe", seed: int = 0) -> void:
 	main = owner_main
@@ -51,6 +60,21 @@ func attach(owner_main: Node, route: String = "safe", seed: int = 0) -> void:
 			route_name = arg.trim_prefix("--route=")
 		elif arg.begins_with("--seed="):
 			seed_value = int(arg.trim_prefix("--seed="))
+		elif arg.begins_with("--jump-delay="):
+			var value: String = arg.trim_prefix("--jump-delay=")
+			if not value.is_valid_float() or not is_finite(float(value)):
+				_argument_error = "--jump-delay requires finite signed seconds"
+			else:
+				_jump_delay = float(value)
+		elif arg.begins_with("--aim-deg="):
+			var value: String = arg.trim_prefix("--aim-deg=")
+			if not value.is_valid_float() or not is_finite(float(value)) or float(value) < 0:
+				_argument_error = "--aim-deg requires a finite nonnegative range in degrees"
+			else:
+				_explicit_aim = true
+				_aim_range = deg_to_rad(float(value))
+		elif arg == "--jump-delay" or arg == "--aim-deg":
+			_argument_error = arg + " requires =value"
 		elif arg.begins_with("--evidence-dir="):
 			_evidence_dir = arg.trim_prefix("--evidence-dir=")
 		elif arg.begins_with("--capture-every="):
@@ -60,6 +84,9 @@ func attach(owner_main: Node, route: String = "safe", seed: int = 0) -> void:
 		elif arg == "--bot-quit":
 			quit_at_end = true
 	process_physics_priority = -100
+	if not _argument_error.is_empty():
+		_fail_setup(_argument_error)
+		return
 	if player == null or level == null:
 		_fail_setup("main must expose player and level")
 		return
@@ -101,11 +128,17 @@ func attach(owner_main: Node, route: String = "safe", seed: int = 0) -> void:
 		return
 	_initial_respawns = int(main.get("respawn_count"))
 	_previous = player.global_position
+	_ordered_checkpoints.append(int(main.get("checkpoint_index")))
+	_observed_jumps = int(player.get("jump_count"))
 	_set_perturbation()
 	_write({"event": "start", "input": "InputEventAction + InputEventMouseMotion.screen_relative",
 		"route": route_name, "seed": seed_value, "attempts": 1, "points": _route.size(),
 		"timing_radius_perturbation_m": .08 if seed_value != 0 else 0,
-		"aim_perturbation_rad": .012 if seed_value != 0 else 0,
+		"aim_perturbation_rad": _aim_range if _explicit_aim or seed_value != 0 else 0,
+		"aim_range_deg": rad_to_deg(_aim_range) if _explicit_aim or seed_value != 0 else 0,
+		"jump_delay_s": _jump_delay,
+		"early_trigger": "horizontal speed * abs(delay) added to marker radius; distance-based, not time replay",
+		"late_trigger": "advance to landing immediately; ordinary jump input at scheduled time regardless of grounded state",
 		"display": DisplayServer.get_name(), "screenshots": _screenshots,
 		"fixture": false, "trace_path": _trace.get_path_absolute()})
 	print("spillway driver: route=%s seed=%d trace=%s" % [route_name, seed_value, _trace.get_path_absolute()])
@@ -117,17 +150,29 @@ func _fail_setup(reason: String) -> void:
 	if _trace != null:
 		_write({"event": "result", "successes": 0, "attempts": 1, "reason": reason, "route": route_name, "seed": seed_value})
 	if quit_at_end:
-		get_tree().quit(2)
+		_quit(2)
 
 func _physics_process(delta: float) -> void:
 	if done:
 		_finish_wait += delta
 		if quit_at_end and _finish_wait >= .25:
-			get_tree().quit(0 if succeeded else 1)
+			_quit(0 if succeeded else 1)
 		return
 	if player == null or _trace == null:
 		return
 	time += delta
+	_max_speed = maxf(_max_speed, player.get_speed())
+	if bool(player.get("in_water")):
+		_water_time += delta
+	var checkpoint: int = int(main.get("checkpoint_index"))
+	if _ordered_checkpoints.is_empty() or checkpoint != _ordered_checkpoints.back():
+		_ordered_checkpoints.append(checkpoint)
+		_write(_sample("checkpoint"))
+	if int(player.get("jump_count")) != _observed_jumps:
+		_observed_jumps = int(player.get("jump_count"))
+		_write(_sample("jump_executed"))
+	if not _wall_contacts().is_empty():
+		_write(_sample("wall_contact"))
 	_sample_age += delta
 	_capture_age += delta
 	_max_step = maxf(_max_step, player.global_position.distance_to(_previous))
@@ -160,6 +205,9 @@ func _physics_process(delta: float) -> void:
 	if _jump_release_at > 0 and time >= _jump_release_at:
 		_action("jump", false)
 		_jump_release_at = -1
+	if not _pending_jump.is_empty() and time >= float(_pending_jump["due_time"]):
+		_press_jump(_pending_jump)
+		_pending_jump = {}
 	if index >= _route.size():
 		_action("move_forward", false)
 		_action("crouch", false)
@@ -170,6 +218,8 @@ func _physics_process(delta: float) -> void:
 	var flat: Vector3 = offset.slide(Vector3.UP)
 	var distance: float = flat.length()
 	var radius: float = maxf(.15, float(step["radius"]) + _radius_bias)
+	var early_distance: float = player.get_speed() * maxf(0.0, -_jump_delay) if bool(step.get("jump", false)) else 0.0
+	var trigger_radius: float = radius + early_distance
 	if distance < _best_distance - .15:
 		_best_distance = distance
 		_progress_at = time
@@ -179,13 +229,36 @@ func _physics_process(delta: float) -> void:
 		angle = absf(angle_difference(float(player.get("yaw")), atan2(-flat.x, -flat.z)))
 	_action("move_forward", angle < deg_to_rad(65) or not player.is_on_floor())
 	_action("crouch", bool(step.get("crouch", false)))
-	if distance <= radius and absf(offset.y) <= maxf(radius, .8):
+	if distance <= trigger_radius and absf(offset.y) <= maxf(radius, .8):
 		if bool(step.get("jump", false)):
 			if not player.is_on_floor():
 				return
-			_action("jump", true)
-			_jump_release_at = time + .16
+			if not _pending_jump.is_empty():
+				_complete(false, "next takeoff reached before pending jump input")
+				return
+			var request: Dictionary = _sample("jump_scheduled")
+			request.merge({"takeoff_waypoint": index, "trigger_time": time,
+				"due_time": time + maxf(0.0, _jump_delay), "jump_delay_s": _jump_delay,
+				"base_radius_m": radius, "early_distance_m": early_distance,
+				"trigger_radius_m": trigger_radius, "distance_m": distance,
+				"target_position": [target.x, target.y, target.z]}, true)
+			_write(request)
+			if _jump_delay > 0:
+				_pending_jump = request
+			else:
+				_press_jump(request)
+		# positive delay advances now, so gaze and movement follow the landing.
 		_advance("takeoff" if bool(step.get("jump", false)) else "reached")
+
+func _press_jump(request: Dictionary) -> void:
+	_action("jump", true)
+	_jump_release_at = time + .16
+	var row: Dictionary = _sample("jump_pressed")
+	row.merge({"takeoff_waypoint": request["takeoff_waypoint"],
+		"trigger_time": request["trigger_time"], "due_time": request["due_time"],
+		"actual_delay_s": time - float(request["trigger_time"]),
+		"schedule_error_s": time - float(request["due_time"])}, true)
+	_write(row)
 
 func _look(flat: Vector3, delta: float) -> void:
 	if flat.length_squared() < .00001:
@@ -223,21 +296,37 @@ func _advance(reason: String) -> void:
 	_set_perturbation()
 
 func _set_perturbation() -> void:
-	_yaw_bias = _rng.randf_range(-.012, .012) if seed_value != 0 else 0
+	_yaw_bias = _rng.randf_range(-_aim_range, _aim_range) if _explicit_aim or seed_value != 0 else 0
 	_radius_bias = _rng.randf_range(-.08, .08) if seed_value != 0 else 0
 
 func _sample(kind: String) -> Dictionary:
 	var p: Vector3 = player.global_position
 	var v: Vector3 = player.velocity
+	var contacts: Array = _wall_contacts()
 	return {"event": kind, "time": time, "route": route_name, "seed": seed_value,
 		"waypoint": index, "waypoint_count": _route.size(), "position": [p.x, p.y, p.z],
 		"velocity": [v.x, v.y, v.z], "speed": player.get_speed(), "mode": player.get("mode"),
 		"yaw": player.get("yaw"), "pitch": player.get("pitch"), "grounded": player.is_on_floor(),
-		"crouched": player.get("crouched"), "jumps": player.get("jump_count"), "mantles": player.get("mantle_count"),
+		"water": player.get("in_water"), "crouched": player.get("crouched"), "jumps": player.get("jump_count"), "mantles": player.get("mantle_count"),
 		"landings": player.get("land_count"), "last_impact": player.get("last_impact"),
 		"elapsed": main.get("elapsed"), "checkpoint": main.get("checkpoint_index"),
 		"respawns": main.get("respawn_count"), "clean_eligible": main.get("clean_eligible"),
-		"max_step_m": _max_step, "held": _held.duplicate()}
+		"max_step_m": _max_step, "max_speed_mps": _max_speed, "water_time_s": _water_time,
+		"ordered_checkpoints": _ordered_checkpoints.duplicate(), "aim_bias_deg": rad_to_deg(_yaw_bias),
+		"radius_bias_m": _radius_bias, "jump_delay_s": _jump_delay,
+		"pending_jump_due": _pending_jump.get("due_time", -1.0),
+		"wall_contacts": contacts, "held": _held.duplicate()}
+
+func _wall_contacts() -> Array:
+	var contacts: Array = []
+	for collision_index: int in player.get_slide_collision_count():
+		var collision: KinematicCollision3D = player.get_slide_collision(collision_index)
+		var collider: Object = collision.get_collider()
+		var normal: Vector3 = collision.get_normal()
+		if absf(normal.y) < .7:
+			contacts.append({"collider": str((collider as Node).get_path()) if collider is Node else str(collider),
+				"normal": [normal.x, normal.y, normal.z]})
+	return contacts
 
 func _write(row: Dictionary) -> void:
 	if _trace != null:
@@ -307,3 +396,9 @@ static func evidence_path_allowed(path: String) -> bool:
 		candidate = parent
 	var clean: String = path.simplify_path().trim_suffix("/")
 	return clean != repo and not clean.begins_with(repo + "/")
+
+func _quit(code: int) -> void:
+	if is_instance_valid(main) and main.has_method("request_quit"):
+		main.call("request_quit", code)
+	else:
+		get_tree().quit(code)

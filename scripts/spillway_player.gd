@@ -39,6 +39,8 @@ var _air_budget: float = RUN_SPEED
 var _eye_height: float = 1.63
 var _dip: float = 0.0
 var _distance: float = 0.0
+var _gait_phase: float = 0.0
+var _gait_blend: float = 0.0
 var _last_position: Vector3
 var _previous_position: Vector3
 var _current_position: Vector3
@@ -77,7 +79,7 @@ func _ready() -> void:
 func reset_to(pose: Transform3D) -> void:
 	global_transform = pose
 	yaw = pose.basis.get_euler().y
-	pitch = -0.10
+	pitch = -0.23
 	velocity = Vector3.ZERO
 	mode = "air"
 	crouched = false
@@ -87,6 +89,8 @@ func reset_to(pose: Transform3D) -> void:
 	_dip = 0.0
 	_air_budget = RUN_SPEED
 	_eye_height = 1.63
+	_gait_phase = 0.0
+	_gait_blend = 0.0
 	_mantle_latched = false
 	_mantle_phase = 0
 	_last_position = global_position
@@ -142,27 +146,33 @@ func _physics_process(delta: float) -> void:
 		crouched = false
 	_set_height(LOW_HEIGHT if crouched else STAND_HEIGHT)
 	var horizontal := Vector3(velocity.x, 0.0, velocity.z)
-	var sliding := grounded and crouched and horizontal.length() > 4.0 and not in_water
 	var previous_mode := mode
+	var downslope := Vector3.DOWN.slide(get_floor_normal()) * GRAVITY if grounded else Vector3.ZERO
+	var downhill := downslope.dot(horizontal) > 0.2 and get_floor_normal().y < 0.985 if grounded else false
+	# p / hysteresis keeps ordinary crouch walking out of slide ownership.
+	var slide_threshold := 3.0 if previous_mode == "slide" or downhill else 6.0
+	var sliding := grounded and crouched and horizontal.length() >= slide_threshold and not in_water
 	mode = "slide" if sliding else ("run" if grounded else "air")
 	if mode == "slide" and previous_mode != "slide":
 		move_started.emit("slide")
 	floor_constant_speed = not sliding
 	if grounded:
+		_air_budget = maxf(RUN_SPEED, horizontal.length())
 		if sliding:
-			if wish.length_squared() > 0.01:
+			if wish.length_squared() > 0.01 and stick.y < 0.2:
 				var angle := horizontal.signed_angle_to(wish, Vector3.UP)
 				horizontal = horizontal.rotated(Vector3.UP, clampf(angle, -PI * 0.5 * delta, PI * 0.5 * delta))
-			var downslope := Vector3.DOWN.slide(get_floor_normal()) * GRAVITY
 			horizontal += Vector3(downslope.x, 0.0, downslope.z) * delta
-			horizontal = horizontal.move_toward(Vector3.ZERO, 0.85 * delta)
+			var friction := 0.85 if get_floor_normal().y < 0.985 else 2.0
+			friction += maxf(0.0, stick.y) * 12.0
+			horizontal = horizontal.move_toward(Vector3.ZERO, friction * delta)
 			if horizontal.length() > SLIDE_CAP:
 				horizontal = horizontal.normalized() * SLIDE_CAP
 		else:
-			var speed_limit := RUN_SPEED * (0.50 if crouched else 1.0)
+			var speed_limit := 3.2 if crouched else RUN_SPEED
 			if in_water:
 				speed_limit = 4.5
-			var carried := maxf(speed_limit, horizontal.length() - 4.0 * delta)
+			var carried := maxf(speed_limit, horizontal.length() - (12.0 if in_water else 4.0) * delta)
 			var target := wish * carried
 			horizontal = horizontal.move_toward(target, (ACCEL if wish.length_squared() > 0.0 else BRAKE) * delta)
 		velocity.y = -0.4
@@ -201,8 +211,11 @@ func _physics_process(delta: float) -> void:
 		landed.emit(impact)
 		# landings keep the horizontal velocity returned by collision.
 	if is_on_floor() and not sliding:
-		_distance += Vector2(global_position.x - _last_position.x, global_position.z - _last_position.z).length()
-		if _distance > (1.25 if not in_water else 0.9):
+		var travelled := Vector2(global_position.x - _last_position.x, global_position.z - _last_position.z).length()
+		var step_length := 1.35 if crouched else (1.7 if in_water else 2.25)
+		_distance += travelled
+		_gait_phase = fmod(_gait_phase + travelled * TAU / step_length, TAU)
+		if _distance > step_length:
 			_distance = 0.0
 			footstep.emit(clampf(get_speed() / RUN_SPEED, 0.0, 1.0))
 	_last_position = global_position
@@ -274,7 +287,8 @@ func _step_mantle(delta: float, jump_held: bool) -> void:
 			_end_mantle(true)
 
 func _end_mantle(success: bool) -> void:
-	velocity = _mantle_carry
+	# cancelling gives the player back motion without driving them into the caught wall.
+	velocity = _mantle_carry if success else Vector3.ZERO
 	velocity.y = 0.0 if success else -1.0
 	mode = "air"
 	_buffer = 0.0
@@ -292,7 +306,10 @@ func _update_eye(delta: float) -> void:
 	_dip = move_toward(_dip, 0.0, 0.28 * delta)
 	var fraction := clampf(Engine.get_physics_interpolation_fraction(), 0.0, 1.0)
 	var feet := _previous_position.lerp(_current_position, fraction)
-	camera.global_position = feet + Vector3.UP * (_eye_height - _dip * (0.4 if comfort else 1.0))
+	var gait_target := 1.0 if is_on_floor() and mode != "slide" and get_speed() > 0.8 and not comfort else 0.0
+	_gait_blend = move_toward(_gait_blend, gait_target, delta * 7.0)
+	var bob := sin(_gait_phase) * 0.008 * _gait_blend * minf(get_speed() / RUN_SPEED, 1.0)
+	camera.global_position = feet + Vector3.UP * (_eye_height + bob - _dip * (0.4 if comfort else 1.0))
 	camera.global_rotation = Vector3(pitch, yaw, 0.0)
 	var extra := 0.0 if comfort else clampf((get_speed() - 6.0) * 0.5, 0.0, 5.0)
 	var horizontal_fov := fov_horizontal + extra

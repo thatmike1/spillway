@@ -16,6 +16,7 @@ func attach(player: CharacterBody3D, level: Node3D) -> void:
 	_sounds["land"] = _wav(_thump(0.23, 72.0, 0.65))
 	_sounds["land_soft"] = _wav(_thump(0.12, 105.0, 0.38))
 	_sounds["hand"] = _wav(_slap())
+	_sounds["splash"] = _wav(_splash())
 	_sounds["finish"] = _wav(_chime())
 	_sounds["slide"] = _wav(_wind_loop(2.0), true)
 	for i: int in 8:
@@ -33,11 +34,13 @@ func attach(player: CharacterBody3D, level: Node3D) -> void:
 	_slide_voice.pitch_scale = 1.9
 	add_child(_slide_voice)
 	_slide_voice.play()
-	var regions: Array = level.get("water_regions")
-	for i: int in mini(regions.size(), 3):
+	var sources: Array = level.get("water_audio_sources").duplicate()
+	for region: Dictionary in level.get("water_regions"):
+		sources.append((region["bounds"] as AABB).get_center())
+	for i: int in mini(sources.size(), 4):
 		var water := AudioStreamPlayer3D.new()
 		water.stream = _wav(_water_loop(), true)
-		water.position = (regions[i]["bounds"] as AABB).get_center()
+		water.position = sources[i]
 		water.unit_size = 12.0
 		water.max_distance = 85.0
 		water.volume_db = -17.0
@@ -52,12 +55,34 @@ func _process(delta: float) -> void:
 	if not _enabled or _player == null or _wind == null:
 		return
 	var speed: float = _player.get_speed()
-	var target := clampf((speed - 4.0) / 12.0, 0.0, 1.0)
+	var target := 0.0 if get_tree().paused else clampf((speed - 4.0) / 12.0, 0.0, 1.0)
 	_wind_level = lerpf(_wind_level, target, 1.0 - exp(-4.0 * delta))
 	_wind.volume_db = linear_to_db(maxf(_wind_level * _wind_level * 0.16, 0.0001))
 	_wind.pitch_scale = 0.8 + _wind_level * 0.4
-	var scrape := clampf(speed / 16.0, 0.0, 1.0) * 0.15 if _player.mode == "slide" else 0.0
+	var scrape := clampf(speed / 16.0, 0.0, 1.0) * 0.15 if _player.mode == "slide" and not get_tree().paused else 0.0
 	_slide_voice.volume_db = lerpf(_slide_voice.volume_db, linear_to_db(maxf(scrape, 0.0001)), 1.0 - exp(-12.0 * delta))
+
+func _on_landed(impact: float) -> void:
+	if not _enabled:
+		return
+	if _player.in_water:
+		_play(_sounds["splash"], -17.0 + minf(impact * 0.3, 4.0), _rng.randf_range(0.9, 1.05))
+	else:
+		super._on_landed(impact)
+
+func _splash() -> PackedFloat32Array:
+	var samples := _buffer(0.45)
+	var low: float = 0.0
+	var wash: float = 0.0
+	for i: int in samples.size():
+		var t := float(i) / RATE
+		var noise := _rng.randf_range(-1.0, 1.0)
+		low += (noise - low) * 0.06
+		wash += (noise - wash) * 0.35
+		var envelope := minf(t * 90.0, 1.0) * exp(-t * 10.0)
+		var bubble := sin(TAU * (220.0 - t * 170.0) * t) * exp(-t * 16.0)
+		samples[i] = ((wash - low) * 0.8 + low * 2.0 + bubble * 0.12) * envelope
+	return samples
 
 func _on_footstep(strength: float) -> void:
 	if not _enabled:

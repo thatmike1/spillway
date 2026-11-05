@@ -100,7 +100,7 @@ func _run() -> void:
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--evidence-dir="):
 			var path: String = arg.trim_prefix("--evidence-dir=").simplify_path()
-			if not preload("res://tests/spillway_driver.gd").evidence_path_allowed(path):
+			if not preload("res://scripts/spillway_driver.gd").evidence_path_allowed(path):
 				printerr("spillway: evidence directory must be absolute and outside Git")
 				quit(2)
 				return
@@ -113,7 +113,9 @@ func _run() -> void:
 	await responsiveness()
 	await jump_grace()
 	await air_control()
+	await ground_budget_reset()
 	await handoffs()
+	await crouch_policy()
 	await ceiling()
 	await ramps()
 	await authored_stairs()
@@ -221,6 +223,30 @@ func air_control() -> void:
 	check(launch_speed > 9.5 and player.get_speed() >= launch_speed * .99 and player.get_speed() <= launch_speed + .05,
 		"air input preserves excess launch budget without pumping: %.3f / %.3f" % [player.get_speed(), launch_speed])
 
+func ground_budget_reset() -> void:
+	await fresh("landing and braking discard stale air budget", Vector3(12, 1, 26), Vector3(0, -.5, -3))
+	# fixture: a high-speed launch, then ordinary landing/braking and a new edge departure.
+	player.velocity = Vector3(0, 0, -16)
+	action("jump", true)
+	await ticks(2)
+	action("jump", false)
+	await ticks(170)
+	check(player.is_on_floor() and player.get_speed() < .1, "high-speed flight lands and brakes on actual platform")
+	action("move_forward", true)
+	var departed: bool = false
+	for i: int in 180:
+		await ticks(1)
+		if not player.is_on_floor():
+			departed = true
+			break
+	check(departed, "new run leaves a real edge after the landing")
+	action("move_right", true)
+	var peak: float = player.get_speed()
+	for i: int in 90:
+		await ticks(1)
+		peak = maxf(peak, player.get_speed())
+	check(peak <= 8.7, "air steering cannot recover the old sixteen-metre launch budget: %.3f" % peak)
+
 func handoffs() -> void:
 	await fresh("ordinary landing preserves motion")
 	action("move_forward", true)
@@ -277,6 +303,28 @@ func handoffs() -> void:
 		peak = maxf(peak, player.get_speed())
 	check(peak <= 8.7, "16 flat crouch presses create no extra speed: peak %.3f" % peak)
 
+func crouch_policy() -> void:
+	await fresh("flat crouch walking never slides")
+	action("crouch", true)
+	action("move_forward", true)
+	var slide_ticks: int = 0
+	for i: int in 360:
+		await ticks(1)
+		if player.get("mode") == "slide":
+			slide_ticks += 1
+	check(slide_ticks == 0, "three seconds of crouch walking has no slide ownership: %d ticks" % slide_ticks)
+	check(player.get_speed() > 3.0 and player.get_speed() < 3.4, "crouch walking remains responsive at its intended speed")
+	await fresh("slide backward input brakes")
+	action("move_forward", true)
+	await ticks(48)
+	action("crouch", true)
+	await ticks(2)
+	action("move_forward", false)
+	action("move_back", true)
+	await ticks(40)
+	check(player.get_speed() < 4.5, "backward input brakes an active slide promptly")
+	check(absf(player.velocity.x) < .1, "braking does not curve sideways")
+
 func ceiling() -> void:
 	await fresh("crouch ceiling clearance")
 	box(Vector3(0, 1.45, -4), Vector3(8, .3, 5))
@@ -294,7 +342,10 @@ func ceiling() -> void:
 	await ticks(25)
 	check(bool(player.get("crouched")) and player.position.y < .12, "release under ceiling stays low without popping body")
 	action("move_forward", true)
-	await ticks(160)
+	for i: int in 360:
+		await ticks(1)
+		if player.position.z < -7.0:
+			break
 	check(player.position.z < -7.0 and not bool(player.get("crouched")), "clearance exit restores standing")
 
 func make_ramp() -> void:
@@ -434,6 +485,17 @@ func authored_stairs() -> void:
 	var world: Node3D = world_script.new() as Node3D
 	fixture.add_child(world)
 	world.call("build")
+	var terrain_up: bool = true
+	var terrain_count: int = 0
+	for mesh_node: Node in world.find_children("*", "MeshInstance3D", true, false):
+		if not mesh_node.get_meta("terrain_surface", false):
+			continue
+		terrain_count += 1
+		var terrain_mesh: ArrayMesh = mesh_node.mesh
+		var normals: PackedVector3Array = terrain_mesh.surface_get_arrays(0)[Mesh.ARRAY_NORMAL]
+		for normal: Vector3 in normals:
+			terrain_up = terrain_up and normal.y > 0.0
+	check(terrain_count >= 3 and terrain_up, "terrain top surfaces face the sun rather than the underside")
 	var ramps_found: Array[StaticBody3D] = []
 	for child: Node in world.find_children("*", "StaticBody3D", true, false):
 		if bool(child.get_meta("smooth_stair_ramp", false)):

@@ -4,6 +4,7 @@ render_mode diffuse_burley, cull_disabled;
 uniform vec4 water_color : source_color = vec4(0.10, 0.34, 0.34, 1.0);
 uniform float flow_speed = 0.65;
 uniform float foam_amount = 0.12;
+uniform float vertical_flow = 0.0;
 varying vec3 world_position;
 
 void vertex() {
@@ -17,8 +18,9 @@ void vertex() {
 
 void fragment() {
 	float phase = TIME * flow_speed;
-	float ripple = sin(world_position.z * 5.2 - phase * 2.4 + sin(world_position.x * 2.2));
-	float secondary = sin(world_position.z * 1.3 + world_position.x * 2.7 + phase);
+	float flow_axis = mix(world_position.z, world_position.y, vertical_flow);
+	float ripple = sin(flow_axis * 5.2 + phase * 2.4 + sin(world_position.x * 2.2));
+	float secondary = sin(flow_axis * 1.3 + world_position.x * 2.7 + phase);
 	float edge = min(min(UV.x, 1.0 - UV.x), min(UV.y, 1.0 - UV.y));
 	float shore = (1.0 - smoothstep(0.0, 0.025, edge)) * (0.5 + secondary * 0.2);
 	float fleck = smoothstep(0.94, 1.0, ripple) * smoothstep(0.6, 1.0, secondary) * foam_amount;

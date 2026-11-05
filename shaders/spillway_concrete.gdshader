@@ -4,7 +4,7 @@ render_mode diffuse_burley;
 uniform vec4 wall_color : source_color = vec4(0.72, 0.69, 0.59, 1.0);
 uniform vec4 deck_color : source_color = vec4(0.79, 0.77, 0.68, 1.0);
 uniform float weathering = 0.12;
-uniform float waterline = 1.8;
+uniform float waterline = -100.0;
 
 varying vec3 world_position;
 varying vec3 world_normal;
@@ -38,10 +38,13 @@ void fragment() {
 	vec2 joint_uv = abs(fract(world_position.xz / vec2(4.8, 3.6)) - 0.5);
 	float deck_joint = 1.0 - smoothstep(0.001, 0.004, min(joint_uv.x, joint_uv.y));
 	vec3 base = mix(wall_color.rgb, deck_color.rgb, horizontal);
-	base *= 0.94 + grain * 0.07 + clouds * 0.07;
-	base *= 1.0 - (1.0 - horizontal) * (board_edge * 0.045 + board_tone * 0.028 + streak * weathering);
+	base *= 0.97 + grain * 0.025 + clouds * 0.035;
+	base *= mix(0.87, 1.0, horizontal);
+	base *= world_normal.y < -0.3 ? 0.72 : 1.0;
+	base *= 1.0 - (1.0 - horizontal) * (board_edge * 0.10 + board_tone * 0.028 + streak * weathering);
 	base *= 1.0 - deck_joint * horizontal * 0.045;
 	float damp = (1.0 - smoothstep(waterline + 0.02, waterline + 0.65, world_position.y));
+	damp *= mix(1.0, 1.0 - smoothstep(0.06, 0.16, abs(world_position.y - waterline)), horizontal);
 	damp *= 0.65 + noise21(wall_uv * vec2(2.0, 4.0)) * 0.35;
 	base = mix(base, base * vec3(0.55, 0.66, 0.54), damp * 0.62);
 	ALBEDO = base;

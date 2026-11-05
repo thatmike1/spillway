@@ -4,7 +4,7 @@ The active acceptance contract is BRIEF.md beside this file. Source reconstructi
 
 `tools/check-spillway.sh` runs new behavioral checks through native CharacterBody3D collision. These are isolated fixtures: run/brake/reverse, jump grace and expiry, standing air control, look independence, ordinary landing continuity, slide release/jump, flat-ground crouch pumping, real ceiling clearance, ramp/landing seams in four directions/speeds and optional mantle intent/cancellation. Fixture setup may seed a labelled pose/velocity; it is not route proof.
 
-`tests/spillway_driver.gd` supplies ordinary input events through the native game. It never writes position or velocity. Route traces record the seed, input changes, progress, resets, maximum per-tick displacement and a result denominator. Native screenshots/video establish the rendered view. A precise scripted line is evidence of executability, not discoverability or fun.
+`scripts/spillway_driver.gd` supplies ordinary input events through the native game. It never writes position or velocity. Route traces record the seed, input changes, progress, resets, maximum per-tick displacement and a result denominator. Native screenshots/video establish the rendered view. A precise scripted line is evidence of executability, not discoverability or fun.
 
 Input timing/aim perturbations and failures remain in the checkpoint. Normal-speed uninterrupted safe, fast and missed-jump recovery playback, representative approach/airborne/recovery frames, and an independent critique are separate required evidence. Machine rendering performance must name hardware and renderer. No agent can certify Mike's enjoyment or comfort from automated counts.
 
