@@ -54,7 +54,7 @@ func _run() -> void:
 	player._prev_eye = player._curr_eye
 	var clearance: float = 100
 	for i: int in 128:
-		player.landing.time = i / 127.0 * player.tuning.roll_duration
+		player.landing.time = i / 127.0 * player.tuning.roll_active_duration
 		player._update_rig(.01, true)
 		clearance = minf(clearance, player.get_camera().global_position.y)
 	check(clearance > .35, "dense roll eye stays above the floor: %.3fm" % clearance)

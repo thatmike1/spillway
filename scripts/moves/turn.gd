@@ -24,7 +24,7 @@ func step(p, dt: float) -> void:
 	p.look((fraction - previous) * PI, 0)
 	previous = fraction
 	if airborne:
-		p.velocity -= p.up_direction * p.tuning.gravity * dt
+		p.velocity -= p.up_direction * p.tuning.effective_gravity * dt
 	else:
 		if time < p.tuning.turn_lock:
 			p.velocity *= maxf(0, 1 - p.tuning.ground_friction * p.tuning.turn_friction * dt)

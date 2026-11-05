@@ -15,8 +15,9 @@ extends Resource
 # turning, energy decay (H numbers, M equation).
 @export var energy_decay_time: float = 3.0
 @export var energy_decay_exponent: float = .5
-# turning, unreal input mapped from yaw radians/second divided by PI (P).
+# turning, stored coefficient retained; footage-first yaw input transfer (P).
 @export var turn_loss: float = 10.0
+@export var turn_input_scale: float = .05
 # turning, no-input braking coefficient and stop threshold (M).
 @export var ground_friction: float = 8.0
 @export var braking_strength: float = .5
@@ -27,6 +28,10 @@ extends Resource
 @export var jump_forward_gate: float = .10
 # units/player dimensions, gravity and terminal speed (H).
 @export var gravity: float = 8.0
+# footage-first choice (P): map/volume runtime override unresolved; .7875 s flat jump.
+@export var flight_gravity_multiplier: float = 2.0
+var effective_gravity: float:
+	get: return gravity * flight_gravity_multiplier
 @export var terminal_speed: float = 35.0
 # jumping, air-control fraction times acceleration limit (M).
 @export var acceleration_limit: float = 61.44
@@ -52,6 +57,8 @@ extends Resource
 @export var roll_retrigger: float = .60
 # animation timing/displacement, original resynthesis profile (H totals, P profile).
 @export var roll_duration: float = 1.26667
+# port choice (P): active root-motion ownership, separate from nominal local clip.
+@export var roll_active_duration: float = .65
 @export var roll_distance: float = 3.13517
 @export var hard_duration: float = 2.0
 # vaults, clearance and variant saved-speed/timing contracts (H).
@@ -205,7 +212,7 @@ func ground_velocity(old: Vector3, wish: Vector3, forward: Vector3, yaw_rate: fl
 		var error: Vector3 = direction * speed - old
 		accel = direction * acceleration(speed) + error.limit_length(error.length() / maxf(dt, .00001)) * minf(sprint_gain, 1.0 / dt)
 		if speed > .01:
-			accel -= old / speed * turn_loss * absf(yaw_rate) / PI
+			accel -= old / speed * turn_loss * turn_input_scale * absf(yaw_rate) / PI
 	else:
 		var energy: float = maxf(speed - base_speed, 0.0)
 		energy = maxf(0.0, energy - (maximum_speed - base_speed) / energy_decay_time * (1.0 - pow(clampf(alignment, 0, .9), energy_decay_exponent)) * dt)

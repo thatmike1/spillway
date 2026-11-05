@@ -21,7 +21,7 @@ var top_speed: float:
 var jump_speed: float:
 	get: return tuning.jump_speed
 var gravity_strength: float:
-	get: return tuning.gravity
+	get: return tuning.effective_gravity
 @export var mouse_sensitivity: float = 0.0022
 @export var stick_look_speed: float = 3.2
 @export var invert_y: bool = false
@@ -62,6 +62,12 @@ var _yaw_input: float = 0.0
 var _pre_jump_speed: float = 0.0
 var _jump_flight: bool = false
 var _fall_origin: float = 0.0
+var _air_speed_limit: float = 7.2
+var _landing_continuation: bool = false
+var _continuation_direction: Vector3 = Vector3.FORWARD
+var displacement_velocity: Vector3 = Vector3.ZERO
+var travel_distance: float = 0
+var _body_recovery: float = 0
 var last_landing_speed: float = 0.0
 var _pitch: float = 0.0
 var _jump_buffer: float = 0.0
@@ -202,6 +208,13 @@ func reset_to(spawn: Transform3D, up: Vector3 = Vector3.UP) -> void:
 	global_transform = Transform3D(basis_now.orthonormalized(), spawn.origin)
 	up_direction = up.normalized()
 	velocity = Vector3.ZERO
+	displacement_velocity = Vector3.ZERO
+	travel_distance = 0
+	_stride = 0
+	_landing_elapsed = 100
+	_body_recovery = 0
+	_landing_continuation = false
+	_air_speed_limit = tuning.maximum_speed
 	move = Move.GROUND
 	_jump_flight = false
 	_yaw_input = 0.0
@@ -261,7 +274,9 @@ func _read_stick_look(delta: float) -> void:
 # ---------------------------------------------------------------- simulation
 
 func _physics_process(delta: float) -> void:
+	var motion_origin: Vector3 = global_position
 	_prev_eye = _curr_eye
+	_body_recovery = maxf(0, _body_recovery - delta)
 	_clock += delta
 	_landing_elapsed += delta
 	_step_grace = maxf(0, _step_grace - delta)
@@ -290,6 +305,8 @@ func _physics_process(delta: float) -> void:
 		Move.SPRINGBOARD: springboard.step(self, delta)
 		Move.STEP: step_up.step(self, delta)
 		_: _step_free(delta, crouch_held)
+	displacement_velocity = (global_position - motion_origin) / delta
+	travel_distance += displacement_velocity.slide(up_direction).length() * delta
 	_jump_buffer = maxf(0, _jump_buffer - delta)
 	_camera_turn_target = clampf((_yaw_input / maxf(delta, .00001)) * tuning.turn_lag_multiplier * tuning.turn_lag_projection, -PI / 4, PI / 4) * clampf((get_speed() - 1) / 3, 0, 1)
 	_yaw_input = 0
@@ -314,11 +331,12 @@ func _step_free(delta: float, crouch_held: bool) -> void:
 		_coyote = tuning.coyote_time if assists_enabled else 0.0
 		_air_time = 0.0
 		move = Move.GROUND
+		_fall_origin = global_position.dot(up)
+		_air_speed_limit = maxf(tuning.maximum_speed, get_speed())
 	else:
 		_coyote = maxf(0.0, _coyote - delta)
 		_air_time += delta
 		move = Move.AIR
-		_fall_origin = maxf(_fall_origin, global_position.dot(up))
 	var wish: Vector3 = _wish(_input_axis)
 	var forward_input: float = -_input_axis.y
 	var vertical: float = velocity.dot(up)
@@ -330,6 +348,10 @@ func _step_free(delta: float, crouch_held: bool) -> void:
 	if grounded:
 		if _jump_buffer <= 0.0:
 			lateral = tuning.ground_velocity(lateral, wish, (-global_basis.z).slide(up).normalized(), _yaw_input / delta, delta, _crouched)
+		if _landing_continuation:
+			# source one-frame continuation; released-input carry is a labelled P extension.
+			lateral = velocity.slide(up) + _continuation_direction * tuning.acceleration_limit * delta
+			_landing_continuation = false
 		vertical = minf(vertical, -1.5)
 		_stride += lateral.length() * delta
 		momentum = clampf((lateral.length() - base_speed) / (top_speed - base_speed), 0.0, 1.0)
@@ -339,7 +361,8 @@ func _step_free(delta: float, crouch_held: bool) -> void:
 			var probe: Dictionary = _ray(global_position, global_position + wish * (tuning.radius + .1))
 			if probe.is_empty():
 				lateral += wish * tuning.air_control * tuning.acceleration_limit * delta
-		vertical = maxf(vertical - tuning.gravity * delta, -tuning.terminal_speed)
+		lateral = lateral.limit_length(_air_speed_limit)
+		vertical = maxf(vertical - gravity_strength * delta, -tuning.terminal_speed)
 	velocity = lateral + up * vertical
 
 	# current-controller actions precede global context selection.
@@ -357,11 +380,13 @@ func _step_free(delta: float, crouch_held: bool) -> void:
 			elif grounded and h <= 1.48 and lateral_speed <= tuning.step_speed_limit and float(edge.distance) < tuning.step_reach:
 				step_up.start(self, edge)
 				return
-			elif h >= 1.45 and h <= tuning.vault_high_height and vertical >= tuning.vault_high_gate:
+			elif h >= 1.45 and h <= tuning.vault_high_height and vertical >= tuning.vault_high_gate and float(edge.distance) <= 1.2:
 				vault.start(self, edge, true, bool(edge.onto))
+				vault.step(self, delta)
 				return
-			elif h >= tuning.vault_low_height and h <= tuning.vault_fast_height and (grounded or vertical >= 0) and forward_input > .7:
+			elif h >= tuning.vault_low_height and h <= tuning.vault_fast_height and (grounded or vertical >= 0) and forward_input > .7 and float(edge.distance) <= 1.2:
 				vault.start(self, edge, false, bool(edge.onto))
+				vault.step(self, delta)
 				return
 			elif not grounded and h > 1.48 and h < tuning.grab_feet_reach and vertical < 4:
 				ledge.start(self, edge)
@@ -408,6 +433,7 @@ func _after_move(was_grounded: bool, pre_velocity: Vector3) -> void:
 
 func _do_jump(new_velocity: Vector3) -> void:
 	velocity = new_velocity
+	_air_speed_limit = maxf(tuning.maximum_speed, velocity.slide(up_direction).length())
 	_jump_origin = global_position
 	_fall_origin = global_position.dot(up_direction)
 	grounded = false
@@ -429,7 +455,15 @@ func get_camera_forward() -> Vector3:
 func sweep_motion(displacement: Vector3) -> KinematicCollision3D:
 	if displacement.length_squared() < .00000001:
 		return null
-	return move_and_collide(displacement)
+	var hit: KinematicCollision3D = move_and_collide(displacement)
+	if hit != null and hit.get_normal().dot(up_direction) >= tuning.walkable_normal:
+		# keep precise forward travel when the floor resolves a tiny contact penetration.
+		var remainder: Vector3 = hit.get_remainder().slide(hit.get_normal())
+		if remainder.length_squared() > .00000001:
+			var next_hit: KinematicCollision3D = move_and_collide(remainder)
+			if next_hit != null:
+				return next_hit
+	return hit
 
 func detect_edge(reach: float, max_rise: float) -> Dictionary:
 	var up: Vector3 = up_direction
@@ -664,16 +698,15 @@ func _update_rig(delta: float, snap: bool) -> void:
 	elif move == Move.PULLUP:
 		local_eye.y -= .35 * sin(get_climb_progress() * PI)
 	elif move == Move.ROLL:
-		var f: float = clampf(landing.time / tuning.roll_duration, 0, 1)
+		var f: float = clampf(landing.time / tuning.roll_active_duration, 0, 1)
 		# port choice (P): local track range is retargeted around the crouched shoulder, not
 		# subtracted from the world eye. the physical root still travels 3.13517 m.
 		local_eye.y -= tuning.roll_eye_range.y * tuning.roll_eye_projection * sin(f * PI)
-		local_eye.z += tuning.roll_eye_range.z * sin(f * PI)
-		anim_pitch = -TAU * smoothstep(0, 1, f)
+		anim_pitch = -1.05 * sin(f * PI) # port choice (P): a forward shoulder dip with free horizon recovery.
 	elif move == Move.LANDING:
 		var f: float = clampf(landing.time / tuning.hard_duration, 0, 1)
 		local_eye.y -= tuning.hard_eye_range.y * sin(f * PI)
-		local_eye.z += tuning.hard_eye_range.z * sin(f * PI)
+		# port choice (P): keep the eye in front of the visual torso during impact.
 		anim_pitch = -.94 * sin(f * PI)
 	elif _landing_elapsed < tuning.normal_landing_recovery:
 		# port choice (P): an impact-weighted eye animation, not random or universal shake.

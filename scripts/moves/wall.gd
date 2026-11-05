@@ -38,7 +38,7 @@ func start_vertical(p, n: Vector3) -> void:
 	time = 0
 	var h: float = t.climb_horizontal_height * clampf(inverse_lerp(t.climb_speed_min, t.climb_speed_max, p.get_speed()), 0, 1)
 	h += t.climb_vertical_height * clampf(p.velocity.dot(p.up_direction) / t.climb_vertical_max, 0, 1)
-	p.velocity = p.up_direction * sqrt(maxf(4 * h * t.gravity, .0001))
+	p.velocity = p.up_direction * sqrt(maxf(4 * h * t.effective_gravity, .0001))
 	p.move = p.Move.WALLCLIMB
 	p._wall_normal = n
 	p.move_started.emit("wallclimb")
@@ -48,7 +48,7 @@ func jump(p) -> void:
 	var d: float = normal.dot(p.get_camera_forward().slide(p.up_direction).normalized())
 	var tangent: Vector3 = p.velocity.slide(p.up_direction).slide(normal)
 	var height: float = maxf(.01, t.wall_jump_height + t.wall_jump_turned * d)
-	var vz: float = 2 * t.gravity * sqrt(height / t.gravity) / (1 + consecutive)
+	var vz: float = 2 * t.effective_gravity * sqrt(height / t.effective_gravity) / (1 + consecutive)
 	p._do_jump(tangent * (t.wall_tangent_min + (1 - t.wall_tangent_min) * (1 - d)) + normal * (t.wall_push + t.wall_push_turned * d) + p.up_direction * vz)
 	from_jump = true
 	illegal_normal = normal
@@ -67,7 +67,7 @@ func step(p, dt: float) -> void:
 		p.move = p.Move.AIR
 		return
 	var vz: float = p.velocity.dot(p.up_direction)
-	var a: float = t.gravity if vertical else (t.wall_up_accel if vz > 0 else t.wall_down_accel) * (1 + consecutive)
+	var a: float = t.effective_gravity if vertical else (t.wall_up_accel if vz > 0 else t.wall_down_accel) * (1 + consecutive)
 	vz -= a * dt
 	var tangent: Vector3 = p.velocity.slide(p.up_direction).slide(normal)
 	if not vertical:

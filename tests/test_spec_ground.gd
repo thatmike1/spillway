@@ -99,11 +99,11 @@ func _run() -> void:
 			break
 	csv.close()
 	# takeoff sample is after one physics tick. allow one-step timing/height error.
-	check(absf(apex - .9 - 2.480625) < .05, "jump rise %.4fm, expected 2.4806 ± .05m" % (apex - .9))
-	check(absf(apex_time - .7875) < .025, "apex %.4fs, expected .7875 ± .025s" % apex_time)
-	check(absf(landed_at - 1.575) < .04, "return %.4fs, expected 1.575 ± .04s" % landed_at)
+	check(absf(apex - .9 - 1.2403125) < .05, "jump rise %.4fm, expected 1.2403 ± .05m" % (apex - .9))
+	check(absf(apex_time - .39375) < .025, "apex %.4fs, expected .39375 ± .025s" % apex_time)
+	check(absf(landed_at - .7875) < .04, "return %.4fs, expected .7875 ± .04s" % landed_at)
 	var distance: float = absf(player.position.z)
-	check(absf(distance - 7.3 * 1.575) < .35, "jump distance %.4fm, expected 11.4975 ± .35m" % distance)
+	check(absf(distance - 7.3 * .7875) < .35, "jump distance %.4fm, expected 5.74875 ± .35m" % distance)
 	check(absf(player.last_landing_speed - 5.65) < .03, "landing %.4fm/s, expected 5.65 ± .03" % player.last_landing_speed)
 	await fresh()
 	player.velocity = Vector3(0, 0, -6.3)

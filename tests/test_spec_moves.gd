@@ -94,7 +94,7 @@ func _landings() -> void:
 	check(player.landing.kind == "roll", "fresh crouch inside .2s selects roll on >2m drop")
 	var start: Vector3 = player.position
 	Input.action_release("move_forward")
-	await record_ticks("roll", 152)
+	await record_ticks("roll", 78)
 	check(absf(player.position.distance_to(start) - 3.13517) < .08, "roll travels %.4fm vs 3.13517 ± .08m" % player.position.distance_to(start))
 	await fresh()
 	player.reset_to(Transform3D(Basis.IDENTITY, Vector3(0, 4.9, 0)))
@@ -147,7 +147,7 @@ func _walls() -> void:
 	player.wall.consecutive = 0
 	player.wall.jump(player)
 	var fresh_v: float = player.velocity.y
-	check(absf(fresh_v - 5.65685) < .001, "wall jump d=0 uses doubled-height equation")
+	check(absf(fresh_v - 8.0) < .001, "wall jump d=0 uses doubled-height equation")
 	check(absf(player.velocity.x - 1.2) < .001 and absf(player.velocity.z + 6) < .001, "wall jump retains tangent and adds outward push")
 	player.wall.consecutive = 1
 	player.wall.jump(player)
@@ -155,13 +155,13 @@ func _walls() -> void:
 	player.wall.consecutive = 0
 	player.look(-PI / 2, 0)
 	player.wall.jump(player)
-	check(absf(player.velocity.x - 5.2) < .01 and absf(player.velocity.y - 7.15542) < .01, "turned wall jump d=1 gets 5.2 outward and 7.15542 vertical")
+	check(absf(player.velocity.x - 5.2) < .01 and absf(player.velocity.y - 10.11929) < .01, "turned wall jump d=1 gets 5.2 outward and 10.11929 vertical")
 	await fresh()
 	box_at(Vector3(0, 5, -1), Vector3(10, 10, .4))
 	player.reset_to(Transform3D(Basis.IDENTITY, Vector3(0, 2, 0)))
 	player.velocity = Vector3(0, 3.2, -6.5)
 	player.wall.start_vertical(player, Vector3.BACK)
-	check(absf(player.velocity.y - sqrt(4 * 1.9 * 8)) < .001, "vertical climb converts horizontal/upward budgets")
+	check(absf(player.velocity.y - sqrt(4 * 1.9 * 16)) < .001, "vertical climb converts horizontal/upward budgets")
 	Input.action_press("move_forward")
 	await record_ticks("wallclimb", 20)
 	check(player.position.y > 3, "vertical controller rises along real wall")
