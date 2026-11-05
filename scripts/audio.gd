@@ -5,6 +5,7 @@ extends Node
 
 const RATE: int = 22050
 
+var _enabled: bool = true
 var _player: CharacterBody3D
 var _steps: Array[AudioStreamWAV] = []
 var _sounds: Dictionary = {}
@@ -17,6 +18,7 @@ var _wind_level: float = 0.0
 
 
 func attach(player: CharacterBody3D, _level: Node3D) -> void:
+	_enabled = DisplayServer.get_name() != "headless"
 	_player = player
 	_rng.seed = 99
 	for variant: int in range(4):
@@ -44,7 +46,8 @@ func attach(player: CharacterBody3D, _level: Node3D) -> void:
 	player.connect("jumped", func() -> void: _play(_sounds["jump"], -9.0, _rng.randf_range(0.92, 1.08)))
 	player.connect("landed", _on_landed)
 	player.connect("move_started", _on_move)
-	_wind.play()
+	if _enabled:
+		_wind.play()
 
 
 func set_volume(value: float) -> void:
@@ -58,6 +61,8 @@ func reset() -> void:
 
 
 func fold_started(_fold: Node) -> void:
+	if not _enabled:
+		return
 	_rumble.volume_db = -2.0
 	_rumble.play()
 
@@ -102,6 +107,8 @@ func _on_move(kind: String) -> void:
 
 
 func _play(stream: AudioStream, volume_db: float, pitch: float) -> void:
+	if not _enabled:
+		return
 	for voice: AudioStreamPlayer in _pool:
 		if not voice.playing:
 			voice.stream = stream
