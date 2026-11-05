@@ -6,6 +6,7 @@ signal landed(impact: float)
 signal move_started(kind: String)
 
 const RUN_SPEED: float = 8.5
+const WATER_SPEED: float = 3.4
 const ACCEL: float = 28.0
 const BRAKE: float = 34.0
 const GRAVITY: float = 20.0
@@ -172,7 +173,7 @@ func _physics_process(delta: float) -> void:
 		else:
 			var speed_limit := 3.2 if crouched else RUN_SPEED
 			if in_water:
-				speed_limit = 4.5
+				speed_limit = minf(speed_limit, WATER_SPEED)
 			var carried := maxf(speed_limit, horizontal.length() - (12.0 if in_water else 4.0) * delta)
 			var target := wish * carried
 			horizontal = horizontal.move_toward(target, (ACCEL if wish.length_squared() > 0.0 else BRAKE) * delta)

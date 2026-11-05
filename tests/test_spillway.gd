@@ -114,6 +114,7 @@ func _run() -> void:
 	await jump_grace()
 	await air_control()
 	await ground_budget_reset()
+	await water_recovery()
 	await handoffs()
 	await crouch_policy()
 	await ceiling()
@@ -574,3 +575,19 @@ func authored_stairs() -> void:
 			check(unsupported <= 3, "authored seams keep continuous support: %d unsupported ticks" % unsupported)
 			check(max_jitter < .055 and residual_max - residual_min < .20,
 				"authored camera residual against slope: step %.4f range %.4f" % [max_jitter, residual_max - residual_min])
+
+func water_recovery() -> void:
+	await fresh("water costs time without a reset")
+	player.set("in_water", true)
+	# explicit high-speed water-entry fixture, not a route launch.
+	player.velocity = Vector3(0, 0, -16)
+	action("move_forward", true)
+	action("crouch", true)
+	await ticks(180)
+	check(player.get_speed() <= 3.45 and str(player.get("mode")) != "slide", "crouching cannot slide through water at dry speed")
+	action("crouch", false)
+	await ticks(120)
+	check(absf(player.get_speed() - 3.4) < .08, "standing water recovery reaches its P3.4m/s speed")
+	player.set("in_water", false)
+	await ticks(48)
+	check(player.get_speed() > 8.3, "leaving the water restores responsive dry running")
