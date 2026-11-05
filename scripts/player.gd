@@ -535,6 +535,10 @@ func try_ordinary_step(dt: float) -> bool:
 	if not grounded or get_speed() < .1:
 		return false
 	var motion: Vector3 = velocity.slide(up_direction) * dt
+	var toe: Vector3 = global_position - up_direction * (.9 - .05)
+	var face = _ray(toe, toe + motion.normalized() * (RADIUS + .10))
+	if face.is_empty() or absf(Vector3(face.normal).dot(up_direction)) > .3:
+		return false
 	if not test_move(global_transform, motion):
 		return false
 	var raised: Transform3D = global_transform
