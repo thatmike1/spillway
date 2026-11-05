@@ -32,7 +32,7 @@ var best_time: float = -1.0
 var _persist: bool = true
 var settings: Dictionary = {
 	"sensitivity": 1.0, "fov": 85.0, "bank": 1.0, "speed_fov": false,
-	"assists": false, "head_bob": false, "invert_y": false, "volume": 0.8,
+	"runner_vision": true, "assists": false, "head_bob": false, "invert_y": false, "volume": 0.8,
 }
 
 var _headless: bool = false
@@ -189,16 +189,7 @@ func _update_cues() -> void:
 		var radius: float = float(level.get("cues")[index]["radius"])
 		if player.global_position.distance_to(position) < radius:
 			cue_progress = index + 1
-	var pulse: float = 0.85 + 0.15 * sin(_time * 4.0)
-	for index: int in range(count):
-		var level_value: float = 1.0
-		if index < cue_progress:
-			level_value = 0.3
-		elif index == cue_progress:
-			level_value = 3.4 * pulse
-		elif index == cue_progress + 1:
-			level_value = 2.0
-		level.call("set_cue_level", index, level_value)
+	level.vision.step(player.global_position, get_physics_process_delta_time())
 
 
 func _process(delta: float) -> void:
@@ -305,6 +296,7 @@ func _apply_settings() -> void:
 	player.set("bank_amount", float(settings["bank"]))
 	player.set("speed_fov", bool(settings["speed_fov"]))
 	player.set("head_bob_enabled", bool(settings["head_bob"]))
+	level.vision.allowed = bool(settings["runner_vision"])
 	player.set("assists_enabled", bool(settings["assists"]))
 	player.set("invert_y", bool(settings["invert_y"]))
 	if audio != null:

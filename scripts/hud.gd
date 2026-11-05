@@ -222,6 +222,7 @@ func _make_pause(root: Control) -> Control:
 	column.add_child(_slider("Volume", "volume", 0.0, 1.0, 0.05))
 	column.add_child(_toggle("Speed FOV (Foldrunner extension)", "speed_fov"))
 	column.add_child(_toggle("Jump grace (Foldrunner extension)", "assists"))
+	column.add_child(_toggle("Runner vision", "runner_vision"))
 	column.add_child(_toggle("Head bob", "head_bob"))
 	column.add_child(_toggle("Invert look", "invert_y"))
 	column.add_child(_button("Quit", func() -> void: quit_requested.emit()))

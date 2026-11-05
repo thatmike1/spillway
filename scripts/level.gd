@@ -29,6 +29,7 @@ const CURL_RADIUS: float = 6.0
 const CREST_CENTER: Vector3 = Vector3(0, 21, -175)
 const CREST_RADIUS: float = 4.0
 
+var vision = preload("res://scripts/runner_vision.gd").new()
 var fold: AnimatableBody3D
 var folds: Array[AnimatableBody3D] = []
 var fold_triggers: Array[Dictionary] = []
@@ -95,13 +96,12 @@ func cue_position(index: int) -> Vector3:
 	return anchor.global_transform * Vector3(cue["local"])
 
 
-func set_cue_level(index: int, level: float) -> void:
-	var material: StandardMaterial3D = cues[index]["material"]
-	material.emission_energy_multiplier = level
-	material.albedo_color = AMBER.lerp(Color(0.22, 0.2, 0.18), clampf(1.0 - level / 1.2, 0.0, 0.85))
+func set_cue_level(_index: int, _level: float) -> void:
+	pass
 
 
 func reset_state() -> void:
+	vision.reset()
 	for block: AnimatableBody3D in folds:
 		block.call("reset_fold")
 
@@ -263,6 +263,7 @@ func _cue(anchor: Node3D, local: Vector3, radius: float) -> int:
 	material.emission = AMBER
 	material.emission_energy_multiplier = 1.0
 	material.roughness = 0.5
+	vision.register(anchor, local, material)
 	cues.append({"anchor": anchor, "local": local, "radius": radius, "material": material})
 	return cues.size() - 1
 
