@@ -80,7 +80,7 @@ func fresh(label: String, floor_size: Vector3 = Vector3(160, 1, 160), floor_cent
 
 func _run() -> void:
 	var motor_path: String = "res://scripts/spillway_player.gd"
-	if not FileAccess.file_exists(motor_path):
+	if not ResourceLoader.exists(motor_path):
 		printerr("spillway: motor unavailable at ", motor_path)
 		quit(2)
 		return
@@ -494,8 +494,8 @@ func mantles() -> void:
 
 func authored_stairs() -> void:
 	var world_path: String = "res://scripts/spillway_level.gd"
-	if not FileAccess.file_exists(world_path):
-		print("SKIP authored stairs: world script unavailable; synthetic seams still tested")
+	if not ResourceLoader.exists(world_path):
+		check(false, "authored stairs require the actual world resource")
 		return
 	await fresh("authored stair discovery", Vector3.ZERO)
 	var world_script: GDScript = load(world_path) as GDScript
