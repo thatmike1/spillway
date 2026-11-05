@@ -65,11 +65,11 @@ func _run() -> void:
 		# the full cycle must contain both signs, avoiding the old repeating half-wave.
 		player.move = player.Move.GROUND
 		player.grounded = true
-		player._stride = .55
+		player._stride = player.tuning.gait_stride * .25
 		for i: int in 100:
 			arms._process(1.0 / 120)
 		var first: float = arms._arms[0].wrist.z - arms._arms[1].wrist.z
-		player._stride = 1.65
+		player._stride = player.tuning.gait_stride * .75
 		for i: int in 100:
 			arms._process(1.0 / 120)
 		var second: float = arms._arms[0].wrist.z - arms._arms[1].wrist.z
@@ -80,6 +80,15 @@ func _run() -> void:
 	player.displacement_velocity = Vector3(0, 0, -7.2)
 	player._update_rig(.1, true)
 	check(player._fov_extra <= 1.251, "single comfort option reduces speed FOV")
+	var streaks = load("res://scripts/streaks.gd").new()
+	streaks.player = player
+	fixture.add_child(streaks)
+	player.sprint_effect = 1
+	streaks._process(0)
+	var comfortable: float = streaks.strength
+	player.comfort_enabled = false
+	streaks._process(0)
+	check(comfortable < streaks.strength / 3, "same comfort option reduces actual streak drawing")
 	print("presentation: %d/%d checks passed" % [checks - failures, checks])
 	fixture.queue_free()
 	quit(1 if failures else 0)

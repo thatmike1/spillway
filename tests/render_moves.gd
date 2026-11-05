@@ -76,6 +76,7 @@ func _run() -> void:
 	audio = load("res://scripts/audio.gd").new()
 	world.add_child(audio)
 	audio.attach(player, world)
+	audio.set_volume(.8) # match the shipped master-volume default.
 	if fixture_only == 10:
 		audio.effects_enabled = false
 	var effects := CanvasLayer.new()

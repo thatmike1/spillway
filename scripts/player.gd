@@ -318,13 +318,13 @@ func _physics_process(delta: float) -> void:
 	displacement_velocity = (global_position - motion_origin) / delta
 	var distance: float = get_presentation_speed() * delta
 	travel_distance += distance
-	_stride = fmod(travel_distance, 2.2)
+	_stride = fmod(travel_distance, tuning.gait_stride)
 	if grounded and move == Move.GROUND:
 		_step_distance += distance
-		if _step_distance >= 1.1:
-			_step_distance = fmod(_step_distance, 1.1)
+		if _step_distance >= tuning.gait_stride / 2:
+			_step_distance = fmod(_step_distance, tuning.gait_stride / 2)
 			footstep.emit(clampf(get_presentation_speed() / top_speed, .2, 1))
-	var streak_target: float = clampf((get_presentation_speed() - 6.1) / .7, 0, 1)
+	var streak_target: float = .5 + .5 * clampf((get_presentation_speed() - 6.1) / 1.1, 0, 1) if get_presentation_speed() >= 6.1 else 0.0
 	sprint_effect = lerpf(sprint_effect, streak_target, 1 - exp(-delta * (8 if streak_target > sprint_effect else .8)))
 	_jump_buffer = maxf(0, _jump_buffer - delta)
 	_camera_turn_target = clampf((_yaw_input / maxf(delta, .00001)) * tuning.turn_lag_multiplier * tuning.turn_lag_projection, -PI / 4, PI / 4) * clampf((get_speed() - 1) / 3, 0, 1)
@@ -350,7 +350,7 @@ func _step_free(delta: float, crouch_held: bool) -> void:
 		_coyote = tuning.coyote_time if assists_enabled else 0.0
 		_air_time = 0.0
 		move = Move.GROUND
-		_fall_origin = global_position.dot(up)
+		_fall_origin = get_support_height()
 		_air_speed_limit = maxf(tuning.maximum_speed, get_speed())
 	else:
 		_coyote = maxf(0.0, _coyote - delta)
@@ -444,11 +444,21 @@ func _after_move(was_grounded: bool, pre_velocity: Vector3) -> void:
 		_fall_origin = global_position.dot(up_direction)
 
 
+# port choice (P): measure real support planes, excluding capsule edge rounding/safe margin.
+func get_support_height() -> float:
+	var hit: Dictionary = _ray(global_position + up_direction * .2, global_position - up_direction * 1.4)
+	if not hit.is_empty() and Vector3(hit.normal).dot(up_direction) >= tuning.walkable_normal:
+		var height: float = Vector3(hit.position).dot(up_direction) + tuning.standing_height / 2
+		if absf(global_position.dot(up_direction) - height) < .45:
+			return height
+	return _fall_origin
+
+
 func _do_jump(new_velocity: Vector3) -> void:
 	velocity = new_velocity
 	_air_speed_limit = maxf(tuning.maximum_speed, velocity.slide(up_direction).length())
 	_jump_origin = global_position
-	_fall_origin = global_position.dot(up_direction)
+	_fall_origin = get_support_height() if grounded else global_position.dot(up_direction)
 	grounded = false
 	_since_jump = 0.0
 	_coyote = 0.0
@@ -689,7 +699,7 @@ func _update_rig(delta: float, snap: bool) -> void:
 	var target_roll: float = 0
 	var local_eye: Vector3 = Vector3.ZERO
 	var speed: float = get_presentation_speed()
-	_animation_phase = travel_distance / 2.2 * TAU
+	_animation_phase = travel_distance / tuning.gait_stride * TAU
 	if move == Move.WALLRUN:
 		target_roll = -deg_to_rad(tuning.wall_left_tilt if _wall_side < 0 else tuning.wall_right_tilt) # ue left-handed roll mapped to Godot
 		var extent: Vector2 = tuning.wall_left_eye_range if _wall_side < 0 else tuning.wall_right_eye_range

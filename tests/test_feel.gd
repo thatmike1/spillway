@@ -161,10 +161,10 @@ func sprint_turn() -> void:
 	var cue_time: float = -1
 	for i: int in 1200:
 		await ticks(1)
-		if cue_time < 0 and player.get_speed() >= 6.1:
+		if cue_time < 0 and player.sprint_effect >= .35:
 			cue_time = float(i + 1) / 120
 	var straight: float = player.get_speed()
-	check(cue_time >= 1.8 and cue_time <= 2.6, "streak threshold reached at %.4fs" % cue_time)
+	check(cue_time >= 1.8 and cue_time <= 2.6, "visible streak envelope reached at %.4fs" % cue_time)
 	await fresh()
 	Input.action_press("move_forward")
 	for i: int in 1200:

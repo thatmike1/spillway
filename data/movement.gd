@@ -185,6 +185,8 @@ var effective_gravity: float:
 @export var roll_eye_projection: float = .38
 @export var turn_lag_projection: float = .12
 @export var hand_ik_blend: float = .10
+# port choice (P): a full displacement gait matches .53333 s at 7.2 m/s.
+@export var gait_stride: float = 3.84
 
 # context geometry/vertical native solver unresolved (U); port reach and attraction (P).
 @export var grab_feet_reach: float = 2.6

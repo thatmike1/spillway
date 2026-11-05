@@ -11,7 +11,7 @@ func start(p, impact_speed: float, soft: bool = false) -> void:
 	impact = impact_speed
 	p._landing_elapsed = 0
 	var t = p.tuning
-	height = maxf(0, p._fall_origin - p.global_position.dot(p.up_direction))
+	height = maxf(0, p._fall_origin - p.get_support_height())
 	time = 0.0
 	kind = "normal"
 	if soft:

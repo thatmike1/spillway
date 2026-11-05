@@ -33,7 +33,7 @@ func attach(owner_main: Node, runner: CharacterBody3D, route: Node3D, quit: bool
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--trace-run="):
 			_trace = FileAccess.open(arg.trim_prefix("--trace-run="), FileAccess.WRITE)
-			_trace.store_line("time,x,y,z,speed,move,waypoint,up_x,up_y,up_z")
+			_trace.store_line("time,x,y,z,speed,move,waypoint,up_x,up_y,up_z,travel_speed,fov_extra,streak,wind,stride,landing_kind,fall_height")
 	process_physics_priority = -100
 	process_mode = Node.PROCESS_MODE_PAUSABLE
 
@@ -51,7 +51,7 @@ func _physics_process(delta: float) -> void:
 		return
 	time += delta
 	if _trace != null:
-		_trace.store_line("%.5f,%.5f,%.5f,%.5f,%.5f,%d,%d,%.5f,%.5f,%.5f" % [time, player.position.x, player.position.y, player.position.z, player.get_speed(), player.move, index, player.up_direction.x, player.up_direction.y, player.up_direction.z])
+		_trace.store_line("%.5f,%.5f,%.5f,%.5f,%.5f,%d,%d,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%s,%.5f" % [time, player.position.x, player.position.y, player.position.z, player.get_speed(), player.move, index, player.up_direction.x, player.up_direction.y, player.up_direction.z, player.get_presentation_speed(), player._fov_extra, player.sprint_effect, main.audio._wind_level, player.get_stride(), player.landing.kind, player.landing.height])
 	if time > 130:
 		print("bot timeout at ", player.position, " waypoint ", index)
 		get_tree().quit(1)
@@ -180,3 +180,5 @@ func _send_action(action: String, pressed: bool) -> void:
 	event.action = action
 	event.pressed = pressed
 	Input.parse_input_event(event)
+	# flush injected actions before the next physics substep, including 10fps captures.
+	Input.flush_buffered_events()

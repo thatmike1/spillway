@@ -211,7 +211,7 @@ func _process(delta: float) -> void:
 	var vertical: float = _player.velocity.dot(up)
 	var speed: float = float(_player.call("get_presentation_speed"))
 	var run: float = clampf(speed / 7.2, 0.0, 1.0)
-	var stride_phase: float = float(_player.call("get_stride")) / 2.2 * TAU
+	var stride_phase: float = float(_player.call("get_stride")) / _player.tuning.gait_stride * TAU
 	var camera_basis: Basis = main_camera.global_basis
 	var body_basis: Basis = _player.call("get_body_basis")
 	_lower.transform = Transform3D(camera_basis.inverse() * body_basis, camera_basis.inverse() * (_player.global_position - main_camera.global_position))
@@ -272,7 +272,7 @@ func _process(delta: float) -> void:
 				if on_ground:
 					# pumping arms, mostly below the frame; they crest the bottom edge at speed
 					var swing: float = sin(stride_phase) * side
-					target = Vector3(side * (0.25 - run * 0.03), -0.42 + run * 0.12 * maxf(swing, 0.0) - run * 0.03, -0.3 - swing * 0.1 * run)
+					target = Vector3(side * (.30 - run * .02), -.35 + run * .10 * maxf(swing, 0.0) - run * .02, -.40 - swing * .10 * run)
 					facing = _hand_basis(side, deg_to_rad(40.0 + swing * 20.0), deg_to_rad(side * 10.0))
 					curl = 0.75
 					target.y = lerpf(target.y, -.10, _land_kick)

@@ -16,7 +16,13 @@ func build() -> void:
 			child.environment.fog_density = .001
 	_grid = SurfaceTool.new()
 	_grid.begin(Mesh.PRIMITIVE_LINES)
-	_platform(Vector3(2, 0, -35), Vector2(28, 94), "MainApron")
+	_platform(Vector3(6, 0, -35), Vector2(20, 94), "MainApron")
+	_platform(Vector3(-8, 0, -15.5), Vector2(8, 55), "ChainApproach")
+	_platform(Vector3(-8, -1.2, -53), Vector2(8, 14), "ChainRollLanding")
+	_platform(Vector3(-8, -1.2, -75), Vector2(8, 14), "ChainWallLanding")
+	var return_ramp := _solid(self, Vector3(-4.8, -.6, -74), Vector3(1.5, .25, sqrt(101.44)), _materials.concrete_dark, "LoopReturnRamp")
+	return_ramp.rotation.x = atan2(1.2, 10)
+	_platform(Vector3(-4, 0, -80), Vector2(3, 2), "LoopReturnBridge")
 	spawn = Transform3D(Basis.IDENTITY, Vector3(0, .9, 3))
 	stations["straight"] = {"length": 75.0, "start": Vector3(0, 0, 3), "end": Vector3(0, 0, -72)}
 	_sign("75 m  /  sprint lane", Vector3(-2, 1, 0))
@@ -76,7 +82,7 @@ func build() -> void:
 	_mesh(self, Vector3(-10.47, 2.0, -65), Vector3(.04, .12, 18), _materials.metal)
 	stations["wallrun"] = {"point": Vector3(-10.3, 1, -58), "length": 18.0}
 	stations["climb"] = stations.grab
-	stations["loop"] = {"rail": rail, "bypass": Vector3(-3, 0, -18)}
+	stations["loop"] = {"rail": rail, "bypass": Vector3(-3, 0, -18), "drop": 2.4, "wall_gap": 8.0}
 	_sign("Chain loop  /  vault, springboard, wall run", Vector3(-6, 1.1, -7))
 	_sign("Drop stations  /  return via side ramps", Vector3(-17, .9, 5))
 	# distant perimeter gives a horizon without introducing a city traversal puzzle.
@@ -89,8 +95,19 @@ func build() -> void:
 	grid_mesh.material_override = _standard(Color("#818b93"), 1)
 	grid_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(grid_mesh)
-	finish_point = Vector3(0, 0, -78)
-	finish_trigger = _trigger("YardLap", Vector3(0, 1, -79), Vector3(3, 3, 1))
+	finish_point = Vector3(-7, -1.2, -77)
+	finish_trigger = _trigger("YardLap", Vector3(-7, 0, -77), Vector3(6, 3, 1))
+	bot_path = [
+		{"point": Vector3(-7, .9, -5)},
+		{"point": Vector3(-7, .9, -9.5), "jump": true},
+		{"point": Vector3(-7, .9, -24)},
+		{"point": Vector3(-7, .9, -35.5), "jump": true},
+		{"point": Vector3(-7, -.3, -55), "roll": true},
+		{"point": Vector3(-10, -.3, -58.5), "jump": true},
+		{"point": Vector3(-10, 1.2, -64.5), "wall_jump": true},
+		{"point": Vector3(-7, -.3, -73)},
+		{"point": Vector3(-7, -.3, -77)},
+	]
 	checkpoints.append({"area": null, "pose": spawn, "folds_down": 0})
 
 func _platform(top: Vector3, size: Vector2, node_name: String) -> void:

@@ -28,6 +28,6 @@ func _draw() -> void:
 				x = size.x - x
 			var head := Vector2(x, y)
 			var direction: Vector2 = (head - centre).normalized()
-			var length: float = (18 + 35 * progress) * strength
-			var alpha: float = strength * .16 * sin(progress * PI)
-			draw_line(head - direction * length, head, Color(.75, .85, .95, alpha), 1.4, true)
+			var length: float = (28 + 45 * progress) * strength
+			var alpha: float = strength * .23 * sin(progress * PI)
+			draw_line(head - direction * length, head, Color(.75, .85, .95, alpha), 1.8, true)

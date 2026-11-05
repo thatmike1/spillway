@@ -69,6 +69,17 @@ func _run() -> void:
 	check(main.hud._metrics.visible, "F3 shows metrics")
 	await key(KEY_F3)
 	check(not main.hud._metrics.visible, "F3 hides metrics")
+	# verify the actual 6m yard station, beyond the dimension raycast.
+	main.player.reset_to(Transform3D(Basis.IDENTITY, s.drop6.start))
+	Input.action_press("move_forward")
+	for i: int in 700:
+		await ticks(1)
+		if main.player.move == main.player.Move.LANDING:
+			break
+	Input.action_release("move_forward")
+	check(main.player.landing.kind == "hard" and absf(main.player.landing.height - 6) < .03, "actual yard 6m station gives a hard landing: %s %.4fm at %s state=%s" % [main.player.landing.kind, main.player.landing.height, main.player.position, main.player.move])
+	await key(KEY_R)
+	check(main.player.position.distance_to(main.level.spawn.origin) < .02, "R also resets directly out of hard landing")
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--capture-dir="):
 			var output: String = arg.trim_prefix("--capture-dir=")

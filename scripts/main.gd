@@ -50,8 +50,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_headless = DisplayServer.get_name() == "headless"
 	bind_inputs()
-	_load_settings()
 	city_mode = bool(get_tree().get_meta("foldrunner_city", city_mode or OS.get_cmdline_user_args().has("--city")))
+	_load_settings()
 	level = (LEVEL_SCRIPT if city_mode else YARD_SCRIPT).new() as Node3D
 	level.name = "Level"
 	level.process_mode = Node.PROCESS_MODE_PAUSABLE
@@ -101,6 +101,11 @@ func _ready() -> void:
 	_apply_settings()
 	restart_run()
 	var args: PackedStringArray = OS.get_cmdline_user_args()
+	if args.has("--verify-startup"):
+		print("startup: %s; scene=%s; FOV=%s gait=%s comfort=%s" % ["city" if city_mode else "yard", level.get_script().resource_path, player.speed_fov, player.head_bob_enabled, player.comfort_enabled])
+		await get_tree().physics_frame
+		await get_tree().physics_frame
+		request_quit()
 	if args.has("--no-hud"):
 		hud.hide()
 	for arg: String in args:
@@ -353,16 +358,17 @@ func _load_settings() -> void:
 		return
 	for key: String in settings.keys():
 		settings[key] = config.get_value("settings", key, settings[key])
-	best_time = float(config.get_value("run", "best", -1.0))
+	best_time = float(config.get_value("run", "city_best" if city_mode else "yard_best", -1.0))
 
 
 func _save_settings() -> void:
 	if _headless or not _persist:
 		return
 	var config: ConfigFile = ConfigFile.new()
+	config.load(SETTINGS_PATH) # preserve the other course's best time.
 	for key: String in settings.keys():
 		config.set_value("settings", key, settings[key])
-	config.set_value("run", "best", best_time)
+	config.set_value("run", "city_best" if city_mode else "yard_best", best_time)
 	config.save(SETTINGS_PATH)
 
 
