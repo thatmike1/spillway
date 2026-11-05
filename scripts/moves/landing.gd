@@ -7,6 +7,7 @@ var origin: Vector3
 var forward: Vector3
 
 func start(p, impact: float, soft: bool = false) -> void:
+	p._landing_elapsed = 0
 	var t = p.tuning
 	height = maxf(0, p._fall_origin - p.global_position.dot(p.up_direction))
 	time = 0.0

@@ -9,7 +9,7 @@ const HUD_SCRIPT: Script = preload("res://scripts/hud.gd")
 const ARMS_SCRIPT: Script = preload("res://scripts/arms.gd")
 const AUDIO_SCRIPT: Script = preload("res://scripts/audio.gd")
 const BOT_SCRIPT: Script = preload("res://scripts/bot.gd")
-const SETTINGS_PATH: String = "user://settings.cfg"
+const SETTINGS_PATH: String = "user://settings_me.cfg"
 const FALL_FLOOR: float = -24.0
 
 var player: CharacterBody3D
@@ -31,8 +31,8 @@ var best_time: float = -1.0
 # bot and checkpoint-start runs are for recording; they never touch saved settings or the best time
 var _persist: bool = true
 var settings: Dictionary = {
-	"sensitivity": 1.0, "fov": 90.0, "bank": 1.0, "speed_fov": true,
-	"head_bob": false, "invert_y": false, "volume": 0.8,
+	"sensitivity": 1.0, "fov": 85.0, "bank": 1.0, "speed_fov": false,
+	"assists": false, "head_bob": false, "invert_y": false, "volume": 0.8,
 }
 
 var _headless: bool = false
@@ -305,6 +305,7 @@ func _apply_settings() -> void:
 	player.set("bank_amount", float(settings["bank"]))
 	player.set("speed_fov", bool(settings["speed_fov"]))
 	player.set("head_bob_enabled", bool(settings["head_bob"]))
+	player.set("assists_enabled", bool(settings["assists"]))
 	player.set("invert_y", bool(settings["invert_y"]))
 	if audio != null:
 		audio.call("set_volume", float(settings["volume"]))

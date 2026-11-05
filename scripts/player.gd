@@ -44,6 +44,12 @@ var slide = preload("res://scripts/moves/slide.gd").new()
 var turn = preload("res://scripts/moves/turn.gd").new()
 var springboard = preload("res://scripts/moves/springboard.gd").new()
 var step_up = preload("res://scripts/moves/step.gd").new()
+var _body_q: Quaternion = Quaternion.IDENTITY
+var _neck: Vector2 = Vector2.ZERO
+var _turn_lag: float = 0
+var _camera_turn_target: float = 0
+var _animation_phase: float = 0
+var _landing_elapsed: float = 100
 var _step_grace: float = 0
 var _clock: float = 0
 var _context_lock: float = 0
@@ -277,6 +283,7 @@ func _read_stick_look(delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	_prev_eye = _curr_eye
 	_clock += delta
+	_landing_elapsed += delta
 	_step_grace = maxf(0, _step_grace - delta)
 	floor_snap_length = 0 if _step_grace > 0 else .45
 	_since_jump += delta
@@ -304,6 +311,7 @@ func _physics_process(delta: float) -> void:
 		Move.STEP: step_up.step(self, delta)
 		_: _step_free(delta, crouch_held)
 	_jump_buffer = maxf(0, _jump_buffer - delta)
+	_camera_turn_target = clampf(_yaw_input * tuning.turn_lag_multiplier, -PI / 4, PI / 4) * clampf((get_speed() - 1) / 3, 0, 1)
 	_yaw_input = 0
 	_follow_surface()
 	var target_eye: float = EYE_LOW if is_low() else EYE_STAND
@@ -626,6 +634,7 @@ func _set_low(low: bool, force: bool) -> void:
 func _snap_view() -> void:
 	if _rig == null:
 		return
+	_body_q = global_basis.get_rotation_quaternion()
 	_view_q = global_basis.get_rotation_quaternion()
 	_curr_eye = global_position + up_direction * _eye_height
 	_prev_eye = _curr_eye
@@ -649,29 +658,89 @@ func _update_rig(delta: float, snap: bool) -> void:
 	_dip = clampf(_dip, -0.45, 0.2)
 	_nod_velocity += (-_nod * 150.0 - _nod_velocity * 18.0) * delta
 	_nod += _nod_velocity * delta
-	var target_roll: float = 0.0
+	var target_roll: float = 0
+	var local_eye: Vector3 = Vector3.ZERO
+	var speed: float = get_speed()
+	var cycle: float = tuning.sprint_cycle if speed >= 6.3 else tuning.run_cycle
+	var rate: float = clampf(speed / (6.0 if speed >= 6.3 else 5.0), .2, 1.4)
+	_animation_phase += delta * rate / cycle * TAU
 	if move == Move.WALLRUN:
-		target_roll = deg_to_rad(9.0) * _wall_side
-	elif move == Move.SLIDE:
-		target_roll = deg_to_rad(-3.0)
-	target_roll += deg_to_rad(1.3) * -_input_axis.x * clampf(get_speed() / top_speed, 0.0, 1.0)
-	_roll = lerpf(_roll, target_roll * bank_amount, 1.0 - exp(-8.0 * delta))
+		target_roll = deg_to_rad(tuning.wall_left_tilt if _wall_side < 0 else tuning.wall_right_tilt)
+		var extent: Vector2 = tuning.wall_left_eye_range if _wall_side < 0 else tuning.wall_right_eye_range
+		local_eye = Vector3(sin(_animation_phase * 1.4) * extent.x / 2, sin(_animation_phase * 2.8) * extent.y / 2, 0)
+	elif grounded and head_bob_enabled and move == Move.GROUND:
+		var extent: Vector2 = tuning.sprint_eye_range if speed >= 6.3 else tuning.run_eye_range
+		local_eye = Vector3(sin(_animation_phase) * extent.x / 2, sin(_animation_phase * 2) * extent.y / 2, 0)
+	var anim_pitch: float = 0
+	if move == Move.VAULT:
+		var f: float = get_climb_progress()
+		local_eye.y -= sin(f * PI) * tuning.vault_eye_compression
+		anim_pitch = -.18 * sin(f * PI)
+	elif move == Move.PULLUP:
+		local_eye.y -= .35 * sin(get_climb_progress() * PI)
+	elif move == Move.ROLL:
+		var f: float = clampf(landing.time / tuning.roll_duration, 0, 1)
+		local_eye.y -= tuning.roll_eye_range.y * sin(f * PI)
+		local_eye.z += tuning.roll_eye_range.z * sin(f * PI)
+		anim_pitch = -TAU * smoothstep(0, 1, f)
+	elif move == Move.LANDING:
+		var f: float = clampf(landing.time / tuning.hard_duration, 0, 1)
+		local_eye.y -= tuning.hard_eye_range.y * sin(f * PI)
+		local_eye.z += tuning.hard_eye_range.z * sin(f * PI)
+		anim_pitch = -.94 * sin(f * PI)
+	elif _landing_elapsed < .6:
+		var amount: float = clampf((landing.height - 3) / (5.3 - 3), .2, 1)
+		local_eye.y -= tuning.normal_landing_compression * amount * sin(_landing_elapsed / .6 * PI)
+	_turn_lag = lerpf(_turn_lag, _camera_turn_target, minf(1, delta / tuning.turn_lag_time))
+	_roll = lerpf(_roll, target_roll * bank_amount + _turn_lag, 1 - exp(-8 * delta))
 	var fraction: float = Engine.get_physics_interpolation_fraction()
 	var eye: Vector3 = _curr_eye if snap else _prev_eye.lerp(_curr_eye, fraction)
 	var view_basis: Basis = Basis(_view_q)
-	var bob: Vector3 = Vector3.ZERO
-	if head_bob_enabled and grounded and move == Move.GROUND:
-		_bob_phase = _stride / 2.2 * PI
-		bob = view_basis.y * absf(sin(_bob_phase)) * 0.035 * clampf(get_speed() / top_speed, 0.0, 1.0)
+	# leg yaw trails view at the recovered maximum angular rate.
+	var body_target: Quaternion = global_basis.get_rotation_quaternion()
+	var body_angle: float = _body_q.angle_to(body_target)
+	_body_q = _body_q.slerp(body_target, minf(1, deg_to_rad(tuning.leg_rotation_speed) * delta / maxf(body_angle, .00001))) if not snap else body_target
+	var neck_progress: float = clampf((rad_to_deg(-_pitch) - tuning.neck_start) / tuning.neck_span, 0, 1)
+	var neck_target: Vector2 = Vector2(tuning.neck_forward * neck_progress * cos(neck_progress * PI / 4), tuning.neck_down * neck_progress * sin(neck_progress * PI / 4))
+	if move == Move.ROLL:
+		neck_target = Vector2.ZERO
+	_neck = _neck.lerp(neck_target, minf(1, delta / tuning.neck_smoothing))
+	local_eye += Vector3(0, -_neck.y, -_neck.x)
 	_rig.global_transform = Transform3D(
-		view_basis * Basis(Vector3.RIGHT, _pitch + _nod) * Basis(Vector3.BACK, _roll),
-		eye + view_basis.y * _dip + bob
+		view_basis * Basis(Vector3.RIGHT, _pitch + _nod + anim_pitch) * Basis(Vector3.BACK, _roll),
+		eye + view_basis * (local_eye + Vector3(0, _dip, 0))
 	)
-	var widen: float = 0.0
-	if speed_fov:
-		widen = 5.0 * clampf(inverse_lerp(base_speed + 0.5, top_speed, get_speed()), 0.0, 1.0)
-	_fov_extra = lerpf(_fov_extra, widen, 1.0 - exp(-3.0 * delta)) if not snap else widen
+	# Foldrunner extension, explicitly optional; baseline has a fixed lens.
+	var widen: float = 5 * clampf(inverse_lerp(base_speed + .5, top_speed, speed), 0, 1) if speed_fov else 0.0
+	_fov_extra = lerpf(_fov_extra, widen, 1 - exp(-3 * delta)) if not snap else widen
 	_camera.fov = vertical_fov(fov_horizontal + _fov_extra)
+
+func get_body_basis() -> Basis:
+	return Basis(_body_q)
+
+func get_hand_target(side: float) -> Vector3:
+	if move in [Move.VAULT, Move.GRAB, Move.PULLUP]:
+		return _climb_hand + global_basis.x * side * .18
+	if move in [Move.WALLRUN, Move.WALLCLIMB]:
+		var origin: Vector3 = global_position + up_direction * .65 - global_basis.z * .65
+		var hit = _ray(origin, origin - _wall_normal * (RADIUS + tuning.wall_probe))
+		if not hit.is_empty():
+			return Vector3(hit.position) + _wall_normal * .025
+	return Vector3.INF
+
+func get_hand_weight(side: float) -> float:
+	var contact: Vector3 = get_hand_target(side)
+	if not contact.is_finite():
+		return 0
+	var local: Vector3 = _rig.global_basis.inverse() * (contact - _rig.global_position)
+	var reach: float = (1 - smoothstep(1.0, 1.7, local.length())) * (1 - smoothstep(-.05, .05, local.z))
+	if move == Move.VAULT:
+		return reach * minf(1, vault.time / tuning.hand_ik_blend) * minf(1, (vault.duration - vault.time) / tuning.hand_ik_blend)
+	if move == Move.WALLRUN and signf(side) != signf(_wall_side):
+		return 0
+	if move == Move.PULLUP:
+		return reach * (1 - smoothstep(.6, 1, get_climb_progress()))
+	return reach
 
 
 ## Horizontal FOV is defined at 16:9. Camera keeps height, so wider screens see more.

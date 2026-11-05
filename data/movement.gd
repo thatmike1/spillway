@@ -148,6 +148,33 @@ extends Resource
 @export var contact_margin: float = .035
 @export var trajectory_lift_fraction: float = .22
 
+# camera/body, inherited world baseline; 16:9 horizontal interpretation is P.
+@export var world_fov: float = 85.0
+# camera/body, measured eye peak-to-peak ranges and nominal cycles (H/M).
+@export var run_eye_range: Vector2 = Vector2(.12354, .06002)
+@export var sprint_eye_range: Vector2 = Vector2(.08, .03994)
+@export var wall_left_eye_range: Vector2 = Vector2(.06, .06068)
+@export var wall_right_eye_range: Vector2 = Vector2(.16074, .06068)
+@export var run_cycle: float = .66667
+@export var sprint_cycle: float = .53333
+@export var wall_left_tilt: float = 17.814
+@export var wall_right_tilt: float = -23.0
+@export var hard_eye_range: Vector3 = Vector3(.01222, .73852, .25960)
+@export var roll_eye_range: Vector3 = Vector3(.00731, 1.39665, .84993)
+# camera lag and swan neck, recovered constants, original spring transfer P.
+@export var turn_lag_time: float = .20
+@export var turn_lag_multiplier: float = -.15
+@export var neck_start: float = 15.0
+@export var neck_span: float = 95.50
+@export var neck_forward: float = .35
+@export var neck_down: float = .30
+@export var neck_smoothing: float = .07
+@export var leg_rotation_speed: float = 274.66
+# original body-eye curves for contacts; exact composed curves U, resynthesis P.
+@export var vault_eye_compression: float = 1.05
+@export var normal_landing_compression: float = .12
+@export var hand_ik_blend: float = .10
+
 func acceleration(speed: float) -> float:
 	for i: int in range(1, speed_knots.size()):
 		if speed <= speed_knots[i]:

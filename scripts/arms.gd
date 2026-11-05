@@ -16,6 +16,8 @@ var _rect: TextureRect
 var _arms: Array[Dictionary] = []
 var _land_kick: float = 0.0
 var _jump_kick: float = 0.0
+var _lower: Node3D
+var _legs: Array[Dictionary] = []
 var _materials: Dictionary = {}
 
 
@@ -57,6 +59,19 @@ func attach(player: CharacterBody3D) -> void:
 	_materials["glove"] = _material(Color("#20262e"), 0.8)
 	for side: float in [-1.0, 1.0]:
 		_arms.append(_build_arm(side))
+	_lower = Node3D.new()
+	_camera.add_child(_lower)
+	_box(_lower, Vector3(0, -.12, 0), Vector3(.32, .30, .22), _materials["sleeve"])
+	_box(_lower, Vector3(0, .15, .035), Vector3(.37, .28, .23), _materials["sleeve"])
+	for side: float in [-1.0, 1.0]:
+		var thigh := Node3D.new()
+		_lower.add_child(thigh)
+		_capsule(thigh, .085, .45, _materials["sleeve"]).name = "Mesh"
+		var shin := Node3D.new()
+		_lower.add_child(shin)
+		_capsule(shin, .065, .43, _materials["sleeve"]).name = "Mesh"
+		var foot := _box(_lower, Vector3.ZERO, Vector3(.13, .10, .28), _materials["glove"])
+		_legs.append({"side": side, "thigh": thigh, "shin": shin, "foot": foot})
 	_layer = CanvasLayer.new()
 	_layer.layer = 5
 	add_child(_layer)
@@ -192,9 +207,25 @@ func _process(delta: float) -> void:
 	var up: Vector3 = _player.up_direction
 	var vertical: float = _player.velocity.dot(up)
 	var speed: float = float(_player.call("get_speed"))
-	var run: float = clampf(speed / 9.6, 0.0, 1.0)
+	var run: float = clampf(speed / 7.2, 0.0, 1.0)
 	var stride_phase: float = float(_player.call("get_stride")) / 2.2 * PI
 	var camera_basis: Basis = main_camera.global_basis
+	var body_basis: Basis = _player.call("get_body_basis")
+	_lower.transform = Transform3D(camera_basis.inverse() * body_basis, camera_basis.inverse() * (_player.global_position - main_camera.global_position))
+	if move in [4, 5, 9]:
+		_lower.position += camera_basis.inverse() * up * -.55
+	for leg: Dictionary in _legs:
+		var side: float = leg.side
+		var phase: float = sin(stride_phase) * side * run if on_ground else .4 * side
+		var hip: Vector3 = Vector3(side * .105, -.22, 0)
+		var knee: Vector3 = Vector3(side * .12, -.5 + absf(phase) * .10, -.04 - phase * .19)
+		var ankle: Vector3 = Vector3(side * .12, -.83 + maxf(phase, 0) * .15, phase * .28)
+		if move == 4:
+			knee = Vector3(side * .13, -.45, -.42)
+			ankle = Vector3(side * .14, -.5, -.78)
+		_aim(leg.thigh, hip, knee)
+		_aim(leg.shin, knee, ankle)
+		(leg.foot as Node3D).position = ankle + Vector3(0, -.02, -.07)
 	for arm: Dictionary in _arms:
 		var side: float = arm["side"]
 		var target: Vector3
@@ -202,13 +233,11 @@ func _process(delta: float) -> void:
 		var curl: float = 0.35
 		var stiffness: float = 140.0
 		match move:
-			3: # climb or vault: palms planted on the ledge
+			3, 5, 6, 7, 8: # climb or vault: palms planted on the ledge
 				var hand_world: Vector3 = _player.call("get_climb_hand_point")
 				var local: Vector3 = camera_basis.inverse() * (hand_world - main_camera.global_position)
 				var progress: float = float(_player.call("get_climb_progress"))
-				target = Vector3(side * 0.2, clampf(local.y, -0.34, -0.1), clampf(local.z, -0.55, -0.3))
-				target.y -= progress * 0.25
-				target.z += progress * 0.25
+				target = Vector3(side * .2, -.10 - progress * .07, -.48)
 				facing = _hand_basis(side, deg_to_rad(-80.0), deg_to_rad(side * -10.0))
 				curl = 0.1
 				stiffness = 320.0
@@ -219,7 +248,7 @@ func _process(delta: float) -> void:
 					facing = _hand_basis(side, deg_to_rad(-10.0), deg_to_rad(side * -80.0))
 					curl = 0.05
 				else:
-					target = Vector3(side * 0.2, -0.32 + sin(stride_phase * 2.0) * 0.05, -0.36)
+					target = Vector3(side * 0.2, -0.12 + sin(stride_phase * 2.0) * 0.04, -0.48)
 					facing = _hand_basis(side, deg_to_rad(30.0), 0.0)
 			4: # slide: one hand forward for balance, the other trails low
 				if side > 0.0:
@@ -235,7 +264,8 @@ func _process(delta: float) -> void:
 					target = Vector3(side * (0.25 - run * 0.03), -0.42 + run * 0.12 * maxf(swing, 0.0) - run * 0.03, -0.3 - swing * 0.1 * run)
 					facing = _hand_basis(side, deg_to_rad(40.0 + swing * 20.0), deg_to_rad(side * 10.0))
 					curl = 0.75
-					target.y -= _land_kick * 0.12
+					target.y = lerpf(target.y, -.10, _land_kick)
+					target.z = lerpf(target.z, -.48, _land_kick)
 				else:
 					# airborne: hands come up into view and spread, then lower for the landing
 					var rising: float = clampf(vertical / 6.0, -1.0, 1.0)
@@ -244,6 +274,12 @@ func _process(delta: float) -> void:
 					facing = _hand_basis(side, deg_to_rad(lerpf(-10.0, 72.0, reach)), deg_to_rad(side * lerpf(-30.0, -14.0, reach)))
 					curl = lerpf(0.3, 0.08, reach)
 					stiffness = 170.0
+		var weight: float = float(_player.call("get_hand_weight", side))
+		if weight > 0:
+			var contact: Vector3 = _player.call("get_hand_target", side)
+			var local: Vector3 = camera_basis.inverse() * (contact - main_camera.global_position)
+			target = target.lerp(local, weight)
+			stiffness = 450
 		_drive_arm(arm, target, facing, curl, stiffness, delta)
 
 
