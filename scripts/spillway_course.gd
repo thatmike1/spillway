@@ -19,10 +19,10 @@ func build(level: Node3D) -> void:
 	checkpoints.clear()
 	checkpoints.append_array([
 		{"pose": level.get("spawn"), "title": "Crest"},
-		{"pose": Transform3D(Basis.IDENTITY, Vector3(11, 4.04, -59)), "title": "Sluice yard", "radius": 4.0},
-		{"pose": Transform3D(Basis(Vector3.UP, -PI * .5), Vector3(-28, 3.04, -104)), "title": "Outflow", "radius": 4.0, "bounds": AABB(Vector3(-39.5, 2.8, -109.5), Vector3(21.0, 3.0, 10.0))},
+		{"pose": Transform3D(Basis.IDENTITY, Vector3(10, 4.04, -65)), "title": "Sluice yard", "hint": "the sluice yard entrance", "radius": 4.0, "bounds": AABB(Vector3(6.5, 3.5, -74.5), Vector3(7.5, 3.0, 12.5))},
+		{"pose": Transform3D(Basis(Vector3.UP, -PI * .5), Vector3(-28, 3.04, -104)), "title": "Outflow", "hint": "the brick filter-house roof", "radius": 4.0, "bounds": AABB(Vector3(-39.5, 2.8, -109.5), Vector3(21.0, 3.0, 10.0))},
 	])
-	level.set("finish_position", Vector3(24, -3, -67))
+	level.set("finish_position", Vector3(24, -3, -64.5))
 	level.set("finish_radius", 2.0)
 	var bounds: Array = level.get("segment_bounds")
 	bounds.append(AABB(Vector3(-44, -9, -110), Vector3(61, 18, 54)))
@@ -79,6 +79,9 @@ func _make_yard() -> void:
 		_level.call("_solid", "ValvePlinth", Vector3(-35, 2.1, z), Vector3(4, 1.2, 4), "old_concrete")
 		_level.call("_cylinder", Vector3(-35, 2.7, z), Vector3(-35, 3.7, z), .3, "pipe")
 		_level.call("_wheel", Vector3(-35, 3.8, z), .9, "ochre", true)
+	# p / the low apron does not feed the high outflow run-up; its edge is guarded.
+	_level.call("_rail", Vector3(-19, 1.5, -96.9), Vector3(-11, 1.5, -96.9))
+	_level.call("_rail", Vector3(-19, 1.5, -96.9), Vector3(-19, 1.5, -99))
 	_level.call("_rail", Vector3(-11, 1.5, -78), Vector3(-11, 1.5, -93))
 	_level.call("_rail", Vector3(-40, 1.5, -72), Vector3(-40, 1.5, -85))
 	# visible water works continue under the apron, with foundation-depth openings.
@@ -104,6 +107,10 @@ func _make_filter_house() -> void:
 		_level.call("_solid", "InspectionApronPier", Vector3(x, -3.5, -98), Vector3(.7, 9, .7), "old_concrete")
 	# the low east inspection housing is an optional forgiving roof catch.
 	_level.call("_solid", "FilterInspectionHousing", Vector3(-21, 2.1, -97), Vector3(3, 1.2, 3), "old_concrete")
+	# p / one continuous nosing carries the housing line across the old slot and curb.
+	_level.call("_ramp", "InspectionRoofNosing", Vector3(-21, 2.7, -98.0), Vector3(-21, 3, -98.65), 3.0, 0.2, "concrete")
+	_level.call("_slab", "InspectionRoofBridge", Vector3(-21, 3, -98.95), Vector2(3, 0.7), 0.25, "concrete")
+	_level.call("_box", Vector3(-21, 3.02, -99.1), Vector3(3, 0.025, 0.12), "ochre")
 	_level.call("_rail", Vector3(-40, 3, -110), Vector3(-18, 3, -110))
 	_level.call("_rail", Vector3(-40, 3, -110), Vector3(-40, 3, -99))
 	# ventilation stacks stay behind the approach, leaving roof and tower readable.
@@ -149,6 +156,9 @@ func _make_basin() -> void:
 	_walk("BasinWestEdge", Vector3(-16, -5.65, -100), Vector3(-16, -5.65, -80), 3.0, false)
 	_walk("BasinEdgeAccess", Vector3(-12, -6, -83), Vector3(-14.5, -5.65, -83), 3.0, false)
 	_walk("BasinExitRamp", Vector3(-10, -6, -79), Vector3(-10, -3, -65), 5.0, false)
+	_level.call("_beam", Vector3(-12.35, -5.95, -78.7), Vector3(-7.65, -5.95, -78.7), 0.08, "ochre")
+	_level.call("_solid", "BasinRampHeadstock", Vector3(-12.85, -5.3, -79), Vector3(0.14, 1.4, 0.14), "steel")
+	_level.call("_box", Vector3(-12.85, -4.58, -79), Vector3(0.18, 0.1, 0.18), "ochre")
 	_level.call("_slab", "BasinExitLanding", Vector3(-10, -3, -63.5), Vector2(5, 3), .5, "concrete")
 	_walk("BasinFrontWalk", Vector3(-7.5, -3, -65), Vector3(24, -3, -65), 8.0, false)
 	_level.call("_rail", Vector3(-7.5, -3, -62.1), Vector3(7, -3, -62.1))
@@ -209,32 +219,38 @@ func _define_routes() -> void:
 		_p(Vector3(-37, 1.5, -87)), _p(Vector3(-37, 3, -101)),
 		_p(Vector3(-28, 3, -104)), _p(Vector3(-18.5, 3, -106)),
 		_p(Vector3(-5, 0, -106)), _p(Vector3(37, 0, -106)),
-		_p(Vector3(37, -3, -85)), _p(Vector3(37, -3, -64)), _p(Vector3(24, -3, -63)), _p(Vector3(24, -3, -67)),
+		_p(Vector3(37, -3, -85)), _p(Vector3(37, -3, -64)), _p(Vector3(24, -3, -62.7), .6), _p(Vector3(24, -3, -64.5)),
 	])
 	var fast: Array = common.duplicate()
 	fast.append_array([
-		_p(Vector3(-27, 1.5, -75)), _p(Vector3(-27, 1.5, -80), .8, true),
-		_p(Vector3(-27, 1.5, -85), .8, true), _p(Vector3(-27, 1.5, -90)),
+		_p(Vector3(-27, 1.5, -75)), _p(Vector3(-27, 1.5, -79.5), .85),
+		_p(Vector3(-27, 1.5, -84), .9, true), _p(Vector3(-27, 1.5, -90)),
 		_p(Vector3(-27, 3, -101)), _p(Vector3(-28, 3, -104)),
 		_p(Vector3(-18, 3, -100), 1.3), _p(Vector3(-5.5, .12, -95.2), 1, true),
 		_p(Vector3(-3.4, 0, -92.6), .95, true, true), _p(Vector3(2, -1, -86), 1.4, true),
 		_p(Vector3(3.5, -1, -84.5), 1.2, true, true), _p(Vector3(7.6, -2.25, -74.7), 2.5, true),
 		_p(Vector3(8.6, -2.5, -73.5), 1.5, true, true), _p(Vector3(16, -3, -65), 1.6),
-		_p(Vector3(24, -3, -63)), _p(Vector3(24, -3, -67)),
+		_p(Vector3(24, -3, -62.7), .6), _p(Vector3(24, -3, -64.5)),
 	])
 	var recovery: Array = common.duplicate()
 	recovery.append_array([
-		_p(Vector3(-27, 1.5, -75)), _p(Vector3(-27, 1.5, -80), .8, true),
-		_p(Vector3(-27, 1.5, -85), .8, true), _p(Vector3(-27, 1.5, -90)),
+		_p(Vector3(-27, 1.5, -75)), _p(Vector3(-27, 1.5, -79.5), .85),
+		_p(Vector3(-27, 1.5, -84), .9, true), _p(Vector3(-27, 1.5, -90)),
 		_p(Vector3(-27, 3, -101)), _p(Vector3(-28, 3, -104)),
 		_p(Vector3(-18, 3, -100), 1.3), _p(Vector3(-5.5, .12, -95.2)),
 		_p(Vector3(-7, -6, -91), 1.8), _p(Vector3(-10, -6, -80)),
-		_p(Vector3(-10, -3, -63.5), 1.3), _p(Vector3(15, -3, -65)), _p(Vector3(24, -3, -63)), _p(Vector3(24, -3, -67)),
+		_p(Vector3(-10, -3, -63.5), 1.3), _p(Vector3(15, -3, -65)), _p(Vector3(24, -3, -62.7), .6), _p(Vector3(24, -3, -64.5)),
 	])
 	var routes: Dictionary = _level.get("routes")
 	routes["safe"].append_array(safe)
 	routes["fast"].append_array(fast)
 	routes["recovery"].append_array(recovery)
+	# input regression for the ordinary west corner that missed the original sphere.
+	var corner: Array = routes["safe"].duplicate(true)
+	corner[10] = _p(Vector3(-9, 4, -56.5))
+	corner[11] = _p(Vector3(7.7, 4, -62.8), .8)
+	corner.insert(12, _p(Vector3(9.9, 4, -69.5)))
+	routes["safe_corner"] = corner
 
 
 func _p(pos: Vector3, radius: float = 1.0, crouch: bool = false, jump: bool = false) -> Dictionary:
