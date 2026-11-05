@@ -146,6 +146,7 @@ func _run() -> void:
 	await clean_records()
 	await practice_records()
 	await recovery_records()
+	await authored_roof_checkpoint()
 	await assisted_comparisons()
 	await paused_controls()
 	await controller_menu()
@@ -401,3 +402,25 @@ func projection_aspects() -> void:
 	root.content_scale_size = old_scale
 	game.call("change_setting", "fov", old_fov)
 	game.call("change_setting", "comfort", old_comfort)
+
+func authored_roof_checkpoint() -> void:
+	case_name = "authored roof checkpoint region"
+	var authored := game.find_child("Spillway", false, false) as Node3D
+	var points: Array = authored.get("checkpoints")
+	check(points[2].get("bounds") is AABB, "actual filter-house roof authors a region rather than a small central target")
+	if not points[2].get("bounds") is AABB:
+		return
+	var region: AABB = points[2]["bounds"]
+	var original: Node3D = game.get("level")
+	game.set("level", authored)
+	await restart("east mantle roof grants ordered checkpoint")
+	await visit((points[1].pose as Transform3D).origin, 5.0)
+	await visit(Vector3(-21, 3.04, -101), 10.0)
+	check(int(game.get("checkpoint_index")) == 2, "east mantle landing advances checkpoint without crossing roof centre")
+	await visit(authored.get("finish_position"), 20.0)
+	check(bool(game.get("finished")), "valid east-roof approach can finish the actual level")
+	await restart("yard below roof cannot advance checkpoint")
+	await visit((points[1].pose as Transform3D).origin, 5.0)
+	await visit(Vector3(-21, 1.5, -98), 10.0)
+	check(int(game.get("checkpoint_index")) == 1 and not region.has_point(Vector3(-21, 1.5, -98)), "yard and inspection approach cannot claim the roof early")
+	game.set("level", original)

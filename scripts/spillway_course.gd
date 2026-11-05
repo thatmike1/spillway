@@ -20,7 +20,7 @@ func build(level: Node3D) -> void:
 	checkpoints.append_array([
 		{"pose": level.get("spawn"), "title": "Crest"},
 		{"pose": Transform3D(Basis.IDENTITY, Vector3(11, 4.04, -59)), "title": "Sluice yard", "radius": 4.0},
-		{"pose": Transform3D(Basis(Vector3.UP, -PI * .5), Vector3(-28, 3.04, -104)), "title": "Outflow", "radius": 4.0},
+		{"pose": Transform3D(Basis(Vector3.UP, -PI * .5), Vector3(-28, 3.04, -104)), "title": "Outflow", "radius": 4.0, "bounds": AABB(Vector3(-39.5, 2.8, -109.5), Vector3(21.0, 3.0, 10.0))},
 	])
 	level.set("finish_position", Vector3(24, -3, -67))
 	level.set("finish_radius", 2.0)

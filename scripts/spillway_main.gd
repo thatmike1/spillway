@@ -1,7 +1,7 @@
 extends Node3D
 ## p / run provenance is separate from movement and presentation.
 
-const BUILD_ID := "spillway-2026.11.05-r4"
+const BUILD_ID := "spillway-2026.11.05-r5"
 const SAVE_PATH := "user://spillway_v1.cfg"
 var player: CharacterBody3D
 var level: Node3D
@@ -139,7 +139,8 @@ func _physics_process(delta: float) -> void:
 		var point: Dictionary = points[next]
 		var position: Vector3 = (point["pose"] as Transform3D).origin
 		var radius := float(point.get("radius", 5.0))
-		if player.global_position.distance_to(position) < radius:
+		var reached := (point["bounds"] as AABB).has_point(player.global_position) if point.get("bounds") is AABB else player.global_position.distance_to(position) < radius
+		if reached:
 			checkpoint_index = next
 			splits.append(elapsed)
 			hud.call("notify", point.get("title", "Next segment"))
