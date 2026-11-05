@@ -48,6 +48,17 @@ func build() -> void:
 		_batch_static_boxes()
 
 
+func is_finish_at(feet: Vector3) -> bool:
+	var front := AABB(finish_position - Vector3(2.0, 0.3, 0.8), Vector3(4.0, 3.0, 1.6))
+	if front.has_point(feet):
+		return true
+	if not has_meta("spillway_course_built"):
+		return false
+	# p / arriving at the wheel counts from either side of the loading platform.
+	var wheel_approach := AABB(finish_position - Vector3(3.0, 0.3, 5.0), Vector3(6.0, 3.0, 4.5))
+	return wheel_approach.has_point(feet)
+
+
 func _batch_static_boxes() -> void:
 	# p / same geometry and materials, fewer draw calls; wheel parts remain separate.
 	var groups: Dictionary = {}

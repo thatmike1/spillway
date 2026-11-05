@@ -118,6 +118,16 @@ func run() -> void:
 		action("move_back", false)
 		await ticks(20)
 		check(int(player.get("mantle_count")) == count, "the same held jump cannot immediately recatch")
+	for start: Vector3 in [Vector3(16, -2.96, -65), Vector3(32, -2.96, -64)]:
+		await fixture("direct wheel approach %.0f" % start.x, start)
+		var roof: Transform3D = game.get("level").get("checkpoints")[2].pose
+		player.call("reset_to", roof)
+		await ticks(3)
+		check(int(game.get("checkpoint_index")) == 2, "fixture grants Outflow through its real roof region")
+		player.call("reset_to", Transform3D(Basis.IDENTITY, start))
+		await ticks(8)
+		await walk(Vector3(23.8, -3, -68.8))
+		check(bool(game.get("finished")), "walking directly to the wheel finishes from either side")
 	for key: String in ["move_forward", "move_back", "jump", "crouch"]:
 		action(key, false)
 	print("spillway access: %d/%d checks passed; explicit authored-level fixtures, not whole-route proof" % [checks - failures, checks])

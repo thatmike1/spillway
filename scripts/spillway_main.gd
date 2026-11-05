@@ -1,7 +1,7 @@
 extends Node3D
 ## p / run provenance is separate from movement and presentation.
 
-const BUILD_ID := "spillway-2026.11.05-r6"
+const BUILD_ID := "spillway-2026.11.05-r7"
 const SAVE_PATH := "user://spillway_v1.cfg"
 var player: CharacterBody3D
 var level: Node3D
@@ -146,7 +146,8 @@ func _physics_process(delta: float) -> void:
 			hud.call("notify", point.get("title", "Next segment"))
 	var finish_center: Vector3 = level.get("finish_position")
 	var finish_box := AABB(finish_center - Vector3(2.0, 0.3, 0.8), Vector3(4.0, 3.0, 1.6))
-	if finish_box.has_point(player.global_position):
+	var at_finish: bool = level.call("is_finish_at", player.global_position) if level.has_method("is_finish_at") else finish_box.has_point(player.global_position)
+	if at_finish:
 		if checkpoint_index == points.size() - 1:
 			_finish()
 		elif not _finish_hint:

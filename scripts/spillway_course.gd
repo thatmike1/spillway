@@ -252,6 +252,11 @@ func _define_routes() -> void:
 	corner[11] = _p(Vector3(7.7, 4, -62.8), .8)
 	corner.insert(12, _p(Vector3(9.9, 4, -69.5)))
 	routes["safe_corner"] = corner
+	# input regression for heading straight to the wheel rather than the front box.
+	var direct: Array = routes["fast"].duplicate(true)
+	direct.resize(direct.size() - 2)
+	direct.append(_p(Vector3(23.8, -3, -68.8)))
+	routes["fast_direct_finish"] = direct
 
 
 func _p(pos: Vector3, radius: float = 1.0, crouch: bool = false, jump: bool = false) -> Dictionary:
