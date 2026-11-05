@@ -1,5 +1,7 @@
 # Foldrunner
 
+**Reboot planned, runtime unchanged:** Mike's Linux playtest rejected this build's feel. The current design is [Spillway](docs/reboot/BRIEF.md), a new controller and one finished dam-descent level. [The council](docs/reboot/COUNCIL.md) explains the decision; [the goal prompt](docs/reboot/GOAL.txt) starts the autonomous build. Everything below describes the pre-reboot game, not a completed Spillway build.
+
 A first-person parkour game in Godot 4.7.2. It opens in an original training yard; Tab switches to the folding-city route, whose clean scripted run takes about 84 seconds. Speed builds quickly into a run, then slowly toward 7.2m/s. Footage-first jumps take about .79 seconds and rise 1.27 metres. Landings, vaults, grabs, rolls and wall jumps have separate momentum contracts. All geometry, body animation, materials and synthesized sound are original.
 
 ## Play on Windows
