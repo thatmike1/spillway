@@ -25,6 +25,7 @@ var _spawn_origin: Vector3
 var _persist: bool = true
 var _recovery_time: float = 0.0
 var _quitting: bool = false
+var _finish_hint: bool = false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -72,6 +73,7 @@ func restart_run() -> void:
 	splits.clear()
 	split_deltas.clear()
 	_started = false
+	_finish_hint = false
 	_recovery_time = 0.0
 	_spawn_origin = level.get("spawn").origin
 	player.call("reset_to", level.get("spawn"))
@@ -99,6 +101,7 @@ func respawn() -> void:
 	hud.call("notify", "Back on solid ground · practice attempt")
 
 func _restore_checkpoint() -> void:
+	split_deltas.clear()
 	var points: Array = level.get("checkpoints")
 	var pose: Transform3D = level.get("spawn")
 	if checkpoint_index < points.size():
@@ -141,6 +144,11 @@ func _physics_process(delta: float) -> void:
 	if finish_box.has_point(player.global_position):
 		if checkpoint_index == points.size() - 1:
 			_finish()
+		elif not _finish_hint:
+			hud.call("notify", "Pump feed closed · cross the brick filter-house roof first")
+			_finish_hint = true
+	else:
+		_finish_hint = false
 
 func _finish() -> void:
 	finished = true

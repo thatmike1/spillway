@@ -10,6 +10,7 @@ var timing: Label
 var message: Label
 var finish_label: Label
 var pause_panel: ColorRect
+var _resume_button: Button
 var _fade: ColorRect
 var _blink_alpha: float = 0.0
 var _message_time: float = 0.0
@@ -134,12 +135,16 @@ func _make_pause() -> void:
 	for item: Array in [["Resume", func() -> void: game.set_paused(false)], ["Restart clean run", func() -> void: game.restart_run()], ["Quit", func() -> void: game.request_quit()]]:
 		var button := Button.new()
 		button.text = item[0]
+		if str(item[0]) == "Resume":
+			_resume_button = button
 		button.pressed.connect(item[1])
 		column.add_child(button)
 	pause_panel.hide()
 
 func set_paused(value: bool) -> void:
 	pause_panel.visible = value
+	if value and _resume_button != null:
+		_resume_button.grab_focus()
 
 func _slider_changed(value: float, key: String) -> void:
 	game.change_setting(key, value)

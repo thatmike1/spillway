@@ -459,6 +459,25 @@ func mantles() -> void:
 		action("move_back", false)
 		await ticks(20)
 		check(int(player.get("mantle_count")) == catches, "same held input cannot recatch after cancellation")
+	await mantle_fixture("oblique mantle abort preserves momentum")
+	player.call("reset_to", Transform3D(Basis.IDENTITY, Vector3(-0.8, 0.025, 0)))
+	action("move_forward", true)
+	action("move_right", true, 0.4)
+	await ticks(14)
+	action("jump", true)
+	caught = false
+	for i: int in 110:
+		await ticks(1)
+		if str(player.get("mode")) == "mantle":
+			caught = true
+			break
+	check(caught, "oblique real-input approach catches the lip")
+	if caught:
+		var tangent_before: float = player.velocity.x
+		action("jump", false)
+		await ticks(2)
+		check(tangent_before > 1.0 and player.velocity.x > tangent_before * 0.8 and player.velocity.y < 0.0,
+			"release keeps lateral carry while resuming the fall: %.3f to %s" % [tangent_before, player.velocity])
 	await mantle_fixture("grounded movement never catches")
 	await approach_mantle(false)
 	check(int(player.get("mantle_count")) == 0, "grounded forward alone never starts mantle")

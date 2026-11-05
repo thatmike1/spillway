@@ -146,16 +146,17 @@ func _run() -> void:
 	await clean_records()
 	await practice_records()
 	await recovery_records()
+	await assisted_comparisons()
 	await paused_controls()
+	await controller_menu()
+	await projection_aspects()
 	for name: String in ACTIONS:
 		action(name, false)
 	game.call("set_paused", false)
 	case_name = "profile isolation"
 	check(profile_snapshot() == saved_profile, "settings and clean/practice finishes never create or change saved profile")
-	game.queue_free()
-	await frames(2)
 	print("spillway flow: %d/%d checks passed; failures=%d; isolated flow fixture, route playback separate" % [checks - failures, checks, failures])
-	quit(1 if failures else 0)
+	game.call("request_quit", 1 if failures else 0)
 
 func ordered_checkpoints() -> void:
 	await restart("ordered checkpoints")
@@ -332,3 +333,67 @@ func settings_controls() -> void:
 		await activate(comfort)
 		check(bool(game.get("settings").comfort) != before and bool(game.get("player").get("comfort")) != before,
 			"focused comfort control receives real input and changes camera setting while paused")
+
+func assisted_comparisons() -> void:
+	for assistance: String in ["practice", "respawn"]:
+		await restart("post-finish " + assistance + " comparisons")
+		await finish_run([7.0, 16.0, 28.0])
+		check(not game.get("split_deltas").is_empty(), "clean finish establishes comparisons before assistance")
+		var before := records()
+		if assistance == "practice":
+			await pulse("practice")
+		else:
+			game.get("player").call("reset_to", Transform3D(Basis.IDENTITY, Vector3(0, -30, -8)))
+			await ticks(24)
+		await visit(game.get("level").get("finish_position"), 55.0)
+		var text: String = game.get("hud").get("finish_label").text
+		check(bool(game.get("finished")) and game.get("split_deltas").is_empty() and not "vs segment best" in text,
+			"assisted replay clears previous clean comparisons from the actual result")
+		check(records() == before and "PRACTICE FINISH" in text, "post-finish assistance protects clean records and labels result")
+
+func joy(button_index: int, pressed: bool) -> void:
+	var event := InputEventJoypadButton.new()
+	event.button_index = button_index
+	event.pressed = pressed
+	Input.parse_input_event(event)
+	Input.flush_buffered_events()
+
+func controller_menu() -> void:
+	await restart("controller menu without test focus")
+	joy(JOY_BUTTON_START, true)
+	await frames(2)
+	joy(JOY_BUTTON_START, false)
+	await frames(2)
+	var resume := button("Resume")
+	check(paused and root.gui_get_focus_owner() == resume, "controller Start opens pause with Resume already focused")
+	joy(JOY_BUTTON_DPAD_UP, true)
+	await frames(2)
+	joy(JOY_BUTTON_DPAD_UP, false)
+	await frames(2)
+	check(root.gui_get_focus_owner() != null and root.gui_get_focus_owner() != resume, "D-pad reaches settings without any test grab_focus")
+	joy(JOY_BUTTON_START, true)
+	await frames(2)
+	joy(JOY_BUTTON_START, false)
+	await frames(2)
+	check(not paused, "controller Start resumes from settings focus")
+
+func projection_aspects() -> void:
+	case_name = "actual horizontal projection"
+	var old_size: Vector2i = root.size
+	var old_scale: Vector2i = root.content_scale_size
+	var old_fov: float = game.get("settings").fov
+	var old_comfort: bool = game.get("settings").comfort
+	game.call("change_setting", "fov", 90.0)
+	game.call("change_setting", "comfort", true)
+	root.content_scale_size = Vector2i.ZERO
+	for size: Vector2i in [Vector2i(1280, 720), Vector2i(2560, 720)]:
+		root.size = size
+		await frames(3)
+		var camera: Camera3D = game.get("player").get("camera")
+		var projection := camera.get_camera_projection()
+		var actual := rad_to_deg(2.0 * atan(1.0 / projection.x.x))
+		check(absf(actual - 90.0) < 0.05, "90 horizontal FOV remains 90 at %s: %.3f" % [root.get_visible_rect().size, actual])
+	root.size = old_size
+	root.content_scale_size = old_scale
+	game.call("change_setting", "fov", old_fov)
+	game.call("change_setting", "comfort", old_comfort)

@@ -65,6 +65,14 @@ def main():
     provenance = json.loads((windows / 'PROVENANCE.json').read_text())
     if provenance.get('official_digest') != 'sha256:' + digest(windows / 'Godot_v4.7.2-stable_win64.exe.zip'):
         parser.error('Windows archive does not match the recorded official release digest')
+    with zipfile.ZipFile(windows / 'Godot_v4.7.2-stable_win64.exe.zip') as official:
+        for name in names:
+            expected = hashlib.sha256()
+            with official.open(name) as stream:
+                for block in iter(lambda: stream.read(1024 * 1024), b''):
+                    expected.update(block)
+            if digest(windows / name) != expected.hexdigest():
+                parser.error('extracted Windows runtime differs from the verified archive: ' + name)
     licenses = ENGINE_DIR / 'licenses'
     for name in ['GODOT-LICENSE.txt', 'GODOT-COPYRIGHT.txt']:
         if not (licenses / name).is_file():

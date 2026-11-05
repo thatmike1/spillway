@@ -48,6 +48,7 @@ var _mantle_latched: bool = false
 var _mantle_phase: int = 0
 var _mantle_goal: Vector3
 var _mantle_lift: Vector3
+var _mantle_wall_normal: Vector3
 var _mantle_carry: Vector3
 var _mantle_time: float = 0.0
 
@@ -258,6 +259,7 @@ func _try_mantle(wish: Vector3) -> bool:
 	if not _clear_body(goal, STAND_HEIGHT):
 		return false
 	_mantle_latched = true
+	_mantle_wall_normal = wall.normal
 	_mantle_goal = goal
 	_mantle_lift = Vector3(global_position.x, goal.y + 0.03, global_position.z)
 	# p / a small hand push restores forward motion lost against the lip.
@@ -288,8 +290,13 @@ func _step_mantle(delta: float, jump_held: bool) -> void:
 
 func _end_mantle(success: bool) -> void:
 	# cancelling gives the player back motion without driving them into the caught wall.
-	velocity = _mantle_carry if success else Vector3.ZERO
-	velocity.y = 0.0 if success else -1.0
+	if success:
+		velocity = _mantle_carry
+		velocity.y = 0.0
+	else:
+		if velocity.dot(_mantle_wall_normal) < 0.0:
+			velocity = velocity.slide(_mantle_wall_normal)
+		velocity.y = minf(velocity.y, -1.0)
 	mode = "air"
 	_buffer = 0.0
 	_coyote = 0.0
@@ -313,4 +320,6 @@ func _update_eye(delta: float) -> void:
 	camera.global_rotation = Vector3(pitch, yaw, 0.0)
 	var extra := 0.0 if comfort else clampf((get_speed() - 6.0) * 0.5, 0.0, 5.0)
 	var horizontal_fov := fov_horizontal + extra
-	camera.fov = rad_to_deg(2.0 * atan(tan(deg_to_rad(horizontal_fov) * 0.5) / (16.0 / 9.0)))
+	var view_size := get_viewport().get_visible_rect().size
+	var aspect := view_size.x / maxf(view_size.y, 1.0)
+	camera.fov = rad_to_deg(2.0 * atan(tan(deg_to_rad(horizontal_fov) * 0.5) / maxf(aspect, 0.1)))

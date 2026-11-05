@@ -15,7 +15,6 @@ var routes: Dictionary = {}
 var water_audio_sources: Array[Vector3] = []
 var _water_surfaces: Array[Dictionary] = []
 var _hero_wheel: Node3D
-var _finish_wheel: Node3D
 var _wheel_speed: float = 0.0
 var _wheel_running: bool = false
 
@@ -44,7 +43,6 @@ func build() -> void:
 	if not OS.get_cmdline_user_args().has("--crest"):
 		preload("res://scripts/spillway_course.gd").new().build(self)
 		routes["brake"].append_array(routes["safe"].slice(12))
-		_make_finish_portal()
 	preload("res://scripts/spillway_art.gd").new().apply(self)
 	if not OS.get_cmdline_user_args().has("--no-batch"):
 		_batch_static_boxes()
@@ -340,11 +338,6 @@ func _make_flowing_spill() -> void:
 	water_audio_sources.append(Vector3(8.5, 4.4, -24.0))
 	water_regions.append({"bounds": AABB(Vector3(6.94, 6.5, -23.7), Vector3(3.12, 6.5, 23.7)), "depth": 0.12})
 
-func _make_finish_portal() -> void:
-	# p / the control wheel sits beside its larger drive, with an open view from the apron.
-	_finish_wheel = _wheel(Vector3(28.0, -1.2, -68.7), 0.7, "ochre")
-	_cylinder(Vector3(28.0, -1.2, -69.5), Vector3(28.0, -1.2, -68.5), 0.15, "steel")
-
 func splash_at(feet: Vector3) -> void:
 	if DisplayServer.get_name() == "headless":
 		return
@@ -382,15 +375,11 @@ func reset_state() -> void:
 	_wheel_speed = 0.0
 	if is_instance_valid(_hero_wheel):
 		_hero_wheel.rotation.z = 0.0
-	if is_instance_valid(_finish_wheel):
-		_finish_wheel.rotation.z = 0.0
 
 func _process(delta: float) -> void:
 	_wheel_speed = move_toward(_wheel_speed, 0.75 if _wheel_running else 0.0, delta * 0.35)
 	if is_instance_valid(_hero_wheel):
 		_hero_wheel.rotation.z -= _wheel_speed * delta
-	if is_instance_valid(_finish_wheel):
-		_finish_wheel.rotation.z += _wheel_speed * delta * 1.5
 
 
 func _make_mantle_housing() -> void:
@@ -425,8 +414,8 @@ func _make_architecture() -> void:
 		_box(Vector3(x, 12.0, -73.97), Vector3(1.4, 4.0, 0.08), "shadow")
 		_box(Vector3(x, 12.0, -73.9), Vector3(0.07, 4.0, 0.09), "steel")
 		_box(Vector3(x, 12.0, -73.9), Vector3(1.4, 0.08, 0.09), "steel")
-	_hero_wheel = _wheel(Vector3(23.8, 4.1, -69.15), 4.2, "ochre")
-	_cylinder(Vector3(23.8, 4.1, -73.7), Vector3(23.8, 4.1, -71.9), 0.42, "steel")
+	_hero_wheel = _wheel(Vector3(23.8, -0.5, -69.15), 2.45, "ochre")
+	_cylinder(Vector3(23.8, -0.5, -73.7), Vector3(23.8, -0.5, -69.0), 0.42, "steel")
 	# retaining wings anchor the crest to the hillside instead of a floating deck.
 	_solid("WestRetainingWing", Vector3(-29.0, -3.0, -12.0), Vector3(3.0, 17.0, 52.0), "old_concrete")
 	_solid("EastRetainingWing", Vector3(19.0, -3.0, -4.0), Vector3(3.5, 17.0, 30.0), "old_concrete")

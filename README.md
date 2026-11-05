@@ -8,7 +8,7 @@ Run, jump, slide down the dry chute, carry speed across the channel, or take the
 
 Linux, from this folder: `./tools/play.sh`. It uses the pinned engine at `~/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64`; set `GODOT` for another engine path.
 
-Windows: double-click `Play Foldrunner.cmd`. The launcher installs the pinned official engine into `%LOCALAPPDATA%\Foldrunner\tools\godot-4.7.2` if needed, imports this project and starts Spillway. Native Windows gameplay remains untested.
+Windows: double-click `Play Spillway.cmd`. The launcher installs the pinned official engine into `%LOCALAPPDATA%\Foldrunner\tools\godot-4.7.2` if needed, imports this project and starts Spillway. Native Windows gameplay remains untested.
 
 WASD runs. Mouse looks. Space jumps. Ctrl/C crouches and slides. R starts a clean run. F restarts the segment for practice. Esc opens pause/settings. F11 toggles fullscreen. Clicking captures the mouse. Left/right gamepad sticks move/look; A jumps and LB crouches. Physical gamepad hardware is untested.
 
