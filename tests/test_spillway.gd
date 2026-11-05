@@ -111,6 +111,7 @@ func _run() -> void:
 				quit(2)
 				return
 	await responsiveness()
+	await braking_intent()
 	await jump_grace()
 	await air_control()
 	await ground_budget_reset()
@@ -326,6 +327,30 @@ func crouch_policy() -> void:
 	await ticks(40)
 	check(player.get_speed() < 4.5, "backward input brakes an active slide promptly")
 	check(absf(player.velocity.x) < .1, "braking does not curve sideways")
+
+func braking_intent() -> void:
+	for speed: float in [8.5, 16.0]:
+		var stops: Array[Vector2] = []
+		for reverse: bool in [false, true]:
+			await fresh("brake %.1f m/s, reverse=%s" % [speed, reverse])
+			await ticks(8)
+			# labelled momentum fixture: seed the speed of a run or fast slide exit.
+			player.velocity = Vector3(0, 0, -speed)
+			var origin := player.global_position
+			action("move_back", reverse)
+			var distance := 0.0
+			var seconds := 0.0
+			for i: int in 180:
+				await ticks(1)
+				seconds += 1.0 / 120.0
+				distance = maxf(distance, origin.z - player.global_position.z)
+				if player.velocity.z >= -0.05:
+					break
+			stops.append(Vector2(seconds, distance))
+		check(stops[1].x <= stops[0].x + 0.009,
+			"opposing input stops at least as promptly as releasing: %.3f vs %.3f s" % [stops[1].x, stops[0].x])
+		check(stops[1].y <= stops[0].y + 0.025,
+			"opposing input never carries farther forward than release: %.3f vs %.3f m" % [stops[1].y, stops[0].y])
 
 func ceiling() -> void:
 	await fresh("crouch ceiling clearance")

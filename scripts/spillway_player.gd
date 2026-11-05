@@ -183,7 +183,9 @@ func _physics_process(delta: float) -> void:
 				speed_limit = minf(speed_limit, WATER_SPEED)
 			var carried := maxf(speed_limit, horizontal.length() - (12.0 if in_water else 4.0) * delta)
 			var target := wish * carried
-			horizontal = horizontal.move_toward(target, (ACCEL if wish.length_squared() > 0.0 else BRAKE) * delta)
+			# p / changing your mind brakes as firmly as releasing, then accelerates away.
+			var braking := wish.length_squared() == 0.0 or horizontal.dot(wish) < 0.0
+			horizontal = horizontal.move_toward(target, (BRAKE if braking else ACCEL) * delta)
 		velocity.y = -0.4
 	else:
 		# external launch and floor departure retain their existing speed budget.

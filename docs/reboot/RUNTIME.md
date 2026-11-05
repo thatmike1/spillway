@@ -17,3 +17,5 @@ The active contract is BRIEF.md. The default scene loads `spillway_main.gd`; the
 Overnight r11-dev: a small upward sphere sweep keeps the animated eye outside geometry during a late crouch, independently of the low body capsule. Wind and water loops blend into a discarded pre-roll, retaining exact loop durations and continuous PCM wrap boundaries. Signal checks do not establish listening quality.
 
 Reachable ventilation stacks and valve stems opt into matching cylinder collision, with solid vent caps and narrow colliding fixed wheel beams. The finish machinery guard has visible rods/rails around its thin collision faces. These changes preserve the authored jump-up approaches and normal route timing.
+
+P/control choice: opposing ground input uses the existing brake until velocity turns, then normal acceleration. It can no longer stop later than simply releasing. Air inertia and the ordinary90-degree cornering policy remain separate.
