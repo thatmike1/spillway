@@ -76,6 +76,66 @@ func approach_roof(x: float, takeoff_z: float) -> bool:
 			return false
 	return false
 
+func roof_fixture(name: String, at: Vector3) -> void:
+	await fixture(name, at)
+	player.call("reset_to", game.get("level").get("checkpoints")[2].pose)
+	await ticks(3)
+	check(int(game.get("checkpoint_index")) == 2, "fixture grants Outflow through its real roof region")
+	player.call("reset_to", Transform3D(Basis.IDENTITY, at))
+	await ticks(8)
+
+func housing_toward_tower() -> void:
+	await fixture("housing turns toward tower", Vector3(-21, 1.54, -90))
+	var jumps: int = player.get("jump_count")
+	action("move_forward", true)
+	for i: int in 300:
+		await ticks(1)
+		if player.global_position.z <= -93.2:
+			break
+	action("jump", true)
+	for i: int in 90:
+		await ticks(1)
+		if player.global_position.y > 2.6 and player.is_on_floor():
+			break
+	action("jump", false)
+	await walk(Vector3(-16, 2.5, -98.6), 240)
+	await walk(Vector3(-6, .1, -95.3), 240)
+	check(int(game.get("checkpoint_index")) == 2 and int(game.get("respawn_count")) == 0,
+		"turning toward the tower from the housing admits Outflow")
+	check(int(player.get("jump_count")) == jumps + 1, "housing-to-run-up line uses only its original jump")
+	await fixture("roof bridge turns toward tower", Vector3(-21, 3.05, -98.9))
+	jumps = player.get("jump_count")
+	await walk(Vector3(-15, 2.4, -98.5), 240)
+	check(int(game.get("checkpoint_index")) == 2 and int(game.get("respawn_count")) == 0,
+		"walking east from the roof bridge admits Outflow")
+	check(int(player.get("jump_count")) == jumps, "bridge approach needs no jump")
+
+func finished_exploration() -> void:
+	await roof_fixture("exploration preserves finished result", Vector3(24, -2.96, -63))
+	await walk(Vector3(24, -3, -66.5), 200)
+	check(bool(game.get("finished")), "fixture reaches the wheel through input")
+	var time: float = game.get("elapsed")
+	var splits: Array = game.get("splits").duplicate()
+	var clean: bool = game.get("clean_eligible")
+	var fell := false
+	var returned := false
+	action("move_forward", true)
+	for i: int in 600:
+		aim(Vector3(33.5, -3, -75))
+		await ticks(1)
+		fell = fell or player.global_position.y < -7.7
+		if fell and player.global_position.y > -3.1:
+			returned = true
+			break
+	action("move_forward", false)
+	await ticks(10)
+	check(fell and returned, "episode falls out of bounds and returns near the wheel")
+	check(bool(game.get("finished")) and is_equal_approx(float(game.get("elapsed")), time),
+		"a genuine post-finish fall retains the result and frozen clock")
+	check(game.get("splits") == splits and bool(game.get("clean_eligible")) == clean and int(game.get("respawn_count")) == 0,
+		"post-finish recovery does not turn the completed run into practice")
+	check(not str(game.get("hud").get("finish_label").text).is_empty(), "result remains visible after exploration")
+
 func run() -> void:
 	game = load("res://scripts/spillway_main.gd").new()
 	root.add_child(game)
@@ -128,6 +188,8 @@ func run() -> void:
 		await ticks(8)
 		await walk(Vector3(23.8, -3, -68.8))
 		check(bool(game.get("finished")), "walking directly to the wheel finishes from either side")
+	await housing_toward_tower()
+	await finished_exploration()
 	for key: String in ["move_forward", "move_back", "jump", "crouch"]:
 		action(key, false)
 	print("spillway access: %d/%d checks passed; explicit authored-level fixtures, not whole-route proof" % [checks - failures, checks])

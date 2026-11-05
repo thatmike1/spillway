@@ -20,7 +20,7 @@ func build(level: Node3D) -> void:
 	checkpoints.append_array([
 		{"pose": level.get("spawn"), "title": "Crest"},
 		{"pose": Transform3D(Basis.IDENTITY, Vector3(10, 4.04, -65)), "title": "Sluice yard", "hint": "the sluice yard entrance", "radius": 4.0, "bounds": AABB(Vector3(6.5, 3.5, -74.5), Vector3(7.5, 3.0, 12.5))},
-		{"pose": Transform3D(Basis(Vector3.UP, -PI * .5), Vector3(-28, 3.04, -104)), "title": "Outflow", "hint": "the brick filter-house roof", "radius": 4.0, "bounds": AABB(Vector3(-39.5, 2.8, -109.5), Vector3(21.0, 3.0, 10.0))},
+		{"pose": Transform3D(Basis(Vector3.UP, -PI * .5), Vector3(-28, 3.04, -104)), "title": "Outflow", "hint": "the brick filter-house roof", "radius": 4.0, "bounds": AABB(Vector3(-39.5, 2.85, -109.5), Vector3(23.0, 3.0, 12.2))},
 	])
 	level.set("finish_position", Vector3(24, -3, -64.5))
 	level.set("finish_radius", 2.0)
@@ -163,8 +163,14 @@ func _make_basin() -> void:
 	_level.call("_slab", "BasinExitLanding", Vector3(-10, -3, -63.5), Vector2(5, 3), .5, "concrete")
 	_walk("BasinFrontWalk", Vector3(-7.5, -3, -65), Vector3(24, -3, -65), 8.0, false)
 	_level.call("_rail", Vector3(-7.5, -3, -62.1), Vector3(7, -3, -62.1))
-	_level.call("_solid", "BasinWestRetainingWall", Vector3(-18.2, -5.1, -84), Vector3(1.2, 3.4, 36), "old_concrete")
-	_level.call("_solid", "BasinSouthRetainingWall", Vector3(0, -5, -104), Vector3(34, 3, 1), "old_concrete")
+	_level.call("_rail", Vector3(7, -3, -62.1), Vector3(12, -3, -61.5))
+	_level.call("_rail", Vector3(-12.4, -3, -62.1), Vector3(-7.5, -3, -62.1))
+	_level.call("_rail", Vector3(-12.4, -3, -65), Vector3(-12.4, -3, -62.1))
+	# p / continuous retaining faces close the basin, including below the front walk.
+	_level.call("_solid", "BasinNorthRetainingWall", Vector3(-.5, -4.75, -61.3), Vector3(33, 2.5, .6), "wet_concrete")
+	_level.call("_solid", "BasinEastReturn", Vector3(15.7, -4.75, -82), Vector3(.6, 2.5, 42.0), "wet_concrete")
+	_level.call("_solid", "BasinWestRetainingWall", Vector3(-17.6, -5.1, -82.2), Vector3(1.2, 3.4, 43.6), "old_concrete")
+	_level.call("_solid", "BasinSouthRetainingWall", Vector3(0, -5, -103), Vector3(34, 3, 1), "old_concrete")
 
 
 func _walk(label: String, a: Vector3, b: Vector3, width: float, rails: bool) -> void:
@@ -220,7 +226,7 @@ func _define_routes() -> void:
 		_p(Vector3(-37, 1.5, -87)), _p(Vector3(-37, 3, -101)),
 		_p(Vector3(-28, 3, -104)), _p(Vector3(-18.5, 3, -106)),
 		_p(Vector3(-5, 0, -106)), _p(Vector3(37, 0, -106)),
-		_p(Vector3(37, -3, -85)), _p(Vector3(37, -3, -64)), _p(Vector3(24, -3, -62.7), .6), _p(Vector3(24, -3, -64.5)),
+		_p(Vector3(37, -3, -85)), _p(Vector3(37, -3, -64)), _p(Vector3(23.8, -3, -68.8)),
 	])
 	var fast: Array = common.duplicate()
 	fast.append_array([
@@ -231,7 +237,7 @@ func _define_routes() -> void:
 		_p(Vector3(-3.4, 0, -92.6), .95, true, true), _p(Vector3(2, -1, -86), 1.4, true),
 		_p(Vector3(3.5, -1, -84.5), 1.2, true, true), _p(Vector3(7.6, -2.25, -74.7), 2.5, true),
 		_p(Vector3(8.6, -2.5, -73.5), 1.5, true, true), _p(Vector3(16, -3, -65), 1.6),
-		_p(Vector3(24, -3, -62.7), .6), _p(Vector3(24, -3, -64.5)),
+		_p(Vector3(23.8, -3, -68.8)),
 	])
 	var recovery: Array = common.duplicate()
 	recovery.append_array([
@@ -240,7 +246,7 @@ func _define_routes() -> void:
 		_p(Vector3(-27, 3, -101)), _p(Vector3(-28, 3, -104)),
 		_p(Vector3(-18, 3, -100), 1.3), _p(Vector3(-5.5, .12, -95.2)),
 		_p(Vector3(-7, -6, -91), 1.8), _p(Vector3(-10, -6, -80)),
-		_p(Vector3(-10, -3, -63.5), 1.3), _p(Vector3(15, -3, -65)), _p(Vector3(24, -3, -62.7), .6), _p(Vector3(24, -3, -64.5)),
+		_p(Vector3(-10, -3, -63.5), 1.3), _p(Vector3(15, -3, -65)), _p(Vector3(23.8, -3, -68.8)),
 	])
 	var routes: Dictionary = _level.get("routes")
 	routes["safe"].append_array(safe)
@@ -254,9 +260,26 @@ func _define_routes() -> void:
 	routes["safe_corner"] = corner
 	# input regression for heading straight to the wheel rather than the front box.
 	var direct: Array = routes["fast"].duplicate(true)
-	direct.resize(direct.size() - 2)
-	direct.append(_p(Vector3(23.8, -3, -68.8)))
+	# retain the r7 regression name; the direct wheel approach is now canonical.
 	routes["fast_direct_finish"] = direct
+	var housing: Array = routes["fast"].duplicate(true)
+	var first: int = -1
+	var last: int = -1
+	for i: int in housing.size():
+		if housing[i].pos == Vector3(-27, 3, -101):
+			first = i
+		if housing[i].pos == Vector3(-18, 3, -100):
+			last = i
+	if first >= 0 and last >= first:
+		for i: int in last - first + 1:
+			housing.remove_at(first)
+		var via: Array = [
+			_p(Vector3(-21, 1.5, -90)), _p(Vector3(-21, 1.5, -93.7), .55, false, true),
+			_p(Vector3(-21, 3, -98.6), 1.6), _p(Vector3(-16, 2.5, -98.6), .8),
+		]
+		for i: int in via.size():
+			housing.insert(first + i, via[i])
+	routes["fast_housing_turn"] = housing
 
 
 func _p(pos: Vector3, radius: float = 1.0, crouch: bool = false, jump: bool = false) -> Dictionary:

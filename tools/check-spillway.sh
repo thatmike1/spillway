@@ -25,6 +25,7 @@ run_clean --headless --path . --check-only --script res://scripts/spillway_drive
 run_clean --headless --fixed-fps 120 --path . --script res://tests/test_spillway.gd -- "${suite_args[@]}"
 run_clean --headless --fixed-fps 120 --path . --script res://tests/test_spillway_flow.gd
 run_clean --headless --fixed-fps 120 --path . --script res://tests/test_spillway_access.gd
+run_clean --headless --fixed-fps 120 --path . --script res://tests/test_spillway_boundaries.gd
 if "$play_routes"; then
 	for route in safe fast recovery; do
 		run_clean --headless --fixed-fps 120 --path . -- --bot --bot-quit "--route=$route" "${suite_args[@]}"

@@ -298,14 +298,15 @@ func _make_water_and_recovery() -> void:
 	water_regions.append({"bounds": AABB(Vector3(-8.0, 1.35, -43.0), Vector3(23.0, 0.65, 19.0)), "depth": 0.28})
 	_ramp("ChannelRecoveryRamp", Vector3(12.0, 1.5, -29.0), Vector3(12.0, 4.0, -40.0), 4.0, 0.5, "concrete")
 	_solid("ChannelEastWall", Vector3(15.3, 1.6, -33.5), Vector3(0.6, 2.2, 20.0), "wet_concrete")
-	_solid("ChannelWestWall", Vector3(-8.3, 1.6, -28.0), Vector3(0.6, 2.2, 8.0), "wet_concrete")
-	_solid("ChannelHeadWall", Vector3(10.0, 1.6, -23.7), Vector3(10.0, 2.2, 0.6), "wet_concrete")
+	_solid("ChannelWestWall", Vector3(-8.3, 1.6, -33.5), Vector3(0.6, 2.2, 20.0), "wet_concrete")
+	_solid("ChannelHeadWall", Vector3(3.5, 1.6, -23.7), Vector3(23.0, 2.2, 0.6), "wet_concrete")
 	# the second catch floor gives a missed narrow bridge a walkable way out too.
 	_slab("SettlingBasinFloor", Vector3(5.5, 1.5, -49.5), Vector2(23.0, 13.0), 0.9, "old_concrete")
 	_water("SettlingWater", Vector3(5.5, 1.68, -49.5), Vector2(23.0, 13.0), "water")
 	water_regions.append({"bounds": AABB(Vector3(-6.0, 1.35, -56.0), Vector3(23.0, 0.5, 13.0)), "depth": 0.18})
 	_ramp("BridgeRecoveryRamp", Vector3(15.0, 1.5, -45.0), Vector3(15.0, 4.0, -56.0), 3.2, 0.5, "concrete")
 	_solid("SettlingBasinEastWall", Vector3(17.3, 1.6, -49.5), Vector3(0.6, 2.2, 13.0), "wet_concrete")
+	_solid("SettlingBasinNorthReturn", Vector3(16.15, 1.6, -42.9), Vector3(2.3, 2.2, .6), "wet_concrete")
 	# surface drains at the ramp feet provide scale without obstructing capsules.
 	for z: float in [-28.7, -44.7]:
 		var x: float = 12.0 if z > -30.0 else 15.0

@@ -350,8 +350,16 @@ func assisted_comparisons() -> void:
 		if assistance == "practice":
 			await pulse("practice")
 		else:
+			var finish_text: String = game.get("hud").get("finish_label").text
+			var finish_time: float = game.get("elapsed")
+			var deltas: Array = game.get("split_deltas").duplicate()
 			game.get("player").call("reset_to", Transform3D(Basis.IDENTITY, Vector3(0, -30, -8)))
 			await ticks(24)
+			check(bool(game.get("finished")) and game.get("split_deltas") == deltas and game.get("hud").get("finish_label").text == finish_text,
+				"post-finish fall preserves the completed result and comparisons")
+			check(records() == before and bool(game.get("clean_eligible")) and is_equal_approx(float(game.get("elapsed")), finish_time),
+				"post-finish exploration keeps records, provenance and frozen time")
+			continue
 		await visit(game.get("level").get("finish_position"), 55.0)
 		var text: String = game.get("hud").get("finish_label").text
 		check(bool(game.get("finished")) and game.get("split_deltas").is_empty() and not "vs segment best" in text,
@@ -415,7 +423,7 @@ func authored_roof_checkpoint() -> void:
 	var region: AABB = points[2]["bounds"]
 	var original: Node3D = game.get("level")
 	game.set("level", authored)
-	await restart("east mantle roof grants ordered checkpoint")
+	await restart("east roof grants ordered checkpoint")
 	await visit((points[1].pose as Transform3D).origin, 5.0)
 	await visit(Vector3(-21, 3.04, -101), 10.0)
 	check(int(game.get("checkpoint_index")) == 2, "east mantle landing advances checkpoint without crossing roof centre")
@@ -425,4 +433,8 @@ func authored_roof_checkpoint() -> void:
 	await visit((points[1].pose as Transform3D).origin, 5.0)
 	await visit(Vector3(-21, 1.5, -98), 10.0)
 	check(int(game.get("checkpoint_index")) == 1 and not region.has_point(Vector3(-21, 1.5, -98)), "yard and inspection approach cannot claim the roof early")
+	await visit(Vector3(-21, 2.8, -98), 11.0)
+	check(int(game.get("checkpoint_index")) == 1, "a normal apron jump below roof height cannot claim Outflow")
+	await visit(Vector3(-21, 3.04, -98.9), 12.0)
+	check(int(game.get("checkpoint_index")) == 2, "the actual access bridge admits an eastward continuation")
 	game.set("level", original)

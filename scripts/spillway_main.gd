@@ -1,7 +1,7 @@
 extends Node3D
 ## p / run provenance is separate from movement and presentation.
 
-const BUILD_ID := "spillway-2026.11.05-r7"
+const BUILD_ID := "spillway-2026.11.05-r8"
 const SAVE_PATH := "user://spillway_v1.cfg"
 var player: CharacterBody3D
 var level: Node3D
@@ -128,7 +128,16 @@ func _physics_process(delta: float) -> void:
 	if player.global_position.y < -8.3 or absf(player.global_position.x) > 180.0 or player.global_position.z < -400.0 or player.global_position.z > 60.0:
 		_recovery_time += delta
 		if _recovery_time > 0.12:
-			respawn()
+			if finished:
+				# p / exploration after a finish cannot invalidate its result or restart time.
+				var look_pitch: float = player.get("pitch")
+				var look_yaw: float = player.get("yaw")
+				var wheel_feet: Vector3 = level.get("finish_position") + Vector3.UP * .04
+				player.call("reset_to", Transform3D(Basis(Vector3.UP, look_yaw), wheel_feet))
+				player.set("pitch", look_pitch)
+				_recovery_time = 0.0
+			else:
+				respawn()
 	else:
 		_recovery_time = 0.0
 	if finished:
