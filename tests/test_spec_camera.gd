@@ -22,11 +22,13 @@ func _run() -> void:
 	player._wall_side = -1
 	for i: int in 200:
 		player._update_rig(.016, false)
-	check(absf(rad_to_deg(player._roll) - 17.814) < .01, "left wall bank +17.814")
+	check(absf(rad_to_deg(player._roll) + 17.814) < .01, "left source +17.814 maps to Godot negative roll")
+	check(player.get_camera().global_basis.x.dot(player.up_direction) < -.25, "left ear rises away from the left wall")
 	player._wall_side = 1
 	for i: int in 200:
 		player._update_rig(.016, false)
-	check(absf(rad_to_deg(player._roll) + 23) < .01, "right wall bank -23")
+	check(absf(rad_to_deg(player._roll) - 23) < .01, "right source -23 maps to Godot positive roll")
+	check(player.get_camera().global_basis.x.dot(player.up_direction) > .35, "right ear rises away from the right wall")
 	player.bank_amount = 0
 	for i: int in 200:
 		player._update_rig(.016, false)
@@ -45,6 +47,22 @@ func _run() -> void:
 	for i: int in 40:
 		player._update_rig(.1, false)
 	check(absf(player._dip) < .001 and absf(player._dip_velocity) < .001, "eye springs settle through 100ms frames")
+	await fresh()
+	player.move = player.Move.ROLL
+	player._eye_height = .18
+	player._curr_eye = player.position + Vector3.UP * .18
+	player._prev_eye = player._curr_eye
+	var clearance: float = 100
+	for i: int in 128:
+		player.landing.time = i / 127.0 * player.tuning.roll_duration
+		player._update_rig(.01, true)
+		clearance = minf(clearance, player.get_camera().global_position.y)
+	check(clearance > .35, "dense roll eye stays above the floor: %.3fm" % clearance)
+	player.move = player.Move.GROUND
+	player._camera_turn_target = 6 * player.tuning.turn_lag_multiplier * player.tuning.turn_lag_projection
+	for i: int in 20:
+		player._update_rig(.016, false)
+	check(absf(rad_to_deg(player._roll)) > 2 and absf(rad_to_deg(player._roll)) < 7, "fast angular-rate flick has small visible roll")
 	print("spec camera: %d/%d checks passed" % [checks - failures, checks])
 	player.move = player.Move.GROUND
 	fixture.queue_free()

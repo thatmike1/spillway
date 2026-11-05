@@ -163,7 +163,7 @@ func get_climb_hand_point() -> Vector3:
 
 
 func is_low() -> bool:
-	return move == Move.SLIDE or _crouched
+	return move in [Move.SLIDE, Move.ROLL] or _crouched
 
 
 func set_controls_enabled(enabled: bool) -> void:
@@ -291,7 +291,7 @@ func _physics_process(delta: float) -> void:
 		Move.STEP: step_up.step(self, delta)
 		_: _step_free(delta, crouch_held)
 	_jump_buffer = maxf(0, _jump_buffer - delta)
-	_camera_turn_target = clampf(_yaw_input * tuning.turn_lag_multiplier, -PI / 4, PI / 4) * clampf((get_speed() - 1) / 3, 0, 1)
+	_camera_turn_target = clampf((_yaw_input / maxf(delta, .00001)) * tuning.turn_lag_multiplier * tuning.turn_lag_projection, -PI / 4, PI / 4) * clampf((get_speed() - 1) / 3, 0, 1)
 	_yaw_input = 0
 	_follow_surface()
 	var target_eye: float = (tuning.standing_eye - tuning.standing_height + tuning.low_height) if is_low() else tuning.standing_eye
@@ -646,7 +646,7 @@ func _update_rig(delta: float, snap: bool) -> void:
 	var rate: float = clampf(speed / (6.0 if speed >= 6.3 else 5.0), .2, 1.4)
 	_animation_phase += delta * rate / cycle * TAU
 	if move == Move.WALLRUN:
-		target_roll = deg_to_rad(tuning.wall_left_tilt if _wall_side < 0 else tuning.wall_right_tilt)
+		target_roll = -deg_to_rad(tuning.wall_left_tilt if _wall_side < 0 else tuning.wall_right_tilt) # UE left-handed roll mapped to Godot
 		var extent: Vector2 = tuning.wall_left_eye_range if _wall_side < 0 else tuning.wall_right_eye_range
 		local_eye = Vector3(sin(_animation_phase * 1.4) * extent.x / 2, sin(_animation_phase * 2.8) * extent.y / 2, 0)
 	elif grounded and head_bob_enabled and move == Move.GROUND:
@@ -661,7 +661,9 @@ func _update_rig(delta: float, snap: bool) -> void:
 		local_eye.y -= .35 * sin(get_climb_progress() * PI)
 	elif move == Move.ROLL:
 		var f: float = clampf(landing.time / tuning.roll_duration, 0, 1)
-		local_eye.y -= tuning.roll_eye_range.y * sin(f * PI)
+		# P: local track range is retargeted around the crouched shoulder, not
+		# subtracted from the world eye. the physical root still travels 3.13517 m.
+		local_eye.y -= tuning.roll_eye_range.y * tuning.roll_eye_projection * sin(f * PI)
 		local_eye.z += tuning.roll_eye_range.z * sin(f * PI)
 		anim_pitch = -TAU * smoothstep(0, 1, f)
 	elif move == Move.LANDING:
@@ -669,9 +671,10 @@ func _update_rig(delta: float, snap: bool) -> void:
 		local_eye.y -= tuning.hard_eye_range.y * sin(f * PI)
 		local_eye.z += tuning.hard_eye_range.z * sin(f * PI)
 		anim_pitch = -.94 * sin(f * PI)
-	elif _landing_elapsed < .6:
-		var amount: float = clampf((landing.height - 3) / (5.3 - 3), .2, 1)
-		local_eye.y -= tuning.normal_landing_compression * amount * sin(_landing_elapsed / .6 * PI)
+	elif _landing_elapsed < tuning.normal_landing_recovery:
+		# P: an impact-weighted eye animation, not random or universal shake.
+		var amount: float = clampf(pow(landing.impact / 8.0, 2), .15, 1)
+		local_eye.y -= tuning.normal_landing_compression * amount * sin(_landing_elapsed / tuning.normal_landing_recovery * PI)
 	_turn_lag = lerpf(_turn_lag, _camera_turn_target, minf(1, delta / tuning.turn_lag_time))
 	_roll = lerpf(_roll, target_roll * bank_amount + _turn_lag, 1 - exp(-8 * delta))
 	var fraction: float = Engine.get_physics_interpolation_fraction()
@@ -689,12 +692,19 @@ func _update_rig(delta: float, snap: bool) -> void:
 	local_eye += Vector3(0, -_neck.y, -_neck.x)
 	_rig.global_transform = Transform3D(
 		view_basis * Basis(Vector3.RIGHT, _pitch + _nod + anim_pitch) * Basis(Vector3.BACK, _roll),
-		eye + view_basis * (local_eye + Vector3(0, _dip, 0))
+		_resolve_eye(eye + view_basis * (local_eye + Vector3(0, _dip, 0)))
 	)
 	# foldrunner extension, explicitly optional; baseline has a fixed lens.
 	var widen: float = 5 * clampf(inverse_lerp(base_speed + .5, top_speed, speed), 0, 1) if speed_fov else 0.0
 	_fov_extra = lerpf(_fov_extra, widen, 1 - exp(-3 * delta)) if not snap else widen
 	_camera.fov = vertical_fov(fov_horizontal + _fov_extra)
+
+# P: keep the final composed eye on the body side of nearby solid geometry.
+func _resolve_eye(desired: Vector3) -> Vector3:
+	var hit: Dictionary = _ray(global_position, desired)
+	if not hit.is_empty():
+		return Vector3(hit.position) + Vector3(hit.normal) * .14
+	return desired
 
 func get_body_basis() -> Basis:
 	return Basis(_body_q)

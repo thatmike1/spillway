@@ -3,10 +3,12 @@ extends RefCounted
 var time: float = 0.0
 var kind: String = "normal"
 var height: float = 0.0
+var impact: float = 0.0
 var origin: Vector3
 var forward: Vector3
 
-func start(p, impact: float, soft: bool = false) -> void:
+func start(p, impact_speed: float, soft: bool = false) -> void:
+	impact = impact_speed
 	p._landing_elapsed = 0
 	var t = p.tuning
 	height = maxf(0, p._fall_origin - p.global_position.dot(p.up_direction))
@@ -36,8 +38,7 @@ func start(p, impact: float, soft: bool = false) -> void:
 	p._vault_landing = false
 	p._air_turned = false
 	p.last_landing_speed = p.get_speed()
-	p._dip_velocity -= clampf(impact * .11, .3, 2.6)
-	p._nod_velocity -= clampf(impact * .012, 0, .16)
+	# P: normal impact is composed by the eye curve; hard/roll have their own clips.
 	p.landed.emit(impact)
 
 func step(p, dt: float) -> void:

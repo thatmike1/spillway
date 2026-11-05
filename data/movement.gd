@@ -171,8 +171,12 @@ extends Resource
 @export var neck_smoothing: float = .07
 @export var leg_rotation_speed: float = 274.66
 # original body-eye curves for contacts; exact composed curves U, resynthesis P.
-@export var vault_eye_compression: float = 1.05
-@export var normal_landing_compression: float = .12
+@export var vault_eye_compression: float = .28
+@export var normal_landing_compression: float = .10
+@export var normal_landing_recovery: float = .32
+# P: resynthesis gains for original local eye tracks and unresolved spring transfer.
+@export var roll_eye_projection: float = .38
+@export var turn_lag_projection: float = .12
 @export var hand_ik_blend: float = .10
 
 # context geometry/vertical native solver unresolved (U); port reach and attraction (P).

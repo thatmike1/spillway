@@ -8,6 +8,7 @@ var time: float = 0
 var phase: int = -1
 var jumped: bool = false
 var arms: Node
+var eye_trace: FileAccess
 
 func _initialize() -> void:
 	_run.call_deferred()
@@ -32,6 +33,10 @@ func box(center: Vector3, size: Vector3, color: Color) -> void:
 
 func _run() -> void:
 	MAIN.bind_inputs()
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--eye-trace="):
+			eye_trace = FileAccess.open(arg.trim_prefix("--eye-trace="), FileAccess.WRITE)
+			eye_trace.store_csv_line(["time", "phase", "eye_x", "eye_y", "eye_z", "floor_clearance", "roll_degrees", "move", "low", "left_wrist", "right_wrist"])
 	world = Node3D.new()
 	root.add_child(world)
 	var environment := WorldEnvironment.new()
@@ -46,8 +51,10 @@ func _run() -> void:
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-45, -25, 0)
 	world.add_child(sun)
-	box(Vector3(40, -.5, -25), Vector3(120, 1, 90), Color("#53677b"))
+	box(Vector3(110, -.5, -25), Vector3(300, 1, 90), Color("#53677b"))
 	box(Vector3(30, .5, -6), Vector3(5, 1, .6), Color("#c93932"))
+	box(Vector3(150, 1.5, -1), Vector3(6, 3, 2), Color("#c93932"))
+	box(Vector3(180.7, 5, -10), Vector3(.4, 10, 30), Color("#c2c7ca"))
 	box(Vector3(59.3, 5, -10), Vector3(.4, 10, 30), Color("#c2c7ca"))
 	for i: int in 20:
 		box(Vector3(-12 + i * 7, 8, -40), Vector3(5, 16, 6), Color("#24364b"))
@@ -68,7 +75,7 @@ func _physics_process(dt: float) -> bool:
 		return false
 	time += dt
 	var next: int = int(time / 3)
-	if next > 3:
+	if next > 7:
 		quit(0)
 		return false
 	if next != phase:
@@ -76,10 +83,10 @@ func _physics_process(dt: float) -> bool:
 		jumped = false
 		Input.action_release("move_forward")
 		Input.action_release("crouch")
-		var positions: Array[Vector3] = [Vector3(0, .9, 0), Vector3(30, .9, 0), Vector3(60, 2.0, 0), Vector3(90, 4.9, 0)]
+		var positions: Array[Vector3] = [Vector3(0, .9, 0), Vector3(30, .9, 0), Vector3(60, 2.0, 0), Vector3(90, 4.9, 0), Vector3(120, .9, 0), Vector3(150, 2.0, .4), Vector3(180, 2.0, 0), Vector3(210, .9, 0)]
 		player.reset_to(Transform3D(Basis.IDENTITY, positions[phase]))
 		player.look(0, -.13 if phase != 3 else -.28)
-		label.text = ["jump: original hands enter on takeoff", "vault: hands follow the actual red rail", "wall run: left contact, +17.814 degree bank", "landing: normal impact and body recovery"][phase]
+		label.text = ["jump: original hands enter on takeoff", "vault: hands follow the actual red rail", "wall run: left contact, corrected Godot bank", "landing: normal impact and body recovery", "roll: safe retargeted eye, recovered root travel", "grab: two separate planted hands", "wall run: right contact, corrected Godot bank", "turn: angular-rate lazy spring"][phase]
 		print("visual fixture ", phase, " begins at movie t=", time)
 	var t: float = fmod(time, 3)
 	match phase:
@@ -97,9 +104,42 @@ func _physics_process(dt: float) -> bool:
 				player._jump_origin = player.position
 				player.wall.start(player, Vector3.RIGHT, -1)
 				jumped = true
+		4:
+			if not jumped:
+				player.move = player.Move.ROLL
+				player.landing.kind = "roll"
+				player.landing.time = 0
+				player.landing.forward = Vector3.FORWARD
+				player._set_low(true, false)
+				jumped = true
+		5:
+			if not jumped:
+				player.ledge.start(player, {"top": Vector3(150, 3, 0), "into": Vector3.FORWARD})
+				jumped = true
+			if t > 1.3:
+				Input.action_press("move_forward")
+		6:
+			Input.action_press("move_forward")
+			if not jumped:
+				player.velocity = Vector3(0, 1, -6)
+				player._jump_origin = player.position
+				player.wall.start(player, Vector3.LEFT, 1)
+				jumped = true
+		7:
+			Input.action_press("move_forward")
+			if t > 1 and t < 1.35:
+				player.look(dt * 6, 0)
 		3:
 			Input.action_press("move_forward")
 			if t > 2 and not jumped:
 				player.look(0, -.9)
 				jumped = true
+	return false
+
+func _process(_dt: float) -> bool:
+	if eye_trace != null and player != null:
+		var eye: Vector3 = player.get_camera().global_position
+		var hit: Dictionary = player._ray(eye, eye - player.up_direction * 15)
+		var clearance: float = eye.distance_to(hit.position) if not hit.is_empty() else -1
+		eye_trace.store_csv_line([time, phase, eye.x, eye.y, eye.z, clearance, rad_to_deg(player._roll), player.move, player.is_low(), arms._arms[0].wrist, arms._arms[1].wrist])
 	return false
