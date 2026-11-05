@@ -1,7 +1,7 @@
 extends Node3D
 ## p / run provenance is separate from movement and presentation.
 
-const BUILD_ID := "spillway-2026.11.05-r10"
+const BUILD_ID := "spillway-2026.11.06-r11-dev"
 const SAVE_PATH := "user://spillway_v1.cfg"
 var player: CharacterBody3D
 var level: Node3D

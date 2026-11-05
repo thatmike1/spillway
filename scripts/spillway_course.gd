@@ -24,9 +24,36 @@ func build(level: Node3D) -> void:
 	])
 	level.set("finish_position", Vector3(24, -3, -64.5))
 	level.set("finish_radius", 2.0)
+	_make_wheel_guard()
 	var bounds: Array = level.get("segment_bounds")
 	bounds.append(AABB(Vector3(-44, -9, -110), Vector3(61, 18, 54)))
 	bounds.append(AABB(Vector3(-43, -10, -115), Vector3(87, 19, 59)))
+
+
+func _make_wheel_guard() -> void:
+	# p / a real machinery bay keeps the arrival view clear of the rotating spokes.
+	# small mesh openings are below capsule width; one thin proxy matches each face.
+	var corners: Array[Vector3] = [
+		Vector3(20.8, -3, -69.55), Vector3(20.8, -3, -64.5),
+		Vector3(27.2, -3, -64.5), Vector3(27.2, -3, -74.1),
+	]
+	for i: int in corners.size() - 1:
+		var a := corners[i]
+		var b := corners[i + 1]
+		_level.call("_rail", a, b, "ochre")
+		var direction := (b - a).normalized()
+		var count := ceili(a.distance_to(b) / 0.16)
+		for rod: int in count + 1:
+			var at := a.lerp(b, float(rod) / float(count))
+			_level.call("_beam", at + Vector3.UP * 0.12, at + Vector3.UP * 0.98, 0.018, "steel")
+		var size := Vector3(0.035, 1.02, a.distance_to(b))
+		var body: StaticBody3D = _level.call("_solid", "WheelMaintenanceGuard", (a + b) * 0.5 + Vector3.UP * 0.53, size, "steel")
+		body.rotation.y = atan2(direction.x, direction.z)
+		# the visible rods and rails describe this collision face, not a solid panel.
+		for child: Node in body.get_children():
+			if child is MeshInstance3D:
+				child.free()
+		_level.call("_beam", a + Vector3.UP * 0.09, b + Vector3.UP * 0.09, 0.055, "steel")
 
 
 func _open_crest_exit() -> void:

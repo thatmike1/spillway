@@ -55,7 +55,8 @@ func is_finish_at(feet: Vector3) -> bool:
 	if not has_meta("spillway_course_built"):
 		return false
 	# p / arriving at the wheel counts from either side of the loading platform.
-	var wheel_approach := AABB(finish_position - Vector3(3.0, 0.3, 5.0), Vector3(6.0, 3.0, 4.5))
+	# p / the visible maintenance guard is part of arrival, from either side.
+	var wheel_approach := AABB(finish_position - Vector3(4.0, 0.3, 5.0), Vector3(8.0, 3.0, 4.5))
 	return wheel_approach.has_point(feet)
 
 

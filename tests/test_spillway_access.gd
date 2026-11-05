@@ -139,6 +139,29 @@ func finished_exploration() -> void:
 		"post-finish recovery does not turn the completed run into practice")
 	check(not str(game.get("hud").get("finish_label").text).is_empty(), "result remains visible after exploration")
 
+func wheel_guard() -> void:
+	# p / ordinary arrivals stop at visible machinery guarding, including crouching.
+	var episodes := [
+		["front", Vector3(23.8, -2.96, -62), Vector3(23.8, -3, -72), false],
+		["front crouched", Vector3(23.8, -2.96, -62), Vector3(23.8, -3, -72), true],
+		["west", Vector3(18, -2.96, -66), Vector3(24, -3, -66), false],
+		["east", Vector3(30, -2.96, -66), Vector3(24, -3, -66), false],
+	]
+	for episode: Array in episodes:
+		await roof_fixture("wheel guard " + str(episode[0]), episode[1])
+		aim(episode[2])
+		action("crouch", episode[3])
+		action("move_forward", true)
+		await ticks(240)
+		action("move_forward", false)
+		var feet := player.global_position
+		var outside: bool = feet.z > -64.25 if str(episode[0]).begins_with("front") else (feet.x < 20.5 if episode[0] == "west" else feet.x > 27.5)
+		check(outside and player.is_on_floor() and int(game.get("respawn_count")) == 0,
+			"held input stops outside the visible machinery bay: %s" % feet)
+		check(bool(game.get("finished")) and str(game.get("finish_kind")) == "clean",
+			"the guard never refuses an ordered arrival")
+		action("crouch", false)
+
 func hop(at: Vector3, toward: Vector3, axis: int, past: float, direction: float) -> void:
 	# one ordinary running jump: hold forward, press jump once past a takeoff line, land.
 	aim(toward)
@@ -289,6 +312,7 @@ func run() -> void:
 		check(bool(game.get("finished")), "walking directly to the wheel finishes from either side")
 	await housing_toward_tower()
 	await deck_progress()
+	await wheel_guard()
 	await finished_exploration()
 	for key: String in ["move_forward", "move_back", "jump", "crouch"]:
 		action(key, false)
