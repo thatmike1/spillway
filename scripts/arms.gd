@@ -172,6 +172,7 @@ func _build_arm(side: float) -> Dictionary:
 		hand.add_child(root_joint)
 		var proximal: float = length * 0.56
 		_capsule(root_joint, 0.0098, proximal + 0.012, _materials["glove"]).position = Vector3(0, 0, -proximal * 0.5)
+		_box(root_joint, Vector3(0, .009, -proximal * .55), Vector3(.014, .006, proximal * .6), _materials["cuff"])
 		var tip_joint: Node3D = Node3D.new()
 		tip_joint.position = Vector3(0, 0, -proximal)
 		root_joint.add_child(tip_joint)
@@ -279,7 +280,7 @@ func _process(delta: float) -> void:
 					var rising: float = clampf(vertical / 6.3, -1, 1)
 					var reach: float = clampf(.55 + rising * .25 + _jump_kick * (.30 if side < 0 else .1), 0, 1)
 					target = Vector3(side * (.36 + .05 * reach), -.23 + .06 * reach + side * .025, -.58 - .03 * reach)
-					facing = _hand_basis(side, deg_to_rad(-12 + reach * 6 + side * 4), deg_to_rad(side * -16))
+					facing = _hand_basis(side, deg_to_rad(22 + reach * 10 + side * 4), deg_to_rad(side * -16))
 					curl = .08 + (1 - reach) * .18
 					stiffness = 170.0
 		var weight: float = float(_player.call("get_hand_weight", side))

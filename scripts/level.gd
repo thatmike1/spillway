@@ -748,6 +748,11 @@ func _extended_district() -> void:
 		_skylight(Vector3(25.5, 29.8, z))
 		for x: float in [24, 36]:
 			_mesh(self, Vector3(x, 30, z - 3), Vector3(.12, .12, 5), _materials["metal"])
+	# foreground service plant casts long dusk shadows across the last roof.
+	_solid(self, Vector3(25.6, 30.8, -371.5), Vector3(3.2, 2, 4), _materials["metal"], "FinishPlant")
+	_ac_unit(Vector3(34.1, 29.8, -372), true)
+	for x: float in [24.8, 25.6, 26.4]:
+		_cylinder(self, Vector3(x, 32.1, -371.5), .22, .6, _materials["dark"])
 	# finish shelter and a service mast give the destination a human scale.
 	for x: float in [25.5, 34.5]:
 		_mesh(self, Vector3(x, 31.6, -378), Vector3(.18, 3.6, .18), _materials["metal"])

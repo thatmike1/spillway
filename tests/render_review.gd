@@ -40,6 +40,33 @@ func _run() -> void:
 	for entry: Dictionary in main.level.fold_triggers:
 		entry.area.set_deferred("monitoring", false)
 	main.player.controls_enabled = false
+	if OS.get_cmdline_user_args().has("--skyline-only"):
+		pose(Vector3(-80, 25.9, -220), .21, .52)
+		await save_frame("curved-tower", 1.2)
+		main.audio.stop_all()
+		for i: int in 8:
+			await process_frame
+		quit()
+		return
+	if OS.get_cmdline_user_args().has("--front-only"):
+		pose(Vector3(7.8, -2.1, -138), .45, .25)
+		await save_frame("front-before", 1.2)
+		main.level.folds[1].start_fold()
+		await save_frame("front-during", 2.3)
+		await save_frame("front-after", 2)
+		main.audio.stop_all()
+		for i: int in 8:
+			await process_frame
+		quit()
+		return
+	if OS.get_cmdline_user_args().has("--finish-only"):
+		pose(Vector3(30, 30.7, -365), 0, -.08)
+		await save_frame("finish", 1.2)
+		main.audio.stop_all()
+		for i: int in 8:
+			await process_frame
+		quit()
+		return
 	if OS.get_cmdline_user_args().has("--district-only"):
 		pose(Vector3(0, 25.9, -205), 0, .10)
 		await save_frame("district-before")

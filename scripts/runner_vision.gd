@@ -1,7 +1,6 @@
 extends RefCounted
 ## authored object eligibility, independent proximity/look timers and material fades.
 const RED: Color = Color("#d9342e") # runner vision RGB is U; this treatment is P.
-const NEUTRAL: Color = Color("#a5aeb6")
 var objects: Array[Dictionary] = []
 var mode: int = 1
 var difficulty: int = 0

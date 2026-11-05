@@ -1,6 +1,6 @@
 # Foldrunner
 
-A first-person parkour run through a folding city, built in Godot 4.7.2. The clean scripted route takes about 84 seconds. Speed builds quickly into a run, then slowly toward 7.2m/s. Jump trajectory, landing costs, vaults, grabs, rolls and wall jumps have separate momentum contracts. All geometry, body animation, materials and synthesized sound are original.
+A first-person parkour run through a folding city, built in Godot 4.7.2. The clean scripted route takes about 79 seconds. Speed builds quickly into a run, then slowly toward 7.2m/s. Jump trajectory, landing costs, vaults, grabs, rolls and wall jumps have separate momentum contracts. All geometry, body animation, materials and synthesized sound are original.
 
 ## Play on Windows
 
@@ -41,7 +41,7 @@ Vaults, grabs/pull-ups and wall climbs select from suitable geometry and forward
 
 ## The route
 
-Low roof vault; a connected block folds into a road; slide under its gantry; drop onto the second roof and choose either side of the stair housing; cross a falling facade; run the gravity bend and crest; climb/grab/pull onto the upper district; high vault; paired springboard into a roll; wall run and jump across a street; turn at the water tank; take the east cross street; slow terrace step; finish beam. Red geometry marks authored traversal objects through proximity/direction/fade rules. A whole street district folds beside the upper route.
+Low roof vault; a connected block folds into a road; slide under its gantry; drop onto the second roof and choose either side of the stair housing; cross a falling facade; run the gravity bend and crest; climb/grab/pull onto the upper district; high vault; paired springboard into a roll; wall run and jump across a street; turn at the water tank; take the east cross street; slow terrace step; finish shelter. Small red hardware marks usable rails, lips, pipes and footplants through proximity/direction/fade rules. A street district turns its road toward the upper route; a continuous mirrored city spans overhead.
 
 Pause settings include sensitivity, FOV, bank, volume and runner vision. Head bob defaults off. Speed FOV and general jump grace are explicitly labelled Foldrunner extensions and default off. Settings/best time are in Godot's `user://settings_me.cfg`; scripted runs do not save them.
 
@@ -55,7 +55,7 @@ Pause settings include sensitivity, FOV, bank, volume and runner vision. Head bo
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\check.ps1
 ```
 
-The seven headless suites cover spec traces, move contracts, camera, runner vision, controls/gravity surfaces, integration and two full traversals. `tests/test_interface.gd` separately checks real UI input/layout in a rendered engine. Predictions, tolerances and port choices are in [docs/VERIFICATION.md](docs/VERIFICATION.md). Runtime ownership is in [docs/CONTRACT.md](docs/CONTRACT.md). Tuning is SI in `data/movement.tres` and its script.
+The eight headless suites cover spec traces, move contracts, camera/body contact, runner vision, controls/gravity surfaces, integration and two full traversals. `tests/test_interface.gd` separately checks real UI input/layout in a rendered engine. Predictions, tolerances and port choices are in [docs/VERIFICATION.md](docs/VERIFICATION.md). Runtime ownership is in [docs/CONTRACT.md](docs/CONTRACT.md). Tuning is SI in `data/movement.tres` and its script.
 
 ## Record
 
@@ -67,6 +67,6 @@ xvfb-run -a -s '-screen 0 1280x720x24' "$GODOT" --path . --audio-driver Dummy --
   --write-movie /tmp/foldrunner/run.png --fixed-fps 10 -- --bot --bot-quit
 ```
 
-Create the output folder first. `--audio-driver Dummy` permits clean capture shutdown. Movie Maker's frame rate changes recording/input delivery, not the movement constants; 10fps permits all twelve 120Hz physics ticks per recorded frame. Captures and spec/reference files stay outside Git. Useful user arguments: `--no-bank`, `--detour`, `--from=N`, `--trace-run=/absolute/run.csv`. The bot supplies ordinary held inputs, mouse motion and action presses; it never assigns route positions or velocity. `tests/render_moves.gd` and `tests/render_folds.gd` are labelled visual fixtures that reset between episodes, separate from route proof.
+Create the output folder first. Keep the virtual display at 1280×720: a taller maximized window causes Movie Maker to crop the foreground body. `--audio-driver Dummy` permits clean capture shutdown. Movie Maker's frame rate changes recording/input delivery, not the movement constants; 10fps permits all twelve 120Hz physics ticks per recorded frame. Captures and spec/reference files stay outside Git. Useful user arguments: `--no-hud`, `--no-bank`, `--detour`, `--from=N`, `--trace-run=/absolute/run.csv`. The bot supplies ordinary held inputs, mouse motion and action presses; it never assigns route positions or velocity. `tests/render_moves.gd`, `tests/render_review.gd` and `tests/render_folds.gd` are labelled visual fixtures that reset between episodes, separate from route proof.
 
 Windows script flow was tested in PowerShell on Linux with official archive/checksum validation and Linux Godot for execution. Native Windows gameplay, real controller hardware and subjective feel still need a person playing.
