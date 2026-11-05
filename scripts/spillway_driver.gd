@@ -381,21 +381,22 @@ func _exit_tree() -> void:
 		_trace.close()
 
 static func evidence_path_allowed(path: String) -> bool:
-	if not path.is_absolute_path():
+	if not path.is_absolute_path() or path.begins_with("res://") or path.begins_with("user://"):
 		return false
-	var project: String = ProjectSettings.globalize_path("res://").trim_suffix("/")
-	var repo: String = project
-	var candidate: String = project
+	var clean := path.simplify_path().trim_suffix("/")
+	var project := ProjectSettings.globalize_path("res://").trim_suffix("/")
+	if project.is_absolute_path() and (clean == project or clean.begins_with(project + "/")):
+		return false
+	# packed games have no filesystem res:// root; inspect destination ancestors instead.
+	var candidate := clean
 	while not candidate.is_empty():
 		if FileAccess.file_exists(candidate.path_join(".git")) or DirAccess.dir_exists_absolute(candidate.path_join(".git")):
-			repo = candidate
-			break
-		var parent: String = candidate.get_base_dir()
+			return false
+		var parent := candidate.get_base_dir()
 		if parent == candidate:
 			break
 		candidate = parent
-	var clean: String = path.simplify_path().trim_suffix("/")
-	return clean != repo and not clean.begins_with(repo + "/")
+	return true
 
 func _quit(code: int) -> void:
 	if is_instance_valid(main) and main.has_method("request_quit"):
