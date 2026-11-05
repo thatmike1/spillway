@@ -64,6 +64,7 @@ func build() -> void:
 	_roof_two()
 	_roof_three_and_bend()
 	_tower_b()
+	_extended_district()
 	_city()
 	_spectacle()
 	_route_for_bot()
@@ -433,6 +434,13 @@ func _drawbridge_tower() -> void:
 	var center: Vector3 = Vector3(0, TA_HEIGHT * 0.5, -TA_DEPTH * 0.5)
 	_mesh(fold, center, Vector3(TA_WIDTH, TA_HEIGHT, TA_DEPTH), _ta_material)
 	_shape(fold, center, Vector3(TA_WIDTH, TA_HEIGHT, TA_DEPTH))
+	# connected side wings share the hinge, making this a block rather than a lone slab.
+	for side: float in [-1.0, 1.0]:
+		var wing_center := Vector3(side * 12, 18, -6)
+		_mesh(fold, wing_center, Vector3(7.5, 36, 12), _ta_material)
+		_shape(fold, wing_center, Vector3(7.5, 36, 12))
+		_mesh(fold, Vector3(side * 8, 10, -3), Vector3(2.5, 2, 6), _materials["concrete"])
+		_mesh(fold, Vector3(side * 8, 26, -3), Vector3(2.5, 2, 6), _materials["concrete"])
 	# corner piers: after the fold they are the low kerbs along the road
 	for side: float in [-1.0, 1.0]:
 		var pier_center: Vector3 = Vector3(side * (TA_WIDTH * 0.5 - 0.45), TA_HEIGHT * 0.5, 0.2)
@@ -632,15 +640,99 @@ func _tower_b() -> void:
 		collider.transform = Transform3D(slab_basis, point - normal * thickness * 0.5)
 		if index == steps - 3:
 			_cue_strip(crest_cue, holder, Vector3(0, 0.02, 0), Vector3(6.0, 0.05, 0.2))
-	_parapet(Vector3(0, roof_y, face_z - depth * 0.5 - CREST_RADIUS * 0.5), Vector2(20, depth - CREST_RADIUS), true, [true, true, false, true])
-	# the finish: a pale beam visible from the very first roof
-	var finish_base: Vector3 = Vector3(0, roof_y, -190)
+	_parapet(Vector3(0, roof_y, face_z - depth * 0.5 - CREST_RADIUS * 0.5), Vector2(20, depth - CREST_RADIUS), true, [true, true, false, false])
+	# roof overlook: stable foreground from which to read the rising district.
+	_mesh(self, Vector3(7.5, roof_y + .8, -185), Vector3(.25, 1.6, 5), _materials["metal"])
+
+
+# ---------------------------------------------------------------- the second district
+
+func _mark_object(body: StaticBody3D, group: String = "") -> void:
+	var mesh: MeshInstance3D = body.get_child(0) as MeshInstance3D
+	if mesh == null:
+		return
+	var material := _standard(CONCRETE, .8)
+	mesh.material_override = material
+	vision.register(body, Vector3.ZERO, material, {"group": group})
+
+func _route_lip(position: Vector3, width: float = 7) -> void:
+	var cue: int = _cue(self, position, 4)
+	_cue_strip(cue, self, position + Vector3(0, .025, 0), Vector3(width, .05, .20))
+
+func _extended_district() -> void:
+	# a slide-clearance service gantry on the fallen tower: a low, readable silhouette.
+	var gantry := _solid(self, Vector3(0, 1.65, -76), Vector3(13.8, .60, 2.8), _materials["concrete"], "SlideGantry")
+	_mark_object(gantry)
+	for x: float in [-6.8, 6.8]:
+		_solid(self, Vector3(x, .7, -76), Vector3(.35, 1.4, 3), _materials["metal"])
+	# continuation from the gravity crest. no seam, no position relocation.
+	_building(Vector2(0, -210), Vector2(18, 24), 25, true, _facade(4), false)
+	_building(Vector2(0, -235.5), Vector2(18, 23), 29.8, true, _facade(2), false)
+	_parapet(Vector3(0, 29.8, -235.5), Vector2(18, 23), true, [true, true, false, false])
+	_route_lip(Vector3(0, 25, -221.8))
+	_route_lip(Vector3(0, 29.8, -224.1))
+	_checkpoint(Vector3(0, 27, -208), Vector3(18, 4, 6), Transform3D(Basis.IDENTITY, Vector3(0, 25.9, -207)), 2)
+	# this high service wall demands the slower high-vault contract; a side lane stays open.
+	var high := _solid(self, Vector3(-1, 30.65, -234.5), Vector3(11, 1.7, .65), _materials["metal"], "HighVaultRail")
+	_mark_object(high)
+	# paired footplants: a springboard takes you across the street below.
+	var spring_a := _solid(self, Vector3(0, 30.12, -243), Vector3(5, .64, .5), _materials["metal"], "FirstFootplant")
+	var spring_b := _solid(self, Vector3(0, 30.4, -244.12), Vector3(5, 1.2, .5), _materials["metal"], "SecondFootplant")
+	_mark_object(spring_a, "footplants")
+	_mark_object(spring_b, "footplants")
+	_building(Vector2(0, -267), Vector2(18, 28), 29.8, true, _facade(5), false)
+	_route_lip(Vector3(0, 29.8, -258.1))
+	_route_lip(Vector3(0, 29.8, -280.8))
+	_checkpoint(Vector3(0, 32, -268), Vector3(18, 5, 6), Transform3D(Basis.IDENTITY, Vector3(0, 30.7, -267)), 2)
+	# a wall carries you across the next cut. the street is visible beneath your feet.
+	var wall := _solid(self, Vector3(-.72, 33.8, -285), Vector3(.4, 8, 16), _facade(1), "WallRunFacade")
+	var contact := _solid(self, Vector3(-.495, 32, -285), Vector3(.05, .25, 15.8), _materials["concrete"], "WallHandRail")
+	contact.set_meta("exclude_feet", true)
+	_mark_object(contact)
+	_building(Vector2(0, -309), Vector2(18, 36), 29.8, true, _facade(0), false)
+	_parapet(Vector3(0, 29.8, -309), Vector2(18, 36), true, [true, true, false, true])
+	# turn at the water tank, then take the right-hand cross street.
+	_water_tank(Vector3(5.5, 29.8, -321), true)
+	_route_lip(Vector3(0, 29.8, -322))
+	_checkpoint(Vector3(0, 32, -300), Vector3(18, 5, 6), Transform3D(Basis.IDENTITY, Vector3(0, 30.7, -298)), 2)
+	_building(Vector2(20, -305), Vector2(24, 12), 29.8, true, _facade(3), false)
+	_building(Vector2(30, -327), Vector2(14, 48), 29.8, true, _facade(3), false)
+	_parapet(Vector3(30, 29.8, -327), Vector2(14, 48), true, [true, true, false, false])
+	for z: float in [-309, -321, -333]:
+		_route_lip(Vector3(30, 29.8, z), 5)
+	# slow approach step-up, then a final free run to the finish terrace.
+	var step := _solid(self, Vector3(30, 30.24, -340), Vector3(10, .88, 5), _materials["concrete"], "StepTerrace")
+	_mark_object(step)
+	_building(Vector2(30, -366), Vector2(18, 30), 29.8, true, _facade(4), false)
+	_route_lip(Vector3(30, 29.8, -350.8))
+	_route_lip(Vector3(30, 29.8, -351.2))
+	var finish_base := Vector3(30, 29.8, -376)
 	finish_point = finish_base
-	_cylinder(self, finish_base + Vector3(0, 0.06, 0), 2.6, 0.12, _materials["cyan"])
-	var beam: MeshInstance3D = _cylinder(self, finish_base + Vector3(0, 200, 0), 1.1, 400.0, _materials["beam"])
+	_cylinder(self, finish_base + Vector3(0, .06, 0), 2.6, .12, _materials["cyan"])
+	var beam := _cylinder(self, finish_base + Vector3(0, 100, 0), .65, 200, _materials["beam"])
 	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	landmarks["finish_beam"] = beam
-	finish_trigger = _trigger("FinishTrigger", finish_base + Vector3(0, 2, 0), Vector3(8, 4, 6))
+	finish_trigger = _trigger("FinishTrigger", finish_base + Vector3(0, 2, 0), Vector3(8, 4, 5))
+	# one coherent city block folds as a whole, retaining roads, bays and roofs.
+	var district := FOLD_SCRIPT.new() as AnimatableBody3D
+	district.name = "RisingDistrict"
+	district.position = Vector3(-60, 8, -249)
+	district.set("axis", Vector3.FORWARD)
+	district.set("angle", deg_to_rad(68))
+	district.set("anticipation", 1.5)
+	district.set("duration", 7.0)
+	add_child(district)
+	var chunk := _city_chunk(Vector3.ZERO, 5)
+	chunk.reparent(district, false)
+	chunk.position = Vector3(-37, 0, 0)
+	folds.append(district)
+	fold_triggers.append({"area": _trigger("DistrictFoldTrigger", Vector3(0, 27, -202), Vector3(18, 5, 32)), "fold": district})
+	# ordinary human-scale details repeat along the cross-street.
+	for x: float in [12, 20]:
+		_ac_unit(Vector3(x, 29.8, -300.5), true)
+	for z: float in [-313, -324, -346, -365]:
+		_mesh(self, Vector3(35, 30.15, z), Vector3(1, .7, 1.8), _materials["metal"])
+
 
 
 # ---------------------------------------------------------------- the city around it
@@ -655,7 +747,7 @@ func _city() -> void:
 			if distance > 360.0:
 				continue
 			# the route corridor stays clear
-			if absf(center.x) < 30.0 and center.y > -230.0 and center.y < 30.0:
+			if absf(center.x) < 30.0 and center.y > -430.0 and center.y < 30.0:
 				continue
 			var downtown: float = clampf(1.0 - Vector2(center.x + 80.0, center.y + 330.0).length() / 220.0, 0.0, 1.0)
 			var lots: int = 1 + _rng.randi() % 3
@@ -664,7 +756,7 @@ func _city() -> void:
 				var lot_center: Vector2 = center + Vector2(-block * 0.5 + (float(lot) + 0.5) * block / float(lots), _rng.randf_range(-2.0, 2.0))
 				var depth: float = _rng.randf_range(14.0, block)
 				var height: float = _rng.randf_range(18.0, 52.0) + downtown * _rng.randf_range(40.0, 130.0)
-				if absf(lot_center.x) < 70.0 and lot_center.y > -230.0 and lot_center.y < 30.0:
+				if absf(lot_center.x) < 70.0 and lot_center.y > -430.0 and lot_center.y < 30.0:
 					height = minf(height, 42.0)
 				var roof_y: float = STREET_Y + height
 				var near: bool = absf(lot_center.x) < 60.0 and lot_center.y > -240.0 and lot_center.y < 40.0
@@ -733,6 +825,13 @@ func _city_chunk(origin: Vector3, count: int) -> Node3D:
 	add_child(chunk)
 	_mesh(chunk, Vector3(0, -1, 0), Vector3(90, 2, 34), _materials["concrete_dark"])
 	_mesh(chunk, Vector3(0, 0.05, 0), Vector3(90, 0.1, 8), _materials["asphalt"])
+	for side: float in [-1.0, 1.0]:
+		_mesh(chunk, Vector3(0, .15, side * 5.6), Vector3(90, .3, 2.5), _materials["concrete"])
+	for x: float in [-38, -26, -14, -2, 10, 22, 34]:
+		_mesh(chunk, Vector3(x, .12, 0), Vector3(5, .04, .12), _materials["lane"])
+		# small parked vans establish the scale of the street through its turn.
+		_mesh(chunk, Vector3(x + 3, .8, 3), Vector3(3.5, 1.4, 1.7), _materials["concrete_dark"])
+		_mesh(chunk, Vector3(x + 3.8, 1.2, 3), Vector3(1.2, .8, 1.65), _materials["dark"])
 	for index: int in range(count):
 		var x: float = -36.0 + float(index) * 72.0 / float(maxi(count - 1, 1))
 		for side: float in [-1.0, 1.0]:
@@ -747,16 +846,31 @@ func _city_chunk(origin: Vector3, count: int) -> Node3D:
 ## takeoff point: the bot presses jump when it gets within reach of it.
 func _route_for_bot() -> void:
 	bot_path = [
-		{"point": Vector3(0, 0.9, -5), "look_around": true},
-		{"point": Vector3(0, 0.9, -38), "wait_fold": 0, "watch": Vector3(0, 0, -80)},
-		{"point": Vector3(0, 0.9, -48.0), "jump": true},
-		{"point": Vector3(0, 0.9, -98.6), "jump": true},
-		{"point": Vector3(4.5, -2.1, -112)},
-		{"point": Vector3(5.0, -2.1, -128)},
-		{"point": Vector3(1.5, -2.1, -137.0), "wait_fold": 1, "watch": Vector3(0, 3, -152), "watch_pitch": 18.0},
+		{"point": Vector3(0, .9, -5), "look_around": true},
+		{"point": Vector3(0, .9, -38), "wait_fold": 0, "watch": Vector3(0, 0, -80)},
+		{"point": Vector3(0, .9, -48), "jump": true},
+		{"point": Vector3(0, .9, -70)},
+		{"point": Vector3(0, .9, -80), "slide": true},
+		{"point": Vector3(0, .9, -98.6)},
+		{"point": Vector3(4.7, -2.1, -112)},
+		{"point": Vector3(5, -2.1, -128)},
+		{"point": Vector3(1.5, -2.1, -137), "wait_fold": 1, "watch": Vector3(0, 3, -152), "watch_pitch": 18},
 		{"point": Vector3(0, -2.1, -160)},
-		{"point": Vector3(0, 2.0, -170.3)},
-		{"point": Vector3(0, 18.0, -170.1)},
+		{"point": Vector3(0, 2, -170.3)},
+		{"point": Vector3(0, 18, -170.1)},
 		{"point": Vector3(0, 25.9, -180)},
-		{"point": Vector3(0, 25.9, -190)},
+		{"point": Vector3(0, 25.9, -219.5), "jump": true},
+		{"point": Vector3(0, 30.7, -229)},
+		{"point": Vector3(0, 30.7, -232.6), "jump": true},
+		{"point": Vector3(0, 30.7, -239.0), "jump": true},
+		{"point": Vector3(0, 30.7, -270), "roll": true},
+		{"point": Vector3(0, 30.7, -279), "jump": true},
+		{"point": Vector3(0, 32, -286.5), "wall_jump": true},
+		{"point": Vector3(1.5, 30.7, -301)},
+		{"point": Vector3(1.5, 30.7, -320), "turn": true},
+		{"point": Vector3(1.5, 30.7, -306)},
+		{"point": Vector3(30, 30.7, -305)},
+		{"point": Vector3(30, 30.7, -334)},
+		{"point": Vector3(30, 31.58, -342), "slow": true},
+		{"point": Vector3(30, 30.7, -376)},
 	]

@@ -38,7 +38,7 @@ func _route(no_bank: bool) -> void:
 	var actions: Dictionary = {}
 	player.connect("move_started", func(kind: String) -> void: actions[kind] = true)
 	var ticks: int = 0
-	while ticks < 120 * 75:
+	while ticks < 120 * 120:
 		await physics_frame
 		ticks += 1
 		var step: float = player.global_position.distance_to(previous)
@@ -67,8 +67,9 @@ func _route(no_bank: bool) -> void:
 	check(max_up_turn > deg_to_rad(85.0), "gravity never turned to the wall")
 	# 120 Hz physics at ~10 m/s is under 0.1 m a tick; anything big is a teleport
 	check(max_step < 0.35, "position jumped %.2fm in one tick" % max_step)
-	check(elapsed > 20.0 and elapsed < 60.0, "run length %.1fs outside the 20-60s slice" % elapsed)
-	check(actions.has("vault"), "never vaulted the vent row")
+	check(elapsed >= 60.0 and elapsed <= 90.0, "run length %.1fs outside the 60-90s slice" % elapsed)
+	for kind: String in ["vault", "high_vault", "wallclimb", "grab", "pullup", "roll", "slide", "wallrun", "walljump", "springboard", "step", "turn"]:
+		check(actions.has(kind), "route missed " + kind)
 	Input.action_release("move_forward")
 	main.queue_free()
 	await process_frame

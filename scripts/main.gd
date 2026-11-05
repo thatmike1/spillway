@@ -172,10 +172,12 @@ func _check_fall(delta: float) -> void:
 		return
 	var falling: bool = player.global_position.y < FALL_FLOOR
 	var air: float = float(player.call("get_air_time"))
-	if air > 3.2 or (air > 1.8 and not player.up_direction.is_equal_approx(Vector3.UP)):
+	if air > 5.0 or (air > 1.8 and not player.up_direction.is_equal_approx(Vector3.UP)):
 		falling = true
 	var away: Vector3 = player.global_position
-	if absf(away.x) > 120.0 or away.z > 60.0 or away.z < -260.0 or away.y > 140.0:
+	if absf(away.x) > 120.0 or away.z > 60.0 or away.z < -500.0 or away.y > 140.0:
+		falling = true
+	if player.move == player.Move.LANDING and player.landing.kind == "death":
 		falling = true
 	if falling:
 		_respawning = 0.0

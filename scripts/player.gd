@@ -380,10 +380,10 @@ func _step_free(delta: float, crouch_held: bool) -> void:
 			elif h >= 1.45 and h <= tuning.vault_high_height and vertical >= tuning.vault_high_gate:
 				vault.start(self, edge, true, bool(edge.onto))
 				return
-			elif h >= tuning.vault_low_height and h <= tuning.vault_fast_height and (grounded or vertical >= 0):
+			elif h >= tuning.vault_low_height and h <= tuning.vault_fast_height and (grounded or vertical >= 0) and forward_input > .7:
 				vault.start(self, edge, false, bool(edge.onto))
 				return
-			elif not grounded and h > 1.48 and h < 3.4 and vertical < 4:
+			elif not grounded and h > 1.48 and h < 2.6 and vertical < 4:
 				ledge.start(self, edge)
 				return
 		if not grounded and _air_time > .04 and try_wall(lateral):
@@ -652,12 +652,14 @@ func _update_rig(delta: float, snap: bool) -> void:
 	else:
 		# gravity turns ease in over a fraction of a second, yaw is already applied
 		_view_q = _view_q.slerp(body_q, 1.0 - exp(-9.0 * delta)).normalized()
-	# landing compression and small nods are springs, never shakes
-	_dip_velocity += (-_dip * 170.0 - _dip_velocity * 19.0) * delta
-	_dip += _dip_velocity * delta
-	_dip = clampf(_dip, -0.45, 0.2)
-	_nod_velocity += (-_nod * 150.0 - _nod_velocity * 18.0) * delta
-	_nod += _nod_velocity * delta
+	# substep the eye springs, including slow Movie Maker frames and real hitches.
+	var spring_steps: int = maxi(1, ceili(delta * 120))
+	var h: float = delta / spring_steps
+	for i: int in spring_steps:
+		_dip_velocity += (-_dip * 170 - _dip_velocity * 19) * h
+		_dip = clampf(_dip + _dip_velocity * h, -.45, .2)
+		_nod_velocity += (-_nod * 150 - _nod_velocity * 18) * h
+		_nod += _nod_velocity * h
 	var target_roll: float = 0
 	var local_eye: Vector3 = Vector3.ZERO
 	var speed: float = get_speed()

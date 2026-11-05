@@ -72,7 +72,7 @@ func _test_fold() -> void:
 	var tower: Node3D = fold as Node3D
 	var facade_normal: Vector3 = tower.global_basis * Vector3.BACK
 	check(facade_normal.dot(Vector3.UP) > 0.999, "the facade now faces the sky")
-	var hit: Dictionary = _ray(Vector3(0, 5, -75), Vector3(0, -5, -75))
+	var hit: Dictionary = _ray(Vector3(0, 5, -72), Vector3(0, -5, -72))
 	check(not hit.is_empty() and absf(Vector3(hit["position"]).y) < 0.05, "the road surface sits level with the start roof")
 	check(not _ray(Vector3(0, 5, -98.5), Vector3(0, -5, -98.5)).is_empty(), "the road reaches 48 m out")
 

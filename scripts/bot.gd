@@ -14,6 +14,9 @@ var finished_at: float = -1.0
 var jumps: int = 0
 var log_lines: PackedStringArray = PackedStringArray()
 
+var _turn_wait: float = 0
+var _crouch_sent: bool = false
+var _trace: FileAccess
 var _look_phase: float = 0.0
 var _waiting: float = 0.0
 var _jump_release: int = 0
@@ -25,6 +28,13 @@ func attach(owner_main: Node, runner: CharacterBody3D, route: Node3D, quit: bool
 	player = runner
 	level = route
 	quit_at_end = quit
+	if OS.get_cmdline_user_args().has("--detour"):
+		level.bot_path[6].point = Vector3(-5, -2.1, -112)
+		level.bot_path[7].point = Vector3(-5, -2.1, -128)
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--trace-run="):
+			_trace = FileAccess.open(arg.trim_prefix("--trace-run="), FileAccess.WRITE)
+			_trace.store_line("time,x,y,z,speed,move,waypoint,up_x,up_y,up_z")
 	process_physics_priority = -100
 	process_mode = Node.PROCESS_MODE_PAUSABLE
 
@@ -41,6 +51,12 @@ func _physics_process(delta: float) -> void:
 	if player == null:
 		return
 	time += delta
+	if _trace != null:
+		_trace.store_line("%.5f,%.5f,%.5f,%.5f,%.5f,%d,%d,%.5f,%.5f,%.5f" % [time, player.position.x, player.position.y, player.position.z, player.get_speed(), player.move, index, player.up_direction.x, player.up_direction.y, player.up_direction.z])
+	if time > 130:
+		print("bot timeout at ", player.position, " waypoint ", index)
+		get_tree().quit(1)
+		return
 	_sensitivity = float(player.get("mouse_sensitivity"))
 	if _jump_release > 0:
 		_jump_release -= 1
@@ -50,6 +66,11 @@ func _physics_process(delta: float) -> void:
 		Input.action_release("move_forward")
 		if finished_at < 0.0:
 			finished_at = time
+			for line: String in log_lines:
+				print(line)
+			print("route finished at ", main.elapsed, " seconds; respawns ", main.respawn_count)
+			if _trace != null:
+				_trace.flush()
 		_turn_toward(Vector3(0, 25, -60), delta, 1.2)
 		if quit_at_end and time - finished_at > 2.5:
 			get_tree().quit(0)
@@ -87,17 +108,38 @@ func _physics_process(delta: float) -> void:
 			_aim_pitch(deg_to_rad(float(step.get("watch_pitch", 12.0))), delta)
 			_turn_toward(step["watch"], delta, 1.0)
 			return
-	Input.action_press("move_forward")
+	if step.get("turn", false) and (flat.length() < 1.5 or _turn_wait > 0):
+		Input.action_release("move_forward")
+		if _turn_wait == 0:
+			_send_action("turn", true)
+		_turn_wait += delta
+		if _turn_wait > 1.10:
+			_send_action("turn", false)
+			_advance("180 turn")
+		return
+	Input.action_press("move_forward", .55 if step.get("slow", false) else 1.0)
+	if step.get("slide", false):
+		Input.action_press("crouch")
+	elif step.get("roll", false):
+		if _crouch_sent and player.move == player.Move.ROLL:
+			Input.action_release("crouch")
+		if player.velocity.dot(up) < -2 and player.position.y - target.y < 1.0 and not _crouch_sent:
+			Input.action_press("crouch")
+			_crouch_sent = true
+		elif not _crouch_sent:
+			Input.action_release("crouch")
+	else:
+		Input.action_release("crouch")
 	_turn_toward(target, delta, 1.0)
 	var look_down: float = deg_to_rad(-8.0)
 	if step.get("jump", false):
 		look_down = deg_to_rad(-4.0)
 	_aim_pitch(look_down, delta)
 	var reach: float = 1.4
-	if step.get("jump", false):
+	if step.get("jump", false) or step.get("wall_jump", false):
 		var forward: Vector3 = (-player.global_basis.z).slide(up).normalized()
 		var ahead: float = offset.dot(forward)
-		if ahead < 0.35 and bool(player.get("grounded")):
+		if ahead < .35 and (bool(player.get("grounded")) or (step.get("wall_jump", false) and player.move == player.Move.WALLRUN)):
 			_send_action("jump", true)
 			_jump_release = 6
 			jumps += 1
@@ -112,6 +154,8 @@ func _physics_process(delta: float) -> void:
 func _advance(reason: String) -> void:
 	log_lines.append("t=%.2f waypoint %d %s at %s" % [time, index, reason, player.global_position])
 	index += 1
+	_turn_wait = 0
+	_crouch_sent = false
 
 
 func _turn_toward(target: Vector3, delta: float, gain: float) -> void:
