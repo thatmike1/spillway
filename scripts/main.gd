@@ -336,7 +336,7 @@ static func bind_inputs() -> void:
 		"move_forward": [KEY_W], "move_back": [KEY_S], "move_left": [KEY_A], "move_right": [KEY_D],
 		"look_left": [KEY_LEFT], "look_right": [KEY_RIGHT], "look_up": [KEY_UP], "look_down": [KEY_DOWN],
 		"jump": [KEY_SPACE], "crouch": [KEY_CTRL, KEY_C], "restart": [KEY_R],
-		"pause": [KEY_ESCAPE], "fullscreen": [KEY_F11],
+		"turn": [KEY_Q], "pause": [KEY_ESCAPE], "fullscreen": [KEY_F11],
 	}
 	var axes: Dictionary = {
 		"move_left": [JOY_AXIS_LEFT_X, -1.0], "move_right": [JOY_AXIS_LEFT_X, 1.0],
@@ -347,7 +347,7 @@ static func bind_inputs() -> void:
 	}
 	var buttons: Dictionary = {
 		"jump": [JOY_BUTTON_A, JOY_BUTTON_RIGHT_SHOULDER], "crouch": [JOY_BUTTON_B, JOY_BUTTON_LEFT_SHOULDER],
-		"restart": [JOY_BUTTON_BACK], "pause": [JOY_BUTTON_START],
+		"turn": [JOY_BUTTON_Y], "restart": [JOY_BUTTON_BACK], "pause": [JOY_BUTTON_START],
 	}
 	for action: String in keys.keys():
 		if InputMap.has_action(action):

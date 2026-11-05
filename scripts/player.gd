@@ -10,7 +10,7 @@ signal landed(impact: float)
 signal footstep(strength: float)
 signal move_started(kind: String)
 
-enum Move { GROUND, AIR, WALLRUN, CLIMB, SLIDE }
+enum Move { GROUND, AIR, WALLRUN, CLIMB, SLIDE, VAULT, GRAB, PULLUP, WALLCLIMB, ROLL, TURN, SPRINGBOARD, STEP, LANDING }
 
 const STAND_HEIGHT: float = 1.8
 const LOW_HEIGHT: float = 1.22
@@ -36,6 +36,23 @@ var gravity_strength: float:
 @export_range(0.0, 1.0) var bank_amount: float = 1.0
 @export var head_bob_enabled: bool = false
 
+var landing = preload("res://scripts/moves/landing.gd").new()
+var vault = preload("res://scripts/moves/vault.gd").new()
+var ledge = preload("res://scripts/moves/ledge.gd").new()
+var wall = preload("res://scripts/moves/wall.gd").new()
+var slide = preload("res://scripts/moves/slide.gd").new()
+var turn = preload("res://scripts/moves/turn.gd").new()
+var springboard = preload("res://scripts/moves/springboard.gd").new()
+var step_up = preload("res://scripts/moves/step.gd").new()
+var _step_grace: float = 0
+var _clock: float = 0
+var _context_lock: float = 0
+var _crouch_age: float = 100
+var _last_crouch_press: float = -100
+var _crouch_held: bool = false
+var _air_turned: bool = false
+var _vault_landing: bool = false
+var _jump_origin: Vector3 = Vector3.ZERO
 var controls_enabled: bool = true
 var move: Move = Move.GROUND
 var momentum: float = 0.0
@@ -145,11 +162,11 @@ func get_wall_side() -> float:
 
 
 func get_climb_progress() -> float:
-	return clampf(_climb_time / maxf(_climb_duration, 0.01), 0.0, 1.0) if move == Move.CLIMB else 0.0
+	return clampf(vault.time / maxf(vault.duration, .01), 0, 1) if move == Move.VAULT else (clampf(ledge.time / tuning.pull_duration, 0, 1) if move == Move.PULLUP else 0.0)
 
 
 func get_climb_kind() -> String:
-	return _climb_kind if move == Move.CLIMB else ""
+	return vault.variant if move == Move.VAULT else ("pullup" if move == Move.PULLUP else "")
 
 
 func get_climb_hand_point() -> Vector3:
@@ -171,12 +188,22 @@ func queue_jump() -> void:
 
 
 func look(yaw_delta: float, pitch_delta: float) -> void:
-	if not controls_enabled:
+	if not controls_enabled or move in [Move.ROLL, Move.LANDING] or (move == Move.PULLUP and ledge.time < tuning.pull_look_release):
 		return
+	if move == Move.SLIDE:
+		var since: float = slide.start_yaw.signed_angle_to(-global_basis.z, up_direction)
+		yaw_delta = clampf(since + yaw_delta, -deg_to_rad(tuning.slide_look), deg_to_rad(tuning.slide_look)) - since
 	_yaw_input += yaw_delta
 	rotate_object_local(Vector3.UP, yaw_delta)
 	_view_q = (_view_q * Quaternion(Vector3.UP, yaw_delta)).normalized()
-	_pitch = clampf(_pitch + pitch_delta, deg_to_rad(-88.0), deg_to_rad(88.0))
+	var limit: float = 88.0
+	if move == Move.WALLRUN:
+		limit = 71.41
+	elif move == Move.SLIDE:
+		limit = tuning.slide_look
+	elif _crouched:
+		limit = tuning.crouch_pitch
+	_pitch = clampf(_pitch + pitch_delta, deg_to_rad(-limit), deg_to_rad(limit))
 
 
 func reset_to(spawn: Transform3D, up: Vector3 = Vector3.UP) -> void:
@@ -189,6 +216,16 @@ func reset_to(spawn: Transform3D, up: Vector3 = Vector3.UP) -> void:
 	move = Move.GROUND
 	_jump_flight = false
 	_yaw_input = 0.0
+	_fall_origin = spawn.origin.dot(up_direction)
+	_jump_origin = spawn.origin
+	_air_turned = false
+	_vault_landing = false
+	_context_lock = 0
+	_crouch_age = 100
+	_crouch_held = false
+	wall.consecutive = 0
+	wall.from_jump = false
+	wall.illegal_time = 0
 	momentum = 0.0
 	_pitch = 0.0
 	_jump_buffer = 0.0
@@ -219,6 +256,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		# screen_relative ignores the canvas stretch, so sensitivity is the same at any window size
 		var delta: Vector2 = motion.screen_relative
 		look(-delta.x * mouse_sensitivity, -delta.y * mouse_sensitivity * (-1.0 if invert_y else 1.0))
+	elif event.is_action_pressed("turn"):
+		if move in [Move.GROUND, Move.AIR]:
+			turn.start(self)
 	elif event.is_action_pressed("jump"):
 		_jump_buffer = tuning.jump_buffer if assists_enabled else 1.0 / 120.0 + .00001
 
@@ -236,24 +276,35 @@ func _read_stick_look(delta: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	_prev_eye = _curr_eye
+	_clock += delta
+	_step_grace = maxf(0, _step_grace - delta)
+	floor_snap_length = 0 if _step_grace > 0 else .45
 	_since_jump += delta
+	_context_lock = maxf(0, _context_lock - delta)
+	wall.illegal_time = maxf(0, wall.illegal_time - delta)
+	_crouch_age += delta
 	_input_axis = Vector2.ZERO
 	var crouch_held: bool = false
 	if controls_enabled:
-		_input_axis = Input.get_vector("move_left", "move_right", "move_forward", "move_back", 0.2)
+		_input_axis = Input.get_vector("move_left", "move_right", "move_forward", "move_back", .2)
 		crouch_held = Input.is_action_pressed("crouch")
 		_read_stick_look(delta)
+	if crouch_held and not _crouch_held and _clock - _last_crouch_press > tuning.roll_retrigger:
+		_crouch_age = 0
+		_last_crouch_press = _clock
+	_crouch_held = crouch_held
 	match move:
-		Move.CLIMB:
-			_step_climb(delta)
-		Move.WALLRUN:
-			_step_wallrun(delta)
-		Move.SLIDE:
-			_step_slide(delta, crouch_held)
-		_:
-			_step_free(delta, crouch_held)
-	_jump_buffer = maxf(0.0, _jump_buffer - delta)
-	_yaw_input = 0.0
+		Move.VAULT: vault.step(self, delta)
+		Move.GRAB, Move.PULLUP: ledge.step(self, delta)
+		Move.WALLRUN, Move.WALLCLIMB: wall.step(self, delta)
+		Move.SLIDE: slide.step(self, delta)
+		Move.ROLL, Move.LANDING: landing.step(self, delta)
+		Move.TURN: turn.step(self, delta)
+		Move.SPRINGBOARD: springboard.step(self, delta)
+		Move.STEP: step_up.step(self, delta)
+		_: _step_free(delta, crouch_held)
+	_jump_buffer = maxf(0, _jump_buffer - delta)
+	_yaw_input = 0
 	_follow_surface()
 	var target_eye: float = EYE_LOW if is_low() else EYE_STAND
 	_eye_height = move_toward(_eye_height, target_eye, delta * (5.5 if target_eye < _eye_height else 3.2))
@@ -274,9 +325,12 @@ func _step_free(delta: float, crouch_held: bool) -> void:
 	if grounded:
 		_coyote = tuning.coyote_time if assists_enabled else 0.0
 		_air_time = 0.0
+		move = Move.GROUND
 	else:
 		_coyote = maxf(0.0, _coyote - delta)
 		_air_time += delta
+		move = Move.AIR
+		_fall_origin = maxf(_fall_origin, global_position.dot(up))
 	var wish: Vector3 = _wish(_input_axis)
 	var forward_input: float = -_input_axis.y
 	var vertical: float = velocity.dot(up)
@@ -300,20 +354,33 @@ func _step_free(delta: float, crouch_held: bool) -> void:
 		vertical = maxf(vertical - tuning.gravity * delta, -tuning.terminal_speed)
 	velocity = lateral + up * vertical
 
-	# actions in order of priority: slide, vault/climb, wall-run, jump
-	if grounded and crouch_held and lateral_speed > 5.2 and _since_jump > 0.15:
-		_begin_slide(lateral)
+	# current-controller actions precede global context selection.
+	if grounded and _jump_buffer > 0 and try_springboard():
 		return
-	if forward_input > 0.4 and _since_jump > 0.12:
-		if grounded and lateral_speed > 2.0 and _try_ledge(1.25, 0.5 + lateral_speed * 0.05, false):
+	if grounded and crouch_held and lateral.dot((-global_basis.z).slide(up).normalized()) >= tuning.slide_min and _context_lock <= 0:
+		slide.start(self, lateral)
+		return
+	if forward_input > .4 and _context_lock <= 0:
+		var edge: Dictionary = detect_edge(maxf(.6, lateral_speed * tuning.vault_reach_time), 3.4 if not grounded else 1.93)
+		if not edge.is_empty():
+			var h: float = edge.height
+			if grounded and h <= tuning.step_height:
+				try_ordinary_step(delta)
+			elif grounded and h <= 1.48 and lateral_speed <= tuning.step_speed_limit and float(edge.distance) < tuning.step_reach:
+				step_up.start(self, edge)
+				return
+			elif h >= 1.45 and h <= tuning.vault_high_height and vertical >= tuning.vault_high_gate:
+				vault.start(self, edge, true, bool(edge.onto))
+				return
+			elif h >= tuning.vault_low_height and h <= tuning.vault_fast_height and (grounded or vertical >= 0):
+				vault.start(self, edge, false, bool(edge.onto))
+				return
+			elif not grounded and h > 1.48 and h < 3.4 and vertical < 4:
+				ledge.start(self, edge)
+				return
+		if not grounded and _air_time > .04 and try_wall(lateral):
 			return
-		if not grounded and vertical < 4.0 and _try_ledge(2.0, 0.65, true):
-			return
-	if _jump_buffer > 0.0 and grounded and _try_ledge(1.25, 0.9, false):
-		return
-	if not grounded and _air_time > 0.04 and _try_wallrun(lateral, forward_input):
-		return
-	if _jump_buffer > 0.0 and (grounded or _coyote > 0.0):
+	if _jump_buffer > 0 and (grounded or _coyote > 0):
 		_pre_jump_speed = lateral.length()
 		_jump_flight = true
 		var forward: Vector3 = (-global_basis.z).slide(up).normalized()
@@ -321,6 +388,8 @@ func _step_free(delta: float, crouch_held: bool) -> void:
 			lateral += forward * tuning.jump_forward
 		_do_jump(up * tuning.jump_speed + lateral)
 		return
+	if grounded:
+		try_ordinary_step(delta)
 
 	var pre_velocity: Vector3 = velocity
 	move_and_slide()
@@ -333,9 +402,16 @@ func _after_move(was_grounded: bool, pre_velocity: Vector3) -> void:
 	if now_grounded and not was_grounded and _since_jump > 0.1:
 		grounded = true
 		_last_wall_normal = Vector3.ZERO
+		wall.consecutive = 0
+		wall.from_jump = false
 		var impact: float = maxf(down_speed, 0.0)
 		if impact > 2.0:
-			_on_land(impact)
+			var soft: bool = false
+			if get_slide_collision_count() > 0:
+				var body = get_last_slide_collision().get_collider()
+				soft = body is Node and body.get_meta("soft_landing", false)
+			landing.start(self, impact, soft)
+		_fall_origin = global_position.dot(up_direction)
 	if grounded and now_grounded:
 		var stride_length: float = 2.2
 		if _stride >= stride_length:
@@ -343,19 +419,10 @@ func _after_move(was_grounded: bool, pre_velocity: Vector3) -> void:
 			footstep.emit(clampf(get_speed() / top_speed, 0.2, 1.0))
 
 
-func _on_land(impact: float) -> void:
-	_dip_velocity -= clampf(impact * 0.11, 0.3, 2.6)
-	_nod_velocity -= clampf(impact * 0.012, 0.0, 0.16)
-	if _jump_flight:
-		var lateral: Vector3 = velocity.slide(up_direction)
-		velocity = lateral.limit_length(maxf(0.0, _pre_jump_speed - tuning.landing_reduction))
-		_jump_flight = false
-	last_landing_speed = get_speed()
-	landed.emit(impact)
-
-
 func _do_jump(new_velocity: Vector3) -> void:
 	velocity = new_velocity
+	_jump_origin = global_position
+	_fall_origin = global_position.dot(up_direction)
 	grounded = false
 	_since_jump = 0.0
 	_coyote = 0.0
@@ -367,199 +434,124 @@ func _do_jump(new_velocity: Vector3) -> void:
 	move_and_slide()
 
 
-# ---------------------------------------------------------------- slide
+# ---------------------------------------------------------------- context geometry
 
-func _begin_slide(lateral: Vector3) -> void:
-	move = Move.SLIDE
-	_slide_speed = lateral.length() + 0.9
-	_slide_time = 0.0
-	_set_low(true, false)
-	_dip_velocity -= 0.4
-	move_started.emit("slide")
-	velocity = lateral.normalized() * _slide_speed
-	move_and_slide()
+func get_camera_forward() -> Vector3:
+	return -global_basis.z
 
+func sweep_motion(displacement: Vector3) -> KinematicCollision3D:
+	if displacement.length_squared() < .00000001:
+		return null
+	return move_and_collide(displacement)
 
-func _step_slide(delta: float, crouch_held: bool) -> void:
-	_slide_time += delta
+func detect_edge(reach: float, max_rise: float) -> Dictionary:
 	var up: Vector3 = up_direction
-	var lateral: Vector3 = velocity.slide(up)
-	var direction: Vector3 = lateral.normalized() if lateral.length_squared() > 0.01 else (-global_basis.z).slide(up).normalized()
-	var wish: Vector3 = _wish(_input_axis)
-	if wish.length_squared() > 0.01:
-		var steer: float = clampf(direction.signed_angle_to(wish, up), -1.0, 1.0) * 1.4 * delta
-		direction = direction.rotated(up, steer)
-	_slide_speed = maxf(0.0, _slide_speed - (2.6 + _slide_time * 2.0) * delta)
-	var vertical: float = velocity.dot(up)
-	grounded = is_on_floor()
-	if grounded:
-		vertical = minf(vertical, 0.0)
-	else:
-		vertical -= gravity_strength * delta
-	velocity = direction * _slide_speed + up * vertical
-	if _jump_buffer > 0.0 and grounded and _can_stand():
-		_set_low(false, false)
-		_do_jump(up * jump_speed + direction * maxf(_slide_speed, base_speed))
-		return
-	var done: bool = _slide_speed < 3.6 or (not crouch_held and _slide_time > 0.25)
-	if done and (_can_stand() or crouch_held):
-		move = Move.GROUND
-		momentum = clampf(inverse_lerp(base_speed, top_speed, _slide_speed), 0.0, 1.0)
-	var was_grounded: bool = grounded
-	var pre: Vector3 = velocity
-	move_and_slide()
-	if not is_on_floor() and _since_jump > 0.1:
-		move = Move.AIR
-	_after_move(was_grounded, pre)
+	var forward: Vector3 = (-global_basis.z).slide(up).normalized()
+	var feet: Vector3 = global_position - up * .9
+	var face: Dictionary = {}
+	for height: float in [.15, .4, .8, 1.25, 1.7, 2.1]:
+		if height > max_rise:
+			break
+		face = _ray(feet + up * height, feet + up * height + forward * (RADIUS + reach))
+		if not face.is_empty() and absf(Vector3(face.normal).dot(up)) < .3:
+			break
+		face = {}
+	if face.is_empty():
+		return {}
+	var body = face.collider
+	if body is Node and body.get_meta("exclude_hands", false):
+		return {}
+	var into: Vector3 = -Vector3(face.normal).slide(up).normalized()
+	if forward.dot(into) < .6:
+		return {}
+	var front: Vector3 = Vector3(face.position)
+	var base: Vector3 = front - up * (front - feet).dot(up)
+	var top_hit: Dictionary = _ray(base + into * .08 + up * (max_rise + .15), base + into * .08 - up * .05)
+	if top_hit.is_empty() or Vector3(top_hit.normal).dot(up) < .707:
+		return {}
+	var top: Vector3 = top_hit.position
+	var h: float = (top - feet).dot(up)
+	if h < .08 or h > max_rise:
+		return {}
+	var depth: float = .1
+	var onto: bool = true
+	for i: int in range(1, 17):
+		var along: float = float(i) * .15
+		var hit = _ray(top + into * along + up * .2, top + into * along - up * .2)
+		if hit.is_empty():
+			onto = false
+			break
+		depth = along
+	return {"top": top, "into": into, "height": h, "depth": depth, "onto": onto, "distance": (front - global_position).slide(up).length()}
 
-
-# ---------------------------------------------------------------- wall-run
-
-func _try_wallrun(lateral: Vector3, forward_input: float) -> bool:
-	if forward_input < 0.3 or lateral.length() < 5.0 or velocity.dot(up_direction) < -5.0:
+func try_springboard() -> bool:
+	var first: Dictionary = detect_edge(maxf(1, get_speed()), 1.49)
+	if first.is_empty() or absf(float(first.height) - tuning.spring_intermediate) > tuning.spring_tolerance:
 		return false
+	var into: Vector3 = first.into
+	var probe: Vector3 = Vector3(first.top) + into * tuning.spring_separation
+	var feet: Vector3 = global_position - up_direction * .9
+	var hit = _ray(probe + up_direction * 2, probe - up_direction * .2)
+	if hit.is_empty():
+		return false
+	var height: float = (Vector3(hit.position) - feet).dot(up_direction)
+	if height < tuning.spring_min_height or height > tuning.spring_max_height:
+		return false
+	# require the second support to be a separate higher contact.
+	if height - float(first.height) < .2:
+		return false
+	springboard.start(self, first, {"top": hit.position})
+	return true
+
+func try_wall(lateral: Vector3) -> bool:
+	if lateral.length() < tuning.wall_min_speed or velocity.dot(up_direction) < -5:
+		return false
+	var front = _ray(global_position, global_position - global_basis.z * tuning.climb_distance)
+	if not front.is_empty() and Vector3(front.normal).dot(global_basis.z) > cos(deg_to_rad(tuning.climb_angle)) and velocity.dot(up_direction) > 0:
+		wall.start_vertical(self, front.normal)
+		return true
 	for side: float in [-1.0, 1.0]:
-		var origin: Vector3 = global_position + up_direction * 0.2
-		var hit: Dictionary = _ray(origin, origin + global_basis.x * side * (RADIUS + 0.85))
+		var hit = _ray(global_position, global_position + global_basis.x * side * (RADIUS + tuning.wall_probe))
 		if hit.is_empty():
 			continue
-		var normal: Vector3 = hit["normal"]
-		if absf(normal.dot(up_direction)) > 0.2:
+		var normal: Vector3 = hit.normal
+		if absf(normal.dot(up_direction)) > .2:
 			continue
-		if _last_wall_normal != Vector3.ZERO and normal.dot(_last_wall_normal) > 0.9:
+		if wall.illegal_time > 0 and normal.dot(wall.illegal_normal) > .9:
 			continue
-		var along: Vector3 = lateral.slide(normal)
-		if along.length() < lateral.length() * 0.55:
+		var body = hit.collider
+		if body is Node and body.get_meta("exclude_feet", false):
 			continue
-		move = Move.WALLRUN
-		_wall_normal = normal
-		_wall_side = side
-		_wall_time = 0.0
-		_last_wall_normal = normal
-		var speed: float = maxf(along.length(), 7.2)
-		velocity = along.normalized() * speed + up_direction * maxf(velocity.dot(up_direction), 3.2)
-		move_started.emit("wallrun")
+		var high_hit = _ray(global_position + up_direction * (tuning.wall_min_height - .9), global_position + up_direction * (tuning.wall_min_height - .9) + global_basis.x * side * (RADIUS + tuning.wall_probe))
+		if high_hit.is_empty():
+			continue
+		if lateral.normalized().dot(-global_basis.z) < .5 or lateral.slide(normal).length() < lateral.length() * .54:
+			continue
+		wall.start(self, normal, side)
 		return true
 	return false
 
-
-func _step_wallrun(delta: float) -> void:
-	_wall_time += delta
-	var up: Vector3 = up_direction
-	var vertical: float = velocity.dot(up) - 7.5 * delta
-	var along: Vector3 = velocity.slide(up).slide(_wall_normal)
-	var hit: Dictionary = _ray(global_position, global_position - _wall_normal * (RADIUS + 0.9))
-	var keep: bool = not hit.is_empty() and -_input_axis.y > 0.2 and _wall_time < 1.15
-	if _jump_buffer > 0.0:
-		move = Move.AIR
-		_do_jump(along * 0.95 + _wall_normal * 5.0 + up * 6.2)
-		return
-	if not keep:
-		move = Move.AIR
-		velocity = along + up * vertical + _wall_normal * 0.8
-		return
-	velocity = along + up * vertical - _wall_normal * 1.5
-	_stride += along.length() * delta
-	var pre: Vector3 = velocity
-	move_and_slide()
-	if is_on_floor():
-		move = Move.GROUND
-		_after_move(false, pre)
-	elif _stride >= 2.0:
-		_stride = 0.0
-		footstep.emit(0.7)
-
-
-# ---------------------------------------------------------------- vault and climb
-
-## Looks for a ledge in front. On success starts a short scripted climb that
-## keeps forward speed: a vault over thin obstacles, a climb onto deep ones.
-func _try_ledge(max_rise: float, reach: float, airborne: bool) -> bool:
-	var up: Vector3 = up_direction
-	var forward: Vector3 = (-global_basis.z).slide(up).normalized()
-	var feet: Vector3 = global_position - up * (STAND_HEIGHT * 0.5)
-	var wall: Dictionary = {}
-	for height: float in [0.35, 0.8, 1.25, 1.7]:
-		if height > max_rise + 0.05:
-			break
-		var from: Vector3 = feet + up * height
-		var hit: Dictionary = _ray(from, from + forward * (RADIUS + reach))
-		if not hit.is_empty() and absf(Vector3(hit["normal"]).dot(up)) < 0.35:
-			wall = hit
-			break
-	if wall.is_empty():
+func try_ordinary_step(dt: float) -> bool:
+	if not grounded or get_speed() < .1:
 		return false
-	var into: Vector3 = -Vector3(wall["normal"]).slide(up).normalized()
-	if into.dot(forward) < 0.6:
+	var motion: Vector3 = velocity.slide(up_direction) * dt
+	if not test_move(global_transform, motion):
 		return false
-	var face: Vector3 = wall["position"]
-	face = face - up * (face - feet).dot(up)
-	var probe_height: float = max_rise + 0.5
-	var top_rise: float = -1.0
-	var depth: float = 0.0
-	for step: int in range(1, 7):
-		var along: float = 0.25 * float(step)
-		var probe: Vector3 = face + into * along + up * probe_height
-		var hit: Dictionary = _ray(probe, probe - up * (probe_height + 0.3))
-		if hit.is_empty() or Vector3(hit["normal"]).dot(up) < 0.8:
-			break
-		var rise: float = (Vector3(hit["position"]) - feet).dot(up)
-		if top_rise < 0.0:
-			top_rise = rise
-		elif absf(rise - top_rise) > 0.25:
-			break
-		depth = along
-	if top_rise < 0.2 or top_rise > max_rise:
+	var raised: Transform3D = global_transform
+	raised.origin += up_direction * tuning.step_height
+	if test_move(global_transform, up_direction * tuning.step_height) or test_move(raised, motion):
 		return false
-	var thin: bool = depth <= 1.25
-	var over: Vector3
-	var kind: String
-	if thin and not airborne and top_rise < 1.3:
-		kind = "vault"
-		over = feet + into * (depth + 0.55) + up * (top_rise + STAND_HEIGHT * 0.5 + 0.12)
-	else:
-		kind = "climb"
-		over = feet + into * 0.75 + up * (top_rise + STAND_HEIGHT * 0.5 + 0.06)
-	if _blocked_at(over):
+	var probe = _ray(raised.origin + motion + motion.normalized() * (RADIUS + .05), raised.origin + motion + motion.normalized() * (RADIUS + .05) - up_direction * 1.3)
+	if probe.is_empty() or Vector3(probe.normal).dot(up_direction) < tuning.walkable_normal:
 		return false
-	var speed: float = velocity.slide(up).length()
-	_climb_kind = kind
-	_climb_from = global_position
-	_climb_to = over
-	_climb_hand = face + into * 0.15 + up * top_rise
-	_climb_time = 0.0
-	if kind == "vault":
-		_climb_duration = 0.34
-		_climb_exit = into * maxf(speed, 6.4) + up * 1.2
-	else:
-		_climb_duration = clampf(0.26 + top_rise * 0.13, 0.3, 0.52)
-		_climb_exit = into * maxf(speed * 0.85, 5.0)
-	move = Move.CLIMB
-	grounded = false
-	_set_low(false, true)
-	move_started.emit(kind)
+	var height: float = (Vector3(probe.position) - (global_position - up_direction * .9)).dot(up_direction)
+	if height < .01 or height > tuning.step_height:
+		return false
+	sweep_motion(up_direction * (height + .03))
+	velocity = velocity.slide(up_direction)
+	_step_grace = .15
+	floor_snap_length = 0
 	return true
-
-
-func _step_climb(delta: float) -> void:
-	_climb_time += delta
-	var t: float = clampf(_climb_time / _climb_duration, 0.0, 1.0)
-	var up: Vector3 = up_direction
-	var travel: Vector3 = _climb_to - _climb_from
-	var rise: float = travel.dot(up)
-	var across: Vector3 = travel - up * rise
-	# rise first, then carry over: the body clears the edge before moving across it
-	var rise_part: float = 1.0 - pow(1.0 - t, 2.4)
-	var across_part: float = t * t * (3.0 - 2.0 * t)
-	var target: Vector3 = _climb_from + up * rise * rise_part + across * across_part
-	velocity = (target - global_position) / maxf(delta, 0.0001)
-	global_position = target
-	if t >= 1.0:
-		move = Move.AIR
-		velocity = _climb_exit
-		_since_jump = 0.2
-		_air_time = 0.0
-		_nod_velocity -= 0.04
 
 
 # ---------------------------------------------------------------- gravity surfaces
