@@ -10,4 +10,4 @@ Input timing/aim perturbations and failures remain in the checkpoint. Normal-spe
 
 Clean records require all three ordered segments and no practice restart/checkpoint respawn since R. Shallow-water recovery is a valid slower clean line. Bot runs never persist personal records or settings. The game uses a fresh `user://spillway_v1.cfg`, not the old feel profile.
 
-Results will be added after the actual runs; this document defines checks and makes no preemptive pass claim.
+Executed results and their limits are in [RESULTS.md](RESULTS.md). `tests/test_spillway_access.gd` uses labelled authored-level fixture poses and actual mouse/action events; it is separate from normal-spawn route proof. `tools/stress-spillway.py --output=/absolute/path/outside/git` preserves every attempt and hashes runtime sources before and after the complete matrix.

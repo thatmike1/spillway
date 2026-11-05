@@ -1,6 +1,6 @@
 # Spillway
 
-Spillway is a first-person downhill parkour game in Godot4.7.2. The default build contains the complete Crest, Sluice yard and Outflow course. The current contract and checkpoint are [BRIEF.md](docs/reboot/BRIEF.md) and [STATUS.md](docs/reboot/STATUS.md).
+Spillway is a first-person downhill parkour game in Godot4.7.2. The default build contains the complete Crest, Sluice yard and Outflow course. The current contract and checkpoint are [BRIEF.md](docs/reboot/BRIEF.md) and [STATUS.md](docs/reboot/STATUS.md). Executed results and limitations are in [RESULTS.md](docs/reboot/RESULTS.md).
 
 Run, jump, slide down the dry chute, carry speed across the channel, or take the switchback stairs. A missed shortcut lands in shallow water with a walking way out. The new motor always enables jump buffering/coyote time, keeps ordinary landing momentum, and lets you correct in the air. An optional airborne mantle requires held forward+jump and cancels on jump release or backward input.
 
