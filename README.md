@@ -57,7 +57,7 @@ Pause settings include sensitivity, FOV, bank, volume and runner vision. Gait mo
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\check.ps1
 ```
 
-The twelve headless suites cover numeric traces, per-tick move handoffs and release frames, displacement-driven presentation, camera/body contact, runner vision, yard geometry/input and chain lap, controls/gravity surfaces, integration and two full city traversals. `tests/test_interface.gd` separately checks real UI input/layout in a rendered engine. Predictions, tolerances and port choices are in [docs/VERIFICATION.md](docs/VERIFICATION.md). Runtime ownership is in [docs/CONTRACT.md](docs/CONTRACT.md). Tuning is SI in `data/movement.tres` and its script.
+The twelve headless suites cover numeric traces, per-tick move handoffs and release frames, displacement-driven presentation, camera/body contact, runner vision, yard geometry/input and chain lap, controls/gravity surfaces, integration and two full city traversals. `tests/test_interface.gd` separately checks real UI input/layout in a rendered engine. Measured feel results are in [docs/FEEL-RESULTS.md](docs/FEEL-RESULTS.md). Predictions, tolerances and port choices are in [docs/VERIFICATION.md](docs/VERIFICATION.md). Runtime ownership is in [docs/CONTRACT.md](docs/CONTRACT.md). Tuning is SI in `data/movement.tres` and its script.
 
 ## Record
 
