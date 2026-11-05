@@ -218,6 +218,8 @@ func _forest() -> void:
 	var conifer_colors: Array[Color] = []
 	var broadleaf: Array[Transform3D] = []
 	var broadleaf_colors: Array[Color] = []
+	var trunks: Array[Transform3D] = []
+	var trunk_colors: Array[Color] = []
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1950
 	var dark: Array[Color] = [Color("26402f"), Color("2f4a36"), Color("34503a"), Color("2b4536")]
@@ -240,6 +242,9 @@ func _forest() -> void:
 			if is_nan(ground):
 				continue
 			var tall: float = rng.randf_range(6.0, 11.0)
+			# p / crowns have visible trunks rooted at the sampled terrain height.
+			trunks.append(Transform3D(Basis.IDENTITY.scaled(Vector3(tall * 0.025, tall * 0.65, tall * 0.025)), Vector3(p.x, ground + tall * 0.325, p.y)))
+			trunk_colors.append(Color("51483a").srgb_to_linear())
 			if rng.randf() < 0.68:
 				for tier: int in 2:
 					var width: float = tall * (0.30 - float(tier) * 0.08)
@@ -263,6 +268,13 @@ func _forest() -> void:
 	ball.height = 2.0
 	ball.radial_segments = 8
 	ball.rings = 5
+	var trunk := CylinderMesh.new()
+	trunk.top_radius = 0.75
+	trunk.bottom_radius = 1.0
+	trunk.height = 1.0
+	trunk.radial_segments = 6
+	trunk.rings = 1
+	_scatter("ArtTreeTrunks", trunk, trunks, trunk_colors)
 	_scatter("ArtConiferBelt", cone, conifers, conifer_colors)
 	_scatter("ArtBroadleafBelt", ball, broadleaf, broadleaf_colors)
 
