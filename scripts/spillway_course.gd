@@ -157,6 +157,9 @@ func _make_basin() -> void:
 	_walk("BasinWestEdge", Vector3(-16, -5.65, -100), Vector3(-16, -5.65, -80), 3.0, false)
 	_walk("BasinEdgeAccess", Vector3(-12, -6, -83), Vector3(-14.5, -5.65, -83), 3.0, false)
 	_walk("BasinExitRamp", Vector3(-10, -6, -79), Vector3(-10, -3, -65), 5.0, false)
+	# p / painted safety hardware makes the existing ramp read from water level.
+	for x: float in [-12.4, -7.6]:
+		_level.call("_rail", Vector3(x, -6, -79), Vector3(x, -3, -65), "ochre")
 	_level.call("_beam", Vector3(-12.35, -5.95, -78.7), Vector3(-7.65, -5.95, -78.7), 0.08, "ochre")
 	_level.call("_solid", "BasinRampHeadstock", Vector3(-12.85, -5.3, -79), Vector3(0.14, 1.4, 0.14), "steel")
 	_level.call("_box", Vector3(-12.85, -4.58, -79), Vector3(0.18, 0.1, 0.18), "ochre")

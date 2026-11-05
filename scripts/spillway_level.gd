@@ -679,16 +679,16 @@ func _stairs(node_name: String, a: Vector3, b: Vector3, width: float, count: int
 	_rail(a + right, b + right)
 
 
-func _rail(a: Vector3, b: Vector3) -> void:
+func _rail(a: Vector3, b: Vector3, material: String = "steel") -> void:
 	var length: float = a.distance_to(b)
 	var sections: int = maxi(1, ceili(length / 2.7))
 	# rails collide as continuous beams; posts remain visual to avoid capsule snags.
-	_beam(a + Vector3.UP * 1.05, b + Vector3.UP * 1.05, 0.075, "steel", true)
-	_beam(a + Vector3.UP * 0.51, b + Vector3.UP * 0.51, 0.045, "steel", true)
+	_beam(a + Vector3.UP * 1.05, b + Vector3.UP * 1.05, 0.075, material, true)
+	_beam(a + Vector3.UP * 0.51, b + Vector3.UP * 0.51, 0.045, material, true)
 	for i: int in sections + 1:
 		var point: Vector3 = a.lerp(b, float(i) / float(sections))
-		_box(point + Vector3.UP * 0.525, Vector3(0.075, 1.05, 0.075), "steel")
-		_box(point + Vector3.UP * 0.035, Vector3(0.22, 0.07, 0.22), "steel")
+		_box(point + Vector3.UP * 0.525, Vector3(0.075, 1.05, 0.075), material)
+		_box(point + Vector3.UP * 0.035, Vector3(0.22, 0.07, 0.22), material)
 
 
 func _beam(a: Vector3, b: Vector3, thickness: float, material: String, collision: bool = false) -> void:

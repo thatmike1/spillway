@@ -1,6 +1,6 @@
 # Spillway result
 
-Candidate **spillway-2026.11.05-r8**, source identity pending clean export, branch **feat/foldrunner-me-build**. The R7 Opus closure review found more admission/recovery faults. R8 fixes and the broader perimeter checks pass; final matrix, clean export and native recordings remain. The active game is one original three-segment dam descent. All tuning is P / game choices. Earlier reconstruction and folding-city targets are retired by BRIEF.md.
+Candidate **spillway-2026.11.05-r9**, source identity pending clean export, branch **feat/foldrunner-me-build**. The R7 Opus closure review found more admission/recovery faults. R8 fixes and the broader perimeter checks pass. R9 adds ochre safety handrails to the existing dark recovery ramp. Its frozen matrix passes35/36; exact delivered native recording and final inspection remain. The active game is one original three-segment dam descent. All tuning is P / game choices. Earlier reconstruction and folding-city targets are retired by BRIEF.md.
 
 Evidence is deliberately outside Git at `/home/thatmike1/foldrunner-build-2026-11-05`. Start with its `REPORT.md` for portable Linux/Windows packages and controls, and `checkpoints/reboot.md` for exact evidence links.
 
