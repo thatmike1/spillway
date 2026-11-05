@@ -91,7 +91,7 @@ func _make_yard() -> void:
 	for x: float in [-36.5, -18.5]:
 		_level.call("_solid", "SluiceGateMachinery", Vector3(x, 3.1, -82), Vector3(7, 3.2, 5.5), "terracotta")
 		_stage(_level.call("_slab", "GateMachineryCap", Vector3(x, 4.9, -82), Vector2(7.6, 6.1), .2, "concrete"), 1)
-		_level.call("_cylinder", Vector3(x, 4.9, -82), Vector3(x, 5.9, -82), .16, "steel")
+		_level.call("_cylinder", Vector3(x, 4.9, -82), Vector3(x, 5.9, -82), .16, "steel", true)
 		_level.call("_wheel", Vector3(x, 5.9, -82), .75, "ochre", true)
 		_level.call("_box", Vector3(x, 3.2, -79.21), Vector3(3, 1.4, .08), "shadow")
 	# floor 1.5, underside 2.77: 1.27 m permits crouching but denies standing.
@@ -99,12 +99,12 @@ func _make_yard() -> void:
 	_level.call("_box", Vector3(-27.5, 2.82, -81.42), Vector3(11, .1, .12), "ochre")
 	for x: float in [-33.2, -21.8]:
 		_level.call("_solid", "GateGuide", Vector3(x, 3.6, -82), Vector3(.3, 4.2, 1.4), "steel")
-		_level.call("_cylinder", Vector3(x, 5.7, -82), Vector3(x, 7.1, -82), .1, "steel")
+		_level.call("_cylinder", Vector3(x, 5.7, -82), Vector3(x, 7.1, -82), .1, "steel", true)
 	_level.call("_beam", Vector3(-33.7, 7.1, -82), Vector3(-21.3, 7.1, -82), .3, "steel")
 	# broad east bypass bends around the working housings, then returns to the roof.
 	for z: float in [-76]:
 		_stage(_level.call("_solid", "ValvePlinth", Vector3(-35, 2.1, z), Vector3(4, 1.2, 4), "old_concrete"), 1)
-		_level.call("_cylinder", Vector3(-35, 2.7, z), Vector3(-35, 3.7, z), .3, "pipe")
+		_level.call("_cylinder", Vector3(-35, 2.7, z), Vector3(-35, 3.7, z), .3, "pipe", true)
 		_level.call("_wheel", Vector3(-35, 3.8, z), .9, "ochre", true)
 	# p / the low apron does not feed the high outflow run-up; its edge is guarded.
 	_level.call("_rail", Vector3(-19, 1.5, -96.9), Vector3(-13, 1.5, -96.9))
@@ -143,8 +143,8 @@ func _make_filter_house() -> void:
 	_level.call("_rail", Vector3(-40, 3, -110), Vector3(-40, 3, -99))
 	# ventilation stacks stay behind the approach, leaving roof and tower readable.
 	for x: float in [-35, -31]:
-		_level.call("_cylinder", Vector3(x, 3, -108), Vector3(x, 5.5, -108), .4, "pipe")
-		_level.call("_box", Vector3(x, 5.55, -108), Vector3(1.2, .16, 1.2), "steel")
+		_level.call("_cylinder", Vector3(x, 3, -108), Vector3(x, 5.5, -108), .4, "pipe", true)
+		_level.call("_solid", "FilterRoofVentCap", Vector3(x, 5.55, -108), Vector3(1.2, .16, 1.2), "steel")
 
 
 func _make_outflow() -> void:

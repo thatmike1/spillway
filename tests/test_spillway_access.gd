@@ -7,6 +7,7 @@ var player: CharacterBody3D
 var checks := 0
 var failures := 0
 var label := "setup"
+var hardware_views := ""
 
 func _initialize() -> void:
 	run.call_deferred()
@@ -162,6 +163,63 @@ func wheel_guard() -> void:
 			"the guard never refuses an ordered arrival")
 		action("crouch", false)
 
+func hardware_frame(id: String) -> void:
+	if hardware_views.is_empty():
+		return
+	await RenderingServer.frame_post_draw
+	get_root().get_texture().get_image().save_png(hardware_views.path_join(id + ".png"))
+
+func hardware_collision() -> void:
+	for x: float in [-35, -31]:
+		await roof_fixture("reachable roof vent %.0f" % x, Vector3(x, 3.04, -104))
+		aim(Vector3(x, 3, -112))
+		action("move_forward", true)
+		await ticks(110)
+		action("move_forward", false)
+		check(player.global_position.z > -107.35 and player.is_on_floor(),
+			"walking meets the actual shaft instead of crossing its centre: %s" % player.global_position)
+		await hardware_frame("vent%.0f" % x)
+		var around := await walk(Vector3(x + 1.3, 3, -106.8), 160)
+		around = await walk(Vector3(x + 1.3, 3, -109.1), 160) and around
+		check(around and player.is_on_floor() and int(game.get("respawn_count")) == 0,
+			"the visible space beside the vent remains a usable roof line")
+	await fixture("crest valve catch approach", Vector3(-3, 4.04, -42), false)
+	var jumps: int = player.get("jump_count")
+	var mantles: int = player.get("mantle_count")
+	aim(Vector3(-3, 4, -34))
+	action("move_forward", true)
+	for i: int in 120:
+		await ticks(1)
+		if player.global_position.z > -40.4:
+			break
+	action("jump", true)
+	await ticks(130)
+	action("jump", false)
+	action("move_forward", false)
+	check(int(player.get("jump_count")) == jumps + 1 and int(player.get("mantle_count")) == mantles + 1 and player.global_position.y > 5.55,
+		"the original jump and catch still reach the valve housing")
+	check(player.global_position.z < -37.5 and int(game.get("respawn_count")) == 0,
+		"the fixed wheel rim stops forward passage through its assembly: %s" % player.global_position)
+	await hardware_frame("crest-valve")
+	await fixture("yard valve jumping approach", Vector3(-30, 1.54, -76))
+	jumps = player.get("jump_count")
+	aim(Vector3(-38, 1.5, -76))
+	action("move_forward", true)
+	for i: int in 240:
+		await ticks(1)
+		if player.global_position.x < -31.7:
+			break
+	action("jump", true)
+	await ticks(12)
+	action("jump", false)
+	await ticks(110)
+	action("move_forward", false)
+	check(int(player.get("jump_count")) == jumps + 1 and player.global_position.y > 2.65,
+		"the original single jump still reaches the plinth")
+	check(player.global_position.x > -34.1 and int(game.get("respawn_count")) == 0,
+		"the plinth wheel remains a physical obstacle: %s" % player.global_position)
+	await hardware_frame("yard-valve")
+
 func hop(at: Vector3, toward: Vector3, axis: int, past: float, direction: float) -> void:
 	# one ordinary running jump: hold forward, press jump once past a takeoff line, land.
 	aim(toward)
@@ -313,6 +371,7 @@ func run() -> void:
 	await housing_toward_tower()
 	await deck_progress()
 	await wheel_guard()
+	await hardware_collision()
 	await finished_exploration()
 	for key: String in ["move_forward", "move_back", "jump", "crouch"]:
 		action(key, false)

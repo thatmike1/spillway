@@ -61,7 +61,7 @@ func is_finish_at(feet: Vector3) -> bool:
 
 
 func _batch_static_boxes() -> void:
-	# p / same geometry and materials, fewer draw calls; wheel parts remain separate.
+	# p / same geometry and materials, fewer draw calls; the animated wheel remains separate.
 	var groups: Dictionary = {}
 	for entry: Node in find_children("*", "MeshInstance3D", true, false):
 		var source := entry as MeshInstance3D
@@ -402,7 +402,7 @@ func _make_mantle_housing() -> void:
 	_ramp("ValveRoofAccess", Vector3(-6.0, 4.0, -41.0), Vector3(-6.0, 5.6, -35.0), 1.8, 0.4, "concrete")
 	_slab("ValveRoofLanding", Vector3(-5.1, 5.6, -35.0), Vector2(3.6, 2.0), 0.4)
 	# roof controls stay behind the catch lip so the motor has clear landing volume.
-	_cylinder(Vector3(-3.0, 5.65, -37.0), Vector3(-3.0, 6.2, -37.0), 0.12, "steel")
+	_cylinder(Vector3(-3.0, 5.65, -37.0), Vector3(-3.0, 6.2, -37.0), 0.12, "steel", true)
 	_wheel(Vector3(-3.0, 6.22, -37.0), 0.45, "ochre", true)
 	for z: float in [-35.0, -36.0, -37.0]:
 		_box(Vector3(-1.485, 4.75, z), Vector3(0.04, 0.45, 0.55), "grate")
@@ -427,7 +427,7 @@ func _make_architecture() -> void:
 		_box(Vector3(x, 12.0, -73.97), Vector3(1.4, 4.0, 0.08), "shadow")
 		_box(Vector3(x, 12.0, -73.9), Vector3(0.07, 4.0, 0.09), "steel")
 		_box(Vector3(x, 12.0, -73.9), Vector3(1.4, 0.08, 0.09), "steel")
-	_hero_wheel = _wheel(Vector3(23.8, -0.5, -69.15), 2.45, "ochre")
+	_hero_wheel = _wheel(Vector3(23.8, -0.5, -69.15), 2.45, "ochre", false, true)
 	_cylinder(Vector3(23.8, -0.5, -73.7), Vector3(23.8, -0.5, -69.0), 0.42, "steel")
 	# retaining wings anchor the crest to the hillside instead of a floating deck.
 	_solid("WestRetainingWing", Vector3(-29.0, -3.0, -12.0), Vector3(3.0, 17.0, 52.0), "old_concrete")
@@ -698,7 +698,7 @@ func _beam(a: Vector3, b: Vector3, thickness: float, material: String, collision
 	beam.quaternion = Quaternion(Vector3.UP, (b - a).normalized())
 
 
-func _cylinder(a: Vector3, b: Vector3, radius: float, material: String) -> void:
+func _cylinder(a: Vector3, b: Vector3, radius: float, material: String, solid: bool = false) -> void:
 	var instance: MeshInstance3D = MeshInstance3D.new()
 	var cylinder: CylinderMesh = CylinderMesh.new()
 	cylinder.top_radius = radius
@@ -709,10 +709,28 @@ func _cylinder(a: Vector3, b: Vector3, radius: float, material: String) -> void:
 	instance.material_override = _materials[material]
 	instance.position = (a + b) * 0.5
 	instance.quaternion = Quaternion(Vector3.UP, (b - a).normalized())
-	add_child(instance)
+	if solid:
+		# p / reachable shafts match their visible cylinder; distant pipework stays scenery.
+		var body := StaticBody3D.new()
+		body.name = "HardwareShaft"
+		body.collision_layer = 1
+		body.collision_mask = 0
+		body.set_meta("surface", "metal")
+		body.transform = instance.transform
+		add_child(body)
+		var shape := CylinderShape3D.new()
+		shape.radius = radius
+		shape.height = cylinder.height
+		var collision := CollisionShape3D.new()
+		collision.shape = shape
+		body.add_child(collision)
+		instance.transform = Transform3D.IDENTITY
+		body.add_child(instance)
+	else:
+		add_child(instance)
 
 
-func _wheel(center: Vector3, radius: float, material: String, horizontal: bool = false) -> Node3D:
+func _wheel(center: Vector3, radius: float, material: String, horizontal: bool = false, moving: bool = false) -> Node3D:
 	var first_child := get_child_count()
 	var count: int = 32 if radius > 1.0 else 16
 	for i: int in count:
@@ -723,14 +741,14 @@ func _wheel(center: Vector3, radius: float, material: String, horizontal: bool =
 		if horizontal:
 			offset_a = Vector3(offset_a.x, 0.0, offset_a.y)
 			offset_b = Vector3(offset_b.x, 0.0, offset_b.y)
-		_beam(center + offset_a, center + offset_b, radius * 0.075, material)
+		_beam(center + offset_a, center + offset_b, radius * 0.075, material, not moving)
 		if i % (count / 8) == 0:
-			_beam(center, center + offset_a, radius * 0.048, "steel")
+			_beam(center, center + offset_a, radius * 0.048, "steel", not moving)
 
 	var members := get_children().slice(first_child)
 	var pivot := Node3D.new()
 	pivot.name = "ValveWheel"
-	pivot.set_meta("moving_geometry", true)
+	pivot.set_meta("moving_geometry", moving)
 	pivot.position = center
 	add_child(pivot)
 	for member: Node in members:
