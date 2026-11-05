@@ -211,6 +211,8 @@ func _scrape(seconds: float) -> PackedFloat32Array:
 
 func _wind_loop(seconds: float) -> PackedFloat32Array:
 	var samples: PackedFloat32Array = _buffer(seconds)
+	var fade: int = int(0.08 * RATE)
+	samples.resize(samples.size() + fade)
 	var low: float = 0.0
 	var mid: float = 0.0
 	for index: int in range(samples.size()):
@@ -220,13 +222,17 @@ func _wind_loop(seconds: float) -> PackedFloat32Array:
 		mid += (noise - mid) * 0.12
 		var gust: float = 0.7 + 0.3 * sin(t * TAU * 2.0) * sin(t * TAU * 3.0)
 		samples[index] = (low * 4.0 + mid * 0.6) * gust * 0.5
-	# crossfade the ends so the loop has no click
-	var fade: int = int(0.08 * RATE)
-	for index: int in range(fade):
-		var w: float = float(index) / float(fade)
-		var end_index: int = samples.size() - fade + index
-		samples[end_index] = samples[end_index] * (1.0 - w) + samples[index] * w
-	return samples
+	return _join_loop(samples, fade)
+
+
+func _join_loop(samples: PackedFloat32Array, overlap: int) -> PackedFloat32Array:
+	# crossfade into the pre-roll, then start playback immediately after it.
+	# the wrap is now two neighbouring original samples, with no jump backwards.
+	var start: int = samples.size() - overlap
+	for index: int in overlap:
+		var phase: float = float(index + 1) / float(overlap) * PI * 0.5
+		samples[start + index] = samples[start + index] * cos(phase) + samples[index] * sin(phase)
+	return samples.slice(overlap)
 
 
 ## the fold's voice: a deep groan that swells through the anticipation, steel

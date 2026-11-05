@@ -113,6 +113,8 @@ func _on_move(kind: String) -> void:
 
 func _water_loop() -> PackedFloat32Array:
 	var samples := _buffer(4.0)
+	var fade := int(RATE * 0.1)
+	samples.resize(samples.size() + fade)
 	var low: float = 0.0
 	var mid: float = 0.0
 	for i: int in samples.size():
@@ -121,12 +123,7 @@ func _water_loop() -> PackedFloat32Array:
 		low += (noise - low) * 0.025
 		mid += (noise - mid) * 0.2
 		samples[i] = (low * 2.5 + mid * 0.5) * (0.55 + 0.08 * sin(TAU * t * 0.5))
-	var fade := int(RATE * 0.1)
-	for i: int in fade:
-		var weight := float(i) / fade
-		var index := samples.size() - fade + i
-		samples[index] = samples[index] * (1.0 - weight) + samples[i] * weight
-	return samples
+	return _join_loop(samples, fade)
 
 func stop_all() -> void:
 	super.stop_all()

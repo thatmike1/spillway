@@ -118,6 +118,7 @@ func _run() -> void:
 	await handoffs()
 	await crouch_policy()
 	await ceiling()
+	await late_crouch_eye()
 	await ramps()
 	await authored_stairs()
 	await mantles()
@@ -348,6 +349,42 @@ func ceiling() -> void:
 		if player.position.z < -7.0:
 			break
 	check(player.position.z < -7.0 and not bool(player.get("crouched")), "clearance exit restores standing")
+
+func late_crouch_eye() -> void:
+	for lead: float in [0.4, 0.6]:
+		await fresh("late crouch eye, %.1f m lead" % lead, Vector3.ZERO)
+		var level: Node3D = preload("res://scripts/spillway_level.gd").new()
+		fixture.add_child(level)
+		level.call("build")
+		player.call("reset_to", Transform3D(Basis.IDENTITY, Vector3(-27.5, 1.525, -76)))
+		await ticks(12)
+		action("move_forward", true)
+		for i: int in 180:
+			await ticks(1)
+			if player.position.z <= -81.45 + lead:
+				break
+		action("crouch", true)
+		var overlaps: int = 0
+		var crossed: bool = false
+		var near_volume := SphereShape3D.new()
+		near_volume.radius = 0.055
+		var query := PhysicsShapeQueryParameters3D.new()
+		query.shape = near_volume
+		query.collision_mask = 1
+		for i: int in 60:
+			await ticks(1)
+			query.transform = Transform3D(Basis.IDENTITY, player.get("camera").global_position)
+			for hit: Dictionary in player.get_world_3d().direct_space_state.intersect_shape(query, 8):
+				if str(hit.collider.name).begins_with("HalfOpenSluiceGate"):
+					overlaps += 1
+			crossed = crossed or player.position.z < -82.8
+		check(crossed, "the late crouch still passes the actual sluice gate")
+		check(overlaps == 0, "the eye and its near volume never enter the gate")
+		action("crouch", false)
+		await ticks(80)
+		var height: float = player.get("camera").global_position.y - player.global_position.y
+		check(not bool(player.get("crouched")) and absf(height - 1.63) < 0.03,
+			"leaving the gate restores the standing eye smoothly")
 
 func make_ramp() -> void:
 	# fixture: continuous collision ramp, decorative stair nosings have no bodies.

@@ -52,6 +52,8 @@ var _mantle_lift: Vector3
 var _mantle_wall_normal: Vector3
 var _mantle_carry: Vector3
 var _mantle_time: float = 0.0
+var _eye_probe := SphereShape3D.new()
+var _eye_query := PhysicsShapeQueryParameters3D.new()
 
 func _ready() -> void:
 	collision_layer = 2
@@ -61,6 +63,11 @@ func _ready() -> void:
 	floor_constant_speed = true
 	floor_stop_on_slope = true
 	safe_margin = 0.002
+	# p / the small eye volume protects the near plane during a late duck.
+	_eye_probe.radius = 0.12
+	_eye_query.shape = _eye_probe
+	_eye_query.collision_mask = 1
+	_eye_query.exclude = [get_rid()]
 	collision = CollisionShape3D.new()
 	var capsule := CapsuleShape3D.new()
 	capsule.radius = RADIUS
@@ -317,7 +324,14 @@ func _update_eye(delta: float) -> void:
 	var gait_target := 1.0 if is_on_floor() and mode != "slide" and get_speed() > 0.8 and not comfort else 0.0
 	_gait_blend = move_toward(_gait_blend, gait_target, delta * 7.0)
 	var bob := sin(_gait_phase) * 0.008 * _gait_blend * minf(get_speed() / RUN_SPEED, 1.0)
-	camera.global_position = feet + Vector3.UP * (_eye_height + bob - _dip * (0.4 if comfort else 1.0))
+	var eye_offset := _eye_height + bob - _dip * (0.4 if comfort else 1.0)
+	# the body is already low when the eye is still travelling down. resolve that
+	# presentation path from inside the clear capsule, never through a ceiling.
+	var anchor := feet + Vector3.UP * 0.34
+	_eye_query.transform = Transform3D(Basis.IDENTITY, anchor)
+	_eye_query.motion = Vector3.UP * maxf(0.0, eye_offset - 0.34)
+	var sweep := get_world_3d().direct_space_state.cast_motion(_eye_query)
+	camera.global_position = anchor + _eye_query.motion * sweep[0]
 	camera.global_rotation = Vector3(pitch, yaw, 0.0)
 	var extra := 0.0 if comfort else clampf((get_speed() - 6.0) * 0.5, 0.0, 5.0)
 	var horizontal_fov := fov_horizontal + extra
