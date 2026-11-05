@@ -1,8 +1,9 @@
 extends Node
-## first-person arms, drawn in their own small world on top of the scene so
-## they never clip into walls. Poses are positions in camera space that the
-## wrists spring toward: low pumping while running, both hands up and out on a
-## jump, a push down on landing, palms planted on a vault, a hand on the wall.
+## original foreground body. shares the scene world, lights and environment.
+## P: fixed arm lengths and authored asynchronous poses, with world contact IK.
+const BODY_LAYER: int = 1 << 19
+const UPPER_LENGTH: float = .34
+const FORE_LENGTH: float = .34
 
 const SKIN: Color = Color("#c39176")
 const SLEEVE: Color = Color("#1b222c")
@@ -16,6 +17,7 @@ var _rect: TextureRect
 var _arms: Array[Dictionary] = []
 var _land_kick: float = 0.0
 var _jump_kick: float = 0.0
+var _pelvis: MeshInstance3D
 var _lower: Node3D
 var _legs: Array[Dictionary] = []
 var _materials: Dictionary = {}
@@ -25,31 +27,14 @@ func attach(player: CharacterBody3D) -> void:
 	_player = player
 	_viewport = SubViewport.new()
 	_viewport.transparent_bg = true
-	_viewport.own_world_3d = true
+	_viewport.own_world_3d = false
 	_viewport.msaa_3d = Viewport.MSAA_4X
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	add_child(_viewport)
-	var world: WorldEnvironment = WorldEnvironment.new()
-	var environment: Environment = Environment.new()
-	environment.background_mode = Environment.BG_CLEAR_COLOR
-	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color("#7f93ad")
-	environment.ambient_light_energy = 0.55
-	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	world.environment = environment
-	_viewport.add_child(world)
-	var key: DirectionalLight3D = DirectionalLight3D.new()
-	key.rotation_degrees = Vector3(-38, 150, 0)
-	key.light_color = Color("#ffd8b0")
-	key.light_energy = 1.1
-	_viewport.add_child(key)
-	var rim: DirectionalLight3D = DirectionalLight3D.new()
-	rim.rotation_degrees = Vector3(10, -30, 0)
-	rim.light_color = Color("#9fc3e0")
-	rim.light_energy = 0.5
-	_viewport.add_child(rim)
 	_camera = Camera3D.new()
 	_camera.near = 0.01
+	_camera.cull_mask = BODY_LAYER
+	(player.call("get_camera") as Camera3D).cull_mask &= ~BODY_LAYER
 	_camera.far = 10.0
 	_camera.current = true
 	_viewport.add_child(_camera)
@@ -61,8 +46,9 @@ func attach(player: CharacterBody3D) -> void:
 		_arms.append(_build_arm(side))
 	_lower = Node3D.new()
 	_camera.add_child(_lower)
-	_box(_lower, Vector3(0, -.12, 0), Vector3(.32, .30, .22), _materials["sleeve"])
-	_box(_lower, Vector3(0, .15, .035), Vector3(.37, .28, .23), _materials["sleeve"])
+	_pelvis = _capsule(_lower, .16, .30, _materials["sleeve"])
+	_pelvis.position = Vector3(0, -.12, .04)
+	
 	for side: float in [-1.0, 1.0]:
 		var thigh := Node3D.new()
 		_lower.add_child(thigh)
@@ -70,7 +56,13 @@ func attach(player: CharacterBody3D) -> void:
 		var shin := Node3D.new()
 		_lower.add_child(shin)
 		_capsule(shin, .065, .43, _materials["sleeve"]).name = "Mesh"
-		var foot := _box(_lower, Vector3.ZERO, Vector3(.13, .10, .28), _materials["glove"])
+		var foot := Node3D.new()
+		_lower.add_child(foot)
+		_box(foot, Vector3(0, -.035, -.025), Vector3(.15, .035, .31), _materials["cuff"])
+		_box(foot, Vector3(0, .018, -.035), Vector3(.135, .085, .27), _materials["glove"])
+		_capsule(foot, .06, .13, _materials["glove"]).position = Vector3(0, .015, -.13)
+		for lace: int in 3:
+			_box(foot, Vector3(0, .064, -.04 - lace * .026), Vector3(.075, .008, .009), _materials["cuff"])
 		_legs.append({"side": side, "thigh": thigh, "shin": shin, "foot": foot})
 	_layer = CanvasLayer.new()
 	_layer.layer = 5
@@ -107,6 +99,8 @@ func _capsule(parent: Node3D, radius: float, length: float, material: Material) 
 	mesh.height = maxf(length, radius * 2.0)
 	mesh.radial_segments = 12
 	mesh.rings = 4
+	instance.layers = BODY_LAYER
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	instance.mesh = mesh
 	instance.material_override = material
 	# capsules are built along Y; the arm code aims them along -Z
@@ -119,6 +113,8 @@ func _box(parent: Node3D, center: Vector3, size: Vector3, material: Material) ->
 	var instance: MeshInstance3D = MeshInstance3D.new()
 	var mesh: BoxMesh = BoxMesh.new()
 	mesh.size = size
+	instance.layers = BODY_LAYER
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	instance.mesh = mesh
 	instance.material_override = material
 	instance.position = center
@@ -131,22 +127,23 @@ func _box(parent: Node3D, center: Vector3, size: Vector3, material: Material) ->
 func _build_arm(side: float) -> Dictionary:
 	var upper: Node3D = Node3D.new()
 	_camera.add_child(upper)
-	_capsule(upper, 0.05, 1.0, _materials["sleeve"]).name = "Mesh"
+	_capsule(upper, 0.044, 1.0, _materials["sleeve"]).name = "Mesh"
 	var fore: Node3D = Node3D.new()
 	_camera.add_child(fore)
-	_capsule(fore, 0.042, 1.0, _materials["sleeve"]).name = "Mesh"
+	_capsule(fore, 0.036, 1.0, _materials["sleeve"]).name = "Mesh"
 	var hand: Node3D = Node3D.new()
 	_camera.add_child(hand)
 	var cuff: MeshInstance3D = MeshInstance3D.new()
 	var band: CylinderMesh = CylinderMesh.new()
-	band.top_radius = 0.043
-	band.bottom_radius = 0.043
-	band.height = 0.022
+	band.top_radius = 0.036
+	band.bottom_radius = 0.036
+	band.height = 0.06
 	band.radial_segments = 14
+	cuff.layers = BODY_LAYER
 	cuff.mesh = band
 	cuff.material_override = _materials["cuff"]
 	cuff.rotation_degrees = Vector3(90, 0, 0)
-	cuff.position = Vector3(0, 0, 0.018)
+	cuff.position = Vector3(0, 0, 0.025)
 	hand.add_child(cuff)
 	var palm: MeshInstance3D = MeshInstance3D.new()
 	var ellipsoid: SphereMesh = SphereMesh.new()
@@ -154,11 +151,15 @@ func _build_arm(side: float) -> Dictionary:
 	ellipsoid.height = 1.0
 	ellipsoid.radial_segments = 16
 	ellipsoid.rings = 8
+	palm.layers = BODY_LAYER
 	palm.mesh = ellipsoid
-	palm.material_override = _materials["skin"]
-	palm.scale = Vector3(0.082, 0.034, 0.105)
+	palm.material_override = _materials["glove"]
+	palm.scale = Vector3(0.095, 0.044, 0.12)
 	palm.position = Vector3(0, 0, -0.048)
 	hand.add_child(palm)
+	# knuckle ridge and thumb mound give the palm a shaped silhouette.
+	_box(hand, Vector3(0, .018, -.073), Vector3(.070, .012, .026), _materials["cuff"])
+	_box(hand, Vector3(-side * .027, -.007, -.038), Vector3(.034, .032, .045), _materials["glove"])
 	var fingers: Array[Node3D] = []
 	var offsets: Array = [-0.027, -0.009, 0.009, 0.026]
 	var lengths: Array = [0.074, 0.082, 0.077, 0.061]
@@ -170,24 +171,24 @@ func _build_arm(side: float) -> Dictionary:
 		root_joint.position = Vector3(x, 0.002, -0.094 + absf(float(offsets[finger])) * 0.25)
 		hand.add_child(root_joint)
 		var proximal: float = length * 0.56
-		_capsule(root_joint, 0.0098, proximal + 0.012, _materials["skin"]).position = Vector3(0, 0, -proximal * 0.5)
+		_capsule(root_joint, 0.0098, proximal + 0.012, _materials["glove"]).position = Vector3(0, 0, -proximal * 0.5)
 		var tip_joint: Node3D = Node3D.new()
 		tip_joint.position = Vector3(0, 0, -proximal)
 		root_joint.add_child(tip_joint)
 		var distal: float = length * 0.44
-		_capsule(tip_joint, 0.0088, distal + 0.01, _materials["skin"]).position = Vector3(0, 0, -distal * 0.5)
+		_capsule(tip_joint, 0.0088, distal + 0.01, _materials["glove"]).position = Vector3(0, 0, -distal * 0.5)
 		fingers.append(root_joint)
 		fingers.append(tip_joint)
 	var thumb: Node3D = Node3D.new()
 	thumb.position = Vector3(-side * 0.036, -0.008, -0.03)
 	thumb.rotation_degrees = Vector3(0, side * 42.0, side * 25.0)
 	hand.add_child(thumb)
-	_capsule(thumb, 0.0115, 0.042, _materials["skin"]).position = Vector3(0, 0, -0.018)
+	_capsule(thumb, 0.0115, 0.042, _materials["glove"]).position = Vector3(0, 0, -0.018)
 	var thumb_tip: Node3D = Node3D.new()
 	thumb_tip.position = Vector3(0, 0, -0.036)
 	thumb_tip.rotation_degrees = Vector3(0, side * -18.0, 0)
 	thumb.add_child(thumb_tip)
-	_capsule(thumb_tip, 0.0102, 0.034, _materials["skin"]).position = Vector3(0, 0, -0.015)
+	_capsule(thumb_tip, 0.0102, 0.034, _materials["glove"]).position = Vector3(0, 0, -0.015)
 	return {
 		"side": side, "upper": upper, "fore": fore, "hand": hand, "fingers": fingers,
 		"wrist": Vector3(side * 0.24, -0.5, -0.3), "wrist_velocity": Vector3.ZERO,
@@ -200,6 +201,7 @@ func _process(delta: float) -> void:
 		return
 	var main_camera: Camera3D = _player.call("get_camera")
 	_camera.fov = main_camera.fov
+	_camera.global_transform = main_camera.global_transform
 	_land_kick = move_toward(_land_kick, 0.0, delta * 3.2)
 	_jump_kick = move_toward(_jump_kick, 0.0, delta * 1.6)
 	var move: int = int(_player.get("move"))
@@ -212,14 +214,21 @@ func _process(delta: float) -> void:
 	var camera_basis: Basis = main_camera.global_basis
 	var body_basis: Basis = _player.call("get_body_basis")
 	_lower.transform = Transform3D(camera_basis.inverse() * body_basis, camera_basis.inverse() * (_player.global_position - main_camera.global_position))
-	if move in [4, 5, 9]:
-		_lower.position += camera_basis.inverse() * up * -.55
+	_pelvis.visible = move not in [5, 9]
+	if move == 5:
+		_lower.position += camera_basis.inverse() * up * -1.2
+	if move in [4, 9]:
+		_lower.position += camera_basis.inverse() * up * -.32
 	for leg: Dictionary in _legs:
 		var side: float = leg.side
 		var phase: float = sin(stride_phase) * side * run if on_ground else .4 * side
 		var hip: Vector3 = Vector3(side * .105, -.22, 0)
 		var knee: Vector3 = Vector3(side * .12, -.5 + absf(phase) * .10, -.04 - phase * .19)
 		var ankle: Vector3 = Vector3(side * .12, -.83 + maxf(phase, 0) * .15, phase * .28)
+		if move == 5:
+			var progress: float = _player.call("get_climb_progress")
+			knee = Vector3(side * .17, -.28, -.38 - .1 * sin(progress * PI))
+			ankle = Vector3(side * .20, -.48, -.65 + side * .12)
 		if move == 4:
 			knee = Vector3(side * .13, -.45, -.42)
 			ankle = Vector3(side * .14, -.5, -.78)
@@ -234,11 +243,9 @@ func _process(delta: float) -> void:
 		var stiffness: float = 140.0
 		match move:
 			3, 5, 6, 7, 8: # climb or vault: palms planted on the ledge
-				var hand_world: Vector3 = _player.call("get_climb_hand_point")
-				var local: Vector3 = camera_basis.inverse() * (hand_world - main_camera.global_position)
 				var progress: float = float(_player.call("get_climb_progress"))
-				target = Vector3(side * .2, -.10 - progress * .07, -.48)
-				facing = _hand_basis(side, deg_to_rad(-80.0), deg_to_rad(side * -10.0))
+				target = Vector3(side * .32, -.20 - progress * .07, -.52)
+				facing = _hand_basis(side, deg_to_rad(-10.0), deg_to_rad(side * -10.0))
 				curl = 0.1
 				stiffness = 320.0
 			2: # wall-run: the wall-side hand reaches out and brushes the wall
@@ -267,18 +274,29 @@ func _process(delta: float) -> void:
 					target.y = lerpf(target.y, -.10, _land_kick)
 					target.z = lerpf(target.z, -.48, _land_kick)
 				else:
-					# airborne: hands come up into view and spread, then lower for the landing
-					var rising: float = clampf(vertical / 6.0, -1.0, 1.0)
-					var reach: float = clampf(0.55 + rising * 0.45 + _jump_kick * 0.3, 0.0, 1.0)
-					target = Vector3(side * lerpf(0.3, 0.2, reach), lerpf(-0.28, -0.08, reach), lerpf(-0.36, -0.42, reach))
-					facing = _hand_basis(side, deg_to_rad(lerpf(-10.0, 72.0, reach)), deg_to_rad(side * lerpf(-30.0, -14.0, reach)))
-					curl = lerpf(0.3, 0.08, reach)
+					# P: reference 15, low outer hands, backs visible, fingers forward.
+					# different phase per hand separates takeoff, flight and recovery.
+					var rising: float = clampf(vertical / 6.3, -1, 1)
+					var reach: float = clampf(.55 + rising * .25 + _jump_kick * (.30 if side < 0 else .1), 0, 1)
+					target = Vector3(side * (.36 + .05 * reach), -.23 + .06 * reach + side * .025, -.58 - .03 * reach)
+					facing = _hand_basis(side, deg_to_rad(-12 + reach * 6 + side * 4), deg_to_rad(side * -16))
+					curl = .08 + (1 - reach) * .18
 					stiffness = 170.0
 		var weight: float = float(_player.call("get_hand_weight", side))
 		if weight > 0:
 			var contact: Vector3 = _player.call("get_hand_target", side)
 			var local: Vector3 = camera_basis.inverse() * (contact - main_camera.global_position)
 			target = target.lerp(local, weight)
+			# palm -Y rests against the wall normal; fingers point along travel.
+			var normal: Vector3 = _player.get("_wall_normal") if move in [2, 8] else _player.up_direction
+			var back: Vector3 = camera_basis.inverse() * normal
+			var forward: Vector3 = camera_basis.inverse() * (-body_basis.z).slide(normal).normalized()
+			if forward.length_squared() < .01:
+				forward = camera_basis.inverse() * _player.up_direction
+			var z_axis: Vector3 = -forward
+			var x_axis: Vector3 = back.cross(z_axis).normalized()
+			var contact_basis := Basis(x_axis, z_axis.cross(x_axis).normalized(), z_axis)
+			facing = Basis(facing.get_rotation_quaternion().slerp(contact_basis.get_rotation_quaternion(), weight))
 			stiffness = 450
 		_drive_arm(arm, target, facing, curl, stiffness, delta)
 
@@ -300,10 +318,16 @@ func _drive_arm(arm: Dictionary, target: Vector3, facing: Basis, curl: float, st
 	for _step: int in range(steps):
 		velocity += ((target - wrist) * stiffness - velocity * damping) * h
 		wrist += velocity * h
+	# contact targets are fixed world points, not a spring that slips over the rail.
+	if stiffness >= 450:
+		wrist = target
+		velocity = Vector3.ZERO
 	arm["wrist"] = wrist
 	arm["wrist_velocity"] = velocity
 	var current: Basis = arm["facing"]
 	current = Basis(current.get_rotation_quaternion().slerp(facing.get_rotation_quaternion(), 1.0 - exp(-16.0 * delta)))
+	if stiffness >= 450:
+		current = facing
 	arm["facing"] = current
 	arm["curl"] = lerpf(float(arm["curl"]), curl, 1.0 - exp(-12.0 * delta))
 	var side: float = arm["side"]
@@ -316,11 +340,26 @@ func _drive_arm(arm: Dictionary, target: Vector3, facing: Basis, curl: float, st
 		var open: float = 1.0 - float(arm["curl"])
 		var fan: float = (float(finger) - 1.5) * 0.09 * open * -side if index % 2 == 0 else 0.0
 		joints[index].rotation = Vector3(-float(arm["curl"]) * (1.25 if index % 2 == 0 else 1.05), fan, 0)
-	var shoulder: Vector3 = Vector3(side * 0.24, -0.42, 0.18)
-	var elbow: Vector3 = shoulder.lerp(wrist, 0.5) + Vector3(side * 0.09, -0.13, 0.06)
-	var wrist_back: Vector3 = wrist + current * Vector3(0, 0, 0.05)
+	var shoulder: Vector3 = Vector3(side * .24, -.36, .04)
+	var wrist_back: Vector3 = wrist + current * Vector3(0, 0, .035)
+	var axis: Vector3 = wrist_back - shoulder
+	var distance: float = clampf(axis.length(), .04, UPPER_LENGTH + FORE_LENGTH - .005)
+	axis = axis.normalized()
+	wrist_back = shoulder + axis * distance
+	wrist = wrist_back - current * Vector3(0, 0, .035)
+	hand.position = wrist
+	arm["wrist"] = wrist
+	# analytic two-bone solve, with a stable outward/down pole.
+	var pole: Vector3 = Vector3(side * .7, -.8, .3)
+	var bend: Vector3 = pole.slide(axis).normalized()
+	var along: float = (UPPER_LENGTH * UPPER_LENGTH - FORE_LENGTH * FORE_LENGTH + distance * distance) / (2 * distance)
+	var elbow: Vector3 = shoulder + axis * along + bend * sqrt(maxf(0, UPPER_LENGTH * UPPER_LENGTH - along * along))
 	_aim(arm["fore"], elbow, wrist_back)
 	_aim(arm["upper"], shoulder, elbow)
+	arm["elbow"] = elbow
+	arm["shoulder"] = shoulder
+	arm["end"] = wrist_back
+
 
 
 func _aim(segment: Node3D, from: Vector3, to: Vector3) -> void:

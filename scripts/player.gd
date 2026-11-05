@@ -655,8 +655,12 @@ func _update_rig(delta: float, snap: bool) -> void:
 	var anim_pitch: float = 0
 	if move == Move.VAULT:
 		var f: float = get_climb_progress()
-		local_eye.y -= sin(f * PI) * tuning.vault_eye_compression
-		anim_pitch = -.18 * sin(f * PI)
+		# P: crouch the visual body around the planted rail. root capsule clearance
+		# is independent of this eye curve; collision resolution follows composition.
+		var plant: float = smoothstep(0, .16, f) * (1 - smoothstep(.52, .90, f))
+		var over_rail: float = (global_position + up_direction * _eye_height - _climb_hand).dot(up_direction)
+		local_eye.y -= maxf(0, over_rail - tuning.vault_eye_above_contact) * plant
+		anim_pitch = -.80 * sin(f * PI) # P: see the planted hand and rail through push-off
 	elif move == Move.PULLUP:
 		local_eye.y -= .35 * sin(get_climb_progress() * PI)
 	elif move == Move.ROLL:
@@ -711,9 +715,9 @@ func get_body_basis() -> Basis:
 
 func get_hand_target(side: float) -> Vector3:
 	if move in [Move.VAULT, Move.GRAB, Move.PULLUP]:
-		return _climb_hand + global_basis.x * side * .18
+		return _climb_hand + global_basis.x * side * (.36 if move == Move.VAULT else .18) + up_direction * .025
 	if move in [Move.WALLRUN, Move.WALLCLIMB]:
-		var origin: Vector3 = global_position + up_direction * .65 - global_basis.z * .65
+		var origin: Vector3 = global_position + up_direction * (.65 + (.08 * side if move == Move.WALLCLIMB else 0)) - global_basis.z * .45 + global_basis.x * (side * .20 if move == Move.WALLCLIMB else 0)
 		var hit = _ray(origin, origin - _wall_normal * (tuning.radius + tuning.wall_probe))
 		if not hit.is_empty():
 			return Vector3(hit.position) + _wall_normal * .025
@@ -726,6 +730,8 @@ func get_hand_weight(side: float) -> float:
 	var local: Vector3 = _rig.global_basis.inverse() * (contact - _rig.global_position)
 	var reach: float = (1 - smoothstep(1.0, 1.7, local.length())) * (1 - smoothstep(-.05, .05, local.z))
 	if move == Move.VAULT:
+		if side > 0:
+			return 0 # P: one planted push-off hand, the other balances.
 		return reach * minf(1, vault.time / tuning.hand_ik_blend) * minf(1, (vault.duration - vault.time) / tuning.hand_ik_blend)
 	if move == Move.WALLRUN and signf(side) != signf(_wall_side):
 		return 0

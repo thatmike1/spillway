@@ -9,6 +9,7 @@ var phase: int = -1
 var jumped: bool = false
 var arms: Node
 var eye_trace: FileAccess
+var fixture_only: int = -1
 
 func _initialize() -> void:
 	_run.call_deferred()
@@ -32,11 +33,18 @@ func box(center: Vector3, size: Vector3, color: Color) -> void:
 	body.add_child(mesh)
 
 func _run() -> void:
+	root.mode = Window.MODE_WINDOWED
+	root.size = Vector2i(1280, 720)
+	root.content_scale_size = Vector2i(1280, 720)
+	root.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_KEEP
 	MAIN.bind_inputs()
 	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--fixture="):
+			fixture_only = int(arg.trim_prefix("--fixture="))
+			time = fixture_only * 3.0
 		if arg.begins_with("--eye-trace="):
 			eye_trace = FileAccess.open(arg.trim_prefix("--eye-trace="), FileAccess.WRITE)
-			eye_trace.store_csv_line(["time", "phase", "eye_x", "eye_y", "eye_z", "floor_clearance", "roll_degrees", "move", "low", "left_wrist", "right_wrist"])
+			eye_trace.store_csv_line(["time", "phase", "eye_x", "eye_y", "eye_z", "floor_clearance", "roll_degrees", "move", "low", "left_wrist", "right_wrist", "left_weight", "left_contact_error"])
 	world = Node3D.new()
 	root.add_child(world)
 	var environment := WorldEnvironment.new()
@@ -75,7 +83,7 @@ func _physics_process(dt: float) -> bool:
 		return false
 	time += dt
 	var next: int = int(time / 3)
-	if next > 7:
+	if next > 8 or (fixture_only >= 0 and next > fixture_only):
 		quit(0)
 		return false
 	if next != phase:
@@ -83,10 +91,10 @@ func _physics_process(dt: float) -> bool:
 		jumped = false
 		Input.action_release("move_forward")
 		Input.action_release("crouch")
-		var positions: Array[Vector3] = [Vector3(0, .9, 0), Vector3(30, .9, 0), Vector3(60, 2.0, 0), Vector3(90, 4.9, 0), Vector3(120, .9, 0), Vector3(150, 2.0, .4), Vector3(180, 2.0, 0), Vector3(210, .9, 0)]
+		var positions: Array[Vector3] = [Vector3(0, .9, 0), Vector3(30, .9, 0), Vector3(60, 2.0, 0), Vector3(90, 4.9, 0), Vector3(120, .9, 0), Vector3(150, 2.0, .4), Vector3(180, 2.0, 0), Vector3(210, .9, 0), Vector3(240, .9, 0)]
 		player.reset_to(Transform3D(Basis.IDENTITY, positions[phase]))
-		player.look(0, -.13 if phase != 3 else -.28)
-		label.text = ["jump: original hands enter on takeoff", "vault: hands follow the actual red rail", "wall run: left contact, corrected Godot bank", "landing: normal impact and body recovery", "roll: safe retargeted eye, recovered root travel", "grab: two separate planted hands", "wall run: right contact, corrected Godot bank", "turn: angular-rate lazy spring"][phase]
+		player.look(0, -1.35 if phase == 8 else (.30 if phase == 5 else (-.13 if phase != 3 else -.28)))
+		label.text = ["jump: original hands enter on takeoff", "vault: hands follow the actual red rail", "wall run: left contact, corrected Godot bank", "landing: normal impact and body recovery", "roll: safe retargeted eye, recovered root travel", "grab: two separate planted hands", "wall run: right contact, corrected Godot bank", "turn: angular-rate lazy spring", "look down: articulated legs and shoes"][phase]
 		print("visual fixture ", phase, " begins at movie t=", time)
 	var t: float = fmod(time, 3)
 	match phase:
@@ -141,5 +149,5 @@ func _process(_dt: float) -> bool:
 		var eye: Vector3 = player.get_camera().global_position
 		var hit: Dictionary = player._ray(eye, eye - player.up_direction * 15)
 		var clearance: float = eye.distance_to(hit.position) if not hit.is_empty() else -1
-		eye_trace.store_csv_line([time, phase, eye.x, eye.y, eye.z, clearance, rad_to_deg(player._roll), player.move, player.is_low(), arms._arms[0].wrist, arms._arms[1].wrist])
+		eye_trace.store_csv_line([time, phase, eye.x, eye.y, eye.z, clearance, rad_to_deg(player._roll), player.move, player.is_low(), arms._arms[0].wrist, arms._arms[1].wrist, player.get_hand_weight(-1), arms._arms[0].hand.global_position.distance_to(player.get_hand_target(-1)) if player.get_hand_target(-1).is_finite() else -1])
 	return false

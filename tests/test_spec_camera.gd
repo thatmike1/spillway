@@ -38,7 +38,7 @@ func _run() -> void:
 	player.vault.duration = .65
 	player._climb_hand = player.get_camera().global_position + player.global_basis * Vector3(0, -.3, -.5)
 	var left: Vector3 = player.get_hand_target(-1)
-	check(absf(left.distance_to(player._climb_hand) - .18) < .001, "hand target belongs to actual world contact")
+	check(absf((left - player._climb_hand).slide(player.up_direction).length() - .36) < .001, "hand target belongs to actual world contact")
 	player._climb_hand += Vector3.RIGHT
 	check(absf(player.get_hand_target(-1).distance_to(left) - 1) < .001, "moving contact moves hand target exactly")
 	player.move = player.Move.GROUND
@@ -63,6 +63,16 @@ func _run() -> void:
 	for i: int in 20:
 		player._update_rig(.016, false)
 	check(absf(rad_to_deg(player._roll)) > 2 and absf(rad_to_deg(player._roll)) < 7, "fast angular-rate flick has small visible roll")
+	await fresh()
+	player.landing.impact = 6.3
+	player._landing_elapsed = .16
+	player._update_rig(.016, true)
+	var compression: float = player.position.y + player.tuning.standing_eye - player.get_camera().global_position.y
+	check(compression > .055 and compression < .07, "ordinary landing has a visible impact-scaled eye dip")
+	player._landing_elapsed = .33
+	player._update_rig(.016, true)
+	check(absf(player.get_camera().global_position.y - player.position.y - player.tuning.standing_eye) < .001, "ordinary eye recovers in .32 seconds")
+	check(player._resolve_eye(player.position - Vector3.UP * 2).y > .1, "final eye resolves against solid floor")
 	print("spec camera: %d/%d checks passed" % [checks - failures, checks])
 	player.move = player.Move.GROUND
 	fixture.queue_free()
