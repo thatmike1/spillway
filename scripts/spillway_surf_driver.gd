@@ -215,7 +215,7 @@ func _begin_drop(label: String) -> void:
 	phase = "drop"
 
 func _catch_surf() -> void:
-	if player.get("surf_normal") != Vector3.ZERO:
+	if _on_section(str(_section.name)):
 		_enter(_section)
 
 func _enter(section: Dictionary) -> void:
@@ -232,7 +232,7 @@ func _ride() -> void:
 	var theta := GEOMETRY.angle_at(section, player.global_position)
 	var report: Dictionary = surf_report[section.name]
 	report.ride_ticks += 1
-	if player.get("surf_normal") != Vector3.ZERO:
+	if player.get("surf_normal") != Vector3.ZERO and _on_section(str(section.name)):
 		report.contact_ticks += 1
 	if theta > section.arc + .01:
 		report["exit_speed"] = float(player.call("get_speed"))
@@ -290,10 +290,23 @@ func _outflow_entry() -> Vector3:
 
 func _on_section(label: String) -> bool:
 	for i: int in player.get_slide_collision_count():
-		var body := player.get_slide_collision(i).get_collider() as Node
-		if body != null and str(body.get_meta("surf_section", "")) == label:
-			return true
+		var contact := player.get_slide_collision(i)
+		for j: int in contact.get_collision_count():
+			var body := contact.get_collider(j) as Node
+			if body != null and str(body.get_meta("surf_section", "")) == label:
+				return true
 	return false
+
+func _contact_sections() -> Array[String]:
+	var labels: Array[String] = []
+	for i: int in player.get_slide_collision_count():
+		var contact := player.get_slide_collision(i)
+		for j: int in contact.get_collision_count():
+			var body := contact.get_collider(j) as Node
+			var label := str(body.get_meta("surf_section", "")) if body != null else ""
+			if not label.is_empty() and not labels.has(label):
+				labels.append(label)
+	return labels
 
 # --- input -------------------------------------------------------------------
 
@@ -375,7 +388,11 @@ func _record(before: float) -> void:
 	if before - speed > 1.0:
 		var hits: Array = []
 		for i: int in player.get_slide_collision_count():
-			hits.append(str((player.get_slide_collision(i).get_collider() as Node).name))
+			var contact := player.get_slide_collision(i)
+			for j: int in contact.get_collision_count():
+				var name := str((contact.get_collider(j) as Node).name)
+				if not hits.has(name):
+					hits.append(name)
 		speed_drops.append({"tick": tick, "phase": phase, "position": player.global_position, "from": before, "to": speed, "hits": hits})
 		_note("DROP phase=%s pos=%s %.2f->%.2f hits=%s" % [phase, _v(player.global_position), before, speed, hits])
 	_peak_speed = maxf(_peak_speed, speed)
@@ -388,6 +405,7 @@ func _sample(kind: String) -> Dictionary:
 		"held":_held.duplicate(), "yaw":float(player.get("yaw")), "pitch":float(player.get("pitch")),
 		"position":[p.x,p.y,p.z], "velocity":[v.x,v.y,v.z], "speed":float(player.call("get_speed")),
 		"grounded":player.is_grounded(), "surf":player.get("surf_normal") != Vector3.ZERO,
+		"contact_sections":_contact_sections(),
 		"mode":str(player.get("mode")), "crouched":bool(player.get("crouched")), "water":bool(player.get("in_water")),
 		"jumps":int(player.get("jump_count")), "checkpoint":int(main.get("checkpoint_index")),
 		"ordered_checkpoints":_stages.duplicate(), "respawns":int(main.get("respawn_count")),
