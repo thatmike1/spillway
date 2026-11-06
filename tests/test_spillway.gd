@@ -172,6 +172,7 @@ func jump_grace() -> void:
 	await ticks(2)
 	check(int(player.get("jump_count")) == 0 and player.velocity.y < 0, "167ms after edge cannot jump")
 	await fresh("buffered jump / drop fixture")
+	player.set("autohop", false)
 	player.call("reset_to", Transform3D(Basis.IDENTITY, Vector3(0, 2, 0)))
 	# fixture: falling seed bypasses the wait to apex, never used by route playback.
 	player.velocity = Vector3(0, -3, 0)
@@ -181,9 +182,11 @@ func jump_grace() -> void:
 		if player.position.y < .35 and player.velocity.y < 0 and not requested:
 			action("jump", true)
 			requested = true
+			await ticks(2)
+			action("jump", false)
 		if int(player.get("jump_count")) > 0:
 			break
-	check(requested and int(player.get("jump_count")) == 1 and player.velocity.y > 4, "press just before contact jumps on landing")
+	check(requested and not Input.is_action_pressed("jump") and int(player.get("jump_count")) == 1 and player.velocity.y > 4, "a released tap just before contact jumps from its buffer with autohop off")
 	action("jump", false)
 	await ticks(110)
 	check(int(player.get("jump_count")) == 1, "one buffered press produces one jump")

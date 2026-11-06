@@ -118,6 +118,8 @@ func _run() -> void:
 	await wet_hop_and_walk()
 	await autohop_mantle()
 	await speed_cap()
+	await surf_ceiling_crease()
+	await collision_speed_cap()
 	drive.call("release_all")
 	if trace != null:
 		trace.close()
@@ -579,3 +581,73 @@ func speed_cap() -> void:
 	note("peak %.3f m/s after 20 s of maximal strafing" % peak)
 	check(peak > 25.0 and peak <= 30.001, "maximal strafing climbs toward but never past the 30 m/s cap: %.3f" % peak)
 	drive.call("release_all")
+
+
+## regression: a ceiling/ramp crease has a free -z tangent. fixed D must keep travelling.
+func surf_ceiling_crease() -> void:
+	await fresh("fixed-input surf under a ceiling", Vector3(-5.1, 9.025, 5))
+	make_surf_ramp()
+	box(Vector3(-5, 8.15, -80), Vector3(12, .3, 100))
+	await drive.call("step", 4)
+	drive.call("keys", ["move_forward"])
+	while player.global_position.z > -8.6:
+		await drive.call("step", 1)
+	drive.call("keys", ["move_forward", "jump"])
+	await drive.call("step", 1)
+	drive.call("keys", [])
+	for i: int in 250:
+		await drive.call("step", 1)
+		if player.get("surf_normal") != Vector3.ZERO:
+			break
+	drive.call("face", 0.0)
+	drive.call("keys", ["move_right"])
+	var stalled := 0
+	var ceiling_ticks := 0
+	for i: int in 1300:
+		await drive.call("step", 1)
+		if player.is_on_ceiling():
+			ceiling_ticks += 1
+			if speed() < 1.0:
+				stalled += 1
+	results["surf_ceiling_crease"] = {"ceiling_ticks": ceiling_ticks, "stalled_ticks": stalled,
+		"end_z": player.global_position.z, "keys": "fixed D, yaw zero"}
+	check(ceiling_ticks > 100, "the real capsule contacts the ceiling above the surf face")
+	check(stalled == 0 and player.global_position.z < -90.0,
+		"the unobstructed crease keeps travelling: %d stalled ticks, end z %.2f" % [stalled, player.global_position.z])
+
+## regression: earn cap speed on a static deck, then fall onto a static steep face.
+func collision_speed_cap() -> void:
+	await fresh("earned cap speed falls onto a surf ramp", Vector3(0, 30.025, -100), -200.0)
+	box(Vector3(0, 15, -100), Vector3(40, 30, 40))
+	var run := 28.0 / tan(deg_to_rad(60.0))
+	prism(PackedVector3Array([Vector3(-run, 0, -125), Vector3(0, 28, -125), Vector3(0, 0, -125),
+		Vector3(-run, 0, -240), Vector3(0, 28, -240), Vector3(0, 0, -240)]))
+	await drive.call("step", 10)
+	# p / this initial view aims the earned circle's exit along the static ramp.
+	drive.call("turn", -atan2(27.421, 12.168))
+	await run_up(60)
+	drive.call("keys", ["move_forward", "jump"])
+	await drive.call("step", 1)
+	for i: int in 2400:
+		await drive.call("strafe", 1, -1.0, ["jump"])
+	var earned := speed()
+	drive.call("keys", ["jump"])
+	var peak := earned
+	var peak_real := 0.0
+	var contacts_on_face := 0
+	for i: int in 700:
+		await drive.call("step", 1)
+		peak = maxf(peak, speed())
+		var real_velocity := player.get_real_velocity()
+		peak_real = maxf(peak_real, Vector2(real_velocity.x, real_velocity.z).length())
+		if player.get("surf_normal") != Vector3.ZERO:
+			contacts_on_face += 1
+		if player.global_position.y < 0.0:
+			break
+	results["collision_speed_cap"] = {"earned": earned, "peak_velocity": peak, "peak_sweep": peak_real,
+		"surf_ticks": contacts_on_face, "recovery_margin_m": player.safe_margin}
+	check(earned > 29.99 and contacts_on_face > 20, "input earns the cap then actually contacts the ramp")
+	check(peak <= 30.001, "collision cannot manufacture authoritative speed above the P cap: %.4f" % peak)
+	# real velocity includes the engine's up-to-2mm contact recovery at120Hz.
+	check(peak_real <= 30.0 + player.safe_margin * 120.0 + .01,
+		"actual swept speed stays within the cap plus contact recovery: %.4f" % peak_real)

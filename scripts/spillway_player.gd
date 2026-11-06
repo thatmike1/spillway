@@ -245,11 +245,17 @@ func _physics_process(delta: float) -> void:
 			_current_position = global_position
 			return
 	var impact := -velocity.y
+	_limit_collision_speed(delta)
 	var before_move := velocity
 	# airborne contacts slide along the surface; on the ground steep faces stay walls.
 	floor_block_on_wall = grounded
 	move_and_slide()
 	_clip_air_contacts(before_move)
+	# p / contact can turn falling energy into horizontal speed; cap the whole vector
+	# after clipping so its direction stays feasible against every touched plane.
+	var resolved_speed := get_speed()
+	if resolved_speed > MAX_SPEED:
+		velocity *= MAX_SPEED / resolved_speed
 	if not grounded and is_on_floor() and impact > 2.0:
 		last_impact = impact
 		land_count += 1
@@ -287,39 +293,75 @@ func _clip_air_contacts(before: Vector3) -> void:
 		return
 	var planes: Array[Vector3] = []
 	for i: int in get_slide_collision_count():
-		var contact := get_slide_collision(i)
-		var normal := contact.get_normal()
-		if normal.y >= cos(floor_max_angle):
-			continue
-		# the capsule's rounded bottom reports a slanted normal on any box edge. classify
-		# by the real face under the contact, so a curb or lip never acts as a launch ramp.
-		var face := _face_normal(contact.get_position(), normal)
-		if face.y > cos(deg_to_rad(SURF_MAX_DEGREES)) and face.y < cos(floor_max_angle):
-			surf_normal = face
-			planes.append(face)
-		elif face.y >= cos(floor_max_angle) or face == Vector3.ZERO:
-			# the lip of a walkable top blocks horizontally only, as the engine's wall rule does.
-			var flat := Vector3(normal.x, 0.0, normal.z)
-			if flat.length_squared() > 0.0001:
-				planes.append(flat.normalized())
-		else:
-			planes.append(face)
+		_contact_planes(get_slide_collision(i), planes, true)
 	if planes.is_empty():
 		return
-	var clipped := before
-	for pass_index: int in 2:
-		for plane: Vector3 in planes:
-			var into := clipped.dot(plane)
-			if into < 0.0:
-				clipped -= plane * into
-	for plane: Vector3 in planes:
-		if clipped.dot(plane) < -0.01:
-			# a crease the two passes cannot resolve keeps the engine's own slide result.
-			return
-	velocity = clipped
+	velocity = _feasible_velocity(before, planes)
 	if surf_normal != Vector3.ZERO:
 		surf_ticks += 1
 		mode = "surf"
+
+func _contact_planes(contact: KinematicCollision3D, planes: Array[Vector3], mark_surf: bool) -> void:
+	for j: int in contact.get_collision_count():
+		var normal := contact.get_normal(j)
+		if normal.y >= cos(floor_max_angle):
+			continue
+		# classify the actual face, including secondary contacts in a ceiling crease.
+		var face := _face_normal(contact.get_position(j), normal)
+		var plane := face
+		if face.y > cos(deg_to_rad(SURF_MAX_DEGREES)) and face.y < cos(floor_max_angle):
+			if mark_surf:
+				surf_normal = face
+		elif face.y >= cos(floor_max_angle) or face == Vector3.ZERO:
+			plane = Vector3(normal.x, 0.0, normal.z).normalized()
+		if plane.length_squared() > .5:
+			var duplicate := false
+			for existing: Vector3 in planes:
+				duplicate = duplicate or existing.dot(plane) > .9999
+			if not duplicate:
+				planes.append(plane)
+
+func _limit_collision_speed(delta: float) -> void:
+	# p / a hard fall can exceed the horizontal cap during the engine's swept motion,
+	# before the final velocity limit. predict only that high-energy contact and limit
+	# its feasible tangent before moving; ordinary movement needs no extra query.
+	if velocity.length_squared() <= MAX_SPEED * MAX_SPEED:
+		return
+	var hit := KinematicCollision3D.new()
+	if not test_move(global_transform, velocity * delta, hit, safe_margin, false, 8):
+		return
+	var planes: Array[Vector3] = []
+	_contact_planes(hit, planes, false)
+	if planes.is_empty():
+		return
+	var resolved := _feasible_velocity(velocity, planes)
+	var speed := Vector2(resolved.x, resolved.z).length()
+	if speed > MAX_SPEED:
+		velocity = resolved * (MAX_SPEED / speed)
+
+func _feasible_velocity(before: Vector3, planes: Array[Vector3]) -> Vector3:
+	# p / project onto the feasible contact cone. its closest point is either the original
+	# vector, one face, a two-face crease, or zero. this preserves a clear travel tangent
+	# without relying on a fixed number of alternating projections to converge.
+	var candidates: Array[Vector3] = [before, Vector3.ZERO]
+	for i: int in planes.size():
+		candidates.append(before.slide(planes[i]))
+		for j: int in range(i + 1, planes.size()):
+			var crease := planes[i].cross(planes[j])
+			if crease.length_squared() > .000001:
+				candidates.append(crease * before.dot(crease) / crease.length_squared())
+	var best := Vector3.ZERO
+	var cost := before.length_squared()
+	for candidate: Vector3 in candidates:
+		var valid := true
+		for plane: Vector3 in planes:
+			if candidate.dot(plane) < -.0001:
+				valid = false
+		var candidate_cost := candidate.distance_squared_to(before)
+		if valid and candidate_cost <= cost:
+			best = candidate
+			cost = candidate_cost
+	return best
 
 func _face_normal(point: Vector3, normal: Vector3) -> Vector3:
 	var hit := _ray(point + normal * 0.08, point - normal * 0.08)
