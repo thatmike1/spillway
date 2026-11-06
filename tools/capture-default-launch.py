@@ -77,15 +77,31 @@ def main():
                     break
             if not ready:
                 raise RuntimeError('no rendered sunlit course after the splash; inspect retained boot views')
+
+            def capture_state(name, dark):
+                # software rendering can still present the preceding frame after a key event.
+                # retain attempts and wait for the visible overlay before sending the next key.
+                for attempt in range(1, 31):
+                    time.sleep(.5)
+                    frame = output / ('%s-attempt-%02d.png' % (name, attempt))
+                    control('magick', 'import', '-display', display, '-window', window, '-silent', frame)
+                    brightness = float(control('magick', frame, '-format', '%[fx:mean]', 'info:').strip())
+                    observed = brightness < mean * .6 if dark else brightness > mean * .8
+                    if observed:
+                        shutil.copy2(frame, output / (name + '.png'))
+                        result.setdefault('visible_states', {})[name] = {
+                            'attempt': attempt, 'mean': brightness, 'startup_mean': mean,
+                            'predicate': 'below60% of start' if dark else 'above80% of start'}
+                        return
+                raise RuntimeError('rendered %s state did not appear; inspect retained attempts' % name)
+
             control('xdotool', 'key', '--window', window, 'Escape')
-            time.sleep(1)
-            control('magick', 'import', '-display', display, '-window', window, '-silent', output / 'pause.png')
+            capture_state('pause', True)
             control('xdotool', 'key', '--window', window, 'Escape')
-            time.sleep(1)
-            control('magick', 'import', '-display', display, '-window', window, '-silent', output / 'resume.png')
+            capture_state('resume', False)
             # there is no window manager in Xvfb. quit through the visible game menu.
             control('xdotool', 'key', '--window', window, 'Escape')
-            time.sleep(.5)
+            capture_state('pause-before-quit', True)
             control('xdotool', 'key', '--window', window, 'Tab', 'Tab')
             time.sleep(.5)
             control('magick', 'import', '-display', display, '-window', window, '-silent', output / 'pre-quit.png')
