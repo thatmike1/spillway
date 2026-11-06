@@ -100,7 +100,7 @@ func profile_snapshot() -> Dictionary:
 	return snapshot
 
 func records() -> Dictionary:
-	return {"best": game.get("best_time"), "splits": game.get("best_splits").duplicate(),
+	return {"best": game.get("best_time"), "open_best": game.get("open_best_time"), "splits": game.get("best_splits").duplicate(),
 		"segments": game.get("best_segments").duplicate()}
 
 func checkpoint_position(index: int) -> Vector3:
@@ -153,6 +153,7 @@ func _run() -> void:
 	game.set("level", flow_level)
 	# records loaded from the real profile are replaced only in memory.
 	game.set("best_time", -1.0)
+	game.set("open_best_time", -1.0)
 	game.get("best_splits").clear()
 	game.get("best_segments").clear()
 	await restart("restart and timer")
@@ -163,6 +164,7 @@ func _run() -> void:
 	action("move_forward", false)
 	check(float(game.get("elapsed")) > 0.0, "real movement away from spawn starts timer")
 	await ordered_checkpoints()
+	await assisted_open_line()
 	await deck_admission()
 	await clean_records()
 	await practice_records()
@@ -188,14 +190,16 @@ func ordered_checkpoints() -> void:
 		titles.append(str(point.title))
 	await visit(checkpoint_position(2), 3.0)
 	check(int(game.get("checkpoint_index")) == 0 and game.get("splits").is_empty(), "visiting checkpoint two first grants no split")
-	# r10 retires the r9 refusal ("finish cannot bypass ... checkpoints" and the "Pump feed closed"
-	# hint): physical wheel arrival always finishes, and skipped stages only withhold the record.
+	# r12 / a clean physical skip can set an open-line best; ordered records and splits
+	# stay separate. this supersedes r10's unrecorded exploration-only expectations.
 	var before := records()
 	await visit(game.get("level").get("finish_position"), 5.0)
 	var text: String = game.get("hud").get("finish_label").text
 	check(bool(game.get("finished")) and str(game.get("finish_kind")) == "exploration", "wheel arrival with both segments skipped still finishes, as exploration")
-	check(records() == before and game.get("splits").is_empty() and game.get("split_deltas").is_empty(), "exploration finish saves no best and invents no splits")
-	check("EXPLORATION FINISH" in text and "NOT RECORDED" in text and not "CLEAN BEST" in text and not "RUN COMPLETE" in text, "exploration result is plainly labelled unrecorded")
+	check(float(game.get("best_time")) == float(before.best) and game.get("best_splits") == before.splits and game.get("best_segments") == before.segments and game.get("splits").is_empty() and game.get("split_deltas").is_empty(), "a skipped-stage finish preserves ordered records and invents no splits")
+	check(absf(float(game.get("open_best_time")) - 5.0) < .1, "a five-second physical arrival establishes its separate open-line best")
+	before = records()
+	check("OPEN LINE FINISH" in text and "NEW OPEN LINE BEST" in text and not "NOT RECORDED" in text and not "FULL COURSE COMPLETE" in text, "a clean skip is celebrated as an open line, never a full course")
 	check(("Skipped " + titles[1]) in text and ("Skipped " + titles[2]) in text, "exploration result names both actually skipped segments")
 	await ticks(10)
 	check(records() == before and game.get("splits").is_empty(), "standing at the wheel after exploration adds nothing")
@@ -224,6 +228,17 @@ func ordered_checkpoints() -> void:
 	var previous := records()
 	await ticks(10)
 	check(game.get("splits").size() == 3 and records() == previous, "standing at finish cannot append splits or replace records repeatedly")
+
+func assisted_open_line() -> void:
+	await restart("practice cannot set an open-line best")
+	var before := records()
+	await pulse("practice")
+	await visit(game.get("level").get("finish_position"), 1.0)
+	check(bool(game.get("finished")) and records() == before, "a faster skipped-stage practice finish changes neither record")
+	var text: String = game.get("hud").get("finish_label").text
+	check("PRACTICE FINISH" in text and "NOT RECORDED" in text and not "NEW OPEN LINE BEST" in text, "assisted open lines remain visibly unrecorded")
+	await restart("R preserves both records and restores clean eligibility")
+	check(records() == before and bool(game.get("clean_eligible")), "R preserves records while clearing assistance")
 
 func deck_admission() -> void:
 	# isolated fixture for the deck rule; the real decks are exercised in test_spillway_access.
@@ -257,6 +272,7 @@ func deck_admission() -> void:
 	check(bool(game.get("finished")) and str(game.get("finish_kind")) == "clean" and game.get("splits").size() == 3, "deck-ordered run finishes as a full ordered result")
 	# the record cases below start from no records, as the profile setup does.
 	game.set("best_time", -1.0)
+	game.set("open_best_time", -1.0)
 	game.get("best_splits").clear()
 	game.get("best_segments").clear()
 
@@ -522,8 +538,9 @@ func record_namespace() -> void:
 	probe.call("_load", r12_path, legacy_path)
 	check(is_equal_approx(float(probe.get("settings").sensitivity), 1.7) and is_equal_approx(float(probe.get("settings").fov), 101.0) and bool(probe.get("settings").autohop),
 		"first r12 start inherits r11 settings and defaults autohop on")
-	check(float(probe.get("best_time")) < 0.0 and probe.get("best_splits").is_empty(), "r11 times never appear as r12 records")
+	check(float(probe.get("best_time")) < 0.0 and float(probe.get("open_best_time")) < 0.0 and probe.get("best_splits").is_empty(), "r11 times never appear as either r12 record")
 	probe.set("best_time", 33.25)
+	probe.set("open_best_time", 8.25)
 	probe.set("best_splits", [10.0, 20.0, 33.25] as Array[float])
 	probe.get("settings").autohop = false
 	probe.call("_save", r12_path)
@@ -534,8 +551,8 @@ func record_namespace() -> void:
 	check(FileAccess.get_sha256(legacy_path) == legacy_hash, "saving r12 never rewrites the r11 profile")
 	var reload: Node = MAIN.new()
 	reload.call("_load", r12_path, legacy_path)
-	check(is_equal_approx(float(reload.get("best_time")), 33.25) and not bool(reload.get("settings").autohop),
-		"r12 profile reloads its own record and the autohop choice")
+	check(is_equal_approx(float(reload.get("best_time")), 33.25) and is_equal_approx(float(reload.get("open_best_time")), 8.25) and not bool(reload.get("settings").autohop),
+		"r12 profile reloads distinct full-course/open-line records and the autohop choice")
 	probe.free()
 	reload.free()
 	for path: String in [legacy_path, r12_path]:

@@ -24,6 +24,9 @@ var best_splits: Array[float] = []
 var best_segments: Array[float] = []
 var split_deltas: Array[float] = []
 var best_time: float = -1.0
+# p / any unassisted physical line can set this, including an emergent stage skip.
+# ordered full-course times/splits above remain a separate record.
+var open_best_time: float = -1.0
 var settings: Dictionary = {"sensitivity": 1.0, "fov": 90.0, "volume": 0.70, "comfort": false, "autohop": true}
 var paused: bool = false
 var _started: bool = false
@@ -164,7 +167,7 @@ func _physics_process(delta: float) -> void:
 	var finish_box := AABB(finish_center - Vector3(2.0, 0.3, 0.8), Vector3(4.0, 3.0, 1.6))
 	var at_finish: bool = level.call("is_finish_at", player.global_position) if level.has_method("is_finish_at") else finish_box.has_point(player.global_position)
 	if at_finish:
-		# p / physical arrival always starts the wheel; skipped stages only withhold the record.
+		# p / physical arrival always finishes; a skip can set an open-line best, never full-course splits.
 		_finish(checkpoint_index == points.size() - 1)
 
 func _stands_on_stage(stage: int) -> bool:
@@ -201,6 +204,9 @@ func _finish(ordered: bool) -> void:
 	if ordered:
 		splits.append(elapsed)
 	var is_best := false
+	var is_open_best := clean_eligible and (open_best_time < 0.0 or elapsed < open_best_time)
+	if is_open_best:
+		open_best_time = elapsed
 	var stages: int = (level.get("checkpoints") as Array).size()
 	if finish_kind == "clean" and splits.size() == stages:
 		var previous: float = 0.0
@@ -216,11 +222,12 @@ func _finish(ordered: bool) -> void:
 		if is_best:
 			best_time = elapsed
 			best_splits = splits.duplicate()
+	if clean_eligible:
 		_save()
 	if level.has_method("start_wheel"):
 		level.call("start_wheel")
 	audio.call("finish")
-	hud.call("show_finish", is_best)
+	hud.call("show_finish", is_best, is_open_best)
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("restart"):
@@ -285,6 +292,7 @@ func _load(path: String = SAVE_PATH, legacy_path: String = LEGACY_SAVE_PATH) -> 
 	for key: String in settings:
 		settings[key] = config.get_value("settings", key, settings[key])
 	best_time = float(config.get_value(RECORD_NAMESPACE, "clean_best", -1.0))
+	open_best_time = float(config.get_value(RECORD_NAMESPACE, "open_best", best_time))
 	var saved: Array = config.get_value(RECORD_NAMESPACE, "clean_splits", [])
 	for value: Variant in saved:
 		best_splits.append(float(value))
@@ -298,6 +306,7 @@ func _save(path: String = SAVE_PATH) -> void:
 	for key: String in settings:
 		config.set_value("settings", key, settings[key])
 	config.set_value(RECORD_NAMESPACE, "clean_best", best_time)
+	config.set_value(RECORD_NAMESPACE, "open_best", open_best_time)
 	config.set_value(RECORD_NAMESPACE, "clean_splits", best_splits)
 	config.set_value(RECORD_NAMESPACE, "clean_segments", best_segments)
 	config.save(path)

@@ -74,9 +74,7 @@ func _process(delta: float) -> void:
 	status.modulate.a = _title_alpha
 	var move_label: String = {"slide": "  /  SLIDE", "surf": "  /  SURF"}.get(str(game.player.mode), "")
 	speed_label.text = "%d  km/h%s" % [roundi(speed * 3.6), move_label]
-	timing.text = "PRACTICE · R starts a clean run" if not game.clean_eligible else ("BEST  %s" % _time(game.best_time) if game.best_time > 0.0 else "")
-	if game.finish_kind == "exploration":
-		timing.text = "EXPLORATION · R starts a clean run"
+	timing.text = "PRACTICE · R starts a clean run" if not game.clean_eligible else ("OPEN LINE BEST  %s" % _time(game.open_best_time) if game.open_best_time > 0.0 else "")
 	_message_time = maxf(0.0, _message_time - delta)
 	message.modulate.a = minf(1.0, _message_time)
 	if not game.finished:
@@ -86,12 +84,20 @@ func notify(text: String) -> void:
 	message.text = text
 	_message_time = 3.0
 
-func show_finish(is_best: bool) -> void:
+func show_finish(is_best: bool, is_open_best: bool = false) -> void:
+	_message_time = 0.0
+	message.text = ""
 	var text := "WATER RUNNING.  %s" % _time(game.elapsed)
-	if game.finish_kind == "exploration":
-		text += "\nEXPLORATION FINISH · NOT RECORDED"
+	if not game.clean_eligible:
+		text += "\nPRACTICE FINISH · NOT RECORDED"
+	elif game.finish_kind == "exploration":
+		text += "\nOPEN LINE FINISH"
 	else:
-		text += "\nNEW CLEAN BEST" if is_best else ("\nPRACTICE FINISH" if not game.clean_eligible else "\nRUN COMPLETE")
+		text += "\nFULL COURSE COMPLETE"
+	if game.clean_eligible:
+		text += "\nNEW OPEN LINE BEST" if is_open_best else "\nOpen line best   %s" % _time(game.open_best_time)
+		if game.finish_kind == "clean":
+			text += "\nNEW FULL COURSE BEST" if is_best else "\nFull course best   %s" % _time(game.best_time)
 	var last: float = 0.0
 	for i: int in game.splits.size():
 		text += "\n%s   %s" % [["Crest", "Sluice yard", "Outflow"][mini(i, 2)], _time(game.splits[i] - last)]
@@ -103,7 +109,7 @@ func show_finish(is_best: bool) -> void:
 	for i: int in range(game.checkpoint_index + 1, points.size()):
 		text += "\nSkipped %s · %s" % [points[i].get("title", "a stage"), points[i].get("hint", "no split")]
 	if game.finish_kind == "exploration":
-		text += "\nUnrecorded: no best saved, no split for a skipped stage"
+		text += "\nOnly measured splits shown. Full course requires every stage."
 	text += "\n\nR to take another line · keep moving to explore"
 	finish_label.text = text
 
