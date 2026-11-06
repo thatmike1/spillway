@@ -77,12 +77,29 @@ func _process(delta: float) -> void:
 	timing.text = "PRACTICE · R starts a clean run" if not game.clean_eligible else ("OPEN LINE BEST  %s" % _time(game.open_best_time) if game.open_best_time > 0.0 else "")
 	_message_time = maxf(0.0, _message_time - delta)
 	message.modulate.a = minf(1.0, _message_time)
+	# p / first-clear guidance stays readable between notifications. a full-course best
+	# makes subsequent clean runs quiet; practice keeps the current stage's reminder.
+	if _message_time <= 0.0 and not game.finished and (game.best_time <= 0.0 or not game.clean_eligible):
+		message.text = _route_hint()
+		message.modulate.a = 0.8
 	if not game.finished:
 		finish_label.text = ""
 
+func _route_hint() -> String:
+	if game.player.in_water or (game.player.global_position.y < 3.2 and game.checkpoint_index == 0):
+		return "Use a recovery ramp to rejoin the service decks."
+	match int(game.checkpoint_index):
+		0:
+			# p / the crest's terrace begins around z -32; its onward route circles the basin.
+			return "Stairs on your left; chute and surf bank ahead." if game.player.global_position.z > -32.0 else "Keep to the upper decks round the basin for the sluice yard."
+		1:
+			return "Slide under the gate or go round it, then climb onto the roof."
+		_:
+			return "The wheel is below. Surf down, or follow the outer gantry."
+
 func notify(text: String) -> void:
 	message.text = text
-	_message_time = 3.0
+	_message_time = 0.0 if text.is_empty() else 3.0
 
 func show_finish(is_best: bool, is_open_best: bool = false) -> void:
 	_message_time = 0.0
@@ -135,7 +152,7 @@ func _make_pause() -> void:
 	identity.add_theme_font_size_override("font_size", 13)
 	column.add_child(identity)
 	var controls := Label.new()
-	controls.text = "Run first, then hold Space to hop; Ctrl / C to slide.\nAir: release W. Hold A/D + turn mouse the same way."
+	controls.text = "Run first, then hold Space to hop; Ctrl / C to slide.\nAir: release W. Hold A/D + turn mouse the same way.\nSurf: strafe into the slope and look along it."
 	controls.add_theme_font_size_override("font_size", 13)
 	column.add_child(controls)
 	for item: Array in [["Mouse sensitivity", "sensitivity", 0.3, 2.5, 0.05], ["Horizontal field of view", "fov", 75.0, 110.0, 1.0], ["Volume", "volume", 0.0, 1.0, 0.05]]:
