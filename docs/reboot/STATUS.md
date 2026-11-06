@@ -1,29 +1,13 @@
-# Spillway overnight continuation
+# Spillway R11 candidate, final verification underway
 
-**Keep working through at least 07:00 UTC / 08:00 Prague on 6 November.** Mike extended the minimum explicitly. The goal is active, no human approval is pending, and R10 remains the stable portable delivery in outer REPORT.md. The working build is r11-dev on feat/foldrunner-me-build, bead ccChat-general-rowb. All tuning and visual choices are P / game choices.
+R11 is exported from pushed runtime source52a66297, build spillway-2026.11.06-r11. R10 remains the prior stable checkpoint until the final report promotes R11. The disk-exhaustion interruption is resolved; no work is claimed during that gap and the deleted game directory has not been recreated.
 
-Pushed runtime changes through b1498743 include:
+Completed: ramp pier moved outside the recovery lane; batching preserves requested shadow settings; all source and packed suites pass audio18, motor103, flow94, access123 and boundaries92. Both portable archives pass CRC, pack/runtime hashes, architecture and licences. Separate isolated processes save/reload clean records/settings and preserve bests through practice. Five packed input routes pass. Native default Linux launch from a path containing spaces shows the correct r11 identity.
 
-- A physical guard around the finish machinery, plus matching collision for reachable roof vents and valve hardware.
-- Collision-resolved eye clearance during a late crouch. Native120Hz body positions are identical while inside-gate eye samples fall2→0.
-- Continuous water/wind loop joins and backward braking equal to releasing the controls, using the existing34m/s² brake.
-- Opus's working pump hall, bucketed wheel, rising sluice gate, water on arrival and concrete deck pours. Root inspected native fixed and bounded moving frames and checked the reset.
-- A visible maintenance screen and supported turn from the first terrace toward the yard. A fresh visual agent previously followed the tower-facing drop and reached an exploration finish while skipping two stages. New barrier/continuation regressions and canonical routes pass; independent discovery is being rechecked.
-- Exact-pack stress mode and isolated packed-resource preflight. The first screened development export omitted three resources and is retained as rejected. The corrected pack passes all17 active resource loads without loose-source fallback.
+Evidence is outside Git under checkpoints/spillway relative to the build root. Current logs: overnight/r11-final-source-check.log, overnight/r11-delivery-check.log, delivery-checks/r11-archive-audit.json and delivered-r11/identity/pause.png. Final archive manifests are in delivery/spillway-r11/BUILD.json. The runtime PCK SHA256 is187c472668e46f32f7dbdac59da04ccfad3bbf091bdba83d3979e7d19618e82a.
 
-Latest source acceptance: audio18, motor103, flow94, access108, boundaries92, all passing. Canonical input routes finish clean: safe48.300s, fast22.192s, recovery43.692s. The access count retires the old entry-ramp-to-apron hop because that opening is now physically screened and adds the replacement barrier/continuation cases. Other exploration finishes remain supported.
+Active: exact-pack41-case matrix in stress/r11-release (root exec session34172); complete native recovery, fast and safe movies in delivered-r11 (root exec session17444,24fps normal playback, three-second finish reaction). Original Opus consultation continues ramp native evidence and critical trail review, functions cell9. Its code changes are already reviewed and committed; no more source changes requested. Sol recovered the interrupted discovery report in interactive/sol-screened-play/REPORT.md: last attempt passed stages0/1/2 without respawns but no finish was recorded; one earlier attempt did respawn. The truncated last PNG is labelled unusable.
 
-A frozen ae0911d9 development pack repeats39/41 stress attempts from an empty external directory, preserving rail-hop seed4 and late-fast seed1 follower stalls. This proves the packed harness, not the current candidate. All attempts are archived with member hashes under outer checkpoints/spillway/overnight/packed-matrix-isolated. The initial non-isolated smoke is explicitly superseded for isolation claims.
+Next: inspect results and complete route movies, preserve all failures, then update REPORT.md, checkpoints/reboot.md, tracked RESULTS/STATUS, evidence index and decision trail. Push final docs and update bead ccChat-general-rowb. Do not rerun completed R10 work or present older movies as proof of R11. No new Opus consultation before08:32UTC after the07:31 pass.
 
-Active work at this checkpoint:
-
-- A fresh Sol visual discovery run against corrected frozen pack outer checkpoints/spillway/interactive/r11-screened/game.pck. It owns sol-screened-play; wait on original functions exec cell60, not task-status polling.
-- Sol basin recovery completed:19 paused native input batches, zero resets, practice finish. It found the ramp but had to steer around the support and jumped toward the wheel to trigger arrival. Root fixed the latter with matched native walking pairs, identical body positions and zero jumps. The Opus pass now examines actual ramp-width obstruction.
-- Both attempted current packed recovery recordings are incomplete and explicitly rejected as completion proof. Outer overnight/r11-packed-recovery/INCOMPLETE.md explains the interruption and resolution mismatch. Resume complete capture when the independent visual runs release the software renderer. The new capture-route wrapper holds three simulation seconds after the result.
-- Opus ramp-clearance implementation began about00:45UTC, original exec cell113. It owns spillway_course.gd and test_spillway_access.gd; root leaves those files alone until return.
-
-The next Opus consultation may start no earlier than01:47UTC /02:47Prague, after the current00:45UTC ramp-clearance pass. Use it on the most consequential actual result from these playthroughs or current rendered motion. Do not spend the remaining run merely documenting passing counts.
-
-Next: resolve fresh discovery/recovery findings, inspect the complete current recovery movie, then verify a coherent final candidate using isolated packed checks and representative full-route renders. Final packaging, report and trail review remain ahead, after the minimum run. The R10 packages and original R10 evidence remain intact.
-
-Storage is tight. Only own historical evidence was compressed or shared, with verified manifests. Earlier WAV paths resolve through adjacent.wav.gz files; old successful source traces and R8/R9 ZIPs have lossless archives/deltas. New R10/overnight proof is retained. Do not prune unrelated files. Human enjoyment, comfort, listening quality, physical controllers, native Windows and desktop GPU performance remain unverified.
+Native Windows, desktop GPU performance, physical controllers, listening quality and human enjoyment/comfort remain unverified. The08:00Prague minimum has passed; finish the actual delivery rather than ending on the clock.
