@@ -49,7 +49,7 @@ func prism(points: PackedVector3Array) -> StaticBody3D:
 	fixture.add_child(body)
 	return body
 
-func fresh(label: String, spawn: Vector3, floor_top: float = 0.0) -> void:
+func fresh(label: String, spawn: Vector3, floor_top: float = 0.0, settle_ticks: int = 10) -> void:
 	if drive != null:
 		drive.call("release_all")
 	if is_instance_valid(fixture):
@@ -67,7 +67,7 @@ func fresh(label: String, spawn: Vector3, floor_top: float = 0.0) -> void:
 	drive = DRIVER.new(self, player, trace)
 	drive.set("label", label)
 	drive.set("before_tick", _apply_water)
-	await drive.call("step", 10)
+	await drive.call("step", settle_ticks)
 
 func _apply_water() -> void:
 	# the same rule spillway_main applies to its level's water regions.
@@ -120,6 +120,8 @@ func _run() -> void:
 	await speed_cap()
 	await surf_ceiling_crease()
 	await collision_speed_cap()
+	await surf_sidewall_crease()
+	await downslope_collision_cap()
 	drive.call("release_all")
 	if trace != null:
 		trace.close()
@@ -144,7 +146,7 @@ func hop_gain() -> void:
 	while int(player.get("hop_count")) - hops_before < 5 and airborne_ticks + floor_ticks < 900:
 		var hops: int = int(player.get("hop_count")) - hops_before
 		side = 1 if hops % 2 == 0 else -1
-		# p / a human-paced 2.4 rad/s mouse turn, view lagging the velocity just enough.
+		# p / a 2.4 rad/s desired velocity turn; this state-aware helper is not a human recording.
 		await drive.call("strafe", side, 2.4, ["jump"])
 		if player.is_on_floor():
 			floor_ticks += 1
@@ -605,9 +607,14 @@ func surf_ceiling_crease() -> void:
 	var ceiling_ticks := 0
 	for i: int in 1300:
 		await drive.call("step", 1)
-		if player.is_on_ceiling():
+		var touching_ceiling := false
+		for k: int in player.get_slide_collision_count():
+			var contact := player.get_slide_collision(k)
+			for j: int in contact.get_collision_count():
+				touching_ceiling = touching_ceiling or contact.get_normal(j).y < -.7
+		if touching_ceiling:
 			ceiling_ticks += 1
-			if speed() < 1.0:
+			if absf(player.get_real_velocity().z) < 1.0:
 				stalled += 1
 	results["surf_ceiling_crease"] = {"ceiling_ticks": ceiling_ticks, "stalled_ticks": stalled,
 		"end_z": player.global_position.z, "keys": "fixed D, yaw zero"}
@@ -651,3 +658,80 @@ func collision_speed_cap() -> void:
 	# real velocity includes the engine's up-to-2mm contact recovery at120Hz.
 	check(peak_real <= 30.0 + player.safe_margin * 120.0 + .01,
 		"actual swept speed stays within the cap plus contact recovery: %.4f" % peak_real)
+
+## regression: a steep face beside a wall must not invent a walkable aggregate floor.
+func surf_sidewall_crease() -> void:
+	var run := 14.0 / tan(deg_to_rad(74.0))
+	var x := -run * .5
+	await fresh("input-earned surf beside a wall", Vector3(x, 9.025, 5), 0.0, 0)
+	prism(PackedVector3Array([Vector3(-run, 0, -10), Vector3(0, 14, -10), Vector3(0, 0, -10),
+		Vector3(-run, 0, -120), Vector3(0, 14, -120), Vector3(0, 0, -120)]))
+	box(Vector3(x, 4.5, -1.5), Vector3(3.8, 9, 15))
+	box(Vector3(x - .5, 15, -60), Vector3(.2, 30, 100))
+	await drive.call("step", 10)
+	drive.call("keys", ["move_forward"])
+	for i: int in 350:
+		if player.global_position.z <= -8.6:
+			break
+		await drive.call("step", 1)
+	drive.call("keys", ["move_forward", "jump"])
+	await drive.call("step", 1)
+	drive.call("keys", ["move_forward", "move_right"])
+	var stalls := 0
+	var crease_contacts := 0
+	for i: int in 180:
+		await drive.call("step", 1)
+		if absf(player.velocity.z) > 3.0 and absf(player.get_real_velocity().z) < .01:
+			stalls += 1
+		var ramp := false
+		var wall := false
+		for k: int in player.get_slide_collision_count():
+			var contact := player.get_slide_collision(k)
+			for j: int in contact.get_collision_count():
+				var normal := contact.get_normal(j)
+				ramp = ramp or normal.x < -.9
+				wall = wall or normal.x > .9
+		if ramp and wall:
+			crease_contacts += 1
+	drive.call("keys", ["move_right"])
+	var start_z := player.global_position.z
+	var stopped := 0
+	for i: int in 900:
+		await drive.call("step", 1)
+		if absf(player.get_real_velocity().z) < .01:
+			stopped += 1
+	results["sidewall_crease"] = {"crease_ticks": crease_contacts, "tangent_stalls": stalls,
+		"D_stopped_ticks": stopped, "D_travel_m": start_z - player.global_position.z}
+	check(crease_contacts > 10, "input actually reaches the wall/ramp crease: %d ticks" % crease_contacts)
+	check(stalls == 0 and stopped == 0 and player.global_position.z < start_z - 40,
+		"the clear tangent moves instead of reporting stationary speed: %d stalls, %d stopped ticks" % [stalls, stopped])
+
+## regression: a walkable downslope arrival must not bypass the swept-motion cap.
+func downslope_collision_cap() -> void:
+	await fresh("earned cap speed lands on a walkable downslope", Vector3(0, 30.025, -100), 0.0, 0)
+	box(Vector3(0, 15, -100), Vector3(40, 30, 40))
+	var run := 30.0 / tan(deg_to_rad(10.0))
+	prism(PackedVector3Array([Vector3(-20, 30, -120), Vector3(20, 30, -120), Vector3(-20, 0, -120 - run),
+		Vector3(20, 0, -120 - run), Vector3(-20, 0, -120), Vector3(20, 0, -120)]))
+	await drive.call("step", 10)
+	drive.call("turn", -atan2(27.421, 12.168))
+	await run_up(60)
+	drive.call("keys", ["move_forward", "jump"])
+	await drive.call("step", 1)
+	for i: int in 2400:
+		await drive.call("strafe", 1, -1.0, ["jump"])
+	var earned := speed()
+	drive.call("keys", ["jump"])
+	var peak_real := 0.0
+	var peak_authoritative := 0.0
+	var jumps_before: int = player.get("jump_count")
+	for i: int in 750:
+		await drive.call("step", 1)
+		peak_authoritative = maxf(peak_authoritative, speed())
+		var real := player.get_real_velocity()
+		peak_real = maxf(peak_real, Vector2(real.x, real.z).length())
+	results["downslope_cap"] = {"earned": earned, "peak_sweep": peak_real,
+		"peak_velocity": peak_authoritative, "rehops": int(player.get("jump_count")) - jumps_before}
+	check(earned > 29.99 and int(player.get("jump_count")) > jumps_before, "input earns30m/s and held jump keeps rehopping on the downslope")
+	check(peak_authoritative <= 30.001 and peak_real <= 30.0 + player.safe_margin * 120.0 + .01,
+		"walkable landings keep the authoritative and swept cap: %.4f / %.4f" % [peak_authoritative, peak_real])

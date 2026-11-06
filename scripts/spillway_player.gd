@@ -71,6 +71,8 @@ var _mantle_lift: Vector3
 var _mantle_wall_normal: Vector3
 var _mantle_carry: Vector3
 var _mantle_time: float = 0.0
+var _contacts_valid: bool = false
+var _ground_normal := Vector3.ZERO
 var _eye_probe := SphereShape3D.new()
 var _eye_query := PhysicsShapeQueryParameters3D.new()
 
@@ -118,6 +120,8 @@ func reset_to(pose: Transform3D) -> void:
 	_buffer = 0.0
 	_dip = 0.0
 	surf_normal = Vector3.ZERO
+	_contacts_valid = false
+	_ground_normal = Vector3.ZERO
 	_eye_height = 1.63
 	_gait_phase = 0.0
 	_gait_blend = 0.0
@@ -133,6 +137,9 @@ func reset_to(pose: Transform3D) -> void:
 
 func get_speed() -> float:
 	return Vector2(velocity.x, velocity.z).length()
+
+func is_grounded() -> bool:
+	return _ground_normal != Vector3.ZERO
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not input_enabled:
@@ -167,7 +174,8 @@ func _physics_process(delta: float) -> void:
 		_step_mantle(delta, jump_held)
 		_current_position = global_position
 		return
-	var grounded := is_on_floor()
+	var ground_normal := _ground_normal
+	var grounded := ground_normal != Vector3.ZERO
 	if grounded:
 		_coyote = COYOTE
 	else:
@@ -188,8 +196,8 @@ func _physics_process(delta: float) -> void:
 	# friction runs, so a hop on the landing tick keeps all of its speed.
 	var held_hop := autohop and jump_held and grounded
 	var hop := _coyote > 0.0 and (_buffer > 0.0 or held_hop)
-	var downslope := Vector3.DOWN.slide(get_floor_normal()) * GRAVITY if grounded else Vector3.ZERO
-	var downhill := downslope.dot(horizontal) > 0.2 and get_floor_normal().y < 0.985 if grounded else false
+	var downslope := Vector3.DOWN.slide(ground_normal) * GRAVITY if grounded else Vector3.ZERO
+	var downhill := downslope.dot(horizontal) > 0.2 and ground_normal.y < 0.985 if grounded else false
 	# p / hysteresis keeps ordinary crouch walking out of slide ownership.
 	var slide_threshold := 3.0 if previous_mode == "slide" or downhill else 6.0
 	var sliding := grounded and not hop and crouched and horizontal.length() >= slide_threshold
@@ -206,7 +214,7 @@ func _physics_process(delta: float) -> void:
 			var carried_in := horizontal.length()
 			horizontal += Vector3(downslope.x, 0.0, downslope.z) * delta
 			horizontal = horizontal.limit_length(maxf(SLIDE_CAP, carried_in))
-			var friction := 0.85 if get_floor_normal().y < 0.985 else 2.0
+			var friction := 0.85 if ground_normal.y < 0.985 else 2.0
 			friction += maxf(0.0, stick.y) * 12.0
 			if in_water:
 				friction += SLIDE_WATER_DRAG
@@ -249,20 +257,26 @@ func _physics_process(delta: float) -> void:
 	var before_move := velocity
 	# airborne contacts slide along the surface; on the ground steep faces stay walls.
 	floor_block_on_wall = grounded
+	# a surf crease can give the engine an aggregate "floor" without a walkable face.
+	# floating contact avoids that ground-only recovery path until real floor returns.
+	motion_mode = MOTION_MODE_FLOATING if not grounded and (surf_normal != Vector3.ZERO or is_on_floor()) else MOTION_MODE_GROUNDED
 	move_and_slide()
+	_contacts_valid = true
+	_ground_normal = _walkable_contact()
 	_clip_air_contacts(before_move)
+	var landed_on_floor := is_grounded()
 	# p / contact can turn falling energy into horizontal speed; cap the whole vector
 	# after clipping so its direction stays feasible against every touched plane.
 	var resolved_speed := get_speed()
 	if resolved_speed > MAX_SPEED:
 		velocity *= MAX_SPEED / resolved_speed
-	if not grounded and is_on_floor() and impact > 2.0:
+	if not grounded and landed_on_floor and impact > 2.0:
 		last_impact = impact
 		land_count += 1
 		_dip = minf(0.09, 0.018 + impact * 0.004)
 		landed.emit(impact)
 		# landings keep the horizontal velocity returned by collision.
-	if is_on_floor() and not sliding:
+	if landed_on_floor and not sliding:
 		var travelled := Vector2(global_position.x - _last_position.x, global_position.z - _last_position.z).length()
 		var step_length := 1.35 if crouched else (1.7 if in_water else 2.25)
 		_distance += travelled
@@ -289,7 +303,7 @@ func _clip_air_contacts(before: Vector3) -> void:
 	# surf: faces between the floor limit and SURF_MAX are slid on, never stood on. the
 	# velocity loses only its component into each touched face, so gravity runs along it.
 	surf_normal = Vector3.ZERO
-	if is_on_floor():
+	if is_grounded():
 		return
 	var planes: Array[Vector3] = []
 	for i: int in get_slide_collision_count():
@@ -301,18 +315,20 @@ func _clip_air_contacts(before: Vector3) -> void:
 		surf_ticks += 1
 		mode = "surf"
 
-func _contact_planes(contact: KinematicCollision3D, planes: Array[Vector3], mark_surf: bool) -> void:
+func _contact_planes(contact: KinematicCollision3D, planes: Array[Vector3], mark_surf: bool, include_floor: bool = false) -> void:
 	for j: int in contact.get_collision_count():
 		var normal := contact.get_normal(j)
-		if normal.y >= cos(floor_max_angle):
-			continue
-		# classify the actual face, including secondary contacts in a ceiling crease.
+		# classify actual faces, including floor arrivals and secondary crease contacts.
 		var face := _face_normal(contact.get_position(j), normal)
+		if normal.y >= cos(floor_max_angle) and not include_floor:
+			continue
 		var plane := face
 		if face.y > cos(deg_to_rad(SURF_MAX_DEGREES)) and face.y < cos(floor_max_angle):
 			if mark_surf:
 				surf_normal = face
-		elif face.y >= cos(floor_max_angle) or face == Vector3.ZERO:
+		elif face.y >= cos(floor_max_angle):
+			plane = face if include_floor else Vector3(normal.x, 0.0, normal.z).normalized()
+		elif face == Vector3.ZERO:
 			plane = Vector3(normal.x, 0.0, normal.z).normalized()
 		if plane.length_squared() > .5:
 			var duplicate := false
@@ -320,6 +336,23 @@ func _contact_planes(contact: KinematicCollision3D, planes: Array[Vector3], mark
 				duplicate = duplicate or existing.dot(plane) > .9999
 			if not duplicate:
 				planes.append(plane)
+
+func _walkable_contact() -> Vector3:
+	# p / only a real walkable face owns ground movement, never an averaged crease normal.
+	if not _contacts_valid:
+		return Vector3.ZERO
+	for i: int in get_slide_collision_count():
+		var contact := get_slide_collision(i)
+		for j: int in contact.get_collision_count():
+			var face := _face_normal(contact.get_position(j), contact.get_normal(j))
+			if face.y >= cos(floor_max_angle):
+				return face
+	# snapping can supply floor support without adding a slide collision.
+	if is_on_floor():
+		var support := _ray(global_position + Vector3.UP * .05, global_position - Vector3.UP * (floor_snap_length + .15))
+		if not support.is_empty() and (support.normal as Vector3).y >= cos(floor_max_angle):
+			return support.normal
+	return Vector3.ZERO
 
 func _limit_collision_speed(delta: float) -> void:
 	# p / a hard fall can exceed the horizontal cap during the engine's swept motion,
@@ -331,7 +364,7 @@ func _limit_collision_speed(delta: float) -> void:
 	if not test_move(global_transform, velocity * delta, hit, safe_margin, false, 8):
 		return
 	var planes: Array[Vector3] = []
-	_contact_planes(hit, planes, false)
+	_contact_planes(hit, planes, false, true)
 	if planes.is_empty():
 		return
 	var resolved := _feasible_velocity(velocity, planes)
@@ -399,10 +432,14 @@ func _try_mantle(wish: Vector3) -> bool:
 		return false
 	var forward := wish.normalized()
 	var wall := _ray(global_position + Vector3.UP * 0.55, global_position + Vector3.UP * 0.55 + forward * 0.8)
+	# p / a near-miss can already be resting on the capsule's curved foot at a low lip.
+	# check below the usual chest ray too, so a fresh held press can still recover it.
+	if wall.is_empty():
+		wall = _ray(global_position + Vector3.UP * 0.12, global_position + Vector3.UP * 0.12 + forward * 0.8)
 	if wall.is_empty() or absf((wall.normal as Vector3).y) > 0.25:
 		return false
 	var beyond := global_position + forward * 0.85
-	var top := _ray(beyond + Vector3.UP * 1.65, beyond + Vector3.UP * 0.25)
+	var top := _ray(beyond + Vector3.UP * 1.65, beyond + Vector3.UP * 0.05)
 	if top.is_empty() or (top.normal as Vector3).y < 0.9:
 		return false
 	var goal: Vector3 = top.position + Vector3.UP * 0.025
@@ -463,7 +500,7 @@ func _update_eye(delta: float) -> void:
 	_dip = move_toward(_dip, 0.0, 0.28 * delta)
 	var fraction := clampf(Engine.get_physics_interpolation_fraction(), 0.0, 1.0)
 	var feet := _previous_position.lerp(_current_position, fraction)
-	var gait_target := 1.0 if is_on_floor() and mode != "slide" and get_speed() > 0.8 and not comfort else 0.0
+	var gait_target := 1.0 if is_grounded() and mode != "slide" and get_speed() > 0.8 and not comfort else 0.0
 	_gait_blend = move_toward(_gait_blend, gait_target, delta * 7.0)
 	var bob := sin(_gait_phase) * 0.008 * _gait_blend * minf(get_speed() / RUN_SPEED, 1.0)
 	var eye_offset := _eye_height + bob - _dip * (0.4 if comfort else 1.0)

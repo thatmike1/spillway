@@ -560,7 +560,8 @@ func mantles() -> void:
 		var tangent_before: float = player.velocity.x
 		action("jump", false)
 		await ticks(2)
-		check(tangent_before > 1.0 and player.velocity.x > tangent_before * 0.8 and player.velocity.y < 0.0,
+		# r12 catches a tick earlier; require measurable carry and retain at least95%, not an arbitrary1m/s entry.
+		check(tangent_before > 0.5 and player.velocity.x > tangent_before * 0.95 and player.velocity.y < 0.0,
 			"release keeps lateral carry while resuming the fall: %.3f to %s" % [tangent_before, player.velocity])
 	await mantle_fixture("grounded movement never catches")
 	await approach_mantle(false)

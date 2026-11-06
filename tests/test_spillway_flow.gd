@@ -234,7 +234,9 @@ func deck_admission() -> void:
 	for tick: int in 90:
 		await ticks(1)
 		for i: int in game.get("player").get_slide_collision_count():
-			wall_contact = wall_contact or game.get("player").get_slide_collision(i).get_normal().z > .9
+			var contact: KinematicCollision3D = game.get("player").get_slide_collision(i)
+			for j: int in contact.get_collision_count():
+				wall_contact = wall_contact or contact.get_normal(j).z > .9
 	action("move_forward", false)
 	check(wall_contact and int(game.get("checkpoint_index")) == 0, "running into a tagged yard wall cannot admit the yard")
 	await restart("airborne above a tagged deck")
@@ -248,7 +250,9 @@ func deck_admission() -> void:
 	await ticks(120)
 	check(int(game.get("checkpoint_index")) == 1 and game.get("splits").size() == 1, "landing on the yard deck admits the yard with one split")
 	await visit(Vector3(-40, 100.45, -30), 9.0)
-	check(int(game.get("checkpoint_index")) == 2 and game.get("splits").size() == 2, "standing on the outflow deck after the yard admits Outflow")
+	# reset discards old floor contacts; this 5cm gap must genuinely land before admission.
+	await ticks(12)
+	check(game.get("player").is_grounded() and int(game.get("checkpoint_index")) == 2 and game.get("splits").size() == 2, "standing on the outflow deck after the yard admits Outflow")
 	await visit(game.get("level").get("finish_position"), 20.0)
 	check(bool(game.get("finished")) and str(game.get("finish_kind")) == "clean" and game.get("splits").size() == 3, "deck-ordered run finishes as a full ordered result")
 	# the record cases below start from no records, as the profile setup does.

@@ -169,28 +169,29 @@ func _physics_process(delta: float) -> void:
 
 func _stands_on_stage(stage: int) -> bool:
 	# p / progress follows decks the runner actually stands on, never side-wall contact.
-	if not player.is_on_floor():
+	if not player.is_grounded():
 		return false
 	var feet: Vector3 = player.global_position
 	for i: int in player.get_slide_collision_count():
 		var contact: KinematicCollision3D = player.get_slide_collision(i)
-		if contact.get_normal().y < cos(player.floor_max_angle) - 0.01:
-			continue
-		# contacts left over from before a reset or respawn are not under the feet.
-		var point: Vector3 = contact.get_position()
-		if absf(point.y - feet.y) > 0.3 or Vector2(point.x - feet.x, point.z - feet.z).length() > 0.8:
-			continue
-		var body := contact.get_collider() as Node
-		if body == null or int(body.get_meta("progress_stage", -1)) != stage:
-			continue
-		# where a later deck overlaps an earlier one (the run-up wedge pokes up to ~0.3 m
-		# through the guarded apron corner), the runner is still standing in the earlier stage.
-		var query := PhysicsRayQueryParameters3D.create(point + Vector3.UP * 0.05, point + Vector3.DOWN * 0.6)
-		query.exclude = [contact.get_collider_rid()]
-		var under: Dictionary = player.get_world_3d().direct_space_state.intersect_ray(query)
-		var under_stage: int = int((under.collider as Node).get_meta("progress_stage", -1)) if not under.is_empty() and under.collider is Node else -1
-		if under_stage < 0 or under_stage >= stage:
-			return true
+		for j: int in contact.get_collision_count():
+			if contact.get_normal(j).y < cos(player.floor_max_angle) - 0.01:
+				continue
+			# contacts left over from before a reset or respawn are not under the feet.
+			var point: Vector3 = contact.get_position(j)
+			if absf(point.y - feet.y) > 0.3 or Vector2(point.x - feet.x, point.z - feet.z).length() > 0.8:
+				continue
+			var body := contact.get_collider(j) as Node
+			if body == null or int(body.get_meta("progress_stage", -1)) != stage:
+				continue
+			# where a later deck overlaps an earlier one (the run-up wedge pokes up to ~0.3 m
+			# through the guarded apron corner), the runner is still standing in the earlier stage.
+			var query := PhysicsRayQueryParameters3D.create(point + Vector3.UP * 0.05, point + Vector3.DOWN * 0.6)
+			query.exclude = [contact.get_collider_rid(j)]
+			var under: Dictionary = player.get_world_3d().direct_space_state.intersect_ray(query)
+			var under_stage: int = int((under.collider as Node).get_meta("progress_stage", -1)) if not under.is_empty() and under.collider is Node else -1
+			if under_stage < 0 or under_stage >= stage:
+				return true
 	return false
 
 func _finish(ordered: bool) -> void:
