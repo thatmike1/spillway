@@ -11,3 +11,5 @@ Fresh view-only discovery found a practice finish after 72 decisions, three F us
 Final Opus 5.5 review in outer `closure-review/REVIEW.md` found no material runtime blocker. Root resolved its wording/provenance corrections in ROOT-RESPONSE.md and retained the minor adjacent jump-event quirk. No implementation or review delegate remains active. Work continued beyond the 18:00 Prague minimum on 6 November. All new choices are P / game choices. Native Windows play, physical controllers, desktop GPU pacing, listening quality and enjoyment remain unverified.
 
 The append-only trail is `docs/reboot/decisions.tsv`; current task state is bead `ccChat-general-rowb`. No old R11 or rejected evidence was overwritten. The deleted original game remains deleted.
+
+Tracker note: the delivery was recorded and synced on the bead. A normal close was refused because its retained assignee is `agent:claude` and this actor is `agent:codex`. Ownership was preserved and no forced close was used; the open tracker state does not mean a missing game deliverable.
