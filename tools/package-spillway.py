@@ -88,6 +88,8 @@ def main():
         pack = stage / 'spillway.pck'
         log = run([engine, '--headless', '--path', PROJECT, '--export-pack', 'Spillway Pack', pack])
         (output / 'export-log.txt').write_text(log)
+        preflight = run(['bash', PROJECT / 'tools/check-pack.sh', pack], cwd=stage)
+        (output / 'packed-resources.txt').write_text(preflight)
         startup = run([engine, '--headless', '--main-pack', pack, '--', '--verify-startup'], cwd=stage)
         (output / 'packed-startup.txt').write_text(startup)
         if 'startup: Spillway; build=' + identity not in startup:
