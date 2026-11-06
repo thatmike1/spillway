@@ -261,9 +261,11 @@ func deck_progress() -> void:
 	# run-up leaves the roof). replacement: a hop over the notch rail meets the berm or the
 	# basin below, never the run-up, and claims nothing; the ordered surf finish is covered by
 	# tests/test_surf_course.gd from the normal spawn.
-	await fixture("notch rail hop into the outflow basin", Vector3(-14, 1.55, -88))
+	# r12 / the yard bank is solid on the apron from 28 degrees, so the old start under its
+	# slab is now inside the bank; the hop starts on the notch apron that remains.
+	await fixture("notch rail hop into the outflow basin", Vector3(-11.6, 1.55, -89.2))
 	var jumps: int = player.get("jump_count")
-	await hop(Vector3(-14, 1.55, -88), Vector3(-14, 1.5, -102), 2, -90.4, -1)
+	await hop(Vector3(-11.6, 1.55, -89.2), Vector3(-11.6, 1.5, -102), 2, -90.4, -1)
 	await ticks(120)
 	check(floor_name() != "OutflowRunup" and int(game.get("checkpoint_index")) == 1 and int(game.get("respawn_count")) == 0,
 		"one jump over the notch rail stays in Yard and needs no reset: %s on %s" % [player.global_position, floor_name()])
@@ -281,7 +283,13 @@ func deck_progress() -> void:
 	# the last hop left the runner in the basin; the wheel still runs, unrecorded.
 	var best: float = game.get("best_time")
 	var best_splits: Array = game.get("best_splits").duplicate()
-	for target: Vector3 in [Vector3(-10, -6, -80), Vector3(-10, -3, -63.5), Vector3(15, -3, -65), Vector3(23.8, -3, -68.8)]:
+	# r12 / the hop now clears the yard bank's toe shelf and lands east of the exit ramp, so
+	# the walk passes south of the ramp's rail foot and the shelf pier before turning in.
+	# the front walk's service joint (x 1.2..2.8) then takes its one ordinary hop.
+	for target: Vector3 in [Vector3(-6, -6, -83), Vector3(-10, -6, -81), Vector3(-10, -3, -63.5), Vector3(-.5, -3, -64.7)]:
+		await walk(target, 900)
+	await hop(Vector3(-.5, -3, -64.7), Vector3(15, -3, -65), 0, .6, 1.0)
+	for target: Vector3 in [Vector3(15, -3, -65), Vector3(23.8, -3, -68.8)]:
 		if bool(game.get("finished")):
 			break
 		await walk(target, 900)
@@ -290,7 +298,9 @@ func deck_progress() -> void:
 		"physical arrival after skipping Outflow starts the wheel as an exploration finish")
 	check(float(game.get("best_time")) == best and game.get("best_splits") == best_splits and game.get("splits").size() == 1,
 		"the exploration finish keeps the earlier best and records only the measured Crest split")
-	check("EXPLORATION FINISH" in text and "Skipped Outflow" in text and not "CLEAN BEST" in text, "the result names the skipped Outflow and is not a record")
+	# r12 / a clean skip is labelled OPEN LINE FINISH; ordered bests stay as checked above.
+	check("OPEN LINE FINISH" in text and not "EXPLORATION FINISH" in text and "Skipped Outflow" in text and not "CLEAN BEST" in text,
+		"the result names the skipped Outflow and is not an ordered record")
 	action("restart", true)
 	await ticks(2)
 	action("restart", false)

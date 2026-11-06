@@ -14,6 +14,11 @@ const TIME_LIMIT := 45.0
 const CREST_TO_YARD: Array[Vector3] = [Vector3(11, 4, -40), Vector3(10, 4, -47), Vector3(10, 4, -57), Vector3(10, 4, -66)]
 # p / aim along the hall toward its wheel, so arrival footage shows the actual finish.
 const FINISH_AIM := Vector3(24, -3, -68.8)
+# p / riding lane on the outflow faces, in metres below the local coping.
+const OUTFLOW_LANE := 2.0
+# p / a hop rises for 0.36 s; one taken with less than this much time of deck left reaches
+# the berm before its apex has passed.
+const OUTFLOW_SLIDE_WINDOW := 0.45
 
 var main: Node
 var player: CharacterBody3D
@@ -180,7 +185,16 @@ func _drive() -> void:
 			if absf(angle_difference(_velocity_yaw(), _runup_yaw())) < .12:
 				phase = "outflow_seek"
 		"outflow_seek":
-			_strafe_toward(_outflow_entry(), 4.0, ["jump"])
+			# p / meet the berm falling. a takeoff near the run-up's end reaches the face still
+			# rising and climbs over its coping, so inside that window release jump and slide
+			# off the end instead: a slide keeps its carried speed.
+			if _runup_slide():
+				if player.is_grounded():
+					_keys(["crouch"])
+				else:
+					_strafe_toward(_outflow_entry(), 4.0, ["crouch"])
+			else:
+				_strafe_toward(_outflow_entry(), 4.0, ["jump"])
 			for label: String in ["OutflowLead", "OutflowSweep"]:
 				if phase == "outflow_seek" and _on_section(label):
 					_enter(section_named(label))
@@ -266,28 +280,56 @@ func _ride_tick(section: Dictionary, theta: float) -> void:
 		"YardSurf":
 			target_y = lerpf(_entry_y, 4.0, clampf((theta - _entry_theta) / maxf(section.arc - _entry_theta, .01), 0, 1))
 		_:
-			# p / outflow keeps a 1.8 m lane under its coping, so the line tracks the profile.
-			target_y = _top_y(section, theta) - 1.8 * tan(deg_to_rad(60.0))
+			# p / outflow keeps a lane 2 m under its descending coping, so the line tracks the profile.
+			target_y = _top_y(section, theta) - OUTFLOW_LANE
 	var side := int(section.get("side", 1.0))
+	if int(section.bend) != side and player.global_position.y > target_y and player.velocity.y > 0.0:
+		# p / rising above the lane on a berm: stop pressing into it, so the climb dies out
+		# below the coping instead of carrying over it.
+		_keys([])
+		_face(GEOMETRY.tangent_yaw(section, theta))
+		return
 	if player.get("surf_normal") == Vector3.ZERO and int(section.bend) == side and player.global_position.y > target_y:
 		# p / airborne over a curve that bends toward its face: strafe-turn with the curve
 		# (A with the mouse left here) and let gravity put the runner back on the face.
 		_strafe(side, 1.5 * float(player.call("get_speed")) / section.radius)
 		return
-	_surf(side, GEOMETRY.tangent_yaw(section, theta), target_y)
+	var along := GEOMETRY.tangent_yaw(section, theta)
+	if int(section.bend) == side and str(section.name).begins_with("Outflow"):
+		# p / on the S's inside face, look along the actual velocity rather than the plan
+		# tangent: a velocity already turned into the face leaves the tangent-relative strafe
+		# almost no room to add turn, and the runner skips along the face.
+		along = _velocity_yaw()
+	_surf(side, along, target_y)
 
 static func _top_y(section: Dictionary, theta: float) -> float:
-	var t := clampf(theta / section.arc, 0, 1)
-	return section.origin.y + lerpf(section.height, section.height_end, t) + lerpf(section.drop_start, section.drop_end, t)
+	var at := clampf(theta, 0, section.arc)
+	return section.origin.y + GEOMETRY.coping_height(section, at) + GEOMETRY.drop_at(section, at)
 
 func _runup_yaw() -> float:
 	var course := preload("res://scripts/spillway_course.gd")
 	return _yaw_toward(course.OUTFLOW_RUNUP_END - course.OUTFLOW_RUNUP_START)
 
 func _outflow_entry() -> Vector3:
-	# p / steer into the banked wall: a point 1.2 m under the coping, 14 degrees into the bank.
+	# p / steer into the banked wall: a point on the riding lane, 10 degrees into the berm.
 	var sweep := section_named("OutflowSweep")
-	return GEOMETRY.point(sweep, deg_to_rad(6.0), sweep.radius - 0.7, sweep.height - 1.2)
+	var theta := deg_to_rad(10.0)
+	return GEOMETRY.point(sweep, theta, sweep.radius - OUTFLOW_LANE / tan(deg_to_rad(60.0)), GEOMETRY.coping_height(sweep, theta) - OUTFLOW_LANE)
+
+## true when the next takeoff (now if grounded, else the coming landing) is too close to the
+## run-up's end: a hop from there would meet the berm on the rise.
+func _runup_slide() -> bool:
+	var course := preload("res://scripts/spillway_course.gd")
+	var heading: Vector3 = (course.OUTFLOW_RUNUP_END - course.OUTFLOW_RUNUP_START).normalized()
+	var p := player.global_position
+	var takeoff := p
+	if not player.is_grounded():
+		var gravity := float((player.get_script() as GDScript).get_script_constant_map().get("GRAVITY", 20.0))
+		var vy := player.velocity.y
+		var fall := (vy + sqrt(vy * vy + 2.0 * gravity * maxf(p.y - course.OUTFLOW_RUNUP_END.y, 0.0))) / gravity
+		takeoff += Vector3(player.velocity.x, 0, player.velocity.z) * fall
+	var remaining: float = (course.OUTFLOW_RUNUP_END - takeoff).dot(heading)
+	return remaining < float(player.call("get_speed")) * OUTFLOW_SLIDE_WINDOW
 
 func _on_section(label: String) -> bool:
 	for i: int in player.get_slide_collision_count():

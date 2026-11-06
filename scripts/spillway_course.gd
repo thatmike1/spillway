@@ -5,6 +5,9 @@ extends RefCounted
 # p / the run-up's end is the outflow face's start plane; both derive from these points.
 const OUTFLOW_RUNUP_START := Vector3(-22, 3, -102.8)
 const OUTFLOW_RUNUP_END := Vector3(-13, 3, -97.3)
+# p / r12: the outflow S ends with its coping this high, still descending, so even a runner
+# riding the coping passes under the yard bank's edge and the yard crossing.
+const OUTFLOW_RELEASE_COPING := 1.0
 
 var _level: Node3D
 
@@ -141,11 +144,15 @@ func _make_yard() -> void:
 		_level.call("_rail", Vector3(span.x, 4, -77.4), Vector3(span.y, 4, -77.4))
 	# two gate machinery rooms leave a direct low opening and wide side approaches.
 	for x: float in [-36.5, -18.5]:
-		_level.call("_solid", "SluiceGateMachinery", Vector3(x, 3.1, -82), Vector3(7, 3.2, 5.5), "terracotta")
-		_stage(_level.call("_slab", "GateMachineryCap", Vector3(x, 4.9, -82), Vector2(7.0, 5.5) if x == -18.5 else Vector2(7.6, 6.1), .2, "concrete"), 1)
+		# p / the east room stops at x -17.5: the yard bank's low face passes clear of it onto the
+		# apron instead of running into its wall. its valve stays on the gate axis.
+		var room_x: float = -19.75 if x == -18.5 else x
+		var room_width: float = 4.5 if x == -18.5 else 7.0
+		_level.call("_solid", "SluiceGateMachinery", Vector3(room_x, 3.1, -82), Vector3(room_width, 3.2, 5.5), "terracotta")
+		_stage(_level.call("_slab", "GateMachineryCap", Vector3(room_x, 4.9, -82), Vector2(4.7, 5.5) if x == -18.5 else Vector2(7.6, 6.1), .2, "concrete"), 1)
 		_level.call("_cylinder", Vector3(x, 4.9, -82), Vector3(x, 5.9, -82), .16, "steel", true)
 		_level.call("_wheel", Vector3(x, 5.9, -82), .75, "ochre", true)
-		_level.call("_box", Vector3(x, 3.2, -79.21), Vector3(3, 1.4, .08), "shadow")
+		_level.call("_box", Vector3(room_x, 3.2, -79.21), Vector3(3, 1.4, .08), "shadow")
 	# floor 1.5, underside 2.77: 1.27 m permits crouching but denies standing.
 	_level.call("_solid", "HalfOpenSluiceGate", Vector3(-27.5, 4.17, -82), Vector3(11, 2.8, 1.1), "steel")
 	_level.call("_box", Vector3(-27.5, 2.82, -81.42), Vector3(11, .1, .12), "ochre")
@@ -163,7 +170,13 @@ func _make_yard() -> void:
 	_level.call("_rail", Vector3(-19, 1.5, -96.9), Vector3(-19, 1.5, -99))
 	_level.call("_rail", Vector3(-17.1, 1.5, -96.9), Vector3(-17.1, 1.5, -90.9))
 	_level.call("_rail", Vector3(-17.1, 1.5, -90.9), Vector3(-11.1, 1.5, -90.9))
-	_level.call("_rail", Vector3(-11.1, 1.5, -78), Vector3(-11.1, 1.5, -90.9))
+	# p / the yard bank's foot meets a narrow toe shelf at apron level, so a rider who slips
+	# low on the bank rolls off onto the apron instead of into its edge. the apron's east rail
+	# starts where the bank face covers that edge.
+	_stage(_level.call("_slab", "YardBankToe", Vector3(-9.1, 1.5, -80.3), Vector2(3.8, 4.6), .55, "concrete"), 1)
+	# its pier stands under the shelf's east edge, outside the basin exit's walking lanes.
+	_level.call("_solid", "YardBankToePier", Vector3(-7.45, -2.5, -81.2), Vector3(.5, 6.9, .7), "old_concrete")
+	_level.call("_rail", Vector3(-11.1, 1.5, -82.7), Vector3(-11.1, 1.5, -90.9))
 	_level.call("_rail", Vector3(-40, 1.5, -72), Vector3(-40, 1.5, -85))
 	# visible water works continue under the apron, with foundation-depth openings.
 	for x: float in [-36.5, -18.5]:
@@ -179,7 +192,9 @@ func _make_filter_house() -> void:
 		_level.call("_solid", "FilterRoofCorbel", Vector3(x, -1.6, -105), Vector3(1.2, 8.8, 4), "old_concrete")
 	# both access ramps avoid mantle; the direct gate line enters the inner ramp.
 	_stage(_walk("WestRoofAccess", Vector3(-37, 1.5, -87), Vector3(-37, 3, -99), 5.0, false), 1)
-	_stage(_walk("InnerRoofAccess", Vector3(-27, 1.5, -90), Vector3(-27, 3, -99), 5.0, false), 1)
+	# p / the inner ramp's east edge runs under the yard bank's foot, so a low rider meets a
+	# crease onto the ramp rather than a curb.
+	_stage(_walk("InnerRoofAccess", Vector3(-25.95, 1.5, -90), Vector3(-25.95, 3, -99), 7.1, false), 1)
 	for x: float in [-33, -29, -25]:
 		_level.call("_box", Vector3(x, 1.1, -98.95), Vector3(2.2, 1.7, .1), "shadow")
 	# this inspection apron presents a 1.5 m roof lip beside the low housing.
@@ -227,40 +242,74 @@ func _make_surf_faces() -> void:
 	var sections: Array = _level.get("surf_sections")
 	var geometry := preload("res://scripts/spillway_surf_geometry.gd")
 	# p / banked sluice aprons follow the dam's plan rather than freestanding trick ramps.
-	# the yard bank's first 12 degrees were never ridden (the line meets it near 15); they
-	# are left out so the outflow sweep has 2 m of headroom under the bank's low edge.
+	# p / the yard bank starts 8 degrees into its plan. a 4 degree lead with a knife-edge slab
+	# catches an early hop on the face instead of its end, and still leaves the outflow release
+	# 1.1 m of headroom (the original first 12 degrees were cut for that release). its foot is
+	# at apron height, so a low rider rolls onto the toe shelf or apron, and over the apron
+	# (from 24 degrees) it is a solid bank with no crawlspace beneath.
 	var yard_plan := {"origin": Vector3(6, -2.5, -83), "yaw": PI * .5, "bend": 1.0, "radius": 30.0,
 		"arc": deg_to_rad(60.0), "drop_start": 0.0, "drop_end": 0.0}
-	var yard_start := deg_to_rad(12.0)
+	var yard_start := deg_to_rad(8.0)
 	sections.append(geometry.build(_level, "YardSurf", geometry.point(yard_plan, yard_start, 30.0),
-		geometry.tangent_yaw(yard_plan, yard_start), 1, 30, 48, 14, 0, 1))
-	_stage(_walk("YardSurfEntry", Vector3(10, 4, -71), Vector3(5, 4, -78.2), 4.0, false), 1)
+		geometry.tangent_yaw(yard_plan, yard_start), 1, 30, 52, 14, 0, 1, -1, 1, 4.0, 6.0, 28.0))
+	# r12 / the YardSurfEntry jetty that ran from the crossing out over the outflow release is
+	# gone: every measured yard takeoff already leaves from the crossing deck itself. its
+	# north edge, open between the rails, is painted where the hop onto the bank starts.
+	_level.call("_box", Vector3(5.6, 4.012, -77.36), Vector3(6.8, .025, .22), "ochre")
 	# p / outflow is a left-hand (A) sluice face, sunlit, alternating with the three D banks.
-	# it opens as a banked right sweep whose face crosses deck height exactly at the run-up's
-	# left edge, coping 2.5 m above the deck: a hop off the end drifts into a rising wall
-	# rather than over a low lip. it then curves left (hold A) under the yard bank and
-	# releases toward the wheel just above walk height.
+	# it opens as a banked right sweep beside the run-up's end, then curves left (hold A) under
+	# the yard bank and releases toward the wheel.
 	var heading := (OUTFLOW_RUNUP_END - OUTFLOW_RUNUP_START).normalized()
 	var left := Vector3(heading.z, 0, -heading.x)
-	var coping := 5.5
-	var top := OUTFLOW_RUNUP_END + left * (2.5 + (coping - OUTFLOW_RUNUP_END.y) / tan(deg_to_rad(60.0)))
-	# an 8 degree lead-in raises the coping from deck height, so the bank's start face is never
+	# p / r12: the berm's coping stands 4 m above the deck, so a roof hop that meets it still
+	# rising runs out of lift below the top instead of sailing over the S.
+	var coping := 7.0
+	# p / r12: the face meets deck height 1.2 m outboard of the run-up's left edge, so leaving
+	# the deck's end, even at its corner, drops onto the face instead of running into its foot.
+	var top := OUTFLOW_RUNUP_END + left * (2.5 + 1.2 + (coping - OUTFLOW_RUNUP_END.y) / tan(deg_to_rad(60.0)))
+	# a 12 degree lead-in raises the coping from deck height, so the bank's start face is never
 	# a wall beside the deck: drifting left off the run-up meets a rising face instead.
+	# r12 / the lead lies on the berm's own plane (face_height): its rising coping only trims
+	# that plane. the earlier lead kept its coping on the sweep radius, which twisted its face
+	# into a 37 degree crease at the sweep and stopped a 19 m/s arrival dead.
+	# its tip starts a metre below the deck, so a runner leaving the deck's left edge passes
+	# over it instead of catching the coping's knife edge.
 	var lead: Dictionary = geometry.build(_level, "OutflowLead", Vector3(top.x, -6, top.z),
-		atan2(-heading.x, -heading.z), 1, 20, 8, OUTFLOW_RUNUP_END.y + 6, 0, 2, coping + 6, -1)
+		atan2(-heading.x, -heading.z), 1, 20, 12, OUTFLOW_RUNUP_END.y + 5, 0, 2, coping + 6, -1, 0, 0, 360, coping + 6)
 	sections.append(lead)
+	# p / r12: the outflow descends on one smooth grade with no step at any joint. the berm
+	# drops only 2 m from level, less than a rider pressed into it sinks anyway, so its
+	# coping never falls away beneath them; the S, whose face is inside its turn, takes the
+	# rest: a rider who loses that face falls back onto it lower. the release is still
+	# descending (grade .25), so it passes under the yard bank's leading edge and the yard
+	# crossing and lands on the outfall apron. a 38 degree berm aims that release 1.9 m clear
+	# of the pump hall's corner, onto the front walk.
+	var berm_drop := 2.0
+	var berm_grade := .35
 	var sweep: Dictionary = geometry.build(_level, "OutflowSweep", geometry.point(lead, lead.arc, lead.radius),
-		geometry.tangent_yaw(lead, lead.arc), 1, 20, 37, coping + 6, 0, 2, -1, -1)
+		geometry.tangent_yaw(lead, lead.arc), 1, 20, 38, coping + 6, -berm_drop, 2, -1, -1, 0, 0, 360, -1, [0.0, -berm_grade])
 	sections.append(sweep)
 	var bend_start := geometry.point(sweep, sweep.arc, sweep.radius)
 	sections.append(geometry.build(_level, "OutflowSurf", bend_start, geometry.tangent_yaw(sweep, sweep.arc),
-		-1, 20, 30, coping + 6, 0, 2, 8.5, -1))
+		-1, 20, 30, coping + 6, OUTFLOW_RELEASE_COPING + berm_drop - coping, 2, -1, -1, 0, 0, 360, -1, [-berm_grade, -.25]))
 	# p / the face releases southeast toward the gap between hall and front rail; a real
 	# outfall apron at walk height, on piers over the basin corner, takes the landing.
 	_level.call("_slab", "OutfallApron", Vector3(7.5, -3, -73), Vector2(11.6, 8), .5, "concrete")
 	for x: float in [3, 7.5, 12]:
 		_level.call("_solid", "OutfallApronPier", Vector3(x, -5.75, -76), Vector3(.9, 5, .9), "old_concrete")
-	_level.call("_rail", Vector3(1.85, -3, -76.85), Vector3(13.2, -3, -76.85))
+	# r12 / the low release crosses the apron's north edge, so that edge is painted, not
+	# railed: a rail there sat in the landing flight. a walker who steps off drops into the
+	# shallow basin beside the recovery ramp.
+	_level.call("_box", Vector3(4.8, -2.988, -76.86), Vector3(6.2, .025, .22), "ochre")
+	# p / a missed outflow bank drops the runner into the basin heading this way: a full-height
+	# ramp climbs from the water straight onto the outfall apron, 12 m short of the wheel,
+	# instead of a wade back west to the basin exit. r12 / it spans the apron's whole north
+	# edge, so a slow release that sinks below the apron lands on the ramp and runs up, and
+	# nobody wades into the low space under the apron. the low release flies well above it.
+	_level.call("_wedge", "OutfallRecoveryRamp", Vector3(7.45, -6, -83), Vector3(7.45, -3, -77), 11.5, "concrete")
+	for x: float in [1.8, 13.1]:
+		_level.call("_beam", Vector3(x, -5.988, -83), Vector3(x, -2.988, -77), .12, "ochre")
+	_level.call("_beam", Vector3(1.7, -5.97, -83), Vector3(13.2, -5.97, -83), .08, "ochre")
 
 
 func _make_basin() -> void:
@@ -274,6 +323,8 @@ func _make_basin() -> void:
 	_walk("BasinWestEdge", Vector3(-16, -5.65, -94.5), Vector3(-16, -5.65, -80), 3.0, false)
 	_walk("BasinEdgeAccess", Vector3(-12, -6, -83), Vector3(-14.5, -5.65, -83), 3.0, false)
 	_walk("BasinExitRamp", Vector3(-10, -6, -79), Vector3(-10, -3, -65), 5.0, false)
+	# r12 / a culvert sill across the pocket mouth was tried and removed: the basin exit is
+	# walkable from every lane without a jump, and a sill made that hop compulsory.
 	# p / painted safety hardware makes the existing ramp read from water level.
 	for x: float in [-12.4, -7.6]:
 		_level.call("_rail", Vector3(x, -6, -79), Vector3(x, -3, -65), "ochre")
@@ -281,8 +332,12 @@ func _make_basin() -> void:
 	_level.call("_solid", "BasinRampHeadstock", Vector3(-12.85, -5.3, -79), Vector3(0.14, 1.4, 0.14), "steel")
 	_level.call("_box", Vector3(-12.85, -4.58, -79), Vector3(0.18, 0.1, 0.18), "ochre")
 	_level.call("_slab", "BasinExitLanding", Vector3(-10, -3, -63.5), Vector2(5, 3), .5, "concrete")
-	_walk("BasinFrontWalk", Vector3(-7.5, -3, -65), Vector3(24, -3, -65), 8.0, false)
-	_level.call("_rail", Vector3(-7.5, -3, -62.1), Vector3(7, -3, -62.1))
+	# p / a 1.6 m service joint over the basin breaks the long walk from the west exit; a
+	# missed hop drops back into the shallow water, beside the outfall ramp.
+	_walk("BasinFrontWalk", Vector3(-7.5, -3, -65), Vector3(1.2, -3, -65), 8.0, false)
+	_walk("BasinFrontWalk", Vector3(2.8, -3, -65), Vector3(24, -3, -65), 8.0, false)
+	_level.call("_rail", Vector3(-7.5, -3, -62.1), Vector3(1.15, -3, -62.1))
+	_level.call("_rail", Vector3(2.85, -3, -62.1), Vector3(7, -3, -62.1))
 	_level.call("_rail", Vector3(7, -3, -62.1), Vector3(12, -3, -61.5))
 	_level.call("_rail", Vector3(-12.4, -3, -62.1), Vector3(-7.5, -3, -62.1))
 	_level.call("_rail", Vector3(-12.4, -3, -65), Vector3(-12.4, -3, -62.1))
@@ -325,7 +380,7 @@ func _walk(label: String, a: Vector3, b: Vector3, width: float, rails: bool) -> 
 		var p: Vector3 = a.lerp(b, float(i) / count)
 		var bottom: float = -8.5
 		var supports: Array[Vector3] = []
-		if label not in ["YardEntryCrossing", "YardSurfEntry"]:
+		if label != "YardEntryCrossing":
 			supports.append(p)
 		if label == "OutflowRunup" and i == count:
 			# the berm starts at the deck end; its pier stands back from the face.
@@ -351,15 +406,19 @@ func _stage(body: StaticBody3D, stage: int) -> void:
 
 func _define_routes() -> void:
 	var common: Array = [
-		_p(Vector3(8, 4, -73)),
+		# south of the entry ramp's rail end, so the westward turn never clips it.
+		_p(Vector3(8.5, 4, -75)),
 		_p(Vector3(-.9, 4, -74), .45, false, true), _p(Vector3(-6, 4, -74)), _p(Vector3(-12, 4, -74)),
 		_p(Vector3(-18, 1.5, -74), 1.0, true),
 	]
 	# p / the beginner line cuts diagonally through the opened gate instead of two square turns.
-	var level_safe: Array = _level.get("routes")["safe"]
-	if level_safe[-1].pos == Vector3(11, 4, -59):
-		level_safe.remove_at(level_safe.size() - 1)
-		level_safe.append_array([_p(Vector3(7.7, 4, -62.8), .8), _p(Vector3(9.9, 4, -69.5))])
+	# r12 / every stage-0 line turns through the gate's middle, clear of the canopy columns.
+	for name: String in ["safe", "wet", "brake", "recovery"]:
+		var level_route: Array = _level.get("routes")[name]
+		if level_route[-1].pos == Vector3(11, 4, -59):
+			level_route.remove_at(level_route.size() - 1)
+			level_route.append_array([_p(Vector3(10.3, 4, -59.2), 1.2),
+				_p(Vector3(9.9, 4, -69.5))])
 	var safe: Array = common.duplicate()
 	safe.append_array([
 		_p(Vector3(-27, 1.5, -75)), _p(Vector3(-27, 1.5, -79.5), .85),
@@ -369,17 +428,21 @@ func _define_routes() -> void:
 		_p(Vector3(-5, 0, -106), 1.0, true),
 		_p(Vector3(6.3, 0, -106), .45, false, true), _p(Vector3(12, 0, -106)),
 		_p(Vector3(22.8, 0, -106), .45, false, true), _p(Vector3(28, 0, -106)), _p(Vector3(37, 0, -106)),
-		_p(Vector3(37, -.3, -102)), _p(Vector3(37, -3, -85), 1.0, true), _p(Vector3(37, -3, -77.2), .45, false, true),
+		_p(Vector3(37, -.6, -102), 1.5), _p(Vector3(37, -3, -85), 1.0, true), _p(Vector3(37, -3, -77.2), .45, false, true),
 		_p(Vector3(37, -3, -71.5)), _p(Vector3(37, -3, -64)), _p(Vector3(23.8, -3, -68.8)),
 	])
 	var recovery: Array = common.duplicate()
 	recovery.append_array([
 		_p(Vector3(-27, 1.5, -75)), _p(Vector3(-27, 1.5, -79.5), .85),
 		_p(Vector3(-27, 1.5, -84), .9, true), _p(Vector3(-27, 1.5, -90)),
-		_p(Vector3(-27, 3, -101)), _p(Vector3(-28, 3, -104)),
-		_p(Vector3(-17.5, 3, -100.05), 1.3), _p(Vector3(-13.6, 3, -97.7), .8),
-		_p(Vector3(-13, -6, -88), 1.8), _p(Vector3(-10, -6, -80)),
-		_p(Vector3(-10, -3, -63.5), 1.3), _p(Vector3(15, -3, -65)), _p(Vector3(23.8, -3, -68.8)),
+		_p(Vector3(-25.5, 3, -100.5)),
+		_p(Vector3(-17.5, 3, -100.05), 1.3), _p(Vector3(-14.4, 3, -98.2), .8, false, true),
+		# the miss: a straight hop off the run-up's end sails over the bank's low lead. slide
+		# through the shallow water to the foot of the west exit, climb it and hop the front
+		# walk's joint to the wheel.
+		_p(Vector3(-10.8, -6, -84.6), 2.4, true), _p(Vector3(-10.2, -6, -79.6), 1.0, true),
+		_p(Vector3(-10, -3, -64.5), 1.3), _p(Vector3(0.0, -3, -64.6), .45, false, true),
+		_p(Vector3(5, -3, -64.8)), _p(Vector3(15, -3, -65)), _p(Vector3(23.8, -3, -68.8)),
 	])
 	var routes: Dictionary = _level.get("routes")
 	routes["safe"].append_array(safe)

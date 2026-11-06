@@ -273,6 +273,8 @@ func _look(flat: Vector3, delta: float) -> void:
 	motion.screen_relative = motion.relative
 	Input.parse_input_event(motion)
 	Input.flush_buffered_events()
+	_write({"event": "mouse", "time": time, "waypoint": index,
+		"screen_relative": [motion.screen_relative.x, motion.screen_relative.y]})
 
 func _action(action_name: String, pressed: bool) -> void:
 	if bool(_held.get(action_name, false)) == pressed:
@@ -307,7 +309,8 @@ func _sample(kind: String) -> Dictionary:
 	return {"event": kind, "time": time, "route": route_name, "seed": seed_value,
 		"waypoint": index, "waypoint_count": _route.size(), "position": [p.x, p.y, p.z],
 		"velocity": [v.x, v.y, v.z], "speed": player.get_speed(), "mode": player.get("mode"),
-		"yaw": player.get("yaw"), "pitch": player.get("pitch"), "grounded": player.is_on_floor(),
+		"yaw": player.get("yaw"), "pitch": player.get("pitch"), "grounded": player.is_grounded(),
+		"engine_grounded": player.is_on_floor(),
 		"water": player.get("in_water"), "crouched": player.get("crouched"), "jumps": player.get("jump_count"), "mantles": player.get("mantle_count"),
 		"landings": player.get("land_count"), "last_impact": player.get("last_impact"),
 		"elapsed": main.get("elapsed"), "checkpoint": main.get("checkpoint_index"), "finish_kind": main.get("finish_kind"),
@@ -322,17 +325,18 @@ func _wall_contacts() -> Array:
 	var contacts: Array = []
 	for collision_index: int in player.get_slide_collision_count():
 		var collision: KinematicCollision3D = player.get_slide_collision(collision_index)
-		var collider: Object = collision.get_collider()
-		var normal: Vector3 = collision.get_normal()
-		if absf(normal.y) < .7:
-			contacts.append({"collider": str((collider as Node).get_path()) if collider is Node else str(collider),
-				"normal": [normal.x, normal.y, normal.z]})
+		for contact_index: int in collision.get_collision_count():
+			var collider: Object = collision.get_collider(contact_index)
+			var normal: Vector3 = collision.get_normal(contact_index)
+			if absf(normal.y) < .7:
+				contacts.append({"collider": str((collider as Node).get_path()) if collider is Node else str(collider),
+					"normal": [normal.x, normal.y, normal.z]})
 	return contacts
 
 func _write(row: Dictionary) -> void:
 	if _trace != null:
 		_trace.store_line(JSON.stringify(row))
-		if row.get("event") != "sample":
+		if row.get("event") not in ["sample", "mouse"]:
 			_trace.flush()
 
 func _complete(success: bool, reason: String) -> void:

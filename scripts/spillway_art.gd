@@ -20,6 +20,7 @@ func apply(level: Node3D) -> void:
 	_materials = level.get("_materials")
 	_light()
 	_retune_materials()
+	_surf_faces()
 	_wet_bands()
 	_fix_roof_overlap()
 	_terrain()
@@ -98,6 +99,20 @@ func _retune_materials() -> void:
 	glass.roughness = 0.12
 	glass.metallic = 0.35
 	_materials["art_glass"] = glass
+
+
+func _surf_faces() -> void:
+	# p / riding faces are a lighter, smoother float finish than the walls around them, so a
+	# bank still reads as rideable where the yard bank shades the outflow s.
+	var surf := (_materials["concrete"] as ShaderMaterial).duplicate() as ShaderMaterial
+	surf.set_shader_parameter("wall_color", Color("aaa595"))
+	surf.set_shader_parameter("weathering", 0.05)
+	_materials["surf_concrete"] = surf
+	for node: Node in _level.get_children():
+		if node is StaticBody3D and node.has_meta("surf_section"):
+			for child: Node in node.get_children():
+				if child is MeshInstance3D:
+					(child as MeshInstance3D).material_override = surf
 
 
 func _concrete(key: String, wall: Color, deck: Color, weathering: float) -> void:

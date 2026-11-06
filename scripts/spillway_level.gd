@@ -222,6 +222,10 @@ func _make_crest() -> void:
 
 func _make_switchback() -> void:
 	_stairs("UpperSwitchback", Vector3(-9.0, 12.0, 0.0), Vector3(-9.0, 8.0, -16.0), 4.6, 24)
+	# p / r12: an ochre handrail on the chute side is the stair flight's one bright line in the
+	# spawn view, where the chute wall otherwise hides the treads. it also keeps a runner
+	# heading for the stairs from drifting into the chute.
+	_rail(Vector3(-6.78, 12.0, -0.3), Vector3(-6.78, 8.0, -16.0), "ochre")
 	_slab("SwitchbackLanding", Vector3(-12.5, 8.0, -18.0), Vector2(13.0, 4.0), 0.65)
 	_stairs("LowerSwitchback", Vector3(-16.0, 8.0, -16.0), Vector3(-16.0, 4.0, 0.0), 4.6, 24)
 	_slab("LowerStairLanding", Vector3(-19.0, 4.0, 1.0), Vector2(12.0, 4.0), 0.7)
@@ -270,9 +274,20 @@ func _make_chute() -> void:
 
 func _make_terrace() -> void:
 	_slab("JumpLandingTerrace", Vector3(3.0, 4.0, -42.0), Vector2(26.0, 14.0), 0.7)
-	# p / a sloping apron below the catch lip avoids a deep vertical impact face.
-	_ramp("LandingApron", Vector3(1.0, 1.5, -33.2), Vector3(1.0, 3.3, -35.0), 18.0, 0.3, "old_concrete")
-	_beam(Vector3(-8.0, 4.025, -35.0), Vector3(10.0, 4.025, -35.0), 0.055, "ochre")
+	# p / a sloping apron below the catch lip avoids a deep vertical impact face. it stays
+	# beside the valve housing and under the crest bank's tail.
+	_ramp("LandingApron", Vector3(-4.65, 1.5, -33.2), Vector3(-4.65, 3.3, -35.0), 6.7, 0.3, "old_concrete")
+	_ramp("LandingApron", Vector3(9.5, 1.5, -33.2), Vector3(9.5, 3.3, -35.0), 1.0, 0.3, "old_concrete")
+	# p / a missed crest bank or chute jump lands in the channel facing this full-height
+	# 27 degree ramp: it climbs flush onto the terrace with no lip, so a miss costs speed and
+	# height, not a wade to the east exit. it stops 1.3 m short of the bank's overhanging tail.
+	_wedge("ChannelRecoveryRamp", Vector3(3.85, 1.5, -30.0), Vector3(3.85, 4.0, -35.0), 10.3, "concrete")
+	# flush painted edges, not rails: the ramp is entered from the side as often as head on.
+	for x: float in [-1.2, 8.9]:
+		_beam(Vector3(x, 1.512, -30.0), Vector3(x, 4.012, -35.0), 0.12, "ochre")
+	_beam(Vector3(-1.3, 1.53, -30.0), Vector3(9.0, 1.53, -30.0), 0.08, "ochre")
+	# the lip paint marks only the ramp's top: west of it the valve housing blocks the lip.
+	_beam(Vector3(-1.3, 4.025, -35.0), Vector3(10.0, 4.025, -35.0), 0.055, "ochre")
 	_slab("RecoveryRampJoin", Vector3(12.0, 4.0, -41.5), Vector2(6.0, 3.0), 0.65)
 	# the safe line turns west, south and east around the working settling basin.
 	_slab("ForgivingTerraceTurn", Vector3(-9.0, 4.0, -47.5), Vector2(6.0, 17.0), 0.8)
@@ -294,15 +309,20 @@ func _make_terrace() -> void:
 	# the direct line begins right of the chute axis, so carried speed needs steering.
 	var bridge_a: Vector3 = Vector3(4.0, 4.0, -48.9)
 	var bridge_b: Vector3 = Vector3(10.0, 4.0, -56.1)
-	_ramp("CarriedSpeedBridge", bridge_a, bridge_b, 2.3, 0.28, "concrete")
+	# p / an expansion joint (1.4 m) past mid-span asks the wet line for one hop; each half
+	# cantilevers from its own pedestal.
 	var right: Vector3 = _right_of(bridge_a, bridge_b)
-	for side: float in [-1.0, 1.0]:
-		_beam(bridge_a + right * side * 1.15 - Vector3.UP * 0.29,
-			bridge_b + right * side * 1.15 - Vector3.UP * 0.29, 0.13, "steel")
-		# a low painted edge is visual only, keeping the narrow line honest.
-		_beam(bridge_a + right * side * 1.08 + Vector3.UP * 0.012,
-			bridge_b + right * side * 1.08 + Vector3.UP * 0.012, 0.055, "ochre")
-	for ratio: float in [0.25, 0.75]:
+	for span: Vector2 in [Vector2(0.0, 0.58), Vector2(0.73, 1.0)]:
+		var span_a: Vector3 = bridge_a.lerp(bridge_b, span.x)
+		var span_b: Vector3 = bridge_a.lerp(bridge_b, span.y)
+		_ramp("CarriedSpeedBridge", span_a, span_b, 2.3, 0.28, "concrete")
+		for side: float in [-1.0, 1.0]:
+			_beam(span_a + right * side * 1.15 - Vector3.UP * 0.29,
+				span_b + right * side * 1.15 - Vector3.UP * 0.29, 0.13, "steel")
+			# a low painted edge is visual only, keeping the narrow line honest.
+			_beam(span_a + right * side * 1.08 + Vector3.UP * 0.012,
+				span_b + right * side * 1.08 + Vector3.UP * 0.012, 0.055, "ochre")
+	for ratio: float in [0.3, 0.87]:
 		var support: Vector3 = bridge_a.lerp(bridge_b, ratio)
 		_solid("BridgePedestal", Vector3(support.x, 0.65, support.z), Vector3(0.6, 5.1, 0.8), "old_concrete")
 		_beam(Vector3(support.x, 1.55, support.z), support + Vector3(-0.8, -0.32, 0.0), 0.15, "steel")
@@ -332,12 +352,21 @@ func _make_water_and_recovery() -> void:
 	_ramp("WetChannelJoin", Vector3(20.5, 4, -46.6), Vector3(14, 4, -46.6), 3.2, .5, "concrete")
 	_rail(Vector3(21.9, 1.5, -34), Vector3(21.9, 4, -45), "ochre")
 	_solid("WetExitPier", Vector3(20.5, -1.5, -45), Vector3(.9, 10, 1.2), "old_concrete")
-	_solid("ChannelHeadWall", Vector3(7.5, 1.6, -23.7), Vector3(31.0, 2.2, 0.6), "wet_concrete")
+	# p / r12: a W-first runner who leaves the crest lip lands on the crest bank and slides off
+	# its foot. the slot between the chute's web and that foot was open to the void; a dry
+	# runout now falls gently from under the crest to the channel, straight at the recovery
+	# ramp, so the drop stays a live line instead of a respawn.
+	_ramp("DamToeRunout", Vector3(2.5, 2.6, -1.0), Vector3(2.5, 1.5, -23.4), 7.0, 0.6, "old_concrete")
+	for x: float in [-4.5, 14.5]:
+		_solid("ChannelHeadWall", Vector3(x, 1.6, -23.7), Vector3(7.0 if x < 0.0 else 17.0, 2.2, 0.6), "wet_concrete")
 	# the second catch floor gives a missed narrow bridge a walkable way out too.
 	_slab("SettlingBasinFloor", Vector3(5.5, 1.5, -49.5), Vector2(23.0, 13.0), 0.9, "old_concrete")
 	_water("SettlingWater", Vector3(5.5, 1.68, -49.5), Vector2(23.0, 13.0), "water")
 	water_regions.append({"bounds": AABB(Vector3(-6.0, 1.35, -56.0), Vector3(23.0, 0.5, 13.0)), "depth": 0.18})
 	_ramp("BridgeRecoveryRamp", Vector3(15.0, 1.5, -45.0), Vector3(15.0, 4.0, -56.0), 3.2, 0.5, "concrete")
+	# p / r12: its east side drops outside the basin, like the wet exit's outer side; a hop
+	# chain that climbed it sideways left the dam there (early-fast-1). same ochre guard.
+	_rail(Vector3(16.45, 2.27, -48.4), Vector3(16.45, 4.0, -56.0), "ochre")
 	_solid("SettlingBasinEastWall", Vector3(17.3, 1.6, -49.5), Vector3(0.6, 2.2, 13.0), "wet_concrete")
 	# p / retain the shallow water on every exposed edge, with its shared channel open.
 	_solid("SettlingBasinWestWall", Vector3(-6.3, 1.6, -49.5), Vector3(0.6, 2.2, 13.6), "wet_concrete")
@@ -615,7 +644,7 @@ func _define_routes() -> void:
 		_point(Vector3(-22.0, 4.0, -40.8)), _point(Vector3(-9.0, 4.0, -41.0)),
 		_point(Vector3(-9.0, 4.0, -46.0)), _point(Vector3(-9.0, 4.0, -51.0), 1.0, true),
 		_point(Vector3(-9.0, 4.0, -58.8)),
-		_point(Vector3(1.4, 4, -59.3), .45, false, true), _point(Vector3(5.5, 4, -59.5), 1.0),
+		_point(Vector3(1.4, 4, -59.3), .45, false, true), _point(Vector3(5.5, 4, -59.1), 1.0),
 		_point(finish_position),
 	]
 	# p / the upper flight is a smooth 14 degree ramp under its treads: slide its first half.
@@ -625,7 +654,7 @@ func _define_routes() -> void:
 		_point(Vector3(20.5, 8, -20), 1.0, true), _point(Vector3(20.5, 7.1, -23.3), 1, true),
 		_point(Vector3(20.5, 2.8, -40), 1.0, true), _point(Vector3(20.5, 4, -45.5)),
 		_point(Vector3(14, 4, -46.6)), _point(Vector3(4, 4, -48.1)),
-		_point(Vector3(7, 4, -52.5)), _point(Vector3(10, 4, -57)), _point(finish_position),
+		_point(Vector3(7, 4, -52.5), .45, false, true), _point(finish_position),
 	]
 	# p / run normally first, then crouch at the chute mouth; do not understate launch speed.
 	var launch: Array = [
@@ -644,19 +673,18 @@ func _define_routes() -> void:
 	routes["brake"].append_array([
 		_point(Vector3(-9.0, 4.0, -43.0)), _point(Vector3(-9.0, 4.0, -46.0)),
 		_point(Vector3(-9.0, 4.0, -51.0), 1.0, true), _point(Vector3(-9.0, 4.0, -58.8)),
-		_point(Vector3(1.4, 4, -59.3), .45, false, true), _point(Vector3(5.5, 4, -59.5), 1.0),
+		_point(Vector3(1.4, 4, -59.3), .45, false, true), _point(Vector3(5.5, 4, -59.1), 1.0),
 		_point(finish_position),
 	])
-	# a short running takeoff drops into the channel, with no reset; the walk out then uses
-	# the same simple slide (pipe bridge) and hop (exit deck joint) as the safe line.
+	# a missed chute jump: slide the chute, sail off the launch without jumping and land in the
+	# channel beside the recovery ramp, with no reset. the climb out then uses the same simple
+	# slide (pipe bridge) and hop (exit deck joint) as the safe line.
 	routes["recovery"] = [
-		_point(Vector3(-3.5, 12.0, 1.0)), _point(Vector3(-3.5, 7.0, -20.0)),
-		_point(Vector3(-3.5, 1.5, -30.7), 1.0),
-		_point(Vector3(8.0, 1.5, -33.0)), _point(Vector3(20.5, 1.5, -33.5), .8), _point(Vector3(20.5, 4.0, -45.5)),
-		_point(Vector3(14.0, 4.0, -46.6)), _point(Vector3(3.0, 4.0, -41.0)), _point(Vector3(-9.0, 4.0, -41.0)),
+		_point(Vector3(-3.5, 12.0, 1.0)), _point(Vector3(-3.5, 7.0, -20.0), 1.0, true),
+		_point(Vector3(-2.5, 6.0, -25.5), .8, true), _point(Vector3(2.5, 4.0, -36.5)), _point(Vector3(0.0, 4.0, -40.5), 1.6), _point(Vector3(-9.0, 4.0, -41.5)),
 		_point(Vector3(-9.0, 4.0, -46.0)), _point(Vector3(-9.0, 4.0, -51.0), 1.0, true),
 		_point(Vector3(-9.0, 4.0, -58.8)),
-		_point(Vector3(1.4, 4, -59.3), .45, false, true), _point(Vector3(5.5, 4, -59.5), 1.0),
+		_point(Vector3(1.4, 4, -59.3), .45, false, true), _point(Vector3(5.5, 4, -59.1), 1.0),
 		_point(finish_position),
 	]
 
@@ -740,6 +768,51 @@ func _ramp(node_name: String, a: Vector3, b: Vector3, width: float, thickness: f
 		mesh.mesh = tool.commit()
 		mesh.material_override = _materials[material]
 		body.add_child(mesh)
+	return body
+
+
+func _wedge(node_name: String, low: Vector3, high: Vector3, width: float, material: String) -> StaticBody3D:
+	# p / a solid ramp standing on the floor at low.y: no parallelogram underside to hang below it.
+	var right: Vector3 = _right_of(low, high) * width * 0.5
+	var foot := Vector3(high.x, low.y, high.z)
+	var vertices := PackedVector3Array([low - right, low + right, high + right, high - right, foot - right, foot + right])
+	var body := StaticBody3D.new()
+	body.name = node_name
+	body.collision_layer = 1
+	body.collision_mask = 0
+	body.set_meta("surface", "concrete")
+	add_child(body)
+	var collision := CollisionShape3D.new()
+	var shape := ConvexPolygonShape3D.new()
+	shape.points = vertices
+	collision.shape = shape
+	body.add_child(collision)
+	var tool := SurfaceTool.new()
+	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	tool.set_smooth_group(-1)
+	var center := Vector3.ZERO
+	for vertex: Vector3 in vertices:
+		center += vertex / vertices.size()
+	for face: Array in [[0, 1, 2, 3], [3, 2, 5, 4], [0, 4, 5, 1], [0, 3, 4], [1, 5, 2]]:
+		var tris: Array = [[0, 1, 2]] if face.size() == 3 else [[0, 1, 2], [0, 2, 3]]
+		for tri: Array in tris:
+			var a: Vector3 = vertices[face[tri[0]]]
+			var b: Vector3 = vertices[face[tri[1]]]
+			var c: Vector3 = vertices[face[tri[2]]]
+			# godot's front winding is clockwise; derive an outward normal from the solid.
+			var normal := (c - a).cross(b - a).normalized()
+			if normal.dot((a + b + c) / 3.0 - center) < 0:
+				var swap := b
+				b = c
+				c = swap
+				normal = -normal
+			for vertex: Vector3 in [a, b, c]:
+				tool.set_normal(normal)
+				tool.add_vertex(vertex)
+	var mesh := MeshInstance3D.new()
+	mesh.mesh = tool.commit()
+	mesh.material_override = _materials[material]
+	body.add_child(mesh)
 	return body
 
 

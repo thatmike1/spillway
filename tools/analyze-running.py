@@ -18,6 +18,12 @@ def analyze(path: Path) -> dict:
         errors.append('expected one non-fixture route start')
     if len(results) != 1 or not results[0].get('success'):
         errors.append('route did not complete successfully')
+    if len(results) == 1:
+        final = results[0]
+        if not final.get('clean_eligible') or final.get('finish_kind') != 'clean':
+            errors.append('expected a recorded clean full-course finish')
+        if final.get('ordered_checkpoints') != [0, 1, 2]:
+            errors.append('expected all three stages in order')
     if any(int(row.get('respawns', 0)) for row in samples + results):
         errors.append('route contains a respawn')
     gaps = [float(b['time']) - float(a['time']) for a, b in zip(samples, samples[1:])]
