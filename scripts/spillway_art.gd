@@ -107,6 +107,9 @@ func _surf_faces() -> void:
 	var surf := (_materials["concrete"] as ShaderMaterial).duplicate() as ShaderMaterial
 	surf.set_shader_parameter("wall_color", Color("aaa595"))
 	surf.set_shader_parameter("weathering", 0.05)
+	# p / Compatibility has no baked bounce here; a restrained concrete-coloured fill
+	# preserves cast shadows while separating the shaded riding face from the underpass.
+	surf.set_shader_parameter("bounce_fill", 0.30)
 	_materials["surf_concrete"] = surf
 	for node: Node in _level.get_children():
 		if node is StaticBody3D and node.has_meta("surf_section"):

@@ -5,6 +5,8 @@ uniform vec4 wall_color : source_color = vec4(0.72, 0.69, 0.59, 1.0);
 uniform vec4 deck_color : source_color = vec4(0.79, 0.77, 0.68, 1.0);
 uniform float weathering = 0.12;
 uniform float waterline = -100.0;
+// p / optional diffuse bounce for riding concrete beneath the overpass.
+uniform float bounce_fill : hint_range(0.0, 0.3) = 0.0;
 
 varying vec3 world_position;
 varying vec3 world_normal;
@@ -68,6 +70,7 @@ void fragment() {
 	damp *= 0.65 + noise21(wall_uv * vec2(2.0, 4.0)) * 0.35;
 	base = mix(base, base * vec3(0.55, 0.66, 0.54), damp * 0.62);
 	ALBEDO = base;
+	EMISSION = base * bounce_fill * smoothstep(0.1, 0.4, world_normal.y);
 	ROUGHNESS = mix(0.91, 0.65, damp);
 	SPECULAR = 0.25;
 }
