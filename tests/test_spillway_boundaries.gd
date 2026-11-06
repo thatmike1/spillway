@@ -2,7 +2,57 @@ extends "test_spillway_access.gd"
 ## recovery perimeter coverage: outward input from sampled edges, not authored routes.
 ## native --boundary-views selects representative cases; headless checks every sample.
 
-func outward(name: String, start: Vector3, target: Vector3, outflow: bool) -> void:
+## r12 / the old low cave under the terrace is filled solid and the basin's exit ramp now stands
+## where some of its foot samples were. a sample whose capsule start lies inside one of those
+## named r12 solids moves inward to the nearest standing room within 8.5 m and still walks out
+## across that floor's edge; with no room that close, the edge is sealed and the check confirms the
+## named solid fills it. every other sample keeps its original start. each shift is reported.
+const R12_FILL: Array[String] = ["BasinTerraceSubstructure", "ChannelTerraceSubstructure", "BridgeRecoveryRamp"]
+
+func r12_fill_at(at: Vector3) -> String:
+	var query := PhysicsShapeQueryParameters3D.new()
+	var capsule := CapsuleShape3D.new()
+	capsule.radius = .3
+	capsule.height = 1.8
+	query.shape = capsule
+	query.exclude = [player.get_rid()]
+	query.transform = Transform3D(Basis.IDENTITY, at + Vector3.UP * .96)
+	for hit: Dictionary in player.get_world_3d().direct_space_state.intersect_shape(query, 8):
+		var body := str((hit.collider as Node).name)
+		if body in R12_FILL:
+			return body
+	return ""
+
+func standing_room(at: Vector3) -> bool:
+	var query := PhysicsShapeQueryParameters3D.new()
+	var capsule := CapsuleShape3D.new()
+	capsule.radius = .3
+	capsule.height = 1.8
+	query.shape = capsule
+	query.exclude = [player.get_rid()]
+	query.transform = Transform3D(Basis.IDENTITY, at + Vector3.UP * .96)
+	return player.get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty()
+
+func outward(name: String, start: Vector3, target: Vector3, outflow: bool, inward := Vector3.ZERO) -> void:
+	var fill := r12_fill_at(start) if inward != Vector3.ZERO else ""
+	if not fill.is_empty():
+		var sample := start
+		start = Vector3.INF
+		for step: int in range(1, 86):
+			if standing_room(sample + inward * step * .1):
+				start = sample + inward * step * .1
+				break
+		label = name
+		if start == Vector3.INF:
+			# the fill must reach the terrace's underside: no crawl gap left above it.
+			var head := PhysicsPointQueryParameters3D.new()
+			head.position = sample + Vector3.UP * 1.72
+			var filled := false
+			for hit: Dictionary in player.get_world_3d().direct_space_state.intersect_point(head, 8):
+				filled = filled or str((hit.collider as Node).name) in R12_FILL
+			check(filled, "edge sealed: the old foot %s is inside %s up to the terrace, no standing room within 8.5 m inward" % [sample, fill])
+			return
+		name += " (old foot %s inside %s; moved %.1f m inward to %s)" % [sample, fill, start.distance_to(sample), start]
 	if outflow:
 		await roof_fixture(name, start)
 	else:
@@ -34,7 +84,7 @@ func run() -> void:
 				else:
 					edge.z += normal.z * size.z * .5
 					edge.x += (fraction - .5) * size.x
-				await outward("%s edge%s %.2f" % [floor_name, normal, fraction], edge - normal * .85, edge + normal * 1.2, floor_name == "OutflowRecoveryFloor")
+				await outward("%s edge%s %.2f" % [floor_name, normal, fraction], edge - normal * .85, edge + normal * 1.2, floor_name == "OutflowRecoveryFloor", -normal)
 		if not compact or floor_name == "SettlingBasinFloor":
 			for x_sign: float in [-1, 1]:
 				for z_sign: float in [-1, 1]:
@@ -42,7 +92,7 @@ func run() -> void:
 						continue
 					var normal := Vector3(x_sign, 0, z_sign).normalized()
 					var corner := top + Vector3(x_sign * size.x * .5, 0, z_sign * size.z * .5)
-					await outward("%s corner%s" % [floor_name, normal], corner - normal * 1.2, corner + normal * 1.2, floor_name == "OutflowRecoveryFloor")
+					await outward("%s corner%s" % [floor_name, normal], corner - normal * 1.2, corner + normal * 1.2, floor_name == "OutflowRecoveryFloor", -normal)
 	# turns that looked like exits in the late-miss and ramp-top views.
 	for episode: Array in [
 		["late miss toward daylight", Vector3(9.9, -5.96, -68), Vector3(16, -6, -60)],

@@ -134,6 +134,10 @@ func _make_yard() -> void:
 	# p / the apron stops short of the outflow berm: a square notch, guarded on both edges.
 	_stage(_level.call("_slab", "SluiceYardApron", Vector3(-25.5, 1.5, -81.5), Vector2(29, 19), .55, "concrete"), 1)
 	_stage(_level.call("_slab", "SluiceYardApron", Vector3(-28.5, 1.5, -94), Vector2(23, 6), .55, "concrete"), 1)
+	# r12 / a steel grating covers the intake slot between the roof ramps. the 2 m slot under
+	# the roof lip dropped a hop that drifted off the inner ramp out of bounds; the lip itself
+	# still stands 1.5 m above the apron, so it remains a mantle and not a step.
+	_stage(_level.call("_slab", "IntakeSlotGrating", Vector3(-32, 1.5, -98), Vector2(5, 2), .2, "grate"), 1)
 	# p / a 1.6 m joint in the crossing, clear of the fast line's yard turn, is a simple hop.
 	_stage(_walk("YardEntryCrossing", Vector3(11, 4, -74), Vector3(-1.4, 4, -74), 7.0, false), 1)
 	_stage(_walk("YardEntryCrossing", Vector3(-3, 4, -74), Vector3(-12, 4, -74), 7.0, false), 1)
@@ -143,16 +147,28 @@ func _make_yard() -> void:
 	for span: Vector2 in [Vector2(2, -1.3), Vector2(-3.1, -9)]:
 		_level.call("_rail", Vector3(span.x, 4, -77.4), Vector3(span.y, 4, -77.4))
 	# two gate machinery rooms leave a direct low opening and wide side approaches.
-	for x: float in [-36.5, -18.5]:
-		# p / the east room stops at x -17.5: the yard bank's low face passes clear of it onto the
-		# apron instead of running into its wall. its valve stays on the gate axis.
-		var room_x: float = -19.75 if x == -18.5 else x
-		var room_width: float = 4.5 if x == -18.5 else 7.0
-		_level.call("_solid", "SluiceGateMachinery", Vector3(room_x, 3.1, -82), Vector3(room_width, 3.2, 5.5), "terracotta")
-		_stage(_level.call("_slab", "GateMachineryCap", Vector3(room_x, 4.9, -82), Vector2(4.7, 5.5) if x == -18.5 else Vector2(7.6, 6.1), .2, "concrete"), 1)
-		_level.call("_cylinder", Vector3(x, 4.9, -82), Vector3(x, 5.9, -82), .16, "steel", true)
-		_level.call("_wheel", Vector3(x, 5.9, -82), .75, "ochre", true)
-		_level.call("_box", Vector3(room_x, 3.2, -79.21), Vector3(3, 1.4, .08), "shadow")
+	_level.call("_solid", "SluiceGateMachinery", Vector3(-36.5, 3.1, -82), Vector3(7.0, 3.2, 5.5), "terracotta")
+	_stage(_level.call("_slab", "GateMachineryCap", Vector3(-36.5, 4.9, -82), Vector2(7.6, 6.1), .2, "concrete"), 1)
+	_level.call("_cylinder", Vector3(-36.5, 4.9, -82), Vector3(-36.5, 5.9, -82), .16, "steel", true)
+	_level.call("_wheel", Vector3(-36.5, 5.9, -82), .75, "ochre", true)
+	_level.call("_box", Vector3(-36.5, 3.2, -79.21), Vector3(3, 1.4, .08), "shadow")
+	# p / r12: the east house is turned 45 degrees to run along the yard bank's foot instead of
+	# standing square across the apron. a hop that misses the bank wide now meets its long side
+	# at a glance and turns southwest along it, where the square end wall stopped it dead
+	# (14.7 to 4.4 m/s); the channel between house and foot widens from 1.3 m to about 4 m.
+	# the gate's east end and its guide stay inside the house's southwest end, and the cap,
+	# valve and door turn with it. its north corner stays south of z -78, so a rider carried
+	# along the crossing's south rail and down the descent passes it as before.
+	var east := Transform3D(Basis(Vector3.UP, PI * .25), Vector3(-20.35, 0, -81.27))
+	var house: StaticBody3D = _level.call("_solid", "SluiceGateMachinery", east * Vector3(0, 3.1, 0), Vector3(2.8, 3.2, 6.4), "terracotta")
+	house.basis = east.basis
+	var cap: StaticBody3D = _level.call("_solid", "GateMachineryCap", east * Vector3(0, 4.8, 0), Vector3(3.0, .2, 6.6), "concrete")
+	cap.basis = east.basis
+	_stage(cap, 1)
+	_level.call("_cylinder", east * Vector3(0, 4.9, 0), east * Vector3(0, 5.9, 0), .16, "steel", true)
+	_level.call("_wheel", east * Vector3(0, 5.9, 0), .75, "ochre", true)
+	var door: Node3D = _level.call("_box", east * Vector3(-1.41, 3.2, 0), Vector3(.08, 1.4, 3), "shadow")
+	door.basis = east.basis
 	# floor 1.5, underside 2.77: 1.27 m permits crouching but denies standing.
 	_level.call("_solid", "HalfOpenSluiceGate", Vector3(-27.5, 4.17, -82), Vector3(11, 2.8, 1.1), "steel")
 	_level.call("_box", Vector3(-27.5, 2.82, -81.42), Vector3(11, .1, .12), "ochre")
@@ -178,6 +194,8 @@ func _make_yard() -> void:
 	_level.call("_solid", "YardBankToePier", Vector3(-7.45, -2.5, -81.2), Vector3(.5, 6.9, .7), "old_concrete")
 	_level.call("_rail", Vector3(-11.1, 1.5, -82.7), Vector3(-11.1, 1.5, -90.9))
 	_level.call("_rail", Vector3(-40, 1.5, -72), Vector3(-40, 1.5, -85))
+	# r12 / the apron's north edge dropped straight into the void beside the safe route.
+	_level.call("_rail", Vector3(-40, 1.5, -72.1), Vector3(-18.2, 1.5, -72.1))
 	# visible water works continue under the apron, with foundation-depth openings.
 	for x: float in [-36.5, -18.5]:
 		_level.call("_box", Vector3(x, -.5, -97.04), Vector3(4, 2.2, .08), "shadow")
@@ -192,9 +210,11 @@ func _make_filter_house() -> void:
 		_level.call("_solid", "FilterRoofCorbel", Vector3(x, -1.6, -105), Vector3(1.2, 8.8, 4), "old_concrete")
 	# both access ramps avoid mantle; the direct gate line enters the inner ramp.
 	_stage(_walk("WestRoofAccess", Vector3(-37, 1.5, -87), Vector3(-37, 3, -99), 5.0, false), 1)
-	# p / the inner ramp's east edge runs under the yard bank's foot, so a low rider meets a
-	# crease onto the ramp rather than a curb.
-	_stage(_walk("InnerRoofAccess", Vector3(-25.95, 1.5, -90), Vector3(-25.95, 3, -99), 7.1, false), 1)
+	# p / r12: the inner ramp starts just past the yard bank's tail. the bank's foot runs out on
+	# flat apron to its end, and a low rider leaving the tail meets the ramp head on. a ramp
+	# rising under the foot made a floor-to-face crease that stopped walkers and low riders
+	# dead, with its corner exposed beside the foot.
+	_stage(_walk("InnerRoofAccess", Vector3(-25.95, 1.5, -95.2), Vector3(-25.95, 3, -99), 7.1, false), 1)
 	for x: float in [-33, -29, -25]:
 		_level.call("_box", Vector3(x, 1.1, -98.95), Vector3(2.2, 1.7, .1), "shadow")
 	# this inspection apron presents a 1.5 m roof lip beside the low housing.
@@ -209,6 +229,9 @@ func _make_filter_house() -> void:
 	_level.call("_box", Vector3(-21, 3.02, -99.1), Vector3(3, 0.025, 0.12), "ochre")
 	_level.call("_rail", Vector3(-40, 3, -110), Vector3(-18, 3, -110))
 	_level.call("_rail", Vector3(-40, 3, -110), Vector3(-40, 3, -99))
+	# r12 / the roof's south rail stopped 1.6 m short of the gantry's: a wide turn over the
+	# roof slipped off its southeast corner.
+	_level.call("_rail", Vector3(-18, 3, -110), Vector3(-18, 3, -108.45))
 	# ventilation stacks stay behind the approach, leaving roof and tower readable.
 	for x: float in [-35, -31]:
 		_level.call("_cylinder", Vector3(x, 3, -108), Vector3(x, 5.5, -108), .4, "pipe", true)

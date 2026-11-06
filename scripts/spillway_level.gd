@@ -363,10 +363,26 @@ func _make_water_and_recovery() -> void:
 	_slab("SettlingBasinFloor", Vector3(5.5, 1.5, -49.5), Vector2(23.0, 13.0), 0.9, "old_concrete")
 	_water("SettlingWater", Vector3(5.5, 1.68, -49.5), Vector2(23.0, 13.0), "water")
 	water_regions.append({"bounds": AABB(Vector3(-6.0, 1.35, -56.0), Vector3(23.0, 0.5, 13.0)), "depth": 0.18})
-	_ramp("BridgeRecoveryRamp", Vector3(15.0, 1.5, -45.0), Vector3(15.0, 4.0, -56.0), 3.2, 0.5, "concrete")
-	# p / r12: its east side drops outside the basin, like the wet exit's outer side; a hop
-	# chain that climbed it sideways left the dam there (early-fast-1). same ochre guard.
-	_rail(Vector3(16.45, 2.27, -48.4), Vector3(16.45, 4.0, -56.0), "ochre")
+	# p / r12: the terrace stands on solid substructure, not on a 1.8 m cave. the basin and the
+	# channel below it each keep their own open-water exit instead of a low crawl between them.
+	_solid("BasinTerraceSubstructure", Vector3(5.5, 2.4, -46.0), Vector3(23.0, 1.8, 6.0), "wet_concrete")
+	_solid("ChannelTerraceSubstructure", Vector3(4.0, 2.4, -39.0), Vector3(24.0, 1.8, 8.0), "wet_concrete")
+	# p / r12: a missed bridge lands in open water facing this ramp; it climbs south, in plain
+	# view, flush onto the exit deck beside the bridge's end and the canopy. its toe stands 2 m
+	# off the terrace face so the front is open water, not a slot; the slope matches the channel's.
+	_wedge("BridgeRecoveryRamp", Vector3(14.0, 1.5, -51.0), Vector3(14.0, 4.0, -56.0), 6.0, "concrete")
+	for x: float in [11.05, 16.95]:
+		_beam(Vector3(x, 1.512, -51.0), Vector3(x, 4.012, -56.0), 0.12, "ochre")
+	_beam(Vector3(11.0, 1.53, -51.0), Vector3(17.0, 1.53, -51.0), 0.08, "ochre")
+	# its east side drops outside the basin, like the wet exit's outer side; a hop chain that
+	# climbed it sideways left the dam there (early-fast-1). same ochre guard.
+	_rail(Vector3(16.85, 2.0, -52.0), Vector3(16.85, 4.0, -56.0), "ochre")
+	# beside the toe's open water the east wall rises to deck height, where the old ramp's rail
+	# used to start: a hop chain along the toe cleared the 1.2 m wall into the drop (early-fast-1).
+	# the substructure's corner beside it fills to terrace height, so no ledge leads onto it.
+	_solid("BasinEastParapet", Vector3(17.3, 3.35, -50.425), Vector3(0.6, 1.3, 4.35), "wet_concrete")
+	_solid("BasinCornerTerraceSubstructure", Vector3(16.5, 3.65, -48.625), Vector3(1.0, 0.7, 0.75), "wet_concrete")
+	_rail(Vector3(17.3, 4.0, -48.3), Vector3(17.3, 4.0, -52.6), "ochre")
 	_solid("SettlingBasinEastWall", Vector3(17.3, 1.6, -49.5), Vector3(0.6, 2.2, 13.0), "wet_concrete")
 	# p / retain the shallow water on every exposed edge, with its shared channel open.
 	_solid("SettlingBasinWestWall", Vector3(-6.3, 1.6, -49.5), Vector3(0.6, 2.2, 13.6), "wet_concrete")
@@ -374,8 +390,8 @@ func _make_water_and_recovery() -> void:
 	_solid("ChannelSouthwestReturn", Vector3(-7.0, 1.6, -43.3), Vector3(2.6, 2.2, 0.6), "wet_concrete")
 	_solid("SettlingBasinNorthReturn", Vector3(16.15, 1.6, -42.9), Vector3(2.3, 2.2, .6), "wet_concrete")
 	# surface drains at the ramp feet provide scale without obstructing capsules.
-	for z: float in [-28.7, -44.7]:
-		var x: float = 12.0 if z > -30.0 else 15.0
+	for z: float in [-28.7, -50.4]:
+		var x: float = 12.0 if z > -30.0 else 14.0
 		for i: int in 7:
 			_box(Vector3(x - 1.1 + float(i) * 0.35, 1.795 if z > -30.0 else 1.695, z), Vector3(0.07, 0.035, 0.7), "grate")
 

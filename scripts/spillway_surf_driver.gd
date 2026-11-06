@@ -19,6 +19,12 @@ const OUTFLOW_LANE := 2.0
 # p / a hop rises for 0.36 s; one taken with less than this much time of deck left reaches
 # the berm before its apex has passed.
 const OUTFLOW_SLIDE_WINDOW := 0.45
+# p / r12 yard recovery: a hop that has sunk below this height while still this far outside the
+# bank's riding face missed it wide; strafe back into the face (a human's correction).
+const YARD_WIDE_HEIGHT := 3.6
+const YARD_WIDE_GAP := 0.45
+# p / the roof spot a low yard exit climbs to by the inner ramp before its u-turn.
+const YARD_ROOF := Vector3(-25.0, 3.0, -101.0)
 
 var main: Node
 var player: CharacterBody3D
@@ -30,6 +36,8 @@ var failure_reason := ""
 var events: PackedStringArray = PackedStringArray()
 ## per surf section: entry/exit speed and contact ticks, for reports and tests.
 var surf_report: Dictionary = {}
+## input corrections taken after a missed line, in order; empty means a clean surf line.
+var recoveries: PackedStringArray = PackedStringArray()
 ## every single-tick horizontal speed loss above 1 m/s, with what was touched.
 var speed_drops: Array[Dictionary] = []
 var tick := 0
@@ -53,6 +61,7 @@ var _jump_delay := 0.0
 var _peak_speed := 0.0
 var _stages: Array[int] = [0]
 var _trace_path := ""
+var _low_exit := false
 
 func attach(owner_main: Node) -> void:
 	main = owner_main
@@ -150,7 +159,24 @@ func _drive() -> void:
 			_begin_drop("CrestSurf")
 		"drop":
 			# keys stay as the takeoff left them: a held jump keeps hopping any deck on the way.
+			if str(_section.name) == "YardSurf":
+				if GEOMETRY.angle_at(_section, player.global_position) > _section.arc and player.global_position.x < -18.0:
+					_recover("yard drop passed the bank's tail")
+					phase = "yard_low_exit"
+				else:
+					var gap := _yard_gap()
+					# a miss beside the bank, low or clearly wide: curve right into its face, hops
+					# still held, harder the further out the line runs.
+					if gap > 2.5 or (gap > YARD_WIDE_GAP and player.global_position.y < YARD_WIDE_HEIGHT):
+						_recover("yard hop missed wide")
+						_strafe(1, clampf(1.4 + gap * .5, 2.0, 4.0), ["jump"])
 			_catch_surf()
+		"yard_low_exit":
+			# p / leaving the bank below the roof: hop up the inner ramp first, then u-turn as usual.
+			_low_exit = true
+			_strafe_toward(YARD_ROOF, 3.0, ["jump"])
+			if player.global_position.y > 2.9 and player.global_position.z < -98.5:
+				phase = "roof_uturn"
 		"surf":
 			_ride()
 		"crest_bhop":
@@ -181,7 +207,9 @@ func _drive() -> void:
 		"roof_uturn":
 			# p / the bank leaves the runner heading away from the finish over the roof;
 			# a held right strafe u-turn (about 150 degrees) lines up with the run-up.
-			_strafe(1, 3.6, ["jump"])
+			# p / a low exit starts its turn further along the roof, so it turns tighter to come
+			# round before the gantry rail.
+			_strafe(1, 4.4 if _low_exit else 3.6, ["jump"])
 			if absf(angle_difference(_velocity_yaw(), _runup_yaw())) < .12:
 				phase = "outflow_seek"
 		"outflow_seek":
@@ -259,6 +287,9 @@ func _ride() -> void:
 				phase = "crest_bhop"
 			"YardSurf":
 				phase = "roof_uturn"
+				if player.global_position.y < 2.9:
+					_recover("yard bank left below the roof")
+					phase = "yard_low_exit"
 			"OutflowLead", "OutflowSweep":
 				# the outflow pieces share their edges; the ride simply continues.
 				_enter(section_named("OutflowSweep" if section.name == "OutflowLead" else "OutflowSurf"))
@@ -283,6 +314,14 @@ func _ride_tick(section: Dictionary, theta: float) -> void:
 			# p / outflow keeps a lane 2 m under its descending coping, so the line tracks the profile.
 			target_y = _top_y(section, theta) - OUTFLOW_LANE
 	var side := int(section.get("side", 1.0))
+	if str(section.name) == "YardSurf" and player.is_grounded():
+		# p / slipped off the bank's foot onto the apron: held strafe there only walks into the
+		# face, so hop back onto it a little ahead, low on the face.
+		_recover("yard rider grounded beside the bank")
+		var foot: float = section.foot_height + 1.4
+		var radius: float = section.radius + (section.height - foot) / tan(deg_to_rad(60.0))
+		_strafe_toward(GEOMETRY.point(section, minf(theta + .15, section.arc), radius, foot), 3.0, ["jump"])
+		return
 	if int(section.bend) != side and player.global_position.y > target_y and player.velocity.y > 0.0:
 		# p / rising above the lane on a berm: stop pressing into it, so the climb dies out
 		# below the coping instead of carrying over it.
@@ -305,6 +344,25 @@ func _ride_tick(section: Dictionary, theta: float) -> void:
 static func _top_y(section: Dictionary, theta: float) -> float:
 	var at := clampf(theta, 0, section.arc)
 	return section.origin.y + GEOMETRY.coping_height(section, at) + GEOMETRY.drop_at(section, at)
+
+## how far a yard hop runs outside the bank's riding face at its height; 0 when not beside it.
+func _yard_gap() -> float:
+	var section := _section
+	var p := player.global_position
+	if p.x > 2.0 or p.y < .5:
+		return 0.0
+	var theta := GEOMETRY.angle_at(section, p)
+	if theta < 0.0 or theta > section.arc:
+		return 0.0
+	var center: Vector3 = section.origin + Basis(Vector3.UP, section.yaw) * Vector3(section.bend * section.radius, 0, 0)
+	var foot_radius: float = section.radius + (section.height - section.foot_height) / tan(deg_to_rad(60.0))
+	var face_radius := foot_radius - maxf(p.y - section.origin.y - section.foot_height, 0.0) / tan(deg_to_rad(60.0))
+	return Vector2(p.x - center.x, p.z - center.z).length() - face_radius
+
+func _recover(reason: String) -> void:
+	if recoveries.is_empty() or recoveries[-1] != reason:
+		recoveries.append(reason)
+		_note("RECOVER %s at %s" % [reason, _v(player.global_position)])
 
 func _runup_yaw() -> float:
 	var course := preload("res://scripts/spillway_course.gd")
@@ -477,7 +535,8 @@ func _complete(success: bool, reason: String) -> void:
 	if player != null and main != null:
 		var result := _sample("result")
 		result.merge({"success":success, "successes":1 if success else 0, "attempts":1,
-			"reason":reason, "trace_path":_trace_path, "surf_report":surf_report, "speed_drops":speed_drops}, true)
+			"reason":reason, "trace_path":_trace_path, "surf_report":surf_report, "speed_drops":speed_drops,
+			"recoveries":recoveries, "line":"clean" if recoveries.is_empty() else "recovered"}, true)
 		_write(result)
 	if _trace != null:
 		_trace.close()

@@ -26,7 +26,8 @@ func run() -> void:
 	level.build()
 	await physics_frame
 	await physics_frame
-	for valve: Array in [[Vector3(-3, 6.22, -37), .45], [Vector3(-36.5, 5.9, -82), .75], [Vector3(-18.5, 5.9, -82), .75], [Vector3(-35, 3.8, -76), .9]]:
+	# r12 / the east gate valve moved with its turned machinery house, from (-18.5, -82) to its centre.
+	for valve: Array in [[Vector3(-3, 6.22, -37), .45], [Vector3(-36.5, 5.9, -82), .75], [Vector3(-20.35, 5.9, -81.27), .75], [Vector3(-35, 3.8, -76), .9]]:
 		var center: Vector3 = valve[0]
 		var radius: float = valve[1]
 		for i: int in 16:

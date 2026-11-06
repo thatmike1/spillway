@@ -14,7 +14,7 @@ PROJECT = Path(__file__).resolve().parents[1]
 SUITES = ['test_spillway_audio.gd', 'test_spillway.gd', 'test_spillway_surf.gd',
           'test_surf_course.gd', 'test_surf_geometry.gd', 'test_spillway_flow.gd',
           'test_spillway_access.gd', 'test_spillway_boundaries.gd']
-OPTIONAL_SUITES = ['test_spillway_recovery.gd', 'test_yard_join.gd']
+OPTIONAL_SUITES = ['test_spillway_recovery.gd', 'test_yard_join.gd', 'test_basin_exit.gd']
 ROUTES = ['safe', 'fast', 'recovery', 'brake', 'safe_corner', 'wet']
 
 
