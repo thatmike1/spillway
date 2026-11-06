@@ -425,8 +425,8 @@ func _penstocks() -> void:
 	for i: int in rings.size():
 		colors.append((_materials["steel"] as StandardMaterial3D).albedo_color.srgb_to_linear())
 	_scatter("ArtPenstockFlanges", ring, rings, colors)
-	_box(Vector3(12.75, -3.4, -18.0), Vector3(4.6, 2.6, 3.4), "old_concrete")
-	_box(Vector3(12.75, -2.0, -18.0), Vector3(4.9, 0.25, 3.7), "concrete")
+	_level.call("_box", Vector3(12.75, -3.4, -18.0), Vector3(4.6, 2.6, 3.4), "old_concrete", true, "PenstockThrustBlock")
+	_level.call("_box", Vector3(12.75, -2.0, -18.0), Vector3(4.9, 0.25, 3.7), "concrete", true, "PenstockThrustCap")
 
 
 func _finish_bay() -> void:

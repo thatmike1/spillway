@@ -225,10 +225,13 @@ func _make_switchback() -> void:
 	_rail(Vector3(-6.7, 8.0, -16.0), Vector3(-6.7, 8.0, -20.0))
 	_rail(Vector3(-6.7, 8.0, -20.0), Vector3(-19.0, 8.0, -20.0))
 	_rail(Vector3(-19.0, 8.0, -20.0), Vector3(-19.0, 8.0, -16.0))
-	_rail(Vector3(-25.0, 4.0, 3.0), Vector3(-25.0, 4.0, -43.0))
-	_rail(Vector3(-25.0, 4.0, 3.0), Vector3(-13.0, 4.0, 3.0))
+	# p / the long rail and its return feet stand inside the actual walk edges.
+	_rail(Vector3(-24.35, 4.0, 1.15), Vector3(-24.35, 4.0, -41.15))
+	_rail(Vector3(-24.85, 4.0, 2.85), Vector3(-24.35, 4.0, 1.15))
+	_rail(Vector3(-24.35, 4.0, -41.15), Vector3(-24.85, 4.0, -42.85))
+	_rail(Vector3(-24.85, 4.0, 2.85), Vector3(-13.15, 4.0, 2.85))
 	_rail(Vector3(-19.5, 4.0, -3.5), Vector3(-19.5, 4.0, -38.8))
-	_rail(Vector3(-25.0, 4.0, -43.0), Vector3(-12.0, 4.0, -43.0))
+	_rail(Vector3(-24.85, 4.0, -42.85), Vector3(-12.15, 4.0, -42.85))
 	for z: float in [-5.0, -18.0, -32.0]:
 		_solid("WestWalkPier", Vector3(-22.0, -2.0, z), Vector3(1.25, 11.4, 1.4), "old_concrete")
 	for x: float in [-16.0, -9.0]:
@@ -247,7 +250,7 @@ func _make_chute() -> void:
 		_solid("GateUpright", Vector3(x, 10.1, -13.0), Vector3(0.4, 5.0, 0.8), "steel")
 	# p / the crest frame is readable at speed; the yard owns the optional low gate.
 	_box(Vector3(2.5, 11.35, -13.0), Vector3(6.7, 0.5, 0.6), "ochre", true, "RaisedDryingGate")
-	_box(Vector3(2.5, 13.05, -13.0), Vector3(7.1, 0.22, 0.95), "steel")
+	_box(Vector3(2.5, 13.05, -13.0), Vector3(7.1, 0.22, 0.95), "steel", true, "DryingFrameCap")
 	for x: float in [0.0, 1.25, 2.5, 3.75, 5.0]:
 		_box(Vector3(x, 12.15, -13.0), Vector3(0.10, 1.2, 0.18), "steel")
 
@@ -290,7 +293,7 @@ func _make_terrace() -> void:
 	# the finish is an architectural threshold, with the tower visible beyond.
 	for x: float in [8.2, 13.8]:
 		_solid("ExitCanopyColumn", Vector3(x, 5.65, -60.3), Vector3(0.3, 3.3, 0.35), "steel")
-	_box(Vector3(11.0, 7.4, -60.3), Vector3(6.6, 0.22, 2.8), "terracotta")
+	_box(Vector3(11.0, 7.4, -60.3), Vector3(6.6, 0.22, 2.8), "terracotta", true, "ExitCanopyRoof")
 	_box(Vector3(11.0, 7.24, -58.85), Vector3(6.6, 0.10, 0.12), "ochre")
 	for x: float in [-9.0, 1.0, 12.0]:
 		_solid("ExitDeckPier", Vector3(x, -2.0, -59.0), Vector3(1.4, 11.0, 2.0), "old_concrete")
@@ -312,6 +315,10 @@ func _make_water_and_recovery() -> void:
 	water_regions.append({"bounds": AABB(Vector3(-6.0, 1.35, -56.0), Vector3(23.0, 0.5, 13.0)), "depth": 0.18})
 	_ramp("BridgeRecoveryRamp", Vector3(15.0, 1.5, -45.0), Vector3(15.0, 4.0, -56.0), 3.2, 0.5, "concrete")
 	_solid("SettlingBasinEastWall", Vector3(17.3, 1.6, -49.5), Vector3(0.6, 2.2, 13.0), "wet_concrete")
+	# p / retain the shallow water on every exposed edge, with its shared channel open.
+	_solid("SettlingBasinWestWall", Vector3(-6.3, 1.6, -49.5), Vector3(0.6, 2.2, 13.6), "wet_concrete")
+	_solid("SettlingBasinSouthWall", Vector3(5.5, 1.6, -56.3), Vector3(23.6, 2.2, 0.6), "wet_concrete")
+	_solid("ChannelSouthwestReturn", Vector3(-7.0, 1.6, -43.3), Vector3(2.6, 2.2, 0.6), "wet_concrete")
 	_solid("SettlingBasinNorthReturn", Vector3(16.15, 1.6, -42.9), Vector3(2.3, 2.2, .6), "wet_concrete")
 	# surface drains at the ramp feet provide scale without obstructing capsules.
 	for z: float in [-28.7, -44.7]:
@@ -416,7 +423,7 @@ func _make_mantle_housing() -> void:
 func _make_architecture() -> void:
 	# large pipes and a tower keep the dam legible from the very first view.
 	for x: float in [11.5, 14.0]:
-		_cylinder(Vector3(x, 10.0, 5.0), Vector3(x, -3.0, -18.0), 0.55, "pipe")
+		_cylinder(Vector3(x, 10.0, 5.0), Vector3(x, -3.0, -18.0), 0.55, "pipe", true)
 		# p / the pressure main dives below the basin before the walkable loading apron.
 		_cylinder(Vector3(x, -3.0, -18.0), Vector3(x, -3.0, -55.0), 0.55, "pipe")
 		_cylinder(Vector3(x, -3.0, -55.0), Vector3(x, -7.0, -60.0), 0.55, "pipe")
@@ -441,7 +448,7 @@ func _make_architecture() -> void:
 		_solid("WestWingButtress", Vector3(-26.3, -3.0, z), Vector3(2.5, 17.0, 2.0), "concrete")
 	# a small utility house at the crest provides nearby scale and layered shadow.
 	_solid("CrestGatehouse", Vector3(-15.0, 14.0, 7.5), Vector3(5.0, 4.0, 4.0), "terracotta")
-	_box(Vector3(-15.0, 16.15, 7.5), Vector3(5.6, 0.3, 4.6), "concrete")
+	_box(Vector3(-15.0, 16.15, 7.5), Vector3(5.6, 0.3, 4.6), "concrete", true, "CrestGatehouseRoof")
 	_box(Vector3(-15.0, 13.45, 5.47), Vector3(1.0, 2.9, 0.08), "steel")
 	_box(Vector3(-13.3, 14.5, 5.45), Vector3(1.25, 1.4, 0.08), "shadow")
 	# grating is recessed into the far terrace wall, not placed across a running line.
@@ -450,6 +457,15 @@ func _make_architecture() -> void:
 
 
 func _make_landscape() -> void:
+	# p / the forebay is held by a full-depth dam and banks, not a suspended plane.
+	_solid("ReservoirDamFace", Vector3(-14.0, -2.0, 11.9), Vector3(154.0, 25.0, 2.2), "old_concrete")
+	for x: float in [-90.0, 62.0]:
+		_solid("ReservoirSideBank", Vector3(x, -2.0, 68.0), Vector3(4.0, 25.0, 114.0), "old_concrete")
+	_solid("ReservoirBackBank", Vector3(-14.0, -2.0, 123.0), Vector3(154.0, 25.0, 4.0), "old_concrete")
+	_slab("ReservoirCoping", Vector3(-14.0, 10.65, 11.9), Vector2(154.4, 2.5), 0.15, "concrete")
+	_landform(Vector3(-98.0, -7.0, 79.0), Vector2(46.0, 162.0), 29.0, 1.2)
+	_landform(Vector3(73.0, -7.0, 79.0), Vector2(46.0, 162.0), 26.0, 2.5)
+	_landform(Vector3(-14.0, -7.0, 135.0), Vector2(206.0, 54.0), 25.0, 0.6)
 	_water("UpperReservoir", Vector3(-14.0, 8.7, 67.0), Vector2(150.0, 108.0), "reservoir")
 	_water("DistantOutflow", Vector3(18.0, -7.4, -101.0), Vector2(130.0, 70.0), "reservoir")
 	# p / rounded banks replace the provisional spiked backdrop; no traversal collision.
@@ -459,6 +475,8 @@ func _make_landscape() -> void:
 	_landform(Vector3(0.0, -9.5, -83.0), Vector2(170.0, 230.0), 0.5, 0.3)
 	_landform(Vector3(-38.0, -9.0, -24.0), Vector2(27.0, 86.0), 14.0, 0.5)
 	_landform(Vector3(30.0, -9.0, -8.0), Vector2(23.0, 72.0), 16.0, 1.5)
+	_landform(Vector3(92.0, -10.0, -125.0), Vector2(34.0, 80.0), 16.0, 1.8)
+	_landform(Vector3(-54.0, -9.0, -120.0), Vector2(30.0, 82.0), 12.0, 0.9)
 	_make_trees()
 
 
@@ -695,7 +713,8 @@ func _rail(a: Vector3, b: Vector3, material: String = "steel") -> void:
 	for i: int in sections + 1:
 		var point: Vector3 = a.lerp(b, float(i) / float(sections))
 		_box(point + Vector3.UP * 0.525, Vector3(0.075, 1.05, 0.075), material)
-		_box(point + Vector3.UP * 0.035, Vector3(0.22, 0.07, 0.22), material)
+		var foot := _box(point + Vector3.UP * 0.035, Vector3(0.22, 0.07, 0.22), material)
+		foot.set_meta("rail_base", point)
 
 
 func _beam(a: Vector3, b: Vector3, thickness: float, material: String, collision: bool = false) -> void:
@@ -746,9 +765,30 @@ func _wheel(center: Vector3, radius: float, material: String, horizontal: bool =
 		if horizontal:
 			offset_a = Vector3(offset_a.x, 0.0, offset_a.y)
 			offset_b = Vector3(offset_b.x, 0.0, offset_b.y)
-		_beam(center + offset_a, center + offset_b, radius * 0.075, material, not moving)
+		_beam(center + offset_a, center + offset_b, radius * 0.075, material)
 		if i % (count / 8) == 0:
-			_beam(center, center + offset_a, radius * 0.048, "steel", not moving)
+			_beam(center, center + offset_a, radius * 0.048, "steel")
+
+	if not moving:
+		# p / a visible backing disc and one convex envelope remove spoke/rim traps.
+		var axis := Vector3.UP if horizontal else Vector3.BACK
+		_cylinder(center - axis * radius * 0.075, center - axis * radius * 0.0125, radius, "steel")
+		var body := StaticBody3D.new()
+		body.name = "ValveConvexDisc"
+		body.position = center
+		body.collision_layer = 1
+		body.collision_mask = 0
+		body.set_meta("surface", "metal")
+		body.set_meta("valve_disc", true)
+		var shape := CylinderShape3D.new()
+		shape.radius = radius * 1.038
+		shape.height = radius * 0.075
+		var collision := CollisionShape3D.new()
+		collision.shape = shape
+		if not horizontal:
+			collision.rotation.x = PI * 0.5
+		body.add_child(collision)
+		add_child(body)
 
 	var members := get_children().slice(first_child)
 	var pivot := Node3D.new()

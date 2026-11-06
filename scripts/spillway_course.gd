@@ -136,7 +136,7 @@ func _make_yard() -> void:
 	for x: float in [-33.2, -21.8]:
 		_level.call("_solid", "GateGuide", Vector3(x, 3.6, -82), Vector3(.3, 4.2, 1.4), "steel")
 		_level.call("_cylinder", Vector3(x, 5.7, -82), Vector3(x, 7.1, -82), .1, "steel", true)
-	_level.call("_beam", Vector3(-33.7, 7.1, -82), Vector3(-21.3, 7.1, -82), .3, "steel")
+	_level.call("_beam", Vector3(-33.7, 7.1, -82), Vector3(-21.3, 7.1, -82), .3, "steel", true)
 	# broad east bypass bends around the working housings, then returns to the roof.
 	for z: float in [-76]:
 		_stage(_level.call("_solid", "ValvePlinth", Vector3(-35, 2.1, z), Vector3(4, 1.2, 4), "old_concrete"), 1)
