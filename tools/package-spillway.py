@@ -125,10 +125,11 @@ def main():
             (folder / 'README.txt').write_text(
                 'SPILLWAY / THE LONG WAY DOWN\n' + identity + '\n\nExtract the whole folder, then ' + launch + '.\n'
                 'No source checkout or engine installation is needed. Keep runtime/ and spillway.pck together.\n'
-                'WASD run; mouse look; Space jump; Ctrl/C slide; R clean restart; F segment practice; Esc settings; F11 fullscreen.\n'
-                'Carry speed downhill, or take the broad stairs and gantries. Shallow water has exit ramps.\n'
+                'WASD run; mouse look; Space jump (hold to bhop); Ctrl/C slide; R restart; F segment practice; Esc settings; F11 fullscreen.\n'
+                'Air strafe: release W, hold A or D and turn the mouse the same way. Surf: strafe into the angled face.\n'
+                'Autohop is on by default; toggle it in Esc settings. Slides and hops keep speed through shallow water.\n'
                 'The visible build identity is in the pause menu. BUILD.json records this exact source and runtime.\n'
-                'Settings and personal bests use the OS Godot user data directory for Spillway.\n'
+                'R12 settings and personal bests use spillway_r12.cfg in the OS Godot user data directory for Spillway. R11 records stay separate.\n'
                 'Native Windows gameplay and physical gamepad hardware are unverified on the Linux build host.\n')
             destination = output / (identity + '-' + platform + '-' + source[:8] + '.zip')
             archive(folder, destination)

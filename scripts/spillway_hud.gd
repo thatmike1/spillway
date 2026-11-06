@@ -38,7 +38,7 @@ func attach(main: Node) -> void:
 	add_child(overlay)
 	title = _label("SPILLWAY", 46, Vector2(42, 32))
 	subtitle = _label("THE LONG WAY DOWN", 14, Vector2(45, 86), Color("f3cd83"))
-	status = _label("WASD move    Space jump, hold to hop    Ctrl / C slide\nIn the air: hold A or D and turn the mouse the same way\nR new run    F segment practice    Esc settings", 17, Vector2(44, 127))
+	status = _label("WASD move    Space jump, hold to hop    Ctrl / C slide\nAir: release W, hold A or D, turn the mouse the same way\nR new run    F segment practice    Esc settings", 17, Vector2(44, 127))
 	speed_label = _label("", 19, Vector2(42, 640))
 	timing = _label("", 15, Vector2(42, 673))
 	message = _label("", 20, Vector2(42, 572))
@@ -73,7 +73,7 @@ func _process(delta: float) -> void:
 	subtitle.modulate.a = _title_alpha
 	status.modulate.a = _title_alpha
 	var move_label: String = {"slide": "  /  SLIDE", "surf": "  /  SURF"}.get(str(game.player.mode), "")
-	speed_label.text = "%02d  km/h%s" % [roundi(speed * 3.6), move_label]
+	speed_label.text = "%d  km/h%s" % [roundi(speed * 3.6), move_label]
 	timing.text = "PRACTICE · R starts a clean run" if not game.clean_eligible else ("BEST  %s" % _time(game.best_time) if game.best_time > 0.0 else "")
 	if game.finish_kind == "exploration":
 		timing.text = "EXPLORATION · R starts a clean run"
@@ -128,6 +128,10 @@ func _make_pause() -> void:
 	identity.text = game.BUILD_ID
 	identity.add_theme_font_size_override("font_size", 13)
 	column.add_child(identity)
+	var controls := Label.new()
+	controls.text = "Air: release W. Hold A/D + turn mouse the same way.\nHold Space to hop; Ctrl / C to slide."
+	controls.add_theme_font_size_override("font_size", 13)
+	column.add_child(controls)
 	for item: Array in [["Mouse sensitivity", "sensitivity", 0.3, 2.5, 0.05], ["Horizontal field of view", "fov", 75.0, 110.0, 1.0], ["Volume", "volume", 0.0, 1.0, 0.05]]:
 		var label := Label.new()
 		label.text = item[0]

@@ -1,12 +1,12 @@
 # Spillway r12: active build, 6 Nov 2026
 
-Contract: BRIEF.md here (verbatim outer SURF-BRIEF.md). Bhop/surf supersedes R11 air restrictions; sunlit dam/art/three stages stay. Minimum work time is 17:00 UTC / 18:00 Prague today. Goal is active and incomplete. Mike is unavailable; decide autonomously. Never claim enjoyment. Current source branch feat/foldrunner-me-build, bead ccChat-general-rowb. Pushed HEAD172d9454. REPORT still points to delivered R11 until exact r12 delivery passes.
+Contract: BRIEF.md here (verbatim outer SURF-BRIEF.md). Bhop/surf supersedes R11 air restrictions; sunlit dam/art/three stages stay. Minimum work time is 17:00 UTC / 18:00 Prague today. Goal is active and incomplete. Mike is unavailable; decide autonomously. Never claim enjoyment. Current source branch feat/foldrunner-me-build, bead ccChat-general-rowb. Pushed source includes the crease/cap fixes, actual-chute reproducer, running audit and speed/contact audio. REPORT still points to delivered R11 until exact r12 delivery passes.
 
 ## Ownership right now
 
 Opus course pass is RUNNING, started 11:27 UTC, original exec cell97 returned a timed-out wait. Do not poll or duplicate it; completion wakes the parent. Task22c6b091-3779-4160-96e5-f4804432a527 owns level/course/surf_geometry/probe_surf_course/access, optional new surf driver/course test/art files. Root must not edit those until handoff. Root owns player/main/HUD/audio, motor/flow/geometry tests, water probe, tools/docs/package. Next Opus slot no earlier 12:28 UTC. One consultation per hour remains in force.
 
-Root has one uncommitted main change: visible identity r11→r12. Root's tests/test_surf_geometry.gd changed the relocated drying-frame check. Other live course edits are with Opus. Do not stage someone else's unrelated files. Canonical decision trail: docs/reboot/decisions.tsv.
+Visible identity and packaged controls say r12. Root's tests/test_surf_geometry.gd changed the relocated drying-frame check. Other live course edits are with Opus. Do not stage someone else's unrelated files. Canonical decision trail: docs/reboot/decisions.tsv.
 
 ## Verified so far
 
@@ -20,6 +20,6 @@ Actual-chute water fixture now proves the reported bug and fix: R11 wet3.2/dry15
 
 ## Next work
 
-Commit the water proof. Strict continuous-running analysis counts turns and brief stops: safe-3 has a 15.4s plain stretch, so the no-walk rule is still unmet. This evidence was steered to the active course pass. Review Opus handoff against live source and native frames, integrate the course driver and adapt obsolete map assertions explicitly. Consider separately rewarding clean physical skips without fabricating missing splits once access work settles. Then current fast/safe/recovery routes, perturbations and off-line discovery, no-walk measurement, final native evidence and remaining visual/gameplay fixes. Package r12 Linux/Windows with checksums, visible pause identity, isolated exact-pack tests, launch/persistence checks, updated REPORT/checkpoint, cross-family trail review and pushed commits. Keep working through the minimum time and actual acceptance.
+Water proof and audio are committed and pushed. Audio24/24 covers PCM continuity and mixer state only, not listening quality. Native pause at960x540 shows r12, the release-W reminder and all settings; flow103/103 passes. Strict continuous-running analysis counts turns and brief stops: safe-3 has a 15.4s plain stretch, so the no-walk rule is still unmet. This evidence was steered to the active course pass. Review Opus handoff against live source and native frames, integrate the course driver and adapt obsolete map assertions explicitly. Consider separately rewarding clean physical skips without fabricating missing splits once access work settles. Then current fast/safe/recovery routes, perturbations and off-line discovery, no-walk measurement, final native evidence and remaining visual/gameplay fixes. Package r12 Linux/Windows with checksums, visible pause identity, isolated exact-pack tests, launch/persistence checks, updated REPORT/checkpoint, cross-family trail review and pushed commits. Keep working through the minimum time and actual acceptance.
 
 Canonical memory capture e8917e0bade94850a146f6f74e846403 updates the accepted genre/contract. Existing untracked topic/history files in the main checkout belong to the shared memory workflow; do not stage other writers' changes. Deleted /home/thatmike1/mirrors-edge must stay deleted; retain R11 packages and mirrors-edge-re evidence.

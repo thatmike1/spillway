@@ -1,7 +1,7 @@
 extends Node3D
 ## p / run provenance is separate from movement and presentation.
 
-const BUILD_ID := "spillway-2026.11.06-r11"
+const BUILD_ID := "spillway-2026.11.06-r12"
 # p / r12 physics and course times are a new record namespace in their own file; the r11
 # profile is never rewritten, and only its settings seed a first r12 profile.
 const SAVE_PATH := "user://spillway_r12.cfg"
