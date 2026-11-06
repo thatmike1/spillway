@@ -14,6 +14,7 @@ PROJECT = Path(__file__).resolve().parents[1]
 SUITES = ['test_spillway_audio.gd', 'test_spillway.gd', 'test_spillway_surf.gd',
           'test_surf_course.gd', 'test_surf_geometry.gd', 'test_spillway_flow.gd',
           'test_spillway_access.gd', 'test_spillway_boundaries.gd']
+OPTIONAL_SUITES = ['test_spillway_recovery.gd', 'test_yard_join.gd']
 ROUTES = ['safe', 'fast', 'recovery', 'brake', 'safe_corner', 'wet']
 
 
@@ -29,7 +30,9 @@ def stage_fixtures(commit, destination):
     """Keep fixtures from the packaged source revision; runtime loads still use the PCK."""
     files = git('ls-tree', '-r', '--full-tree', '--name-only', commit, 'projects/foldrunner/tests').decode().splitlines()
     assert set(SUITES + ['surf_motor_driver.gd']) <= {Path(name).name for name in files}, 'required fixture source missing'
-    needed = set(SUITES + ['surf_motor_driver.gd', 'test_spillway_recovery.gd'])
+    # historical r12 candidates predate these regressions; a source that contains one
+    # must stage and execute it against its own pack rather than silently ignoring it.
+    needed = set(SUITES + OPTIONAL_SUITES + ['surf_motor_driver.gd'])
     files = [name for name in files if Path(name).name in needed]
     originals = destination / 'fixture-originals'
     staged = destination / 'fixture-runners'
@@ -141,7 +144,7 @@ def main():
     assert platforms == {'linux-x86_64', 'windows-x86_64'} and linux
     (output / 'archive-audit.json').write_text(json.dumps(checks, indent=2) + '\n')
     fixtures = stage_fixtures(common['source_commit'], output)
-    suites = SUITES + (['test_spillway_recovery.gd'] if (fixtures / 'test_spillway_recovery.gd').exists() else [])
+    suites = SUITES + [name for name in OPTIONAL_SUITES if (fixtures / name).exists()]
     rows = []
     for suite in suites:
         folder = output / suite.removesuffix('.gd')
