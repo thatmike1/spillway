@@ -70,6 +70,8 @@ func _process(_delta: float) -> bool:
 	if active.get("quit", false):
 		game.call("request_quit")
 		return false
+	# fixed-fps ignores the ordinary frame limiter; render only while a batch is active.
+	RenderingServer.render_loop_enabled = true
 	var next_held: Array[String] = []
 	for action: String in active.get("keys", []):
 		if action in ["move_forward", "move_back", "move_left", "move_right", "jump", "crouch"]:
@@ -120,3 +122,4 @@ func snapshot() -> void:
 	remaining = 0
 	active = {}
 	capturing = false
+	RenderingServer.render_loop_enabled = false
