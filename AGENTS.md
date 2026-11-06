@@ -1,6 +1,6 @@
 # Spillway
 
-Before movement, level, presentation or delivery changes, read docs/reboot/BRIEF.md. It is the active game contract. docs/reboot/STATUS.md is the resume checkpoint. The earlier reconstruction, folding-city and FEEL contracts are historical.
+Before movement, level, presentation or delivery changes, read docs/surf/BRIEF.md. It is the active r12 bhop/surf contract. docs/reboot/BRIEF.md still supplies the setting, art direction and three stages; its air-speed restrictions are superseded. docs/surf/STATUS.md is the resume checkpoint. Earlier reconstruction, folding-city and FEEL contracts are historical.
 
 Godot4.7.2, GDScript, Compatibility rendering, metres/seconds/radians,120Hz physics. All new tuning is P / game choices. spillway_player.gd owns collision and velocity; camera/audio present actual motion. Runtime ownership and verification are in docs/reboot/RUNTIME.md and docs/reboot/VERIFICATION.md.
 
