@@ -1,8 +1,9 @@
 extends "res://scripts/audio.gd"
-## p / original synthesis, with quiet continuous water and speed-driven wind.
+## p / original synthesis, with quiet water, speed-driven wind and contact scrape.
 var _slide_voice: AudioStreamPlayer
 var _waters: Array[AudioStreamPlayer3D] = []
 var _step_surface: String = "concrete"
+var _contact_level: float = 0.0
 
 func attach(player: CharacterBody3D, level: Node3D) -> void:
 	_enabled = DisplayServer.get_name() != "headless"
@@ -55,12 +56,23 @@ func _process(delta: float) -> void:
 	if not _enabled or _player == null or _wind == null:
 		return
 	var speed: float = _player.get_speed()
-	var target := 0.0 if get_tree().paused else clampf((speed - 4.0) / 12.0, 0.0, 1.0)
+	# p / wind keeps describing earned speed above 16 m/s, through the motor's 30 cap.
+	var target := 0.0 if get_tree().paused else clampf((speed - 4.0) / 26.0, 0.0, 1.0)
 	_wind_level = lerpf(_wind_level, target, 1.0 - exp(-4.0 * delta))
-	_wind.volume_db = linear_to_db(maxf(_wind_level * _wind_level * 0.16, 0.0001))
-	_wind.pitch_scale = 0.8 + _wind_level * 0.4
-	var scrape := clampf(speed / 16.0, 0.0, 1.0) * 0.15 if _player.mode == "slide" and not get_tree().paused else 0.0
-	_slide_voice.volume_db = lerpf(_slide_voice.volume_db, linear_to_db(maxf(scrape, 0.0001)), 1.0 - exp(-12.0 * delta))
+	_wind.volume_db = linear_to_db(maxf(_wind_level * 0.12, 0.0001))
+	_wind.pitch_scale = 0.8 + sqrt(_wind_level) * 0.6
+	var contact := str(_player.mode)
+	var scrape := 0.0
+	if not get_tree().paused:
+		if contact == "slide":
+			scrape = clampf(speed / 16.0, 0.0, 1.0) * (0.10 if _player.in_water else 0.15)
+		elif contact == "surf":
+			# p / a quiet sustained scrape confirms real ramp contact, ending on departure.
+			scrape = clampf(speed / 30.0, 0.0, 1.0) * 0.10
+	_contact_level = lerpf(_contact_level, scrape, 1.0 - exp(-12.0 * delta))
+	_slide_voice.volume_db = linear_to_db(maxf(_contact_level, 0.0001))
+	var scrape_pitch := 1.05 + clampf(speed / 30.0, 0.0, 1.0) * 0.45 if contact == "surf" else 1.9
+	_slide_voice.pitch_scale = lerpf(_slide_voice.pitch_scale, scrape_pitch, 1.0 - exp(-8.0 * delta))
 
 func _on_landed(impact: float) -> void:
 	if not _enabled:
