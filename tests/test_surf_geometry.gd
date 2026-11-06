@@ -34,7 +34,7 @@ func run() -> void:
 			var at := center + Vector3(cos(angle), 0, sin(angle)) * radius * .70
 			top(at, center.y + radius * .0375, "valve %s has continuous support at sector %d" % [center, i])
 	top(Vector3(-27.5, 7.25, -82), 7.25, "yard gate top beam supports the capsule")
-	top(Vector3(2.5, 13.16, -13), 13.16, "drying frame cap is solid")
+	top(Vector3(-3.5, 13.16, -13), 13.16, "drying frame cap is solid")
 	top(Vector3(11, 7.51, -60.3), 7.51, "exit canopy is solid")
 	top(Vector3(-17.65, 16.3, 7.5), 16.3, "gatehouse roof overhang is solid")
 	top(Vector3(12.75, -1.875, -18), -1.875, "penstock thrust cap is solid")

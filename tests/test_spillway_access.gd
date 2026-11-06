@@ -105,10 +105,12 @@ func housing_toward_tower() -> void:
 	action("jump", false)
 	check(player.global_position.y < 2.85 and int(game.get("checkpoint_index")) == 1,
 		"landing on the low housing is still Yard; height alone does not admit Outflow: %s" % player.global_position)
-	await walk(Vector3(-16, 2.5, -98.6), 240)
-	await walk(Vector3(-6, .1, -95.3), 240)
+	# r12 / the jump meets the yard bank's tail and lands on the inner roof ramp; the turn
+	# toward the tower runs up it and along the roof onto the run-up, which now ends at the berm.
+	await walk(Vector3(-25.6, 3, -99.8), 240)
+	await walk(Vector3(-16, 3, -99.4), 240)
 	check(int(game.get("checkpoint_index")) == 2 and int(game.get("respawn_count")) == 0,
-		"turning toward the tower from the housing admits Outflow")
+		"turning toward the tower from the housing admits Outflow: %s on %s cp=%d" % [player.global_position, floor_name(), int(game.get("checkpoint_index"))])
 	check(int(player.get("jump_count")) == jumps + 1, "housing-to-run-up line uses only its original jump")
 	await fixture("roof bridge turns toward tower", Vector3(-21, 3.05, -98.9))
 	jumps = player.get("jump_count")
@@ -254,22 +256,18 @@ func floor_name() -> String:
 
 func deck_progress() -> void:
 	# r10: the r9 rail-hop repro; progress follows the deck actually reached.
-	await fixture("apron rail hop onto the run-up", Vector3(-14, 1.55, -91.4))
+	# r12 / retired: the r9/r10 apron rail-hop and corner-hop repros onto the old run-up. that
+	# junction is intentionally gone (the apron corner is the outflow berm's notch and the
+	# run-up leaves the roof). replacement: a hop over the notch rail meets the berm or the
+	# basin below, never the run-up, and claims nothing; the ordered surf finish is covered by
+	# tests/test_surf_course.gd from the normal spawn.
+	await fixture("notch rail hop into the outflow basin", Vector3(-14, 1.55, -88))
 	var jumps: int = player.get("jump_count")
-	await hop(Vector3(-14, 1.55, -91.4), Vector3(-14, 1.5, -102), 2, -94.4, -1)
-	check(floor_name() == "OutflowRunup" and int(game.get("checkpoint_index")) == 2 and int(game.get("respawn_count")) == 0,
-		"one jump over the apron rail lands on the run-up and admits Outflow: %s on %s" % [player.global_position, floor_name()])
-	check(int(player.get("jump_count")) == jumps + 1, "the rail hop is a single ordinary jump")
-	for target: Vector3 in [Vector3(-6, .1, -95.3), Vector3(-7, -6, -91), Vector3(-10, -6, -82), Vector3(-10, -3, -63.5), Vector3(15, -3, -65), Vector3(23.8, -3, -68.8)]:
-		if bool(game.get("finished")):
-			break
-		await walk(target, 900)
-	check(bool(game.get("finished")) and str(game.get("finish_kind")) == "clean" and game.get("splits").size() == 3 and int(game.get("respawn_count")) == 0,
-		"walking on through basin recovery finishes the run as an ordered result")
-	check(float(game.get("best_time")) > 0.0 and not "EXPLORATION" in str(game.get("hud").get("finish_label").text), "the ordered rail-hop finish is recorded")
-	await fixture("apron corner hop onto the run-up", Vector3(-17.2, 1.55, -90.4))
-	await hop(Vector3(-17.2, 1.55, -90.4), Vector3(-6, 1.5, -97), 0, -14.2, 1)
-	check(floor_name() == "OutflowRunup" and int(game.get("checkpoint_index")) == 2, "a diagonal hop off the apron corner also lands on the run-up and admits Outflow: %s on %s cp=%d" % [player.global_position, floor_name(), int(game.get("checkpoint_index"))])
+	await hop(Vector3(-14, 1.55, -88), Vector3(-14, 1.5, -102), 2, -90.4, -1)
+	await ticks(120)
+	check(floor_name() != "OutflowRunup" and int(game.get("checkpoint_index")) == 1 and int(game.get("respawn_count")) == 0,
+		"one jump over the notch rail stays in Yard and needs no reset: %s on %s" % [player.global_position, floor_name()])
+	check(int(player.get("jump_count")) == jumps + 1, "the notch hop is a single ordinary jump")
 	# hops from the yard crossing reach finale decks; those stay catches, never entries.
 	# the old entry-ramp-to-apron hop is retired: visible screening now guards that drop.
 	# terrace_direction checks its physical replacement and the open path into the yard.
@@ -300,7 +298,7 @@ func deck_progress() -> void:
 	check(not bool(game.get("finished")) and str(game.get("finish_kind")).is_empty() and int(game.get("checkpoint_index")) == 0 and bool(game.get("clean_eligible")),
 		"R after the exploration finish starts a fresh clean attempt")
 	# seeded: decks admit only the next stage, from the crest as well.
-	await fixture("seeded crest pose on the run-up", Vector3(-12, 2.4, -98.2), false)
+	await fixture("seeded crest pose on the run-up", Vector3(-15, 3.05, -99.5), false)
 	await ticks(30)
 	check(floor_name() == "OutflowRunup" and int(game.get("checkpoint_index")) == 0, "an Outflow deck cannot skip an unvisited yard")
 	await fixture("seeded crest pose on the lower yard", Vector3(-25, 1.55, -76), false)
@@ -315,8 +313,9 @@ func deck_progress() -> void:
 	check(int(game.get("checkpoint_index")) == 0, "R from a tagged yard deck keeps Crest progress at spawn")
 	await ticks(4)
 	check(int(game.get("checkpoint_index")) == 0, "old yard contact cannot advance the fresh run")
-	await fixture("restart after tagged Outflow contact", Vector3(-14, 1.55, -91.4))
-	await hop(Vector3(-14, 1.55, -91.4), Vector3(-14, 1.5, -102), 2, -94.4, -1)
+	# r12 / the yard-admitted fixture now stands on the run-up itself for its Outflow contact.
+	await fixture("restart after tagged Outflow contact", Vector3(-15, 3.05, -99.5))
+	await ticks(20)
 	check(floor_name() == "OutflowRunup" and int(game.get("checkpoint_index")) == 2, "restart starts with a real Outflow floor contact")
 	game.call("restart_run")
 	await ticks(3)
@@ -338,7 +337,23 @@ func terrace_direction() -> void:
 		check(int(game.get("respawn_count")) == 0, "meeting the maintenance screen needs no reset")
 	await fixture("terrace continuation to yard", Vector3(10, 4.04, -59), false)
 	check(await walk(Vector3(10, 4, -73)), "the broad opening still leads south from the terrace")
-	check(await walk(Vector3(-12, 4, -74)), "the unobstructed crossing turns west toward the yard")
+	# r12 / the crossing now has a 1.6 m service joint at x -3..-1.4: one ordinary hop.
+	check(await walk(Vector3(0.4, 4, -74)), "the broad crossing turns west toward the yard")
+	var crossing_jumps: int = player.get("jump_count")
+	aim(Vector3(-12, 4, -74))
+	action("move_forward", true)
+	while player.global_position.x > -.9:
+		await ticks(1)
+	action("jump", true)
+	await ticks(12)
+	action("jump", false)
+	for i: int in 120:
+		await ticks(1)
+		if player.is_on_floor() and player.global_position.x < -3.2:
+			break
+	check(player.global_position.y > 3.9 and int(player.get("jump_count")) == crossing_jumps + 1,
+		"one ordinary hop clears the crossing joint: %s" % player.global_position)
+	check(await walk(Vector3(-12, 4, -74)), "the far crossing span continues west toward the yard")
 	check(int(game.get("checkpoint_index")) == 1 and int(game.get("respawn_count")) == 0,
 		"ordinary continuation discovers Yard before the finish")
 
@@ -426,16 +441,20 @@ func run() -> void:
 	root.add_child(game)
 	game.set("_persist", false)
 	player = game.get("player")
-	await fixture("west yard corner", Vector3(-9, 4.05, -56.5), false)
+	# r12 / the exit deck now has a service joint at x 2..3.6; the corner cut starts past it.
+	await fixture("west yard corner", Vector3(4.5, 4.05, -56.8), false)
 	check(await walk(Vector3(7.7, 4, -62.8)), "corner can be reached with ordinary input")
 	check(await walk(Vector3(9.9, 4, -69.5)), "entry ramp continues without a reset")
 	check(int(game.get("checkpoint_index")) == 1 and int(game.get("respawn_count")) == 0, "cutting the west corner still admits the yard")
+	# r12 / the apron's southeast corner is now a notch for the outflow berm; its rail guards it.
 	for x: float in [-14, -12.2]:
-		await fixture("guarded low apron %.1f" % x, Vector3(x, 1.55, -94))
+		await fixture("guarded low apron %.1f" % x, Vector3(x, 1.55, -88))
 		aim(Vector3(x, 1.5, -102))
 		action("move_forward", true)
 		await ticks(300)
-		check(player.global_position.z > -97.0 and int(game.get("checkpoint_index")) == 1, "ordinary running cannot step from the low apron onto the finale run-up")
+		action("move_forward", false)
+		check(player.global_position.z > -90.9 and player.global_position.y > 1.35 and int(game.get("checkpoint_index")) == 1,
+			"ordinary running stops at the notch rail above the outflow berm: %s" % player.global_position)
 	await fixture("guarded diagonal junction", Vector3(-14, 1.55, -90))
 	await walk(Vector3(-12, 1.5, -96.2), 240)
 	await walk(Vector3(-5, 0, -95), 300)
@@ -447,13 +466,18 @@ func run() -> void:
 	await ticks(80)
 	check(player.global_position.y >= 2.98 and player.global_position.z < -99.5 and int(game.get("checkpoint_index")) == 2, "one jump onto the housing runs smoothly onto the roof: %s mode=%s" % [player.global_position, player.get("mode")])
 	check(int(player.get("jump_count")) == jumps + 1, "the former slot and curb need no second jump")
-	await fixture("actual roof mantle", Vector3(-23.3, 1.54, -90))
-	var caught := await approach_roof(-23.3, -96.4)
-	check(caught, "held forward and jump catch the actual roof beside the housing")
+	# r12 / the yard bank's tail (YardSurfFace12-15) lies across the apron at x -27..-18, so the
+	# old x -23.3 lane ran into its face, not the roof. the mantle lane moves to the open lip
+	# between the two roof ramps; the housing step is still covered by the line above.
+	await fixture("actual roof mantle", Vector3(-32, 1.54, -90))
+	aim(Vector3(-32, 1.5, -102))
+	var caught := await approach_roof(-32, -96.4)
+	check(caught, "held forward and jump catch the actual roof between its access ramps")
 	await ticks(100)
-	check(player.global_position.y >= 2.98 and int(game.get("checkpoint_index")) == 2, "authored mantle lands in the Outflow admission region")
-	await fixture("actual roof mantle cancellation", Vector3(-23.3, 1.54, -90))
-	caught = await approach_roof(-23.3, -96.4)
+	check(player.global_position.y >= 2.98 and int(game.get("checkpoint_index")) == 2, "authored mantle lands in the Outflow admission region: %s v=%s mode=%s cp=%d" % [player.global_position, player.velocity, player.get("mode"), int(game.get("checkpoint_index"))])
+	await fixture("actual roof mantle cancellation", Vector3(-32, 1.54, -90))
+	aim(Vector3(-32, 1.5, -102))
+	caught = await approach_roof(-32, -96.4)
 	check(caught, "cancellation episode reaches a real catch")
 	if caught:
 		var count: int = player.get("mantle_count")

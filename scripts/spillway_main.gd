@@ -65,7 +65,7 @@ func _ready() -> void:
 		await get_tree().physics_frame
 		request_quit()
 	if args.has("--bot"):
-		bot = preload("res://scripts/spillway_driver.gd").new()
+		bot = preload("res://scripts/spillway_surf_driver.gd").new() if args.has("--route=fast") else preload("res://scripts/spillway_driver.gd").new()
 		add_child(bot)
 		bot.call("attach", self)
 

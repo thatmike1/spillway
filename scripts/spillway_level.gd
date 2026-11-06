@@ -12,6 +12,7 @@ var finish_position: Vector3 = Vector3(11.0, 4.0, -59.0)
 var finish_radius: float = 1.6
 var water_regions: Array[Dictionary] = []
 var routes: Dictionary = {}
+var surf_sections: Array[Dictionary] = []
 var water_audio_sources: Array[Vector3] = []
 var _water_surfaces: Array[Dictionary] = []
 var _hero_wheel: Node3D
@@ -42,7 +43,6 @@ func build() -> void:
 	segment_bounds = [AABB(Vector3(-32.0, -12.0, -66.0), Vector3(66.0, 43.0, 83.0))]
 	if not OS.get_cmdline_user_args().has("--crest"):
 		preload("res://scripts/spillway_course.gd").new().build(self)
-		routes["brake"].append_array(routes["safe"].slice(12))
 	preload("res://scripts/spillway_art.gd").new().apply(self)
 	if not OS.get_cmdline_user_args().has("--no-batch"):
 		_batch_static_boxes()
@@ -204,10 +204,15 @@ func _make_crest() -> void:
 		_solid("CrestPier", Vector3(x, 1.0, 5.5), Vector3(1.2, 20.0, 2.0), "old_concrete")
 	_rail(Vector3(-20.0, 12.0, 0.0), Vector3(-20.0, 12.0, 10.0))
 	_rail(Vector3(-20.0, 12.0, 10.0), Vector3(8.0, 12.0, 10.0))
-	_rail(Vector3(8.0, 12.0, 10.0), Vector3(8.0, 12.0, 0.0))
+	_rail(Vector3(8.0, 12.0, 10.0), Vector3(8.0, 12.0, 7.5))
+	_rail(Vector3(8.0, 12.0, 2.5), Vector3(8.0, 12.0, 0.0))
+	_slab("WetChuteAccess", Vector3(14.5, 12, 5), Vector2(15, 5), .7)
+	_ramp("WetChuteEntry", Vector3(20.5, 12, 5), Vector3(20.5, 12.7, 0), 3.2, .45, "wet_concrete")
+	_rail(Vector3(8, 12, 7.35), Vector3(21.85, 12, 7.35))
+	_rail(Vector3(8, 12, 2.65), Vector3(18.75, 12, 2.65))
 	# the gap in the low crest parapet exposes the stair and chute mouths.
 	_solid("CrestParapetWest", Vector3(-15.6, 12.42, 0.1), Vector3(8.8, 0.84, 0.3), "concrete")
-	_solid("CrestParapetMiddle", Vector3(-3.2, 12.42, 0.1), Vector3(6.0, 0.84, 0.3), "concrete")
+	_solid("CrestParapetMiddle", Vector3(-6.35, 12.42, 0.1), Vector3(0.7, 0.84, 0.3), "concrete")
 	_solid("CrestParapetEast", Vector3(6.8, 12.42, 0.1), Vector3(2.4, 0.84, 0.3), "concrete")
 	# short paint caps belong to the two actual route openings, not a floor trail.
 	_box(Vector3(-6.35, 12.86, 0.1), Vector3(0.26, 0.05, 0.36), "ochre")
@@ -220,17 +225,21 @@ func _make_switchback() -> void:
 	_slab("SwitchbackLanding", Vector3(-12.5, 8.0, -18.0), Vector2(13.0, 4.0), 0.65)
 	_stairs("LowerSwitchback", Vector3(-16.0, 8.0, -16.0), Vector3(-16.0, 4.0, 0.0), 4.6, 24)
 	_slab("LowerStairLanding", Vector3(-19.0, 4.0, 1.0), Vector2(12.0, 4.0), 0.7)
-	_slab("WestServiceWalk", Vector3(-22.0, 4.0, -20.0), Vector2(5.0, 42.0), 0.65)
+	# p / three open maintenance joints ask for simple hops and break the former long walk.
+	# each 2 m joint sits clear of the walk piers (z -5, -18, -32), so it is open to the ground.
+	for span: Vector2 in [Vector2(1, -9), Vector2(-11, -22), Vector2(-24, -35), Vector2(-37, -41)]:
+		_slab("WestServiceWalk", Vector3(-22, 4, (span.x + span.y) * .5), Vector2(5, span.x - span.y), .65)
 	_slab("WestTerraceJoin", Vector3(-15.5, 4.0, -41.0), Vector2(19.0, 4.0), 0.65)
 	_rail(Vector3(-6.7, 8.0, -16.0), Vector3(-6.7, 8.0, -20.0))
 	_rail(Vector3(-6.7, 8.0, -20.0), Vector3(-19.0, 8.0, -20.0))
 	_rail(Vector3(-19.0, 8.0, -20.0), Vector3(-19.0, 8.0, -16.0))
 	# p / the long rail and its return feet stand inside the actual walk edges.
-	_rail(Vector3(-24.35, 4.0, 1.15), Vector3(-24.35, 4.0, -41.15))
+	for span: Vector2 in [Vector2(1, -9), Vector2(-11, -22), Vector2(-24, -35), Vector2(-37, -41)]:
+		_rail(Vector3(-24.35, 4, span.x - .15), Vector3(-24.35, 4, span.y + .15))
+		_rail(Vector3(-19.65, 4, span.x - .15), Vector3(-19.65, 4, span.y + .15))
 	_rail(Vector3(-24.85, 4.0, 2.85), Vector3(-24.35, 4.0, 1.15))
 	_rail(Vector3(-24.35, 4.0, -41.15), Vector3(-24.85, 4.0, -42.85))
 	_rail(Vector3(-24.85, 4.0, 2.85), Vector3(-13.15, 4.0, 2.85))
-	_rail(Vector3(-19.5, 4.0, -3.5), Vector3(-19.5, 4.0, -38.8))
 	_rail(Vector3(-24.85, 4.0, -42.85), Vector3(-12.15, 4.0, -42.85))
 	for z: float in [-5.0, -18.0, -32.0]:
 		_solid("WestWalkPier", Vector3(-22.0, -2.0, z), Vector3(1.25, 11.4, 1.4), "old_concrete")
@@ -239,41 +248,49 @@ func _make_switchback() -> void:
 
 
 func _make_chute() -> void:
-	_ramp("DryChute", Vector3(2.5, 12.0, 0.0), Vector3(2.5, 6.0, -24.0), 5.0, 0.65, "concrete")
-	_slab("ChuteLaunch", Vector3(2.5, 6.0, -25.0), Vector2(5.0, 2.0), 0.65)
-	# smooth low side walls contain the descent, then end before the launch lip.
-	for x: float in [-0.25, 5.25]:
-		_ramp("ChuteSide", Vector3(x, 12.65, 0.0), Vector3(x, 6.65, -24.0), 0.4, 0.85, "old_concrete")
-		_box(Vector3(x, 6.36, -25.0), Vector3(0.4, 0.72, 2.0), "old_concrete", true, "LaunchCheek")
-	# a working drying gate makes crouch clearance legible on the fast line.
-	for x: float in [-0.7, 5.7]:
+	# p / the shallow west chute remains an easy slide; the curved dam face rewards strafe.
+	_ramp("DryChute", Vector3(-3.5, 12.0, 0.0), Vector3(-3.5, 6.0, -24.0), 4.6, 0.65, "concrete")
+	_slab("ChuteLaunch", Vector3(-3.5, 6.0, -25.0), Vector2(4.6, 2.0), 0.65)
+	for x: float in [-6.0, -1.0]:
+		_ramp("ChuteSide", Vector3(x, 12.65, 0.0), Vector3(x, 6.65, -24.0), 0.3, 0.85, "old_concrete")
+		_box(Vector3(x, 6.36, -25.0), Vector3(0.3, 0.72, 2.0), "old_concrete", true, "LaunchCheek")
+	for x: float in [-6.7, -0.3]:
 		_solid("GateUpright", Vector3(x, 10.1, -13.0), Vector3(0.4, 5.0, 0.8), "steel")
-	# p / the crest frame is readable at speed; the yard owns the optional low gate.
-	_box(Vector3(2.5, 11.35, -13.0), Vector3(6.7, 0.5, 0.6), "ochre", true, "RaisedDryingGate")
-	_box(Vector3(2.5, 13.05, -13.0), Vector3(7.1, 0.22, 0.95), "steel", true, "DryingFrameCap")
-	for x: float in [0.0, 1.25, 2.5, 3.75, 5.0]:
+	_box(Vector3(-3.5, 11.35, -13.0), Vector3(6.7, 0.5, 0.6), "ochre", true, "RaisedDryingGate")
+	_box(Vector3(-3.5, 13.05, -13.0), Vector3(7.1, 0.22, 0.95), "steel", true, "DryingFrameCap")
+	for x: float in [-6.0, -4.75, -3.5, -2.25, -1.0]:
 		_box(Vector3(x, 12.15, -13.0), Vector3(0.10, 1.2, 0.18), "steel")
-
-	# the dam's deep central web supports the sloping channel, outside the stairs.
-	_ramp("DamWeb", Vector3(2.5, 11.3, 0.0), Vector3(2.5, 5.3, -24.0), 9.0, 13.0, "old_concrete")
+	_ramp("DamWeb", Vector3(-3.5, 11.3, 0.0), Vector3(-3.5, 5.3, -24.0), 5.0, 13.0, "old_concrete")
+	surf_sections.append(preload("res://scripts/spillway_surf_geometry.gd").build(self,
+		"CrestSurf", Vector3(8, 4, -1), 0.0, 1, 46.0, 35.0, 14.0, 0.0, 0))
 	for z: float in [-4.0, -12.0, -21.0]:
 		var top := lerpf(12.7, 7.1, -z / 23.7) - 0.5
-		_solid("DamEastButtress", Vector3(8.6, (top - 8.5) * 0.5, z), Vector3(2.1, top + 8.5, 2.2), "concrete")
+		_solid("DamEastButtress", Vector3(20.6, (top - 8.5) * 0.5, z), Vector3(2.1, top + 8.5, 2.2), "concrete")
 
 
 func _make_terrace() -> void:
-	_slab("JumpLandingTerrace", Vector3(1.0, 4.0, -42.0), Vector2(18.0, 14.0), 0.7)
+	_slab("JumpLandingTerrace", Vector3(3.0, 4.0, -42.0), Vector2(26.0, 14.0), 0.7)
 	# p / a sloping apron below the catch lip avoids a deep vertical impact face.
 	_ramp("LandingApron", Vector3(1.0, 1.5, -33.2), Vector3(1.0, 3.3, -35.0), 18.0, 0.3, "old_concrete")
 	_beam(Vector3(-8.0, 4.025, -35.0), Vector3(10.0, 4.025, -35.0), 0.055, "ochre")
 	_slab("RecoveryRampJoin", Vector3(12.0, 4.0, -41.5), Vector2(6.0, 3.0), 0.65)
 	# the safe line turns west, south and east around the working settling basin.
 	_slab("ForgivingTerraceTurn", Vector3(-9.0, 4.0, -47.5), Vector2(6.0, 17.0), 0.8)
-	_slab("SliceExitDeck", Vector3(2.5, 4.0, -59.0), Vector2(29.0, 6.0), 0.85)
+	# p / a 1.6 m service joint in the exit deck, between its piers, is the next simple hop.
+	_slab("SliceExitDeck", Vector3(-5.0, 4.0, -59.0), Vector2(14.0, 6.0), 0.85)
+	_slab("SliceExitDeck", Vector3(10.3, 4.0, -59.0), Vector2(13.4, 6.0), 0.85)
 	_rail(Vector3(-12.0, 4.0, -43.0), Vector3(-12.0, 4.0, -62.0))
 	_rail(Vector3(-12.0, 4.0, -62.0), Vector3(17.0, 4.0, -62.0))
 	_rail(Vector3(17.0, 4.0, -62.0), Vector3(17.0, 4.0, -56.0))
 	_rail(Vector3(-6.0, 4.0, -45.0), Vector3(-6.0, 4.0, -54.0))
+	# p / a low pipe bridge over the forgiving turn: 1.3 m clear, too low to stand under and
+	# too high to hop, so the safe line slides beneath it. its frame stands on real ground.
+	_cylinder(Vector3(-12.1, 5.6, -48.5), Vector3(-4.8, 5.6, -48.5), 0.3, "pipe", true)
+	_box(Vector3(-12.1, 5.6, -48.5), Vector3(0.3, 0.8, 0.8), "steel", true, "PipeBridgeFlange")
+	for x: float in [-11.7, -5.3]:
+		var foot: float = 1.5 if x > -6.0 else 4.0
+		_solid("PipeBridgePost", Vector3(x, (foot + 5.3) * 0.5, -48.5), Vector3(0.22, 5.3 - foot, 0.22), "steel")
+		_box(Vector3(x, 5.3, -48.5), Vector3(0.5, 0.08, 0.5), "steel")
 	# the direct line begins right of the chute axis, so carried speed needs steering.
 	var bridge_a: Vector3 = Vector3(4.0, 4.0, -48.9)
 	var bridge_b: Vector3 = Vector3(10.0, 4.0, -56.1)
@@ -302,13 +319,20 @@ func _make_terrace() -> void:
 
 
 func _make_water_and_recovery() -> void:
-	_slab("ChannelRecoveryFloor", Vector3(3.5, 1.5, -33.5), Vector2(23.0, 19.0), 1.0, "old_concrete")
-	_water("ShallowChannel", Vector3(3.5, 1.78, -33.5), Vector2(23.0, 19.0), "water")
-	water_regions.append({"bounds": AABB(Vector3(-8.0, 1.35, -43.0), Vector3(23.0, 0.65, 19.0)), "depth": 0.28})
-	_ramp("ChannelRecoveryRamp", Vector3(12.0, 1.5, -29.0), Vector3(12.0, 4.0, -40.0), 4.0, 0.5, "concrete")
-	_solid("ChannelEastWall", Vector3(15.3, 1.6, -33.5), Vector3(0.6, 2.2, 20.0), "wet_concrete")
+	_slab("ChannelRecoveryFloor", Vector3(7.5, 1.5, -33.5), Vector2(31.0, 19.0), 1.0, "old_concrete")
+	_water("ShallowChannel", Vector3(7.5, 1.78, -33.5), Vector2(31.0, 19.0), "water")
+	water_regions.append({"bounds": AABB(Vector3(-8.0, 1.35, -43.0), Vector3(31.0, 0.65, 19.0)), "depth": 0.28})
+	# p / the old x 12 recovery ramp is retired: the crest bank's wedge overhangs its foot and the
+	# widened catch terrace roofs its top. the channel's way out is the east exit at x 20.5.
+	_solid("ChannelEastWall", Vector3(23.3, 1.6, -33.5), Vector3(0.6, 2.2, 20.0), "wet_concrete")
 	_solid("ChannelWestWall", Vector3(-8.3, 1.6, -33.5), Vector3(0.6, 2.2, 20.0), "wet_concrete")
-	_solid("ChannelHeadWall", Vector3(3.5, 1.6, -23.7), Vector3(23.0, 2.2, 0.6), "wet_concrete")
+	# p / the moved wet flume has its own obvious uphill exit and held southeast corner.
+	_solid("ChannelSoutheastReturn", Vector3(20, 1.6, -43.3), Vector3(6.6, 2.2, .6), "wet_concrete")
+	_ramp("WetChannelExit", Vector3(20.5, 1.5, -34), Vector3(20.5, 4, -45), 3.2, .5, "concrete")
+	_ramp("WetChannelJoin", Vector3(20.5, 4, -46.6), Vector3(14, 4, -46.6), 3.2, .5, "concrete")
+	_rail(Vector3(21.9, 1.5, -34), Vector3(21.9, 4, -45), "ochre")
+	_solid("WetExitPier", Vector3(20.5, -1.5, -45), Vector3(.9, 10, 1.2), "old_concrete")
+	_solid("ChannelHeadWall", Vector3(7.5, 1.6, -23.7), Vector3(31.0, 2.2, 0.6), "wet_concrete")
 	# the second catch floor gives a missed narrow bridge a walkable way out too.
 	_slab("SettlingBasinFloor", Vector3(5.5, 1.5, -49.5), Vector2(23.0, 13.0), 0.9, "old_concrete")
 	_water("SettlingWater", Vector3(5.5, 1.68, -49.5), Vector2(23.0, 13.0), "water")
@@ -329,8 +353,8 @@ func _make_water_and_recovery() -> void:
 
 func _make_flowing_spill() -> void:
 	# p / a wet flume beside the dry route makes the waterworks visibly work.
-	var a := Vector3(8.5, 12.7, 0.0)
-	var b := Vector3(8.5, 7.1, -23.7)
+	var a := Vector3(20.5, 12.7, 0.0)
+	var b := Vector3(20.5, 7.1, -23.7)
 	_ramp("WetSpillwayBed", a, b, 3.2, 0.5, "wet_concrete")
 	for side: float in [-1.0, 1.0]:
 		_ramp("WetSpillwayCheek", a + Vector3(side * 1.7, 0.45, 0.0), b + Vector3(side * 1.7, 0.45, 0.0), 0.3, 0.7, "old_concrete")
@@ -347,7 +371,7 @@ func _make_flowing_spill() -> void:
 	var sheet := PlaneMesh.new()
 	sheet.size = Vector2(3.12, 5.37)
 	cascade.mesh = sheet
-	cascade.position = Vector3(8.5, 4.44, -24.05)
+	cascade.position = Vector3(20.5, 4.44, -24.05)
 	cascade.rotation.x = -1.44
 	var foam: ShaderMaterial = _materials["water"].duplicate()
 	foam.set_shader_parameter("flow_speed", 2.8)
@@ -359,9 +383,9 @@ func _make_flowing_spill() -> void:
 	cascade.material_override = curtain
 	cascade.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(cascade)
-	_water("TurbulentPool", Vector3(8.5, 1.81, -25.5), Vector2(3.7, 3.0), "foam_water")
-	water_audio_sources.append(Vector3(8.5, 4.4, -24.0))
-	water_regions.append({"bounds": AABB(Vector3(6.94, 6.5, -23.7), Vector3(3.12, 6.5, 23.7)), "depth": 0.12})
+	_water("TurbulentPool", Vector3(20.5, 1.81, -25.5), Vector2(3.7, 3.0), "foam_water")
+	water_audio_sources.append(Vector3(20.5, 4.4, -24.0))
+	water_regions.append({"bounds": AABB(Vector3(18.94, 6.5, -23.7), Vector3(3.12, 6.5, 23.7)), "depth": 0.12})
 
 func splash_at(feet: Vector3) -> void:
 	if DisplayServer.get_name() == "headless":
@@ -440,6 +464,24 @@ func _make_architecture() -> void:
 		_box(Vector3(x, 12.0, -73.9), Vector3(0.07, 4.0, 0.09), "steel")
 		_box(Vector3(x, 12.0, -73.9), Vector3(1.4, 0.08, 0.09), "steel")
 	_hero_wheel = _wheel(Vector3(23.8, -0.5, -69.15), 2.45, "ochre", false, true)
+	# p / the turning wheel keeps its spokes visual; one fixed disc proxy, backed by a visible
+	# steel plate, fills its whole envelope to the hall face, so a hop over the guard meets
+	# solid machinery and never threads the spokes.
+	_cylinder(Vector3(23.8, -0.5, -69.36), Vector3(23.8, -0.5, -69.2), 2.45, "steel")
+	var envelope := StaticBody3D.new()
+	envelope.name = "FinishWheelEnvelope"
+	envelope.position = Vector3(23.8, -0.5, -69.27)
+	envelope.collision_layer = 1
+	envelope.collision_mask = 0
+	envelope.set_meta("surface", "metal")
+	var disc := CylinderShape3D.new()
+	disc.radius = 2.45 * 1.038
+	disc.height = 0.46
+	var disc_shape := CollisionShape3D.new()
+	disc_shape.shape = disc
+	disc_shape.rotation.x = PI * 0.5
+	envelope.add_child(disc_shape)
+	add_child(envelope)
 	_cylinder(Vector3(23.8, -0.5, -73.7), Vector3(23.8, -0.5, -69.0), 0.42, "steel")
 	# retaining wings anchor the crest to the hillside instead of a floating deck.
 	_solid("WestRetainingWing", Vector3(-29.0, -3.0, -12.0), Vector3(3.0, 17.0, 52.0), "old_concrete")
@@ -565,16 +607,32 @@ func _define_routes() -> void:
 		_point(Vector3(2.5, 12.0, 3.0)), _point(Vector3(-9.0, 12.0, 3.0)),
 		_point(Vector3(-9.0, 11.75, -1.0)), _point(Vector3(-9.0, 8.0, -17.8)),
 		_point(Vector3(-16.0, 8.0, -18.0)), _point(Vector3(-16.0, 7.75, -15.0)),
+		_point(Vector3(-16.0, 6.0, -7.0), 1.0, true),
 		_point(Vector3(-16.0, 4.0, 1.0)), _point(Vector3(-22.0, 4.0, 1.0)),
+		_point(Vector3(-22, 4, -7.8), .45, false, true), _point(Vector3(-22, 4, -13), 1.0),
+		_point(Vector3(-22, 4, -20.8), .45, false, true), _point(Vector3(-22, 4, -26), 1.0),
+		_point(Vector3(-22, 4, -34.6), .45, false, true), _point(Vector3(-22, 4, -39), 1.0),
 		_point(Vector3(-22.0, 4.0, -40.8)), _point(Vector3(-9.0, 4.0, -41.0)),
-		_point(Vector3(-9.0, 4.0, -58.8)), _point(finish_position),
+		_point(Vector3(-9.0, 4.0, -46.0)), _point(Vector3(-9.0, 4.0, -51.0), 1.0, true),
+		_point(Vector3(-9.0, 4.0, -58.8)),
+		_point(Vector3(1.4, 4, -59.3), .45, false, true), _point(Vector3(5.5, 4, -59.5), 1.0),
+		_point(finish_position),
+	]
+	# p / the upper flight is a smooth 14 degree ramp under its treads: slide its first half.
+	routes["safe"].insert(3, _point(Vector3(-9.0, 10.0, -8.0), 1.0, true))
+	routes["wet"] = [
+		_point(Vector3(20.5, 12, 5)), _point(Vector3(20.5, 12.7, .5)),
+		_point(Vector3(20.5, 8, -20), 1.0, true), _point(Vector3(20.5, 7.1, -23.3), 1, true),
+		_point(Vector3(20.5, 2.8, -40), 1.0, true), _point(Vector3(20.5, 4, -45.5)),
+		_point(Vector3(14, 4, -46.6)), _point(Vector3(4, 4, -48.1)),
+		_point(Vector3(7, 4, -52.5)), _point(Vector3(10, 4, -57)), _point(finish_position),
 	]
 	# p / run normally first, then crouch at the chute mouth; do not understate launch speed.
 	var launch: Array = [
-		_point(Vector3(2.5, 12.0, 0.8), 0.45),
-		_point(Vector3(2.5, 7.0, -20.0), 1.0, true),
-		_point(Vector3(2.5, 6.0, -24.8), 0.55, true, true),
-		_point(Vector3(2.9, 4.0, -41.0), 1.8),
+		_point(Vector3(-3.5, 12.0, 0.8), 0.45),
+		_point(Vector3(-3.5, 7.0, -20.0), 1.0, true),
+		_point(Vector3(-3.5, 6.0, -24.8), 0.55, true, true),
+		_point(Vector3(-3.5, 4.0, -41.0), 1.8),
 	]
 	routes["fast"] = launch.duplicate(true)
 	routes["fast"].append_array([
@@ -584,15 +642,22 @@ func _define_routes() -> void:
 	])
 	routes["brake"] = launch.duplicate(true)
 	routes["brake"].append_array([
-		_point(Vector3(-9.0, 4.0, -43.0)), _point(Vector3(-9.0, 4.0, -58.8)), _point(finish_position),
+		_point(Vector3(-9.0, 4.0, -43.0)), _point(Vector3(-9.0, 4.0, -46.0)),
+		_point(Vector3(-9.0, 4.0, -51.0), 1.0, true), _point(Vector3(-9.0, 4.0, -58.8)),
+		_point(Vector3(1.4, 4, -59.3), .45, false, true), _point(Vector3(5.5, 4, -59.5), 1.0),
+		_point(finish_position),
 	])
-	# no jump, no slide: a short running takeoff drops into the channel, with no reset.
+	# a short running takeoff drops into the channel, with no reset; the walk out then uses
+	# the same simple slide (pipe bridge) and hop (exit deck joint) as the safe line.
 	routes["recovery"] = [
-		_point(Vector3(2.5, 12.0, 1.0)), _point(Vector3(2.5, 7.0, -20.0)),
-		_point(Vector3(2.5, 1.5, -30.7), 1.0),
-		_point(Vector3(12.0, 1.5, -28.0)), _point(Vector3(12.0, 4.0, -40.8)),
-		_point(Vector3(3.0, 4.0, -41.0)), _point(Vector3(-9.0, 4.0, -41.0)),
-		_point(Vector3(-9.0, 4.0, -58.8)), _point(finish_position),
+		_point(Vector3(-3.5, 12.0, 1.0)), _point(Vector3(-3.5, 7.0, -20.0)),
+		_point(Vector3(-3.5, 1.5, -30.7), 1.0),
+		_point(Vector3(8.0, 1.5, -33.0)), _point(Vector3(20.5, 1.5, -33.5), .8), _point(Vector3(20.5, 4.0, -45.5)),
+		_point(Vector3(14.0, 4.0, -46.6)), _point(Vector3(3.0, 4.0, -41.0)), _point(Vector3(-9.0, 4.0, -41.0)),
+		_point(Vector3(-9.0, 4.0, -46.0)), _point(Vector3(-9.0, 4.0, -51.0), 1.0, true),
+		_point(Vector3(-9.0, 4.0, -58.8)),
+		_point(Vector3(1.4, 4, -59.3), .45, false, true), _point(Vector3(5.5, 4, -59.5), 1.0),
+		_point(finish_position),
 	]
 
 
