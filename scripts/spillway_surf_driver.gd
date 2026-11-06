@@ -12,7 +12,8 @@ const TICK := 1.0 / 120.0
 const TIME_LIMIT := 45.0
 # p / bhop waypoints between banks; each is a floor position reached within 2 m.
 const CREST_TO_YARD: Array[Vector3] = [Vector3(11, 4, -40), Vector3(10, 4, -47), Vector3(10, 4, -57), Vector3(10, 4, -66)]
-const FINISH_AIM := Vector3(24, -3, -63.8)
+# p / aim along the hall toward its wheel, so arrival footage shows the actual finish.
+const FINISH_AIM := Vector3(24, -3, -68.8)
 
 var main: Node
 var player: CharacterBody3D
