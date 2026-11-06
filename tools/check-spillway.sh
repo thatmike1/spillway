@@ -24,6 +24,8 @@ run_clean --headless --path . --import
 run_clean --headless --path . --check-only --script res://scripts/spillway_driver.gd
 run_clean --headless --path . --script res://tests/test_spillway_audio.gd
 run_clean --headless --fixed-fps 120 --path . --script res://tests/test_spillway.gd -- "${suite_args[@]}"
+run_clean --headless --fixed-fps 120 --path . --script res://tests/test_spillway_surf.gd
+run_clean --headless --fixed-fps 120 --path . --script res://tests/test_surf_geometry.gd
 run_clean --headless --fixed-fps 120 --path . --script res://tests/test_spillway_flow.gd
 run_clean --headless --fixed-fps 120 --path . --script res://tests/test_spillway_access.gd
 run_clean --headless --fixed-fps 120 --path . --script res://tests/test_spillway_boundaries.gd

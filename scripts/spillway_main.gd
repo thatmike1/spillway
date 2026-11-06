@@ -2,7 +2,11 @@ extends Node3D
 ## p / run provenance is separate from movement and presentation.
 
 const BUILD_ID := "spillway-2026.11.06-r11"
-const SAVE_PATH := "user://spillway_v1.cfg"
+# p / r12 physics and course times are a new record namespace in their own file; the r11
+# profile is never rewritten, and only its settings seed a first r12 profile.
+const SAVE_PATH := "user://spillway_r12.cfg"
+const LEGACY_SAVE_PATH := "user://spillway_v1.cfg"
+const RECORD_NAMESPACE := "records_r12"
 var player: CharacterBody3D
 var level: Node3D
 var hud: CanvasLayer
@@ -20,7 +24,7 @@ var best_splits: Array[float] = []
 var best_segments: Array[float] = []
 var split_deltas: Array[float] = []
 var best_time: float = -1.0
-var settings: Dictionary = {"sensitivity": 1.0, "fov": 90.0, "volume": 0.70, "comfort": false}
+var settings: Dictionary = {"sensitivity": 1.0, "fov": 90.0, "volume": 0.70, "comfort": false, "autohop": true}
 var paused: bool = false
 var _started: bool = false
 var _spawn_origin: Vector3
@@ -264,32 +268,38 @@ func _apply_settings() -> void:
 	player.set("mouse_sensitivity", 0.0022 * float(settings.sensitivity))
 	player.set("fov_horizontal", float(settings.fov))
 	player.set("comfort", bool(settings.comfort))
+	player.set("autohop", bool(settings.autohop))
 	if audio != null:
 		audio.call("set_volume", float(settings.volume))
 
-func _load() -> void:
+func _load(path: String = SAVE_PATH, legacy_path: String = LEGACY_SAVE_PATH) -> void:
 	var config := ConfigFile.new()
-	if config.load(SAVE_PATH) != OK:
+	if config.load(path) != OK:
+		# first r12 start: carry settings from the r11 profile, never its records.
+		var legacy := ConfigFile.new()
+		if legacy.load(legacy_path) == OK:
+			for key: String in settings:
+				settings[key] = legacy.get_value("settings", key, settings[key])
 		return
 	for key: String in settings:
 		settings[key] = config.get_value("settings", key, settings[key])
-	best_time = float(config.get_value("records", "clean_best", -1.0))
-	var saved: Array = config.get_value("records", "clean_splits", [])
+	best_time = float(config.get_value(RECORD_NAMESPACE, "clean_best", -1.0))
+	var saved: Array = config.get_value(RECORD_NAMESPACE, "clean_splits", [])
 	for value: Variant in saved:
 		best_splits.append(float(value))
-	for value: Variant in config.get_value("records", "clean_segments", []):
+	for value: Variant in config.get_value(RECORD_NAMESPACE, "clean_segments", []):
 		best_segments.append(float(value))
 
-func _save() -> void:
+func _save(path: String = SAVE_PATH) -> void:
 	if not _persist:
 		return
 	var config := ConfigFile.new()
 	for key: String in settings:
 		config.set_value("settings", key, settings[key])
-	config.set_value("records", "clean_best", best_time)
-	config.set_value("records", "clean_splits", best_splits)
-	config.set_value("records", "clean_segments", best_segments)
-	config.save(SAVE_PATH)
+	config.set_value(RECORD_NAMESPACE, "clean_best", best_time)
+	config.set_value(RECORD_NAMESPACE, "clean_splits", best_splits)
+	config.set_value(RECORD_NAMESPACE, "clean_segments", best_segments)
+	config.save(path)
 
 static func bind_inputs() -> void:
 	var keys := {"move_forward": [KEY_W], "move_back": [KEY_S], "move_left": [KEY_A], "move_right": [KEY_D], "look_left": [KEY_LEFT], "look_right": [KEY_RIGHT], "look_up": [KEY_UP], "look_down": [KEY_DOWN], "jump": [KEY_SPACE], "crouch": [KEY_CTRL, KEY_C], "restart": [KEY_R], "practice": [KEY_F], "pause": [KEY_ESCAPE], "fullscreen": [KEY_F11]}

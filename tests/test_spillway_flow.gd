@@ -89,10 +89,15 @@ func ticks(count: int) -> void:
 	await process_frame
 
 func profile_snapshot() -> Dictionary:
-	var path: String = ProjectSettings.globalize_path(MAIN.SAVE_PATH)
-	if not FileAccess.file_exists(path):
-		return {"exists": false}
-	return {"exists": true, "sha256": FileAccess.get_sha256(path), "modified": FileAccess.get_modified_time(path)}
+	# both the r12 profile and the retained r11 profile must stay untouched.
+	var snapshot := {}
+	for save_path: String in [MAIN.SAVE_PATH, MAIN.LEGACY_SAVE_PATH]:
+		var path: String = ProjectSettings.globalize_path(save_path)
+		if not FileAccess.file_exists(path):
+			snapshot[save_path] = {"exists": false}
+		else:
+			snapshot[save_path] = {"exists": true, "sha256": FileAccess.get_sha256(path), "modified": FileAccess.get_modified_time(path)}
+	return snapshot
 
 func records() -> Dictionary:
 	return {"best": game.get("best_time"), "splits": game.get("best_splits").duplicate(),
@@ -167,6 +172,7 @@ func _run() -> void:
 	await paused_controls()
 	await controller_menu()
 	await projection_aspects()
+	record_namespace()
 	for name: String in ACTIONS:
 		action(name, false)
 	game.call("set_paused", false)
@@ -410,6 +416,16 @@ func settings_controls() -> void:
 		await activate(comfort)
 		check(bool(game.get("settings").comfort) != before and bool(game.get("player").get("comfort")) != before,
 			"focused comfort control receives real input and changes camera setting while paused")
+	var autohop := button("Autohop (hold jump to bunny hop)") as CheckButton
+	check(autohop != null and autohop.button_pressed == bool(game.get("settings").autohop), "pause exposes the autohop setting showing its current state")
+	if autohop != null:
+		var before: bool = game.get("settings").autohop
+		await activate(autohop)
+		check(bool(game.get("settings").autohop) != before and bool(game.get("player").get("autohop")) != before,
+			"focused autohop control receives real input and changes the motor while paused")
+		await activate(autohop)
+		check(bool(game.get("settings").autohop) == before and bool(game.get("player").get("autohop")) == before,
+			"autohop control toggles back")
 
 func assisted_comparisons() -> void:
 	for assistance: String in ["practice", "respawn"]:
@@ -482,6 +498,45 @@ func projection_aspects() -> void:
 	root.content_scale_size = old_scale
 	game.call("change_setting", "fov", old_fov)
 	game.call("change_setting", "comfort", old_comfort)
+
+func record_namespace() -> void:
+	# fixture profiles in a scratch user:// folder; the real profiles are compared separately.
+	case_name = "r12 record namespace"
+	check(MAIN.SAVE_PATH != MAIN.LEGACY_SAVE_PATH, "r12 records live in their own profile file")
+	var folder := "user://flow-fixture-%d" % OS.get_process_id()
+	DirAccess.make_dir_recursive_absolute(folder)
+	var legacy_path := folder.path_join("legacy.cfg")
+	var r12_path := folder.path_join("r12.cfg")
+	var legacy := ConfigFile.new()
+	legacy.set_value("settings", "sensitivity", 1.7)
+	legacy.set_value("settings", "fov", 101.0)
+	legacy.set_value("records", "clean_best", 61.5)
+	legacy.set_value("records", "clean_splits", [20.0, 40.0, 61.5])
+	legacy.save(legacy_path)
+	var legacy_hash := FileAccess.get_sha256(legacy_path)
+	var probe: Node = MAIN.new()
+	probe.call("_load", r12_path, legacy_path)
+	check(is_equal_approx(float(probe.get("settings").sensitivity), 1.7) and is_equal_approx(float(probe.get("settings").fov), 101.0) and bool(probe.get("settings").autohop),
+		"first r12 start inherits r11 settings and defaults autohop on")
+	check(float(probe.get("best_time")) < 0.0 and probe.get("best_splits").is_empty(), "r11 times never appear as r12 records")
+	probe.set("best_time", 33.25)
+	probe.set("best_splits", [10.0, 20.0, 33.25] as Array[float])
+	probe.get("settings").autohop = false
+	probe.call("_save", r12_path)
+	var written := ConfigFile.new()
+	written.load(r12_path)
+	check(is_equal_approx(float(written.get_value(MAIN.RECORD_NAMESPACE, "clean_best", -1.0)), 33.25) and not written.has_section("records"),
+		"r12 records are written under their own namespace")
+	check(FileAccess.get_sha256(legacy_path) == legacy_hash, "saving r12 never rewrites the r11 profile")
+	var reload: Node = MAIN.new()
+	reload.call("_load", r12_path, legacy_path)
+	check(is_equal_approx(float(reload.get("best_time")), 33.25) and not bool(reload.get("settings").autohop),
+		"r12 profile reloads its own record and the autohop choice")
+	probe.free()
+	reload.free()
+	for path: String in [legacy_path, r12_path]:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(folder))
 
 func authored_roof_checkpoint() -> void:
 	case_name = "authored roof checkpoint region"

@@ -187,13 +187,29 @@ func jump_grace() -> void:
 	action("jump", false)
 	await ticks(110)
 	check(int(player.get("jump_count")) == 1, "one buffered press produces one jump")
-	await fresh("expired buffer / drop fixture")
+	# r12: autohop (on by default) turns a held press into a hop on landing, so buffer
+	# expiry is checked with the autohop setting off, and the held hop is checked with it on.
+	await fresh("expired buffer, autohop off / drop fixture")
+	player.set("autohop", false)
 	player.call("reset_to", Transform3D(Basis.IDENTITY, Vector3(0, 3, 0)))
 	player.velocity = Vector3(0, -3, 0)
 	await ticks(18)
 	action("jump", true)
 	await ticks(130)
 	check(player.is_on_floor() and int(player.get("jump_count")) == 0, "a held press more than 120ms before landing expires")
+	await fresh("held autohop / drop fixture")
+	player.call("reset_to", Transform3D(Basis.IDENTITY, Vector3(0, 3, 0)))
+	player.velocity = Vector3(0, -3, 0)
+	await ticks(18)
+	action("jump", true)
+	var held_jumps: Array[int] = []
+	for i: int in 200:
+		await ticks(1)
+		if int(player.get("jump_count")) > held_jumps.size():
+			held_jumps.append(frame)
+	check(held_jumps.size() >= 2 and int(player.get("hop_count")) == held_jumps.size(),
+		"held jump rehops on each landing tick with autohop on: %d hops" % held_jumps.size())
+	action("jump", false)
 
 func air_control() -> void:
 	await fresh("standing jump air correction")
@@ -202,8 +218,9 @@ func air_control() -> void:
 	action("jump", false)
 	action("move_right", true)
 	await ticks(30)
-	check(not player.is_on_floor() and player.velocity.x > 1.0 and player.position.x > .12,
-		"zero-speed launch has visible air correction: x=%.3f vx=%.3f" % [player.position.x, player.velocity.x])
+	# r12 retires the r11 vx>1.0 bound: a strafe from standstill reaches only the source-style wish cap.
+	check(not player.is_on_floor() and player.velocity.x >= .74 and player.velocity.x <= .76 and player.position.x > .12,
+		"zero-speed launch has visible air correction up to the wish cap: x=%.3f vx=%.3f" % [player.position.x, player.velocity.x])
 	await fresh("air look independence / excess-speed launch fixture")
 	player.velocity = Vector3(0, 0, -11)
 	action("jump", true)
@@ -223,8 +240,9 @@ func air_control() -> void:
 	action("move_right", true)
 	await ticks(30)
 	var launch_speed: float = Vector2(before.x, before.z).length()
+	# r12: speed gain needs the mouse turning with the strafe; a held strafe alone adds one wish cap at most.
 	check(launch_speed > 9.5 and player.get_speed() >= launch_speed * .99 and player.get_speed() <= launch_speed + .05,
-		"air input preserves excess launch budget without pumping: %.3f / %.3f" % [player.get_speed(), launch_speed])
+		"held strafe without turning keeps launch speed and adds no pumping: %.3f / %.3f" % [player.get_speed(), launch_speed])
 
 func ground_budget_reset() -> void:
 	await fresh("landing and braking discard stale air budget", Vector3(12, 1, 26), Vector3(0, -.5, -3))
@@ -248,7 +266,7 @@ func ground_budget_reset() -> void:
 	for i: int in 90:
 		await ticks(1)
 		peak = maxf(peak, player.get_speed())
-	check(peak <= 8.7, "air steering cannot recover the old sixteen-metre launch budget: %.3f" % peak)
+	check(peak <= 8.7, "unturned air steering after a braked landing cannot recover the old sixteen-metre speed: %.3f" % peak)
 
 func handoffs() -> void:
 	await fresh("ordinary landing preserves motion")
@@ -646,7 +664,10 @@ func water_recovery() -> void:
 	action("move_forward", true)
 	action("crouch", true)
 	await ticks(180)
-	check(player.get_speed() <= 3.45 and str(player.get("mode")) != "slide", "crouching cannot slide through water at dry speed")
+	# r12 retires the r11 rule "crouching cannot slide through water at dry speed": water now
+	# stops walking but barely touches a slide (wet/dry proof lives in test_spillway_surf).
+	check(str(player.get("mode")) == "slide" and player.get_speed() > 10.0 and player.get_speed() < 16.0,
+		"a slide keeps sliding through shallow water and still slows: %.3f" % player.get_speed())
 	action("crouch", false)
 	await ticks(120)
 	check(absf(player.get_speed() - 3.4) < .08, "standing water recovery reaches its P3.4m/s speed")

@@ -38,7 +38,7 @@ func attach(main: Node) -> void:
 	add_child(overlay)
 	title = _label("SPILLWAY", 46, Vector2(42, 32))
 	subtitle = _label("THE LONG WAY DOWN", 14, Vector2(45, 86), Color("f3cd83"))
-	status = _label("WASD run    Space jump    Ctrl / C slide\nR new run    F segment practice    Esc settings", 17, Vector2(44, 127))
+	status = _label("WASD move    Space jump, hold to hop    Ctrl / C slide\nIn the air: hold A or D and turn the mouse the same way\nR new run    F segment practice    Esc settings", 17, Vector2(44, 127))
 	speed_label = _label("", 19, Vector2(42, 640))
 	timing = _label("", 15, Vector2(42, 673))
 	message = _label("", 20, Vector2(42, 572))
@@ -72,7 +72,8 @@ func _process(delta: float) -> void:
 	title.modulate.a = _title_alpha
 	subtitle.modulate.a = _title_alpha
 	status.modulate.a = _title_alpha
-	speed_label.text = "%02d  km/h%s" % [roundi(speed * 3.6), "  /  SLIDE" if game.player.mode == "slide" else ""]
+	var move_label: String = {"slide": "  /  SLIDE", "surf": "  /  SURF"}.get(str(game.player.mode), "")
+	speed_label.text = "%02d  km/h%s" % [roundi(speed * 3.6), move_label]
 	timing.text = "PRACTICE · R starts a clean run" if not game.clean_eligible else ("BEST  %s" % _time(game.best_time) if game.best_time > 0.0 else "")
 	if game.finish_kind == "exploration":
 		timing.text = "EXPLORATION · R starts a clean run"
@@ -143,6 +144,11 @@ func _make_pause() -> void:
 	comfort_button.button_pressed = game.settings.comfort
 	comfort_button.toggled.connect(func(value: bool) -> void: game.change_setting("comfort", value))
 	column.add_child(comfort_button)
+	var autohop_button := CheckButton.new()
+	autohop_button.text = "Autohop (hold jump to bunny hop)"
+	autohop_button.button_pressed = game.settings.autohop
+	autohop_button.toggled.connect(func(value: bool) -> void: game.change_setting("autohop", value))
+	column.add_child(autohop_button)
 	for item: Array in [["Resume", func() -> void: game.set_paused(false)], ["Restart clean run", func() -> void: game.restart_run()], ["Quit", func() -> void: game.request_quit()]]:
 		var button := Button.new()
 		button.text = item[0]

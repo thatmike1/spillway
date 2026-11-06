@@ -11,7 +11,21 @@ const ACCEL: float = 28.0
 const BRAKE: float = 34.0
 const GRAVITY: float = 20.0
 const JUMP_SPEED: float = 7.2
-const AIR_ACCEL: float = 13.0
+# p / r12 source-style air: acceleration only adds speed along the wish direction until
+# the velocity's projection on it reaches the small wish cap, so a strafe synced with the
+# mouse curves and gains while W alone or looking alone gains nothing.
+const AIR_ACCELERATE: float = 12.0
+const AIR_WISH_CAP: float = 0.75
+const MAX_SPEED: float = 30.0
+# p / above run speed, staying on the ground costs this much each second; hopping skips it.
+const GROUND_OVERSPEED_DECAY: float = 8.0
+const WATER_DECAY: float = 12.0
+# p / shallow water barely touches a slide; it only stops walking.
+const SLIDE_WATER_DRAG: float = 0.25
+const FLOOR_MAX_DEGREES: float = 46.0
+const SURF_MAX_DEGREES: float = 75.0
+# p / a held autohop chain never catches a lip; mantles are for carry speed and a fresh press.
+const MANTLE_MAX_SPEED: float = 10.0
 const STAND_HEIGHT: float = 1.8
 const LOW_HEIGHT: float = 1.05
 const RADIUS: float = 0.30
@@ -32,11 +46,16 @@ var crouched: bool = false
 var in_water: bool = false
 var jump_count: int = 0
 var mantle_count: int = 0
+var hop_count: int = 0
+var autohop: bool = true
+var surf_ticks: int = 0
+var surf_normal: Vector3 = Vector3.ZERO
 var land_count: int = 0
 var last_impact: float = 0.0
 var _coyote: float = 0.0
+var _ground_ticks: int = 0
+var _hold_ticks: int = 0
 var _buffer: float = 0.0
-var _air_budget: float = RUN_SPEED
 var _eye_height: float = 1.63
 var _dip: float = 0.0
 var _distance: float = 0.0
@@ -59,7 +78,7 @@ func _ready() -> void:
 	collision_layer = 2
 	collision_mask = 1
 	floor_snap_length = 0.45
-	floor_max_angle = deg_to_rad(48.0)
+	floor_max_angle = deg_to_rad(FLOOR_MAX_DEGREES)
 	floor_constant_speed = true
 	floor_stop_on_slope = true
 	safe_margin = 0.002
@@ -94,9 +113,11 @@ func reset_to(pose: Transform3D) -> void:
 	crouched = false
 	in_water = false
 	_coyote = 0.0
+	_ground_ticks = 0
+	_hold_ticks = 0
 	_buffer = 0.0
 	_dip = 0.0
-	_air_budget = RUN_SPEED
+	surf_normal = Vector3.ZERO
 	_eye_height = 1.63
 	_gait_phase = 0.0
 	_gait_blend = 0.0
@@ -135,6 +156,9 @@ func _physics_process(delta: float) -> void:
 	var jump_held := Input.is_action_pressed("jump")
 	if not jump_held:
 		_mantle_latched = false
+		_hold_ticks = 0
+	else:
+		_hold_ticks += 1
 	if Input.is_action_just_pressed("jump"):
 		_buffer = BUFFER
 	else:
@@ -156,65 +180,76 @@ func _physics_process(delta: float) -> void:
 	_set_height(LOW_HEIGHT if crouched else STAND_HEIGHT)
 	var horizontal := Vector3(velocity.x, 0.0, velocity.z)
 	var previous_mode := mode
+	if grounded:
+		_ground_ticks += 1
+	else:
+		_ground_ticks = 0
+	# a buffered press, or jump held with autohop, leaves the ground before any ground
+	# friction runs, so a hop on the landing tick keeps all of its speed.
+	var held_hop := autohop and jump_held and grounded
+	var hop := _coyote > 0.0 and (_buffer > 0.0 or held_hop)
 	var downslope := Vector3.DOWN.slide(get_floor_normal()) * GRAVITY if grounded else Vector3.ZERO
 	var downhill := downslope.dot(horizontal) > 0.2 and get_floor_normal().y < 0.985 if grounded else false
 	# p / hysteresis keeps ordinary crouch walking out of slide ownership.
 	var slide_threshold := 3.0 if previous_mode == "slide" or downhill else 6.0
-	var sliding := grounded and crouched and horizontal.length() >= slide_threshold and not in_water
-	mode = "slide" if sliding else ("run" if grounded else "air")
+	var sliding := grounded and not hop and crouched and horizontal.length() >= slide_threshold
+	mode = "slide" if sliding else ("run" if grounded and not hop else "air")
 	if mode == "slide" and previous_mode != "slide":
 		move_started.emit("slide")
 	floor_constant_speed = not sliding
-	if grounded:
-		_air_budget = maxf(RUN_SPEED, horizontal.length())
+	if grounded and not hop:
 		if sliding:
 			if wish.length_squared() > 0.01 and stick.y < 0.2:
 				var angle := horizontal.signed_angle_to(wish, Vector3.UP)
 				horizontal = horizontal.rotated(Vector3.UP, clampf(angle, -PI * 0.5 * delta, PI * 0.5 * delta))
+			# downhill feeds a slide up to its cap; speed carried in from a hop is never clipped.
+			var carried_in := horizontal.length()
 			horizontal += Vector3(downslope.x, 0.0, downslope.z) * delta
+			horizontal = horizontal.limit_length(maxf(SLIDE_CAP, carried_in))
 			var friction := 0.85 if get_floor_normal().y < 0.985 else 2.0
 			friction += maxf(0.0, stick.y) * 12.0
+			if in_water:
+				friction += SLIDE_WATER_DRAG
 			horizontal = horizontal.move_toward(Vector3.ZERO, friction * delta)
-			if horizontal.length() > SLIDE_CAP:
-				horizontal = horizontal.normalized() * SLIDE_CAP
 		else:
 			var speed_limit := 3.2 if crouched else RUN_SPEED
 			if in_water:
 				speed_limit = minf(speed_limit, WATER_SPEED)
-			var carried := maxf(speed_limit, horizontal.length() - (12.0 if in_water else 4.0) * delta)
+			var carried := maxf(speed_limit, horizontal.length() - (WATER_DECAY if in_water else GROUND_OVERSPEED_DECAY) * delta)
 			var target := wish * carried
 			# p / changing your mind brakes as firmly as releasing, then accelerates away.
 			var braking := wish.length_squared() == 0.0 or horizontal.dot(wish) < 0.0
 			horizontal = horizontal.move_toward(target, (BRAKE if braking else ACCEL) * delta)
 		velocity.y = -0.4
 	else:
-		# external launch and floor departure retain their existing speed budget.
-		_air_budget = maxf(_air_budget, horizontal.length())
-		if wish.length_squared() > 0.01:
-			# air acceleration has a launch-aware ceiling, including standing jumps.
-			var along := horizontal.dot(wish.normalized())
-			var available := maxf(0.0, _air_budget - along)
-			horizontal += wish.normalized() * minf(AIR_ACCEL * delta, available)
-			if horizontal.length() > _air_budget:
-				horizontal = horizontal.normalized() * _air_budget
+		horizontal = _air_accelerate(horizontal, wish, delta)
 		velocity.y -= GRAVITY * delta
+	horizontal = horizontal.limit_length(MAX_SPEED)
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
-	if _buffer > 0.0 and _coyote > 0.0:
+	if hop:
 		velocity.y = JUMP_SPEED
-		_air_budget = maxf(RUN_SPEED, get_speed())
+		if _ground_ticks == 1:
+			hop_count += 1
+		# p / jump held through a landing is an autohop chain, which never catches a lip
+		# until jump is released; a press made on this stretch of ground still can.
+		if _hold_ticks > _ground_ticks and _buffer <= 0.0:
+			_mantle_latched = true
 		_coyote = 0.0
 		_buffer = 0.0
-		mode = "air"
 		grounded = false
 		jump_count += 1
 		move_started.emit("jump")
-	elif not grounded and jump_held and stick.y < -0.2 and not _mantle_latched and not crouched:
+	elif not grounded and jump_held and stick.y < -0.2 and not _mantle_latched and not crouched and get_speed() <= MANTLE_MAX_SPEED:
 		if _try_mantle(wish):
 			_current_position = global_position
 			return
 	var impact := -velocity.y
+	var before_move := velocity
+	# airborne contacts slide along the surface; on the ground steep faces stay walls.
+	floor_block_on_wall = grounded
 	move_and_slide()
+	_clip_air_contacts(before_move)
 	if not grounded and is_on_floor() and impact > 2.0:
 		last_impact = impact
 		land_count += 1
@@ -231,6 +266,69 @@ func _physics_process(delta: float) -> void:
 			footstep.emit(clampf(get_speed() / RUN_SPEED, 0.0, 1.0))
 	_last_position = global_position
 	_current_position = global_position
+
+func _air_accelerate(horizontal: Vector3, wish: Vector3, delta: float) -> Vector3:
+	if wish.length_squared() < 0.0001:
+		return horizontal
+	var direction := wish.normalized()
+	var wish_speed := RUN_SPEED * minf(wish.length(), 1.0)
+	# the cap compares against the projection, not the speed: turning the wish away from
+	# the velocity reopens room to add, which is what a synced strafe does.
+	var room := minf(wish_speed, AIR_WISH_CAP) - horizontal.dot(direction)
+	if room <= 0.0:
+		return horizontal
+	return horizontal + direction * minf(AIR_ACCELERATE * wish_speed * delta, room)
+
+func _clip_air_contacts(before: Vector3) -> void:
+	# surf: faces between the floor limit and SURF_MAX are slid on, never stood on. the
+	# velocity loses only its component into each touched face, so gravity runs along it.
+	surf_normal = Vector3.ZERO
+	if is_on_floor():
+		return
+	var planes: Array[Vector3] = []
+	for i: int in get_slide_collision_count():
+		var contact := get_slide_collision(i)
+		var normal := contact.get_normal()
+		if normal.y >= cos(floor_max_angle):
+			continue
+		# the capsule's rounded bottom reports a slanted normal on any box edge. classify
+		# by the real face under the contact, so a curb or lip never acts as a launch ramp.
+		var face := _face_normal(contact.get_position(), normal)
+		if face.y > cos(deg_to_rad(SURF_MAX_DEGREES)) and face.y < cos(floor_max_angle):
+			surf_normal = face
+			planes.append(face)
+		elif face.y >= cos(floor_max_angle) or face == Vector3.ZERO:
+			# the lip of a walkable top blocks horizontally only, as the engine's wall rule does.
+			var flat := Vector3(normal.x, 0.0, normal.z)
+			if flat.length_squared() > 0.0001:
+				planes.append(flat.normalized())
+		else:
+			planes.append(face)
+	if planes.is_empty():
+		return
+	var clipped := before
+	for pass_index: int in 2:
+		for plane: Vector3 in planes:
+			var into := clipped.dot(plane)
+			if into < 0.0:
+				clipped -= plane * into
+	for plane: Vector3 in planes:
+		if clipped.dot(plane) < -0.01:
+			# a crease the two passes cannot resolve keeps the engine's own slide result.
+			return
+	velocity = clipped
+	if surf_normal != Vector3.ZERO:
+		surf_ticks += 1
+		mode = "surf"
+
+func _face_normal(point: Vector3, normal: Vector3) -> Vector3:
+	var hit := _ray(point + normal * 0.08, point - normal * 0.08)
+	if hit.is_empty():
+		return Vector3.ZERO
+	# a ray at a seam can find the hidden end cap of the next segment, which faces back
+	# along the ramp. a face that disagrees that much with the contact is not the one touched.
+	var face: Vector3 = hit.normal
+	return face if face.dot(normal) > 0.3 else normal
 
 func _set_height(height: float) -> void:
 	(collision.shape as CapsuleShape3D).height = height

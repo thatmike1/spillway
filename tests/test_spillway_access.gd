@@ -51,6 +51,9 @@ func fixture(name: String, at: Vector3, yard: bool = true) -> void:
 		check(int(game.get("checkpoint_index")) == 1, "fixture grants yard through its real admission volume")
 	player.call("reset_to", Transform3D(Basis.IDENTITY, at))
 	await ticks(8)
+	# r12 / these legacy single-jump access episodes explicitly exercise buffered mode.
+	# default held autohop is covered independently by test_spillway_surf.
+	player.set("autohop", false)
 
 func walk(at: Vector3, limit: int = 600) -> bool:
 	action("move_forward", true)
@@ -234,7 +237,9 @@ func hop(at: Vector3, toward: Vector3, axis: int, past: float, direction: float)
 	action("jump", false)
 	for i: int in 240:
 		await ticks(1)
-		if player.is_on_floor():
+		# r12 / Source contact can land briefly on a rail; continue the same input
+		# until the actual destination, rather than ending the probe on the first rail.
+		if player.is_on_floor() and (floor_name() == "OutflowRunup" or player.global_position.y < at.y - .3):
 			break
 	action("move_forward", false)
 	# the run loop reads a landing on the physics frame after it happens.
@@ -249,9 +254,9 @@ func floor_name() -> String:
 
 func deck_progress() -> void:
 	# r10: the r9 rail-hop repro; progress follows the deck actually reached.
-	await fixture("apron rail hop onto the run-up", Vector3(-14, 1.55, -94))
+	await fixture("apron rail hop onto the run-up", Vector3(-14, 1.55, -91.4))
 	var jumps: int = player.get("jump_count")
-	await hop(Vector3(-14, 1.55, -94), Vector3(-14, 1.5, -102), 2, -94.4, -1)
+	await hop(Vector3(-14, 1.55, -91.4), Vector3(-14, 1.5, -102), 2, -94.4, -1)
 	check(floor_name() == "OutflowRunup" and int(game.get("checkpoint_index")) == 2 and int(game.get("respawn_count")) == 0,
 		"one jump over the apron rail lands on the run-up and admits Outflow: %s on %s" % [player.global_position, floor_name()])
 	check(int(player.get("jump_count")) == jumps + 1, "the rail hop is a single ordinary jump")
@@ -262,15 +267,15 @@ func deck_progress() -> void:
 	check(bool(game.get("finished")) and str(game.get("finish_kind")) == "clean" and game.get("splits").size() == 3 and int(game.get("respawn_count")) == 0,
 		"walking on through basin recovery finishes the run as an ordered result")
 	check(float(game.get("best_time")) > 0.0 and not "EXPLORATION" in str(game.get("hud").get("finish_label").text), "the ordered rail-hop finish is recorded")
-	await fixture("apron corner hop onto the run-up", Vector3(-14, 1.55, -92))
-	await hop(Vector3(-14, 1.55, -92), Vector3(-6, 1.5, -97), 0, -12.2, 1)
-	check(floor_name() == "OutflowRunup" and int(game.get("checkpoint_index")) == 2, "a diagonal hop off the apron corner also lands on the run-up and admits Outflow")
+	await fixture("apron corner hop onto the run-up", Vector3(-17.2, 1.55, -90.4))
+	await hop(Vector3(-17.2, 1.55, -90.4), Vector3(-6, 1.5, -97), 0, -14.2, 1)
+	check(floor_name() == "OutflowRunup" and int(game.get("checkpoint_index")) == 2, "a diagonal hop off the apron corner also lands on the run-up and admits Outflow: %s on %s cp=%d" % [player.global_position, floor_name(), int(game.get("checkpoint_index"))])
 	# hops from the yard crossing reach finale decks; those stay catches, never entries.
 	# the old entry-ramp-to-apron hop is retired: visible screening now guards that drop.
 	# terrace_direction checks its physical replacement and the open path into the yard.
-	for hop_case: Array in [["crossing hop onto first support", Vector3(2, 4.05, -74), Vector3(2, 4, -90), 2, -76.4, -1.0],
-			["crossing hop into basin", Vector3(7, 4.05, -74), Vector3(7, 4, -90), 2, -76.4, -1.0],
-			["apron east hop into basin", Vector3(-13.5, 1.55, -82), Vector3(0, 1.5, -82), 0, -11.6, 1.0]]:
+	for hop_case: Array in [["crossing hop onto first support", Vector3(2, 4.05, -72), Vector3(2, 4, -90), 2, -76.4, -1.0],
+			["crossing hop into basin", Vector3(7, 4.05, -72), Vector3(7, 4, -90), 2, -76.4, -1.0],
+			["apron east hop into basin", Vector3(-15, 1.55, -82), Vector3(0, 1.5, -82), 0, -11.6, 1.0]]:
 		await fixture(hop_case[0], hop_case[1])
 		await hop(hop_case[1], hop_case[2], hop_case[3], hop_case[4], hop_case[5])
 		check(player.global_position.y < 0.0 and int(game.get("checkpoint_index")) == 1 and int(game.get("respawn_count")) == 0,
@@ -310,8 +315,8 @@ func deck_progress() -> void:
 	check(int(game.get("checkpoint_index")) == 0, "R from a tagged yard deck keeps Crest progress at spawn")
 	await ticks(4)
 	check(int(game.get("checkpoint_index")) == 0, "old yard contact cannot advance the fresh run")
-	await fixture("restart after tagged Outflow contact", Vector3(-14, 1.55, -94))
-	await hop(Vector3(-14, 1.55, -94), Vector3(-14, 1.5, -102), 2, -94.4, -1)
+	await fixture("restart after tagged Outflow contact", Vector3(-14, 1.55, -91.4))
+	await hop(Vector3(-14, 1.55, -91.4), Vector3(-14, 1.5, -102), 2, -94.4, -1)
 	check(floor_name() == "OutflowRunup" and int(game.get("checkpoint_index")) == 2, "restart starts with a real Outflow floor contact")
 	game.call("restart_run")
 	await ticks(3)
