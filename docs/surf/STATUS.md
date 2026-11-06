@@ -1,12 +1,12 @@
 # Spillway r12, active build
 
-Active contract: BRIEF.md here, copied from outer SURF-BRIEF.md. Bhop/surf supersedes the old air budget; the sunlit dam, three stages and native verification remain. Work through at least17:00UTC /18:00Prague on6November. Goal incomplete. REPORT.md still describes delivered R11 until exact r12 acceptance. Branch feat/foldrunner-me-build, bead ccChat-general-rowb. Pushed checkpoint59293c8f; records and the frozen42-case harness are included.
+Active contract: BRIEF.md here, copied from outer SURF-BRIEF.md. Bhop/surf supersedes the old air budget; the sunlit dam, three stages and native verification remain. Work through at least17:00UTC /18:00Prague on6November. Goal incomplete. REPORT.md still describes delivered R11 until exact r12 acceptance. Branch feat/foldrunner-me-build, bead ccChat-general-rowb. Pushed checkpoint890cb96f; records, the frozen42-case harness, practice verification and bot finish-aim improvement are included.
 
 ## Current work
 
 The12:41UTC Opus recovery pass is running, taske1d7c4a5-9aff-412d-b23f-18b02cb78386. It owns level/course/surf_geometry/art, access/boundary tests and optional new recovery/presentation files. Its evidence goes in outer checkpoints/spillway/r12/recovery-opus/. Root owns player/main/HUD/audio, surf driver/course test, other motor/flow/geometry tests, tools/docs/package. Next Opus slot no earlier13:42UTC. Previous11:27 course pass and12:06 Sol motor challenge are complete.
 
-The13:04UTC Sol native discovery review is running on immutable bd48-plus-records.pck, taskcd546135-8954-425c-9d1d-7900bc7ea8b2, evidence outer r12/discovery-review-bd48/. It is view-driven exploration, not current-source acceptance.
+The13:05UTC Sol native discovery review completed on immutable bd48-plus-records.pck, taskcd546135-8954-425c-9d1d-7900bc7ea8b2, evidence outer r12/discovery-review-bd48/REVIEW.md. It found the chute and water exit but no stage/finish in29 decisions across3starts. Root inspected the starting/drop, obstructed-looking terrace landing and recovery-entry views and steered their composition to Opus. This is older view-driven exploration, not current-source acceptance.
 
 Root added a separate open-line best for unassisted physical shortcuts, while preserving ordered full-course bests and honest splits. Internal exploration finish kind stays for compatibility; the HUD labels a clean skipped-stage finish OPEN LINE. F/respawn remain unrecorded practice. Opus has been told about its access text assertions. Flow107/107 and native open/full/practice results pass; outer open-records/README.md labels fixture boundaries. The R12 matrix has42 fixed cases and completes37/42 on the frozen bd48-plus-records pack. All beginner/alternate cases and safe timing variants finish. Fast aim/timing cases expose Yard bank/apron interference; exact points were steered to Opus. Matching-bank contact instrumentation preserves the canonical13/13 line. This is development evidence, not the changing recovery source or final acceptance.
 
@@ -20,7 +20,7 @@ Playtest bugs: smooth fixed valves, solid reachable gate/caps/roofs/pipes, suppo
 
 Export preflight caught a missing surf geometry module. Both surf modules are now explicit export entries, and scripts must instantiate. The second development export passes isolated preflight. Its manual native discovery, in discovery-dev-1209/play/, reaches actual Crest surf around13m/s, then misses into recovery. It is an earlier frozen prototype, not the final course. Failed export and discovery attempts remain.
 
-Actual-input F/R native checks now pass after normal-spawn fast traversal to both yard and roof: outer r12/practice-dev/README.md. These are partial control fixtures with no player pose/state writes, not full-route proof. The helper is tools/capture-practice.gd; exact-pack refresh remains. A bot-only finish-aim experiment is running against a separate frozen source snapshot to face the real wheel during arrival; no player camera assist.
+Actual-input F/R native checks now pass after normal-spawn fast traversal to both yard and roof: outer r12/practice-dev/README.md. These are partial control fixtures with no player pose/state writes, not full-route proof. The helper is tools/capture-practice.gd; exact-pack refresh remains. The bot-only finish-aim experiment passed13/13 and13.650s, with unchanged bank contacts and an inspected native strip/movie sheet, outer r12/finish-aim-dev/. No player camera assist. Native physical-record saving and a second-process reload also pass on the older immutable pack, outer r12/physical-records-dev/README.md. Exact delivered-pack refresh remains required.
 
 ## Remaining work
 
