@@ -4,6 +4,7 @@ extends RefCounted
 
 const BRICK_SHADER: Shader = preload("res://shaders/spillway_art_brick.gdshader")
 const TERRAIN_SHADER: Shader = preload("res://shaders/spillway_art_terrain.gdshader")
+const FINISH_PRESENTATION: Script = preload("res://scripts/spillway_finish_presentation.gd")
 # p / the running area; no tree or ridge geometry is placed inside it.
 const COURSE := Rect2(-48.0, -120.0, 92.0, 138.0)
 
@@ -26,6 +27,7 @@ func apply(level: Node3D) -> void:
 	_forest()
 	_tower()
 	_penstocks()
+	_finish_bay()
 
 
 func _light() -> void:
@@ -425,6 +427,15 @@ func _penstocks() -> void:
 	_scatter("ArtPenstockFlanges", ring, rings, colors)
 	_box(Vector3(12.75, -3.4, -18.0), Vector3(4.6, 2.6, 3.4), "old_concrete")
 	_box(Vector3(12.75, -2.0, -18.0), Vector3(4.9, 0.25, 3.7), "concrete")
+
+
+func _finish_bay() -> void:
+	# p / only the full course has the guarded wheel bay this dresses.
+	if not _level.has_meta("spillway_course_built"):
+		return
+	var bay: Node3D = FINISH_PRESENTATION.new()
+	_level.add_child(bay)
+	bay.call("build", _level, _materials)
 
 
 func _box(center: Vector3, size: Vector3, material: String) -> void:

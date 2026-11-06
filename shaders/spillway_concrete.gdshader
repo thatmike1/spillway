@@ -45,6 +45,24 @@ void fragment() {
 	base *= world_normal.y < -0.3 ? 0.72 : 1.0;
 	base *= 1.0 - (1.0 - horizontal) * (board_edge * 0.10 + board_tone * 0.028 + streak * weathering);
 	base *= 1.0 - deck_joint * horizontal * 0.24;
+	// p / each deck bay is its own pour: a tone step, a smooth tooled margin inside the joint,
+	// a broomed field, grime in the joints and broad wear, all fading to a calm tone at distance.
+	vec2 bay = floor(world_position.xz / vec2(4.8, 3.6) + 0.5);
+	float pour = hash21(bay + vec2(17.0, 3.0));
+	float joint_metres = min(joint_uv.x * 4.8, joint_uv.y * 3.6);
+	float metre_width = max(fwidth(joint_metres), 0.002);
+	float near_field = 1.0 - smoothstep(0.02, 0.09, metre_width);
+	float margin = (1.0 - smoothstep(0.075, 0.075 + metre_width, joint_metres)) * smoothstep(0.012, 0.012 + metre_width, joint_metres);
+	float grime = (1.0 - smoothstep(0.0, 0.2, joint_metres)) * (0.4 + noise21(world_position.xz * 1.7) * 0.6);
+	float wear = smoothstep(0.5, 0.85, noise21(world_position.xz * 0.27 + vec2(5.0, 9.0)));
+	float scuff = smoothstep(0.58, 0.95, noise21(world_position.xz * vec2(0.9, 2.3)));
+	vec2 grit_cell = floor(world_position.xz * 55.0);
+	float grit = (hash21(grit_cell) - 0.5) * (1.0 - smoothstep(0.004, 0.012, fwidth(world_position.x) + fwidth(world_position.z)));
+	float deck_tone = (pour - 0.5) * 0.11 + grime * 0.09 + wear * 0.075 + scuff * 0.03 - grit * 0.08;
+	deck_tone -= margin * 0.055 * near_field;
+	deck_tone += (1.0 - margin) * 0.018;
+	base *= 1.0 - horizontal * deck_tone;
+	base = mix(base, base * vec3(0.95, 0.96, 0.91), horizontal * wear * 0.7);
 	float damp = (1.0 - smoothstep(waterline + 0.02, waterline + 0.65, world_position.y));
 	damp *= mix(1.0, 1.0 - smoothstep(0.06, 0.16, abs(world_position.y - waterline)), horizontal);
 	damp *= 0.65 + noise21(wall_uv * vec2(2.0, 4.0)) * 0.35;
