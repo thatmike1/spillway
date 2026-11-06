@@ -9,4 +9,6 @@ play_engine="${GODOT:-$HOME/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-sta
 [[ ! -e "$play_inbox/input-and-state.jsonl" ]]
 mkdir -p "$play_inbox/profile"
 export XDG_DATA_HOME="$play_inbox/profile"
+# an empty external working directory prevents source fallback for missing packed assets.
+cd "$play_inbox"
 exec xvfb-run -a -s '-screen 0 1280x720x24' "$play_engine" --main-pack "$play_pack" --windowed --resolution 1280x720 --audio-driver Dummy --rendering-driver opengl3 --fixed-fps 30 --script "$play_project/tools/visual-play.gd" -- "--inbox=$play_inbox"

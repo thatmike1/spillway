@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import tempfile
 
 PROJECT = Path(__file__).resolve().parents[1]
 SOURCES = ['spillway_player.gd', 'spillway_level.gd', 'spillway_course.gd', 'spillway_main.gd', 'spillway_driver.gd']
@@ -40,6 +41,9 @@ def main():
 
     cases = [(f'baseline-{route}-{seed}', route, seed, []) for route in ['safe', 'fast', 'recovery', 'brake', 'safe_corner', 'fast_housing_turn', 'rail_hop_recovery'] for seed in range(5)]
     cases += [(f'{label}-fast-{seed}', 'fast', seed, [f'--jump-delay={delay}', '--aim-deg=2']) for label, delay in [('early', '-0.08'), ('late', '0.08')] for seed in range(1, 4)]
+    isolated_runtime = tempfile.TemporaryDirectory(prefix="spillway-packed-matrix-") if pack else None
+    run_directory = Path(isolated_runtime.name) if isolated_runtime else PROJECT
+    provenance["execution_directory"] = str(run_directory)
     rows = []
     def save(complete=False, unchanged=True):
         temporary = output / 'matrix-results.json.tmp'
@@ -53,7 +57,7 @@ def main():
         folder.mkdir(exist_ok=True)
         runtime = ['--main-pack', str(pack)] if pack else ['--path', str(PROJECT)]
         command = [args.godot, '--headless', '--fixed-fps', '120', *runtime, '--', '--bot', '--bot-quit', f'--route={route}', f'--seed={seed}', f'--evidence-dir={folder}', *extra]
-        result = subprocess.run(command, cwd=PROJECT, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        result = subprocess.run(command, cwd=run_directory, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         (folder / 'engine.log').write_text(result.stdout)
         traces = sorted(folder.glob('route-*.jsonl'), key=lambda path: path.stat().st_mtime_ns)
         records = [json.loads(line) for line in traces[-1].read_text().splitlines()] if traces else []
