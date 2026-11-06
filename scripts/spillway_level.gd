@@ -50,6 +50,9 @@ func build() -> void:
 
 func is_finish_at(feet: Vector3) -> bool:
 	var front := AABB(finish_position - Vector3(2.0, 0.3, 0.8), Vector3(4.0, 3.0, 1.6))
+	if has_meta("spillway_course_built"):
+		# p / arriving beside the front guard counts; climbing into machinery is unnecessary.
+		front = AABB(finish_position - Vector3(4.0, 0.3, 0.8), Vector3(8.0, 3.0, 2.6))
 	if front.has_point(feet):
 		return true
 	if not has_meta("spillway_course_built"):

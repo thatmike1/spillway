@@ -115,7 +115,8 @@ func housing_toward_tower() -> void:
 	check(int(player.get("jump_count")) == jumps, "bridge approach needs no jump")
 
 func finished_exploration() -> void:
-	await roof_fixture("exploration preserves finished result", Vector3(24, -2.96, -63))
+	# start outside the expanded arrival strip, before establishing this fixture's Outflow stage.
+	await roof_fixture("exploration preserves finished result", Vector3(24, -2.96, -62))
 	await walk(Vector3(24, -3, -66.5), 200)
 	check(bool(game.get("finished")), "fixture reaches the wheel through input")
 	var time: float = game.get("elapsed")
@@ -337,6 +338,18 @@ func terrace_direction() -> void:
 		"ordinary continuation discovers Yard before the finish")
 
 
+func wheel_front_strip() -> void:
+	# p / walking beside the visible wheel guard is arrival; no jump into machinery is required.
+	for x: float in [19.0, 29.0]:
+		await roof_fixture("front wheel approach %.0f" % x, Vector3(x, -2.96, -63.17))
+		var jumps: int = player.get("jump_count")
+		await walk(Vector3(24, -3, -63.17), 300)
+		check(bool(game.get("finished")) and str(game.get("finish_kind")) == "clean",
+			"ordinary walking along the front strip reaches the wheel from either side")
+		check(int(player.get("jump_count")) == jumps and int(game.get("respawn_count")) == 0,
+			"the machinery enclosure needs no jump or reset to finish")
+
+
 func run() -> void:
 	game = load("res://scripts/spillway_main.gd").new()
 	root.add_child(game)
@@ -395,6 +408,7 @@ func run() -> void:
 	await hardware_collision()
 	await finished_exploration()
 	await terrace_direction()
+	await wheel_front_strip()
 	for key: String in ["move_forward", "move_back", "jump", "crouch"]:
 		action(key, false)
 	print("spillway access: %d/%d checks passed; explicit authored-level fixtures, not whole-route proof" % [checks - failures, checks])
