@@ -115,7 +115,9 @@ func _make_yard() -> void:
 	# p / open culverts support the east apron without blocking the recovery basin.
 	for x: float in [-25, -18, -12]:
 		for z: float in [-74, -84.5, -95]:
-			_level.call("_solid", "YardCulvertPier", Vector3(x, -3.75, z), Vector3(1, 9.5, 1.5), "old_concrete")
+			# p / the east junction pier stands under the descent deck, outside the exit ramp's rail.
+			var pier_x: float = -13.75 if x == -12 and z == -74 else x
+			_level.call("_solid", "YardCulvertPier", Vector3(pier_x, -3.75, z), Vector3(1, 9.5, 1.5), "old_concrete")
 	_stage(_level.call("_slab", "SluiceYardApron", Vector3(-25.5, 1.5, -84.5), Vector2(29, 25), .55, "concrete"), 1)
 	_stage(_walk("YardEntryCrossing", Vector3(11, 4, -74), Vector3(-12, 4, -74), 7.0, false), 1)
 	_stage(_walk("YardApronDescent", Vector3(-12, 4, -74), Vector3(-18, 1.5, -74), 7.0, false), 1)
@@ -271,6 +273,9 @@ func _walk(label: String, a: Vector3, b: Vector3, width: float, rails: bool) -> 
 		var supports: Array[Vector3] = []
 		if label != "YardEntryCrossing":
 			supports.append(p)
+		if label == "YardApronDescent" and i == 0:
+			# share the relocated culvert pier; the basin exit ramp keeps its full width below.
+			supports = [a.lerp(b, 1.75 / 6.0)]
 		if label == "YardEntryRamp":
 			# leave the lower crossing and final approach clear beneath the entrance.
 			supports = [p + side * .85]

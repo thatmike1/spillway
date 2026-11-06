@@ -350,6 +350,72 @@ func wheel_front_strip() -> void:
 			"the machinery enclosure needs no jump or reset to finish")
 
 
+func basin_ramp_width() -> void:
+	# p / the sol basin player met a pier inside the yellow-railed exit; every lane now climbs.
+	for x: float in [-11.9, -10.0, -8.1]:
+		await roof_fixture("basin exit ramp lane %.1f" % x, Vector3(x, -5.96, -82.5))
+		var jumps: int = player.get("jump_count")
+		await walk(Vector3(x, -3, -64.5), 600)
+		var feet := player.global_position
+		check(feet.z > -65.5 and feet.y > -3.2 and absf(feet.x - x) < 0.25,
+			"walking straight up the ramp from the basin reaches the landing in its own lane: %s" % feet)
+		check(int(player.get("jump_count")) == jumps and int(game.get("respawn_count")) == 0,
+			"the basin exit needs no jump or reset")
+	# a standing capsule fits anywhere between the rails along the whole incline.
+	var space := player.get_world_3d().direct_space_state
+	var query := PhysicsShapeQueryParameters3D.new()
+	var shape := CapsuleShape3D.new()
+	shape.radius = 0.3
+	shape.height = 1.8
+	query.shape = shape
+	query.exclude = [player.get_rid()]
+	var blocked: Array[Vector3] = []
+	for step: int in 27:
+		var z := -78.5 + step * 0.5
+		for lane: float in [-11.9, -11.4, -10.0, -8.6, -8.1]:
+			var at := Vector3(lane, -6.0 + 3.0 * (z + 79.0) / 14.0 + 0.95, z)
+			query.transform = Transform3D(Basis.IDENTITY, at)
+			if not space.intersect_shape(query, 1).is_empty():
+				blocked.append(at)
+	check(blocked.is_empty(), "no support or hardware occupies the ramp between its rails: %s" % [blocked])
+
+
+func static_batch_shadows() -> void:
+	label = "static batches keep requested shadows"
+	# p / batching must not turn the see-through terrace screens back into solid shadow casters.
+	var screen_instances := 0
+	var screens_cast := false
+	for batch: Node in game.get("level").find_children("*", "MultiMeshInstance3D", true, false):
+		var shader_material := (batch as MultiMeshInstance3D).material_override as ShaderMaterial
+		if shader_material != null and shader_material.shader.resource_path.ends_with("spillway_screen.gdshader"):
+			screen_instances += (batch as MultiMeshInstance3D).multimesh.instance_count
+			screens_cast = screens_cast or (batch as MultiMeshInstance3D).cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	check(screen_instances == 4 and not screens_cast, "the four terrace screen panels stay batched without casting shadows")
+	# one material with mixed shadow requests splits; moving geometry stays live.
+	var fixture: Node3D = load("res://scripts/spillway_level.gd").new()
+	root.add_child(fixture)
+	var material := StandardMaterial3D.new()
+	fixture.get("_materials")["fixture"] = material
+	fixture.call("_box", Vector3(-1, 0, 0), Vector3.ONE, "fixture")
+	var shadowless: Node3D = fixture.call("_box", Vector3(1, 0, 0), Vector3.ONE, "fixture")
+	(shadowless.get_child(0) as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var moving := Node3D.new()
+	moving.set_meta("moving_geometry", true)
+	fixture.add_child(moving)
+	var live := MeshInstance3D.new()
+	live.mesh = BoxMesh.new()
+	live.material_override = material
+	moving.add_child(live)
+	fixture.call("_batch_static_boxes")
+	await process_frame
+	var states: Array[String] = []
+	for batch: Node in fixture.find_children("*", "MultiMeshInstance3D", true, false):
+		states.append("%d:%d" % [(batch as MultiMeshInstance3D).cast_shadow, (batch as MultiMeshInstance3D).multimesh.instance_count])
+	states.sort()
+	check(states == ["0:1", "1:1"] and is_instance_valid(live), "a shared material batches shadowed and shadowless boxes apart: %s" % [states])
+	fixture.queue_free()
+
+
 func run() -> void:
 	game = load("res://scripts/spillway_main.gd").new()
 	root.add_child(game)
@@ -409,6 +475,8 @@ func run() -> void:
 	await finished_exploration()
 	await terrace_direction()
 	await wheel_front_strip()
+	await basin_ramp_width()
+	await static_batch_shadows()
 	for key: String in ["move_forward", "move_back", "jump", "crouch"]:
 		action(key, false)
 	print("spillway access: %d/%d checks passed; explicit authored-level fixtures, not whole-route proof" % [checks - failures, checks])

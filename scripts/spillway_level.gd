@@ -79,19 +79,20 @@ func _batch_static_boxes() -> void:
 			ancestor = ancestor.get_parent()
 		if moving:
 			continue
-		var material: Material = source.material_override
-		if not groups.has(material):
-			groups[material] = []
+		# p / a batch draws with one shadow setting, so requested shadow-free parts batch apart.
+		var key: Array = [source.material_override, source.cast_shadow]
+		if not groups.has(key):
+			groups[key] = []
 		var pose := global_transform.affine_inverse() * source.global_transform
 		var size := (source.mesh as BoxMesh).size
 		pose.basis.x *= size.x
 		pose.basis.y *= size.y
 		pose.basis.z *= size.z
-		groups[material].append(pose)
+		groups[key].append(pose)
 		source.hide()
 		source.queue_free()
-	for material: Material in groups:
-		var transforms: Array = groups[material]
+	for key: Array in groups:
+		var transforms: Array = groups[key]
 		var mesh := BoxMesh.new()
 		mesh.size = Vector3.ONE
 		var instances := MultiMesh.new()
@@ -103,7 +104,8 @@ func _batch_static_boxes() -> void:
 		var batch := MultiMeshInstance3D.new()
 		batch.name = "StaticDetailBatch"
 		batch.multimesh = instances
-		batch.material_override = material
+		batch.material_override = key[0]
+		batch.cast_shadow = key[1]
 		add_child(batch)
 
 
