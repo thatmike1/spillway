@@ -11,6 +11,7 @@ func build(level: Node3D) -> void:
 	level.set_meta("spillway_course_built", true)
 	_level = level
 	_open_crest_exit()
+	_screen_terrace_drop()
 	_make_yard()
 	_make_filter_house()
 	_make_outflow()
@@ -73,6 +74,39 @@ func _open_crest_exit() -> void:
 		_level.call("_rail", Vector3(-12, 4, -62), Vector3(7, 4, -62))
 		_level.call("_rail", Vector3(15, 4, -62), Vector3(17, 4, -62))
 	_stage(_walk("YardEntryRamp", Vector3(10, 4, -62), Vector3(10, 4, -74), 6.0, true), 1)
+
+
+func _screen_terrace_drop() -> void:
+	# p / the tower is a landmark beyond the yard, not the first terrace's next landing.
+	# mesh guards close only the inviting direct drop; the broad westward crossing stays open.
+	_stage(_level.call("_slab", "YardEntryTurn", Vector3(10, 4, -74), Vector2(6.2, 7), 0.5, "concrete"), 1)
+	_level.call("_solid", "YardEntryTurnPier", Vector3(12.6, -2.5, -76.8), Vector3(0.65, 12, 0.85), "old_concrete")
+	var material := ShaderMaterial.new()
+	material.shader = preload("res://shaders/spillway_screen.gdshader")
+	var corners: Array[Vector3] = [
+		Vector3(17.05, 4, -56), Vector3(17.05, 4, -62.1),
+		Vector3(13.05, 4, -62.1), Vector3(13.05, 4, -77.4), Vector3(11, 4, -77.4),
+	]
+	for i: int in corners.size() - 1:
+		var a := corners[i]
+		var b := corners[i + 1]
+		var length := a.distance_to(b)
+		var direction := (b - a).normalized()
+		var body: StaticBody3D = _level.call("_solid", "TerraceMaintenanceScreen", (a + b) * 0.5 + Vector3.UP * 1.35,
+			Vector3(0.045, 2.7, length), "steel")
+		body.rotation.y = atan2(direction.x, direction.z)
+		for child: Node in body.get_children():
+			if child is MeshInstance3D:
+				child.material_override = material
+				child.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		for y: float in [0.12, 1.35, 2.7]:
+			_level.call("_beam", a + Vector3.UP * y, b + Vector3.UP * y, 0.055, "steel")
+		var count := ceili(length / 2.5)
+		for post: int in count + 1:
+			var point := a.lerp(b, float(post) / float(count))
+			_level.call("_solid", "MaintenanceScreenPost", point + Vector3.UP * 1.35,
+				Vector3(0.09, 2.7, 0.09), "steel")
+			_level.call("_box", point + Vector3.UP * 0.025, Vector3(0.22, 0.05, 0.22), "steel")
 
 
 func _make_yard() -> void:

@@ -265,9 +265,10 @@ func deck_progress() -> void:
 	await hop(Vector3(-14, 1.55, -92), Vector3(-6, 1.5, -97), 0, -12.2, 1)
 	check(floor_name() == "OutflowRunup" and int(game.get("checkpoint_index")) == 2, "a diagonal hop off the apron corner also lands on the run-up and admits Outflow")
 	# hops from the yard crossing reach finale decks; those stay catches, never entries.
+	# the old entry-ramp-to-apron hop is retired: visible screening now guards that drop.
+	# terrace_direction checks its physical replacement and the open path into the yard.
 	for hop_case: Array in [["crossing hop onto first support", Vector3(2, 4.05, -74), Vector3(2, 4, -90), 2, -76.4, -1.0],
 			["crossing hop into basin", Vector3(7, 4.05, -74), Vector3(7, 4, -90), 2, -76.4, -1.0],
-			["entry ramp hop onto loading apron", Vector3(10, 4.05, -66), Vector3(20, 4, -66), 0, 12.3, 1.0],
 			["apron east hop into basin", Vector3(-13.5, 1.55, -82), Vector3(0, 1.5, -82), 0, -11.6, 1.0]]:
 		await fixture(hop_case[0], hop_case[1])
 		await hop(hop_case[1], hop_case[2], hop_case[3], hop_case[4], hop_case[5])
@@ -314,6 +315,26 @@ func deck_progress() -> void:
 	game.call("restart_run")
 	await ticks(3)
 	check(int(game.get("checkpoint_index")) == 0 and player.global_position.distance_to(game.get("level").get("spawn").origin) < .2, "R from Outflow leaves no stale stage admission")
+
+
+func terrace_direction() -> void:
+	# p / visible maintenance screens keep the direct tower drop from reading as the route.
+	for start: Vector3 in [Vector3(15.5, 4.04, -59), Vector3(11, 4.04, -65)]:
+		await fixture("terrace tower-facing screen %.1f" % start.z, start, false)
+		aim(Vector3(26, 4, -67))
+		action("move_forward", true)
+		action("jump", true)
+		await ticks(180)
+		action("jump", false)
+		action("move_forward", false)
+		check(player.global_position.y > 3.95 and not bool(game.get("finished")),
+			"ordinary forward jump meets visible screening instead of dropping straight to the wheel: %s" % player.global_position)
+		check(int(game.get("respawn_count")) == 0, "meeting the maintenance screen needs no reset")
+	await fixture("terrace continuation to yard", Vector3(10, 4.04, -59), false)
+	check(await walk(Vector3(10, 4, -73)), "the broad opening still leads south from the terrace")
+	check(await walk(Vector3(-12, 4, -74)), "the unobstructed crossing turns west toward the yard")
+	check(int(game.get("checkpoint_index")) == 1 and int(game.get("respawn_count")) == 0,
+		"ordinary continuation discovers Yard before the finish")
 
 
 func run() -> void:
@@ -373,6 +394,7 @@ func run() -> void:
 	await wheel_guard()
 	await hardware_collision()
 	await finished_exploration()
+	await terrace_direction()
 	for key: String in ["move_forward", "move_back", "jump", "crouch"]:
 		action(key, false)
 	print("spillway access: %d/%d checks passed; explicit authored-level fixtures, not whole-route proof" % [checks - failures, checks])
