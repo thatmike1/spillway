@@ -431,7 +431,9 @@ func _define_routes() -> void:
 	var common: Array = [
 		# south of the entry ramp's rail end, so the westward turn never clips it.
 		_p(Vector3(8.5, 4, -75)),
-		_p(Vector3(-.9, 4, -74), .45, false, true), _p(Vector3(-6, 4, -74)), _p(Vector3(-12, 4, -74)),
+		# p / keep aiming along the landing deck after the joint: the redundant near marker
+		# made a W-only hop circle back when its carried sideways speed passed that marker.
+		_p(Vector3(-.9, 4, -74), .45, false, true), _p(Vector3(-12, 4, -74)),
 		_p(Vector3(-18, 1.5, -74), 1.0, true),
 	]
 	# p / the beginner line cuts diagonally through the opened gate instead of two square turns.

@@ -194,8 +194,10 @@ func _physics_process(delta: float) -> void:
 		# the authored finish volume may trigger before the last point radius.
 		if index == _route.size() - 1:
 			_advance("finish volume")
-		var exploration := str(main.get("finish_kind")) == "exploration"
-		_complete(index >= _route.size() and not exploration, "exploration finish is not an ordered route" if exploration else ("finish" if index >= _route.size() else "finish before all waypoints"))
+		var ordered: bool = str(main.get("finish_kind")) == "clean" and bool(main.get("clean_eligible")) and _ordered_checkpoints.size() == level.get("checkpoints").size()
+		for stage: int in _ordered_checkpoints.size():
+			ordered = ordered and _ordered_checkpoints[stage] == stage
+		_complete(index >= _route.size() and ordered, "finish is not a clean ordered route" if not ordered else ("finish" if index >= _route.size() else "finish before all waypoints"))
 		return
 	if time > 150:
 		_complete(false, "150s timeout")

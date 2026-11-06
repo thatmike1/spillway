@@ -4,6 +4,55 @@ extends SceneTree
 func _initialize() -> void:
 	run.call_deferred()
 
+func finish_hold(main: Node, output: String, look_at_wheel: bool) -> bool:
+	# p / recording input only: after braking, turn the head to watch the wheel start.
+	# this is ordinary mouse input in the capture, never automatic camera behavior in play.
+	var journal := FileAccess.open(output.path_join("post-finish-inputs.jsonl"), FileAccess.WRITE)
+	var player: CharacterBody3D = main.get("player")
+	var camera: Camera3D = player.get("camera")
+	var wheel: Node3D = main.get("level").get("_hero_wheel")
+	var previous := player.global_position
+	var elapsed := 0.0
+	var worst_step := 0.0
+	var wheel_contact := false
+	var machinery_contact := false
+	var views := 0
+	while elapsed < 3.0:
+		var delta: float = main.get_process_delta_time()
+		if look_at_wheel and elapsed > .75 and player.is_grounded() and float(player.call("get_speed")) < 1.0 and wheel != null:
+			var offset := wheel.global_position + Vector3.UP * .25 - camera.global_position
+			var yaw := atan2(-offset.x, -offset.z)
+			var pitch := atan2(offset.y, Vector2(offset.x, offset.z).length())
+			var turn := clampf(angle_difference(float(player.get("yaw")), yaw), -2.0 * delta, 2.0 * delta)
+			var tilt := clampf(pitch - float(player.get("pitch")), -delta, delta)
+			var motion := InputEventMouseMotion.new()
+			motion.screen_relative = Vector2(-turn, -tilt) / float(player.get("mouse_sensitivity"))
+			motion.relative = motion.screen_relative
+			Input.parse_input_event(motion)
+			Input.flush_buffered_events()
+			journal.store_line(JSON.stringify({"event":"mouse","post_finish_s":elapsed,"screen_relative":[motion.screen_relative.x,motion.screen_relative.y]}))
+		await process_frame
+		elapsed += main.get_process_delta_time()
+		worst_step = maxf(worst_step, player.global_position.distance_to(previous))
+		previous = player.global_position
+		for i: int in player.get_slide_collision_count():
+			var hit := player.get_slide_collision(i)
+			for j: int in hit.get_collision_count():
+				var body := hit.get_collider(j) as Node
+				wheel_contact = wheel_contact or (body != null and str(body.name) == "FinishWheelEnvelope")
+				machinery_contact = machinery_contact or (body != null and (str(body.name) == "FinishWheelEnvelope" or str(body.name).begins_with("WheelMaintenanceGuard")))
+		journal.store_line(JSON.stringify({"event":"state","post_finish_s":elapsed,"position":[previous.x,previous.y,previous.z],"speed":player.call("get_speed"),"finished":main.get("finished"),"respawns":main.get("respawn_count")}))
+		views += 1
+	journal.close()
+	var passed: bool = bool(main.get("finished")) and int(main.get("respawn_count")) == 0 and worst_step < 2.0
+	var result := {"passed":passed,"seconds":elapsed,"samples":views,"max_step_m":worst_step,
+		"wheel_contact":wheel_contact,"machinery_contact":machinery_contact,"scripted_mouse_look_after_braking":look_at_wheel,
+		"method":"three seconds of live player physics after input-driven finish; optional ordinary mouse input, no camera or body writes"}
+	var file := FileAccess.open(output.path_join("post-finish-summary.json"),FileAccess.WRITE)
+	file.store_string(JSON.stringify(result,"  "))
+	file.close()
+	return passed
+
 func run() -> void:
 	var args := OS.get_cmdline_user_args()
 	if not args.has("--bot") or args.has("--bot-quit"):
@@ -15,6 +64,10 @@ func run() -> void:
 	for arg: String in args:
 		if arg.begins_with("--evidence-dir="):
 			output = arg.trim_prefix("--evidence-dir=").simplify_path()
+	if not preload("res://scripts/spillway_driver.gd").evidence_path_allowed(output) or DirAccess.make_dir_recursive_absolute(output) != OK or FileAccess.file_exists(output.path_join("post-finish-summary.json")):
+		printerr("capture-route needs a fresh absolute evidence directory outside Git")
+		quit(2)
+		return
 	if save_records:
 		# the normal bot never saves. this optional acceptance mode uses only a fresh,
 		# isolated profile below the evidence folder, never the player's personal bests.
@@ -33,7 +86,7 @@ func run() -> void:
 		await process_frame
 	var success: bool = driver.get("succeeded")
 	# p / evidence hold only: show the real finish machinery respond before closing the movie.
-	await create_timer(3.0).timeout
+	success = await finish_hold(main, output, args.has("--finish-look")) and success
 	if save_records:
 		# read what the ordinary physical finish actually wrote; never seed a result or clock.
 		var config := ConfigFile.new()

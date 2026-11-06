@@ -12,8 +12,9 @@ const TICK := 1.0 / 120.0
 const TIME_LIMIT := 45.0
 # p / bhop waypoints between banks; each is a floor position reached within 2 m.
 const CREST_TO_YARD: Array[Vector3] = [Vector3(11, 4, -40), Vector3(10, 4, -47), Vector3(10, 4, -57), Vector3(10, 4, -66)]
-# p / aim along the hall toward its wheel, so arrival footage shows the actual finish.
-const FINISH_AIM := Vector3(24, -3, -68.8)
+# p / arrive along the apron in front of the guard, with room to brake beyond the finish.
+# aiming at the wheel itself drove the demonstration into solid machinery at 22 m/s.
+const FINISH_AIM := Vector3(28, -3, -61.9)
 # p / riding lane on the outflow faces, in metres below the local coping.
 const OUTFLOW_LANE := 2.0
 # p / a hop rises for 0.36 s; one taken with less than this much time of deck left reaches
@@ -230,7 +231,13 @@ func _drive() -> void:
 			# p / round the hall's front corner, then straight along the front to the wheel.
 			var corner := Vector3(12.5, -3, -67.2)
 			var aim := corner if player.global_position.x < corner.x - 1.5 else FINISH_AIM
-			_strafe_toward(aim, 3.0, ["jump"])
+			# p / release autohop on arrival and use ordinary grounded steering. the final
+			# catch has already cleared the gaps; another hop aimed directly into the wheel.
+			if player.is_grounded():
+				_keys(["move_forward"])
+				_face(_yaw_toward(aim - player.global_position))
+			else:
+				_strafe_toward(aim, 3.0)
 
 ## the terrace gap toward the yard is cleared by a hop taken late enough; a hop chain lands
 ## wherever its phase falls. like a player, release jump when the next takeoff would land in
