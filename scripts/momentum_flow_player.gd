@@ -38,17 +38,20 @@ const FLOW_AIR_FLOOR: float = 4.0
 const FLOW_AIR_PUSH: float = 6.0
 const FLOW_CARVE_GAIN: float = 1.0
 const FLOW_CARVE_CAP: float = 17.0
-# p / the surface's own climb is part of the motion: a jump or an edge keeps most of it,
-# and cresting a ramp fast enough throws the runner instead of gluing them to the top.
+# p / keep a short turn budget between mouse deliveries. a continuous 30 hz sweep must
+# earn the same carve as 120 hz; an isolated flick cannot bank a whole flight's reward.
+const FLOW_CARVE_WINDOW: float = 0.067
+# p / a jump or a real edge keeps most of the surface's climb. supported crests do not
+# trigger a hidden launch: the earlier threshold rule also popped on small stair contacts.
 const FLOW_RAMP_KEEP: float = 0.8
-const FLOW_LAUNCH_SPEED: float = 11.0
-const FLOW_LAUNCH_MIN: float = 2.0
-const FLOW_CREST_DROP: float = 1.5
 
 var carve_gain_total: float = 0.0
+# retained for the original lab trace schema; automatic crest launches are retired.
 var launch_count: int = 0
 var _flow_yaw_last: float = 0.0
 var _flow_last_vs: float = 0.0
+var _flow_carve_turn: float = 0.0
+var _flow_carve_time: float = 0.0
 
 func _ready() -> void:
 	super()
@@ -60,6 +63,7 @@ func reset_to(pose: Transform3D) -> void:
 	super(pose)
 	_flow_yaw_last = yaw
 	_flow_last_vs = 0.0
+	_clear_carve()
 
 func _physics_process(delta: float) -> void:
 	_previous_position = _current_position
@@ -85,6 +89,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		_buffer = maxf(0.0, _buffer - delta)
 	if mode == "mantle":
+		_clear_carve()
 		_step_mantle(delta, jump_held)
 		_current_position = global_position
 		return
@@ -110,11 +115,6 @@ func _physics_process(delta: float) -> void:
 	var hop := _coyote > 0.0 and (_buffer > 0.0 or held_hop)
 	var started_grounded := grounded
 	var surface_vy := _surface_climb(ground_normal, horizontal) if grounded else _flow_last_vs
-	var launched := false
-	if grounded and not hop and horizontal.length() >= FLOW_LAUNCH_SPEED and _flow_last_vs >= FLOW_LAUNCH_MIN and surface_vy < _flow_last_vs - FLOW_CREST_DROP:
-		# the support just stopped climbing under a fast runner: leave with the climb.
-		launched = true
-		grounded = false
 	var downhill := grounded and ground_normal.y < 0.985 and Vector2(ground_normal.x, ground_normal.z).dot(Vector2(horizontal.x, horizontal.z)) > 0.2
 	var slide_threshold := FLOW_SLIDE_KEEP if previous_mode == "slide" or downhill else FLOW_SLIDE_ENTER
 	var sliding := grounded and not hop and crouched and horizontal.length() >= slide_threshold
@@ -122,16 +122,12 @@ func _physics_process(delta: float) -> void:
 	if mode == "slide" and previous_mode != "slide":
 		move_started.emit("slide")
 	if grounded and not hop:
+		_clear_carve()
 		horizontal = _flow_ground(horizontal, wish, ground_normal, sliding, delta)
 		velocity.y = -0.4
 	else:
 		horizontal = _flow_air(horizontal, wish, stick, view_turn, delta)
-		if launched:
-			velocity.y = _flow_last_vs * FLOW_RAMP_KEEP
-			launch_count += 1
-			move_started.emit("launch")
-		else:
-			velocity.y -= GRAVITY * delta
+		velocity.y -= GRAVITY * delta
 	horizontal = horizontal.limit_length(MAX_SPEED)
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
@@ -165,7 +161,9 @@ func _physics_process(delta: float) -> void:
 		velocity.y = surface_vy * (FLOW_RAMP_KEEP if surface_vy > 0.0 else 1.0)
 	if not grounded and landed_on_floor:
 		_catch_landing(before_move)
-	_flow_last_vs = _surface_climb(_ground_normal, Vector3(velocity.x, 0.0, velocity.z)) if landed_on_floor else 0.0
+	# keep the support used for this move in the diagnostic history, rather than replacing
+	# it with the newly discovered support before a transition can be observed.
+	_flow_last_vs = _surface_climb(ground_normal, Vector3(before_move.x, 0.0, before_move.z)) if grounded else 0.0
 	var resolved_speed := get_speed()
 	if resolved_speed > MAX_SPEED:
 		velocity *= MAX_SPEED / resolved_speed
@@ -232,43 +230,67 @@ func _flow_ground(horizontal: Vector3, wish: Vector3, normal: Vector3, sliding: 
 	return heading * maxf(speed, 0.0)
 
 func _flow_air(horizontal: Vector3, wish: Vector3, stick: Vector2, view_turn: float, delta: float) -> Vector3:
+	_flow_carve_time = maxf(0.0, _flow_carve_time - delta)
+	if _flow_carve_time <= 0.0:
+		_flow_carve_turn = 0.0
 	var wish_length := minf(wish.length(), 1.0)
 	if wish_length < 0.05:
+		_clear_carve()
 		return horizontal
 	var wish_dir := wish / wish.length()
 	var speed := horizontal.length()
 	if speed < FLOW_AIR_FLOOR:
+		_clear_carve()
 		# a standing or slow jump can still drift where it is pointed, a little.
 		return (horizontal + wish_dir * FLOW_AIR_PUSH * wish_length * delta).limit_length(maxf(speed, FLOW_AIR_FLOOR))
 	var heading := horizontal / speed
 	if stick.y > 0.2:
+		_clear_carve()
 		return heading * move_toward(speed, 0.0, FLOW_AIR_BRAKE * delta)
 	# p / in the air the view leads, whatever forward or strafe keys are held: a strafe key
 	# never pulls the line sideways, so swapping a for d is not read as a reversal.
 	var view := Vector3(-sin(yaw), 0.0, -cos(yaw))
 	var angle := heading.signed_angle_to(view, Vector3.UP)
 	if absf(angle) > FLOW_REVERSE_ANGLE:
+		_clear_carve()
 		return horizontal
 	var limit := minf(FLOW_AIR_TURN_MAX, FLOW_AIR_GRIP / speed) * delta
 	var turn := clampf(angle, -limit, limit)
 	heading = heading.rotated(Vector3.UP, turn)
-	# a strafe key holds the inside of a turn when it points the way the heading rotates
-	# (A turns left, positive); only the part the view also turned counts as a carve.
+	# a strafe key holds the inside of a turn when it points the way the heading rotates.
+	# spend the recent view turn over the physics ticks that actually catch up with it.
 	var inside := absf(stick.x) > 0.2 and signf(turn) == -signf(stick.x)
-	if inside and signf(view_turn) == signf(turn) and speed < FLOW_CARVE_CAP:
-		var gain := minf(FLOW_CARVE_CAP - speed, FLOW_CARVE_GAIN * minf(absf(turn), absf(view_turn)))
+	if not inside or (not is_zero_approx(view_turn) and signf(view_turn) != signf(turn)):
+		_clear_carve()
+	elif not is_zero_approx(view_turn):
+		if signf(_flow_carve_turn) != signf(view_turn):
+			_flow_carve_turn = 0.0
+		_flow_carve_turn += view_turn
+		_flow_carve_time = FLOW_CARVE_WINDOW
+	if inside and signf(_flow_carve_turn) == signf(turn):
+		var used := minf(absf(turn), absf(_flow_carve_turn))
+		_flow_carve_turn -= signf(turn) * used
+		var gain := minf(maxf(0.0, FLOW_CARVE_CAP - speed), FLOW_CARVE_GAIN * used)
 		speed += gain
 		carve_gain_total += gain
 	return heading * speed
 
+func _clear_carve() -> void:
+	_flow_carve_turn = 0.0
+	_flow_carve_time = 0.0
+
 func _catch_landing(before: Vector3) -> void:
-	# p / a landing never costs speed; a downslope catches part of the fall along itself.
-	var caught := before.slide(_ground_normal)
+	# p / a downslope can catch the fall only along a collision-feasible tangent. include
+	# every active plane so projecting onto the floor cannot recreate motion into a wall.
+	var planes: Array[Vector3] = [_ground_normal]
+	for i: int in get_slide_collision_count():
+		_contact_planes(get_slide_collision(i), planes, false, true)
+	var caught := _feasible_velocity(before, planes)
 	var caught_h := Vector3(caught.x, 0.0, caught.z)
+	velocity = _feasible_velocity(velocity, planes)
 	var current := Vector3(velocity.x, 0.0, velocity.z)
 	if caught_h.length() > current.length() and caught_h.dot(current) >= 0.0:
-		velocity.x = caught_h.x
-		velocity.z = caught_h.z
+		velocity = caught
 
 func _surface_climb(normal: Vector3, horizontal: Vector3) -> float:
 	# vertical rate of travel along the support at this horizontal velocity.

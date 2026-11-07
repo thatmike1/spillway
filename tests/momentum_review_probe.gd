@@ -29,6 +29,9 @@ func _run() -> void:
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	for cadence: int in [120, 60, 30]:
 		await episode({"name": "earned_cadence_%d" % cadence, "kind": "earned_air", "cadence": cadence, "gesture": "a"})
+	for cadence: int in [60, 30]:
+		for phase: int in 120 / cadence:
+			await episode({"name": "earned_cadence_%d_phase_%d" % [cadence, phase], "kind": "earned_air", "cadence": cadence, "gesture": "a", "phase": phase})
 	for gesture: String in ["w", "d", "offbeat", "a_static", "d_static", "none", "wa", "flick"]:
 		await episode({"name": "earned_air_" + gesture, "kind": "earned_air", "cadence": 120, "gesture": gesture})
 	for motor: String in MOTORS:
@@ -148,6 +151,7 @@ func episode(cfg: Dictionary) -> void:
 	rows.clear()
 	trace = FileAccess.open(out_dir.path_join(cfg["name"] + ".jsonl"), FileAccess.WRITE)
 	var count: int = cfg.get("ticks", 198)
+	var delivered_turn := 0.0
 	for i: int in count:
 		tick = i
 		var keys: Array = []
@@ -174,10 +178,19 @@ func episode(cfg: Dictionary) -> void:
 					keys = []
 				if g not in ["a_static", "d_static", "none"]:
 					var period: int = 120 / int(cfg["cadence"])
-					if (i - 102) % period == 0:
+					if cfg.has("phase"):
+						# causal samples plus a final remainder; keep the same total view turn.
+						if (i - 102) % period == int(cfg["phase"]) or i == 161:
+							var target := 1.8 * DT * float(i - 101)
+							turn = target - delivered_turn
+							delivered_turn = target
+					elif (i - 102) % period == 0:
 						turn = 1.8 * DT * period
 					if g == "flick":
 						turn = 0.9 if i == 102 else 0.0
+			if cfg.has("phase") and i >= 162 and i < 166:
+				# let the final sampled mouse update settle while the same strafe is held.
+				keys = ["a"]
 		elif kind == "earned_crest":
 			keys = ["w", "crouch"] if i > 96 else ["w"]
 		elif kind in ["crest", "seam", "stair", "slope_change"]:

@@ -14,8 +14,10 @@ Files:
 - `tests/momentum_flow_probe.gd`: R12 vs FLOW on labelled fixtures and one real-course line.
 
 Traces and captures (outside Git): `checkpoints/spillway/r13/controller-lab/`. `run1` is the
-first FLOW air design (rejected, see below), `run2` adds fixtures, `run3` is the current
-policy, `native/` holds the frame captures.
+first FLOW air design (rejected, see below), `run2` adds fixtures, `run3` records the original
+policy, `native/` holds its frame captures. The adversarial review and subsequent corrections
+are in controller-review-sol.md and controller-fixes.md. The old measurements below remain
+attributed to their original snapshot rather than silently becoming current-build results.
 
 ## 1. What is confirmed
 
@@ -47,7 +49,7 @@ policy, `native/` holds the frame captures.
 - A hop on the landing tick happens before any ground friction, so a held or buffered jump
   keeps all speed. A late press pays the ground policy above for every tick on the floor.
 
-### Measured (probe, `run3`, 120 Hz, real key and mouse events, one placement per episode)
+### Measured (original probe, `run3`, before adversarial corrections)
 
 | fixture | R12 | FLOW |
 |---|---|---|
@@ -120,8 +122,14 @@ Air:
 Contact transitions:
 
 - A jump adds 0.8 of the surface's climb rate. Leaving an edge keeps the surface's vertical
-  rate. Cresting a ramp above 11 m/s with a climb ≥2 m/s that drops by ≥1.5 m/s launches.
-- A landing never costs speed; on a downslope it keeps the plane-projected velocity.
+  rate. The original automatic continuous-crest rule is retired: fixing its broken history
+  exposed unwanted launches on small stair contacts. No hidden crest threshold remains.
+- A downslope landing can keep plane-projected velocity, constrained against every active
+  contact plane. This replaces the original floor-only restoration that could report speed
+  into a blocking wall. See controller-fixes.md for the exact before/after repros.
+- A 67 ms P turn budget now lets the heading consume a mouse update between deliveries.
+  Equivalent sweeps earn equivalent carve at 30/60/120 event rates; a lone flick cannot bank
+  a whole flight's reward. This fixes the original event-bearing-tick-only gain rule.
 
 Rejected inside the lab: `run1` steered air toward the *key* wish. A held A then pulled the
 line left, so the A→D swap of a strafe hop read as a reversal and braked (e3b ended at
@@ -167,8 +175,8 @@ interchangeable. What the frames do not show: how either motor feels.
   build a new identity and record namespace; FLOW times are not comparable with R12's.
 - `spillway_driver.gd` / `spillway_surf_driver.gd` routes and the R12 surf/flow tests assume
   R12 air physics; they will need re-authoring or retirement with reasons.
-- HUD and audio read `get_speed()`, `mode`, signals; FLOW keeps those names and adds a
-  `launch` move kind and `carve_gain_total` / `launch_count` counters.
+- HUD and audio read `get_speed()`, `mode`, signals; FLOW keeps those names and adds
+  `carve_gain_total`. The retired `launch_count` remains zero for old trace compatibility.
 - The HUD's control hint ("Air: release W, hold A or D, turn mouse the same way") teaches
   R12's air. Under FLOW it is wrong: W and the mouse steer, a strafe key into the turn carves.
 - The course should be authored around slopes that pay, kickers, and turns taken at speed.
@@ -178,8 +186,8 @@ interchangeable. What the frames do not show: how either motor feels.
 
 - Air steering at 3.2 rad/s may feel floaty or too forgiving; air control this strong lowers
   the ceiling. Carve gain is generous: an off-beat A/D gesture reached 15.9 m/s in 8 s.
-- The crest launch has only been checked on a fixture; at stair ramps and course seams it is
-  gated by speed (11 m/s) alone.
+- The automatic crest launch is removed. Continuous seams/steps and the real ramp-edge
+  carry are separate checks; complete real-course contact behavior remains unverified.
 - The FLOW slope term uses the horizontal projection of gravity while travel follows the
   slope; it is a tuning value, not physics.
 - Falling into the e4 gap shows both motors catching on the landing slab's front edge; FLOW
