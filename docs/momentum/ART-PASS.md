@@ -31,11 +31,17 @@ runtime parts and `apply_ms`. It dresses only `variant == "course"` with `materi
 "kit"`; the block holdouts and `--overflow-neutral` are left untouched and say why.
 
 What it touches on the level: the `WorldEnvironment`'s environment (replaced by a new
-resource) and the `Sun` light's angle, colour and energy; every `Mesh_<kind>` child is
+resource, reusing the existing Sky) and the `Sun` light's angle, colour and energy; every `Mesh_<kind>` child is
 replaced by `Art_<look>` meshes holding the same triangles (`Mesh_hill` is dropped for the
 terrain); water planes get new materials, and the spill plane is re-laid on the dam face.
 It reads the level's `manifest`, `_release` and `_gate`. A kind it does not know is left as
 built. It never edits `momentum_materials.gd`'s cached materials: every material is new.
+
+The existing Sky is reused because releasing it before its first draw produces two
+radiance-texture leaks in the pinned Compatibility renderer. Root's native before/after
+Quit probe reproduces the two errors before this change and none after; the visual
+parameters and game geometry are unchanged. Evidence: outer
+`checkpoints/spillway/r13/delivery-review-sol/root-fix/quit/`.
 
 ## Choices
 

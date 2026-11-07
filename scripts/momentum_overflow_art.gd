@@ -218,7 +218,16 @@ static func _light(level: Node3D, report: Dictionary) -> void:
 	# and the tail race turns into the light. warm sun against a cool sky fill keeps lit and
 	# shaded planes apart in temperature as well as value.
 	var environment := Environment.new()
-	var sky := Sky.new()
+	# reuse the level's sky RID: freeing a still-dirty sky before the first draw leaks
+	# its radiance textures in the pinned Compatibility renderer.
+	var sky: Sky
+	for child: Node in level.get_children():
+		if child is WorldEnvironment and (child as WorldEnvironment).environment != null:
+			sky = (child as WorldEnvironment).environment.sky
+			if sky != null:
+				break
+	if sky == null:
+		sky = Sky.new()
 	var sky_material := ShaderMaterial.new()
 	sky_material.shader = SKY
 	sky.sky_material = sky_material
