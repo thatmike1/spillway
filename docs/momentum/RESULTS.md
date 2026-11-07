@@ -38,11 +38,30 @@ Evidence folders are outside Git in the build workspace. Committed tests and doc
 them, preserving failed trials and source hashes. Exact-state physics, imperfect tapes,
 view-only discovery, GPU presentation and human feel are separate claims.
 
+## Final packaged route checks
+
+Root additionally plays the same final official Linux release pack through the shortcut
+and a deliberate bay miss. Both pass all 36 release checks, including clean ordered
+progress, no respawns, complete saved records and unchanged separate-process reload.
+The shortcut finishes in 22.475 s with all 3082 positions equal to source; the miss
+finishes in 25.592 s with all 3456 positions equal to source. Root inspects their approach and finish
+frames. Evidence: outer
+`checkpoints/spillway/r13/final-packed-lines/ROOT-CHECK.json` and each `packed/summary.json`.
+The initial root wrapper read the wrong result filename after the successful shortcut
+check; its error is retained, and the corrected runner resumes only the unexecuted miss.
+No game code, input tape or comparison tolerance was changed.
+
 ## Comparisons and failed attempts
 
 The first 16 s prototype had a cheap diagonal and poor recovery. It was revised rather
 than accepted from its test count. The final earned shortcut beats tight ordinary by
-1.98 s. Its ordinary route works without learning synchronized strafes. The old broad
+1.98 s against the discrete-hop references, which brake at the pool. A W-and-held-Space
+run misses that bay jump, uses the recovery apron and still finishes in 22.667 s, only
+0.19 s behind the mastery reference: its tail takes 8.292 s versus 10.342 s. In these
+measured runs, holding hops through the tail is the larger time lever. The mastery
+reference is not a measured ceiling; combining its opening with a held-hop tail is
+untested, so no faster combined time is claimed. The ordinary route works without
+learning synchronized strafes. The old broad
 projection profile punished ordinary faster turns; narrow reward varied with mouse
 cadence. FLOW remained a useful forgiving control but bundled camera-led steering with
 other changes. The original candidate uses CARRY's shared ground/contact body with a
@@ -67,9 +86,12 @@ per build shows about 170 ms longer before the first image. It does not alter th
 clock. Distant groove patterns are filtered, and the overflow sheet retains highlight
 detail. See ART-PASS.md and outer presentation-fix-opus/REPORT.md plus ROOT-CHECK.json.
 
-An intermittent native GPU shutdown hang remains unresolved: one unmodified-source
-diagnostic was terminated at its limit; the next 16 native runs and current portable
-verification exited normally. The original Sky radiance leaks were separately fixed and
+Four native GPU shutdown hangs remain unresolved across the two private AMD audits:
+three instrumented runs in final-hardware and one unmodified-source diagnostic in
+presentation-fix-opus. The plain executor control, the next 16 native runs and current
+portable verification exited normally. This is a selected diagnostic sample, not a
+player failure-rate estimate. If Quit leaves the window open, end the Spillway process;
+finished records are saved before Quit. The original Sky radiance leaks were separately fixed and
 do not recur. Initialization timing can choose trajectories differing by at most 1.70 cm
 at a two-deck seam, with identical tested times, splits and respawns. Render phase was
 not established as the cause; strict same-setup packed equality remains required.
@@ -79,11 +101,22 @@ satisfaction are unverified. Most full movies use llvmpipe; AMD evidence uses a 
 virtual compositor. The tail race is broad, trees are faceted, and the visible sluice
 overflow is stylised above the hidden physical channel. Free view-only discovery uses
 paused planning and engine-injected inputs; it does not measure uninterrupted human play.
+The start help can show through the pause shade, and the OS title briefly reads Spillway
+before the R13 title is set. These presentation quirks are accepted without changing the
+verified runtime.
 
 ## Trail and review
 
 Canonical decisions are append-only in `../reboot/decisions.tsv`. Root's self-audit,
 transcript index and original line references are under outer
-`checkpoints/spillway/r13/self-audit/`. The final different-family artifact/trail review is
-pending; no final-review verdict is claimed here yet. Earlier Sol release-checker findings
-are repaired with retained red/green controls in delivery-review-sol/root-fix/ROOT-FIX.md.
+`checkpoints/spillway/r13/self-audit/`. The final Claude Opus 5.5 artifact/trail review
+finds no runtime must-fix and confirms package/source identity and the honest trail. Root
+accepts both doc corrections: disclose the held-hop recovery result beside the shortcut
+comparison, and report all four observed private-GPU shutdown hangs with practical advice.
+The review and root response are in outer `checkpoints/spillway/r13/closure-review-r13/`.
+Earlier Sol release-checker findings are repaired with retained red/green controls in
+`delivery-review-sol/root-fix/ROOT-FIX.md`. Native Windows and human enjoyment remain open.
+
+The unresolved shutdown and initialization investigations are tracked separately as
+`ccChat-general-tuss` and `ccChat-general-6h6j`. They do not stand for verified Windows
+behavior or a verdict on player enjoyment.
