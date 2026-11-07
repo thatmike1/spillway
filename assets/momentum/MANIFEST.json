@@ -1,0 +1,390 @@
+{
+ "kit": "Spillway momentum art kit (R13)",
+ "api": "res://scripts/momentum_materials.gd: get_material(kind), kinds(), variant(kind, overrides), build(kind, overrides), instance_prop(prop, collision)",
+ "shader": "res://shaders/momentum_surface.gdshader",
+ "kinds": [
+  "deck",
+  "concrete",
+  "old_concrete",
+  "steel",
+  "ochre",
+  "brick"
+ ],
+ "mapping": "metres in each object's rotation frame (scale removed); no mesh UVs used",
+ "normal_convention": "OpenGL (+Y green = image up); verified by tools/capture-momentum-materials.gd --mode=normals",
+ "texture_sets": [
+  {
+   "set": "deck",
+   "id": "brushed_concrete",
+   "name": "Brushed Concrete ",
+   "authors": {
+    "Dario Barresi": "Processing",
+    "Dimitrios Savva": "Photography"
+   },
+   "source_page": "https://polyhaven.com/a/brushed_concrete",
+   "api_files": "https://api.polyhaven.com/files/brushed_concrete",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-07",
+   "physical_size_m": [
+    2.5,
+    2.5
+   ],
+   "physical_size_source": "Poly Haven API info.dimensions (millimetres)",
+   "upstream_resolution": "1k (1024 x 1024); 8k exists upstream and was not downloaded",
+   "use": "top faces of deck, concrete, old_concrete and brick kinds",
+   "modifications": "16-bit upstream PNGs quantised to 8 bits per channel (8-bit upstream pixels unchanged), alpha dropped, metadata stripped: magick IN -alpha off -depth 8 -strip PNG24:OUT (ImageMagick 7.1.2-34). No resampling, cropping or colour change; tints are shader parameters. Godot imports 8-bit for VRAM compression in any case.",
+   "maps": [
+    {
+     "map": "diff",
+     "meaning": "albedo, sRGB",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/brushed_concrete/brushed_concrete_diff_1k.png",
+     "upstream_md5_api": "e8e1a31fb84c5031d1fd680948b410da",
+     "upstream_sha256": "9120936cff5ce270f8803d8be5905c628ff6b4d5af8c18b820f9f55e3d8232b3",
+     "upstream_bytes": 5707708,
+     "upstream_format": "1024 x 1024, 16-bit/color RGB",
+     "file": "textures/brushed_concrete/brushed_concrete_diff_1k.png",
+     "sha256": "9f819ecdf3a6d28a1820be03bd8dfd72d98060071ae773da138fd0054c7b0d51",
+     "bytes": 1918340,
+     "format": "1024 x 1024, 8-bit/color RGB",
+     "import": "VRAM compressed (S3TC/BC1 on desktop), mipmaps",
+     "imported_desktop_ctex_bytes": 699116
+    },
+    {
+     "map": "nor_gl",
+     "meaning": "tangent normal, OpenGL convention (+Y = image up)",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/brushed_concrete/brushed_concrete_nor_gl_1k.png",
+     "upstream_md5_api": "0987d9e303afda8c7f81d925847e0bd6",
+     "upstream_sha256": "dc39a146451f173f871568a6d02f0459f8250c1a6d51b06c3a906b5f6b7329fd",
+     "upstream_bytes": 5486315,
+     "upstream_format": "1024 x 1024, 16-bit/color RGB",
+     "file": "textures/brushed_concrete/brushed_concrete_nor_gl_1k.png",
+     "sha256": "80fcce62f164f41d93b2c9f55f27369596dad396aaf20e2e15265733b1067043",
+     "bytes": 1769457,
+     "format": "1024 x 1024, 8-bit/color RGB",
+     "import": "VRAM compressed with compress/normal_map=1 (two-channel RGTC on desktop), mipmaps; shader rebuilds z",
+     "imported_desktop_ctex_bytes": 1398180
+    },
+    {
+     "map": "arm",
+     "meaning": "linear packed R=ambient occlusion, G=roughness, B=metalness",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/brushed_concrete/brushed_concrete_arm_1k.png",
+     "upstream_md5_api": "5fdee46f693dd06fc043246c0cba44ba",
+     "upstream_sha256": "4cd3fa795969a52c9c299fdb58e15e945938c7db962a76a0e907723652ae670e",
+     "upstream_bytes": 4479435,
+     "upstream_format": "1024 x 1024, 16-bit/color RGB",
+     "file": "textures/brushed_concrete/brushed_concrete_arm_1k.png",
+     "sha256": "4232bb11c85b75b49dfa8c2336f861081e9e3d91746f058a38435c5d7e5df3d1",
+     "bytes": 1623739,
+     "format": "1024 x 1024, 8-bit/color RGB",
+     "import": "VRAM compressed, mipmaps, roughness/mode=green limited by the set's nor_gl (specular anti-aliasing in mips)",
+     "imported_desktop_ctex_bytes": 699116
+    }
+   ]
+  },
+  {
+   "set": "formwork",
+   "id": "concrete_layers_02",
+   "name": "Concrete Layers 02",
+   "authors": {
+    "Rob Tuytel": "All"
+   },
+   "source_page": "https://polyhaven.com/a/concrete_layers_02",
+   "api_files": "https://api.polyhaven.com/files/concrete_layers_02",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-07",
+   "physical_size_m": [
+    2.0,
+    2.0
+   ],
+   "physical_size_source": "Poly Haven API info.dimensions (millimetres)",
+   "upstream_resolution": "1k (1024 x 1024); 8k exists upstream and was not downloaded",
+   "use": "side faces of deck, concrete and old_concrete kinds",
+   "modifications": "16-bit upstream PNGs quantised to 8 bits per channel (8-bit upstream pixels unchanged), alpha dropped, metadata stripped: magick IN -alpha off -depth 8 -strip PNG24:OUT (ImageMagick 7.1.2-34). No resampling, cropping or colour change; tints are shader parameters. Godot imports 8-bit for VRAM compression in any case.",
+   "maps": [
+    {
+     "map": "diff",
+     "meaning": "albedo, sRGB",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/concrete_layers_02/concrete_layers_02_diff_1k.png",
+     "upstream_md5_api": "af46be9bf148d83d1e36d5cf6da3f318",
+     "upstream_sha256": "c8a7f03bb7f93aad7f80b39adb205473bf7b91986e90d239d0172ee2b0916bc7",
+     "upstream_bytes": 5391321,
+     "upstream_format": "1024 x 1024, 16-bit/color RGB",
+     "file": "textures/concrete_layers_02/concrete_layers_02_diff_1k.png",
+     "sha256": "cfd36c7e8fda0e2838192c10ea7d2717c7e37a8282a1ff68301c5be8cc6f4795",
+     "bytes": 1378213,
+     "format": "1024 x 1024, 8-bit/color RGB",
+     "import": "VRAM compressed (S3TC/BC1 on desktop), mipmaps",
+     "imported_desktop_ctex_bytes": 699116
+    },
+    {
+     "map": "nor_gl",
+     "meaning": "tangent normal, OpenGL convention (+Y = image up)",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/concrete_layers_02/concrete_layers_02_nor_gl_1k.png",
+     "upstream_md5_api": "7a452bdae04a6683c4297866980da4c4",
+     "upstream_sha256": "5ad35828ace251186981acc0027423309d7a5957113a7c082baa4569f7ae5a63",
+     "upstream_bytes": 6151748,
+     "upstream_format": "1024 x 1024, 16-bit/color RGBA",
+     "file": "textures/concrete_layers_02/concrete_layers_02_nor_gl_1k.png",
+     "sha256": "3748925cb3c5378ed861aafd221541cc43e44fb5d3457c4cabc8243b69d829c1",
+     "bytes": 1707007,
+     "format": "1024 x 1024, 8-bit/color RGB",
+     "import": "VRAM compressed with compress/normal_map=1 (two-channel RGTC on desktop), mipmaps; shader rebuilds z",
+     "imported_desktop_ctex_bytes": 1398180
+    },
+    {
+     "map": "arm",
+     "meaning": "linear packed R=ambient occlusion, G=roughness, B=metalness",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/concrete_layers_02/concrete_layers_02_arm_1k.png",
+     "upstream_md5_api": "dcf4b76c79790bba53a2188770b558c8",
+     "upstream_sha256": "72c6b5698beea7f7b58f6e429d40351d1365a901ec736c54ffcd00a62a6bf51d",
+     "upstream_bytes": 4051113,
+     "upstream_format": "1024 x 1024, 16-bit/color RGB",
+     "file": "textures/concrete_layers_02/concrete_layers_02_arm_1k.png",
+     "sha256": "b5e927d3102c74bcf640d32751ff222e473c18a6e787902d8716521dfdd508a5",
+     "bytes": 1116393,
+     "format": "1024 x 1024, 8-bit/color RGB",
+     "import": "VRAM compressed, mipmaps, roughness/mode=green limited by the set's nor_gl (specular anti-aliasing in mips)",
+     "imported_desktop_ctex_bytes": 699116
+    }
+   ]
+  },
+  {
+   "set": "plate",
+   "id": "metal_plate_02",
+   "name": "Metal Plate 02",
+   "authors": {
+    "Rob Tuytel": "All"
+   },
+   "source_page": "https://polyhaven.com/a/metal_plate_02",
+   "api_files": "https://api.polyhaven.com/files/metal_plate_02",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-07",
+   "physical_size_m": [
+    2.0,
+    2.0
+   ],
+   "physical_size_source": "Poly Haven API info.dimensions (millimetres)",
+   "upstream_resolution": "1k (1024 x 1024); 8k exists upstream and was not downloaded",
+   "use": "all faces of steel and ochre kinds (ochre paints over it)",
+   "modifications": "16-bit upstream PNGs quantised to 8 bits per channel (8-bit upstream pixels unchanged), alpha dropped, metadata stripped: magick IN -alpha off -depth 8 -strip PNG24:OUT (ImageMagick 7.1.2-34). No resampling, cropping or colour change; tints are shader parameters. Godot imports 8-bit for VRAM compression in any case.",
+   "maps": [
+    {
+     "map": "diff",
+     "meaning": "albedo, sRGB",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/metal_plate_02/metal_plate_02_diff_1k.png",
+     "upstream_md5_api": "5cb02c12674de25264222511214e3c62",
+     "upstream_sha256": "6565bd25062e3f724018cc6ddd83ba896bdae7a7026635d670491eced3294463",
+     "upstream_bytes": 5401242,
+     "upstream_format": "1024 x 1024, 16-bit/color RGB",
+     "file": "textures/metal_plate_02/metal_plate_02_diff_1k.png",
+     "sha256": "f2aa81809c03e8642bab762301736b025e3fab9528f6073c19b3e83441075859",
+     "bytes": 1474003,
+     "format": "1024 x 1024, 8-bit/color RGB",
+     "import": "VRAM compressed (S3TC/BC1 on desktop), mipmaps",
+     "imported_desktop_ctex_bytes": 699116
+    },
+    {
+     "map": "nor_gl",
+     "meaning": "tangent normal, OpenGL convention (+Y = image up)",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/metal_plate_02/metal_plate_02_nor_gl_1k.png",
+     "upstream_md5_api": "95504e9795834d3bd9b7818031d19f86",
+     "upstream_sha256": "a39eee156a992afef4f1453010f2f2ff3c01cd6b5e0ce408259954ce25dd049f",
+     "upstream_bytes": 3580368,
+     "upstream_format": "1024 x 1024, 16-bit/color RGB",
+     "file": "textures/metal_plate_02/metal_plate_02_nor_gl_1k.png",
+     "sha256": "2d0ca9659b2a23c99fe2a00dc85e023a70d3cd0cff5ccf71fd2f3f0ecbe6ce2b",
+     "bytes": 407841,
+     "format": "1024 x 1024, 8-bit/color RGB",
+     "import": "VRAM compressed with compress/normal_map=1 (two-channel RGTC on desktop), mipmaps; shader rebuilds z",
+     "imported_desktop_ctex_bytes": 1398180
+    },
+    {
+     "map": "arm",
+     "meaning": "linear packed R=ambient occlusion, G=roughness, B=metalness",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/metal_plate_02/metal_plate_02_arm_1k.png",
+     "upstream_md5_api": "a542a4230dc18e38bd51dbb042bf60fc",
+     "upstream_sha256": "7b8221dcba57767eac0509066cfc50bc3183bc4a0c2613c2c61047083ee8e202",
+     "upstream_bytes": 5390079,
+     "upstream_format": "1024 x 1024, 16-bit/color RGB",
+     "file": "textures/metal_plate_02/metal_plate_02_arm_1k.png",
+     "sha256": "b96eb0edfa1e5e2f6fb5c2b23b44af7f00300cc88b60e4a2144bb81fa9b8b657",
+     "bytes": 1727116,
+     "format": "1024 x 1024, 8-bit/color RGB",
+     "import": "VRAM compressed, mipmaps, roughness/mode=green limited by the set's nor_gl (specular anti-aliasing in mips)",
+     "imported_desktop_ctex_bytes": 699116
+    }
+   ]
+  },
+  {
+   "set": "brick",
+   "id": "red_brick",
+   "name": "Red Brick",
+   "authors": {
+    "Rob Tuytel": "All"
+   },
+   "source_page": "https://polyhaven.com/a/red_brick",
+   "api_files": "https://api.polyhaven.com/files/red_brick",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-07",
+   "physical_size_m": [
+    1.4,
+    1.4
+   ],
+   "physical_size_source": "Poly Haven API info.dimensions (millimetres)",
+   "upstream_resolution": "1k (1024 x 1024); 8k exists upstream and was not downloaded",
+   "use": "side faces of the brick kind",
+   "modifications": "16-bit upstream PNGs quantised to 8 bits per channel (8-bit upstream pixels unchanged), alpha dropped, metadata stripped: magick IN -alpha off -depth 8 -strip PNG24:OUT (ImageMagick 7.1.2-34). No resampling, cropping or colour change; tints are shader parameters. Godot imports 8-bit for VRAM compression in any case.",
+   "maps": [
+    {
+     "map": "diff",
+     "meaning": "albedo, sRGB",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/red_brick/red_brick_diff_1k.png",
+     "upstream_md5_api": "5409e56dbc7677d2ed68d1a43a34764c",
+     "upstream_sha256": "6cbeb81b1121713662835b863c0f71859d3b8cd51161d3ddb017631d0bf52d43",
+     "upstream_bytes": 5485318,
+     "upstream_format": "1024 x 1024, 16-bit/color RGB",
+     "file": "textures/red_brick/red_brick_diff_1k.png",
+     "sha256": "78e73a5e8b6fd72317bb5da45bc353f6210438c16b4469ee233539180099ffc0",
+     "bytes": 1683151,
+     "format": "1024 x 1024, 8-bit/color RGB",
+     "import": "VRAM compressed (S3TC/BC1 on desktop), mipmaps",
+     "imported_desktop_ctex_bytes": 699116
+    },
+    {
+     "map": "nor_gl",
+     "meaning": "tangent normal, OpenGL convention (+Y = image up)",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/red_brick/red_brick_nor_gl_1k.png",
+     "upstream_md5_api": "f3f92057f5af1b90d747dd01717740ab",
+     "upstream_sha256": "e1116366df05651cb54edea4977563a4c0d4ee7a523be61a51fb895c279fa9a8",
+     "upstream_bytes": 2236680,
+     "upstream_format": "1024 x 1024, 8-bit/color RGB",
+     "file": "textures/red_brick/red_brick_nor_gl_1k.png",
+     "sha256": "4f35e451076acccd4c38a969813c0f5046229486324ebe03f5c50c5647a6dbfe",
+     "bytes": 2109141,
+     "format": "1024 x 1024, 8-bit/color RGB",
+     "import": "VRAM compressed with compress/normal_map=1 (two-channel RGTC on desktop), mipmaps; shader rebuilds z",
+     "imported_desktop_ctex_bytes": 1398180
+    },
+    {
+     "map": "arm",
+     "meaning": "linear packed R=ambient occlusion, G=roughness, B=metalness",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/red_brick/red_brick_arm_1k.png",
+     "upstream_md5_api": "c2b50e1fa6c6f8ee77072faf4efd8a9e",
+     "upstream_sha256": "83dc54551315c207411cd812e9b047dfafd5f4808802b5df358af149dbc2afea",
+     "upstream_bytes": 3945075,
+     "upstream_format": "1024 x 1024, 16-bit/color RGB",
+     "file": "textures/red_brick/red_brick_arm_1k.png",
+     "sha256": "7a29e53ae63ff1c14a01ce2f887d17a555c47fb54ca9502ad567d4fe55301069",
+     "bytes": 1114167,
+     "format": "1024 x 1024, 8-bit/color RGB",
+     "import": "VRAM compressed, mipmaps, roughness/mode=green limited by the set's nor_gl (specular anti-aliasing in mips)",
+     "imported_desktop_ctex_bytes": 699116
+    }
+   ]
+  }
+ ],
+ "imported_desktop_vram_bytes_total": 11185648,
+ "props": {
+  "origin": "foot of the (first) post on the walking surface; section runs along +X; +Y up; metres",
+  "author": "original work for Spillway, CC0-1.0",
+  "generator": {
+   "file": "props/make_rail.py",
+   "sha256": "40b888a58889e376a208311f60b1d3298db70ddbaee8851783b06217e858f010",
+   "command": "python3 -I assets/momentum/props/make_rail.py assets/momentum/props"
+  },
+  "dimensions_m": {
+   "section_length": 2.0,
+   "post": "0.06 square",
+   "top_rail": "0.048 octagon at 1.07 (top 1.094)",
+   "knee_rail": "0.042 octagon at 0.55",
+   "base_plate": "0.16 x 0.012"
+  },
+  "collision_proxy": {
+   "rail_section": "BoxShape3D 2.08 x 1.1 x 0.16 centred (0.96, 0.55, 0)",
+   "rail_post": "BoxShape3D 0.16 x 1.1 x 0.16 centred (0, 0.55, 0)",
+   "note": "covers the full visual envelope including base plates; added by instance_prop(prop, true); root enlarged the original study barrier proxies during integration"
+  },
+  "files": [
+   {
+    "prop": "rail_section",
+    "file": "props/rail_section.gltf",
+    "sha256": "e65c37d8e9e91c525fbf5acb7e0e8dbe9a21d73685e005ab694edce81c835b5c",
+    "bytes": 11704,
+    "triangles": 80,
+    "bounds_m": [
+     [
+      -0.08,
+      0.0,
+      -0.08
+     ],
+     [
+      2.0,
+      1.0921731087802709,
+      0.08
+     ]
+    ]
+   },
+   {
+    "prop": "rail_post",
+    "file": "props/rail_post.gltf",
+    "sha256": "88fe08e0499b2f87d587c099dd0d8e6b35d1bea12e71780161f155ef3da42b7f",
+    "bytes": 4510,
+    "triangles": 24,
+    "bounds_m": [
+     [
+      -0.08,
+      0.0,
+      -0.08
+     ],
+     [
+      0.08,
+      1.07,
+      0.08
+     ]
+    ]
+   }
+  ]
+ },
+ "licences": {
+  "CC0-1.0-legalcode.txt": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+  "upstream": "https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt",
+  "notice": "licences/POLYHAVEN-NOTICE.md"
+ },
+ "rejected": [
+  {
+   "id": "concrete_floor_worn_001",
+   "role": "deck",
+   "reason": "too uniform (albedo sd 4/255); brightened to deck value it rendered as blank plastic"
+  },
+  {
+   "id": "concrete",
+   "role": "formwork",
+   "reason": "4 m vertical board-form with tie holes: strong close up, but nearly doubled quarter-pixel shift change on the running wall view (1.43 vs 0.77) and 4 mm texels at 1k"
+  },
+  {
+   "id": "concrete_slab_wall_02",
+   "role": "formwork",
+   "reason": "screening only: tiled board lines read as a timber fence"
+  },
+  {
+   "id": "blue_metal_plate",
+   "role": "plate",
+   "reason": "smooth painted sheet close to the water hue; weaker steel/water separation"
+  },
+  {
+   "id": "red_brick_03",
+   "role": "brick",
+   "reason": "more weathered but higher contrast; raised bridge-view shift change 0.66 -> 0.75"
+  },
+  {
+   "id": "concrete_floor_02, concrete_floor_03, dirty_concrete, garage_floor, hangar_concrete_floor, scuffed_cement, smooth_concrete_floor, worn_concrete_floor, concrete_pavement",
+   "role": "deck",
+   "reason": "albedo screening only (no full sets): noisy, beige, too dark, blotchy or paver-patterned"
+  }
+ ],
+ "evidence": "outside Git: /home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r13/material-kit/"
+}
