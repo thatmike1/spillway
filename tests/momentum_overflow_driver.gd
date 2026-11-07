@@ -6,15 +6,16 @@ extends SceneTree
 ## schedule (mouse early in step N, key edges after step N-1), so its applied events are saved
 ## as a spillway-momentum-tape that tools/momentum-tape.py replays open loop.
 ## godot --headless --fixed-fps 30 --path . --script res://tests/momentum_overflow_driver.gd --
-##   --out=DIR [--world=course|block|block_mirror|block_offset] [--air=broad|narrow]
-##   [--route=ordinary|tight|corner|hop|stutter|mastery|miss|slot_miss|basin_miss]
+##   --out=DIR [--world=course|block|block_mirror|block_offset] [--air=candidate|broad|narrow]
+##   [--route=ordinary|tight|mastery|miss|pool_miss|slot_miss|wide_turn on the course;
+##    ordinary|tight|corner|hop|stutter|mastery|miss on the block]
 ##   [--nodes=JSON] [--max-ticks=N]
 
 const GAME := preload("res://scripts/momentum_overflow_game.gd")
 const KEYS := {"w": KEY_W, "a": KEY_A, "s": KEY_S, "d": KEY_D, "space": KEY_SPACE, "ctrl": KEY_CTRL}
 const PX := 0.0022
 const WARMUP := 8
-const SOURCES := ["res://scripts/momentum_overflow_level.gd", "res://scripts/momentum_overflow_game.gd", "res://scripts/momentum_carry_game.gd", "res://scripts/momentum_carry_player.gd", "res://scripts/spillway_player.gd", "res://scripts/spillway_main.gd", "res://scripts/momentum_materials.gd", "res://tests/momentum_overflow_driver.gd"]
+const SOURCES := ["res://scripts/momentum_overflow_level.gd", "res://scripts/momentum_overflow_game.gd", "res://scripts/momentum_carry_game.gd", "res://scripts/momentum_carry_player.gd", "res://scripts/momentum_carry_air_candidate.gd", "res://scripts/spillway_player.gd", "res://scripts/spillway_main.gd", "res://scripts/momentum_materials.gd", "res://tests/momentum_overflow_driver.gd"]
 
 ## route nodes in design coordinates (the course frame; the block shares it). keys:
 ## p target (x, z), r pass radius, jump: tap space on reaching, hop: hold space on/off,
@@ -63,13 +64,6 @@ const CORNER_PIER := [
 	{"p": Vector2(-10, -55.5), "r": 2.0},
 	{"p": Vector2(-26, -56)},
 ]
-## a poor approach on the course: S brakes on the run-out, so the diagonal starts slow
-## (a full W run from the crest arrives fast enough to make it).
-const BRAKED_APPROACH := [
-	{"p": Vector2(0, -19.0)},
-	{"p": Vector2(0, -21.0), "w": false, "s": true},
-	{"p": Vector2(0, -23.5), "w": true, "s": false},
-]
 ## the W-run diagonal attempt from the pier's nosing that falls short into the bay.
 const MISS_PIER := [
 	{"p": Vector2(0, -27.3), "jump": true},
@@ -79,37 +73,75 @@ const MISS_PIER := [
 	{"p": Vector2(-25, -48.5)},
 	{"p": Vector2(-30, -55)},
 ]
-const ORDINARY_BASIN := [
-	{"p": Vector2(-33, -60.5), "r": 3.0},
-	{"p": Vector2(-35, -67.4), "jump": true},
-	{"p": Vector2(-35, -78.4), "jump": true},
-	{"p": Vector2(-33.8, -89.2), "jump": true},
-	{"p": Vector2(-35, -99.6), "jump": true},
-	{"p": Vector2(-35, -116)},
-	{"p": Vector2(-35, -132)},
-	{"p": Vector2(-35, -140), "w": false},
+## course (revision 2): after slot 2 the ordinary line runs the pier, veers onto the platform
+## and takes the slipway down through the spill bay and over the crest, then the chute.
+const COURSE_ORDINARY_PIER := [
+	{"p": Vector2(0, -27.3), "jump": true},
+	{"p": Vector2(-6, -44)},
+	{"p": Vector2(-18, -54)},
+	{"p": Vector2(-18, -74)},
+	{"p": Vector2(-15, -86)},
+	{"p": Vector2(-6, -98)},
 ]
-## the diagonal lands near 16 m/s heading further south than the ordinary line, too fast for
-## that tighter turn: brake to 13.5 m/s on the deck and take the first block from its east side.
-const MASTERY_BASIN := [
-	{"p": Vector2(-28, -63.0), "r": 2.0, "hop": false, "brake": 13.5},
-	{"p": Vector2(-33.0, -65.0), "r": 1.5},
-	{"p": Vector2(-34.6, -67.4), "jump": true},
-	{"p": Vector2(-35, -78.4), "jump": true},
-	{"p": Vector2(-33.8, -89.2), "jump": true},
-	{"p": Vector2(-35, -99.6), "jump": true},
-	{"p": Vector2(-35, -116)},
-	{"p": Vector2(-35, -132)},
-	{"p": Vector2(-35, -140), "w": false},
+## the earned line: held hops from slot 1 carry speed down the pier; the hop stops on a landing
+## past the pier's middle and the runner jumps the bay's wide end straight on from its edge.
+const COURSE_MASTERY_PIER := [
+	{"p": Vector2(0, -23.0), "hop": false},
+	{"p": Vector2(0, -27.4), "jump": true, "hold": true},
+	{"p": Vector2(0, -54.0), "ground": true},
+	{"p": Vector2(0, -65.4), "jump": true, "r": 0.6, "hop": false},
+	{"p": Vector2(0, -90)},
+	{"p": Vector2(-0.5, -100)},
 ]
-const BASIN_MISS := [
-	{"p": Vector2(-33, -60.5), "r": 3.0},
-	{"p": Vector2(-39.6, -70), "r": 1.5},
-	{"p": Vector2(-40, -90)},
-	{"p": Vector2(-40, -102.5)},
-	{"p": Vector2(-35, -116)},
-	{"p": Vector2(-35, -132)},
-	{"p": Vector2(-35, -140), "w": false},
+## the ordinary line run well, the payoff the earned jump is measured against: held hops from
+## slot 1, a tap over slot 2, then a run down the pier and onto the slipway. hopping the pier
+## into the turn was slower (26.4 to 26.6 s): the 17 m/s runner swings wide of the slipway.
+const COURSE_TIGHT_PIER := [
+	{"p": Vector2(0, -23.0), "hop": false},
+	{"p": Vector2(0, -27.4), "jump": true},
+	{"p": Vector2(-3, -44)},
+	{"p": Vector2(-17, -55)},
+	{"p": Vector2(-18, -74)},
+	{"p": Vector2(-15, -86)},
+	{"p": Vector2(-6, -98)},
+]
+## a plain W run that tries the wide end anyway: it falls short onto the apron and climbs out.
+const COURSE_MISS_PIER := [
+	{"p": Vector2(0, -27.3), "jump": true},
+	{"p": Vector2(0, -65.4), "jump": true, "r": 0.6},
+	{"p": Vector2(0, -88)},
+	{"p": Vector2(-0.5, -100)},
+]
+## the bends and the finish: W is let go past the line, on the sluice deck.
+const COURSE_ARRIVAL := [
+	{"p": Vector2(-36, -145)},
+	{"p": Vector2(-50, -152)},
+	{"p": Vector2(-52, -168)},
+	{"p": Vector2(-52, -194)},
+	{"p": Vector2(-52, -200), "w": false},
+	{"p": Vector2(-52, -202)},
+]
+## the bucket and the tail race. the ordinary line brakes to 12 m/s for the first bend.
+const COURSE_TAIL := [
+	{"p": Vector2(-1, -108)},
+	{"p": Vector2(-1, -114.3), "jump": true, "r": 0.8},
+	{"p": Vector2(-3, -141), "r": 2.0, "brake": 12.0},
+	{"p": Vector2(-14, -146)},
+]
+## the fast line keeps its speed through the tail race and swings wide instead of braking.
+const COURSE_WIDE_TAIL := [
+	{"p": Vector2(-0.5, -108)},
+	{"p": Vector2(-0.5, -114.3), "jump": true, "r": 0.8},
+	{"p": Vector2(-2, -142), "r": 2.0},
+	{"p": Vector2(-12, -150)},
+]
+## a deliberately slow bucket: brake on the chute and run off the lip without a jump; the
+## run-off drops onto the pool apron, which climbs ahead.
+const COURSE_POOL_MISS_TAIL := [
+	{"p": Vector2(-1, -100), "brake": 8.6},
+	{"p": Vector2(-1, -121)},
+	{"p": Vector2(-3, -141), "r": 2.0},
+	{"p": Vector2(-14, -146)},
 ]
 
 var opts := {}
@@ -186,7 +218,7 @@ func _route(route: String, world: String) -> Array:
 	var course := world == "course"
 	if course:
 		plan.append({"p": Vector2(0, 40)})
-		if route == "mastery":
+		if route in ["mastery", "wide_turn", "tight"]:
 			plan.append({"p": Vector2(0, 16.0), "hop": false})
 			plan.append({"p": Vector2(0, 11.6), "jump": true, "hold": true})
 		elif route == "slot_miss":
@@ -196,8 +228,14 @@ func _route(route: String, world: String) -> Array:
 		plan.append({"p": Vector2(0, -5)})
 	else:
 		plan.append({"p": Vector2(0, -6), "hop": route in ["mastery", "hop", "stutter", "sweep"]})
-	if route == "slot_miss":
-		plan.append_array([{"p": Vector2(0, -27.0)}, {"p": Vector2(6.5, -31.5), "r": 1.5}, {"p": Vector2(6.5, -41.0)}, {"p": Vector2(1.5, -44.0)}, {"p": Vector2(0, -50)}, {"p": Vector2(-1.5, -57.0), "r": 2.5}, {"p": Vector2(-12, -57.5)}, {"p": Vector2(-26, -56)}])
+	if course:
+		if route == "slot_miss":
+			plan.append_array([{"p": Vector2(0, -27.0)}, {"p": Vector2(6.5, -31.5), "r": 1.5}, {"p": Vector2(6.5, -41.0)}, {"p": Vector2(1.5, -44.0)}])
+			plan.append_array(COURSE_ORDINARY_PIER.slice(1))
+		else:
+			plan.append_array({"mastery": COURSE_MASTERY_PIER, "wide_turn": COURSE_MASTERY_PIER, "tight": COURSE_TIGHT_PIER, "miss": COURSE_MISS_PIER}.get(route, COURSE_ORDINARY_PIER))
+		plan.append_array({"wide_turn": COURSE_WIDE_TAIL, "pool_miss": COURSE_POOL_MISS_TAIL}.get(route, COURSE_TAIL))
+		plan.append_array(COURSE_ARRIVAL)
 	elif opts.has("nodes"):
 		# a sweep: pier nodes as json [[x, z, flags...]], flags jump/hold/ground/hop0/hop1/w0/w1.
 		for item: Array in JSON.parse_string(str(opts.nodes)):
@@ -214,17 +252,9 @@ func _route(route: String, world: String) -> Array:
 					"r3": node.r = 3.0
 					"r05": node.r = 0.5
 			plan.append(node)
+		plan.append_array([{"p": Vector2(-36, -55)}, {"p": Vector2(-42, -55), "w": false}, {"p": Vector2(-44, -55)}])
 	else:
-		if course and route == "miss":
-			plan.append_array(BRAKED_APPROACH)
-		var hop_pier: Array = HOP_PIER.duplicate(true)
-		if course and route == "mastery":
-			# let go of space in the diagonal's flight and brake from the landing.
-			hop_pier[-1].merge({"p": Vector2(-23, -61.0), "hop": false, "brake": 13.5}, true)
-		plan.append_array({"mastery": hop_pier, "hop": HOP_PIER, "stutter": STUTTER_PIER, "corner": CORNER_PIER, "tight": TIGHT_PIER, "miss": MISS_PIER}.get(route, ORDINARY_PIER))
-	if course:
-		plan.append_array({"mastery": MASTERY_BASIN, "basin_miss": BASIN_MISS}.get(route, ORDINARY_BASIN))
-	else:
+		plan.append_array({"mastery": HOP_PIER, "hop": HOP_PIER, "stutter": STUTTER_PIER, "corner": CORNER_PIER, "tight": TIGHT_PIER, "miss": MISS_PIER}.get(route, ORDINARY_PIER))
 		plan.append_array([{"p": Vector2(-36, -55)}, {"p": Vector2(-42, -55), "w": false}, {"p": Vector2(-44, -55)}])
 	# map into the variant's world: the landing-offset holdout shifts the pier section.
 	var mirror: float = -1.0 if world == "block_mirror" else 1.0
@@ -344,7 +374,10 @@ func _control(p: Vector3, grounded: bool, speed: float) -> void:
 		var slow := speed > float(node.brake)
 		_key("w", not slow, next)
 		_key("s", slow, next)
-	# steer the view toward the target: proportional, rate-limited like a hand on a mouse.
+	# steer the view toward the target: proportional, rate-limited like a hand on a mouse. a
+	# hop-through node already passed in the air steers on toward the node after it.
+	if node.get("ground", false) and along != Vector2.ZERO and (here - target).dot(along) >= 0.0 and node_index + 1 < nodes.size():
+		target = nodes[node_index + 1].p
 	var to := target - here
 	var desired := atan2(-to.x, -to.y)
 	var error := wrapf(desired - float(player.get("yaw")), -PI, PI)

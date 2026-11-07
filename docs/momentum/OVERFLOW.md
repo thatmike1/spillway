@@ -1,31 +1,29 @@
-# Overflow course, first build
+# Overflow course, revision 2
 
-Root integration checkpoint: this is a retained first prototype, not the finished course.
-After the support fix at `fd38b1e9`, root reran all four geometry variants with zero
-failures and the ordinary closed-loop line finished cleanly in 16.292 s, with six jumps,
-zero respawns and no stalls. Evidence is in `root-post-fd38b1e9/` under this course's
-evidence directory. Other numerical results below remain the worker's labelled pre-fix
-results. Root inspected the truncated ordinary contact sheet, not a complete movie.
+The R13 course for the CARRY motor, 7 November 2026. Base: committed `275c477b` (air candidate
+sha256 `aceb14e5`, shared CARRY base `1c3a4f9d`), product loop `scripts/momentum_overflow_main.gd`
+from `459e5051`. Every number and layout choice here is a P hypothesis, and nothing here claims
+fun. Godot 4.7.2, 120 Hz physics, headless runs plus llvmpipe renders on a private Xvfb (software
+rendering: valid captures, not performance proof). Evidence lives outside Git under
+`checkpoints/spillway/r13/overflow-revision/`: `LABELS.md` says which set is which, `final-275c477b/`
+is the final set, and `STATE.md` is the resumable log. The first build's evidence stays in
+`overflow-course/`, untouched.
 
-The next course revision must address the nearly free diagonal, its 0.30 s net reward,
-the bay exit behind a failed arrival, and the sparse short route. Root chooses the new
-air challenger provisionally for that iteration, pending independent challenge and
-comparison on the frozen block. Keep the original block/holdout geometry intact as
-controls, and label any progress-metadata corrections separately. The next course should
-add a purposeful momentum choice rather than plain running to fill time. Complete native
-ordinary, shortcut and physical recovery captures remain required.
-
-The R13 course for the CARRY motor, 7 November 2026, on base 390cb022. Every number and
-layout choice here is a P hypothesis. Nothing here claims fun. Godot 4.7.2, 120 Hz physics,
-headless runs plus llvmpipe renders on a private Xvfb. Evidence is kept outside Git under
-`checkpoints/spillway/r13/overflow-course/`, and `STATE.md` there is the resumable log.
-R12 is still the baseline and is untouched.
+Root integration: all captured run-input hashes match before/after and the current
+runtime. The raw SOURCES.verdict says MIXED because HEAD and Git status changed during
+the docs-only hardware commit, not because those hashed inputs changed. Root reran all
+four geometry worlds and ordinary, mastery and bay-miss tapes through the actual product
+main, with clean ordered finishes, zero respawns and no input/order/integrity failures.
+Root inspected all five composite native strips, including the whole arrival/result
+sequence. These are sampled sequences, not a claim of watching the complete movies.
+See `checkpoints/spillway/r13/overflow-revision/ROOT-REVIEW.md` outside Git. The course is
+ready for art integration and independent casual-input probing, not final delivery.
 
 | File | Role |
 | --- | --- |
-| `scripts/momentum_overflow_level.gd` | builds the course or the neutral block (`block`, `block_mirror`, `block_offset`) from convex prisms and kit props, with a geometry manifest and hash |
-| `scripts/momentum_overflow_game.gd` | thin adapter over `momentum_carry_game.gd` that sets `level_script`; inner classes `Block`, `BlockMirror`, `BlockOffset` |
-| `tests/test_momentum_overflow.gd` | geometry checks with no motor: envelope, tops and normals, lips, ordinary gap clearance, rail feet, walking connectivity to the finish |
+| `scripts/momentum_overflow_level.gd` | builds the course or the frozen neutral block (`block`, `block_mirror`, `block_offset`) from convex prisms and kit props, with a geometry manifest and hash |
+| `scripts/momentum_overflow_game.gd` | adapter over `momentum_carry_game.gd`: runs the candidate air law by default, `broad` or `narrow` as labelled controls; inner classes `Block`, `BlockMirror`, `BlockOffset` |
+| `tests/test_momentum_overflow.gd` | geometry checks with no motor: envelope, tops and normals, lips, gap clearance, the earned jump's margins, rail feet, walking connectivity to the finish |
 | `tests/momentum_overflow_driver.gd` | closed-loop, state-aware route driver; writes its applied events as a replayable tape |
 
 ## Commands
@@ -35,184 +33,199 @@ From `projects/foldrunner`, with `G=$HOME/.local/share/foldrunner/godot-4.7.2/Go
 ```sh
 $G --headless --path . --script res://tests/test_momentum_overflow.gd -- --out=DIR [--worlds=course,block] [--freeze]
 $G --headless --audio-driver Dummy --fixed-fps 30 --path . --script res://tests/momentum_overflow_driver.gd -- \
-   --out=DIR --world=course --air=broad --route=ordinary   # also mastery, miss, slot_miss, basin_miss
-python3 tools/momentum-tape.py run DIR/events.tape.json --out RUN --game-script res://scripts/momentum_overflow_game.gd \
-   --game-class '' --motor broad --headless                # Block, BlockMirror or BlockOffset for the block
+   --out=DIR --world=course --air=candidate --route=ordinary   # tight, mastery, wide_turn, miss, pool_miss, slot_miss
+python3 tools/momentum-tape.py run DIR/events.tape.json --out RUN --headless \
+   --game-script res://scripts/momentum_overflow_main.gd --game-class ''   # the product loop, records off
+python3 tools/momentum-tape.py run DIR/events.tape.json --out RUN --headless \
+   --game-script res://scripts/momentum_overflow_game.gd --game-class Block --motor broad   # block and controls
 ```
 
-The test exits 1 on any failure. A native render drops `--headless` and adds `--display N
---wall-budget 900`. At the default 120 s budget, llvmpipe stops after about 13 s of play.
+The geometry test exits 1 on any failure. A native render drops `--headless` and adds
+`--display N --actor-every 3 --wall-budget 900`. The evidence directory's `rerun.sh TAG` runs the
+whole headless set and `render.sh TAG ROUTE...` the renders; both snapshot every source before and
+after.
 
-## Integration interface
+## Interface
 
-The level extends `Node3D`; a factory sets `next_variant` (or `--overflow-world=`), and
-`build()` runs once. It exposes `spawn` (a feet transform), `checkpoints`, `segment_bounds`,
-`finish_position`, `finish_radius`, `water_regions` (empty: there is no swimming water in
-reach), `water_audio_sources`, `routes`, `reset_state()`, `start_wheel()`,
-`is_finish_at(feet)`, `segment_at(position)` and `route_hint(stage, feet)`. The finish is a
-box on the sluice deck. `start_wheel()` spins the hand wheel, lifts the sluice gate 3.6 m and
-releases a sheet of water. Materials come from the kit's `get_material(kind)`;
-`--overflow-neutral` swaps in flat colours. `geometry_manifest()` and `geometry_hash()`
-cover the solid pieces, not the materials.
+Unchanged from the first build: `spawn`, `checkpoints`, `segment_bounds`, `finish_position`,
+`finish_radius`, `water_regions` (empty), `water_audio_sources`, `routes`, `reset_state()`,
+`start_wheel()`, `is_finish_at(feet)`, `segment_at(position)`, `route_hint(stage, feet)`,
+`geometry_manifest()` and `geometry_hash()`. New: `kill_bounds` (the respawn AABB the product loop
+reads, y > -8.3, |x| < 180, -400 < z < 60) and `jump_gaps` (each designed gap's edge, landing,
+design speed and kind, which the geometry test judges).
 
-## Layout
+## Layout and beats
 
-Forward is -z, then -x round the pier head, then -z again. The crest spawn is at y 20.5 and
-the finish is on the sluice deck at y 5.0. All coordinates stay inside y > -8.3, |x| < 180
-and -400 < z < 60.
+Forward is -z down to the tail race, then -x through an S-bend, then -z up to the sluice. The
+crest spawn is at y 20.5 and the finish line is the top of the arrival ramp at y 0.5.
 
-1. **Open descent.** A 15° apron runs off the crest onto terrace 1, then slot hop 1 (3.0 m
-   across, 1 m down). Terrace 2 leads to a descent and a run-out, then slot hop 2 (3.5 m
-   across, 1 m down) onto the pier. Each slot is a trench with a catch floor and a visible
-   ramp on the right that climbs back out.
-2. **Pier bend.** A 10 m wide pier with kit rails on its right edge. The ordinary line runs
-   to the pier head, turns left and goes down the exit ramp onto the pier deck. The diagonal
-   leaves from the ochre nosing on the pier's left edge and crosses the bay, about 11 m,
-   onto the bottom of the exit ramp or the deck. A short jump drops into the bay, a catch
-   floor whose ramp on the far (west) side rises onto the pier deck.
-3. **Baffles and arrival.** The course alone adds a 6 m apron on the pier deck, so an
-   overspeed runner can turn south, and moves everything after it 6 m further south. Three
-   baffle blocks (8, 7.5 and 7 m long, yawed 0, -5 and +5°) set a rhythm of one hop per
-   block at the 13.75 m/s the ordinary line carries. The basin floor runs beside and between
-   them, and past the last block the whole floor climbs to the sill (21°). From the sill, a
-   rising arrival ramp (1.8 to 5.0 m over 18 m) spends speed. The sluice deck leaves 20 m
-   for braking and looking round before the wheel.
+1. **Open descent** (unchanged). A 15° apron, slot hop 1 (3.0 m, 1 m down), terrace, descent,
+   slot hop 2 (3.5 m, 1 m down) onto the pier. Each slot has a catch trench with a ramp out.
+2. **Pier and spill bay: the earned choice.** The pier is a 34 m flat at y 8.5. A plain W run
+   drains on it to about 11.8 m/s at the bay edge. Held hops keep the flight speed, so a runner
+   who hops the pier reaches the edge at about 16.8 m/s. The bay's wide end is 16 m straight on
+   and lands on the 18° chute downslope at the crest. At carried speed it clears with 0.17 s of
+   early-press tolerance; a drained runner falls 2.4 m short.
+   - **Ordinary:** the platform widens left onto a slipway (x -25 to -11) that drops 6.5 m, dips and
+     rises 1.5 m to the crest, so height becomes speed and it joins the chute straight on.
+   - **Miss:** a short jump lands on the bay apron, a stained catch slab that climbs forward at
+     about 20° to the crest and joins the chute in the same direction. No turning round.
+3. **Chute, flip bucket and plunge pool.** The chute narrows from 34 to 23 m over 24 m, down 8 m,
+   to a toe at y -4.5. The flip bucket's lip (y -3.0) throws the runner over an 11.5 m plunge pool
+   onto the tail-race deck. A short or slow throw lands on the pool apron, which climbs forward.
+   At about 20 m/s even a run-off without a jump clears the pool, so only a slow approach drops in.
+4. **Tail race: the braking choice.** A wide deck, then a left bend round a run-off berm (rising
+   3 m, open on the outside) and a right bend onto the arrival straight, with a second berm. The
+   ordinary line brakes to 12 m/s for the first bend; the fast line swings wide and keeps 23 m/s.
+5. **Arrival and sluice.** A 20 m ramp rises 4 m to the sluice deck. The finish line is its top
+   edge, an ochre strip. Past it are 25 m of level deck, then the brick sluice house with its
+   handwheel facing the runner. Crossing the line turns the wheel; the gate beside it lifts and
+   water runs down the outflow channel toward the tail race, below the deck and currently
+   outside the runner's stopping view.
 
-Every catch surface walks to the finish (the test floods a 0.5 m grid backwards from the
-finish). There is no death pit, hidden teleport or recovery cave. Respawn happens only
-below y -8.3, which a run cannot reach.
+Every gap lands short on a catch surface that climbs forward toward the next stage. The test
+floods a 0.5 m grid back from the finish, and every catch surface walks to it. There is no death
+pit, hidden teleport, boost, invisible wall or forced slowdown. Joins are flush (5 cm sampling,
+1 cm tolerance), and concave creases such as toe to bucket are allowed because the step is
+explained by the surface it climbs onto.
 
-## Neutral block and freeze
+**Look.** Course-only material variants from the licensed kit (`Materials.variant`): landing decks
+a step lighter than running decks, catch aprons and the pool darker and stained with a waterline,
+mossy hills to separate the far bank from the course. The sun was moved to light the run's faces
+(yaw +35°, energy 1.25), fog and sky were adjusted. Landmarks are real dam construction: crest
+gantries over the spawn and the chute, the pump house beside the pier, the gate and outflow at the
+sluice. No signs or arrows.
 
-The block is the course from terrace 2 to the pier deck, built by the same functions in the
-same coordinates, with its finish band on the pier deck. It and two holdouts were frozen
-(v5) before any side-key or holdout route ran: `block_mirror` (x mirrored) and
-`block_offset` (everything past slot 2 shifted 3 m sideways). Criteria C1 to C5 and the
-manifests are in `freeze-v5/` (`CRITERIA.md`, `freeze/*.json`). Frozen geometry hashes:
-block `a6030e6e`, mirror `a203695f`, offset `bc843788`. They are unchanged at the end.
-Nothing was tuned against a holdout.
+## Block, freeze and checkpoint correction
 
-Gap check (C1: 8.5 m/s run, 7.2 m/s jump, 20 m/s², pressed 0.25 s early, landing 0.5 m
-past the far edge). Every ordinary gap passes:
+The block and its holdouts are geometrically unchanged: block `a6030e6e`, mirror `a203695f`, offset
+`bc843788`, checked by the frozen manifests in every set. One metadata correction, separate from
+geometry: the block's "Pier deck" checkpoint box covered the bay's airspace, so a falling-short
+diagonal collected it in flight. It is now `_box(Vector3(-45 + o, 3.3, -62), Vector3(26, 6, 15))`,
+the deck only. No hash covers checkpoint metadata, so this is reported here.
 
-| Gap | Distance / drop | Early-press tolerance |
-| --- | --- | --- |
-| slot 1 | 3.0 m / 1.0 m | 0.427 s |
-| slot 2 (block and course) | 3.5 m / 1.0 m | 0.369 s (offset 0.363) |
-| baffle entry, 1 to 2, 2 to 3 | 3.0 to 3.3 m / 0.1 to 0.3 m | 0.348, 0.312, 0.287 s |
+## Results on 275c477b
 
-Baffle 3 to the sill is now a drop onto the climbing floor, not a gap. Lips: none on the
-ordinary line (sampled every 5 cm, 1 cm tolerance). The steepest walkable top is 19.65°.
-Rails stand on decks within 2 cm.
+All closed-loop runs are labelled CLOSED LOOP: a state-aware execution proof from the normal spawn,
+not imperfect play. Inputs start after the game's own `restart_run()`; no pose, velocity or camera
+writes, no velocity restore.
 
-## Results before the shared-base air-contact patch
+Geometry: 4 worlds, 0 failures (course `3a04610b`, 105 pieces). Gap tolerances at their design
+speed: slot 1 0.427 s, slot 2 0.369 s, plunge pool 0.258 s at 14 m/s, and the bay's wide end 0.171 s
+at 16.8 m/s carried, 2.39 m short at 11.8 m/s drained.
 
-All results below use the pre-patch base (`momentum_carry_player.gd` sha256 `280be87c`).
-Root is patching a support-relative air-contact filter into the shared base, and every
-motor-dependent result is rerun after it, in separate directories. Source hashes before the
-patch: `pre-base-patch/SOURCES.txt`.
+**Course, closed loop** (candidate air; 0 respawns and 0 stalls in every run; checkpoint times are
+pier, chute crest and tail race):
 
-**Profiles.** With only W and jump, broad and narrow produce identical traces in every run
-(compared by position-trace hash). The profiles differ only on side keys. Every result here
-is therefore one result for both.
+| Line | Finish | Checkpoints | Top speed | Notes |
+| --- | --- | --- | --- | --- |
+| ordinary | 24.892 s | 6.62 / 10.56 / 13.69 | 20.9 | tapped slots, plain pier run, slipway, brakes to 12 m/s for the first bend |
+| tight ordinary | 24.458 s | 6.49 / 10.33 / 13.39 | 21.8 | held hops from slot 1, slipway |
+| mastery (earned shortcut) | 22.475 s | 6.48 / 9.76 / 12.13 | 25.5 | held hops along the pier, jumps the bay's wide end, brakes for the bend |
+| wide turn | 22.500 s | 6.48 / 9.76 / 12.14 | 25.5 | mastery without braking, swings wide over the berm |
+| miss (bay recovery) | 25.592 s | 6.61 / 10.50 / 14.02 | 17.1 | plain W run tries the wide end, lands on the bay apron, climbs to the crest |
+| pool miss | 27.767 s | 6.62 / 10.56 / 15.77 | 18.4 | brakes on the chute, runs off the lip, climbs the pool apron |
+| slot miss | 28.650 s | 6.83 / 13.87 / 17.26 | 18.8 | runs into slot 2's trench and climbs its ramp |
 
-**Block, closed loop** (finish times; 0 respawns and 0 stalls in all 30 runs):
+The earned jump saves 1.98 s over the tight ordinary line and 2.42 s over the plain one. Its
+reward lands in the bay crossing: 0.57 s to the chute crest and a faster chute, worth 1.26 s at
+the tail race. Broad and narrow give byte-identical results on the ordinary, tight, mastery and
+miss lines (W-only within 45°, where the laws agree). Every finish counts as ordered (all
+checkpoints in order) and `finish_kind` is `clean`.
 
-| Line | block | mirror | offset |
+**Product loop.** The course tapes replay on `momentum_overflow_main.gd` (records off, built with
+`new()`) to the same finish times. The v4 ordinary tape matched the driver trace to 5e-5 m.
+
+**Block matrix, closed loop** (3 variants × candidate, broad, narrow × 5 lines = 45 runs): 43
+finish clean, with the first build's times (ordinary 8.467 to 8.492 s, tight 7.600 to 7.642 s,
+corner 7.450 to 7.492 s, hop 7.358 to 7.408 s, miss 13.475 to 16.533 s). The candidate's W-run
+miss on `block` and `block_offset` never finishes: it stops dead in the bay against the side face
+of the bay return ramp (x -30 to -20, rising from z -37 to -47 with an open east side). The
+candidate's slightly different landing meets it at z -37.75, where the face is 15 cm tall; broad
+crosses at z -37.33, where it is 7 cm. This is frozen holdout geometry, so it was not changed.
+
+**Open-loop imperfect tapes** (product loop for the candidate course tapes, the adapter with
+`--motor` for controls and block): jump edges shifted -12, -6 or +6 ticks, or mouse scaled by 0.9
+or 1.1, each also as a hold-W copy that drops the recording's last W release and holds W 10 s
+longer. Nothing was tuned between runs, and all 120 are kept.
+
+- **Course: 42 of 42 hold-W tapes finish** (ordinary 24.89 to 26.04 s, tight 24.40 to 25.54,
+  mastery 21.83 to 23.09, miss 24.85 to 26.35, pool miss 26.95 to 28.85), 0 respawns. Every
+  perturbed mastery tape still clears the bay, every miss tape lands on the bay apron, and the
+  perturbed ordinary and miss lines that fell into the plunge pool climbed out. As recorded, 27 of
+  42 finish: the other 15 reach the arrival ramp late and stop on it where the recording let go of
+  W. None stalls or respawns.
+- **Block:** candidate ordinary and mirror hop 24 of 24. Broad's offset miss 6 of 12: the six
+  failures end stuck at (-16.7, -46.7), against the same bay return ramp's open side.
+- On the course the executor's stuck and hard-stop flags occur only 3 s or more after the finish,
+  when hold-W tapes reach the wheel plinth or the sluice house. None occurs before a finish.
+
+**Native renders** (`final-275c477b/render/`): the closed-loop tapes replayed open loop on the
+product loop, private Xvfb :161, Dummy audio, isolated XDG, `--actor-every 3`, 900 s wall budget,
+one at a time. All four completed the whole run through the finish with no flags:
+
+| Line | Finish | Wall time | Movie |
 | --- | --- | --- | --- |
-| ordinary | 8.467 | 8.467 | 8.492 |
-| tight ordinary (hug the corner) | 7.633 | 7.642 | 7.600 |
-| corner hop | 7.492 | 7.492 | 7.450 |
-| held-jump diagonal | 7.358 | 7.358 | 7.408 |
-| W-run diagonal miss, bay recovery | 16.300 | 13.475 | 16.533 |
+| ordinary | 24.892 s clean | 189 s | `render/ordinary/movie.mp4` |
+| mastery (earned shortcut) | 22.475 s clean | 188 s | `render/mastery/movie.mp4` |
+| miss (bay apron recovery) | 25.592 s clean | 194 s | `render/miss/movie.mp4` |
+| pool miss (pool apron recovery) | 27.767 s clean | 205 s | `render/pool_miss/movie.mp4` |
 
-**Course v8, closed loop** (geometry `f3f46656`; checkpoint times are crest to pier, pier
-deck and sill):
+Each run keeps the executor's contact sheet, every fifth sampled frame (0.5 s apart) and its
+trace; `render/inspection/` holds the composite sheets used for inspection. What the frames show: the
+bay's wide end and the chute crest beyond it are visible from the pier, under the chute gantry.
+The mastery jump lands on the chute downslope. The miss falls onto the darker apron with the ochre
+crest nosing ahead and the hint "Short of the crest: the apron ahead climbs back to the chute."
+The pool miss climbs straight out toward the lighter tail deck. On the arrival the handwheel is
+dead ahead from the ramp, the finish strip is where the finish triggers (the "WATER RUNNING" panel
+appears on that frame), and the runner stops on the deck in front of the turning wheel. Each
+native run wrote 2 files into its temporary XDG directory; they were removed with it and not
+inspected.
 
-| Line | Finish | Checkpoints | Notes |
-| --- | --- | --- | --- |
-| ordinary | 16.292 s | 6.61 / 8.74 / 13.97 | tapped slot hops, one hop per baffle at 13.75 m/s |
-| mastery | 15.992 s | 6.49 / 7.63 / 13.20 | held hops from slot 2, diagonal, brake to 13.5 m/s on the deck |
-| miss (braked approach) | 23.133 s | 6.98 / 13.52 / 20.16 | diagonal falls into the bay, climbs the west ramp |
-| slot miss | 19.717 s | 6.83 / 10.79 / 16.97 | runs past slot 2 into the trench, climbs the right ramp |
-| basin miss | 17.492 s | 6.61 / 8.73 / 14.77 | drops off beside the baffles, climbs the sill floor |
+## Weaknesses
 
-**Open-loop imperfect tapes.** These are the recorded events replayed through
-`tools/momentum-tape.py` with jump edges shifted -12, -6 or +6 ticks, or mouse scaled by 0.9
-or 1.1, on both profiles. Nothing was tuned between runs. A replay of the unperturbed
-ordinary tape matches the closed-loop trace to 0.05 mm.
+- **Basic line is about 25 s** with the driver, at the bottom of the 25 to 35 s target. A human
+  line will be slower, but nothing was added for length.
+- **The arrival climb equalises speed.** Every line, fast or slow, reaches the arrival ramp at
+  about run speed and climbs it at 8.3 m/s. The last 3 s do not reward what came before.
+- **The pool miss needs a deliberately slow approach.** At chute speed the bucket throws even a
+  run-off clear of the pool.
+- **A plain 8.5 m/s run drains on flats.** That is what makes the bay jump earned, but it also means
+  the pier feels slow to a runner who doesn't hop.
+- **Hold W past the line and you run into the sluice house.** 25 m of deck is enough to brake, but
+  the open-loop hold-W tapes end against its face (flagged by the executor after the finish).
+- **The released water is out of view at the stop.** The wheel turns ahead and the gate lifts in
+  its frame on the right, but the water runs in the outflow channel 5.5 m below the deck, so the
+  runner never sees it flow. Moving the release sheet is visual only; giving it a line of sight
+  from the deck would change geometry.
+- **The plunge pool is a dry, dark slab.** It reads as a catch surface, not as water.
+- **The tail race is still a broad pale deck** in the renders, with little to read at 20 m/s. The
+  run's other stretches have landmarks; this one does not.
+- **A braking driver frame faces the chute wall** for about half a second on the pool miss. That
+  is the driver's steering under S, not the level, but a human braking hard there could get the
+  same view.
+- Renders are software (llvmpipe): valid captures, not performance proof.
+- **Frozen block pocket.** Two block faults are in the frozen holdout geometry and were not tuned:
+  the bay return ramp's open east side stops the candidate's W-run miss dead (a 15 cm side face),
+  and perturbed broad offset misses stick against the same ramp. See results.
+- **Driver line, not discovery.** The tight ordinary, mastery and wide lines are the driver's
+  best of a few tries, not optimal play.
 
-- Block, all three variants: 47 of 48 finish. Ordinary lines finish under every
-  perturbation (8.467 to 8.55 s), and so do the hop lines (7.29 to 7.46 s), except
-  mirror-hop with mouse ×1.1. That one falls into the bay's south pocket, and with no
-  steering its held autohop repeats against the pier deck's 2 m east face.
-- Course v7: 9 of 12 finish. All three failures (ordinary mouse ×0.9, mastery jump -12 and
-  +6) dropped into the basin and ended pressing W into the sill's 1.8 m face. The only way
-  up was a 4 m side ramp. Course v8 replaced that face with the full-width climb.
-- Course v8: 15 of 18 finish (ordinary 16.20 to 16.87 s, mastery 15.65 to 16.40 s, basin
-  miss 17.43 to 18.01 s). The other three (ordinary mouse ×0.9, mastery jump -12, basin
-  miss mouse ×0.9) fell into the basin and climbed the sill floor. They were still moving
-  on the arrival ramp or the sluice deck when the recorded tape released W, with no stuck
-  or hard-stop flag. The tapes are open loop, so a perturbed run reaches the finish later
-  than the recording's W release.
+## Rejected designs
 
-## After the base patch
+- Narrow-end hop across the bay (v1, v2): the detour and its 5 m drop onto a flat cost as much as
+  falling, so the miss beat the ordinary line.
+- A corner-cut diagonal with a lateral cut: slow runners turn first and the cut is always open.
+- A straight gap over a down-and-up channel: it saves nothing.
+- Baffles after a variable-speed merge: overspeed runners hop onto the next block's face.
+- A 13° chute: drag dominated and the bucket throw was too short; steepened to 18° with an 8 m drop.
+- A flat tail and a higher sluice (v3, about 18 s): replaced by the S-bend and a lower sluice.
+- A 14 m plunge pool: only 0.07 s of tolerance at 14 m/s; shortened to 11.5 m (0.26 s).
+- Hopping the pier into the slipway as the tight ordinary line: slower (26.4 to 26.6 s), because a
+  17 m/s runner swings wide of the slipway.
 
-[pending root's committed hash: geometry test, closed-loop block and course matrix,
-open-loop tapes and native renders, all in `post-base-patch/`, produced by `rerun.sh`]
+## For root
 
-The base changed in the working tree partway through a baseline rerun (player `1c3a4f9d`,
-uncommitted). That set is kept, labelled mixed, in `mixed-280be87c-1c3a4f9d-uncommitted/`.
-Its 9 course runs on `1c3a4f9d` match the pre-patch times and trace hashes exactly. It is
-not a substitute for the committed patch.
-
-## Findings and weaknesses
-
-- **The diagonal is not hard-earned on the course.** A full W run from the crest reaches
-  the nosing at about 14.75 m/s and makes the diagonal without technique. The miss line has
-  to brake on the run-out to fall short. On the block, which starts on terrace 2, a W run
-  falls short.
-- **The diagonal's reward is small.** On the block it is 0.28 s against a tight ordinary
-  line, and the corner hop takes 0.14 s of that. On the course it saves about 1.0 s on the
-  pier, but it lands heading about 34° further south than the ordinary line. At 16 m/s that
-  forces a brake before the basin, which gives about 0.7 s back: net 0.30 s.
-- **Basic time is about 16 s,** under the brief's 25 to 45 s. The course was not padded.
-- **The bay pocket faces walls.** A short diagonal lands in the bay's south pocket looking
-  at the exit ramp's side face and the pier deck's east face. The recovery ramp is behind
-  and to the right. It is visible and walkable, and the hint text names it, but the player
-  has to turn round to find it. This pocket is where the mirror holdout's open-loop failure
-  ends.
-- **Mirror asymmetry.** The W-run miss finishes in 16.30 s on the block and 13.475 s on the
-  mirror, and the mirror's hop line is the only block tape to fail open loop. The driver
-  mirrors its route nodes, so the geometry and the plan are symmetric. The difference
-  arises somewhere in the bay contacts or in how the closed loop responds to them, and is
-  not yet isolated.
-- **Block checkpoint.** The block's pier-deck checkpoint box still covers the bay's
-  airspace, so a falling-short diagonal collects it in flight. The course's box was
-  narrowed to the deck. The block box is a frozen holdout definition and is reported here,
-  not changed.
-
-## Rejected layouts
-
-- A helix bend: it rewarded no more than a square pier head and risked trimesh contacts.
-- A 90° arc with a chord cut: the chord saves only about 0.16 R.
-- Guard rails at the inner corner: short tries hit them in the air.
-- A pump house in the inner corner: it blocked every straight diagonal.
-- A 4 m bay notch beside a narrow exit ramp (v2): the shortest cut pointed about 90° west,
-  so W-only lines failed or only lip-caught the ramp edge.
-- A screen wall on the pier's last 6 m (v3 and v4): honest diagonals and edge-huggers hit
-  its end face and dead-stopped.
-- Course pier deck without an apron: a 17 m/s arrival off the exit ramp could not turn into
-  the basin.
-- 4 m baffles: at 13.75 m/s a hop overshot onto the next block's face.
-- A sill face with one 4 m side ramp (v7): open-loop misses ended against the face.
-
-## For root to integrate
-
-- Default-game wiring, records, the final UI and packaging. The adapter needs only
-  `level_script`. Nothing in `main`, the HUD, the player, `project.godot` or old evidence
-  was changed.
-- The `.uid` files were generated in a scratch copy of the project, so the shared `.godot`
-  cache was not touched. None collides with an existing uid.
-- Whether the diagonal should be made harder on the course (for example a slower run-out),
-  given the findings above. That is a design call for after the base patch.
+- Integration, packaging and final discovery. Nothing outside the owned files was changed: no
+  main, HUD, audio, project settings, material kit, tape helper or CARRY source.
+- No new files, so no new `.uid` files.

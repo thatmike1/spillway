@@ -1,6 +1,7 @@
 extends SceneTree
 ## p / overflow geometry checks: envelope, collision tops and normals, flush running joins,
-## ordinary gap clearance from the shared run/jump envelope, supported rails, and walking
+## ordinary gap clearance from the shared run/jump envelope (or a level-declared design speed),
+## the earned jump's carried margin and drained shortfall, supported rails, and walking
 ## connectivity from every catch surface to the finish. no motor runs here; routes are
 ## driven by tests/momentum_overflow_driver.gd and tools/momentum-tape.py.
 ## godot --headless --path . --script res://tests/test_momentum_overflow.gd -- [--out=DIR]
@@ -122,8 +123,10 @@ func _tops(world: String, level: Node3D) -> Dictionary:
 
 func _gaps(world: String, level: Node3D) -> Array:
 	# walk the ordinary line in 5 cm steps. a lip is any step up the surface does not explain;
-	# a gap is where the support drops more than 0.5 m and returns. each gap is judged from
-	# the shared envelope: run speed, jump speed, gravity, an early press and a landing margin.
+	# a gap starts where the support drops more than 0.5 m and ends back on a route surface,
+	# whether that is a step up or a catch apron climbing flush onto it. each gap is judged
+	# from the shared envelope (run speed unless the level declares the jump's design speed
+	# and take-off climb), with an early press and a landing margin.
 	var route: Array = (level.get("routes") as Dictionary).get("ordinary", [])
 	var gaps: Array = []
 	var previous: Dictionary = {}
@@ -136,7 +139,7 @@ func _gaps(world: String, level: Node3D) -> Array:
 		var n := int(ceil(flat.length() / 0.05))
 		for k: int in n:
 			var q := a.lerp(b, float(k) / n)
-			var hit := _ray(level, Vector3(q.x, 30.0, q.z), Vector3(q.x, -6.0, q.z))
+			var hit := _ray(level, Vector3(q.x, 30.0, q.z), Vector3(q.x, -7.0, q.z))
 			if hit.is_empty():
 				_fail(world, "no surface under the ordinary line at %s" % q)
 				continue
@@ -146,31 +149,72 @@ func _gaps(world: String, level: Node3D) -> Array:
 				var step: Vector3 = (hit.position as Vector3) - (previous.position as Vector3)
 				var normal: Vector3 = previous.normal
 				var expected := -(normal.x * step.x + normal.z * step.z) / normal.y
+				# a concave crease: the step is explained by the surface it climbs onto.
+				var onto: Vector3 = hit.normal
+				if absf(dy - expected) > 0.01 and absf(dy + (onto.x * step.x + onto.z * step.z) / onto.y) <= 0.01:
+					expected = dy
 				if dy < -0.5 and gap_start.is_empty():
 					gap_start = previous
-				elif dy > 0.5 and not gap_start.is_empty():
-					gaps.append(_judge_gap(world, gap_start, hit))
+				elif not gap_start.is_empty() and role in ["route", "baffle"] and (dy > 0.5 or absf(dy - expected) < 0.01):
+					gaps.append(_judge_gap(world, level, gap_start, hit))
 					gap_start = {}
 				elif gap_start.is_empty() and role != "wall" and absf(dy - expected) > 0.01 and dy > 0.0:
 					lips += 1
 					_fail(world, "lip of %.3f m on the ordinary line at %s" % [dy - expected, hit.position])
 			previous = hit
+	if not gap_start.is_empty():
+		_fail(world, "the ordinary line ends inside a gap from %s" % gap_start.position)
 	if lips == 0 and gaps.is_empty() and world == "course":
 		_fail(world, "no gaps found on the ordinary line")
+	for declared: Dictionary in level.get("jump_gaps"):
+		if declared.kind == "earned":
+			gaps.append(_judge_earned(world, declared))
 	return gaps
 
-func _judge_gap(world: String, from: Dictionary, to: Dictionary) -> Dictionary:
+func _flight(speed: float, climb: float, drop: float) -> float:
+	# time from a take-off with the jump (plus the surface's climb) to a landing `drop` below.
+	var up := JUMP + speed * climb
+	return (up + sqrt(maxf(0.0, up * up + 2.0 * GRAVITY * drop))) / GRAVITY
+
+func _judge_gap(world: String, level: Node3D, from: Dictionary, to: Dictionary) -> Dictionary:
 	var a: Vector3 = from.position
 	var b: Vector3 = to.position
+	var speed := RUN
+	var climb := 0.0
+	var label := "run"
+	for declared: Dictionary in level.get("jump_gaps"):
+		if declared.kind == "ordinary" and (declared.edge as Vector3).distance_to(a) < 3.0:
+			speed = declared.speed
+			climb = declared.climb
+			label = declared.label
 	var distance := Vector2(b.x - a.x, b.z - a.z).length()
 	var drop := a.y - b.y
-	var flight := (JUMP + sqrt(JUMP * JUMP + 2.0 * GRAVITY * maxf(drop, -JUMP * JUMP / (2.0 * GRAVITY)))) / GRAVITY
-	var reach := RUN * flight
+	var flight := _flight(speed, climb, drop)
+	var reach := speed * flight
 	var spare := reach - distance - LANDING
-	var verdict := {"at": [snappedf(a.x, 0.01), snappedf(a.z, 0.01)], "distance": snappedf(distance, 0.01), "drop": snappedf(drop, 0.01),
-		"perfect_speed": snappedf(distance / flight, 0.01), "reach_at_run": snappedf(reach, 0.01), "early_tolerance_s": snappedf(spare / RUN, 0.001)}
-	if spare / RUN < EARLY:
-		_fail(world, "gap at %s: %.2f m, %.2f m drop leaves %.3f s early tolerance at run speed" % [a, distance, drop, spare / RUN])
+	var verdict := {"label": label, "at": [snappedf(a.x, 0.01), snappedf(a.z, 0.01)], "distance": snappedf(distance, 0.01), "drop": snappedf(drop, 0.01),
+		"design_speed": speed, "perfect_speed": snappedf(distance / flight, 0.01), "reach_at_design": snappedf(reach, 0.01), "early_tolerance_s": snappedf(spare / speed, 0.001)}
+	if spare / speed < EARLY:
+		_fail(world, "gap at %s: %.2f m, %.2f m drop leaves %.3f s early tolerance at %.1f m/s" % [a, distance, drop, spare / speed, speed])
+	return verdict
+
+func _judge_earned(world: String, declared: Dictionary) -> Dictionary:
+	# p / an earned jump must clear with margin at the carried design speed and must fall
+	# short at the speed a plain run drains to, pressed exactly at the edge.
+	var a: Vector3 = declared.edge
+	var b: Vector3 = declared.land
+	var distance := Vector2(b.x - a.x, b.z - a.z).length()
+	var drop := a.y - b.y
+	var carried: float = declared.speed
+	var drained: float = declared.drained
+	var spare := carried * _flight(carried, declared.climb, drop) - distance - LANDING
+	var short := distance - drained * _flight(drained, declared.climb, drop)
+	var verdict := {"label": declared.label, "distance": snappedf(distance, 0.01), "drop": snappedf(drop, 0.01), "carried_speed": carried, "drained_speed": drained,
+		"perfect_speed": snappedf(distance / _flight(carried, declared.climb, drop), 0.01), "carried_early_tolerance_s": snappedf(spare / carried, 0.001), "drained_short_m": snappedf(short, 0.01)}
+	if spare / carried < 0.12:
+		_fail(world, "%s leaves only %.3f s early tolerance at the carried %.1f m/s" % [declared.label, spare / carried, carried])
+	if short < 1.0:
+		_fail(world, "%s is only %.2f m short at the drained %.1f m/s" % [declared.label, short, drained])
 	return verdict
 
 func _rails(world: String, level: Node3D) -> Dictionary:
@@ -195,7 +239,7 @@ func _connectivity(world: String, level: Node3D) -> Dictionary:
 	# walking only: a 0.5 m grid of walkable tops joined where neighbours differ by under 6 cm.
 	# every catch surface must walk to the finish; the ordinary line needs its hops.
 	var tops := {}
-	var bounds := AABB(Vector3(-50, -2, -160), Vector3(65, 30, 222))
+	var bounds := AABB(Vector3(-72, -6, -218), Vector3(87, 30, 280))
 	if world != "course":
 		bounds = AABB(Vector3(-50, -2, -70), Vector3(100, 20, 80))
 	var nx := int(bounds.size.x / STEP)
@@ -204,7 +248,7 @@ func _connectivity(world: String, level: Node3D) -> Dictionary:
 		for j: int in nz:
 			var x := bounds.position.x + (i + 0.5) * STEP
 			var z := bounds.position.z + (j + 0.5) * STEP
-			var hit := _ray(level, Vector3(x, 30, z), Vector3(x, -6, z))
+			var hit := _ray(level, Vector3(x, 30, z), Vector3(x, -7, z))
 			if hit.is_empty() or (hit.normal as Vector3).y < WALKABLE:
 				continue
 			var role := str((hit.collider as Node).get_meta("surface", ""))
