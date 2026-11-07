@@ -13,6 +13,55 @@ Candidate final-product forks, none selected. Order does not rank them:
 
 Testing may combine state-aware fixtures/replay, imperfect open-loop input tapes, screenshot/video-only navigation, semantic inspection, learned/real-time agents and adversarial exploration. Explain what each can establish and what it cannot. A successful exact-state bot is not proof of satisfying handling or human enjoyment. Mike is the eventual human judge; optional asynchronous A/B builds may help him react, but his availability is not a gate on continued work.
 
+## Synthesis
+
+Build **Overflow**, a recoverable downhill hop course: height builds momentum, W and mouse
+place jumps, and side-key technique earns optional shortcuts. No mandatory surf, automatic
+mantle, slide or hidden crest trigger in the first slice. The ordinary line must be active
+and complete; a miss should land on a catch walk and rejoin. The implementation decision,
+initial P values, comparison and delivery requirements are in BUILD.md.
+
+Use one new CARRY motor with a broad side-gain candidate and a narrow diagnostic control,
+sharing ground, slope, body, camera and contacts. Broad is the moderator's provisional
+choice for usable ordinary corrections, not a council vote or verified improvement. Narrow
+remains an essential challenger. Matching peak speed gain does not match angular authority,
+so this compares two laws rather than forgiveness alone. R12 and corrected FLOW remain
+controls, with their evidence intact.
+
+Standing disagreements are resolved provisionally as follows:
+
+- **Ground retention:** use gentle linear overspeed decay (initially 2 m/s² pushing) and
+  bounded grip, rather than Sol's 4/s friction or Opus's return to R12's 8 m/s² tax. Compare
+  release, brake, turns and late hops at equal speed. If ground-only travel erases the
+  shortcut's approach choice, adjust grip/route deliberately; do not tax all landings.
+- **Slope economy:** supported descent pays and climbs spend, with explicit motion/energy
+  accounting. This favors understandable height carry. A frictionless diagnostic and flat
+  repeated-action checks must expose numerical gifts; no physical-fidelity claim is made.
+- **Assisted turn charge:** no extra 4%-per-radian tax initially. A demonstrated loss of
+  meaningful braking/approach choice can justify it. Speed-neutral assistance is not a gain.
+- **Air family:** broad must improve imperfect key overlap/corrections across neutral and
+  mirrored/offset geometry while retaining a useful mastery reward; otherwise choose narrow
+  or revise the rule. A lower landing spread, higher speed or solved bot route is not enough.
+- **Contacts:** compare backend, grouped deck geometry and ownership separately. Start with
+  the current CharacterBody3D path and publish requested/resolved motion plus real travel.
+  Only a retained relevant fault justifies replacing the sweep. Do not migrate nineteen
+  historical consumers before a new course exists.
+
+Keep Godot as the experiment platform and provisional product engine. Root reran the retained
+four-way backend probe: unset and explicit Godot Physics return the documented face-index
+signature, while Jolt differs until its face-index option is enabled. This identifies R12's
+backend; it does not show better contacts. A measured contact, pacing, art or delivery blocker
+can justify a bounded raylib/Jolt, Unity or Unreal proof. GPU/display behavior and native
+Windows remain unmeasured, and missing access is not an engine failure.
+
+The riskiest assumption is that approachable placement and earned speed can coexist without
+flattening route decisions. Test it on a frozen neutral turn/jump block and one actual course
+with a basic line, diagonal and physical recovery. Apply the same imperfect relative-input
+tapes, include a mirrored/offset holdout, and inspect actual native movement. Choose one
+coherent candidate after that comparison, then expand and finish it. A finite tape executor
+and small licensed material kit are already dispatched as supporting implementations. No
+live review is required to proceed; Mike's eventual enjoyment remains his judgment.
+
 ## Settled by Mike
 
 On 7 November he said he remains unsatisfied with movement and momentum and asks for broad research and continued work. He enjoyed VHOLUME as a reference resembling CS bhop. He permits our own implementation, dropping surf (which he disliked here), external assets/textures and anything useful to advance the game. Delegate budget is unlimited today. He asks to reconsider Godot for the final product and put a council to work. Earlier autonomy remains: make decisions without stopping to ask for a live review.
@@ -408,6 +457,151 @@ Give concrete seams consistent physical spacing, handrails credible height, stee
 Drive wind from measured travel speed and contact sounds from real supported motion/impact. Never add a celebratory acceleration cue when velocity did not increase. Use original sound or a verified redistributable source; listening quality remains unverified without listening. The finished slice should look and sound intentional, but its policy identity must remain visible so a nicer material does not become evidence for a better controller.
 
 I would still change the revised brief to require an explicit choice of where speed is earned before selecting a motor: flat strafe technique, terrain, or a discrete traversal action.
+
+## Round 2: Opus 5.5
+
+Source post: round2-opus.md
+
+### Round two: Opus 5.5
+
+Written 7 November 2026 against board `021bbeea` and `research/controller-fixes.md`. I did not read the other round-two post. Values are **P**. Tags: **[src]** primary page read today, **[local]** run today with a retained artifact, **[calc]** arithmetic, **[inf]** inference.
+
+**My revision:** keep one new motor, but stop protecting R12's strafe law. Build two settings of one side-key strafe law, matched for peak reward and differing only in forgiveness. Adopt Sol's gentle ground decay and supported-slope gravity. Test backend, geometry and controller ownership separately, in that order, stopping at the first that answers.
+
+#### What Sol saw that I missed
+
+1. **I assumed Mike wants CS strafing.** CARRY kept the air law Mike rejected as its protected element. Sol is right to demand an explicit choice of where speed is earned first.
+2. **Side keys alone should correct a line.** Holding A at a fixed view gives at most 0.75 m/s of drift under R12, and zero under FLOW (controller-review-sol §4).
+3. **My ground contradicted my own principle.** Source-style friction at 4/s removes a third of a 20 m/s run in 0.1 s on the ground **[calc]**, far harsher than R12's linear 8 m/s². It erases the slope speed a basic-line player carries.
+4. **Validate input before comparing motors.** Root's FLOW cadence fix shows delivery, not tuning, can create a reward difference.
+5. **Backend and ownership are different variables.** I bundled an owned sweep with Jolt, which would make any contact fix unattributable.
+
+#### Narrow versus broad, resolved
+
+The material difference is the **angular window that pays**, not the cap. R12's law (cap 0.75, accel 12) against a broad law (cap = run speed 8.5) with accel 0.468, chosen so its best gain equals R12's at 13 m/s **[calc, `checkpoints/spillway/r13/council/airlaw-math/`]**:
+
+| 120 Hz | best gain at 9 / 13 / 20 m/s | wish angles keeping ≥50% of best gain, at 13 m/s |
+|---|---|---|
+| Narrow (R12) | 3.74 / 2.59 / 1.69 m/s per s | 87.7–91.1° (~3.5° wide) |
+| Broad, matched | 3.74 / 2.59 / 1.69 m/s per s | 49.3–71.0° (~22° wide) |
+
+Two further results matter:
+
+- **Narrow gain scales with tick rate** because the cap limits each tick: 2.59 m/s per s at 120 Hz, 1.30 at 60 Hz. The broad law is nearly invariant (7.72 against 7.65 at an unmatched accel of 1.4) **[calc]**. An "exact Source cap" at 120 Hz reproduces no Source server, and a port or tick change silently retunes its mastery. It is useful as R12's control, at R12's 0.75. The 30-inch conversion, 0.762 m, is a different number with no claim on us.
+- **Under the broad law, holding W while turning earns speed:** 2.0 m/s per s with the view 60° off travel **[calc]**. That is camera-led gain, which Sol's own contract forbids.
+
+Sol's broad gain, forward assist and "W never mints speed" are consistent only if **projection acts on the side-key component of the wish alone**, while the forward component feeds a speed-neutral bend. I adopt that split for both settings. Side-only input stays bit-identical to R12 under narrow.
+
+**Speed is earned** from height (supported descent and slope landings, for everyone) and from side-key strafing synchronised with the mouse (mastery). **It is spent** on climbs, gradual grounded overspeed decay, grip-bounded ground turns, bends (4% per radian), wall normals and misses into slower recovery ground. A per-tick ledger with zero residual enforces that list.
+
+#### Ground and slope
+
+Accelerate toward run speed without chord loss. Overspeed decays linearly while grounded, starting at R12's 8 m/s²; friction applies only below run speed. S, or input more than 120° off travel, brakes explicitly. Landing grace is 80 ms. Walkable slopes add supported tangent gravity: I concede to Sol that a descent should carry momentum without hopping.
+
+**Still in disagreement:** ground turns at overspeed need bounded lateral acceleration (20 m/s² P). With free grip, ground bends carry speed as well as air, and the strafe line through the pier bend stops mattering.
+
+#### What to build first
+
+One motor, CARRY-2, with that ground, slope, hop and bend, and two strafe settings: **N** (narrow) and **B** (matched broad). This is one constant pair, not a matrix. Compare R12 (archived control), N and B. Run FLOW with root's fixes on fixtures only; it enters slice builds only if it beats CARRY-2 on perturbed W tapes. Its intentional A/D semantics are then tested against B. The bend-off flag is diagnostic. Crouch-slide, walls and surf stay out.
+
+#### Route-authoring bias and criteria
+
+Fix the bias in the open:
+
+- Size every gap from the shared forward-key bend envelope, without strafing, which is identical in N and B.
+- Set the shortcut threshold at basic arrival speed plus a declared 2.5 m/s margin (P).
+- Freeze geometry before N or B runs on it, keep a held-out variant, and disclose that the slice disadvantages R12, which lacks the bend.
+
+Report curves, not a score: basic completion on perturbed W tapes without strafing or restarts; each fork taken by some tapes with a route difference above perturbation noise; route time against input quality, perturbation scaled from 0 to 2× (flat means mastery is meaningless, a cliff punishes the basic line); physical recovery; and zero unexplained ledger gain. None measures fun. B will likely tighten landing spread, which may only flatten decisions.
+
+#### Backend versus ownership
+
+**Retained probe [local]:** `checkpoints/spillway/r13/council/backend-probe/run.sh` creates four throwaway projects differing only in `physics/3d/physics_engine`, hashing the project file and binary. A trimesh ray returns face index 1 when unset or with Godot Physics. It returns -1 with Jolt and 1 after enabling Jolt's face-index setting. Godot's Jolt page documents that signature and says Jolt is the default for *new* projects **[src]**. The unset value is Godot Physics.
+
+**New fact against my R1 plan:** the same page says Jolt's active-edge and enhanced-internal-edge mitigations do not apply to ghost collisions between two different bodies **[src]**. The course makes each deck its own `StaticBody3D` via `_solid` and `_ramp` **[local read]**, so Jolt alone may not affect seams between decks.
+
+**E2 order**, with motor math fixed, stopping at the first cell that clears the e4 front-edge catch without new oracle failures:
+
+1. Switch to Jolt.
+2. Merge abutting decks into one body on Jolt.
+3. Own the sweep on Godot Physics.
+
+The first evidence for ownership is a catch that survives cells 1 and 2 in a minimal two-slab fixture.
+
+**Runtime interface:** first, the motor publishes `MotionState`: grounded, support normal, contacts, displacement velocity and ledger. Camera, HUD, audio, tests and tape recorder read only that. Fill it from R12's `move_and_slide` getters, migrate the roughly 19 consuming files and require byte-identical traces. Only then iterate `move_and_collide(test_only…, max_collisions)` **[src]** with motor-owned clipping, after which `is_on_floor()` and `get_real_velocity()` become unreliable for that motor. Sol's raylib-plus-Jolt is the better-defined collision challenger, but earns a spike only if a catch survives all three cells.
+
+#### Unmeasured
+
+Real-GPU frame pacing, Hyprland compositor cadence, input accumulation on real hardware, Forward+ cost with adopted assets and native Windows play remain unmeasured. None is inferred from llvmpipe, and I did not operate Mike's desktop.
+
+#### Standing disagreements and settling results
+
+| Disagreement | Settled by |
+|---|---|
+| N versus B: mastery forgiveness | Skill-gradient curves on frozen geometry, then Mike's blind A/B. B loses if its curve is flat or a W-only wiggle clears the shortcut. |
+| Ground grip, free or bounded | A ground-only pier-bend line matching the strafe line's time means grip is too free. |
+| B's side correction versus FLOW's view-led A/D | Glance and fixed-view correction tapes, then the slice. |
+| Contact fault cause: backend, geometry or ownership | The first E2 cell that clears it. |
+| Godot for the final product | D1–D4 on real hardware, still unmeasured. |
+
+**Next playable artifact:** Overflow graybox with frozen geometry, delivered as three blind builds (R12, CARRY-2 N, CARRY-2 B). They share presentation and labels, run on root's tape executor and show their ledgers. Mike's satisfaction remains unverified.
+
+## Round 2: GPT-6.1 Sol
+
+Source post: round2-sol.md
+
+### Round two: build assisted narrow gain first, challenge it with broad gain
+
+Sol, 7 November 2026, against `021bbeea`. I read the full council and controller corrections, but no other round-two post. Recommendations below are P / game choices. This round adds code inspection and primary-document checks, not gameplay measurements.
+
+#### What Opus saw that I missed
+
+Opus gave ground friction, landing carry and contact ownership a much more concrete treatment. My broad projection recommendation risked making steering and speed generation compensate for faults elsewhere. R12 already supplies narrow projection gain and held hopping; rejecting the whole game does not identify that gain law as the problem. Opus's explicit bend limit also makes a useful distinction: permission to correct a jump need not be permission to accelerate.
+
+I retract broad gain as the default first implementation and drop my terrain-only third motor. Build the assisted narrow-gain motor first, then its broad-gain challenger. Exact side-only identity is useful experimental control, not recovered user preference. Under the inch convention, 30 inches is **0.762 m**; R12's **0.75 m/s** is an approximation, not exact Source equivalence. Neither conversion establishes VHOLUME's behavior.
+
+#### Two air variants, one shared landing and ground policy
+
+Both variants use R12's body, gravity, jump impulse, camera and 120 Hz initially. Keep held rehop, buffer and coyote time. Remove mandatory surf, mantle and slide from this slice.
+
+- **N, first playable:** projection allowance 0.75 m/s and coefficient 12, preserving R12's side-only air calculation as a control.
+- **B, essential challenger:** allowance 8.5 m/s and coefficient 1.5/s, using the same normalized wish direction. This compares two complete gain laws, not the cap alone. Straight aligned W above run speed must not add speed.
+
+Both receive the same forward steering assist, blended by forward input contribution, including W+A/D. Start with Opus's 14 m/s² lateral limit and 45–90 degree fade. Side-only input gets no assist; no keys means looking cannot alter travel. Apply projection first and a speed-neutral rotation second, logging both. Opposing input brakes before reversal.
+
+I still disagree with Opus's automatic 4% speed charge per radian of assisted turning. Correction already costs turning radius and potentially route distance. Start without that extra tax; test whether this makes high-speed corrections erase the shortcut's approach decision. Add a turn charge only if that problem appears. Broad gain may tolerate W+A/D overlap better, but may also combine acceleration and assistance too generously. That is why B remains essential.
+
+Use **one common ground policy**, initially Opus's speed-scaled friction 4/s, stop floor 3 m/s, projection acceleration toward 8.5 m/s at 10/s, and an explicit 24 m/s² opposing brake. Process successful jumps before friction; ramp friction over 80 ms of continuous support. Reset that grace on genuine support loss, never on a normal/classification flicker. Compare this against R12 ground only in matched-speed straight, 90-degree correction, release/brake and late-hop fixtures. Settle unintended skid or abrupt loss there before the two slice builds. No ground-policy product matrix.
+
+The speed economy is explicit: ordinary thrust earns run speed; jumping adds vertical impulse; oblique airborne input earns level-terrain overspeed; downhill landing can redirect falling velocity; friction, braking, uphill redirection and blocked contacts spend it. Assisted rotation earns none. Retain Opus's landing-plane carry initially, without supported tangent gravity or hidden crest launches. This is a deliberately nonconservative game policy: walking downhill does not continuously convert height into speed. Log full 3D contact changes separately from horizontal gains, so redirection cannot masquerade as free energy. No unexplained post-contact restoration or silent clamp is acceptable.
+
+#### FLOW and evidence that cannot choose the game
+
+Root reports cadence-independent reward for the tested sweep/phases, feasible multi-contact landing velocity, and removal of the continuous-crest trigger after stair pops. Those corrections supersede both R1 fault descriptions. I have not rerun their evidence. Mouse-angle reward remains a design choice; A/D's lack of fixed-view correction remains a tradeoff. FLOW stays an existing comparison, not a third implementation target or selected game.
+
+The finite relative-input executor is supporting work in parallel. Do not wait for another harness proposal. Run matched ordinary/overspeed starts with W, W+A/D, side-only, release, brake, glances and imperfect hops. A gain-disabled or assist-disabled run diagnoses a mechanism; it does not require another shipped motor.
+
+Withdraw Opus's rule that wider landing spread than FLOW refutes CARRY. Lower variance may mean steering erased an intended commitment. Likewise, perfect-bot completion establishes reachability only. Compare whether acceleration, braking and takeoff placement still create different useful lines; whether mistakes have understandable costs; and whether recovery reconnects physically. Fun remains unverified.
+
+Avoid authoring the verdict. Freeze a neutral contact/turn block first. Bound basic gaps by the overlap of N/B ordinary jump envelopes, and provide room for both measured turn radii. Do not size the shortcut specifically between CARRY's W and strafe speeds. Retain a mirrored bend and unseen landing offset without retuning. If the slice favors one motor, report that geometry dependence before revising it.
+
+#### Backend first, ownership separately
+
+I reject adopting owned sweeps **and** Jolt as one initial fix. First reproduce a slice-relevant seam/lip fault under the unchanged controller with explicitly selected Godot Physics and Jolt. Opus's unset-backend ray result remains an attributed local claim; I neither reproduced nor rely on it. If used later, retain its runnable probe, settings and logs outside Git under `checkpoints/spillway/r13/council/`.
+
+Godot's [current Jolt documentation](https://docs.godotengine.org/en/stable/tutorials/physics/using_jolt_physics.html) distinguishes motion-query edge removal from simulation settings, and says these techniques do not remove edges between separate bodies. Jolt therefore cannot be presumed to fix an authored slab's front face.
+
+If policy ownership remains necessary, compare an owned sweep on the **same backend** next. The viable adapter is `step(state, input, dt, collision_query) -> motion_report`, using [body motion tests](https://docs.godotengine.org/en/stable/classes/class_physicsserver3d.html#class-physicsserver3d-method-body-test-motion). Report transform, requested/resolved velocity, whole-step displacement, recovery displacement, support identity/normal, contact points/normals and ledger. First prove wall-plus-floor, seam, crest and respawn outcomes. Preserve the complete contact cone.
+
+This needs consumer changes: `spillway_main.gd::_stands_on_stage` reads slide collisions; `get_speed()` reads requested velocity. Godot documents [real velocity and floor queries](https://docs.godotengine.org/en/stable/classes/class_characterbody3d.html) relative to `move_and_slide`. They cannot certify an independently owned loop. Progress, HUD, audio and evaluator must consume the new report; camera interpolation must use committed transforms. Do not add the 0.35 m lip step before showing the remaining fault requires it.
+
+#### Standing disagreements and the next artifact
+
+- **Narrow versus broad gain:** N first, B essential. Adopt B only if it improves ordinary key-overlap correction across both layouts while preserving a useful reward for deliberate strafing and approach speed. Otherwise retain N provisionally. Fidelity and endpoint spread cannot decide this.
+- **Assisted-turn tax:** none first. Add one only if neutral steering removes a meaningful approach/braking decision across both layouts.
+- **Jolt/owned contacts:** separate changes. A retained contact reproduction establishes which layer helps; neither is presumed superior.
+
+Deliver two distinctly identified Linux slice builds with shared presentation, a complete basic descent requiring no advanced strafing, optional earned diagonal and continuous catch walk, plus replay evidence. Keep Godot provisional; a reproduced backend, pacing or presentation blocker warrants a bounded challenger. Real GPU performance, display/input latency and native Windows execution remain unmeasured here. No engine installation or desktop operation was performed. Continue without live review; Mike's eventual satisfaction remains unverified.
 
 ## mike
 

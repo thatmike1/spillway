@@ -17,3 +17,5 @@ Deliver an actual improved playable build, a concise account of the chosen movem
 For 7 November, Mike explicitly makes the delegate budget unlimited. The previous one-Opus-per-hour allowance is lifted for this run. Use independent research, implementation and review where it improves the playable result; keep file ownership separate and synthesize the findings into actual experiments.
 
 Mike also requests research into game-testing harnesses for AI agents and a council on the approach and final engine. Separate exact-state physics tests, imperfect open-loop input, view-only discovery, adversarial exploration and human feel. The current paused screenshot helper is a baseline, not a presumed solution. Research the practicality of available tools and papers, then implement a useful control/evidence loop rather than collecting frameworks.
+
+The two-family council is complete. COUNCIL.md records the posts and moderator synthesis; BUILD.md defines the next Overflow course, the original CARRY comparison and provisional engine choice. These are autonomous P decisions, open to actual playable evidence rather than additional approval.
