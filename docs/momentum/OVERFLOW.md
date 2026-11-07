@@ -152,8 +152,8 @@ longer. Nothing was tuned between runs, and all 120 are kept.
 - **Course: 42 of 42 hold-W tapes finish** (ordinary 24.89 to 26.04 s, tight 24.40 to 25.54,
   mastery 21.83 to 23.09, miss 24.85 to 26.35, pool miss 26.95 to 28.85), 0 respawns. Every
   perturbed mastery tape still clears the bay, every miss tape lands on the bay apron, and the
-  perturbed ordinary and miss lines that fell into the plunge pool climbed out. As recorded, 27 of
-  42 finish: the other 15 reach the arrival ramp late and stop on it where the recording let go of
+  perturbed ordinary and miss lines that fell into the plunge pool climbed out. As recorded, 30 of
+  42 finish: the other 12 reach the arrival ramp late and stop on it where the recording let go of
   W. None stalls or respawns.
 - **Block:** candidate ordinary and mirror hop 24 of 24. Broad's offset miss 6 of 12: the six
   failures end stuck at (-16.7, -46.7), against the same bay return ramp's open side.
@@ -210,6 +210,14 @@ inspected.
   and perturbed broad offset misses stick against the same ramp. See results.
 - **Driver line, not discovery.** The tight ordinary, mastery and wide lines are the driver's
   best of a few tries, not optimal play.
+
+Root corrected the handoff's recorded course total from 27/42 to 30/42 by counting the raw
+120-row results file. All 30 are clean, ordered finishes with zero respawns; the 12 others
+have reached the final stage but have not crossed the line. Candidate-only recorded tapes
+are 21/30; the broad/narrow recorded controls are 9/12. Extended-W course tapes remain
+42/42. The complete open-loop set remains 102/120. Per-tape counts are retained in
+`final-275c477b/root-openloop-counts.json`. Earlier append-only trail claims are superseded
+by the correction row.
 
 ## Rejected designs
 
