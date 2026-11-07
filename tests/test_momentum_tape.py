@@ -49,7 +49,7 @@ def basic(name, report, delivery=True):
     check(f"{name}: completed with neutral input", report["end"] == "completed" and report["neutral"] is True, report.get("end"))
     if delivery:
         check(f"{name}: delivery ok", report["delivery"]["ok"], report["delivery"]["errors"][:5])
-    check(f"{name}: post-motor capture order proven every tick", report["order"]["ok"], report["order"]["errors"][:5])
+    check(f"{name}: capture ordering and available motor evidence agree", report["order"]["ok"], report["order"]["errors"][:5])
     check(f"{name}: owned processes and display cleaned up", report["cleanup"]["clean"], report["cleanup"])
 
 

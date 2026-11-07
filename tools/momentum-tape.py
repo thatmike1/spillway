@@ -448,6 +448,7 @@ def evaluate(run_dir):
         else:
             planned_mouse[e["tick"]] = e["mouse"]
     delivery, order = [], []
+    counter_verified_ticks = 0
     held, expected = set(), {}
     for t in range(plan["duration_ticks"]):
         for key, edge in planned_keys.get(t, []):
@@ -465,6 +466,11 @@ def evaluate(run_dir):
         if previous is not None and r["step"] != previous["step"] + 1:
             order.append({"tick": t, "kind": "skipped_step"})
         o = r["order"]
+        if o.get("step_count_delta") is not None and t not in jumps:
+            if o["step_count_delta"] == 1:
+                counter_verified_ticks += 1
+            else:
+                order.append({"tick": t, "kind": "motor_step_count", "delta": o["step_count_delta"]})
         if not (o["same_physics_frame"] and o["in_physics"]) or o["motor_cur_matches_body"] is False:
             order.append({"tick": t, "kind": "capture_not_after_motor", "order": o})
         if o["motor_prev_matches_pre"] is False and t not in jumps:
@@ -569,8 +575,11 @@ def evaluate(run_dir):
         "end": end.get("reason"), "neutral": end.get("neutral"),
         "delivery": {"ok": not delivery, "errors": delivery[:60], "error_count": len(delivery)},
         "order": {"ok": not order, "errors": order[:30], "error_count": len(order),
+                  "counter_verified_ticks": counter_verified_ticks,
+                  "strength": "counter_verified" if counter_verified_ticks == len(tape) and tape else "state_or_priority_consistency_only",
                   "proof": "per tick: pre sample and mouse in Early (priority -1000), post sample in Late (priority 1000) in the same physics frame; "
-                           "the motor's _previous_position equals the pre sample's _current_position and _current_position equals the body"},
+                           "interpolation fields check state consistency; only a tape_step_count delta of one verifies exactly one motor step, "
+                           "because unchanged positions alone cannot detect a skipped or repeated stationary step"},
         "movement_flags": flags, "integrity_flags": integrity, "movement": movement, "timing": timing,
         "outcome": {"ticks": len(tape), "start_p": first, "end_p": last,
                     "travel_m": sum(disp.values()) * dt, "max_displacement_m_s": max(disp.values(), default=0.0),

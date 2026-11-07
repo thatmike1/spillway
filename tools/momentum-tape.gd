@@ -265,7 +265,8 @@ func early_step() -> void:
 		"physics_frame": Engine.get_physics_frames(), "process_frame": Engine.get_process_frames(),
 		"sim_s": tick * dt if armed else null, "wall_us_pre": Time.get_ticks_usec() - wall_start_us,
 		"pre": {"p": _v3(pre_p), "v": _v3(player.velocity), "yaw": player.get("yaw"), "pitch": player.get("pitch"),
-			"grounded": player.call("is_grounded"), "mode": player.get("mode")},
+			"grounded": player.call("is_grounded"), "mode": player.get("mode"),
+			"tape_step_count": player.get("tape_step_count") if "tape_step_count" in player else null},
 		"keys": pending.get(tick, []), "mouse": {}}
 	pending.erase(tick)
 	if armed and inject == "tick":
@@ -313,7 +314,8 @@ func late_step() -> void:
 	row["order"] = {"same_physics_frame": Engine.get_physics_frames() == int(row.physics_frame), "in_physics": Engine.is_in_physics_frame(),
 		"motor_prev_matches_pre": player.get("_previous_position") == pre_cur if "_previous_position" in player else null,
 		"motor_cur_matches_body": player.get("_current_position") == p if "_current_position" in player else null,
-		"step_count": player.get("tape_step_count") if "tape_step_count" in player else null}
+		"step_count": player.get("tape_step_count") if "tape_step_count" in player else null,
+		"step_count_delta": int(player.get("tape_step_count")) - int(row.pre.tape_step_count) if row.pre.tape_step_count != null else null}
 	if world_kind == "lab":
 		row["game"] = {"respawns": game.get("respawn_count"), "checkpoint": game.get("checkpoint_index"), "elapsed": game.get("elapsed"),
 			"finished": game.get("finished"), "finish_kind": game.get("finish_kind"), "paused": game.get("paused")}
