@@ -10,7 +10,7 @@ are P hypotheses. Nothing here claims fun, VHOLUME or CS fidelity. Godot 4.7.2 (
 | `scripts/momentum_carry_player.gd` | the motor; extends `spillway_player.gd` and reuses its collision helpers |
 | `scripts/momentum_carry_game.gd` | Node3D game factory over `spillway_main.gd`: `air_profile`, `motor`, `level_script`, `steady_camera`; records and settings never read or written |
 | `scripts/momentum_carry_lab.gd` | SceneTree launcher, a neutral calibration block (`CalibrationBlock`, `CalibrationGame`) and three open-loop demo tapes |
-| `tests/test_momentum_carry.gd` | 130 input-driven episodes: 88 gates, plus findings that are reported, not gated |
+| `tests/test_momentum_carry.gd` | input-driven fixtures and comparison summaries; first version had 130 result records and 88 gates, plus disclosed findings |
 
 Default game wiring, the Overflow course, packaging and records remain root's. No existing
 file or `project.godot` changed. During integration root added an internal `player_script`
@@ -29,7 +29,7 @@ python3 tools/momentum-tape.py run TAPE --out DIR --game-script res://scripts/mo
 python3 tools/momentum-tape.py run TAPE --out DIR --game-script res://scripts/momentum_carry_lab.gd --game-class CalibrationGame --motor narrow
 ```
 
-Groups: ground, hop, air, window, contact, slope, cap, cadence, duck, flicker, backend,
+Groups: ground, hop, departure, air, window, contact, slope, cap, cadence, duck, flicker, backend,
 integration. The suite exits 1 on any gate failure. Native capture:
 `checkpoints/spillway/r13/carry/native/capture.sh NAME LAB-ARGS` (private Xvfb `:155`,
 Dummy audio, isolated XDG profile, movie writer at 30 fps, provenance file).
@@ -271,6 +271,25 @@ says nothing about GPU pacing, display latency or enjoyment.
   vertical energy on every downhill hop.
 - **Rejected:** a turn tax, an owned sweep, a step-up, a 0.35 m step and a Jolt switch,
   per BUILD.
+
+## Support-relative departure correction
+
+The first takeoff guard used positive world vertical velocity to discard lingering floor
+contacts. The independent Sol review found an earned downhill hop beside a rail that
+separated from its support while still descending in world space. Stale support caused a
+duplicate held hop and cost about 3.41 m/s of actual forward travel in the reduced case.
+
+Root now rejects a walkable support contact during a hop or airborne motion when the
+requested world velocity separates from that face by more than 0.001 m/s. Ordinary
+supported slope commands keep their surface-speed representation. Wall and ceiling
+resolution still uses the full feasible contact cone. This also prevents lingering
+separating contacts on later airborne ticks from rearming autohop.
+
+The new standalone `departure` group has mirrored reduced and input-earned regressions
+for both profiles. The independent review runner and original fixtures are now included
+in the repository; `--fixtures` can still select the historical external copy. Root's evidence and both-backend validation live in
+`checkpoints/spillway/r13/carry/root-support-fix/`; the original before-fix cases remain.
+R12 and FLOW were preserved as historical controls.
 
 ## Open faults and questions
 

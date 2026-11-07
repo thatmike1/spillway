@@ -208,9 +208,10 @@ func _physics_process(delta: float) -> void:
 	_book("contact_engine", _requested, velocity)
 	_contacts_valid = true
 	_ground_normal = _walkable_contact()
-	if hop and velocity.y > 0.0:
-		# measured on godot physics, not jolt: after a landing that ends slightly inside the
-		# floor, the take-off tick can still report it, and a held hop then fires again.
+	# a separating airborne body cannot use this face as support, even when descending
+	# in world space. recovery contacts may linger beside a rail after a takeoff; accepting
+	# one would rearm autohop and reinterpret air velocity as surface speed on the next tick.
+	if _ground_normal != Vector3.ZERO and (hop or not started_grounded) and _requested.dot(_ground_normal) > 0.001:
 		_ground_normal = Vector3.ZERO
 	var landed_on_floor := is_grounded()
 	_clip_steep_contacts(_requested, landed_on_floor)

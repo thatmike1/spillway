@@ -5,7 +5,7 @@ extends SceneTree
 ## motor in the same physics step. gates are behavior the policy promises; findings are
 ## measurements reported for review. traces and summary.json go outside git.
 ## godot --headless --fixed-fps 120 --path . --script res://tests/test_momentum_carry.gd --
-##   [--out=DIR] [--only=ground,hop,air,window,contact,slope,cap,cadence,duck,flicker,backend,integration]
+##   [--out=DIR] [--only=ground,hop,departure,air,window,contact,slope,cap,cadence,duck,flicker,backend,integration]
 
 const MAIN := preload("res://scripts/spillway_main.gd")
 const CARRY := preload("res://scripts/momentum_carry_player.gd")
@@ -15,7 +15,7 @@ const ACTIONS := {"w": "move_forward", "a": "move_left", "s": "move_back", "d": 
 const DT := 1.0 / 120.0
 const PX := 0.0022
 const PROFILES := ["broad", "narrow"]
-const GROUPS := ["ground", "hop", "air", "window", "contact", "slope", "cap", "cadence", "duck", "flicker", "backend", "integration"]
+const GROUPS := ["ground", "hop", "departure", "air", "window", "contact", "slope", "cap", "cadence", "duck", "flicker", "backend", "integration"]
 
 signal episode_done
 
@@ -90,7 +90,7 @@ func _run() -> void:
 				print("FINDING %s: %s (%s)" % [result.name, item.label, item.detail])
 	for failure: String in gate_failures:
 		print("FAIL " + failure)
-	print("carry tests: %d episodes, %d gates, %d gate failures, %d findings; physics=%s; %s" % [results.size(), gates, gate_failures.size(), findings, summary.physics_engine, out_dir])
+	print("carry tests: %d result records, %d gates, %d gate failures, %d findings; physics=%s; %s" % [results.size(), gates, gate_failures.size(), findings, summary.physics_engine, out_dir])
 	quit(1 if not gate_failures.is_empty() else 0)
 
 # ---------------------------------------------------------------- episode runner
@@ -576,6 +576,46 @@ func group_hop() -> void:
 		var hopped := int(trace[-1].state.jump_count) == 1
 		var r := finish({"press_after_leaving_ms": offset * 1000.0 / 120.0, "hopped": hopped})
 		check(r, "coyote window is 0.1 s", hopped == ((offset + 1) * DT <= 0.1 + 1e-6), "hopped %s" % hopped)
+
+func _descending_rail(w: Node3D, reflection: float) -> void:
+	# p / the independent review reached this recovery state through a real w descent.
+	var angle := deg_to_rad(30.0)
+	ramp(w, "floor", Vector3(0, 40, 10), Vector3(0, 40 - 120 * tan(angle), -110), 8.0)
+	box(w, "rail", Vector3(2 * reflection, 0, -30), Vector3(0.5, 200, 200))
+
+func group_departure() -> void:
+	for profile: String in PROFILES:
+		for reflection: float in [-1.0, 1.0]:
+			for earned: bool in [false, true]:
+				var cfg := {"build": _descending_rail.bind(reflection), "profile": profile, "contacts": true}
+				if earned:
+					cfg.pose = yaw_pose(Vector3(0, 40 - 10 * tan(deg_to_rad(30.0)) + 0.15, 0), -0.12 * reflection)
+					cfg.ticks = 500
+					cfg.tape = [[0, "w", true], [300, "space", true]]
+				else:
+					# one labelled setup extracted from the earned episode; not a route claim.
+					cfg.pose = yaw_pose(Vector3(1.45108294487 * reflection, 3.48476290703, -53.3626708984), -0.12 * reflection)
+					cfg.seed = Vector3(0, -20.0365810394, -22.3228416443)
+					cfg.ticks = 3
+					cfg.tape = [[0, "w", true], [0, "space", true]]
+				var name := "departure_%s_%s_%s" % [profile, "left" if reflection < 0 else "right", "earned" if earned else "reduced"]
+				var trace := await run(name, cfg)
+				var supported := 0
+				var duplicates := 0
+				var last_jump := -100
+				for i: int in range(1, trace.size()):
+					var state: Dictionary = trace[i].state
+					var prior: Dictionary = trace[i - 1].state
+					if state.jump_count <= prior.jump_count:
+						continue
+					if i - last_jump <= 2:
+						duplicates += 1
+					if state.grounded and (state.requested_velocity as Vector3).dot(prior.support_normal) > 0.01:
+						supported += 1
+					last_jump = i
+				var result := finish({"supported_departures": supported, "duplicate_hops": duplicates, "hops": trace[-1].state.jump_count})
+				check(result, "a separating downhill departure clears support", supported == 0, str(supported))
+				check(result, "held input cannot hop twice without a new arrival", duplicates == 0, str(duplicates))
 
 func group_air() -> void:
 	# fixed view, equal seeded 13 m/s over two seconds of open air.
