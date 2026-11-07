@@ -118,7 +118,7 @@ func _ready() -> void:
 	if args.has("--no-hud"):
 		hud.hide()
 	if set_window_title and DisplayServer.get_name() != "headless":
-		DisplayServer.window_set_title("%s · %s" % [BUILD_LABEL, COURSE_NAME])
+		get_window().title = "%s · %s" % [BUILD_LABEL, COURSE_NAME]
 	print("r13 overflow: build=%s; course=%s; stages=%d; course_key=%s; records=%s; runner=%s; renderer=%s" % [BUILD_ID, COURSE_NAME, stage_count(), course_key, profile_state, player.get("air_policy"), RenderingServer.get_current_rendering_method()])
 	if args.has("--verify-startup"):
 		await get_tree().physics_frame
