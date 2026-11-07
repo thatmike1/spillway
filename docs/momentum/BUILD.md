@@ -70,6 +70,14 @@ Keep a mirrored bend and landing offset as holdouts. Build a visible start-to-fi
 and immediate restart, clear personal progress and replay value. A ghost can follow once
 the actual motion is stable; it cannot substitute for the first finished loop.
 
+The first CARRY lab has now challenged the provisional broad choice: side-key turns at
+0.75 rad/s or faster lose speed, while narrow's reward varies with mouse-event cadence.
+Neither is promoted as the final air policy. Build one isolated air-policy challenger on
+the same CARRY ground/body/contact code, with explicit imperfect-input and cadence tests.
+It may use an original rule; matching the reference projection law is not acceptance.
+Retain both first profiles as frozen controls, then choose one coherent policy on the
+neutral block and actual course. No additional menu of motors belongs in the game.
+
 Use the separate licensed material kit for coherent concrete/steel/brick scale and readable
 landings. Compare presentation on a fixed motor/tape before bundling it into the candidate.
 The finite tape executor provides relative inputs, real sampling boundaries, replay and

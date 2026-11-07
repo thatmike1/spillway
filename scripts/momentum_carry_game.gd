@@ -50,6 +50,8 @@ var motor: String = "":
 			air_profile = value
 ## optional Script or res:// path of a level node with spillway_level's interface.
 var level_script: Variant = null
+## internal comparison hook; the default is always the unmodified carry player.
+var player_script: Script = CARRY_PLAYER
 ## p / explicitly labelled comparison: comfort camera, no bob or speed fov.
 var steady_camera: bool = false
 var set_window_title: bool = true
@@ -68,7 +70,7 @@ func _ready() -> void:
 	level.name = "Level"
 	add_child(level)
 	level.call("build")
-	player = CARRY_PLAYER.new()
+	player = player_script.new()
 	player.set("air_profile", air_profile)
 	player.name = "Runner"
 	add_child(player)

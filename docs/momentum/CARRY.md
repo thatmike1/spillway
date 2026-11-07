@@ -13,7 +13,8 @@ are P hypotheses. Nothing here claims fun, VHOLUME or CS fidelity. Godot 4.7.2 (
 | `tests/test_momentum_carry.gd` | 130 input-driven episodes: 88 gates, plus findings that are reported, not gated |
 
 Default game wiring, the Overflow course, packaging and records remain root's. No existing
-file or `project.godot` changed.
+file or `project.godot` changed. During integration root added an internal `player_script`
+factory hook for an isolated air-policy challenger; its default remains CARRY.
 
 ## Commands
 
