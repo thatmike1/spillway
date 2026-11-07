@@ -100,3 +100,10 @@ Retain failures and actual native moving evidence. Native Windows execution, des
 cadence and Mike's satisfaction remain unverified until those paths are exercised. Godot
 is the provisional product engine; a measured contact, pacing, art or delivery blocker
 can justify the bounded alternative described in the council.
+
+The first actual AMD hardware audit now establishes a usable private rendering path on
+the build host: the frozen first Overflow game runs at virtual 60 Hz in Compatibility,
+with identical per-tick motion to software. It gives no measured reason to port. Retain
+Godot for the current product, repeat that method on the final course, and keep physical
+input/display latency, target-resolution visuals and native Windows execution explicitly
+open. See `research/presentation-hardware.md` for measured scope and capture overhead.
