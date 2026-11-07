@@ -78,6 +78,16 @@ It may use an original rule; matching the reference projection law is not accept
 Retain both first profiles as frozen controls, then choose one coherent policy on the
 neutral block and actual course. No additional menu of motors belongs in the game.
 
+The original air challenger is now the provisional policy for the next actual game
+iteration: speed-neutral directional bending, meaningful fixed-view side correction and
+a small synchronized carve. Its root post-support-fix suite passes; independent challenge,
+frozen block comparison and complete native course evidence remain open. This replaces
+the earlier provisional broad choice, not the preserved controls. The first Overflow
+prototype also needs revision: its diagonal is available from an ordinary W descent,
+saves only 0.30 s overall, and a miss can leave the bay exit behind the runner. Repair the
+approach, merge and recovery, then add one purposeful momentum beat toward a roughly
+25–35 s basic course. Duration is a P design target, not a reason to add empty running.
+
 Use the separate licensed material kit for coherent concrete/steel/brick scale and readable
 landings. Compare presentation on a fixed motor/tape before bundling it into the candidate.
 The finite tape executor provides relative inputs, real sampling boundaries, replay and
