@@ -35,7 +35,7 @@ A new motor inside Godot might be the cheapest way to test the control problem. 
 
 ## Materials
 
-- docs/momentum/BRIEF.md and research/classic-movement.md
+- docs/momentum/BRIEF.md, research/classic-movement.md and research/vholume-and-peers.md
 - scripts/spillway_player.gd, spillway_main.gd, spillway_course.gd
 - tools/visual-play.py, visual-play.gd, visual-play.sh, capture-route.gd
 - docs/surf/RESULTS.md and the preserved R12 report/evidence under the outer build directory
