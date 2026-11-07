@@ -2,7 +2,7 @@
 """end-to-end checks for the momentum tape executor (docs/momentum/TAPE.md).
 
 python3 tests/test_momentum_tape.py [--only GROUP ...] [--evidence DIR]
-groups: units audit smooth replay render30 failure negative realtime cleanup
+groups: units audit smooth replay render30 failure negative realtime cleanup review
 native groups use a private Xvfb display; evidence stays outside the checkout.
 """
 
@@ -279,8 +279,86 @@ def g_cleanup():
     check("hang: display stopped and no owned process left; neutral input not claimed", c["clean"] and c["neutral_input"] == "not observable: engine did not finish", c)
 
 
+def g_review():
+    # disposable motor/game injections reproduce the three independent review faults.
+    variants = evidence / "variants"
+    variants.mkdir(exist_ok=True)
+    reverse = variants / "reverse-vector.gd"
+    reverse.write_text('''extends "res://scripts/momentum_flow_player.gd"
+var saved := Vector3.ZERO
+var restore := false
+func _physics_process(delta: float) -> void:
+    if restore:
+        velocity = saved
+    super(delta)
+    saved = velocity
+    restore = true
+    velocity.x = -velocity.x
+    velocity.z = -velocity.z
+''')
+    plan = mt.expand({"format": mt.FORMAT, "version": 1, "name": "reverse-vector",
+                      "physics_hz": 120, "input_profile": "tick120", "duration_ticks": 40,
+                      "events": [{"tick": 0, "key": "w", "edge": "press"}]})
+    control = run("review-vector-control", plan, fixture="flat", headless=True)
+    broken = run("review-vector-injection", plan, fixture="flat", headless=True, motor_script=reverse)
+    check("vector: injection preserves the control trajectory", [r["post"]["p"] for r in trace(control)] == [r["post"]["p"] for r in trace(broken)])
+    check("vector: real motion has no integrity flag", not control["integrity_flags"], control["integrity_flags"])
+    check("vector: opposite heading with equal speed is caught", "post_velocity_unsupported" in broken["integrity_flags"] and "reported_speed_unsupported" not in broken["integrity_flags"], broken["integrity_flags"])
+
+    reset = variants / "counted-reset.gd"
+    reset.write_text('''extends Node3D
+const MAIN := preload("res://scripts/spillway_main.gd")
+const FIXTURE := preload("res://tools/momentum-tape-fixture.gd")
+var player: CharacterBody3D
+var respawn_count := 0
+var checkpoint_index := 0
+var elapsed := 0.0
+var finished := false
+var finish_kind := ""
+var paused := false
+var calls := 0
+func _ready() -> void:
+    process_physics_priority = 100
+    MAIN.bind_inputs()
+    var fixture := FIXTURE.new()
+    add_child(fixture)
+    fixture.build("flat")
+    player = preload("res://scripts/momentum_flow_player.gd").new()
+    add_child(player)
+    player.reset_to(fixture.spawn)
+func _physics_process(_delta: float) -> void:
+    calls += 1
+    if calls == 11:
+        player.reset_to(Transform3D(Basis.IDENTITY, Vector3(50, 0.02, 20)))
+        respawn_count += 1
+''')
+    no_input = mt.expand({"format": mt.FORMAT, "version": 1, "name": "counted-reset",
+                          "physics_hz": 120, "input_profile": "tick120", "duration_ticks": 24, "events": []})
+    report = run("review-reset", no_input, game_script=reset, game_class="", headless=True)
+    check("reset: discontinuity is retained in raw samples", len(report["movement"]["discontinuities"]) == 1, report["movement"])
+    check("reset: teleport adds no travel or peak speed", report["outcome"]["travel_m"] == 0 and report["outcome"]["max_displacement_m_s"] == 0, report["outcome"])
+    meta = json.loads((Path(report["run"]) / "run.json").read_text())
+    check("reset: external game variant is hashed", "game_variant" in meta["source"]["manifest"])
+
+    real_engine = mt.GODOT
+    fake = variants / "non-executable-engine"
+    fake.write_text("#!/bin/sh\nexit 0\n")
+    fake.chmod(0o600)
+    handlers = {s: signal.getsignal(s) for s in (signal.SIGINT, signal.SIGTERM)}
+    try:
+        mt.GODOT = fake
+        failed = run("review-launch-failure", no_input, display=159, wall_budget=5, deadline=8)
+        folder = Path(failed["run"])
+        check("launch failure: exception and provenance are recorded", failed["end"].get("reason") == "launch_failed" and (folder / "run.json").exists() and (folder / "evaluator/cleanup.json").exists(), failed)
+        check("launch failure: private display and owned processes cleaned", failed["cleanup"]["clean"], failed["cleanup"])
+        check("launch failure: signal handlers restored", all(signal.getsignal(s) == h for s, h in handlers.items()))
+        check("launch failure: CLI reports failure", mt.execution_exit(failed) == 2)
+    finally:
+        mt.GODOT = real_engine
+
+
 GROUPS = {"units": g_units, "audit": g_audit, "smooth": g_smooth, "replay": g_replay, "render30": g_render30,
-          "failure": g_failure, "negative": g_negative, "realtime": g_realtime, "cleanup": g_cleanup}
+          "failure": g_failure, "negative": g_negative, "realtime": g_realtime, "cleanup": g_cleanup, "review": g_review}
 
 
 def main():

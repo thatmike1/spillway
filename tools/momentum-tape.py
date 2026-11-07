@@ -239,6 +239,8 @@ def execute(plan, out, cfg):
     extra = {"executor_variant": executor} if executor != EXECUTOR else {}
     if cfg.get("motor_script"):
         extra["motor_variant"] = Path(cfg["motor_script"]).resolve()
+    if cfg.get("game_script") and not str(cfg["game_script"]).startswith("res://"):
+        extra["game_variant"] = Path(cfg["game_script"]).resolve()
     run_id = uuid.uuid4().hex
     headless = cfg.get("headless", False)
     timing = cfg.get("timing", "fixed")
@@ -274,33 +276,41 @@ def execute(plan, out, cfg):
     markers = [run_id]
     cleanup = {}
     started = time.monotonic()
-    if not headless:
-        display = free_display(int(cfg.get("display", 153)))
-        markers.append(f"Xvfb :{display} ")
-        log = open(out / "evaluator/xvfb.log", "wb")
-        xvfb = subprocess.Popen(["Xvfb", f":{display}", "-screen", "0", "1280x720x24", "-nolisten", "tcp", "-noreset"],
-                                stdout=log, stderr=log, start_new_session=True)
-        for _ in range(100):
-            if Path(f"/tmp/.X11-unix/X{display}").exists() or xvfb.poll() is not None:
-                break
-            time.sleep(0.1)
-        if xvfb.poll() is not None:
-            raise RuntimeError(f"Xvfb :{display} failed to start")
-        env["DISPLAY"] = f":{display}"
-    meta["display"] = f":{display}" if display else "headless"
     meta["command"] = args
     cancel = {"requested": None}
+    previous = {}
+    godot = None
+    godot_log = None
+    launch_error = None
+    stage = "display_launch"
 
     def on_signal(signum, _frame):
         cancel["requested"] = cancel["requested"] or signal.Signals(signum).name
 
-    previous = {s: signal.signal(s, on_signal) for s in (signal.SIGINT, signal.SIGTERM)}
-    godot_log = open(out / "evaluator/godot.log", "wb")
-    godot = subprocess.Popen(args, env=env, cwd=str(out / "profile"), stdout=godot_log, stderr=godot_log, start_new_session=True)
-    # p / the wrapper's own deadline sits beyond the executor's wall budget, for engines that hang.
-    deadline = started + float(cfg.get("deadline", float(cfg.get("wall_budget", 120)) + 45))
-    frozen = False
     try:
+        for signum in (signal.SIGINT, signal.SIGTERM):
+            previous[signum] = signal.signal(signum, on_signal)
+        if not headless:
+            display = free_display(int(cfg.get("display", 153)))
+            markers.append(f"Xvfb :{display} ")
+            with open(out / "evaluator/xvfb.log", "wb") as log:
+                xvfb = subprocess.Popen(["Xvfb", f":{display}", "-screen", "0", "1280x720x24", "-nolisten", "tcp", "-noreset"],
+                                        stdout=log, stderr=log, start_new_session=True)
+            stage = "display_ready"
+            for _ in range(100):
+                if Path(f"/tmp/.X11-unix/X{display}").exists() or xvfb.poll() is not None:
+                    break
+                time.sleep(0.1)
+            if xvfb.poll() is not None or not Path(f"/tmp/.X11-unix/X{display}").exists():
+                raise RuntimeError(f"Xvfb :{display} failed to become ready")
+            env["DISPLAY"] = f":{display}"
+        stage = "engine_launch"
+        godot_log = open(out / "evaluator/godot.log", "wb")
+        godot = subprocess.Popen(args, env=env, cwd=str(out / "profile"), stdout=godot_log, stderr=godot_log, start_new_session=True)
+        # p / the wrapper's deadline also covers engines that never acknowledge a cancel.
+        deadline = started + float(cfg.get("deadline", float(cfg.get("wall_budget", 120)) + 45))
+        frozen = False
+        stage = "running"
         while godot.poll() is None:
             now = time.monotonic()
             if cfg.get("cancel_after") and now - started > float(cfg["cancel_after"]):
@@ -322,24 +332,36 @@ def execute(plan, out, cfg):
                 break
             time.sleep(0.05)
         godot.wait(30)
+    except (Exception, KeyboardInterrupt) as error:
+        launch_error = {"stage": stage, "type": type(error).__name__, "message": str(error)}
+        cleanup["exception"] = launch_error
     finally:
         for s, handler in previous.items():
             signal.signal(s, handler)
-        godot_log.close()
-        cleanup["engine_exit"] = godot.returncode
-        if godot.poll() is None or owned_leftovers([run_id]):
+        if godot_log is not None:
+            godot_log.close()
+        if godot is not None and godot.poll() is None:
+            cleanup["engine_forced"] = stop_group(godot, 5)
+        if godot is not None and owned_leftovers([run_id]):
             try:
                 os.killpg(godot.pid, signal.SIGKILL)
             except ProcessLookupError:
                 pass
+        cleanup["engine_exit"] = godot.returncode if godot is not None else None
         if xvfb is not None:
             cleanup["display"] = stop_group(xvfb, 5)
             cleanup["display_socket_removed"] = not Path(f"/tmp/.X11-unix/X{display}").exists()
             cleanup["display_lock_removed"] = not Path(f"/tmp/.X{display}-lock").exists()
         cleanup["leftover_owned_processes"] = owned_leftovers(markers)
         cleanup["wall_s"] = time.monotonic() - started
+    meta["display"] = f":{display}" if display else "headless"
     end_path = out / "end.json"
     end = json.loads(end_path.read_text()) if end_path.exists() else {"reason": "no end record (engine killed)", "neutral": None}
+    if launch_error is not None:
+        meta["wrapper_error"] = launch_error
+        if not end_path.exists():
+            end = {"reason": "launch_failed" if stage != "running" else "wrapper_failed", "neutral": None, "error": launch_error}
+            end_path.write_text(json.dumps(end, indent=1))
     cleanup["neutral_input"] = end.get("neutral") if end.get("neutral") is not None else "not observable: engine did not finish"
     cleanup["clean"] = not cleanup["leftover_owned_processes"] and (xvfb is None or cleanup["display_socket_removed"])
     (out / "evaluator/cleanup.json").write_text(json.dumps(cleanup, indent=1))
@@ -527,7 +549,7 @@ def evaluate(run_dir):
     hard = []
     for t in ticks:
         before = [disp.get(t - k) for k in (3, 4, 5, 6)]
-        if None not in before and sum(before) / 4 > 4.0 and disp[t] < 0.5 and (walls[t] or walls.get(t - 1)) and t not in jumps:
+        if None not in before and not any(t - k in jumps for k in (3, 4, 5, 6)) and sum(before) / 4 > 4.0 and disp[t] < 0.5 and (walls[t] or walls.get(t - 1)) and t not in jumps:
             if not hard or t - hard[-1]["tick"] > 30:
                 hard.append({"tick": t, "sim_s": t * dt, "approach_m_s": sum(before) / 4, "after_m_s": disp[t],
                              "p": by_tick[t]["post"]["p"], "contacts": walls[t] or walls.get(t - 1)})
@@ -535,6 +557,15 @@ def evaluate(run_dir):
     def mismatch(values):
         bad = [t for t in ticks if t not in jumps and abs(values[t] - disp[t]) > max(1.0, 0.25 * max(values[t], disp[t]))]
         return [{"from_tick": a, "to_tick": b, "reported_m_s": values[a], "displacement_m_s": disp[a]} for a, b in runs(bad, 30)]
+
+    # p / horizontal vectors, not only their lengths: opposite headings at equal speed
+    # must fail too. vertical support motion is deliberately outside this check's scope.
+    vector_error = {t: math.hypot(by_tick[t]["post"]["v"][0] - by_tick[t]["post"]["disp_v"][0],
+                                by_tick[t]["post"]["v"][2] - by_tick[t]["post"]["disp_v"][2]) for t in ticks}
+    vector_bad = [t for t in ticks if t not in jumps and vector_error[t] > max(1.0, 0.25 * max(vpost[t], disp[t]))]
+    vector_mismatches = [{"from_tick": a, "to_tick": b, "error_m_s": vector_error[a],
+                          "post_velocity": by_tick[a]["post"]["v"],
+                          "displacement_velocity": by_tick[a]["post"]["disp_v"]} for a, b in runs(vector_bad, 30)]
 
     frames = read_jsonl(run_dir / "evaluator/frames.jsonl") if (run_dir / "evaluator/frames.jsonl").exists() else []
     detached = []
@@ -562,13 +593,14 @@ def evaluate(run_dir):
         "stuck_windows": [{"from_tick": a, "to_tick": b, "contacts": sorted({x for t in range(a, b + 1) for x in walls[t]})} for a, b in stuck],
         "contact_hard_stops": hard,
         "reported_speed_unsupported": mismatch(reported),
-        "post_velocity_unsupported": mismatch(vpost),
+        "post_velocity_unsupported": vector_mismatches,
         "camera_detached_draws": detached[:50],
         "jump_presses": jump_results,
         "discontinuities": sorted(jumps),
     }
     flags = [name for name in ["stuck_windows", "contact_hard_stops"] if movement[name]]
     integrity = [name for name in ["reported_speed_unsupported", "post_velocity_unsupported", "camera_detached_draws"] if movement[name]]
+    travel_ticks = [t for t in ticks if t not in jumps]
     return {
         "run": str(run_dir), "tape": plan["name"], "world": engine["world"], "start": engine["start"], "motor": engine["motor"],
         "profile": plan["input_profile"], "inject": engine["inject"], "sensitivity": engine["settings"],
@@ -582,7 +614,9 @@ def evaluate(run_dir):
                            "because unchanged positions alone cannot detect a skipped or repeated stationary step"},
         "movement_flags": flags, "integrity_flags": integrity, "movement": movement, "timing": timing,
         "outcome": {"ticks": len(tape), "start_p": first, "end_p": last,
-                    "travel_m": sum(disp.values()) * dt, "max_displacement_m_s": max(disp.values(), default=0.0),
+                    "travel_m": sum(disp[t] for t in travel_ticks) * dt,
+                    "max_displacement_m_s": max((disp[t] for t in travel_ticks), default=0.0),
+                    "travel_excludes_discontinuities": True,
                     "end_yaw": tape[-1]["post"]["yaw"] if tape else None, "jumps": tape[-1]["post"]["jumps"] if tape else 0,
                     "respawns": tape[-1].get("game", {}).get("respawns")},
     }
@@ -759,6 +793,11 @@ def summary(report):
     return s
 
 
+def execution_exit(report):
+    end = report.get("end")
+    return 2 if isinstance(end, dict) and end.get("reason") in {"launch_failed", "wrapper_failed"} else 0
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -789,10 +828,14 @@ def main():
     if args.command == "expand":
         print(json.dumps(expand(json.loads(args.tape.read_text())), indent=1))
     elif args.command == "run":
-        print(json.dumps(summary(execute(expand(json.loads(args.tape.read_text())), args.out, run_config(args))), indent=1))
+        report = execute(expand(json.loads(args.tape.read_text())), args.out, run_config(args))
+        print(json.dumps(summary(report), indent=1))
+        return execution_exit(report)
     elif args.command == "replay":
         tape = applied_tape(args.source)
-        print(json.dumps(summary(execute(expand(tape), args.out, run_config(args))), indent=1))
+        report = execute(expand(tape), args.out, run_config(args))
+        print(json.dumps(summary(report), indent=1))
+        return execution_exit(report)
     elif args.command == "evaluate":
         print(json.dumps(evaluate(args.run), indent=1))
     elif args.command == "compare":

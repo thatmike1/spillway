@@ -58,6 +58,7 @@ Each run writes to a fresh directory under `checkpoints/spillway/r13/tape-execut
 - `actor/`: sampled native frames named by sequence and simulated time, `manifest.json` (sequence, file, sim time only) and a contact sheet. The game's own HUD is the only visible feedback.
 - `evaluator/`: `plan.json` (expanded submitted tape), `trace.jsonl` (per tick: applied events with application point and wall time, pre/post position, post velocity, `get_real_velocity`, `get_position_delta`, finite-difference displacement, reported speed, mode, contacts, camera, observed held/just-pressed actions, ordering proof, simulation and wall timestamps), `frames.jsonl` (per drawn frame: physics step, last tick, wall time, camera and feet), `engine.json`, `report.json`, `cleanup.json`, `godot.log`.
 - `movie.avi`: Godot's own `--write-movie` MJPEG. Movie frame i is the i-th `frame_post_draw` since the executor started. Frames after the end record are the lab's 8-frame quit tail.
+- Engine metadata separates `motor_requested` from the runner's `air_policy` or `air_profile` when exposed, and always records its script path. A generic factory argument is not treated as proof of the policy actually instantiated.
 - `run.json`: run id, config, plan hash, engine binary hash, wrapper and executor hashes, renderer/adapter/display/viewport, timing mode, input profile, sensitivity, and the source identity. The source identity covers mode (**source checkout via `godot --path`, not a frozen pack**), git HEAD, dirty flag, porcelain status, a diff hash plus `source/git-diff.patch`, and a per-file manifest of scripts, shaders, scenes, data, `project.godot` and the tape tools, with copies under `source/`. The `.godot/` import cache is not hashed.
 
 The actor/evaluator split is a directory convention. It is not filesystem isolation, and frames-only output does not by itself establish pixel-only discovery: anything that can read the run directory can read the telemetry.
@@ -69,8 +70,8 @@ Each category is a separate result field; none of them is folded into an overall
 - **Delivery** (input reached the game as planned): applied keys versus plan per tick; observed held set versus plan; each edge visible to the motor on its tick; the mouse event's `relative`/`screen_relative` versus plan; view change equal to `−dx × sensitivity` (pitch clamped); no unplanned view change between ticks; nothing still pressed after the neutral release; no undelivered events.
 - **Order**: the checks above, contiguous samples, and the motor's body yaw following the view. A counter delta other than one fails when the motor exposes a counter; without one, the weaker state/priority check is labelled explicitly.
 - **Movement** (from actual finite-difference displacement, never from reported speed): `stuck_windows` (movement keys held at least 0.5 s with under 0.25 m/s horizontal displacement), `contact_hard_stops` (over 4 m/s approach to under 0.5 m/s on a wall contact), and jump presses with the tick each one fired.
-- **Integrity**: `reported_speed_unsupported` and `post_velocity_unsupported` (the motor's speed report or post velocity disagreeing with displacement for at least 0.25 s), and `camera_detached_draws`.
-- Respawns are marked as discontinuities rather than travel. `timing` reports wall time against simulated time. Under `--fixed-fps` that is compute cost, not latency.
+- **Integrity**: `reported_speed_unsupported` checks horizontal speed magnitude; `post_velocity_unsupported` checks the horizontal velocity vector, including direction, against actual displacement for at least 0.25 s. Vertical support motion is outside that vector check. `camera_detached_draws` checks the camera/body relationship.
+- Respawns are marked as discontinuities and excluded from travel totals, peak displacement speed and hard-stop approach samples. Raw reset samples remain in the trace. `timing` reports wall time against simulated time. Under `--fixed-fps` that is compute cost, not latency.
 
 ## Commands
 
@@ -95,6 +96,7 @@ Native runs use a private Xvfb display: `:153`, or the next display from 154 to 
 - Cancellation: the wrapper writes `control/cancel`; the executor checks for it every tick and process frame, releases held keys with ordinary events, verifies nothing is pressed, writes `control/cancel-ack.json` and exits 4.
 - With no acknowledgement in time, the wrapper sends SIGTERM and then SIGKILL to **only its own engine process group**, then stops its own Xvfb group. It verifies that the display socket and lock are gone and that no process carries the run id or display marker. A killed engine is reported as "neutral input not observable", not as neutral.
 - The normal end does the same neutral release. Paused planning, a live chunk queue and a network client are deferred. **Disconnect is not implemented** because no live client exists, so it is not tested.
+- Display acquisition and engine launch share cleanup coverage. Failed launches retain `run.json`, `end.json` and `cleanup.json`, with the failed stage, exception and source/command provenance. CLI run/replay exits 2 for a launch or wrapper exception. An engine that never started has no observed neutral-input state.
 
 ## Hook for a future controller or game
 
