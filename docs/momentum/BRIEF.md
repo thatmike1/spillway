@@ -1,0 +1,15 @@
+# Spillway movement, 7 November
+
+Mike played R12 and remains unsatisfied with movement and momentum. He asks for broad research and continued development. VHOLUME is a reference he enjoyed, alongside Counter-Strike bhop movement. He explicitly permits an original implementation, dropping surf, and external assets/textures wherever they advance the game. This direction supersedes R12's mandatory surf and Source-reconstruction acceptance. Passing R12's numbers did not establish satisfactory feel.
+
+Keep the original sunlit dam as a useful setting, the working native pipeline, free mouse look, restart/practice, records and recoverable mistakes. Godot 4.7.2 remains the current tool; an engine rewrite needs a demonstrated benefit. R12 stays available as an immutable comparison, with its complete evidence intact. New experiments and any eventual delivery use a distinct identity.
+
+Research several approaches before choosing. Include Quake/Source families, VHOLUME and contrasting modern movement games, and the actual local controller/collision behavior. Use primary sources and observed footage; distinguish documented facts, measurements and inferred design. Do not invent a reference game's constants. Reimplement ideas in original code; do not paste engine or commercial game code into the project.
+
+Movement is the priority. Evaluate how ordinary input starts, changes direction, carries earned speed, brakes, hops, lands, slides and recovers from a poor approach. A useful skill ceiling must coexist with an enjoyable basic line. Surf is optional and may disappear. Do not preserve a mechanic solely because an old test or bot uses it. Treat values and design choices as P hypotheses.
+
+Build materially different playable experiments and compare them against the retained R12 motor. Use imperfect keyboard/mouse sequences as well as precise drivers. Inspect native moving views: acceleration and turning, slopes, gaps, contact, recovery, and the finish. Choose a coherent movement policy, then author the route around that policy. Avoid solving control problems through a perfect state-aware bot or constant speed inflation.
+
+External materials, models and audio are welcome when their licence permits redistribution. Keep source URLs, licences, hashes and changes with adopted assets. Use a coherent, affordable set that communicates surface scale, contact and motion. Preserve the dam's readable concrete, brick, steel and water identity unless a concrete alternative proves stronger. Decorative density must not hide the route or consume the movement work.
+
+Deliver an actual improved playable build, a concise account of the chosen movement and rejected experiments, current Linux/Windows packages and controls, rendered verification and explicit remaining weaknesses. Preserve meaningful collision, free-look, restart and persistence checks; adapt or retire obsolete surf/route assertions with reasons. Commit coherent task changes on feat/foldrunner-me-build with ccChat-general-rowb subjects and push. Mike decides whether the result is fun. No request for a live human review is needed to keep working.
