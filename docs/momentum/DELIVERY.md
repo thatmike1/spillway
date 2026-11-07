@@ -113,7 +113,8 @@ Linux, the shipped binary and pack:
    kit textures and kit props. The OS window title is read with `xprop`.
 3. With a tape (`play`, fresh profile): key and relative-mouse events through `Input` at the tape
    executor's tick boundaries; like the executor, tick 0 opens a render frame once the motor has
-   run at least the reference's warmup (the frame phase matters, see below).
+   run at least the reference's warmup. Initialization and exact warmup can affect contact
+   resolution, as the independent review below demonstrates.
    Required: clean finish, stages in order, every stage measured, zero respawns, first clean run
    becomes best/open best/splits, saved to `spillway_r13.cfg` (the only `.cfg` written), the
    packed trace equal to the source executor's tick for tick (position exactly, yaw within 1e-12
@@ -205,11 +206,17 @@ Evidence and the resumable log are outside Git in `checkpoints/spillway/r13/deli
   - a packed release run armed so tick 0 opens a render frame (as the executor arms): 0.0 m
     against the source over all ticks.
 
-  The aligned pack and release runtime reproduce source motion exactly. The worker attributes
-  the earlier discrepancy to render-frame phase, but did not isolate neutral warmup duration,
-  render queries or other initialization state. These runs do not establish its effect under
-  real variable frame rates. Root is opening a bounded independent diagnosis before accepting
-  an engine or controller cause. The probe arms like the executor; tolerance stays 0.0 m.
+  The aligned pack and release runtime reproduce source motion exactly. The subsequent
+  independent review reproduced both historical trajectories in source mode by changing
+  world construction timing, with the same ten neutral motor steps and identical recorded
+  initial script state. Controlled process-cadence and tape-phase changes preserved exact
+  motion. A different neutral warmup can also change the trajectory. Render phase is not
+  established as the cause, and the engine-internal mechanism remains unresolved. All
+  twenty valid cases finished at 24.892 s with identical splits and zero respawns. The
+  maximum observed body-position difference was 1.70 cm; this is not a general guarantee
+  near other edges. No production physics change or relaxed tolerance follows. Evidence:
+  outer `checkpoints/spillway/r13/phase-review-sol/REPORT.md` and root's `ROOT-CHECK.json`.
+  The probe arms like the executor; tolerance stays 0.0 m.
 - **Source suites.** `check-overflow.sh --controls --route <ordinary tape>` in a clone of the
   scratch repo: all active checks and both controls pass, route clean 24.892 s.
 - **Negative controls.** Preflight refuses wrong default scene, wrong build id, R12 records
