@@ -23,6 +23,7 @@ const PROFILE_FORMAT := 1
 ## p / bump when what counts as a finish, a split or a clean run changes.
 const TIMING_RULES := "r13-timing-1"
 const LEVEL := preload("res://scripts/momentum_overflow_level.gd")
+const ART := preload("res://scripts/momentum_overflow_art.gd")
 const RUNNER := preload("res://scripts/momentum_carry_air_candidate.gd")
 const HUD := preload("res://scripts/momentum_overflow_hud.gd")
 const AUDIO := preload("res://scripts/momentum_overflow_audio.gd")
@@ -137,6 +138,7 @@ func _build_world() -> void:
 	level.name = "Spillway"
 	add_child(level)
 	level.call("build")
+	ART.apply(level)
 	player = RUNNER.new()
 	# the carry base needs a profile name before it enters the tree; the candidate law ignores it.
 	player.set("air_profile", "broad")
