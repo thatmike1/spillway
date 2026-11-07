@@ -1,0 +1,19 @@
+{
+ "format": "spillway-momentum-tape",
+ "version": 1,
+ "name": "flat-strafe-turn",
+ "description": "flat fixture calibration and negative-control tape: run, an A strafe hold, a left turn with a little pitch, a right correction. every edge is checked against the motor's own tick.",
+ "physics_hz": 120,
+ "input_profile": "tick120",
+ "duration_ticks": 240,
+ "events": [
+  {"tick": 0, "key": "w", "edge": "press"},
+  {"tick": 60, "key": "a", "edge": "press"},
+  {"tick": 120, "key": "a", "edge": "release"},
+  {"tick": 200, "key": "w", "edge": "release"}
+ ],
+ "curves": [
+  {"kind": "mouse", "start": 30, "ticks": 60, "total": [-200, 30], "shape": "smooth"},
+  {"kind": "mouse", "start": 130, "ticks": 40, "total": [150, -30], "shape": "smooth"}
+ ]
+}

@@ -1,0 +1,13 @@
+{
+ "format": "spillway-momentum-tape",
+ "version": 1,
+ "name": "step-face-press",
+ "description": "step fixture: hold W into the 0.7 m step face and keep pushing. the body is pinned; any speed report must agree with the real displacement.",
+ "physics_hz": 120,
+ "input_profile": "tick120",
+ "duration_ticks": 480,
+ "events": [
+  {"tick": 0, "key": "w", "edge": "press"},
+  {"tick": 460, "key": "w", "edge": "release"}
+ ]
+}

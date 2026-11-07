@@ -1,0 +1,103 @@
+{
+ "format": "spillway-momentum-tape",
+ "version": 1,
+ "name": "render30-batches",
+ "description": "the old visual-play helper's input cadence: held-key batches with a constant per-render-sample mouse step, changing only at 30 Hz render boundaries (every 4th physics tick). it reproduces that cadence, not the helper's pauses between batches.",
+ "physics_hz": 120,
+ "input_profile": "render30",
+ "duration_ticks": 348,
+ "events": [
+  {
+   "tick": 0,
+   "key": "w",
+   "edge": "press"
+  },
+  {
+   "tick": 48,
+   "key": "a",
+   "edge": "press"
+  },
+  {
+   "tick": 108,
+   "key": "a",
+   "edge": "release"
+  },
+  {
+   "tick": 144,
+   "key": "space",
+   "edge": "press"
+  },
+  {
+   "tick": 168,
+   "key": "space",
+   "edge": "release"
+  },
+  {
+   "tick": 240,
+   "key": "d",
+   "edge": "press"
+  },
+  {
+   "tick": 288,
+   "key": "w",
+   "edge": "release"
+  },
+  {
+   "tick": 288,
+   "key": "d",
+   "edge": "release"
+  }
+ ],
+ "curves": [
+  {
+   "kind": "mouse",
+   "start": 0,
+   "ticks": 48,
+   "total": [
+    -80,
+    0
+   ],
+   "shape": "linear"
+  },
+  {
+   "kind": "mouse",
+   "start": 48,
+   "ticks": 60,
+   "total": [
+    -120,
+    10
+   ],
+   "shape": "linear"
+  },
+  {
+   "kind": "mouse",
+   "start": 144,
+   "ticks": 24,
+   "total": [
+    60,
+    0
+   ],
+   "shape": "linear"
+  },
+  {
+   "kind": "mouse",
+   "start": 168,
+   "ticks": 72,
+   "total": [
+    140,
+    -10
+   ],
+   "shape": "linear"
+  },
+  {
+   "kind": "mouse",
+   "start": 240,
+   "ticks": 48,
+   "total": [
+    -40,
+    0
+   ],
+   "shape": "linear"
+  }
+ ]
+}
