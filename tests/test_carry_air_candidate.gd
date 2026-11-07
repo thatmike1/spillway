@@ -6,7 +6,7 @@ extends SceneTree
 ## same fixtures and tapes. gates are what AIR-CANDIDATE.md claims; findings are measurements
 ## for review. each claim is also run on a policy it should reject, and must reject it.
 ## godot --headless --fixed-fps 120 --path . --script res://tests/test_carry_air_candidate.gd --
-##   [--out=DIR] [--only=fixed,look,mouse,cadence,farm,brake,correct,mirror,game,reject]
+##   [--out=DIR] [--only=fixed,look,mouse,cadence,farm,brake,correct,mirror,game,coherence,reject]
 
 const MAIN := preload("res://scripts/spillway_main.gd")
 const CARRY := preload("res://scripts/momentum_carry_player.gd")
@@ -18,7 +18,7 @@ const ACTIONS := {"w": "move_forward", "a": "move_left", "s": "move_back", "d": 
 const DT := 1.0 / 120.0
 const PX := 0.0022
 const POLICIES := ["candidate", "broad", "narrow"]
-const GROUPS := ["fixed", "look", "mouse", "cadence", "farm", "brake", "correct", "mirror", "game", "reject"]
+const GROUPS := ["fixed", "look", "mouse", "cadence", "farm", "brake", "correct", "mirror", "game", "coherence", "reject"]
 const RATES := [0.3, 0.75, 1.5, 3.0, 6.0]
 
 signal episode_done
@@ -414,6 +414,34 @@ func group_fixed() -> void:
 					check(r, "s with a side key still brakes and still bends", gain < -2.5 and trace[-1].post.x < -1.0, "gain %.3f, lateral %.3f" % [gain, trace[-1].post.x], policy == "candidate")
 		var r := finish({"a": lateral.a, "d": lateral.d}, "fixed_mirror_%s" % policy)
 		check(r, "a and d are mirror images", absf(lateral.a + lateral.d) < 1e-4, "a %.5f, d %.5f" % [lateral.a, lateral.d], policy == "candidate")
+
+func group_coherence() -> void:
+	# p / hostile seeded orientations from the independent review; these are not route claims.
+	for keys: String in ["a", "w", "wa"]:
+		var wish_heading := PI * 0.5 if keys == "a" else (PI * 0.25 if keys == "wa" else 0.0)
+		for speed: float in [3.0, 8.49, 8.51]:
+			var tape := keys_tape(keys)
+			for key: String in keys:
+				tape.append([96, key, false])
+			var seed := along(wish_heading + PI, speed)
+			var trace := await run("opposed_%s_%.2f" % [keys, speed], {"pose": yaw_pose(Vector3(0, 180, 0), 0.0), "seed": seed, "ticks": 120, "tape": tape})
+			var slowest := INF
+			var forward := INF
+			for row: Dictionary in trace:
+				slowest = minf(slowest, hs(actual(row)))
+				forward = minf(forward, actual(row).dot(seed.normalized()))
+			var result := finish({"start_speed": speed, "slowest": slowest, "forward": forward})
+			check(result, "opposing steering cannot brake or reverse below the run threshold", slowest >= speed - 0.005 and forward > 0.0, "slowest %.5f, along original %.5f" % [slowest, forward])
+	for wait: int in [6, 360]:
+		var release := wait + (3 if wait == 6 else 60)
+		var tape: Array = [[0, "a", true], [0, "mouse", -0.3 / PX], [wait, "w", true], [release, "w", false]]
+		var trace := await run("stale_turn_%d" % wait, {"pose": yaw_pose(Vector3(0, 180, 0), 0.0), "seed": along(2.0, 13.0), "ticks": release + 100, "tape": tape})
+		var result := finish({"bank_on_w": trace[wait].state.carve_bank, "bank_after_w": trace[release].state.carve_bank, "gain": trace[-1].state.carve_total})
+		check(result, "changing forward intent starts a fresh carve", absf(result.metrics.bank_on_w) < 0.00001 and absf(result.metrics.bank_after_w) < 0.00001, str(result.metrics))
+		check(result, "an earlier view turn cannot pay a later steering phase", result.metrics.gain < 0.00001, str(result.metrics.gain))
+	var trace := await run("unspent_turn_expires", {"pose": yaw_pose(Vector3(0, 180, 0), 0.0), "seed": along(2.0, 13.0), "ticks": 60, "tape": [[0, "a", true], [0, "mouse", -0.3 / PX]]})
+	var result := finish({"bank_after_half_second": trace[-1].state.carve_bank})
+	check(result, "unspent positive view credit expires without a key change", result.metrics.bank_after_half_second <= 0.00001, str(result.metrics.bank_after_half_second))
 
 func group_look() -> void:
 	# no keys while the view turns 90 degrees left and 120 back right: the flight ignores it.

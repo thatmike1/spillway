@@ -31,6 +31,8 @@ const AIR := {
 	# the view turn a carve can hold in reserve, and the opposite turn it can owe (rad). the
 	# reserve makes the pay independent of how the mouse delivers the same turn.
 	"carve_bank": 0.6,
+	# positive synchronization credit lives for at most 0.1 s; counterturns cancel reuse.
+	"carve_memory": 0.1,
 	# s brakes the part of travel along the view (m/s^2) and never reverses it.
 	"brake": 5.0,
 	# below run speed any held key can bring a flight up to it, so held hops from rest get
@@ -49,6 +51,9 @@ var carve_total: float = 0.0
 var _view_prev: float = 0.0
 var _carve_bank: float = 0.0
 var _carve_side: int = 0
+var _carve_forward: int = 0
+var _carve_history: Array[Vector2] = []
+var _carve_debt: float = 0.0
 var _air_tick: int = -2
 var _view_turn: float = 0.0
 
@@ -57,6 +62,9 @@ func reset_to(pose: Transform3D) -> void:
 	_view_prev = yaw
 	_carve_bank = 0.0
 	_carve_side = 0
+	_carve_forward = 0
+	_carve_history.clear()
+	_carve_debt = 0.0
 	_air_tick = -2
 	carve_total = 0.0
 
@@ -77,14 +85,24 @@ func _carry_air(h: Vector3, stick: Vector2, delta: float) -> Vector3:
 		# any ground step ends a carve.
 		_carve_bank = 0.0
 		_carve_side = 0
+		_carve_forward = 0
+		_carve_history.clear()
+		_carve_debt = 0.0
 	_air_tick = motion_tick
 	var key_side := 0 if absf(side) <= 0.05 else (1 if side < 0.0 else -1)
-	if key_side != _carve_side:
+	var key_forward := 0 if absf(push) <= 0.05 else (1 if push > 0.0 else -1)
+	if key_side != _carve_side or key_forward != _carve_forward:
 		_carve_bank = 0.0
+		_carve_history.clear()
+		_carve_debt = 0.0
 		_carve_side = key_side
+		_carve_forward = key_forward
+	_age_carve(delta)
 	var bank: float = air_tuning.carve_bank
 	if key_side != 0:
-		_carve_bank = clampf(_carve_bank + _view_turn * key_side, -bank, bank)
+		var credit := clampf(_carve_bank + _view_turn * key_side, -bank, bank) - _carve_bank
+		if credit != 0.0:
+			_add_carve(credit)
 	var current := h
 	var wish := forward * maxf(push, 0.0) + right * side
 	var amount := minf(wish.length(), 1.0)
@@ -92,7 +110,11 @@ func _carry_air(h: Vector3, stick: Vector2, delta: float) -> Vector3:
 		var wish_dir := wish.normalized()
 		var speed := current.length()
 		if speed < air_tuning.floor:
-			current = _book_step("air_low_push", current, (current + wish_dir * float(air_tuning.push) * amount * delta).limit_length(maxf(speed, air_tuning.floor)))
+			# throttle adds speed along travel, never an opposing vector that brakes or reverses.
+			var direction := current / speed if speed > 0.001 else wish_dir
+			var throttle := maxf(direction.dot(wish_dir), 0.0)
+			var faster := minf(air_tuning.floor, speed + float(air_tuning.push) * amount * throttle * delta)
+			current = _book_step("air_low_push", current, direction * faster)
 			speed = current.length()
 		if speed > 0.05:
 			var angle := (current / speed).signed_angle_to(wish_dir, Vector3.UP)
@@ -106,7 +128,7 @@ func _carry_air(h: Vector3, stick: Vector2, delta: float) -> Vector3:
 			if key_side != 0 and turn * key_side > 0.0:
 				var used := absf(turn) if air_tuning.carve_unsynced else minf(absf(turn), maxf(_carve_bank, 0.0))
 				if used > 0.0:
-					_carve_bank -= used
+					_spend_carve(used)
 					var room := clampf((float(air_tuning.carve_zero) - speed) / (float(air_tuning.carve_zero) - float(air_tuning.carve_full)), 0.0, 1.0)
 					var gain := float(air_tuning.carve) * room * used
 					if gain > 0.0:
@@ -119,6 +141,45 @@ func _carry_air(h: Vector3, stick: Vector2, delta: float) -> Vector3:
 			if opposed > 0.0:
 				current = _book_step("air_brake", current, current * (move_toward(speed, 0.0, float(air_tuning.brake) * opposed * delta) / speed))
 	return current
+
+func _age_carve(delta: float) -> void:
+	_carve_bank = _carve_debt
+	for i: int in range(_carve_history.size() - 1, -1, -1):
+		var sample := _carve_history[i]
+		sample.y += delta
+		if sample.y > float(air_tuning.carve_memory) + 0.000001:
+			_carve_history.remove_at(i)
+		else:
+			_carve_history[i] = sample
+			_carve_bank += sample.x
+
+func _add_carve(turn: float) -> void:
+	if turn > 0.0:
+		# retracing a counterturn pays its debt before it can count as a new carve.
+		var cancel := minf(turn, -_carve_debt)
+		_carve_debt += cancel
+		turn -= cancel
+		_carve_bank += cancel
+		if turn > 0.0:
+			_carve_history.append(Vector2(turn, 0.0))
+			_carve_bank += turn
+	else:
+		var cancel := minf(-turn, maxf(_carve_bank, 0.0))
+		_spend_carve(cancel)
+		_carve_debt += turn + cancel
+		_carve_bank += turn + cancel
+
+func _spend_carve(amount: float) -> void:
+	var remaining := amount
+	for i: int in _carve_history.size():
+		var sample := _carve_history[i]
+		var used := minf(sample.x, remaining)
+		sample.x -= used
+		remaining -= used
+		_carve_history[i] = sample
+		if remaining <= 0.0:
+			break
+	_carve_bank -= amount - remaining
 
 func get_motion_state() -> Dictionary:
 	var state := super()

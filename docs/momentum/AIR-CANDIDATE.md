@@ -49,10 +49,15 @@ Height and clean hops on CARRY's shared ground policy remain the main source of 
   gently and never brakes it. The turn rate is capped at 4 rad/s.
 - **No keys keeps the ballistic line**, so looking around is free.
 - **S brakes** the part of travel along the view at 5 m/s² and never reverses it.
-- **Below run speed** any held key brings a flight up to 8.5 m/s at 6 m/s², never above.
+- **Below run speed** aligned input adds speed along travel at up to 6 m/s², never above
+  8.5 m/s. The alignment scales the throttle. From rest the wish starts the flight; an
+  opposing wish cannot subtract speed or reverse it. Sideways intent still bends the line.
 - **Carve.** A side key held while the view turns its way banks that view turn (net, capped at
-  ±0.6 rad, reset on a key change or any ground step). The flight's bend toward the same side
-  spends the bank and pays 1.0 m/s per radian: in full up to 12 m/s, fading to zero at 16 m/s.
+  ±0.6 rad, reset when side or forward/back intent changes, or on a ground step). Positive
+  credit expires after 0.1 s. Counterturn debt lasts through that same steering phase so
+  retracing a mouse wiggle cannot repeatedly count the same turn. The flight's bend toward
+  the same side spends fresh credit and pays 1.0 m/s per radian: in full up to 12 m/s,
+  fading to zero at 16 m/s.
   The pay depends on how far the view and the flight both turned, not on how the mouse
   delivered the turn. With a fixed view nothing is banked, so nothing is paid.
 
@@ -256,8 +261,32 @@ remain pending. No final game policy or enjoyment claim follows from these check
 
 ## For root
 
-Integrate the three scripts, their UIDs and this document. Rerun the suite and the matrix on
-the patched base. Then compare on Overflow's neutral block and holdouts. The open choice is
-broad / narrow / candidate, with speed-neutral-only as a one-flag variant. The tests show the
-candidate's claims hold and that they discriminate where noted. They do not show that the
-candidate is fun.
+The independent review in `research/air-review-sol.md` found two P2 inconsistencies.
+Root reproduced both with the exported tapes: 3.5-second-old view history paid 0.2169 m/s
+after W changes, and side input reduced 8.49 m/s to 3.69 while 8.51 stayed constant.
+Both are corrected by the rules above. The original broad/narrow controls remain frozen;
+their inherited opposing low-push behavior is documented rather than silently changed.
+
+Root retained a rejected first expiry implementation: forgetting counterturn debt allowed
+the fixed-side wiggle to reach 13.09 m/s. The final version keeps that debt within its
+steering phase and passes the original wiggle check. A new `coherence` group adds 14
+gates on 12 seeded fixture records. It fails 10 gates before and none after. The complete
+suite now passes 56 gates on 146 result records, with the same 21 disclosed findings.
+
+Root also reran 59 independent open-loop tapes: five exported minimal cases, 42 cadence
+and key-edge cases and 12 ordinary block/holdout cases. All 12 ordinary cases finish with
+zero respawns; actual-vector reporting matches finite differences exactly, input delivery
+and motor ordering pass all 22,100 tape ticks, and cleanup is clean. The stale-history and
+no-history controls now have identical final speed with zero carve payout. The low-speed
+3.00/8.49/8.51 cases preserve their initial speed. Cadence variation at 13 m/s remains
+0.0101 m/s across polling schedules with identical key edges. Evidence and the rejected
+trial are in `checkpoints/spillway/r13/air-review-sol/root-fix/` outside Git.
+
+These results address the two defects. They do not prove forgiving recovery: the independent
+review's rough approaches and several holdout recovery tapes still failed. The revised
+course needs its own off-line recovery and complete native acceptance on the corrected
+body. Existing native captures in the review predate this correction.
+
+The challenger remains the provisional game policy, with broad and narrow preserved as
+controls. The next acceptance is the revised actual course: useful lines, off-line
+recovery, complete rendered play and its final delivery. These tests do not establish fun.
