@@ -51,6 +51,9 @@ zips, outside Git. README controls are copied from the committed HUD's `CONTROLS
 
 Records stay in `user://spillway_r13.cfg` under the Godot user data folder named by
 `config/name` ("Spillway"); R12's `spillway_r12.cfg` is only read for first-launch settings.
+The current R13 checker requires the adopted art module, its applied report and the
+visible course's `momentum_overflow_surface.gdshader`, using the licensed kit textures.
+Finding the old shader only in a hidden node or in the resource cache cannot satisfy it.
 
 ## Commands
 

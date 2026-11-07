@@ -9,9 +9,9 @@ extends Node
 ## and, with a tape, a real key and relative-mouse run through Input. tape delivery follows
 ## tools/momentum-tape.gd: key edges for tick N at the end of step N-1, mouse motion early in
 ## step N. like the executor, tick 0 is the first physics step after a render frame, once the
-## motor has run at least the executor's warmup (read from its trace). the frame phase matters:
-## measured on the overflow course, tick 0 one step off a frame boundary drifts up to 17 mm from
-## the same tape. it never writes pose, velocity, progress or records, never calls the finish,
+## motor has run at least the executor's warmup (read from its trace). two different arming
+## schedules drifted up to 17 mm on this course; their precise cause is still under review.
+## it never writes pose, velocity, progress or records, never calls the finish,
 ## and leaves through Esc and a click on the pause panel's Quit.
 ## spec: -- --pack-probe=/abs/spec.json, written by package-overflow.py.
 
@@ -215,7 +215,9 @@ func _check_world() -> void:
 	_scan(game.get("level"), shaders, textures, props)
 	report["world"] = {"shaders": shaders.keys(), "textures": textures.keys(), "props": props.keys()}
 	var kit := str(expect.get("material_shader", ""))
-	check("course uses the kit surface shader", shaders.has(kit), shaders.keys())
+	check("course draws the adopted surface shader", shaders.has(kit), shaders.keys())
+	var art: Dictionary = game.get("level").get_meta("overflow_art", {})
+	check("course art was applied", bool(art.get("applied", false)), art)
 	var prefix := str(expect.get("asset_prefix", ""))
 	var kit_textures := textures.keys().filter(func(p: String) -> bool: return p.begins_with(prefix))
 	check("course textures come from the licensed kit", not kit_textures.is_empty(), kit_textures.size())
@@ -227,7 +229,7 @@ func _scan(node: Node, shaders: Dictionary, textures: Dictionary, props: Diction
 		return
 	if node.scene_file_path != "":
 		props[node.scene_file_path] = true
-	if node is GeometryInstance3D:
+	if node is GeometryInstance3D and (node as GeometryInstance3D).is_visible_in_tree():
 		var materials: Array = [(node as GeometryInstance3D).material_override]
 		if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
 			var mesh := (node as MeshInstance3D).mesh

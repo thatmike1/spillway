@@ -55,10 +55,11 @@ EXPECT = {'build': BUILD, 'main_scene': MAIN_SCENE, 'main_script': MAIN_SCRIPT, 
           'hud_script': 'res://scripts/momentum_overflow_hud.gd', 'audio_script': 'res://scripts/momentum_overflow_audio.gd',
           'hud_required': ['SPILLWAY', 'OVERFLOW  ·  R13'], 'hud_forbidden': ['R12', 'surf', 'debug'],
           'pack_forbidden_prefixes': ['res://tests/', 'res://tools/', 'res://docs/', 'res://builds/'],
-          'material_shader': 'res://shaders/momentum_surface.gdshader', 'asset_prefix': 'res://assets/momentum/'}
+          'art_script': 'res://scripts/momentum_overflow_art.gd',
+          'material_shader': 'res://shaders/momentum_overflow_surface.gdshader', 'asset_prefix': 'res://assets/momentum/'}
 # modules the running game must have loaded; --require adds new ones (an art module, say).
 LOADED = [MAIN_SCRIPT, EXPECT['level_script'], EXPECT['runner_script'], EXPECT['runner_base'], EXPECT['hud_script'],
-          EXPECT['audio_script'], 'res://scripts/momentum_materials.gd', EXPECT['material_shader']]
+          EXPECT['audio_script'], EXPECT['art_script'], 'res://scripts/momentum_materials.gd', EXPECT['material_shader']]
 # committed files that must ship inside the pack: everything a game resource could be.
 SHIPPED_DIRS = ('scripts/', 'scenes/', 'shaders/', 'assets/', 'data/')
 SHIPPED_EXT = ('.gd', '.tscn', '.tres', '.gdshader', '.png', '.jpg', '.webp', '.gltf', '.glb', '.ogg', '.wav', '.json')
