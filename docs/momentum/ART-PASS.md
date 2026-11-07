@@ -4,7 +4,7 @@ A visual pass over the actual Overflow course, applied after the level builds. I
 the course, regroups the level's merged meshes by what each surface is for, gives water and
 the valley a coherent look, and makes the finish's operating water visible. It adds no
 collision, moves no solid and changes no progress data. Every value is a P choice. Nothing
-here claims enjoyment, GPU pacing or Windows behaviour.
+here claims enjoyment or Windows behaviour. The follow-up AMD timing scope is recorded below.
 
 | File | Role |
 | --- | --- |
@@ -94,7 +94,7 @@ pass follows that state without driving it: two hoist cables track the gate, a s
 rises from the gate while the release runs, and white water pours over the lifted plate's top
 edge into the channel. That overflow is a stylisation, not a hydraulic model.
 
-## Proposal for root: a release you can see
+## Deferred geometry option: a release you can see
 
 The level releases water under the gate into the outflow channel at −5.0 m, 5.5 m below the
 sluice deck's 1.1 m parapet, so the actual release is out of sight from the finish and the
@@ -166,6 +166,36 @@ The added primitives are the 1,406 trees (21 triangles each, about 30k) and the 
 before ordinary tape took 189 ms per frame, the other before tapes 293–363 ms), so no frame-time
 claim is made. GPU timing is root's hardware pass.
 
+## Finish presentation follow-up
+
+The final follow-up warms the spray material with one invisible particle during the first
+four rendered frames, then frees it. This moves its first-use shader compilation out of
+the finish. On fresh private AMD profiles the ordinary route's worst finish draw interval
+was 133.4 ms at 720p and 125.9 ms at 1080p before; final repeats were 18.2 and 17.6 ms.
+Normal median intervals stayed about 16.7 ms. One startup sample per build showed the first
+image about 170 ms later. This is virtual-compositor pacing, not input-to-photon latency.
+The run clock, controller and geometry are unchanged.
+
+The recovery grooves now blend toward their average tone when their projected spacing
+is too small to resolve. Near grooves remain visible; distant banding no longer flickers
+across the tail-race view. The finish overflow alone uses foam colour (0.58, 0.60, 0.58),
+coverage 0.75 and aeration 0.35, retaining visible streaks instead of clipping to white.
+These are P presentation choices. The physical channel remains below the parapet; the
+visible overflow is the accepted stylisation, and the geometry option above is deferred.
+
+Evidence: outer `checkpoints/spillway/r13/presentation-fix-opus/REPORT.md`, raw timing,
+source traces and paired native frames. Root verified all 847 retained artifact hashes,
+recomputed the final 720p/1080p finish maxima, and compared 3372 ticks per run with the
+source: body state and game state match exactly. The interpolated camera transform is
+excluded from that comparison because the fixed-fps reference and real-time draws sample
+it at different phases. Root inspected the finish, tail and near-ramp pairs.
+
+The follow-up had 28 clean exits in 29 engine runs. One diagnostic on unmodified source
+hung during shutdown and was terminated at its limit; the next 16 native runs exited
+normally. The intermittent GPU shutdown hang remains unresolved. The earlier Sky texture
+leaks did not recur. Fixed-fps warm-emitter frames are byte-identical to the control, as
+reported by the worker; root independently inspected the native start pair.
+
 ## Weaknesses
 
 - The release itself still runs out of sight; the visible water at the stop is the
@@ -182,5 +212,6 @@ claim is made. GPU timing is root's hardware pass.
   partly open gets one treatment along its whole length.
 - The sun-facing tail race carries a warm haze; whether that reads as atmosphere or glare
   on a real display is unverified.
-- llvmpipe only. Anisotropic filtering, shadow quality and fog differ on GPU drivers; the
-  first look on the AMD path is owed. No human has judged whether it is attractive.
+- The original art comparisons use llvmpipe. The follow-up also inspects private AMD
+  720p/1080p frames and pacing; physical display behaviour and native Windows remain
+  unverified. No human has judged whether it is attractive.

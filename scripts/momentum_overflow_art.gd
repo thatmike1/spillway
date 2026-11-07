@@ -925,14 +925,23 @@ static func _trees(level: Node3D, heights: PackedFloat32Array, clear: PackedFloa
 ## hoist cables tracking the gate as the level lifts it. reads the level, never drives it.
 class Runtime:
 	extends Node3D
+	## p / process frames the invisible spray emitter stays; a few, so at least one is drawn.
+	const WARM_FRAMES := 4
 	var level: Node3D
 	var mist: CPUParticles3D
 	var cables: Array[MeshInstance3D] = []
 	var beam_y := 0.0
 	var overflow: MeshInstance3D
 	var channel_y := 0.0
+	var warm: CPUParticles3D
+	var warm_frames := 0
 
 	func _process(_delta: float) -> void:
+		if is_instance_valid(warm):
+			warm_frames += 1
+			if warm_frames > WARM_FRAMES:
+				warm.queue_free()
+				warm = null
 		var release: Variant = level.get("_release")
 		var running := false
 		if release is MeshInstance3D:
@@ -1015,6 +1024,27 @@ static func _runtime(level: Node3D, pieces: Array, report: Dictionary) -> void:
 			runtime.add_child(mist)
 			runtime.mist = mist
 			parts.append("spray")
+			# the spray's material is the only shader the finish draws for the first time, and
+			# compiling it then stalls a frame by over 100 ms. an emitter with the same mesh
+			# and an alpha-0 copy of the material, exempt from culling, is drawn (invisibly)
+			# in the first frames instead, then freed.
+			var warm := CPUParticles3D.new()
+			warm.name = "GateSprayWarm"
+			warm.amount = 1
+			warm.lifetime = 1.0
+			warm.local_coords = true
+			warm.gravity = Vector3.ZERO
+			warm.initial_velocity_min = 0.0
+			warm.initial_velocity_max = 0.0
+			warm.mesh = quad
+			var clear := spray.duplicate() as StandardMaterial3D
+			clear.albedo_color.a = 0.0
+			warm.material_override = clear
+			warm.extra_cull_margin = 16384.0
+			warm.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			warm.position = mist.position
+			runtime.add_child(warm)
+			runtime.warm = warm
 			if gate is Node3D:
 				# p / the release runs 5.5 m below the finish deck's parapet, out of sight. while
 				# it runs, white water also pours over the lifted plate's top edge in a curved
@@ -1050,7 +1080,9 @@ static func _nappe(at: Vector3, width: float) -> MeshInstance3D:
 	var sheet := MeshInstance3D.new()
 	sheet.name = "GateOverflow"
 	sheet.mesh = st.commit()
-	sheet.material_override = _water_material({"flow_speed": 6.5, "sheet_size": Vector2(width, 8.0), "foam_amount": 0.85, "churn": 0.25, "aeration": 0.45, "foam_color": Color(0.78, 0.8, 0.78)})
+	# p / the sheet faces the sun and the warm horizon, so foam any brighter than this clips
+	# to flat white under the filmic curve; troughs between the streaks stay visible.
+	sheet.material_override = _water_material({"flow_speed": 6.5, "sheet_size": Vector2(width, 8.0), "foam_amount": 0.75, "churn": 0.25, "aeration": 0.35, "foam_color": Color(0.58, 0.6, 0.58)})
 	sheet.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	sheet.position = at
 	sheet.visible = false

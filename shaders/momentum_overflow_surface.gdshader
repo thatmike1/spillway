@@ -286,14 +286,19 @@ void fragment() {
 			fall /= slope;
 			float phase = dot(world_pos.xz, fall) / rib_spacing;
 			float px = fwidth(phase);
-			float fade = (1.0 - smoothstep(0.25, 0.6, px)) * smoothstep(0.06, 0.12, slope);
+			float fade = smoothstep(0.06, 0.12, slope);
+			// past about a sixth of a groove per pixel the profile cannot be resolved and
+			// aliases into bands on a far ramp; blend it to its mean (0.32) so the ramp keeps
+			// its average tone, and drop the tilt, whose mean is zero.
+			float resolve = 1.0 - smoothstep(0.08, 0.3, px);
 			float f = fract(phase);
 			float groove = smoothstep(0.0, 0.18 + px, f) * (1.0 - smoothstep(0.32 - px, 0.5, f));
+			groove = mix(0.32, groove, resolve);
 			albedo *= 1.0 - rib_strength * 0.45 * groove * fade;
 			occlusion *= 1.0 - rib_strength * 0.5 * groove * fade;
 			// the groove's walls tilt the normal along the fall line.
 			float tilt = (smoothstep(0.0, 0.18, f) - smoothstep(0.32, 0.5, f)) * (f < 0.25 ? 1.0 : -1.0);
-			rib_bend = vec3(fall.x, 0.0, fall.y) * tilt * 0.6 * rib_strength * fade;
+			rib_bend = vec3(fall.x, 0.0, fall.y) * tilt * 0.6 * rib_strength * fade * resolve;
 		}
 	}
 	albedo *= 1.0 - joint * joint_dark * top_weight - grime * 0.08 * top_weight - side_joint * 0.35 * (1.0 - top_weight);
