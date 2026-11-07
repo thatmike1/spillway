@@ -1,21 +1,53 @@
-# Spillway
+# Spillway: Overflow
 
-Spillway is a first-person downhill parkour game in Godot4.7.2. The default build contains the complete Crest, Sluice yard and Outflow course. The current contract and checkpoint are [BRIEF.md](docs/reboot/BRIEF.md) and [STATUS.md](docs/reboot/STATUS.md). Executed results and limitations are in [RESULTS.md](docs/reboot/RESULTS.md).
+Overflow is a downhill momentum game set in a working dam. Carry speed from the crest,
+hop the pier's diagonal shortcut, and spend your momentum on the climb to the sluice.
+Missed jumps lead into a bay or plunge pool with ramps that reconnect ahead.
 
-Run, jump, slide down the dry chute, carry speed across the channel, or take the switchback stairs. A missed shortcut lands in shallow water with a walking way out. The new motor always enables jump buffering/coyote time, keeps ordinary landing momentum, and lets you correct in the air. An optional airborne mantle requires held forward+jump and cancels on jump release or backward input.
+The default scene is the R13 game. Its movement keeps earned speed, steers jumps with
+W and mouse, and offers side-key carving for extra speed. All tuning is original P / game
+choices. Surf, slide and automatic mantle are absent from this course. The design and
+comparison evidence are in [BRIEF.md](docs/momentum/BRIEF.md),
+[BUILD.md](docs/momentum/BUILD.md) and [OVERFLOW.md](docs/momentum/OVERFLOW.md).
 
-## Play
+## Play from source
 
-Linux, from this folder: `./tools/play.sh`. It uses the pinned engine at `~/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64`; set `GODOT` for another engine path.
+Linux, from this folder: `./tools/play.sh`. It uses the pinned Godot 4.7.2 at
+`~/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64`.
+Set `GODOT` to use another engine path.
 
-Windows: double-click `Play Spillway.cmd`. The launcher installs the pinned official engine into `%LOCALAPPDATA%\Foldrunner\tools\godot-4.7.2` if needed, imports this project and starts Spillway. Native Windows gameplay remains untested.
+Windows: double-click `Play Spillway.cmd`. Its PowerShell launcher installs the pinned
+official engine into `%LOCALAPPDATA%/Foldrunner/tools/godot-4.7.2` if needed, imports
+the project and starts the default scene. Native Windows gameplay remains untested.
 
-WASD runs. Mouse looks. Space jumps. Ctrl/C crouches and slides. R starts a clean run. F restarts the segment for practice. Esc opens pause/settings. F11 toggles fullscreen. Clicking captures the mouse. Left/right gamepad sticks move/look; A jumps and LB crouches. Physical gamepad hardware is untested.
+WASD moves and the mouse looks. Space jumps; holding it keeps hopping when autohop is
+enabled. S brakes. Ctrl/C ducks. R immediately starts a clean run; F practises from the
+last stage. Esc opens pause/settings, F11 toggles fullscreen, and clicking captures the
+mouse. Gamepad sticks, A for jump and LB for duck are bound; physical gamepad play is
+unverified.
 
-Settings include sensitivity, horizontal FOV, volume and comfort camera. The fresh profile is `user://spillway_v1.cfg`. Practice and checkpoint respawn cannot overwrite clean full-run records. Bot runs never persist settings/records.
+Pause settings include sensitivity, horizontal FOV, volume, comfort camera and autohop.
+Records and settings use `user://spillway_r13.cfg`. A clean ordered finish can set a full
+course best. A physical skip can set an open-line best; practice and respawns record
+neither. Records are separated by course geometry and tuning. R12 settings can seed the
+first R13 start, but its records are untouched. Details are in
+[PLAYABLE.md](docs/momentum/PLAYABLE.md).
 
-## Verify
+The outer build workspace's `REPORT.md` identifies the last verified portable delivery.
+Source changes do not automatically promote an older package to R13.
 
-`./tools/check.sh` runs the new behavioral collision suite. `./tools/check-spillway.sh --play-routes --seed=0 --evidence-dir=/absolute/path/outside/git` also plays the authored safe, fast and recovery routes using real input events. Windows uses `tools/check.ps1` with the pinned engine. [VERIFICATION.md](docs/reboot/VERIFICATION.md) explicitly records which old reconstruction tests are retired.
+## Verification and assets
 
-Captures, original private reference material and external game specs stay outside Git. All current geometry, shaders and synthesized audio are original. Passing tests and scripted runs do not establish that a human enjoys the game.
+[TAPE.md](docs/momentum/TAPE.md) describes relative-input replay and moving evidence.
+[CARRY.md](docs/momentum/CARRY.md) covers the shared controller and diagnostic profiles;
+[OVERFLOW.md](docs/momentum/OVERFLOW.md) records actual route results and retained
+failures. `./tools/check-spillway.sh` explicitly checks the historical R12 motor and
+course, including its old scene when `--play-routes` is supplied. It is not R13 acceptance.
+
+The licensed material kit uses four Poly Haven CC0 texture sets and original props.
+[MANIFEST.json](assets/momentum/MANIFEST.json) records sources, licences, hashes and
+modifications. See [ART.md](docs/momentum/ART.md). Private references, captures and game
+specifications stay outside Git.
+
+Scripted completion does not establish enjoyment. Native Windows play, physical input
+and display latency, and Mike's satisfaction still need their own evidence.

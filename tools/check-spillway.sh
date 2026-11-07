@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# spillway acceptance is separate from the historical reconstruction suites.
+# historical r12 checks remain separate from the current overflow game.
 set -euo pipefail
 GODOT="${GODOT:-$HOME/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64}"
 cd "$(dirname "$0")/.."
@@ -35,6 +35,6 @@ run_clean --headless --fixed-fps 120 --path . --script res://tests/test_yard_joi
 run_clean --headless --fixed-fps 120 --path . --script res://tests/test_basin_exit.gd
 if "$play_routes"; then
 	for route in safe fast recovery; do
-		run_clean --headless --fixed-fps 120 --path . -- --bot --bot-quit "--route=$route" "${suite_args[@]}"
+		run_clean --headless --fixed-fps 120 --path . res://scenes/main.tscn -- --bot --bot-quit "--route=$route" "${suite_args[@]}"
 	done
 fi
