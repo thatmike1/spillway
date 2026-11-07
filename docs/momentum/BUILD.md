@@ -23,7 +23,10 @@ default game until the new course is integrated and checked.
   behavior is the R12 control; this is not a claim of exact CS or VHOLUME fidelity.
 - Projection acts on the side-key contribution. W provides bounded, speed-neutral steering,
   initially 14 m/s² lateral authority with a 45–90 degree view-offset fade. W+A/D blends
-  continuously. No input preserves the ballistic horizontal line. S brakes before reversal.
+  continuously toward the full movement wish, weighted by its forward contribution. It
+  does not erase the sideways intent by always aiming at camera-forward. Check fixed-view
+  diagonals for bounded acceleration; steering must not reopen an infinite side-gain loop.
+  No input preserves the ballistic horizontal line. S brakes before reversal.
 - Shared initial run/jump/body/gravity/camera remain R12's for attribution. Air profiles
   are different gain/steering laws, not merely different forgiveness: matching peak gain
   does not match angular authority. Measure both rather than calling them equivalent.
