@@ -56,6 +56,8 @@ var frames: Array = []
 var _row_armed := false
 var _row_tick := -1
 var _wall_start := 0
+var _drawable_surfaces: Dictionary = {}
+var _walkable_in_view := false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -212,39 +214,68 @@ func _check_world() -> void:
 	var shaders: Dictionary = {}
 	var textures: Dictionary = {}
 	var props: Dictionary = {}
+	_drawable_surfaces.clear()
+	_walkable_in_view = false
 	_scan(game.get("level"), shaders, textures, props)
-	report["world"] = {"shaders": shaders.keys(), "textures": textures.keys(), "props": props.keys()}
+	report["world"] = {"shaders": shaders.keys(), "textures": textures.keys(), "props": props.keys(), "surfaces": _drawable_surfaces, "walkable_in_view": _walkable_in_view}
 	var kit := str(expect.get("material_shader", ""))
 	check("course draws the adopted surface shader", shaders.has(kit), shaders.keys())
 	var art: Dictionary = game.get("level").get_meta("overflow_art", {})
 	check("course art was applied", bool(art.get("applied", false)), art)
+	var missing: Array[String] = []
+	for name: String in ["Art_run", "Art_land", "Art_catch", "Art_recovery", "Art_wall"]:
+		if int(_drawable_surfaces.get(name, 0)) <= 0:
+			missing.append(name)
+	check("required course surfaces can render", missing.is_empty(), missing)
+	check("the camera sees walkable course vertices", _walkable_in_view)
 	var prefix := str(expect.get("asset_prefix", ""))
 	var kit_textures := textures.keys().filter(func(p: String) -> bool: return p.begins_with(prefix))
 	check("course textures come from the licensed kit", not kit_textures.is_empty(), kit_textures.size())
 	var kit_props := props.keys().filter(func(p: String) -> bool: return p.begins_with(prefix))
 	check("course places kit props", not kit_props.is_empty() or not bool(expect.get("props_required", true)), kit_props)
 
-func _scan(node: Node, shaders: Dictionary, textures: Dictionary, props: Dictionary) -> void:
+func _scan(node: Node, shaders: Dictionary, textures: Dictionary, props: Dictionary) -> bool:
 	if node == null:
-		return
-	if node.scene_file_path != "":
-		props[node.scene_file_path] = true
-	if node is GeometryInstance3D and (node as GeometryInstance3D).is_visible_in_tree():
-		var materials: Array = [(node as GeometryInstance3D).material_override]
-		if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
-			var mesh := (node as MeshInstance3D).mesh
+		return false
+	var camera := get_viewport().get_camera_3d()
+	var drawable := false
+	if node is GeometryInstance3D and camera != null:
+		var geometry := node as GeometryInstance3D
+		var mesh: Mesh
+		if node is MeshInstance3D:
+			mesh = (node as MeshInstance3D).mesh
+		elif node is MultiMeshInstance3D:
+			var mm := (node as MultiMeshInstance3D).multimesh
+			if mm != null and mm.instance_count > 0 and mm.visible_instance_count != 0:
+				mesh = mm.mesh
+		if mesh != null and geometry.is_visible_in_tree() and geometry.layers & camera.cull_mask != 0 and geometry.transparency < 1.0 and geometry.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY:
 			for i: int in mesh.get_surface_count():
-				materials.append((node as MeshInstance3D).get_active_material(i))
-		for material: Variant in materials:
-			if material is ShaderMaterial and (material as ShaderMaterial).shader != null:
-				var shader := (material as ShaderMaterial).shader
-				shaders[shader.resource_path if shader.resource_path != "" else "<built-in>"] = true
-				for uniform: Dictionary in shader.get_shader_uniform_list():
-					var value: Variant = (material as ShaderMaterial).get_shader_parameter(uniform.name)
-					if value is Texture2D and (value as Texture2D).resource_path != "":
-						textures[(value as Texture2D).resource_path] = true
+				var arrays := mesh.surface_get_arrays(i)
+				var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+				if vertices.size() < 3:
+					continue
+				drawable = true
+				_drawable_surfaces[str(node.name)] = int(_drawable_surfaces.get(str(node.name), 0)) + vertices.size()
+				if str(node.name) in ["Art_run", "Art_land"]:
+					for vertex: Vector3 in vertices:
+						if camera.is_position_in_frustum((node as Node3D).global_transform * vertex):
+							_walkable_in_view = true
+							break
+				var material := (node as MeshInstance3D).get_active_material(i) if node is MeshInstance3D else geometry.material_override
+				if material == null:
+					material = mesh.surface_get_material(i)
+				if material is ShaderMaterial and (material as ShaderMaterial).shader != null:
+					var shader := (material as ShaderMaterial).shader
+					shaders[shader.resource_path if shader.resource_path != "" else "<built-in>"] = true
+					for uniform: Dictionary in shader.get_shader_uniform_list():
+						var value: Variant = (material as ShaderMaterial).get_shader_parameter(uniform.name)
+						if value is Texture2D and (value as Texture2D).resource_path != "":
+							textures[(value as Texture2D).resource_path] = true
 	for child: Node in node.get_children():
-		_scan(child, shaders, textures, props)
+		drawable = _scan(child, shaders, textures, props) or drawable
+	if drawable and node.scene_file_path != "":
+		props[node.scene_file_path] = true
+	return drawable
 
 # --- tape ----------------------------------------------------------------------------------
 
@@ -364,7 +395,7 @@ func _judge_run() -> void:
 	var elapsed := float(game.get("elapsed"))
 	report["run"] = {"finished": game.get("finished"), "finish_kind": game.get("finish_kind"), "elapsed": elapsed,
 		"respawns": game.get("respawn_count"), "checkpoint_sequence": checkpoint_sequence, "stage_times": times,
-		"best_time": game.get("best_time"), "open_best_time": game.get("open_best_time"), "best_splits": game.get("best_splits"),
+		"best_time": game.get("best_time"), "open_best_time": game.get("open_best_time"), "best_splits": game.get("best_splits"), "best_segments": game.get("best_segments"),
 		"previous_best": game.get("previous_best"), "last_save_ok": game.get("last_save_ok"), "profile_state": game.get("profile_state")}
 	var run: Dictionary = report.run
 	check("the run finished clean", bool(run.finished) and str(run.finish_kind) == "clean", [run.finished, run.finish_kind])
@@ -378,6 +409,10 @@ func _judge_run() -> void:
 	check("finish time is the last split", times.size() == stages and is_equal_approx(float(times[-1]), elapsed), elapsed)
 	if expect.has("fresh_profile") and bool(expect.fresh_profile):
 		check("first clean run becomes the best", float(run.previous_best) < 0.0 and float(run.best_time) == elapsed and float(run.open_best_time) == elapsed and run.best_splits == times, [run.previous_best, run.best_time, run.open_best_time])
+		var segments: Array = []
+		for i: int in times.size():
+			segments.append(float(times[i]) - (float(times[i - 1]) if i > 0 else 0.0))
+		check("first run records its actual segment durations", _same_record(run.best_segments, segments), run.best_segments)
 	check("records saved to the profile", bool(run.last_save_ok) and str(run.profile_state) == "saved", run.profile_state)
 	var file := ProjectSettings.globalize_path(str(expect.save_path))
 	var config := ConfigFile.new()
@@ -385,6 +420,13 @@ func _judge_run() -> void:
 	var loaded := config.load(file) == OK
 	report["profile"] = {"file": file, "sha256": FileAccess.get_sha256(file), "sections": config.get_sections() if loaded else []}
 	check("profile file holds this course's clean best", loaded and config.has_section(section) and float(config.get_value(section, "clean_best", -1.0)) == elapsed and str(config.get_value("profile", "build", "")) == str(expect.build), report.profile)
+	var expected_records := {"clean_best": run.best_time, "open_best": run.open_best_time,
+		"clean_splits": run.best_splits, "clean_segments": run.best_segments}
+	var saved: Dictionary = {}
+	for key: String in expected_records:
+		saved[key] = config.get_value(section, key, null) if loaded else null
+		check("profile saves " + key, _same_record(saved[key], expected_records[key]), saved[key])
+	report.profile["records"] = saved
 	if spec.has("reference_trace") and str(spec.reference_trace) != "":
 		_compare_reference(str(spec.reference_trace))
 
@@ -417,6 +459,21 @@ func _compare_reference(path: String) -> void:
 
 # --- end: records shown, pause, quit through the panel --------------------------------------
 
+func _same_record(actual: Variant, wanted: Variant) -> bool:
+	if actual is Array and wanted is Array:
+		if actual.size() != wanted.size():
+			return false
+		for i: int in actual.size():
+			if not _same_record(actual[i], wanted[i]):
+				return false
+		return true
+	if (actual is float or actual is int) and (wanted is float or wanted is int):
+		return is_finite(float(actual)) and absf(float(actual) - float(wanted)) <= 1e-9
+	return actual == wanted
+
+func _clock(value: float) -> String:
+	return "%02d:%05.2f" % [int(value) / 60, fmod(value, 60.0)]
+
 func _wrap_up() -> void:
 	await _frames(int(spec.get("settle_frames", 45)))
 	capture_next = "settled"
@@ -424,7 +481,8 @@ func _wrap_up() -> void:
 	if str(report.mode) == "reload":
 		var best := float(game.get("best_time"))
 		check("reload restores the clean best", str(game.get("profile_state")) == "loaded" and absf(best - float(expect.get("best_time", -2.0))) < 1e-9, [game.get("profile_state"), best])
-		check("reload restores every split", (game.get("best_splits") as Array).size() == int(game.call("stage_count")), game.get("best_splits"))
+		for key: String in ["best_time", "open_best_time", "best_splits", "best_segments"]:
+			check("reload restores " + key, expect.has("records") and _same_record(game.get(key), expect.get("records", {}).get(key)), game.get(key))
 	_send_key(KEY_ESCAPE, true)
 	await _frames(2)
 	_send_key(KEY_ESCAPE, false)
@@ -436,7 +494,10 @@ func _wrap_up() -> void:
 	check("Esc pauses", bool(game.get("paused")), "")
 	check("pause names this build and course", identity.contains(str(expect.build)) and identity.contains(str(game.get("course_key")).left(8)), identity)
 	if str(report.mode) != "startup":
-		check("pause shows the best", records.begins_with("Best "), records)
+		var wanted := "Best %s" % _clock(float(game.get("best_time")))
+		if float(game.get("open_best_time")) > 0.0:
+			wanted += "  ·  open line %s" % _clock(float(game.get("open_best_time")))
+		check("pause shows the actual best values", records == wanted, records)
 	capture_next = "pause"
 	await _frames(3)
 	_end("")

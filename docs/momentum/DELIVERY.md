@@ -26,6 +26,8 @@ hashes); the 1.3 GB archive was then deleted. The editor that exports the pack i
 The Godot licence and third-party notices equal `LICENSE.txt`/`COPYRIGHT.txt` at the tag. No
 account, signing or paid service is involved; the Windows exe is unsigned and keeps Godot's
 icon and version resource (rcedit was not used).
+Their verified member digests are pinned in the committed helper as well as the extraction
+record. Editing a cache's PROVENANCE.json cannot authorize different runtime bytes.
 
 Measured behaviour of these templates, which shapes the tools:
 
@@ -54,6 +56,10 @@ Records stay in `user://spillway_r13.cfg` under the Godot user data folder named
 The current R13 checker requires the adopted art module, its applied report and the
 visible course's `momentum_overflow_surface.gdshader`, using the licensed kit textures.
 Finding the old shader only in a hidden node or in the resource cache cannot satisfy it.
+The scanner requires real mesh vertices, effective visibility, camera-layer intersection
+and renderable run, landing, catch, recovery and wall surfaces. At least one walkable
+vertex must enter the camera frustum; props need a drawable descendant. This does not
+prove final pixels or artistic quality. Native frame inspection remains separate.
 
 ## Commands
 
@@ -90,12 +96,19 @@ startup line, and with `--tape` expands the tape and plays it in source mode wit
 committed tape executor on that frozen copy (must finish clean). It assembles both folders,
 zips them, writes `SHA256SUMS`, and runs `check`. Zips reach `DIR` only when every check
 passes; otherwise they go to `DIR/rejected/` with `VERIFICATION.json`.
+Archive entry times are fixed to the source commit's timestamp, so the recorded archive
+hash can be reproduced. The executing packager must match its frozen source, and the
+pack run uses a snapshot of that source's probe. Standalone rechecks record their own
+tool/probe hashes separately from the original packaging helpers.
 
 ## What `check` proves
 
 Static, both zips: checksums; each folder holds nothing but runtime, pack, readme, manifest
 and licences; runtimes equal the official template members; the manifest names the actual pack
 and build; both platforms carry the same pack. **Windows stops here: it is not run.**
+External and embedded manifests must agree. Source tree, canonical archive, file count
+and original helper hashes are resolved against the recorded Git commit. The recorded
+course key is checked in the game even when the caller supplies no separate key.
 
 Linux, the shipped binary and pack:
 
@@ -116,13 +129,16 @@ Linux, the shipped binary and pack:
    run at least the reference's warmup. Initialization and exact warmup can affect contact
    resolution, as the independent review below demonstrates.
    Required: clean finish, stages in order, every stage measured, zero respawns, first clean run
-   becomes best/open best/splits, saved to `spillway_r13.cfg` (the only `.cfg` written), the
+   becomes best/open best/splits/segments, all values saved to `spillway_r13.cfg` (the only `.cfg` written), the
    packed trace equal to the source executor's tick for tick (position exactly, yaw within 1e-12
    for JSON text), Esc pauses and shows build, course and best, a click on **Quit** ends the
    process with exit 0, no engine error, the working directory stays empty.
-4. `reload`: a new process on the same profile shows `records=loaded` with the same best and
-   splits, the pause panel shows it, the profile is not rewritten, Quit exits 0.
+4. `reload`: a new process on the same profile shows `records=loaded` with the same clean
+   best, open best, splits and segments (numeric serialization allowance 1e-9 s). The pause
+   panel shows the actual formatted best values, the profile is not rewritten, Quit exits 0.
 5. Cleanup: the private display's socket and lock are gone and no process names the evidence.
+   Engine groups are released in `finally`; SIGINT/SIGTERM unwind ownership scopes, including
+   interruption while the display starts. This cannot promise cleanup after SIGKILL or power loss.
 
 Without a tape a single `startup` run covers 2 and the pause/Quit path, and `VERIFICATION.json`
 has no play result. The probe never writes pose, velocity, progress or records and never calls

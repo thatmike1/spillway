@@ -9,9 +9,13 @@ checksums and manifests made consistent where the break is meant to reach the ru
 `package-overflow.py check` must fail. evidence goes to --evidence, outside Git.
 
 python3 tests/test_overflow_delivery.py --package GOOD_PACKAGE_DIR --evidence NEW_DIR
-    [--only preflight contents runtime] [--display 167]
+    [--only preflight contents runtime integrity] [--display 167]
+python3 tests/test_overflow_delivery.py --only integrity --evidence NEW_DIR
 """
 import argparse
+import copy
+import hashlib
+import io
 import importlib.util
 import json
 from pathlib import Path
@@ -79,6 +83,56 @@ def preflight(evidence):
 
 # --- tampered packages -------------------------------------------------------------------------
 
+def integrity(evidence):
+    """check declared provenance against git and the immutable runtime anchors."""
+    top = Path(po.git('rev-parse', '--show-toplevel').strip())
+    commit = po.git('rev-parse', 'HEAD').strip()
+    prefix = str(PROJECT.relative_to(top))
+    files = po.git('ls-tree', '-r', '--name-only', '--full-tree', commit + ':' + prefix, cwd=top).splitlines()
+    archive = po.source_archive(commit, prefix, top)
+    check('canonical source archive repeats exactly', archive == po.source_archive(commit, prefix, top))
+    stamp = int(po.git('show', '-s', '--format=%ct', commit, cwd=top).strip())
+    with tarfile.open(fileobj=io.BytesIO(archive)) as frozen:
+        check('archive entry times equal the source commit', all(member.mtime == stamp for member in frozen.getmembers()))
+    build = {'build': po.BUILD, 'main_scene': po.MAIN_SCENE, 'records_file': po.SAVE_PATH,
+             'helpers_committed': True, 'export_editor_sha256': po.EDITOR_SHA256, 'export_preset': po.PRESET,
+             'source_commit': commit, 'source_project_path': prefix,
+             'source_tree': po.git('rev-parse', commit + ':' + prefix, cwd=top).strip(),
+             'source_archive_sha256': hashlib.sha256(archive).hexdigest(), 'source_files': len(files),
+             'helpers_sha256': {p: hashlib.sha256(po.git('show', commit + ':' + prefix + '/' + p, binary=True, cwd=top)).hexdigest() for p in po.HELPERS},
+             'runtime': {'archive_sha256': po.TEMPLATES_SHA256}, 'course_key': '0123456789abcdef'}
+    check('valid source provenance resolves', po.verify_source_manifest(build) == files)
+    for key, value in [('source_tree', '0' * 40), ('source_archive_sha256', '0' * 64),
+                       ('source_files', -1), ('helpers_sha256', {}), ('helpers_committed', False),
+                       ('records_file', 'user://spillway_r12.cfg'), ('course_key', 'deadbeef')]:
+        changed = copy.deepcopy(build)
+        changed[key] = value
+        try:
+            po.verify_source_manifest(changed)
+        except po.Rejected as error:
+            check('reject changed provenance: ' + key, True, str(error))
+        else:
+            check('reject changed provenance: ' + key, False)
+    fake = evidence / 'fake-template-cache'
+    fake.mkdir()
+    provenance = json.loads((po.TEMPLATES / 'PROVENANCE.json').read_text())
+    for name in po.TEMPLATE_MEMBERS:
+        (fake / name).write_bytes(b'not an engine\n')
+        provenance['members']['templates/' + name] = po.digest(fake / name)
+    (fake / 'PROVENANCE.json').write_text(json.dumps(provenance))
+    (fake / 'version.txt').write_text('4.7.2.stable\n')
+    actual = po.TEMPLATES
+    try:
+        po.TEMPLATES = fake
+        try:
+            po.templates()
+        except po.Rejected as error:
+            check('reject self-attested replacement runtimes', True, str(error))
+        else:
+            check('reject self-attested replacement runtimes', False)
+    finally:
+        po.TEMPLATES = actual
+
 def unpack(package, work):
     shutil.copytree(package, work, ignore=shutil.ignore_patterns('evidence', 'rejected'))
     folders = {}
@@ -91,6 +145,10 @@ def unpack(package, work):
 
 
 def repack(work, folders, pack=None):
+    if pack:
+        manifest = json.loads((work / 'BUILD.json').read_text())
+        manifest['pack_sha256'] = po.digest(pack)
+        (work / 'BUILD.json').write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + '\n')
     for z, folder in folders.items():
         if pack is not None:
             shutil.copy2(pack, folder / (po.NAME + '.pck'))
@@ -183,23 +241,25 @@ def runtime(package, evidence):
 def main():
     global STAGES, ARGS
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('--package', type=Path, required=True)
+    parser.add_argument('--package', type=Path)
     parser.add_argument('--evidence', type=Path, required=True)
-    parser.add_argument('--only', nargs='*', choices=['preflight', 'contents', 'runtime'])
+    parser.add_argument('--only', nargs='*', choices=['preflight', 'contents', 'runtime', 'integrity'])
     parser.add_argument('--display', type=int, default=167)
     ARGS = parser.parse_args()
-    package, evidence = ARGS.package.resolve(), ARGS.evidence.resolve()
+    if ARGS.package is None and ARGS.only != ['integrity']:
+        parser.error('--package is required except for --only integrity')
+    package, evidence = ARGS.package.resolve() if ARGS.package else None, ARGS.evidence.resolve()
     if evidence.exists() and any(evidence.iterdir()):
         sys.exit('evidence directory must be new or empty')
     evidence.mkdir(parents=True, exist_ok=True)
-    STAGES = json.loads((package / 'BUILD.json').read_text())['stages']
+    STAGES = json.loads((package / 'BUILD.json').read_text())['stages'] if package else None
     for group, function in [('preflight', lambda: preflight(evidence)), ('contents', lambda: contents(package, evidence)),
-                            ('runtime', lambda: runtime(package, evidence))]:
+                            ('runtime', lambda: runtime(package, evidence)), ('integrity', lambda: integrity(evidence))]:
         if not ARGS.only or group in ARGS.only:
             function()
     (evidence / 'summary.json').write_text(json.dumps(results, indent=2) + '\n')
     failures = [r for r in results if not r['ok']]
-    print('%d negative controls, %d not refused' % (len(results), len(failures)))
+    print('%d delivery controls, %d failed' % (len(results), len(failures)))
     sys.exit(1 if failures else 0)
 
 

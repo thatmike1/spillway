@@ -9,6 +9,7 @@ never repairs project config. check: verify published zips from empty directorie
 shipped Linux runtime (tools/check-overflow-pack.sh wraps it). docs/momentum/DELIVERY.md.
 """
 import argparse
+from contextlib import contextmanager
 import hashlib
 import json
 import os
@@ -33,6 +34,12 @@ LICENCES = CACHE / 'godot-4.7.2/licenses'
 # (github asset digest and SHA512-SUMS.txt agree), and LICENSE.txt / COPYRIGHT.txt at the tag.
 ENGINE_VERSION = '4.7.2.stable.official.ed1daf0bf'
 EDITOR_SHA256 = '8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e'
+# member bytes verified when extracting the pinned official archive, independently of the cache manifest.
+TEMPLATE_MEMBERS = {
+    'linux_release.x86_64': 'd9f79ab89b5ae369aeed11c6052d402e8218cd503bf85b4a235f9c30c46a7c63',
+    'windows_release_x86_64.exe': 'd34d36f3be1a6c49c56525ae86469b92e4f417ddf0b43cf00dd80c385c4b0562',
+    'windows_release_x86_64_console.exe': '52bdcae9068e8d23b840e5c63b0c1798ffe2cb66144e5c4bc7af11fb8c8600df',
+}
 TEMPLATES_SHA256 = 'f298490b8d44d934be425a5a65a51bf15f422428b229a06a6e11d9ffea248011'
 LICENCE_SHA256 = {'GODOT-LICENSE.txt': 'b0435e3b3e4e55238f05f4b306f30524a1b2e20147810d436eaa554fa6855c80',
                   'GODOT-COPYRIGHT.txt': 'cb1980c88089573bcacd7221d777c689bb8bbd778799f24c27fca0fe5f774d6d'}
@@ -66,6 +73,9 @@ SHIPPED_EXT = ('.gd', '.tscn', '.tres', '.gdshader', '.png', '.jpg', '.webp', '.
 WINDOWS = {'SpillwayR13.exe': 'windows_release_x86_64.exe', 'SpillwayR13.console.exe': 'windows_release_x86_64_console.exe'}
 LINUX = {'SpillwayR13.x86_64': 'linux_release.x86_64'}
 ERRORS = re.compile(r'SCRIPT ERROR:|(^|\s)ERROR:|Parse Error:|Failed to load', re.M)
+HELPERS = ('tools/package-overflow.py', 'tools/check-overflow-pack.sh', 'tools/overflow-pack-probe.gd',
+           'tools/momentum-tape.py', 'tools/momentum-tape.gd')
+EXECUTED_TOOL_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 
 
 class Rejected(Exception):
@@ -99,9 +109,46 @@ def engine_env(root, display=None):
     return env
 
 
-def run_engine(cmd, cwd, env, log, deadline, watch=None):
+@contextmanager
+def cancellation_signals():
+    """unwind ownership scopes on terminal signals, restoring the caller's handlers."""
+    if threading.current_thread() is not threading.main_thread():
+        yield
+        return
+    previous = {sig: signal.getsignal(sig) for sig in (signal.SIGINT, signal.SIGTERM)}
+    def cancel(sig, _frame):
+        raise KeyboardInterrupt('cancelled by signal %d' % sig)
+    try:
+        for sig in previous:
+            signal.signal(sig, cancel)
+        yield
+    finally:
+        for sig, handler in previous.items():
+            signal.signal(sig, handler)
+
+
+def stop_process(process, grace=5):
+    """release an owned process group, including children if its leader already exited."""
+    if process is None:
+        return
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        pass
+    try:
+        process.wait(grace)
+    except subprocess.TimeoutExpired:
+        pass
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    process.wait(5)
+
+
+def run_engine(cmd, cwd, env, log, deadline, watch=None, cleanup_grace=5):
     """run one owned engine process group to completion or deadline; returns (code, text)."""
-    with open(log, 'wb') as output:
+    with cancellation_signals(), open(log, 'wb') as output:
         process = subprocess.Popen([str(c) for c in cmd], cwd=cwd, env=env, stdout=output, stderr=subprocess.STDOUT,
                                    start_new_session=True)
         watcher = threading.Thread(target=watch, args=(process,), daemon=True) if watch else None
@@ -110,16 +157,11 @@ def run_engine(cmd, cwd, env, log, deadline, watch=None):
         try:
             code = process.wait(deadline)
         except subprocess.TimeoutExpired:
-            for sig, wait in [(signal.SIGTERM, 10), (signal.SIGKILL, 10)]:
-                try:
-                    os.killpg(process.pid, sig)
-                    process.wait(wait)
-                    break
-                except (subprocess.TimeoutExpired, ProcessLookupError):
-                    continue
             code = 'timeout'
-        if watcher:
-            watcher.join(5)
+        finally:
+            stop_process(process, cleanup_grace)
+            if watcher:
+                watcher.join(5)
     return code, Path(log).read_text(errors='replace')
 
 
@@ -135,31 +177,39 @@ class Display:
 
     def __init__(self, number, log):
         self.number, self.log, self.process = number, log, None
+        self.output = self.cancel_scope = None
 
     def __enter__(self):
         socket, lock = Path('/tmp/.X11-unix/X%d' % self.number), Path('/tmp/.X%d-lock' % self.number)
         if socket.exists() or lock.exists():
             raise Rejected('display :%d is in use; pass another --display' % self.number)
-        self.output = open(self.log, 'wb')
-        self.process = subprocess.Popen(['Xvfb', ':%d' % self.number, '-screen', '0', '1280x720x24', '-nolisten', 'tcp',
-                                         '-noreset'], stdout=self.output, stderr=subprocess.STDOUT, start_new_session=True)
-        for _ in range(100):
-            if socket.exists():
-                return self
-            time.sleep(0.1)
-        self.__exit__(None, None, None)
-        raise Rejected('Xvfb :%d did not start' % self.number)
+        self.cancel_scope = cancellation_signals()
+        self.cancel_scope.__enter__()
+        try:
+            self.output = open(self.log, 'wb')
+            self.process = subprocess.Popen(['Xvfb', ':%d' % self.number, '-screen', '0', '1280x720x24', '-nolisten', 'tcp',
+                                             '-noreset'], stdout=self.output, stderr=subprocess.STDOUT, start_new_session=True)
+            for _ in range(100):
+                if socket.exists():
+                    return self
+                if self.process.poll() is not None:
+                    break
+                time.sleep(0.1)
+            raise Rejected('Xvfb :%d did not start' % self.number)
+        except BaseException:
+            self.__exit__(*sys.exc_info())
+            raise
 
     def __exit__(self, *_):
-        if self.process and self.process.poll() is None:
-            self.process.terminate()
-            try:
-                self.process.wait(10)
-            except subprocess.TimeoutExpired:
-                self.process.kill()
-                self.process.wait()
-        self.output.close()
-        self.released = not Path('/tmp/.X11-unix/X%d' % self.number).exists() and not Path('/tmp/.X%d-lock' % self.number).exists()
+        try:
+            stop_process(self.process)
+            if self.output:
+                self.output.close()
+            self.released = not Path('/tmp/.X11-unix/X%d' % self.number).exists() and not Path('/tmp/.X%d-lock' % self.number).exists()
+        finally:
+            if self.cancel_scope:
+                self.cancel_scope.__exit__(None, None, None)
+                self.cancel_scope = None
 
 
 def window_titles(display, found):
@@ -181,6 +231,12 @@ def window_titles(display, found):
 
 def committed(path):
     return git('show', 'HEAD:./' + path)
+
+
+def source_archive(commit, prefix, top):
+    # subtree archives otherwise use wall time for tar entries, so their hashes cannot be rechecked.
+    stamp = git('show', '-s', '--format=%ct', commit, cwd=top).strip()
+    return git('archive', '--format=tar', '--mtime=@' + stamp, commit + ':' + prefix, binary=True, cwd=top)
 
 
 def preflight(args):
@@ -244,7 +300,7 @@ def templates():
     if provenance.get('official_digest') != 'sha256:' + TEMPLATES_SHA256:
         raise Rejected('release templates were not extracted from the official 4.7.2 archive')
     for name in list(LINUX.values()) + list(WINDOWS.values()):
-        if digest(TEMPLATES / name) != provenance['members'].get('templates/' + name):
+        if digest(TEMPLATES / name) != TEMPLATE_MEMBERS[name] or provenance['members'].get('templates/' + name) != TEMPLATE_MEMBERS[name]:
             raise Rejected('cached release template differs from the verified archive member: ' + name)
     if (TEMPLATES / 'version.txt').read_text().strip() != '4.7.2.stable':
         raise Rejected('release templates are not 4.7.2.stable')
@@ -343,12 +399,15 @@ def package(args):
         # freeze: exactly the committed tree, never the working checkout or its import cache.
         tar = stage / 'source.tar'
         # from a subdirectory, archive also filters by that directory; run it from the top.
-        tar.write_bytes(git('archive', '--format=tar', 'HEAD:' + facts['prefix'], binary=True, cwd=PROJECT.parents[len(Path(facts['prefix']).parts) - 1]))
+        tar.write_bytes(source_archive(facts['commit'], facts['prefix'], top))
         facts['archive_sha256'] = digest(tar)
         with tarfile.open(tar) as frozen:
             frozen.extractall(stage / 'source', filter='data')
         tar.unlink()
         source = stage / 'source'
+        if digest(source / 'tools/package-overflow.py') != EXECUTED_TOOL_SHA256:
+            raise Rejected('executing packager differs from its frozen committed source')
+        args.probe = source / 'tools/overflow-pack-probe.gd'
         listed = sorted(str(p.relative_to(source)) for p in source.rglob('*') if p.is_file() or p.is_symlink())
         if listed != sorted(facts['files']):
             raise Rejected('git archive output differs from the committed file list')
@@ -370,9 +429,7 @@ def package(args):
         reference = None
         if args.tape is not None:
             reference = source_reference(args.tape.expanduser().resolve(), source, evidence)
-        helpers = {p: digest(source / p) for p in ['tools/package-overflow.py', 'tools/check-overflow-pack.sh',
-                                                   'tools/overflow-pack-probe.gd', 'tools/momentum-tape.py', 'tools/momentum-tape.gd']
-                   if (source / p).is_file()}
+        helpers = {p: digest(source / p) for p in HELPERS}
         extra = {'game': 'Spillway', 'course': 'Overflow', 'build': BUILD, 'project_version': facts['project_version'],
                  'source_commit': facts['commit'], 'source_tree': facts['tree'], 'source_project_path': facts['prefix'],
                  'source_archive_sha256': facts['archive_sha256'], 'source_files': len(listed),
@@ -382,16 +439,17 @@ def package(args):
                  'pack_sha256': digest(pack), 'main_scene': MAIN_SCENE, 'records_file': SAVE_PATH,
                  'user_data_folder': facts['project_name'], 'course_key': facts['course_key'], 'stages': args.stages,
                  'startup_line': facts['startup'], 'helpers_sha256': helpers,
-                 'helpers_committed': digest(Path(__file__)) == helpers.get('tools/package-overflow.py'),
+                 'helpers_committed': EXECUTED_TOOL_SHA256 == helpers.get('tools/package-overflow.py'),
                  'verification': 'VERIFICATION.json beside the zips'}
         folders = assemble(stage, pack, facts, extra)
         zips = publish(stage / 'dist', facts)
+        build = dict(extra, platforms=[z.name for z in zips])
+        (stage / 'dist' / 'BUILD.json').write_text(json.dumps(build, indent=2, ensure_ascii=False) + '\n')
         result = check_package(stage / 'dist', args, evidence / 'check', facts['course_key'], reference, pack_expect=digest(pack))
         destination = output if result['ok'] else output / 'rejected'
         destination.mkdir(exist_ok=True)
         for path in zips + [stage / 'dist' / 'SHA256SUMS']:
             shutil.move(str(path), destination / path.name)
-        build = dict(extra, platforms=[z.name for z in zips])
         (destination / 'BUILD.json').write_text(json.dumps(build, indent=2, ensure_ascii=False) + '\n')
         (destination / 'VERIFICATION.json').write_text(json.dumps(result, indent=2, ensure_ascii=False) + '\n')
         for platform in folders:
@@ -405,18 +463,22 @@ def package(args):
 def source_reference(tape, source, evidence):
     """expand the tape and play it in source mode on the frozen copy: the tick-for-tick reference."""
     expanded = evidence / 'tape.expanded.json'
-    result = subprocess.run([sys.executable, '-I', source / 'tools/momentum-tape.py', 'expand', tape], capture_output=True, text=True)
-    if result.returncode:
-        raise Rejected('tape does not expand: ' + result.stderr)
-    expanded.write_text(result.stdout)
+    env = engine_env(evidence / 'source-tool-profile')
+    env['GODOT'] = str(EDITOR)
+    code, text = run_engine([sys.executable, '-I', source / 'tools/momentum-tape.py', 'expand', tape],
+                            source, env, evidence / 'expand.log', 60)
+    if code:
+        raise Rejected('tape does not expand: ' + text)
+    expanded.write_text(text)
     run = evidence / 'source-tape'
-    result = subprocess.run([sys.executable, '-I', source / 'tools/momentum-tape.py', 'run', expanded, '--out', run,
-                             '--game-script', MAIN_SCRIPT, '--game-class', '', '--headless', '--wall-budget', '400'],
-                            capture_output=True, text=True, env=dict(os.environ, GODOT=str(EDITOR)))
-    (evidence / 'source-tape.log').write_text(result.stdout + result.stderr)
+    # the tape supervisor owns a separate engine group; allow its acknowledgement and forced
+    # cleanup window to finish before escalating cancellation of that supervisor itself.
+    code, text = run_engine([sys.executable, '-I', source / 'tools/momentum-tape.py', 'run', expanded, '--out', run,
+                            '--game-script', MAIN_SCRIPT, '--game-class', '', '--headless', '--wall-budget', '400'],
+                           source, env, evidence / 'source-tape.log', 440, cleanup_grace=35)
     rows = [json.loads(line) for line in (run / 'evaluator/trace.jsonl').read_text().splitlines() if '"phase":"tape"' in line]
     last = rows[-1]['game'] if rows else {}
-    if result.returncode or not last.get('finished') or last.get('finish_kind') != 'clean' or last.get('respawns'):
+    if code or not last.get('finished') or last.get('finish_kind') != 'clean' or last.get('respawns'):
         raise Rejected('the tape does not finish clean in source mode on this commit: %s' % last)
     return {'tape': str(expanded), 'trace': str(run / 'evaluator/trace.jsonl'), 'arm_motor_steps': rows[0]['pre']['tape_step_count'],
             'source_finish': last, 'tape_sha256': digest(tape)}
@@ -434,6 +496,31 @@ def extract(path, target):
                 written.chmod(mode)
 
 
+def verify_source_manifest(build):
+    """resolve recorded provenance against git, independently of package-supplied hashes."""
+    fixed = {'build': BUILD, 'main_scene': MAIN_SCENE, 'records_file': SAVE_PATH,
+             'helpers_committed': True, 'export_editor_sha256': EDITOR_SHA256, 'export_preset': PRESET}
+    if any(build.get(k) != v for k, v in fixed.items()):
+        raise Rejected('source manifest has an incorrect identity or uncommitted helpers')
+    commit, prefix = build.get('source_commit', ''), build.get('source_project_path', '')
+    if not re.fullmatch('[0-9a-f]{40}', commit):
+        raise Rejected('source manifest needs the full source commit')
+    top = Path(git('rev-parse', '--show-toplevel').strip())
+    tree = git('rev-parse', commit + ':' + prefix, cwd=top).strip()
+    archive = source_archive(commit, prefix, top)
+    files = git('ls-tree', '-r', '--name-only', '--full-tree', commit + ':' + prefix, cwd=top).splitlines()
+    helpers = {p: hashlib.sha256(git('show', commit + ':' + prefix + '/' + p, binary=True, cwd=top)).hexdigest()
+               for p in HELPERS}
+    if (build.get('source_tree') != tree or build.get('source_archive_sha256') != hashlib.sha256(archive).hexdigest()
+            or build.get('source_files') != len(files) or build.get('helpers_sha256') != helpers):
+        raise Rejected('source tree, archive, file count or helper hashes do not match the recorded commit')
+    if build.get('runtime', {}).get('archive_sha256') != TEMPLATES_SHA256:
+        raise Rejected('source manifest names a different runtime archive')
+    if not re.fullmatch('[0-9a-f]{16}', build.get('course_key', '')):
+        raise Rejected('source manifest has no valid course key')
+    return files
+
+
 def check_package(dist, args, evidence, course_key=None, reference=None, pack_expect=None):
     evidence.mkdir(parents=True, exist_ok=True)
     checks = []
@@ -445,6 +532,19 @@ def check_package(dist, args, evidence, course_key=None, reference=None, pack_ex
 
     sums = dict(reversed(line.split('  ', 1)) for line in (dist / 'SHA256SUMS').read_text().splitlines())
     zips = sorted(dist.glob(BUILD + '-*.zip'))
+    build = json.loads((dist / 'BUILD.json').read_text()) if (dist / 'BUILD.json').is_file() else {}
+    try:
+        files = verify_source_manifest(build)
+        record('source manifest matches its committed tree and helpers', True, build['source_commit'])
+        args.pack_required = sorted(set(pack_required(files)) | set(args.require))
+    except (Rejected, KeyError) as error:
+        record('source manifest matches its committed tree and helpers', False, str(error))
+    expected_zips = sorted('%s-%s-%s.zip' % (BUILD, platform, str(build.get('source_commit', ''))[:8])
+                           for platform in ['linux-x86_64', 'windows-x86_64'])
+    record('manifest names the requested stages and packages', build.get('stages') == args.stages
+           and sorted(build.get('platforms', [])) == expected_zips == [z.name for z in zips])
+    record('requested course key agrees with manifest', course_key is None or course_key == build.get('course_key'))
+    course_key = build.get('course_key')
     record('SHA256SUMS lists exactly the zips', sorted(sums) == [z.name for z in zips] and len(zips) == 2, sorted(sums))
     record('zip checksums match', all(digest(z) == sums.get(z.name) for z in zips))
     provenance = templates()
@@ -464,6 +564,10 @@ def check_package(dist, args, evidence, course_key=None, reference=None, pack_ex
         record(platform + ': runtime is the official release template', all(
             (folder / t).is_file() and digest(folder / t) == provenance['members']['templates/' + s] for t, s in runtimes.items()))
         manifest = json.loads((folder / 'BUILD.json').read_text()) if (folder / 'BUILD.json').is_file() else {}
+        common = {k: v for k, v in build.items() if k != 'platforms'}
+        record(platform + ': embedded and external provenance agree', all(manifest.get(k) == v for k, v in common.items())
+               and manifest.get('platform') == platform and manifest.get('runtime_sha256') ==
+               {target: TEMPLATE_MEMBERS[source] for target, source in runtimes.items()})
         pack_sha = digest(folder / (NAME + '.pck')) if (folder / (NAME + '.pck')).is_file() else ''
         record(platform + ': manifest names this pack and build', manifest.get('pack_sha256') == pack_sha and manifest.get('build') == BUILD
                and (pack_expect is None or pack_sha == pack_expect), pack_sha)
@@ -487,7 +591,9 @@ def check_package(dist, args, evidence, course_key=None, reference=None, pack_ex
               'scope': 'Linux release runtime from the zip, private Xvfb, llvmpipe, Dummy audio, isolated XDG; '
                        'engine-injected key and relative-mouse events; Windows static only',
               'windows_native_execution': 'not verified: zip contents and runtime hashes only',
-              'probe_sha256': digest(PROBE), 'tool_sha256': digest(Path(__file__))}
+              'probe_sha256': runs.get('probe_sha256'), 'tool_sha256': EXECUTED_TOOL_SHA256,
+              'packaging_helpers_sha256': build.get('helpers_sha256'),
+              'rechecker': 'current checker and probe hashes above; packaging helper hashes are verified separately against source'}
     if not static_ok:
         result['runs'] = 'skipped: static checks failed'
     (evidence / 'summary.json').write_text(json.dumps(result, indent=2, ensure_ascii=False) + '\n')
@@ -530,7 +636,10 @@ def check_runs(extracted, args, evidence, course_key, reference, record):
     harness.mkdir()
     for name in [NAME + '.x86_64', NAME + '.pck']:
         shutil.copy2(folder / name, harness / name)
-    (harness / 'override.cfg').write_text('[autoload]\nPackProbe="*%s"\n' % PROBE)
+    executed_probe = evidence / 'runs/executed-probe.gd'
+    shutil.copy2(getattr(args, 'probe', PROBE), executed_probe)
+    runs['probe_sha256'] = digest(executed_probe)
+    (harness / 'override.cfg').write_text('[autoload]\nPackProbe="*%s"\n' % executed_probe)
     same = all(digest(harness / n) == digest(folder / n) for n in [NAME + '.x86_64', NAME + '.pck'])
     record('harness runtime and pack are byte-identical to the zip', same)
     profile = evidence / 'runs/profile'
@@ -539,11 +648,12 @@ def check_runs(extracted, args, evidence, course_key, reference, record):
         reference = {'tape': str(args.tape.resolve()), 'arm_motor_steps': args.arm_motor_steps,
                      'trace': str(args.reference.resolve()) if args.reference else ''}
     best = None
+    best_records = {}
     with Display(args.display, evidence / 'runs/xvfb.log') as display:
         for mode in modes:
             out = evidence / 'runs' / mode
             (out / 'cwd').mkdir(parents=True)
-            extra = {'profile_state': 'new', 'fresh_profile': True} if mode != 'reload' else {'profile_state': 'loaded', 'best_time': best}
+            extra = {'profile_state': 'new', 'fresh_profile': True} if mode != 'reload' else {'profile_state': 'loaded', 'best_time': best, 'records': best_records}
             spec = spec_for(mode, harness, out, args, course_key, reference, extra)
             (out / 'spec.json').write_text(json.dumps(spec, indent=2, ensure_ascii=False))
             titles = set()
@@ -566,6 +676,8 @@ def check_runs(extracted, args, evidence, course_key, reference, record):
             records = [Path(p).name for p in after if p.endswith('.cfg')]
             if mode == 'play':
                 best = (report.get('run') or {}).get('elapsed')
+                best_records = {key: (report.get('run') or {}).get(key)
+                                for key in ['best_time', 'open_best_time', 'best_splits', 'best_segments']}
                 record('play: only the r13 records file was written', records == [SAVE_PATH.removeprefix('user://')], records)
             if mode == 'reload':
                 record('reload: the profile is read, not rewritten', after == before, '')
@@ -573,6 +685,7 @@ def check_runs(extracted, args, evidence, course_key, reference, record):
                 record('startup: no records file before a finish', records == [], records)
     runs['display_released'] = display.released
     record('private display released', display.released)
+    record('executed probe stayed unchanged', digest(executed_probe) == runs['probe_sha256'])
     leftovers = [pid for pid in os.listdir('/proc') if pid.isdigit() and str(evidence / 'runs').encode() in _cmdline(pid)]
     record('no owned engine process remains', not leftovers, leftovers)
     return runs
@@ -638,6 +751,9 @@ def main():
     except Rejected as error:
         print('package-overflow: ' + str(error), file=sys.stderr)
         sys.exit(1)
+    except KeyboardInterrupt:
+        print('package-overflow: cancelled; owned process scopes released', file=sys.stderr)
+        sys.exit(130)
 
 
 if __name__ == '__main__':
