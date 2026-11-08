@@ -362,12 +362,9 @@ func _tail_race() -> void:
 	var bar := BoxMesh.new()
 	bar.size = Vector3(TAIL_E - TAIL_W + 1.2, 0.5, 0.5)
 	_beacon.mesh = bar
-	var glow := StandardMaterial3D.new()
-	glow.albedo_color = Color("d9a441")
-	glow.emission_enabled = true
-	glow.emission = Color("d9a441")
-	glow.emission_energy_multiplier = 0.4
-	_beacon.material_override = glow
+	# p / reuse the route's already-drawn shader: the unique emissive material compiled
+	# on first visibility during play and stalled a cold AMD run by about half a second.
+	_beacon.material_override = Materials.variant(&"ochre", {"paint_color": Color("d9a441"), "metallic_scale": 0.1})
 	_beacon.position = Vector3((TAIL_W + TAIL_E) * 0.5, TAIL_Y + 6.0, band - 2.0)
 	add_child(_beacon)
 	for x: float in [TAIL_W - 0.6, TAIL_E + 0.6]:
@@ -574,7 +571,7 @@ func _process(delta: float) -> void:
 	# p / the finish beacon brightens after a finish: presentation only.
 	_finish_glow = move_toward(_finish_glow, 1.0 if _running else 0.0, delta * 1.5)
 	if is_instance_valid(_beacon):
-		(_beacon.material_override as StandardMaterial3D).emission_energy_multiplier = 0.4 + _finish_glow * 2.6
+		(_beacon.material_override as ShaderMaterial).set_shader_parameter("paint_color", Color("d9a441").lerp(Color("ffe49b"), _finish_glow))
 
 ## the frozen geometry: sorted pieces with rounded world points, materials excluded.
 func geometry_manifest() -> Array:
