@@ -75,11 +75,11 @@ that changes physics belongs in the record fingerprint. Ordinary UI settings do 
 
 ## Replay timing must be real
 
-The existing tape expander accepts only 120 Hz; its tick120 and render30 labels are
-not valid descriptions of a 64/128 Hz Source run. Preserve the old protocol, add an
-explicit rate-aware form, set the requested engine rate before tape validation and
-world construction, then reject a game/rate mismatch. Every trace records actual
-delta and motor ordering. Do not retime an old tick tape by changing its header.
+R13's original tape protocol accepts only 120 Hz; its tick120 and render30 labels are
+not valid descriptions of a 64/128 Hz Source run. The integrated v2 protocol now
+declares 64, 120 or 128 Hz, sets that rate before world construction and rejects a
+game/rate mismatch. Every trace records actual delta and motor ordering. Version 1
+remains unchanged. Do not retime an old tick tape by changing its header. See REPLAY.md.
 
 Native evidence keeps a bounded movie, selected frames and compressed input/physics.
 Source, imperfect-input, view-only discovery, hardware timing and human enjoyment

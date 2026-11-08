@@ -2,7 +2,9 @@
 
 P decisions, subject to measured comparisons. The settled target is Source/CS:GO air
 strafing. R13 is a comparison mode, not the chosen assistance policy. The default intended
-play mode is the bhop-server preset; vanilla is the faithful unmodified comparison.
+play mode is the bhop-server preset. Vanilla uses the public reference cvars; its
+stamina and takeoff/ground clamps remain a labelled reconstruction, not an exact
+unmodified CS:GO comparison.
 
 ## Independent work
 

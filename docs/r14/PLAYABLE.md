@@ -15,14 +15,17 @@ that a Source course route is playable; root runs those acceptance checks separa
 | `tests/test_r14_loop.gd`, `tests/r14_loop_fixture_level.gd` | headless loop checks on a labelled fixture level |
 | `tests/test_r14_loop_tour.gd`, `tests/test_r14_loop_native.py` | native UI tour under a private Xvfb |
 
-Existing Source, R13, map, replay and delivery files are unchanged. `project.godot` still starts
-R13 Overflow; making R14 the default scene is root's call.
+The loop task left existing Source, R13, map, replay and delivery files unchanged. Root
+integrated it in `70409e61`: `project.godot` now starts R14, and `R14 Pack` is its export
+preset. The global 120 Hz project default remains for historical R13 tools; R14 selects
+the active preset's rate when it builds the game.
 
 ## Playing
 
 ```sh
-godot --path . --script res://scripts/r14_launch.gd [-- --r14-preset=ID] [-- --r14-map=overflow] [-- --no-records]
-godot --path . res://scenes/r14.tscn          # same game, rate set in _ready instead
+G=~/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64
+$G --path . --script res://scripts/r14_launch.gd -- --r14-preset=server128 --r14-map=overflow --no-records
+$G --path .                               # default R14 scene; records enabled
 ```
 
 It starts on Penstock Yard with the CS:GO bhop-server preset. The top-left line always names
