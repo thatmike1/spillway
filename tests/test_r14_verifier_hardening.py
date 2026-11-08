@@ -71,7 +71,7 @@ def main():
         route = dict(name='boundary', map='practice', preset='server128', tape=str(tape))
         report = dict(rate=dict(ok=True), delivery=dict(ok=True), order=dict(ok=True), cleanup=dict(clean=True),
                       integrity_flags=[], neutral=True, end='completed')
-        for name in ['valid', 'delivery', 'script error', 'order', 'cleanup', 'integrity', 'external']:
+        for name in ['valid', 'delivery', 'script error', 'evaluator error', 'missing evaluator log', 'order', 'cleanup', 'integrity', 'external']:
             altered = copy.deepcopy(report)
             log = 'SCRIPT ERROR: controlled negative' if name == 'script error' else ''
             if name in ('delivery', 'order'): altered[name]['ok'] = False
@@ -87,6 +87,8 @@ def main():
                 run = Path(cmd[cmd.index('--out')+1]) / 'evaluator'; run.mkdir(parents=True)
                 write_trace(run / 'trace.jsonl', good)
                 (run / 'report.json').write_text(json.dumps(altered))
+                if name != 'missing evaluator log':
+                    (run / 'godot.log').write_text('SCRIPT ERROR: controlled evaluator-only negative' if name == 'evaluator error' else '')
                 Path(logfile).write_text(log)
                 return 0, log
             accepted = True

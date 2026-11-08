@@ -430,7 +430,12 @@ def source_route(route, source, evidence, identity=None):
     result['order_ok'] = (report.get('order') or {}).get('ok')
     result['cleanup_ok'] = (report.get('cleanup') or {}).get('clean')
     result['integrity_flags'] = report.get('integrity_flags')
-    if (code or ERRORS.search(text) or not last.get('finished') or last.get('finish_kind') != 'clean' or last.get('respawns') or not ordered
+    engine_log = run / 'evaluator/godot.log'
+    result['engine_log_present'] = engine_log.is_file()
+    result['engine_log_sha256'] = digest(engine_log) if engine_log.is_file() else None
+    result['engine_log_error'] = bool(ERRORS.search(engine_log.read_text(errors='replace'))) if engine_log.is_file() else None
+    if (code or ERRORS.search(text) or result['engine_log_present'] is not True or result['engine_log_error'] is not False
+            or not last.get('finished') or last.get('finish_kind') != 'clean' or last.get('respawns') or not ordered
             or result['rate_ok'] is not True or result['delivery_ok'] is not True or result['order_ok'] is not True
             or result['cleanup_ok'] is not True or report.get('neutral') is not True or report.get('end') != 'completed'
             or result['integrity_flags'] != []):

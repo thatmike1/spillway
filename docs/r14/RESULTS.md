@@ -112,3 +112,15 @@ The Linux ZIP hash is `b849ce5ebb177b95a7b1c1a7683869d87e515142048542b41b2579d85
 Windows is `7a39d10362966254e502c7a7254325e221f77234957f4cbfbf7b3b8c28b8f108`.
 The new report draft is [REPORT-DRAFT.md](REPORT-DRAFT.md). Contents/runtime/cancel
 negative controls and independent reviews are still pending at this snapshot.
+
+## Independent closure challenges
+
+The whole-contract review found no runtime must-fix in5484f10d; its process and report
+corrections remain [CLOSURE-REVIEW.md](CLOSURE-REVIEW.md). The separate verifier review
+found two remaining helper gaps, not actual candidate faults: an error confined to the
+source evaluator's Godot log could pass, and zero-glyph HUD Labels could pass. Both are
+repaired with the original observations preserved and new asserting gates. See
+[VERIFIER-CLOSURE-REVIEW.md](VERIFIER-CLOSURE-REVIEW.md). A new helper-pinned export is
+pending. The completed old candidate's21 contents/runtime/cancel refusal assertions
+are retained in outer `checkpoints/spillway/r14/delivery-negative-final/summary.json`;
+its earlier interrupted run is separately labelled and never counted as success.

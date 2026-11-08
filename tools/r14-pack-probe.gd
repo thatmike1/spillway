@@ -418,7 +418,7 @@ func _check_hud_words(when: String) -> void:
 
 func _label_drawn(field: String) -> bool:
 	var label: Variant = _hud().get(field)
-	if not label is Label or not label.is_visible_in_tree() or str(label.text).is_empty():
+	if not label is Label or not label.is_visible_in_tree() or str(label.text).strip_edges().is_empty() or label.visible_characters == 0:
 		return false
 	var rect: Rect2 = label.get_global_rect()
 	var alpha := 1.0
@@ -427,7 +427,8 @@ func _label_drawn(field: String) -> bool:
 		if node is CanvasItem:
 			alpha *= node.modulate.a
 		node = node.get_parent()
-	return alpha * label.self_modulate.a > 0.05 and rect.size.x > 0.0 and rect.size.y > 0.0 and get_viewport().get_visible_rect().encloses(rect)
+	alpha *= label.self_modulate.a * label.get_theme_color("font_color").a
+	return alpha > 0.05 and label.get_theme_font_size("font_size") > 0 and rect.size.x > 0.0 and rect.size.y > 0.0 and get_viewport().get_visible_rect().encloses(rect)
 
 func _hud_feedback(when: String) -> void:
 	_check_hud_words(when)
