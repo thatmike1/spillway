@@ -42,7 +42,7 @@ contention. Readback captures deliberately stall drawing and are not timing benc
 Other occasional long intervals remain; removing this reproducible hitch does not establish
 uniform frame pacing.
 
-## Shutdown still needs investigation
+## Shutdown was traced to Wayland teardown
 
 The first four repaired-material runs completed their tapes, but two processes remained
 alive after Quit and had to be terminated. A subsequent alternating six-run check had one
@@ -54,6 +54,20 @@ eight-frame wait. Records, when enabled, are saved on finishing before Quit.
 The hang's thread wait channels were retained. A gdb attach was refused by the kernel's
 ptrace policy; its zero exit status is not a successful backtrace. No system policy was
 changed. All owned game/compositor processes and sockets were cleaned up.
+
+A later bounded investigation on `1d7fe13d` reached every game-owned cleanup marker and
+then found the main thread waiting for the Wayland events thread, which was polling an
+idle socket forever. Godot's teardown code explains a possible lost wake-up. Forced
+private Wayland/AMD hung in 5/7 tape runs; private X11/AMD exited in all 9 tape/menu runs.
+These are small private-compositor samples, not a desktop or Windows guarantee. Future
+private GPU checks use explicit free X11 display numbers. See [QUIT-REVIEW.md](QUIT-REVIEW.md)
+for stacks, commands, the inference and the practical workaround. No game quit code changed.
+
+The first diagnostic Xwayland briefly removed the desktop's X0 socket path. It was repaired
+with a symlink to the desktop server's second listening socket; root independently verified
+`DISPLAY=:0 xdpyinfo` answered afterwards. The symlink remains until logout or restart.
+The corrected diagnostic helper never auto-selects a display and checks the desktop socket
+before and after its private runs. The full incident is retained in the review evidence.
 
 ## Evidence and reproduction
 
