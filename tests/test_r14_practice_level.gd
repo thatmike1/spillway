@@ -17,7 +17,7 @@ const R13_MAIN := preload("res://scripts/momentum_overflow_main.gd")
 const WALKABLE := 0.7
 const STEP_UP := 18.0 * 0.0254
 const CELL := 0.5
-const GRID := AABB(Vector3(-100, -6, -256), Vector3(112, 20, 268))
+const GRID := AABB(Vector3(-260, -6, -170), Vector3(280, 20, 190))
 
 var out_dir := ""
 var failures: Array[String] = []
@@ -100,7 +100,7 @@ func _identity(level: Node3D) -> Dictionary:
 		_check("checkpoint %d faces along its deck" % i, not ahead.is_empty() and str(ahead.collider.get_meta("surface", "")) == "route", forward)
 	var finish: Vector3 = level.get("finish_position")
 	_check("finish position stands on the platform", not _ray(level, finish + Vector3.UP * 0.5, finish + Vector3.DOWN * 0.5).is_empty())
-	_check("finish band is on the basic and advanced lines", level.call("is_finish_at", ((level.get("routes") as Dictionary).basic as Array)[-2] + Vector3.UP * 0.05) or level.call("is_finish_at", Vector3(-80, -1.45, -238)))
+	_check("finish band is on the basic and advanced lines", level.call("is_finish_at", ((level.get("routes") as Dictionary).basic as Array)[-2] + Vector3.UP * 0.05) and level.call("is_finish_at", ((level.get("routes") as Dictionary).advanced as Array)[-2] + Vector3.UP * 0.05))
 	_check("finish not at spawn", not level.call("is_finish_at", (level.get("spawn") as Transform3D).origin))
 	var hints := {}
 	for i: int in points.size():
@@ -223,8 +223,10 @@ func _walking(level: Node3D) -> Dictionary:
 		var edge: Vector3 = gap.edge
 		var land: Vector3 = gap.land
 		var along := Vector3(land.x - edge.x, 0, land.z - edge.z).normalized()
-		var take_key := _key(edge - along * 0.3)
-		var land_key := _key(land + along * 0.3)
+		# 0.6 m in from each edge: more than a grid cell's half diagonal, so the cell's own
+		# sample ray lands on the deck whatever the grid's alignment with the edge.
+		var take_key := _key(edge - along * 0.6)
+		var land_key := _key(land + along * 0.6)
 		var pit_key := _key(edge.lerp(land, 0.5))
 		if not tops.has(take_key) or not tops.has(land_key) or not tops.has(pit_key):
 			_check(str(gap.label) + " grid cells exist", false, [tops.has(take_key), tops.has(land_key), tops.has(pit_key)])
@@ -254,10 +256,13 @@ func _walking(level: Node3D) -> Dictionary:
 		if tops[key].role == "route":
 			decks.append(key)
 	var to_deck := _flood(tops, decks, true)
+	var stranded_at: Array = []
 	for key: Vector2i in tops:
 		if tops[key].role != "route" and not to_deck.has(key):
 			stranded += 1
-	_check("every pit and return cell walks to a deck", stranded == 0, stranded)
+			if stranded_at.size() < 8:
+				stranded_at.append([tops[key].piece, GRID.position.x + (key.x + 0.5) * CELL, GRID.position.z + (key.y + 0.5) * CELL])
+	_check("every pit and return cell walks to a deck", stranded == 0, [stranded, stranded_at])
 	var spawn_key := _key((level.get("spawn") as Transform3D).origin)
 	var from_spawn := _flood(tops, [spawn_key])
 	var finish_walkable := false

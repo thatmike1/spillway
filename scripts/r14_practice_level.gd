@@ -6,12 +6,16 @@ extends Node3D
 ## every gap in metres and source units. layout, numbers and limits: docs/r14/PRACTICE.md.
 ##
 ## course, in order (forward is -z, then -x after the valve bend, then -z after the pump bend):
-##   gatehouse pad -> penstock straight (128 m flat, marked every 8 m) -> stop-log blocks
-##   (five straight, gaps 2.0 to 4.0 m, then three zig blocks) -> valve bend (left ring, two
-##   radial gaps: short inside, long outside) -> weir gauges (two gaps whose width runs across
-##   the track, 3 to 8 m and 3 to 12 m, wide ends on opposite sides) -> pump bend (right ring,
-##   walkable inside, an outer notch that needs speed) -> tail race gauge (3.5 to 14 m, 1.5 m
-##   down) -> finish band on the tailwater platform.
+##   gatehouse pad and run-in -> stop-log blocks (five straight, gaps 2.0 to 4.0 m, then three
+##   zig blocks) -> valve bend (left ring, two radial gaps: short inside, long outside) ->
+##   penstock straight (128 m flat, marked every 8 m) -> weir gauges (two gaps whose width
+##   runs across the track, 3 to 8 m and 3 to 12 m, wide ends on opposite sides) -> pump bend
+##   (right ring, walkable inside, an outer notch that needs speed) -> tail race gauge (3.5 to
+##   14 m, 1.5 m down) -> finish band on the tailwater platform.
+## version 2 (8 nov) puts the straight after the blocks and the valve bend, right before the
+## gaps that need its speed: source play built speed on a first straight and then had to walk
+## it off before the blocks. the blocks and the valve bend's islands are deeper for the same
+## reason (docs/r14/PRACTICE.md, "why version 2").
 ## every pit is walkable and climbs back to the take-off deck of the jump it caught: a retry,
 ## never a way forward, because source movement keeps horizontal speed through a landing and
 ## a hopping runner climbs a ramp for free, so a forward catch would bypass its own gap.
@@ -22,13 +26,14 @@ const Materials := preload("res://scripts/momentum_materials.gd")
 ## change to geometry, progress or timing semantics.
 const LEVEL_ID := "r14-practice-penstock-yard"
 const LEVEL_NAME := "Penstock Yard"
-const LEVEL_VERSION := 1
+const LEVEL_VERSION := 3
 const VARIANTS := ["practice"]
 ## p / source units: 1 u = 0.0254 m (the hammer/source convention of 1 u = 1 inch).
 const U := 0.0254
-## p / provisional vanilla cs:go figures for the manifest's dimension checks, pending the
-## researcher's SOURCE-REFERENCE.md: 250 u/s knife run, 301.993 u/s jump, 800 u/s^2 gravity.
-const VANILLA := {"run_ups": 250.0, "jump_ups": 301.993, "gravity_ups": 800.0, "provisional": true}
+## the vanilla cs:go figures behind the manifest's dimension checks (SOURCE-REFERENCE.md):
+## 250 u/s knife run, 301.993 u/s jump, 800 u/s^2 gravity. screening only: actual hull,
+## jump order, stamina and the take-off clamp are judged by driven runs, not by these.
+const VANILLA := {"run_ups": 250.0, "jump_ups": 301.993, "gravity_ups": 800.0, "provisional": false}
 ## p / judging margins: a landing must clear the far edge by this much (feet centre, no hull
 ## credit), and "comfortable" means the jump can also be pressed this early.
 const LANDING := 0.5
@@ -47,42 +52,53 @@ const TRACK_Y := 0.0
 const PIT := 2.5
 const BASE := -6.0
 const WIDTH := 16.0
-## the valve bend's centre and radii (left turn, from heading -z to heading -x).
-const BEND_L := Vector3(-14, 0, -177.5)
-const BEND_L_IN := 6.0
-const BEND_L_OUT := 22.0
+## the gatehouse run-in ends here; the blocks start 2 m on.
+const RUNIN_END := -20.0
+## p / stop-log blocks: [z of the near edge, depth, x from, x to]. 4.5 m straight decks and
+## 4 m zig decks (version 1: 3 m) leave a landing room and a run-up on each at vanilla
+## speed. the zig decks overlap nothing sideways: 1 m apart, corner to corner 2.7 m. blocks
+## stop 1 m short of the return lane (x 4 to 8), so the lane is never a step onto one.
+const BLOCKS := [
+	[-22.0, 4.5, -8.0, 3.0], [-29.0, 4.5, -8.0, 3.0], [-36.5, 4.5, -8.0, 3.0], [-44.5, 4.5, -8.0, 3.0], [-53.0, 4.5, -8.0, 3.0],
+	[-60.0, 4.0, -2.5, 3.0], [-66.5, 4.0, -8.0, -3.5], [-73.0, 4.0, -2.5, 3.0],
+]
+const BEND_START := -80.0
+## the valve bend's centre and radii (left turn, from heading -z to heading -x). p / version
+## 2 widens the inner radius from 6 to 10 m so the inside islands are decks, not stepping stones.
+const BEND_L := Vector3(-18, 0, -80)
+const BEND_L_IN := 10.0
+const BEND_L_OUT := 26.0
 ## p / the islands stop 2 m short of the outer wall: that moat joins every bend pit to the
-## blocks' pit, whose lane climbs back to the runway.
-const BEND_L_ISLAND_OUT := 20.0
+## blocks' pit, whose lane climbs back to the run-in.
+const BEND_L_ISLAND_OUT := 24.0
+## valve bend islands in degrees from the +x radius toward -z; the spaces between are gaps.
+## p / the second gap is 10 degrees (version 2 first had 16): a server hop chain lands on
+## island 2's start, and a 16 degree gap then needed an 11 m hop on the outside line.
+const BEND_L_ISLANDS := [[0.0, 26.0], [42.0, 58.0], [68.0, 90.0]]
+## the penstock straight: 128 m along -x after the valve bend, between these z edges.
+const RUNWAY_START := -18.0
+const RUNWAY_END := -146.0
+const RUNWAY_SECTIONS := 4
+const WEIR_N := -90.0
+const WEIR_S := -106.0
+## p / weir gauges along -x: landing edge x, take-off x on the north and south sides.
+## g1 runs 3 m north to 8 m south, g2 12 m north to 3 m south.
+const G1 := {"land": -166.0, "north": -163.0, "south": -158.0}
+const G2 := {"land": -208.0, "north": -196.0, "south": -205.0}
+const WEIR_END := -224.0
 ## the pump bend's centre and radii (right turn, from heading -x to heading -z).
-const BEND_R := Vector3(-74, 0, -203.5)
+const BEND_R := Vector3(-224, 0, -110)
 const BEND_R_IN := 4.0
 const BEND_R_MID := 12.0
 const BEND_R_OUT := 20.0
 const TAIL_Y := -1.5
-## p / stop-log blocks: [z of the near edge, depth, x from, x to]. the runway ends at -128.
-## blocks stop 1 m short of the return lane (x 4 to 8), so the lane is never a step onto one.
-const BLOCKS := [
-	[-130.0, 3.0, -8.0, 3.0], [-135.5, 3.0, -8.0, 3.0], [-141.5, 3.0, -8.0, 3.0], [-148.0, 3.0, -8.0, 3.0], [-155.0, 3.0, -8.0, 3.0],
-	[-160.5, 3.0, -1.0, 3.0], [-166.0, 3.0, -8.0, -3.0], [-171.5, 3.0, -1.0, 3.0],
-]
-const RUNWAY_END := -128.0
-const BEND_START := -177.5
-## valve bend islands in degrees from the +x radius toward -z; the spaces between are gaps.
-const BEND_L_ISLANDS := [[0.0, 25.0], [43.0, 57.0], [75.0, 90.0]]
-## p / weir gauges along -x: landing edge x, take-off x on the north (z -183.5) and south
-## (z -199.5) sides. g1 runs 3 m north to 8 m south, g2 12 m north to 3 m south.
-const G1 := {"land": -34.0, "north": -31.0, "south": -26.0}
-const G2 := {"land": -58.0, "north": -46.0, "south": -55.0}
-const WEIR_N := -183.5
-const WEIR_S := -199.5
-const WEIR_END := -74.0
-## p / tail race gauge along -z: landing edge z, take-off z on the west (x -94) and east
-## (x -78) sides: 14 m west, 3.5 m east, landing 1.5 m down.
-const G3 := {"land": -231.5, "west": -217.5, "east": -228.0}
-const TAIL_W := -94.0
-const TAIL_E := -78.0
-const TAIL_END := -251.5
+## p / tail race gauge along -z: landing edge z, take-off z on the west (x -244) and east
+## (x -228) sides: 14 m west, 3.5 m east, landing 1.5 m down.
+const G3 := {"land": -138.0, "west": -124.0, "east": -134.5}
+const TAIL_W := -244.0
+const TAIL_E := -228.0
+const TAIL_START := -110.0
+const TAIL_END := -158.0
 ## the pump bend's outer notch, degrees from the entry radius.
 const NOTCH := [30.0, 60.0]
 
@@ -123,7 +139,7 @@ var routes: Dictionary = {}
 ## kind), with metres, units and tiers added; course_manifest() carries the full record.
 var jump_gaps: Array[Dictionary] = []
 ## the respawn envelope: only reachable by leaving the course over a wall.
-var kill_bounds := AABB(Vector3(-140, -6.5, -290), Vector3(200, 120, 310))
+var kill_bounds := AABB(Vector3(-265, -6.5, -175), Vector3(295, 120, 200))
 ## every collision piece: name, world points, stage, role, kind. hashed without materials.
 var manifest: Array[Dictionary] = []
 ## painted measurement marks: name, world position, text. visual only, not hashed.
@@ -154,9 +170,10 @@ func build() -> void:
 	_marks.name = "Markings"
 	add_child(_marks)
 	_environment()
-	_gatehouse_and_runway()
+	_gatehouse()
 	_stop_logs()
 	_valve_bend()
+	_penstock()
 	_weir_gauges()
 	_pump_bend()
 	_tail_race()
@@ -166,33 +183,25 @@ func build() -> void:
 
 # --- the course ---------------------------------------------------------------------------
 
-func _gatehouse_and_runway() -> void:
-	# stage 0: a pad behind the start line and 128 m of flat runway, 16 m wide. nothing on it
-	# gives or takes speed, so what the runner arrives with at its end is strafing alone.
+func _gatehouse() -> void:
+	# stage 0: a pad behind the start line and a 20 m run-in, 16 m wide: enough to reach run
+	# speed (about 2 m at 250 u/s) and to line up on the first block.
 	_deck("s0_pad", -8, 8, 8, 0, TRACK_Y, &"landing", 0)
-	_deck("s0_runway", -8, 8, 0, RUNWAY_END, TRACK_Y, &"track", 0)
+	_deck("s0_runin", -8, 8, 0, RUNIN_END, TRACK_Y, &"track", 0)
 	_wall_x("s0_back", -8.4, 8.4, 8, TRACK_Y, 1, TRAINING)
-	_wall_z("s0_left", -8, 8, RUNWAY_END, -1)
-	_wall_z("s0_right", 8, 8, RUNWAY_END, 1)
+	_wall_z("s0_left", -8, 8, RUNIN_END, -1)
+	_wall_z("s0_right", 8, 8, RUNIN_END, 1)
 	_strip_x("s0_start_line", -8, 8, 0.0, 0.3)
-	# p / a thin line every 8 m and a label every 16 m on both walls, in metres and units.
-	for i: int in range(1, 16):
-		var z := -8.0 * i
-		_strip_x("s0_mark_%02d" % i, -8, 8, z, 0.3 if i % 2 == 0 else 0.12)
-		if i % 2 == 0:
-			var text := "%d m\n%d u" % [8 * i, roundi(8.0 * i / U)]
-			_wall_label("s0_label_l_%02d" % i, Vector3(-7.95, 1.3, z), PI * 0.5, text)
-			_wall_label("s0_label_r_%02d" % i, Vector3(7.95, 1.3, z), -PI * 0.5, text)
-	_strip_x("s0_runway_edge", -8, 8, RUNWAY_END, -0.35)
+	_strip_x("s0_runin_edge", -8, 8, RUNIN_END, -0.35)
 
 func _stop_logs() -> void:
 	# stage 1: eight stop-log blocks over a 2.5 m pit. five straight, each gap 0.5 m wider than
-	# the last, then three zig blocks two metres apart sideways. the pit's right lane walks
-	# back to a ramp onto the runway's end, so a miss retries the blocks.
+	# the last, then three zig blocks one metre apart sideways. the pit's right lane walks back
+	# to a ramp onto the run-in's end, so a miss retries the blocks.
 	var pit_y := TRACK_Y - PIT
-	_deck("s1_pit", -8, 8, RUNWAY_END, BEND_START, pit_y, &"catch", -1, BASE, "catch")
-	_ramp_z("s1_return", 4, 8, -140, RUNWAY_END, pit_y, TRACK_Y, &"return", -1, "recovery")
-	var previous := RUNWAY_END
+	_deck("s1_pit", -8, 8, RUNIN_END, BEND_START, pit_y, &"catch", -1, BASE, "catch")
+	_ramp_z("s1_return", 4, 8, RUNIN_END - 12.0, RUNIN_END, pit_y, TRACK_Y, &"return", -1, "recovery")
+	var previous := RUNIN_END
 	for i: int in BLOCKS.size():
 		var b: Array = BLOCKS[i]
 		var near: float = b[0]
@@ -201,113 +210,153 @@ func _stop_logs() -> void:
 		_strip_x("s1_nose_%d" % (i + 1), b[2], b[3], far, -0.25)
 		_floor_label("s1_gap_%d" % (i + 1), Vector3(clampf(-2.0, b[2] + 1.5, b[3] - 1.5), TRACK_Y, previous - 0.6), 0.0, _gap_text(previous - near))
 		previous = far
-	_floor_label("s1_gap_bend", Vector3(1.5, TRACK_Y, previous - 0.6), 0.0, _gap_text(previous - BEND_START))
-	_wall_z("s1_left", -8, RUNWAY_END, BEND_START, -1, pit_y)
-	_wall_z("s1_right", 8, RUNWAY_END, BEND_START, 1, pit_y)
+	_floor_label("s1_gap_bend", Vector3(0.5, TRACK_Y, previous - 0.6), 0.0, _gap_text(previous - BEND_START))
+	_wall_z("s1_left", -8, RUNIN_END, BEND_START, -1, pit_y)
+	_wall_z("s1_right", 8, RUNIN_END, BEND_START, 1, pit_y)
 
 func _valve_bend() -> void:
-	# stage 2: a quarter ring turning left, 14 m of islands inside a 16 m ring. each gap spans
-	# 18 degrees: 2.5 m on a tight inside line, 5.9 m round the outside, so the line that keeps
-	# speed is the one that needs it. the pit under the ring joins the blocks' pit.
+	# stage 2: a quarter ring turning left, 14 m of islands inside a 16 m ring. the first gap
+	# spans 16 degrees: 3.3 m on the inside line (r 12), 6.4 m round the outside (r 23), so the
+	# line that keeps speed is the one that needs it; the second, 10 degrees, keeps the rhythm.
+	# the pit under the ring joins the blocks' pit.
 	var pit_y := TRACK_Y - PIT
-	for a: float in range(0, 90, 10):
-		var b := a + 10.0
+	# every ring piece breaks at every 10 degrees and at every island edge, so the pit, the
+	# walls and the islands share their chords and no sliver of pit shows between them.
+	var cuts: Array[float] = []
+	for a: float in range(0, 100, 10):
+		cuts.append(a)
+	for span: Array in BEND_L_ISLANDS:
+		for a: float in span:
+			if not cuts.has(a):
+				cuts.append(a)
+	cuts.sort()
+	for k: int in cuts.size() - 1:
+		var a := cuts[k]
+		var b := cuts[k + 1]
 		_ring_piece("s2_pit_%02d" % int(a), BEND_L, Vector3.RIGHT, 1.0, BEND_L_IN, BEND_L_OUT, a, b, pit_y, pit_y, &"catch", -1, BASE, "catch")
 		_ring_wall("s2_inner_%02d" % int(a), BEND_L, Vector3.RIGHT, 1.0, BEND_L_IN - WALL, BEND_L_IN, a, b, pit_y)
 		_ring_wall("s2_outer_%02d" % int(a), BEND_L, Vector3.RIGHT, 1.0, BEND_L_OUT, BEND_L_OUT + WALL, a, b, pit_y)
-	for i: int in BEND_L_ISLANDS.size():
-		var span: Array = BEND_L_ISLANDS[i]
-		var a: float = span[0]
-		while a < float(span[1]) - 0.01:
-			var b := minf(a + 10.0, float(span[1]))
-			_ring_piece("s2_island_%d_%02d" % [i + 1, int(a)], BEND_L, Vector3.RIGHT, 1.0, BEND_L_IN, BEND_L_ISLAND_OUT, a, b, TRACK_Y, TRACK_Y, &"landing", 2)
-			a = b
+		for i: int in BEND_L_ISLANDS.size():
+			if a >= float(BEND_L_ISLANDS[i][0]) and b <= float(BEND_L_ISLANDS[i][1]):
+				_ring_piece("s2_island_%d_%02d" % [i + 1, int(a)], BEND_L, Vector3.RIGHT, 1.0, BEND_L_IN, BEND_L_ISLAND_OUT, a, b, TRACK_Y, TRACK_Y, &"landing", 2)
 	for i: int in BEND_L_ISLANDS.size() - 1:
 		var from: float = BEND_L_ISLANDS[i][1]
 		var to: float = BEND_L_ISLANDS[i + 1][0]
-		for r: float in [8.0, 13.5, 19.0]:
+		for r: float in [12.0, 17.5, 23.0]:
 			var p := _ring_point(BEND_L, Vector3.RIGHT, 1.0, r, from - 1.5)
 			_floor_label("s2_gap_%d_r%02d" % [i + 1, int(r)], p, deg_to_rad(from), _gap_text(2.0 * r * sin(deg_to_rad(to - from) * 0.5)), 0.009)
 
+func _penstock() -> void:
+	# stage 3: 128 m of flat straight along -x, 16 m wide, straight off the valve bend's last
+	# island. nothing on it adds or removes speed, so what the runner takes into the gauges is
+	# strafing alone. a line every 8 m and a label every 16 m on both walls, in m and u.
+	# p / its collision is RUNWAY_SECTIONS coplanar 32 m prisms meeting on exact shared edges, the
+	# walls split at the same seams: godot 4.7.2's motion cast misses some diagonal landings on
+	# a single 128 m prism (root course-floor-casts, 13 of 441 on version 1; docs/r14/PRACTICE.md).
+	for k: int in RUNWAY_SECTIONS:
+		var x0 := lerpf(RUNWAY_START, RUNWAY_END, float(k) / RUNWAY_SECTIONS)
+		var x1 := lerpf(RUNWAY_START, RUNWAY_END, float(k + 1) / RUNWAY_SECTIONS)
+		_deck_x("s3_runway_%d" % (k + 1), x0, x1, WEIR_N, WEIR_S, TRACK_Y, &"track", 3)
+		_wall_line("s3_runway_north_%d" % (k + 1), Vector3(x0, 0, WEIR_N), Vector3(x1, 0, WEIR_N), Vector2(0, 1), TRAINING)
+		_wall_line("s3_runway_south_%d" % (k + 1), Vector3(x0, 0, WEIR_S), Vector3(x1, 0, WEIR_S), Vector2(0, -1), TRAINING)
+	for i: int in range(1, 16):
+		var x := RUNWAY_START - 8.0 * i
+		_strip_line("s3_mark_%02d" % i, Vector3(x, TRACK_Y, WEIR_N), Vector3(x, TRACK_Y, WEIR_S), Vector3(0.3 if i % 2 == 0 else 0.12, 0, 0))
+		if i % 2 == 0:
+			var text := "%d m\n%d u" % [8 * i, roundi(8.0 * i / U)]
+			_wall_label("s3_label_n_%02d" % i, Vector3(x, 1.3, WEIR_N - 0.05), PI, text)
+			_wall_label("s3_label_s_%02d" % i, Vector3(x, 1.3, WEIR_S + 0.05), 0.0, text)
+
 func _weir_gauges() -> void:
-	# stage 3: two gauge gaps across a 16 m track heading -x. each take-off edge runs at a
+	# stage 4: two gauge gaps across a 16 m track heading -x. each take-off edge runs at a
 	# slant, so the gap's width changes across the track: pick a width, the paint says what
 	# it needs. g1 is narrow on the north side, g2 on the south, so the wide line zig-zags.
 	var pit_y := TRACK_Y - PIT
-	_solid("s3_runin", [Vector3(-14, 0, WEIR_N), Vector3(G1.north, 0, WEIR_N), Vector3(G1.south, 0, WEIR_S), Vector3(-14, 0, WEIR_S)], BASE, &"track", 3, "route")
-	_solid("s3_g1_pit", [Vector3(G1.north, pit_y, WEIR_N), Vector3(G1.land, pit_y, WEIR_N), Vector3(G1.land, pit_y, WEIR_S), Vector3(G1.south, pit_y, WEIR_S)], BASE, &"catch", -1, "catch")
-	_solid("s3_middle", [Vector3(G1.land, 0, WEIR_N), Vector3(G2.north, 0, WEIR_N), Vector3(G2.south, 0, WEIR_S), Vector3(G1.land, 0, WEIR_S)], BASE, &"landing", 3, "route")
-	_solid("s3_g2_pit", [Vector3(G2.north, pit_y, WEIR_N), Vector3(G2.land, pit_y, WEIR_N), Vector3(G2.land, pit_y, WEIR_S), Vector3(G2.south, pit_y, WEIR_S)], BASE, &"catch", -1, "catch")
-	_deck_x("s3_runout", G2.land, WEIR_END, WEIR_N, WEIR_S, 0.0, &"landing", 4)
+	_solid("s4_runin", [Vector3(RUNWAY_END, 0, WEIR_N), Vector3(G1.north, 0, WEIR_N), Vector3(G1.south, 0, WEIR_S), Vector3(RUNWAY_END, 0, WEIR_S)], BASE, &"track", 4, "route")
+	_solid("s4_g1_pit", [Vector3(G1.north, pit_y, WEIR_N), Vector3(G1.land, pit_y, WEIR_N), Vector3(G1.land, pit_y, WEIR_S), Vector3(G1.south, pit_y, WEIR_S)], BASE, &"catch", -1, "catch")
+	_solid("s4_middle", [Vector3(G1.land, 0, WEIR_N), Vector3(G2.north, 0, WEIR_N), Vector3(G2.south, 0, WEIR_S), Vector3(G1.land, 0, WEIR_S)], BASE, &"landing", 4, "route")
+	_solid("s4_g2_pit", [Vector3(G2.north, pit_y, WEIR_N), Vector3(G2.land, pit_y, WEIR_N), Vector3(G2.land, pit_y, WEIR_S), Vector3(G2.south, pit_y, WEIR_S)], BASE, &"catch", -1, "catch")
+	_deck_x("s4_runout", G2.land, WEIR_END, WEIR_N, WEIR_S, 0.0, &"landing", 5)
 	# the south lane, 2.5 m down: each pit opens onto it and its ramp climbs east, back to the
-	# deck the missed jump left from. a wall at x -34 keeps the two returns apart.
+	# deck the missed jump left from. a wall at the g1 landing keeps the two returns apart.
 	var lane := WEIR_S - 4.0
-	_deck_x("s3_lane_top_e", -14, -16, WEIR_S, lane, 0.0, &"return", -1, BASE, "recovery")
-	_ramp_x("s3_lane_ramp_e", WEIR_S, lane, -16, -26, 0.0, pit_y, &"return", "recovery")
-	_deck_x("s3_lane_g1", -26, G1.land, WEIR_S, lane, pit_y, &"catch", -1, BASE, "catch")
-	_deck_x("s3_lane_top_w", G1.land, -44, WEIR_S, lane, 0.0, &"return", -1, BASE, "recovery")
-	_ramp_x("s3_lane_ramp_w", WEIR_S, lane, -44, -54, 0.0, pit_y, &"return", "recovery")
-	_deck_x("s3_lane_g2", -54, G2.land, WEIR_S, lane, pit_y, &"catch", -1, BASE, "catch")
-	_wall_line("s3_north", Vector3(-14, 0, WEIR_N), Vector3(WEIR_END, 0, WEIR_N), Vector2(0, 1), TRAINING)
-	_wall_line("s3_lane_outer", Vector3(-14, 0, lane), Vector3(G2.land, 0, lane), Vector2(0, -1), TRAINING)
-	_wall_line("s3_lane_east", Vector3(-14, 0, WEIR_S - WALL), Vector3(-14, 0, lane - WALL), Vector2(1, 0), TRAINING)
-	_wall_line("s3_lane_west", Vector3(G2.land, 0, WEIR_S), Vector3(G2.land, 0, lane - WALL), Vector2(-1, 0), TRAINING)
-	_wall_line("s3_runout_south", Vector3(G2.land, 0, WEIR_S), Vector3(WEIR_END, 0, WEIR_S), Vector2(0, -1), TRAINING)
+	var e := RUNWAY_END
+	_deck_x("s4_lane_top_e", e, e - 2.0, WEIR_S, lane, 0.0, &"return", -1, BASE, "recovery")
+	_ramp_x("s4_lane_ramp_e", WEIR_S, lane, e - 2.0, e - 12.0, 0.0, pit_y, &"return", "recovery")
+	_deck_x("s4_lane_g1", e - 12.0, G1.land, WEIR_S, lane, pit_y, &"catch", -1, BASE, "catch")
+	_deck_x("s4_lane_top_w", G1.land, G1.land - 10.0, WEIR_S, lane, 0.0, &"return", -1, BASE, "recovery")
+	_ramp_x("s4_lane_ramp_w", WEIR_S, lane, G1.land - 10.0, G1.land - 20.0, 0.0, pit_y, &"return", "recovery")
+	_deck_x("s4_lane_g2", G1.land - 20.0, G2.land, WEIR_S, lane, pit_y, &"catch", -1, BASE, "catch")
+	_wall_line("s4_north", Vector3(RUNWAY_END, 0, WEIR_N), Vector3(WEIR_END, 0, WEIR_N), Vector2(0, 1), TRAINING)
+	_wall_line("s4_lane_outer", Vector3(e, 0, lane), Vector3(G2.land, 0, lane), Vector2(0, -1), TRAINING)
+	_wall_line("s4_lane_east", Vector3(e, 0, WEIR_S - WALL), Vector3(e, 0, lane - WALL), Vector2(1, 0), TRAINING)
+	_wall_line("s4_lane_west", Vector3(G2.land, 0, WEIR_S), Vector3(G2.land, 0, lane - WALL), Vector2(-1, 0), TRAINING)
+	_wall_line("s4_runout_south", Vector3(G2.land, 0, WEIR_S), Vector3(WEIR_END, 0, WEIR_S), Vector2(0, -1), TRAINING)
 	for gauge: Dictionary in [G1, G2]:
 		var tag := "g1" if gauge == G1 else "g2"
-		_strip_line("s3_%s_nose" % tag, Vector3(gauge.north, 0, WEIR_N), Vector3(gauge.south, 0, WEIR_S), Vector3(0.3, 0, 0))
-		_strip_line("s3_%s_land" % tag, Vector3(gauge.land, 0, WEIR_N), Vector3(gauge.land, 0, WEIR_S), Vector3(-0.3, 0, 0))
-		_gauge_ticks("s3_%s" % tag, gauge.land, gauge.north, gauge.south, WEIR_N, WEIR_S, 0.0, true)
+		_strip_line("s4_%s_nose" % tag, Vector3(gauge.north, 0, WEIR_N), Vector3(gauge.south, 0, WEIR_S), Vector3(0.3, 0, 0))
+		_strip_line("s4_%s_land" % tag, Vector3(gauge.land, 0, WEIR_N), Vector3(gauge.land, 0, WEIR_S), Vector3(-0.3, 0, 0))
+		_gauge_ticks("s4_%s" % tag, gauge.land, gauge.north, gauge.south, WEIR_N, WEIR_S, 0.0, true)
 
 func _pump_bend() -> void:
-	# stage 4: a quarter ring turning right. the inside band (r 4 to 12) is walkable all the
+	# stage 5: a quarter ring turning right. the inside band (r 4 to 12) is walkable all the
 	# way round. the outside band has a 30 degree notch, 8.3 m across on the middle line; a
 	# short jump drops onto a slope that climbs back to the inside band.
 	var notch_y := TRACK_Y - PIT
-	for a: float in range(0, 90, 10):
-		var b := a + 10.0
-		_ring_piece("s4_inside_%02d" % int(a), BEND_R, Vector3.BACK, -1.0, BEND_R_IN, BEND_R_MID, a, b, TRACK_Y, TRACK_Y, &"track", 4)
+	var cuts: Array[float] = []
+	for a: float in range(0, 100, 10):
+		cuts.append(a)
+	for a: float in NOTCH:
+		if not cuts.has(a):
+			cuts.append(a)
+	cuts.sort()
+	for k: int in cuts.size() - 1:
+		var a := cuts[k]
+		var b := cuts[k + 1]
+		_ring_piece("s5_inside_%02d" % int(a), BEND_R, Vector3.BACK, -1.0, BEND_R_IN, BEND_R_MID, a, b, TRACK_Y, TRACK_Y, &"track", 5)
 		if a >= NOTCH[0] and b <= NOTCH[1]:
-			_ring_piece("s4_notch_%02d" % int(a), BEND_R, Vector3.BACK, -1.0, BEND_R_MID, BEND_R_OUT, a, b, TRACK_Y, notch_y, &"catch", -1, BASE, "catch")
+			_ring_piece("s5_notch_%02d" % int(a), BEND_R, Vector3.BACK, -1.0, BEND_R_MID, BEND_R_OUT, a, b, TRACK_Y, notch_y, &"catch", -1, BASE, "catch")
 		else:
-			_ring_piece("s4_outside_%02d" % int(a), BEND_R, Vector3.BACK, -1.0, BEND_R_MID, BEND_R_OUT, a, b, TRACK_Y, TRACK_Y, &"landing", 4)
-		_ring_wall("s4_inner_%02d" % int(a), BEND_R, Vector3.BACK, -1.0, BEND_R_IN - WALL, BEND_R_IN, a, b, notch_y)
-		_ring_wall("s4_outer_%02d" % int(a), BEND_R, Vector3.BACK, -1.0, BEND_R_OUT, BEND_R_OUT + WALL, a, b, notch_y)
+			_ring_piece("s5_outside_%02d" % int(a), BEND_R, Vector3.BACK, -1.0, BEND_R_MID, BEND_R_OUT, a, b, TRACK_Y, TRACK_Y, &"landing", 5)
+		_ring_wall("s5_inner_%02d" % int(a), BEND_R, Vector3.BACK, -1.0, BEND_R_IN - WALL, BEND_R_IN, a, b, notch_y)
+		_ring_wall("s5_outer_%02d" % int(a), BEND_R, Vector3.BACK, -1.0, BEND_R_OUT, BEND_R_OUT + WALL, a, b, notch_y)
 	for edge: float in NOTCH:
 		var inner := _ring_point(BEND_R, Vector3.BACK, -1.0, BEND_R_MID, edge)
 		var outer := _ring_point(BEND_R, Vector3.BACK, -1.0, BEND_R_OUT, edge)
-		_strip_line("s4_notch_nose_%02d" % int(edge), inner, outer, (_ring_point(BEND_R, Vector3.BACK, -1.0, 16.0, edge + (-0.6 if edge == NOTCH[0] else 0.6)) - _ring_point(BEND_R, Vector3.BACK, -1.0, 16.0, edge)).normalized() * 0.3)
+		_strip_line("s5_notch_nose_%02d" % int(edge), inner, outer, (_ring_point(BEND_R, Vector3.BACK, -1.0, 16.0, edge + (-0.6 if edge == NOTCH[0] else 0.6)) - _ring_point(BEND_R, Vector3.BACK, -1.0, 16.0, edge)).normalized() * 0.3)
 	for r: float in [14.0, 16.0, 19.0]:
 		var p := _ring_point(BEND_R, Vector3.BACK, -1.0, r, NOTCH[0] - 1.5)
-		_floor_label("s4_notch_r%02d" % int(r), p, -deg_to_rad(NOTCH[0]) + PI * 0.5, _gap_text(2.0 * r * sin(deg_to_rad(NOTCH[1] - NOTCH[0]) * 0.5)), 0.009)
+		_floor_label("s5_notch_r%02d" % int(r), p, -deg_to_rad(NOTCH[0]) + PI * 0.5, _gap_text(2.0 * r * sin(deg_to_rad(NOTCH[1] - NOTCH[0]) * 0.5)), 0.009)
 
 func _tail_race() -> void:
-	# stage 5: the last gauge, 1.5 m down onto the tailwater platform: 3.5 m on the east
+	# stage 6: the last gauge, 1.5 m down onto the tailwater platform: 3.5 m on the east
 	# (inside) edge, 14 m on the west (outside) edge, where a fast runner leaves the bend.
 	var pit_y := TAIL_Y - PIT
-	_solid("s5_runin", [Vector3(TAIL_W, 0, -203.5), Vector3(TAIL_E, 0, -203.5), Vector3(TAIL_E, 0, G3.east), Vector3(TAIL_W, 0, G3.west)], BASE, &"track", 5, "route")
-	_solid("s5_pit", [Vector3(TAIL_W, pit_y, G3.west), Vector3(TAIL_E, pit_y, G3.east), Vector3(TAIL_E, pit_y, G3.land), Vector3(TAIL_W, pit_y, G3.land)], BASE, &"catch", -1, "catch")
-	_deck("s5_platform", TAIL_W, TAIL_E, G3.land, TAIL_END, TAIL_Y, &"landing", -1)
+	_solid("s6_runin", [Vector3(TAIL_W, 0, TAIL_START), Vector3(TAIL_E, 0, TAIL_START), Vector3(TAIL_E, 0, G3.east), Vector3(TAIL_W, 0, G3.west)], BASE, &"track", 6, "route")
+	_solid("s6_pit", [Vector3(TAIL_W, pit_y, G3.west), Vector3(TAIL_E, pit_y, G3.east), Vector3(TAIL_E, pit_y, G3.land), Vector3(TAIL_W, pit_y, G3.land)], BASE, &"catch", -1, "catch")
+	_deck("s6_platform", TAIL_W, TAIL_E, G3.land, TAIL_END, TAIL_Y, &"landing", -1)
 	# the east lane, 4 m down at the pit: its ramp climbs north back to the run-in.
 	var lane := TAIL_E + 4.0
-	_deck("s5_lane_pit", TAIL_E, lane, G3.east, G3.land, pit_y, &"catch", -1, BASE, "catch")
-	_ramp_z("s5_lane_ramp", TAIL_E, lane, G3.east, -212.0, pit_y, TRACK_Y, &"return", -1, "recovery")
-	_deck("s5_lane_top", TAIL_E, lane, -212.0, -207.5, TRACK_Y, &"return", -1, BASE, "recovery")
-	_wall_line("s5_west", Vector3(TAIL_W, 0, -203.5), Vector3(TAIL_W, 0, TAIL_END), Vector2(-1, 0), TRAINING)
-	_wall_line("s5_east_head", Vector3(TAIL_E, 0, -203.5), Vector3(TAIL_E, 0, -207.5), Vector2(1, 0), TRAINING)
-	_wall_line("s5_lane_north", Vector3(TAIL_E, 0, -207.5), Vector3(lane + WALL, 0, -207.5), Vector2(0, 1), TRAINING)
-	_wall_line("s5_lane_east", Vector3(lane, 0, -207.5), Vector3(lane, 0, G3.land - WALL), Vector2(1, 0), TRAINING)
-	_wall_line("s5_lane_south", Vector3(TAIL_E, TAIL_Y, G3.land), Vector3(lane, TAIL_Y, G3.land), Vector2(0, -1), TRAINING + 1.5)
-	_wall_line("s5_east", Vector3(TAIL_E, TAIL_Y, G3.land), Vector3(TAIL_E, TAIL_Y, TAIL_END), Vector2(1, 0), TRAINING)
-	_wall_line("s5_end", Vector3(TAIL_W - WALL, TAIL_Y, TAIL_END), Vector3(TAIL_E + WALL, TAIL_Y, TAIL_END), Vector2(0, -1), TRAINING)
-	_strip_line("s5_nose", Vector3(TAIL_W, 0, G3.west), Vector3(TAIL_E, 0, G3.east), Vector3(0, 0, 0.3))
-	_strip_line("s5_land", Vector3(TAIL_W, TAIL_Y, G3.land), Vector3(TAIL_E, TAIL_Y, G3.land), Vector3(0, 0, -0.3))
-	_gauge_ticks("s5_g3", G3.land, G3.west, G3.east, TAIL_W, TAIL_E, -TAIL_Y, false)
+	var top := TAIL_START - 8.5
+	_deck("s6_lane_pit", TAIL_E, lane, G3.east, G3.land, pit_y, &"catch", -1, BASE, "catch")
+	_ramp_z("s6_lane_ramp", TAIL_E, lane, G3.east, top, pit_y, TRACK_Y, &"return", -1, "recovery")
+	_deck("s6_lane_top", TAIL_E, lane, top, TAIL_START - 4.0, TRACK_Y, &"return", -1, BASE, "recovery")
+	_wall_line("s6_west", Vector3(TAIL_W, 0, TAIL_START), Vector3(TAIL_W, 0, TAIL_END), Vector2(-1, 0), TRAINING)
+	_wall_line("s6_east_head", Vector3(TAIL_E, 0, TAIL_START), Vector3(TAIL_E, 0, TAIL_START - 4.0), Vector2(1, 0), TRAINING)
+	_wall_line("s6_lane_north", Vector3(TAIL_E, 0, TAIL_START - 4.0), Vector3(lane + WALL, 0, TAIL_START - 4.0), Vector2(0, 1), TRAINING)
+	_wall_line("s6_lane_east", Vector3(lane, 0, TAIL_START - 4.0), Vector3(lane, 0, G3.land - WALL), Vector2(1, 0), TRAINING)
+	_wall_line("s6_lane_south", Vector3(TAIL_E, TAIL_Y, G3.land), Vector3(lane, TAIL_Y, G3.land), Vector2(0, -1), TRAINING + 1.5)
+	_wall_line("s6_east", Vector3(TAIL_E, TAIL_Y, G3.land), Vector3(TAIL_E, TAIL_Y, TAIL_END), Vector2(1, 0), TRAINING)
+	_wall_line("s6_end", Vector3(TAIL_W - WALL, TAIL_Y, TAIL_END), Vector3(TAIL_E + WALL, TAIL_Y, TAIL_END), Vector2(0, -1), TRAINING)
+	_strip_line("s6_nose", Vector3(TAIL_W, 0, G3.west), Vector3(TAIL_E, 0, G3.east), Vector3(0, 0, 0.3))
+	_strip_line("s6_land", Vector3(TAIL_W, TAIL_Y, G3.land), Vector3(TAIL_E, TAIL_Y, G3.land), Vector3(0, 0, -0.3))
+	_gauge_ticks("s6_g3", G3.land, G3.west, G3.east, TAIL_W, TAIL_E, -TAIL_Y, false)
 	# the finish band across the platform, with 11.5 m to stop beyond it.
-	_finish_box = AABB(Vector3(TAIL_W, TAIL_Y - 0.1, -240.0), Vector3(TAIL_E - TAIL_W, 4.0, 4.0))
-	finish_position = Vector3(-86, TAIL_Y, -246)
-	_strip_x("s5_finish_a", TAIL_W, TAIL_E, -236.0, -0.4, TAIL_Y)
-	_strip_x("s5_finish_b", TAIL_W, TAIL_E, -240.0, 0.4, TAIL_Y)
+	var band := G3.land - 4.5
+	_finish_box = AABB(Vector3(TAIL_W, TAIL_Y - 0.1, band - 4.0), Vector3(TAIL_E - TAIL_W, 4.0, 4.0))
+	finish_position = Vector3((TAIL_W + TAIL_E) * 0.5, TAIL_Y, band - 10.0)
+	_strip_x("s6_finish_a", TAIL_W, TAIL_E, band, -0.4, TAIL_Y)
+	_strip_x("s6_finish_b", TAIL_W, TAIL_E, band - 4.0, 0.4, TAIL_Y)
 	_beacon = MeshInstance3D.new()
 	_beacon.name = "FinishBeacon"
 	var bar := BoxMesh.new()
@@ -319,10 +368,10 @@ func _tail_race() -> void:
 	glow.emission = Color("d9a441")
 	glow.emission_energy_multiplier = 0.4
 	_beacon.material_override = glow
-	_beacon.position = Vector3(-86, TAIL_Y + 6.0, -238)
+	_beacon.position = Vector3((TAIL_W + TAIL_E) * 0.5, TAIL_Y + 6.0, band - 2.0)
 	add_child(_beacon)
 	for x: float in [TAIL_W - 0.6, TAIL_E + 0.6]:
-		_prism_visual([Vector3(x - 0.25, TAIL_Y + 6.25, -237.75), Vector3(x + 0.25, TAIL_Y + 6.25, -237.75), Vector3(x + 0.25, TAIL_Y + 6.25, -238.25), Vector3(x - 0.25, TAIL_Y + 6.25, -238.25)], TAIL_Y - 2.0, &"steel")
+		_prism_visual([Vector3(x - 0.25, TAIL_Y + 6.25, band - 1.75), Vector3(x + 0.25, TAIL_Y + 6.25, band - 1.75), Vector3(x + 0.25, TAIL_Y + 6.25, band - 2.25), Vector3(x - 0.25, TAIL_Y + 6.25, band - 2.25)], TAIL_Y - 2.0, &"steel")
 
 # --- progress, finish and hints --------------------------------------------------------------
 
@@ -331,50 +380,54 @@ func _define_progress() -> void:
 	# so a flight over a gap never collects the deck beyond it. a pose is where that stage's
 	# practice starts and where a fall out of the envelope puts the runner back.
 	spawn = _pose(Vector3(0, TRACK_Y, 4), 0.0)
+	var mid := (WEIR_N + WEIR_S) * 0.5
 	checkpoints = [
 		{"pose": spawn, "title": "Gatehouse"},
-		{"pose": _pose(Vector3(-1, TRACK_Y, -112), 0.0), "title": "Stop logs", "radius": 0.0},
-		{"pose": _pose(_ring_point(BEND_L, Vector3.RIGHT, 1.0, 14.0, 6.0), deg_to_rad(6.0)), "title": "Valve bend", "radius": 0.0},
-		{"pose": _pose(Vector3(-17, TRACK_Y, -191.5), PI * 0.5), "title": "Weir gauges", "radius": 0.0},
-		{"pose": _pose(Vector3(-63, TRACK_Y, -191.5), PI * 0.5), "title": "Pump bend", "radius": 0.0},
-		{"pose": _pose(Vector3(-86, TRACK_Y, -206.5), 0.0), "title": "Tail race", "radius": 0.0},
+		{"pose": _pose(Vector3(-1, TRACK_Y, -12), 0.0), "title": "Stop logs", "radius": 0.0},
+		{"pose": _pose(_ring_point(BEND_L, Vector3.RIGHT, 1.0, 17.0, 6.0), deg_to_rad(6.0)), "title": "Valve bend", "radius": 0.0},
+		{"pose": _pose(Vector3(RUNWAY_START - 4.0, TRACK_Y, mid), PI * 0.5), "title": "Penstock straight", "radius": 0.0},
+		{"pose": _pose(Vector3(RUNWAY_END - 3.0, TRACK_Y, mid), PI * 0.5), "title": "Weir gauges", "radius": 0.0},
+		{"pose": _pose(Vector3(G2.land - 5.0, TRACK_Y, mid), PI * 0.5), "title": "Pump bend", "radius": 0.0},
+		{"pose": _pose(Vector3((TAIL_W + TAIL_E) * 0.5, TRACK_Y, TAIL_START - 3.0), 0.0), "title": "Tail race", "radius": 0.0},
 	]
 	segment_bounds = [
-		AABB(Vector3(-9, -4, RUNWAY_END), Vector3(18, 30, 8 - RUNWAY_END)),
-		AABB(Vector3(-9, -4, BEND_START), Vector3(18, 30, RUNWAY_END - BEND_START)),
-		AABB(Vector3(-37, -4, -200), Vector3(46, 30, 200 + BEND_START)),
-		AABB(Vector3(G2.land, -4, -204), Vector3(-14 - G2.land, 30, 21)),
-		AABB(Vector3(-95, -4, -204), Vector3(37, 30, 21)),
-		AABB(Vector3(-95, -6, TAIL_END), Vector3(22, 30, -203.5 - TAIL_END)),
+		AABB(Vector3(-9, -4, RUNIN_END), Vector3(18, 30, 8 - RUNIN_END)),
+		AABB(Vector3(-9, -4, BEND_START), Vector3(18, 30, RUNIN_END - BEND_START)),
+		AABB(Vector3(RUNWAY_START - BEND_L_OUT - 1.0, -4, WEIR_S - 1.0), Vector3(BEND_L_OUT + 10.0, 30, BEND_START - WEIR_S + 1.0)),
+		AABB(Vector3(RUNWAY_END, -4, WEIR_S - 1.0), Vector3(RUNWAY_START - RUNWAY_END, 30, 18)),
+		AABB(Vector3(WEIR_END, -4, WEIR_S - 5.0), Vector3(RUNWAY_END - WEIR_END, 30, 22)),
+		AABB(Vector3(TAIL_W - 1.0, -4, TAIL_START - 1.0), Vector3(WEIR_END - TAIL_W + 1.0, 30, WEIR_N - TAIL_START + 2.0)),
+		AABB(Vector3(TAIL_W - 1.0, -6, TAIL_END), Vector3(TAIL_E - TAIL_W + 6.0, 30, TAIL_START - TAIL_END)),
 	]
-	water_audio_sources = [Vector3(-30, -6, -120), Vector3(-110, -6, -230)]
+	water_audio_sources = [Vector3(-40, -6, -40), Vector3(-220, -6, -150)]
 	var bl := func(r: float, a: float) -> Vector3: return _ring_point(BEND_L, Vector3.RIGHT, 1.0, r, a)
 	var br := func(r: float, a: float) -> Vector3: return _ring_point(BEND_R, Vector3.BACK, -1.0, r, a)
-	var front: Array = [Vector3(0, 0, 4), Vector3(-1, 0, RUNWAY_END)]
+	var front: Array = [Vector3(0, 0, 4), Vector3(-1, 0, RUNIN_END)]
 	for b: Array in BLOCKS:
 		front.append(Vector3((float(b[2]) + float(b[3])) * 0.5, 0, float(b[0]) - float(b[1]) * 0.5))
 	routes = {
-		"basic": front + [bl.call(10.0, 10.0), bl.call(9.0, 34.0), bl.call(9.0, 66.0), bl.call(10.0, 86.0),
-			Vector3(-24, 0, -185.5), Vector3(-34, 0, -185.0), Vector3(-50, 0, -197.0), Vector3(-58, 0, -197.5), Vector3(-70, 0, -196),
-			br.call(8.0, 20.0), br.call(8.0, 45.0), br.call(8.0, 70.0), Vector3(-81, 0, -212), Vector3(-80, 0, G3.east), Vector3(-80, TAIL_Y, -238), Vector3(-82, TAIL_Y, -244)],
-		"advanced": front + [bl.call(17.5, 12.0), bl.call(18.5, 34.0), bl.call(18.5, 66.0), bl.call(17.5, 86.0),
-			Vector3(-22, 0, -198.0), Vector3(-34, 0, -198.0), Vector3(-44, 0, -185.0), Vector3(-58, 0, -185.0), Vector3(-70, 0, -186),
-			br.call(16.0, 20.0), br.call(16.0, 45.0), br.call(16.0, 70.0), Vector3(-91, 0, -210), Vector3(-92, 0, G3.west), Vector3(-92, TAIL_Y, -238), Vector3(-88, TAIL_Y, -244)],
+		"basic": front + [bl.call(13.0, 13.0), bl.call(12.0, 50.0), bl.call(13.0, 84.0), Vector3(RUNWAY_START - 20.0, 0, mid), Vector3(RUNWAY_END, 0, -92.0),
+			Vector3(G1.north - 1.0, 0, -91.0), Vector3(G1.land - 10.0, 0, -104.0), Vector3(G2.land - 4.0, 0, -104.0),
+			br.call(8.0, 20.0), br.call(8.0, 45.0), br.call(8.0, 70.0), Vector3(TAIL_E - 3.0, 0, -118.0), Vector3(TAIL_E - 3.0, 0, G3.east), Vector3(TAIL_E - 3.0, TAIL_Y, G3.land - 6.5), Vector3(TAIL_E - 5.0, TAIL_Y, G3.land - 12.0)],
+		"advanced": front + [bl.call(20.0, 13.0), bl.call(22.0, 50.0), bl.call(20.0, 84.0), Vector3(RUNWAY_START - 20.0, 0, mid), Vector3(RUNWAY_END, 0, -104.0),
+			Vector3(G1.south - 1.0, 0, -105.0), Vector3(G1.land - 10.0, 0, -91.0), Vector3(G2.land - 4.0, 0, -91.0),
+			br.call(16.0, 20.0), br.call(16.0, 45.0), br.call(16.0, 70.0), Vector3(TAIL_W + 2.0, 0, -118.0), Vector3(TAIL_W + 2.0, 0, G3.west), Vector3(TAIL_W + 2.0, TAIL_Y, G3.land - 6.5), Vector3(TAIL_W + 6.0, TAIL_Y, G3.land - 12.0)],
 	}
 	routes["ordinary"] = routes["basic"]
-	routes["block_recovery"] = [Vector3(-2, TRACK_Y - PIT, -146), Vector3(6, TRACK_Y - PIT, -146), Vector3(6, TRACK_Y - PIT, -140), Vector3(6, TRACK_Y, RUNWAY_END), Vector3(0, 0, -124)]
-	routes["bend_recovery"] = [bl.call(14.0, 34.0) + Vector3.DOWN * PIT, bl.call(21.0, 34.0) + Vector3.DOWN * PIT, bl.call(21.0, 2.0) + Vector3.DOWN * PIT, Vector3(6, TRACK_Y - PIT, -150), Vector3(6, TRACK_Y - PIT, -140), Vector3(6, TRACK_Y, RUNWAY_END)]
-	routes["g1_recovery"] = [Vector3(-30, -PIT, -192), Vector3(-30, -PIT, -201.5), Vector3(-15, 0, -201.5), Vector3(-15, 0, -197)]
-	routes["g2_recovery"] = [Vector3(-55, -PIT, -190), Vector3(-56, -PIT, -201.5), Vector3(-40, 0, -201.5), Vector3(-40, 0, -197)]
+	var pit := TRACK_Y - PIT
+	routes["block_recovery"] = [Vector3(-2, pit, -46), Vector3(6, pit, -46), Vector3(6, pit, RUNIN_END - 12.0), Vector3(6, TRACK_Y, RUNIN_END), Vector3(0, 0, RUNIN_END + 4.0)]
+	routes["bend_recovery"] = [bl.call(17.0, 34.0) + Vector3.DOWN * PIT, bl.call(25.0, 34.0) + Vector3.DOWN * PIT, bl.call(25.0, 2.0) + Vector3.DOWN * PIT, Vector3(6, pit, -50), Vector3(6, pit, RUNIN_END - 12.0), Vector3(6, TRACK_Y, RUNIN_END + 2.0)]
+	routes["g1_recovery"] = [Vector3(G1.land + 4.0, pit, -98), Vector3(G1.land + 4.0, pit, WEIR_S - 2.0), Vector3(RUNWAY_END - 1.0, 0, WEIR_S - 2.0), Vector3(RUNWAY_END - 1.0, 0, WEIR_S + 1.0)]
+	routes["g2_recovery"] = [Vector3(G2.land + 3.0, pit, -96), Vector3(G2.land + 3.0, pit, WEIR_S - 2.0), Vector3(G1.land - 9.0, 0, WEIR_S - 2.0), Vector3(G1.land - 9.0, 0, WEIR_S + 1.0)]
 	routes["notch_recovery"] = [br.call(17.0, 45.0) + Vector3.DOWN * 1.6, br.call(9.0, 45.0)]
-	routes["g3_recovery"] = [Vector3(-86, TAIL_Y - PIT, -229), Vector3(-76, TAIL_Y - PIT, -229), Vector3(-76, 0, -210), Vector3(-80, 0, -209)]
+	routes["g3_recovery"] = [Vector3(TAIL_E - 4.0, TAIL_Y - PIT, G3.land + 2.5), Vector3(TAIL_E + 2.0, TAIL_Y - PIT, G3.land + 2.5), Vector3(TAIL_E + 2.0, 0, TAIL_START - 6.0), Vector3(TAIL_E - 2.0, 0, TAIL_START - 5.0)]
 	_declare_gaps()
 
 func _declare_gaps() -> void:
 	# p / intended entry speeds are design choices for the advanced lines, not measurements.
 	var bl := func(r: float, a: float) -> Vector3: return _ring_point(BEND_L, Vector3.RIGHT, 1.0, r, a)
 	var br := func(r: float, a: float) -> Vector3: return _ring_point(BEND_R, Vector3.BACK, -1.0, r, a)
-	var previous := RUNWAY_END
+	var previous := RUNIN_END
 	var prev_x := Vector2(-8.0, 8.0)
 	for i: int in BLOCKS.size():
 		var b: Array = BLOCKS[i]
@@ -389,27 +442,29 @@ func _declare_gaps() -> void:
 		_gap("block_%d" % (i + 1), "stop_logs", "basic", start, land, 0.0, "block_recovery", 0.0)
 		previous = float(b[0]) - float(b[1])
 		prev_x = Vector2(float(b[2]), float(b[3]))
-	_gap("block_to_bend", "stop_logs", "basic", Vector3(1.5, 0, previous), Vector3(1.5, 0, BEND_START), 0.0, "block_recovery", 0.0)
+	_gap("block_to_bend", "stop_logs", "basic", Vector3(0.5, 0, previous), Vector3(0.5, 0, BEND_START), 0.0, "block_recovery", 0.0)
 	for i: int in BEND_L_ISLANDS.size() - 1:
 		var from: float = BEND_L_ISLANDS[i][1]
 		var to: float = BEND_L_ISLANDS[i + 1][0]
-		_gap("bend_%d_inside" % (i + 1), "valve_bend", "basic", bl.call(8.0, from), bl.call(8.0, to), 0.0, "bend_recovery", 0.0)
-		_gap("bend_%d_outside" % (i + 1), "valve_bend", "advanced", bl.call(19.0, from), bl.call(19.0, to), 0.0, "bend_recovery", 420.0)
+		_gap("bend_%d_inside" % (i + 1), "valve_bend", "basic", bl.call(12.0, from), bl.call(12.0, to), 0.0, "bend_recovery", 0.0)
+		# the second gap is a rhythm gap: 4.0 m even on the outside, so it is declared basic.
+		var wide := to - from > 12.0
+		_gap("bend_%d_outside" % (i + 1), "valve_bend", "advanced" if wide else "basic", bl.call(23.0, from), bl.call(23.0, to), 0.0, "bend_recovery", 420.0 if wide else 0.0)
 	# gauges are judged 1 m in from the side a line uses, where a 0.4 m body can run.
 	for z: float in [WEIR_N - 1.0, WEIR_S + 1.0]:
 		var k := (z - WEIR_N) / (WEIR_S - WEIR_N)
-		var north := z > -191.5
+		var north := z > (WEIR_N + WEIR_S) * 0.5
 		_gap("g1_north" if north else "g1_south", "weir_gauges", "basic" if north else "advanced", Vector3(lerpf(G1.north, G1.south, k), 0, z), Vector3(G1.land, 0, z), 0.0, "g1_recovery", 0.0 if north else 540.0)
 		_gap("g2_north" if north else "g2_south", "weir_gauges", "advanced" if north else "basic", Vector3(lerpf(G2.north, G2.south, k), 0, z), Vector3(G2.land, 0, z), 0.0, "g2_recovery", 720.0 if north else 0.0)
 	_gap("notch_middle", "pump_bend", "advanced", br.call(16.0, NOTCH[0]), br.call(16.0, NOTCH[1]), 0.0, "notch_recovery", 580.0)
 	_gap("notch_outer", "pump_bend", "advanced", br.call(19.5, NOTCH[0]), br.call(19.5, NOTCH[1]), 0.0, "notch_recovery", 680.0)
 	for x: float in [TAIL_E - 1.0, TAIL_W + 1.0]:
 		var edge := lerpf(G3.west, G3.east, (x - TAIL_W) / (TAIL_E - TAIL_W))
-		var east := x > -86.0
+		var east := x > (TAIL_W + TAIL_E) * 0.5
 		_gap("g3_east" if east else "g3_west", "tail_race", "basic" if east else "advanced", Vector3(x, 0, edge), Vector3(x, TAIL_Y, G3.land), 0.0, "g3_recovery", 0.0 if east else 700.0)
 
 func _gap(label: String, section: String, line: String, edge: Vector3, land: Vector3, climb: float, recovery: String, intended_ups: float) -> void:
-	# a declared jump, judged with the provisional vanilla figures, feet centre to feet centre.
+	# a declared jump, judged with the vanilla figures, feet centre to feet centre: screening.
 	var distance := Vector2(land.x - edge.x, land.z - edge.z).length()
 	var drop := edge.y - land.y
 	var t := flight_time(drop)
@@ -462,9 +517,9 @@ func course_manifest() -> Dictionary:
 		stages.append({"title": point.title, "pose": _v((point.pose as Transform3D).origin)})
 	return {
 		"level_id": LEVEL_ID, "level_name": LEVEL_NAME, "level_version": LEVEL_VERSION, "variant": variant,
-		"units": {"u_m": U, "note": "1 u = 0.0254 m (P, pending the source researcher)"},
-		"vanilla_model": VANILLA, "judging": {"landing_margin_m": LANDING, "early_press_s": EARLY, "hull_credit": "none: feet centre to feet centre, conservative for a 32 u box"},
-		"track": {"width_m": WIDTH, "width_u": roundi(WIDTH / U), "runway_m": -RUNWAY_END, "runway_u": roundi(-RUNWAY_END / U), "pit_depth_m": PIT, "training_wall_m": TRAINING},
+		"units": {"u_m": U, "note": "1 u = 0.0254 m (hammer inch, SOURCE-REFERENCE.md)"},
+		"vanilla_model": VANILLA, "judging": {"landing_margin_m": LANDING, "early_press_s": EARLY, "hull_credit": "none: feet centre to feet centre, conservative for a 32 u box; screening only, driven runs decide"},
+		"track": {"width_m": WIDTH, "width_u": roundi(WIDTH / U), "runway_m": RUNWAY_START - RUNWAY_END, "runway_u": roundi((RUNWAY_START - RUNWAY_END) / U), "pit_depth_m": PIT, "training_wall_m": TRAINING},
 		"stages": stages, "finish": {"title": finish_title, "box": [_v(_finish_box.position), _v(_finish_box.size)]},
 		"gaps": gaps, "gauges": gauges, "recovery": "every pit walks back to the take-off deck of the jump it caught; nothing in a pit leads forward",
 		"geometry_hash": geometry_hash(), "pieces": manifest.size(),
@@ -483,26 +538,28 @@ func segment_at(position: Vector3) -> int:
 	return 0
 
 func route_hint(stage: int, feet: Vector3) -> String:
-	if feet.y < TRACK_Y - 0.6 and feet.z < RUNWAY_END and feet.z > BEND_START - 23.0 and feet.x > -14.0:
-		return "In the pit: walk to the right-hand lane and up the ramp to the runway's end."
-	if feet.y < TRACK_Y - 0.6 and feet.z < WEIR_N and feet.z > WEIR_S - 5.0 and feet.x < -14.0 and feet.x > WEIR_END:
+	if feet.y < TRACK_Y - 0.6 and feet.z < RUNIN_END and feet.z > BEND_START - BEND_L_OUT - 1.0 and feet.x > RUNWAY_START - BEND_L_OUT - 1.0:
+		return "In the pit: walk to the right-hand lane and up the ramp to the run-in."
+	if feet.y < TRACK_Y - 0.6 and feet.z < WEIR_N and feet.z > WEIR_S - 5.0 and feet.x < RUNWAY_END and feet.x > WEIR_END:
 		return "In the gauge pit: walk to the south lane and up the ramp behind you."
-	if feet.y < TRACK_Y - 0.4 and feet.z < BEND_R.z + BEND_R_OUT and feet.x < -74.0 and feet.z > -203.5:
+	if feet.y < TRACK_Y - 0.4 and feet.z < BEND_R.z + BEND_R_OUT and feet.x < WEIR_END and feet.z > TAIL_START:
 		return "On the notch slope: walk in toward the pump house to rejoin the inside band."
-	if feet.y < TAIL_Y - 0.6 and feet.z < -212.0 and feet.z > G3.land - 0.1:
+	if feet.y < TAIL_Y - 0.6 and feet.z < TAIL_START - 8.0 and feet.z > G3.land - 0.1:
 		return "In the tail pit: walk east and up the lane ramp to the run-in."
 	match stage:
 		0:
-			return "Build speed down the straight: hop, A/D with the mouse. The wall marks are 16 m apart."
+			return "Run in and line up on the first block. R restarts here."
 		1:
 			return "Hop the stop logs. Each gap is half a metre wider; the last three zig left and right."
 		2:
 			return "Strafe left round the bend. Inside gaps are short; the outside keeps speed and needs it."
 		3:
-			return "Pick a width at each gauge: the paint says what it needs. The wide ends alternate sides."
+			return "Build speed down the straight: hop, A/D with the mouse. The wall marks are 16 m apart."
 		4:
-			return "Round to the right. Walk the inside band, or carry speed over the outer notch."
+			return "Pick a width at each gauge: the paint says what it needs. The wide ends alternate sides."
 		5:
+			return "Round to the right. Walk the inside band, or carry speed over the outer notch."
+		6:
 			return "Last gauge, 1.5 m down: 3.5 m on the right, 14 m on the left. Finish on the platform."
 	return "Cross the line on the platform."
 
@@ -788,23 +845,27 @@ func _environment() -> void:
 func _scenery() -> void:
 	# the dam rises east of the yard, its reservoir behind; the yard sits on the bench at its
 	# foot over the tailwater. none of it can be reached over the training walls.
-	_water(Vector3(-50, -7.6, -130), Vector2(420, 420), Color("3c6163"))
-	# p / the dam stands 40 m east of the runway, its 1:1.2 downstream face toward the yard.
+	_water(Vector3(-120, -7.6, -100), Vector2(500, 420), Color("3c6163"))
+	# p / the dam stands 40 m east of the gatehouse, its 1:1.2 downstream face toward the yard.
 	_prism_visual([Vector3(78, 36, 40), Vector3(92, 36, 40), Vector3(92, 36, -300), Vector3(78, 36, -300)], -8.0, &"concrete")
 	_prism_visual([Vector3(48, -6, 40), Vector3(78, 36, 40), Vector3(78, 36, -300), Vector3(48, -6, -300)], -8.0, &"concrete")
 	_water(Vector3(160, 33.5, -130), Vector2(140, 360), Color("4b7377"))
 	# the gatehouse behind the start, and a pump house in the pump bend's core.
 	_prism_visual([Vector3(-9, 9, 18), Vector3(9, 9, 18), Vector3(9, 9, 9), Vector3(-9, 9, 9)], -2.0, &"brick")
 	_prism_visual([Vector3(-9.6, 9.7, 18.6), Vector3(9.6, 9.7, 18.6), Vector3(9.6, 9.7, 8.4), Vector3(-9.6, 9.7, 8.4)], 9.0, &"concrete")
-	_prism_visual([Vector3(-77, 9, -200.5), Vector3(-71, 9, -200.5), Vector3(-71, 9, -206.5), Vector3(-77, 9, -206.5)], -6.0, &"brick")
+	var pump := BEND_R + Vector3(-3, 0, -3)
+	_prism_visual([pump + Vector3(-3, 9, 3), pump + Vector3(3, 9, 3), pump + Vector3(3, 9, -3), pump + Vector3(-3, 9, -3)], -6.0, &"brick")
 	# a valve tower inside the valve bend, and steel gantries over the straight as passing marks.
-	_prism_visual([Vector3(-16.5, 9, -179.5), Vector3(-12.5, 9, -179.5), Vector3(-12.5, 9, -175.5), Vector3(-16.5, 9, -175.5)], -6.0, &"brick")
-	_prism_visual([Vector3(-17, 9.6, -180), Vector3(-12, 9.6, -180), Vector3(-12, 9.6, -175), Vector3(-17, 9.6, -175)], 9.0, &"concrete")
-	for z: float in [-32.0, -64.0, -96.0]:
-		for x: float in [-9.0, 9.0]:
+	var tower := BEND_L + Vector3(-3, 0, 3)
+	_prism_visual([tower + Vector3(-3, 9, 3), tower + Vector3(3, 9, 3), tower + Vector3(3, 9, -3), tower + Vector3(-3, 9, -3)], -6.0, &"brick")
+	_prism_visual([tower + Vector3(-3.5, 9.6, 3.5), tower + Vector3(3.5, 9.6, 3.5), tower + Vector3(3.5, 9.6, -3.5), tower + Vector3(-3.5, 9.6, -3.5)], 9.0, &"concrete")
+	for x: float in [RUNWAY_START - 32.0, RUNWAY_START - 64.0, RUNWAY_START - 96.0]:
+		for z: float in [WEIR_N + 1.0, WEIR_S - 1.0]:
 			_prism_visual([Vector3(x - 0.25, 9, z + 0.25), Vector3(x + 0.25, 9, z + 0.25), Vector3(x + 0.25, 9, z - 0.25), Vector3(x - 0.25, 9, z - 0.25)], 0.0, &"steel")
-		_prism_visual([Vector3(-9.6, 9.6, z + 0.35), Vector3(9.6, 9.6, z + 0.35), Vector3(9.6, 9.6, z - 0.35), Vector3(-9.6, 9.6, z - 0.35)], 8.8, &"ochre")
-	# the bench's own retaining faces under the decks, so the course reads as built, not floating.
-	_prism_visual([Vector3(-8.4, -0.02, 8.4), Vector3(8.4, -0.02, 8.4), Vector3(8.4, -0.02, -128), Vector3(-8.4, -0.02, -128)], -7.5, &"old_concrete")
-	_prism_visual([Vector3(-200, 20, 40), Vector3(-130, 2, 40), Vector3(-130, 2, -320), Vector3(-200, 20, -320)], -8.0, &"hill")
-	_prism_visual([Vector3(-200, 24, -320), Vector3(60, 24, -320), Vector3(60, 2, -275), Vector3(-200, 2, -275)], -8.0, &"hill")
+		_prism_visual([Vector3(x + 0.35, 9.6, WEIR_N + 1.6), Vector3(x + 0.35, 9.6, WEIR_S - 1.6), Vector3(x - 0.35, 9.6, WEIR_S - 1.6), Vector3(x - 0.35, 9.6, WEIR_N + 1.6)], 8.8, &"ochre")
+	# the bench's own retaining faces under the run-in and the straight, so the course reads
+	# as built, not floating.
+	_prism_visual([Vector3(-8.4, -0.02, 8.4), Vector3(8.4, -0.02, 8.4), Vector3(8.4, -0.02, RUNIN_END), Vector3(-8.4, -0.02, RUNIN_END)], -7.5, &"old_concrete")
+	_prism_visual([Vector3(RUNWAY_START, -0.02, WEIR_N + 0.4), Vector3(RUNWAY_START, -0.02, WEIR_S - 0.4), Vector3(RUNWAY_END, -0.02, WEIR_S - 0.4), Vector3(RUNWAY_END, -0.02, WEIR_N + 0.4)], -7.5, &"old_concrete")
+	_prism_visual([Vector3(-350, 20, 40), Vector3(-272, 2, 40), Vector3(-272, 2, -260), Vector3(-350, 20, -260)], -8.0, &"hill")
+	_prism_visual([Vector3(-350, 24, -260), Vector3(60, 24, -260), Vector3(60, 2, -205), Vector3(-350, 2, -205)], -8.0, &"hill")

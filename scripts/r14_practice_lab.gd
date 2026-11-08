@@ -5,12 +5,13 @@ extends SceneTree
 ## source movement). the hud measures every jump from actual take-off and landing positions.
 ## godot --path . --script res://scripts/r14_practice_lab.gd -- [--r14-runner=res://...]
 ##   [--stage=N] [--no-hud] [--practice-neutral]
-## keys: R restart from the gatehouse, F restart this stage, 1-6 practise stage N, Esc pause.
+## keys: R restart from the gatehouse, F restart this stage, 1-7 practise stage N, Esc pause.
 
 const LEVEL := preload("res://scripts/r14_practice_level.gd")
 const R12_MAIN := preload("res://scripts/spillway_main.gd")
 const SOURCE_RUNNER := "res://scripts/r14_source_player.gd"
 const STAND_IN := "res://scripts/momentum_carry_air_candidate.gd"
+const SOURCE_PRESETS := ["csgo_server", "csgo_vanilla"]
 
 class Lab:
 	extends Node3D
@@ -21,6 +22,13 @@ class Lab:
 	var runner_path: String = ""
 	var runner_label: String = ""
 	var source_preset: String = "csgo_server"
+	## the tape executor's game hook sets this before _ready: a source preset name selects
+	## the source runner's profile (and its physics rate), as --r14-preset= does.
+	var motor: String = ""
+	## the active runner's declared rate, read by the tape executor after _ready.
+	var physics_hz: int:
+		get:
+			return int(player.get("physics_hz")) if player != null and "physics_hz" in player else Engine.physics_ticks_per_second
 	var start_stage: int = 0
 	var show_hud: bool = true
 	var set_window_title: bool = true
@@ -67,6 +75,8 @@ class Lab:
 				start_stage = int(arg.trim_prefix("--stage="))
 			elif arg == "--no-hud":
 				show_hud = false
+		if SOURCE_PRESETS.has(motor):
+			source_preset = motor
 		_bind_lab_keys()
 		level = LEVEL.new()
 		level.name = "PenstockYard"
@@ -101,7 +111,7 @@ class Lab:
 				player.set(key, 0.0022)
 
 	func _bind_lab_keys() -> void:
-		for i: int in 6:
+		for i: int in 9:
 			var action := "lab_stage_%d" % (i + 1)
 			if InputMap.has_action(action):
 				InputMap.erase_action(action)
@@ -227,28 +237,45 @@ class Lab:
 		return ""
 
 	func _support_role() -> String:
+		var bodies := _supports()
+		return str(bodies[0].get_meta("surface", "")) if not bodies.is_empty() else ""
+
+	## the bodies the grounded runner stands on. move_and_slide runners report them as slide
+	## collisions; the source runner moves with move_and_collide and reports none, so for it a
+	## hull-sized slab at the feet asks the world (a 6 cm slab, 1 cm inside the hull's sides so
+	## a wall beside it is not counted).
+	func _supports() -> Array[Node]:
+		var out: Array[Node] = []
+		if "settings" in player and (player.get("settings") as Dictionary).has("hull_width"):
+			var width := float((player.get("settings") as Dictionary).hull_width) * LEVEL.U - 0.02
+			var slab := BoxShape3D.new()
+			slab.size = Vector3(width, 0.06, width)
+			var query := PhysicsShapeQueryParameters3D.new()
+			query.shape = slab
+			query.transform = Transform3D(Basis.IDENTITY, player.global_position + Vector3.DOWN * 0.02)
+			query.exclude = [player.get_rid()]
+			for hit: Dictionary in player.get_world_3d().direct_space_state.intersect_shape(query, 8):
+				var body := hit.collider as Node
+				if body != null and body.has_meta("surface") and str(body.get_meta("surface")) != "wall" and not out.has(body):
+					out.append(body)
+			return out
 		for i: int in player.get_slide_collision_count():
 			var contact := player.get_slide_collision(i)
 			for j: int in contact.get_collision_count():
 				var body := contact.get_collider(j) as Node
-				if body != null and contact.get_normal(j).y > 0.7:
-					return str(body.get_meta("surface", ""))
-		return ""
+				if body != null and contact.get_normal(j).y > 0.7 and not out.has(body):
+					out.append(body)
+		return out
 
 	func _collect(p: Vector3) -> void:
 		# p / the overflow main's rule: the next or a later stage, by standing on its deck.
 		if not player.call("is_grounded"):
 			return
-		var role := ""
 		var stage := -1
-		for i: int in player.get_slide_collision_count():
-			var contact := player.get_slide_collision(i)
-			for j: int in contact.get_collision_count():
-				var body := contact.get_collider(j) as Node
-				if body != null and contact.get_normal(j).y > 0.7:
-					stage = maxi(stage, int(body.get_meta("progress_stage", -1)))
-					role = str(body.get_meta("surface", ""))
-		if stage > checkpoint_index and role == "route":
+		for body: Node in _supports():
+			if str(body.get_meta("surface", "")) == "route":
+				stage = maxi(stage, int(body.get_meta("progress_stage", -1)))
+		if stage > checkpoint_index:
 			stage_times[stage - 1] = elapsed
 			checkpoint_index = stage
 
@@ -277,7 +304,7 @@ class Lab:
 		elif event is InputEventMouseButton and event.pressed and not paused and DisplayServer.get_name() != "headless":
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		else:
-			for i: int in 6:
+			for i: int in 9:
 				if event.is_action_pressed("lab_stage_%d" % (i + 1)) and i < stage_count():
 					practise(i)
 
@@ -321,7 +348,7 @@ class Lab:
 		if not last_jump.is_empty():
 			(_labels.jump as Label).text = "last jump %.2f m / %d u, %.2f s air\ntake-off %d u/s, landing %d u/s%s" % [last_jump.distance_m, roundi(last_jump.distance_u), last_jump.air_s,
 				roundi(last_jump.takeoff_ups), roundi(last_jump.landing_ups), ("\n" + str(last_jump.gap)) if not str(last_jump.gap).is_empty() else ""]
-		(_labels.hint as Label).text = str(level.call("route_hint", checkpoint_index, player.global_position)) + "\nR restart · F this stage · 1-6 stages · Esc pause"
+		(_labels.hint as Label).text = str(level.call("route_hint", checkpoint_index, player.global_position)) + "\nR restart · F this stage · 1-%d stages · Esc pause" % stage_count()
 		(_labels.hint as Label).position = Vector2(20, size.y - 64.0)
 
 func _initialize() -> void:
