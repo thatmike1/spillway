@@ -120,7 +120,7 @@ Settings plus one section per record identity. The identity is:
 - the timing rules (`r15-timing-1`)
 - map id, kind, level id, version and variant
 - the geometry hash and the stage titles
-- the preset, family and motor version (`r15-source-crouch-1`, or `r14-source-motion-3` for the
+- the preset, family and motor version (`r15-source-crouch-2`, or `r14-source-motion-3` for the
   stand-in)
 - the runner path and the rate
 - the running body's full physics fingerprint (the six duck settings included)

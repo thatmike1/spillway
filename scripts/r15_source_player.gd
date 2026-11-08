@@ -39,7 +39,7 @@ const DUCK_DEFAULTS := {
 	"duck_air_crop": false,
 }
 const MOTOR_ID := "r15_source_crouch"
-const MOTOR_VERSION := "r15-source-crouch-1"
+const MOTOR_VERSION := "r15-source-crouch-2"
 
 ## the hull is the duck hull.
 var ducked: bool = false
@@ -60,6 +60,9 @@ var _stand_probe: Dictionary = {}
 var _eye_u: float = 64.0
 var _prev_eye_u: float = 64.0
 var _eye_clamped: bool = false
+## a structural duck change waits until standing or a labelled reset. switching a normal
+## f2/f5 preset has identical duck geometry and therefore still applies immediately.
+var _deferred_duck_settings: Dictionary = {}
 
 func _init() -> void:
 	settings = with_duck(settings)
@@ -74,10 +77,19 @@ static func with_duck(cvars: Dictionary) -> Dictionary:
 	return out
 
 func apply_settings(next: Dictionary) -> void:
-	super(with_duck(next))
+	var requested := with_duck(next)
+	if ducked and (requested.duck_hull_height != settings.duck_hull_height or requested.duck_air_anchor != settings.duck_air_anchor):
+		_deferred_duck_settings = requested
+		return
+	_deferred_duck_settings = {}
+	super(requested)
 
 func reset_to(pose: Transform3D) -> void:
+	var deferred := _deferred_duck_settings
+	_deferred_duck_settings = {}
 	_clear_duck()
+	if not deferred.is_empty():
+		super.apply_settings(deferred)
 	super(pose)
 	_eye_u = float(settings.eye_height)
 	_prev_eye_u = _eye_u
@@ -218,6 +230,12 @@ func _update_duck(held: bool, grounded: bool) -> Vector3:
 			ducked = false
 			_fit_hull()
 			global_position = target
+			# finish with the geometry and anchor that began this duck, then make the new
+			# settings active. neither a roof overlap nor an unmatched air lift is possible.
+			if not _deferred_duck_settings.is_empty():
+				var deferred := _deferred_duck_settings
+				_deferred_duck_settings = {}
+				super.apply_settings(deferred)
 			stand_blocked_ticks = 0
 			var kind := "unduck" if grounded else "unduck_air"
 			duck_counts[kind] += 1
@@ -296,6 +314,7 @@ func get_motion_state() -> Dictionary:
 		"eye_clamped": _eye_clamped,
 		"counts": duck_counts.duplicate(),
 		"events": _duck_events.duplicate(),
+		"geometry_change_deferred": not _deferred_duck_settings.is_empty(),
 	}
 	out["duck_shift"] = _duck_shift
 	out["origin_delta"] = _displacement + _duck_shift
