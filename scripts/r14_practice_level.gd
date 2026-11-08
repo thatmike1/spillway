@@ -26,7 +26,7 @@ const Materials := preload("res://scripts/momentum_materials.gd")
 ## change to geometry, progress or timing semantics.
 const LEVEL_ID := "r14-practice-penstock-yard"
 const LEVEL_NAME := "Penstock Yard"
-const LEVEL_VERSION := 3
+const LEVEL_VERSION := 4
 const VARIANTS := ["practice"]
 ## p / source units: 1 u = 0.0254 m (the hammer/source convention of 1 u = 1 inch).
 const U := 0.0254
@@ -332,7 +332,12 @@ func _tail_race() -> void:
 	# stage 6: the last gauge, 1.5 m down onto the tailwater platform: 3.5 m on the east
 	# (inside) edge, 14 m on the west (outside) edge, where a fast runner leaves the bend.
 	var pit_y := TAIL_Y - PIT
-	_solid("s6_runin", [Vector3(TAIL_W, 0, TAIL_START), Vector3(TAIL_E, 0, TAIL_START), Vector3(TAIL_E, 0, G3.east), Vector3(TAIL_W, 0, G3.west)], BASE, &"track", 6, "route")
+	# p / taper the deck side toward its nose so a wall-hugging return meets a glancing
+	# face instead of the square end. the declared gauge samples remain on the same edge.
+	var nose_inset := 0.8
+	var nose_x := TAIL_E - nose_inset
+	var nose_z := lerpf(G3.west, G3.east, (nose_x - TAIL_W) / (TAIL_E - TAIL_W))
+	_solid("s6_runin", [Vector3(TAIL_W, 0, TAIL_START), Vector3(TAIL_E, 0, TAIL_START), Vector3(nose_x, 0, nose_z), Vector3(TAIL_W, 0, G3.west)], BASE, &"track", 6, "route")
 	_solid("s6_pit", [Vector3(TAIL_W, pit_y, G3.west), Vector3(TAIL_E, pit_y, G3.east), Vector3(TAIL_E, pit_y, G3.land), Vector3(TAIL_W, pit_y, G3.land)], BASE, &"catch", -1, "catch")
 	_deck("s6_platform", TAIL_W, TAIL_E, G3.land, TAIL_END, TAIL_Y, &"landing", -1)
 	# the east lane, 4 m down at the pit: its ramp climbs north back to the run-in.
@@ -340,7 +345,7 @@ func _tail_race() -> void:
 	var top := TAIL_START - 8.5
 	_deck("s6_lane_pit", TAIL_E, lane, G3.east, G3.land, pit_y, &"catch", -1, BASE, "catch")
 	_ramp_z("s6_lane_ramp", TAIL_E, lane, G3.east, top, pit_y, TRACK_Y, &"return", -1, "recovery")
-	_deck("s6_lane_top", TAIL_E, lane, top, TAIL_START - 4.0, TRACK_Y, &"return", -1, BASE, "recovery")
+	_deck("s6_lane_top", TAIL_E - nose_inset, lane, top, TAIL_START - 4.0, TRACK_Y, &"return", -1, BASE, "recovery")
 	_wall_line("s6_west", Vector3(TAIL_W, 0, TAIL_START), Vector3(TAIL_W, 0, TAIL_END), Vector2(-1, 0), TRAINING)
 	_wall_line("s6_east_head", Vector3(TAIL_E, 0, TAIL_START), Vector3(TAIL_E, 0, TAIL_START - 4.0), Vector2(1, 0), TRAINING)
 	_wall_line("s6_lane_north", Vector3(TAIL_E, 0, TAIL_START - 4.0), Vector3(lane + WALL, 0, TAIL_START - 4.0), Vector2(0, 1), TRAINING)

@@ -223,11 +223,11 @@ func _walking(level: Node3D) -> Dictionary:
 		var edge: Vector3 = gap.edge
 		var land: Vector3 = gap.land
 		var along := Vector3(land.x - edge.x, 0, land.z - edge.z).normalized()
-		# 0.6 m in from each edge: more than a grid cell's half diagonal, so the cell's own
-		# sample ray lands on the deck whatever the grid's alignment with the edge.
-		var take_key := _key(edge - along * 0.6)
-		var land_key := _key(land + along * 0.6)
-		var pit_key := _key(edge.lerp(land, 0.5))
+		# anchor 0.6 m inside each jump edge. tapered side edges still need an exact
+		# face check before choosing a nearby cell for the coarse walking flood.
+		var take_key := _anchor_key(level, tops, edge - along * 0.6)
+		var land_key := _anchor_key(level, tops, land + along * 0.6)
+		var pit_key := _anchor_key(level, tops, edge.lerp(land, 0.5))
 		if not tops.has(take_key) or not tops.has(land_key) or not tops.has(pit_key):
 			_check(str(gap.label) + " grid cells exist", false, [tops.has(take_key), tops.has(land_key), tops.has(pit_key)])
 			continue
@@ -277,6 +277,37 @@ func _walking(level: Node3D) -> Dictionary:
 
 func _key(p: Vector3) -> Vector2i:
 	return Vector2i(int(floor((p.x - GRID.position.x) / CELL)), int(floor((p.z - GRID.position.z) / CELL)))
+
+## the exact anchor can stand on a tapered edge while its cell's centre falls outside it.
+## require the real walkable face, then choose a nearby cell on that same named body.
+func _anchor_key(level: Node3D, tops: Dictionary, p: Vector3) -> Vector2i:
+	var invalid := Vector2i(-1, -1)
+	var hit := _ray(level, Vector3(p.x, 14, p.z), Vector3(p.x, -7, p.z))
+	if hit.is_empty() or (hit.normal as Vector3).y < WALKABLE:
+		return invalid
+	var body: Node = hit.collider
+	if not str(body.get_meta("surface", "")) in ["route", "catch", "recovery"]:
+		return invalid
+	var original := _key(p)
+	if tops.has(original) and str(tops[original].piece) == str(body.name):
+		return original
+	var best := invalid
+	var nearest := CELL * 0.75
+	for x: int in range(-1, 2):
+		for z: int in range(-1, 2):
+			var key := original + Vector2i(x, z)
+			if not tops.has(key) or str(tops[key].piece) != str(body.name):
+				continue
+			var sample := Vector2(GRID.position.x + (key.x + 0.5) * CELL, GRID.position.z + (key.y + 0.5) * CELL)
+			var distance := sample.distance_to(Vector2(p.x, p.z))
+			if distance < nearest:
+				nearest = distance
+				best = key
+	if best != invalid:
+		if not report.has("grid_anchor_adjustments"):
+			report["grid_anchor_adjustments"] = []
+		(report["grid_anchor_adjustments"] as Array).append({"point": p, "piece": str(body.name), "cell": best, "distance_m": nearest})
+	return best
 
 func _flood(tops: Dictionary, seeds: Array, backwards := false) -> Dictionary:
 	var reached := {}

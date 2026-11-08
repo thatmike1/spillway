@@ -1,10 +1,11 @@
 # A distinct extra comparison
 
-The default target stays CS bhop. The additional experiment will compare broader
-Quake-style projection acceleration and a separate CPM-style air-control option.
+The default target stays CS bhop. The implemented extra preset on F4 compares broader
+Quake III-inspired projection acceleration. CPM-style air control was researched but
+was not implemented in this round.
 These are P experiments, not replacements for the requested Source baseline.
 
-The first Quake profile should use the publicly documented projection rule with
+The F4 profile uses an original implementation of the publicly documented projection rule with
 the full requested speed as its ceiling, instead of Source's separate 30 u cap.
 The released Quake III base game declares ground acceleration 10, air acceleration
 1, friction 6, stopspeed 100, run speed 320 and gravity 800. Its jump impulse is 270.
@@ -42,7 +43,7 @@ Primary references:
 
 Downloaded reference hashes are in outer
 `checkpoints/spillway/r14/wide-reference/SOURCES.json`. Source code is research
-material only. The experiment must implement original equations, not copy it.
+material only. The implementation uses original equations and copies no engine code.
 
 ## First playable configuration experiment, 8 November
 
@@ -77,4 +78,6 @@ rendered motion only, not frame rate, latency, course suitability or enjoyment.
 
 Evidence, original fixture/profile, oracle, input tapes, MP4s and compressed traces:
 outer `checkpoints/spillway/r14/quake-prototype/RESULTS.json`. These runs predate the
-pending Source contact repair and do not establish a final product preset.
+Source contact repair in `f0e4b6c7`; they are historical fixtures, not final product proof.
+The selectable F4 preset and its later real-course evidence are described in QUAKE.md.
+All Source-family presets now use the separately versioned contact guard in CONTACT-GUARD.md.
