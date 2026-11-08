@@ -36,7 +36,7 @@ the map, the active preset with its key, the physics rate and the air accelerati
 | F1 | CS:GO vanilla (shown with "vanilla cvars · stamina reconstructed") | 64 Hz | AA 12 | press Space or scroll for each hop; holding jumps once |
 | F2 | CS:GO bhop server (default) | 128 Hz | AA 100 | hold Space to autohop; wheel works too; no stamina, no takeoff clamp |
 | F3 | R13 Overflow (unchanged) | 120 Hz | R13 bend + carve | R13 autohop |
-| F4 | reserved for a later independent Quake/air-control motor | - | - | does nothing yet, says so |
+| F4 | Quake III-inspired projection (P) | 128 | 1 | 320 u air wish, autohop; Source contacts, not Quake/CPMA |
 | F5 | P server config AA 1000 | 128 Hz | AA 1000 | as F2; a configured comparison some servers run, not universal CS |
 
 R restarts a clean attempt in the active map and preset, F practises from the last stage

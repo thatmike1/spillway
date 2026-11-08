@@ -51,7 +51,9 @@ adapter: full 320 u wish projection, air acceleration 1, ground acceleration 10,
 friction 6, stopspeed 100, gravity 800 and jump impulse 270. It uses 128 Hz, the
 shared Source hull/collision and P autohop. Deadstrafe and stamina are disabled.
 This is a distinct acceleration comparison, not a Quake recreation or CPM air control.
-It is not yet wired to F4.
+The experiment is now selectable on F4 in the actual game. It retains Source
+contacts and comparison choices rather than claiming a Quake/CPMA recreation.
+See QUAKE.md for the product constants, limitations, records and native-route proof.
 
 The independent closed-form fixture checks 64 combinations of rate, initial speed
 and wish angle. All agree with the shared tick. At 320 u/s and 128 Hz the calculated

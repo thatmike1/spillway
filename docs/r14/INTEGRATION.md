@@ -7,7 +7,8 @@ settled by SOURCE-REFERENCE and the independent oracle, not this interface note.
 
 Start on the practice map with the CS bhop-server profile. Keep Overflow available
 from a map selector. F1 selects vanilla, F2 the bhop-server profile, F3 the unchanged
-R13 runner. Reserve F4 for an independently developed Quake/air-control experiment.
+R13 runner. F4 offers a labelled Quake III-inspired full-wish projection, using the
+same Source body. F5 raises Source air acceleration to 1000 as a P server config.
 The pause menu provides the same choices with their air acceleration, tickrate,
 jump policy and short control description. The active map and preset stay visible.
 

@@ -2,8 +2,9 @@ extends RefCounted
 ## p / r14 movement preset registry. one entry per selectable movement law: its family (which
 ## runner script plays it), the motor preset and overrides it applies, its physics rate and the
 ## words the hud and pause menu show. r14_main.gd builds and switches runners from this table
-## only, so a later family (an independent quake/air-control motor) is one FAMILIES entry plus
-## one PRESETS entry, with no change to the main loop.
+## only, so a later family is one FAMILIES entry plus one PRESETS entry, with no change to the
+## main loop. F4 is not a new family: it is a labelled configuration of the same source motion
+## module and collision adapter (docs/r14/QUAKE.md).
 ##
 ## records: physics_fingerprint() is what enters the record key. ui settings (mouse, view
 ## angle, wheel binding) are removed from it; every cvar and policy that moves the body stays.
@@ -19,8 +20,8 @@ const FAMILIES := {
 	"r13": {"script": R13_PLAYER, "version": "r13-carry-air-candidate-1", "label": "R13", "hull": "r13_capsule"},
 }
 
-## hot keys and the pause list, in this order. slot 4 is held for a later independent motor.
-const ORDER := ["vanilla64", "server128", "r13_original120", "quake_reserved", "server128_aa1000"]
+## hot keys and the pause list, in this order.
+const ORDER := ["vanilla64", "server128", "r13_original120", "quake3_inspired128", "server128_aa1000"]
 
 const PRESETS := {
 	"vanilla64": {
@@ -46,12 +47,29 @@ const PRESETS := {
 		"summary": "the original R13 runner and camera · 120 Hz · keys bend the flight, A/D with the mouse carves a little",
 		"controls": "WASD run · mouse look · hold Space to keep hopping\nIn the air keys bend your flight where they point · no keys keeps your line · S brakes",
 	},
-	"quake_reserved": {
-		"slot": 4, "family": "quake", "available": false, "rate": 0,
-		"label": "Quake / air control (reserved)", "short": "reserved",
-		"air": "-", "jump": "-",
-		"summary": "reserved for a later, independently built motor; nothing runs here yet",
-		"controls": "",
+	# p / quake iii-inspired projection on the source body: the released q3 base game's declared
+	# accelerate 10, airaccelerate 1, friction 6, stopspeed 100, speed 320, gravity 800 and jump
+	# 270 (docs/r14/WIDE.md), with the full wishspeed as the air ceiling instead of the 30 u cap.
+	# the jump order is exact ballistic, the air surface constant (no deadstrafe), and there is no
+	# stamina or takeoff/ground clamp. 128 Hz, autohop, the source hull, eye, u-to-metre scale and
+	# sv_maxvelocity bound are comparison choices. no quake command subdivision, velocity
+	# rounding, cmdscale upmove term, contact or ramp rules: not quake, not cpma.
+	"quake3_inspired128": {
+		"slot": 4, "family": "source", "source_preset": "csgo_server", "rate": 128,
+		"overrides": {
+			"preset": "quake3_inspired", "label": "Quake III-inspired projection (P)", "tickrate": 128,
+			"sv_accelerate": 10.0, "sv_airaccelerate": 1.0, "sv_friction": 6.0, "sv_stopspeed": 100.0,
+			"player_maxspeed": 320.0, "sv_maxspeed": 320.0, "sv_air_max_wishspeed": 320.0,
+			"sv_gravity": 800.0, "sv_jump_impulse": 270.0, "jump_order": "ideal", "air_surface": "constant",
+			"stamina_model": "off", "ground_speed_clamp": false,
+			"sv_enablebunnyhopping": true, "sv_autobunnyhopping": true,
+		},
+		"label": "Quake III-inspired", "short": "Q3-inspired",
+		"air": "AA 1 · 320 u wish, not 30 u",
+		"jump": "P autohop: hold Space (wheel works too)",
+		"qualifier": "not Quake",
+		"summary": "P: Quake III's declared accel 10 · AA 1 · friction 6 · stopspeed 100 · 320 u/s · gravity 800 · jump 270, projected to the full 320 u wish instead of Source's 30 u cap · 128 Hz · Source hull and collision · no Quake command rounding or contacts, not Quake or CPMA",
+		"controls": "WASD run (320 u/s) · mouse look · hold Space to keep hopping (or scroll)\nIn the air: hold W with A or D and turn the mouse gently the same way · let go of every key to coast on your line",
 	},
 	"server128_aa1000": {
 		"slot": 5, "family": "source", "source_preset": "csgo_server", "overrides": {"sv_airaccelerate": 1000.0}, "rate": 128,
@@ -67,6 +85,7 @@ const ALIASES := {
 	"csgo_vanilla": "vanilla64", "vanilla": "vanilla64", "f1": "vanilla64",
 	"csgo_server": "server128", "server": "server128", "f2": "server128",
 	"r13": "r13_original120", "candidate": "r13_original120", "f3": "r13_original120",
+	"quake": "quake3_inspired128", "f4": "quake3_inspired128",
 	"aa1000": "server128_aa1000", "f5": "server128_aa1000",
 }
 

@@ -13,7 +13,7 @@ const BEHIND := Color("eaa17f")
 const DIM := Color(0.957, 0.945, 0.867, 0.72)
 const SHADE := Color(0.055, 0.10, 0.12)
 const NO_SAMPLES := "—"
-const KEYS_LINE := "F1 vanilla · F2 bhop server · F3 R13 · F5 AA 1000 · R restart · F practise · Esc menu"
+const KEYS_LINE := "F1 vanilla · F2 bhop server · F3 R13 · F4 Q3-inspired · F5 AA 1000 · R restart · F practise · Esc menu"
 
 var game: Node
 var overlay: Control
