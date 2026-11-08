@@ -183,10 +183,18 @@ All five also run through the strict standard executor: 30,952 ticks, correct ra
 
 The old driver added an unsupported top-level `radians_per_count` annotation. The new exporter puts look information in `description`; root's normalized input copies remove only that extra annotation and preserve every event, tick and rate. The actual Source sensitivity is 2.5, not the old approved-golden override of 5.7296. Header normalization and source hashes are recorded beside the runs. Both early audit assertion failures are retained and explained; no actor was changed to repair them.
 
-Native R15 views, independent contact/discovery review and final packed acceptance remain pending. The AA1000 earned attempt remains failed, not promoted as a pass.
+Native R15 views are complete below. Independent contact/discovery review and final packed acceptance remain pending. The AA1000 earned attempt remains failed, not promoted as a pass.
 
 ## Crown lamp repair
 
 The first R15 native ordinary run showed genuinely floating lamp fixtures. `_props()` added their five support boxes after the prism batch had already been committed, leaving 50 authored triangles undrawn. The pass now commits that separate support batch. Its footprint stays behind the crown wall; no physics object is added or changed.
 
 Outer `breakwater-r15-host/pole-fix-final/RESULTS.json` verifies the same 250 physics nodes and geometry hash before/after, the 50 now-drawn support triangles, all 1712 geometry checks, and all five standard replays. Across 30,952 full-precision executor ticks, position, velocity, yaw, game state and applied input match exactly (wall-clock capture stamps excluded). The initial diagnostic assumed closed-bottom boxes and expected 60 triangles; the actual authored prisms have no bottom and contain 50. That failed assertion is retained in `pole-fix/`.
+
+## Native R15 views
+
+Root captured complete ordinary, earned and harbour-recovery runs on the frozen `306b230b` game with the repaired supports and actual R15 HUD. Evidence: outer `breakwater-r15-host/native-306b230b/RESULTS.json`. All three use the private AMD/X11 backend with kernel GPU drawing activity, 1280×720 MP4s, isolated profiles, records off and clean process/display cleanup. Every captured driver field matches its headless replay at the driver's rounded precision. Movie frame counts, duration and complete decode pass; this is not frame-pacing or latency evidence.
+
+Root inspected the actual runway support poles, breach approach, landing, clean finish card, checkpoint return message and practice finish card. The latter says `PRACTICE FINISH` and `Not recorded (respawned)`. The two precisely classified platform warnings concern absent private-X11 XIM and MovieWriter's low-space warning on the source tmpfs; HOME met the 15 GiB launch floor, the bounded movie lived on separate tmpfs, and every full encode/decode completed. No game error or other warning occurred. The earlier warning-rejecting audit is retained rather than relabelled.
+
+The F2 earned input tape was also held out unchanged under F5 through the standard executor. It remains unfinished at the end of its tape, before reaching the breach, with zero respawns and no integrity flags. `f5-f2-earned-tape/RESULTS.json` retains this additional failure; it does not close F5's earned-route gap.
