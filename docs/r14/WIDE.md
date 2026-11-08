@@ -43,3 +43,36 @@ Primary references:
 Downloaded reference hashes are in outer
 `checkpoints/spillway/r14/wide-reference/SOURCES.json`. Source code is research
 material only. The experiment must implement original equations, not copy it.
+
+## First playable configuration experiment, 8 November
+
+An external fixture now runs a Quake III-inspired configuration through the Source
+adapter: full 320 u wish projection, air acceleration 1, ground acceleration 10,
+friction 6, stopspeed 100, gravity 800 and jump impulse 270. It uses 128 Hz, the
+shared Source hull/collision and P autohop. Deadstrafe and stamina are disabled.
+This is a distinct acceleration comparison, not a Quake recreation or CPM air control.
+It is not yet wired to F4.
+
+The independent closed-form fixture checks 64 combinations of rate, initial speed
+and wish angle. All agree with the shared tick. At 320 u/s and 128 Hz the calculated
+best one-tick gain is 2.480620 u/s, with a wish angle about 7.17 degrees from travel.
+Source's separate 30 u ceiling instead rewards near-perpendicular wishes.
+
+Four fixed four-second input tapes compare side-only and diagonal input, with a
+slow smooth mouse turn. These are deliberately imperfect inputs, not optimal arcs.
+The profiles begin at their own run speed, so this is not a matched-speed benchmark:
+
+| Input | Source AA100, starts 250 u/s | Quake-inspired, starts 320 u/s |
+| --- | ---: | ---: |
+| A plus the recorded mouse turn, third landing | 256.35 u/s | 479.16 u/s |
+| W+A plus the same turn, third landing | 250.00 u/s | 422.09 u/s |
+
+The side-only tapes also ran natively at 480×270 on llvmpipe. All 512 position,
+velocity and view samples match their headless counterpart exactly. The selected
+frames show the different hop paths on the same checker fixture. Both runs finish
+their tapes, release input and leave no owned processes. These frames establish
+rendered motion only, not frame rate, latency, course suitability or enjoyment.
+
+Evidence, original fixture/profile, oracle, input tapes, MP4s and compressed traces:
+outer `checkpoints/spillway/r14/quake-prototype/RESULTS.json`. These runs predate the
+pending Source contact repair and do not establish a final product preset.
