@@ -46,7 +46,7 @@ func _serialization(alias: String) -> void:
 	check(alias + " sub-tick summation noise is not a best", not game.call("_record_faster", float(total) / hz - 0.000000001, game.best_time))
 	check(alias + " one whole tick faster wins", game.call("_record_faster", float(total - 1) / hz, game.best_time))
 	# a recognised but damaged exact payload must not silently fall back to rounded summaries.
-	for mutation: Array in [["physics_hz", hz * 2], ["time_ticks_version", 99], ["clean_best_ticks", float(total)], ["clean_split_ticks", [1, 2]], ["clean_split_ticks", [1, total + 1, total]], ["clean_segment_ticks", [1, -1, 2]]]:
+	for mutation: Array in [["physics_hz", hz * 2], ["physics_hz", "bad"], ["time_ticks_version", 99], ["time_ticks_version", "bad"], ["clean_best_ticks", float(total)], ["clean_split_ticks", [1, 2]], ["clean_split_ticks", [1, total + 1, total]], ["clean_segment_ticks", [1, -1, 2]]]:
 		var original: Variant = config.get_value(section, mutation[0])
 		config.set_value(section, mutation[0], mutation[1])
 		config.save(game.profile_path)

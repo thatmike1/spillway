@@ -48,3 +48,8 @@ Run from `projects/foldrunner` with the pinned Godot executable:
 Evidence: outer `checkpoints/spillway/r14/record-precision/` and the original
 `record-precision-before/` serialization diagnostic. Final packed checks must verify
 the integer payload and its restored seconds, rather than allow float-format loss.
+
+The independent follow-up found a damaged String version marker could log a script error.
+Types are now checked first, unsupported tick magnitudes are rejected, and the expanded
+precision suite passes 66/66. The independent 46 ranking/save-load assertions pass without
+script errors. See [RECORD-DISPLAY-REVIEW.md](RECORD-DISPLAY-REVIEW.md) for red/green evidence.

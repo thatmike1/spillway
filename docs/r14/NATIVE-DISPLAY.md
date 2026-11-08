@@ -80,6 +80,11 @@ to changed binaries. Original worker evidence predates these verification-only f
 Root's offline run passes 11 tests (12 live/game tests explicitly skipped), and a fresh
 real AMD display start/release passes with desktop :0 answering before and after.
 
+A later independent cancellation test found the same allocation-before-assignment gap
+for an empty runtime directory. Runtime allocation now shares the deferred-signal guard
+with process launch. All seven independent ownership/refusal tests pass after the fix;
+see [RECORD-DISPLAY-REVIEW.md](RECORD-DISPLAY-REVIEW.md). No renderer or game behavior changes.
+
 The root window is 1296×736, one size up from the 1280×720 game window. At exactly the
 window's size, Xwayland flips the game's buffers directly to Weston, and a capture of the X
 root kept showing a stale frame (the pause menu was missing). One size larger keeps

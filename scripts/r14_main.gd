@@ -27,6 +27,7 @@ const SAVE_PATH := "user://spillway_r14.cfg"
 const PROFILE_FORMAT := 1
 ## p / additive record encoding: integer physics ticks are authoritative, floats are readable summaries.
 const RECORD_TICKS_VERSION := 1
+const MAX_RECORD_TICKS := 9007199254740991
 ## p / bump when what counts as a finish, a split or a clean run changes.
 const TIMING_RULES := "r14-timing-2"
 const PRESETS := preload("res://scripts/r14_presets.gd")
@@ -854,7 +855,7 @@ func _load_records() -> void:
 
 ## tick-domain comparisons keep an equal replay equal after configfile's float formatting.
 func _record_ticks(seconds: float) -> int:
-	if not is_finite(seconds) or seconds < 0.0 or seconds * physics_hz > 9007199254740991.0:
+	if not is_finite(seconds) or seconds < 0.0 or seconds * physics_hz > float(MAX_RECORD_TICKS):
 		return -1
 	return roundi(seconds * physics_hz)
 
@@ -879,15 +880,19 @@ func _record_times(ticks: Array) -> Array[float]:
 	return times
 
 func _load_tick_records(config: ConfigFile, section: String) -> void:
-	if config.get_value(section, "time_ticks_version", null) != RECORD_TICKS_VERSION or config.get_value(section, "physics_hz", null) != physics_hz:
+	var version: Variant = config.get_value(section, "time_ticks_version", null)
+	var rate: Variant = config.get_value(section, "physics_hz", null)
+	if typeof(version) != TYPE_INT or typeof(rate) != TYPE_INT:
+		return
+	if version != RECORD_TICKS_VERSION or rate != physics_hz:
 		return
 	var clean: Variant = config.get_value(section, "clean_best_ticks", null)
 	var open: Variant = config.get_value(section, "open_best_ticks", null)
 	var splits: Variant = config.get_value(section, "clean_split_ticks", null)
 	var segments: Variant = config.get_value(section, "clean_segment_ticks", null)
-	if typeof(clean) != TYPE_INT or typeof(open) != TYPE_INT or clean < -1 or open < -1 or not splits is Array or not segments is Array:
+	if typeof(clean) != TYPE_INT or typeof(open) != TYPE_INT or clean < -1 or open < -1 or clean > MAX_RECORD_TICKS or open > MAX_RECORD_TICKS or not splits is Array or not segments is Array:
 		return
-	if splits.any(func(t: Variant) -> bool: return typeof(t) != TYPE_INT or t < 0) or segments.any(func(t: Variant) -> bool: return typeof(t) != TYPE_INT or t < 0):
+	if splits.any(func(t: Variant) -> bool: return typeof(t) != TYPE_INT or t < 0 or t > MAX_RECORD_TICKS) or segments.any(func(t: Variant) -> bool: return typeof(t) != TYPE_INT or t < 0 or t > MAX_RECORD_TICKS):
 		return
 	if clean >= 0 and (splits.size() != stage_count() or segments.size() != stage_count() or splits.back() != clean):
 		return

@@ -23,6 +23,7 @@ docs/r14/NATIVE-DISPLAY.md. `probe` and `status` below are the command-line chec
 """
 import argparse
 import ctypes
+from contextlib import contextmanager
 import fcntl
 import gzip
 import hashlib
@@ -484,22 +485,26 @@ class NativeDisplay:
         for sig in self._previous:
             signal.signal(sig, later)
 
-    def _spawn(self, cmd, *, owner, **options):
-        # a signal is held while Popen runs, so a child is never started without being recorded.
+    @contextmanager
+    def _hold_signals(self):
+        # an acquisition must record ownership before a pending cancellation is raised.
         cancelling = {sig: signal.getsignal(sig) for sig in self._previous}
         self._defer_signals()
         try:
-            process = subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, start_new_session=True,
-                                       preexec_fn=_owned_child(os.getpid()), **options)
-            # keep ownership before a deferred signal can abort the caller's assignment.
-            setattr(self, '_' + owner, process)
-            self.record.setdefault('pids', {})[owner] = process.pid
-            return process
+            yield
         finally:
             for sig, handler in cancelling.items():
                 signal.signal(sig, handler)
             if self._deferred:
                 raise Cancelled('cancelled by signal %d during a launch' % self._deferred.pop())
+
+    def _spawn(self, cmd, *, owner, **options):
+        with self._hold_signals():
+            process = subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, start_new_session=True,
+                                       preexec_fn=_owned_child(os.getpid()), **options)
+            setattr(self, '_' + owner, process)
+            self.record.setdefault('pids', {})[owner] = process.pid
+            return process
 
     def _restore_signals(self):
         for sig, handler in self._previous.items():
@@ -582,8 +587,10 @@ class NativeDisplay:
         raise NativeDisplayError('no requested private display is free: %s' % checked)
 
     def _start_weston(self):
-        self._runtime = Path(tempfile.mkdtemp(prefix='r14nd-', dir='/tmp'))
-        os.chmod(self._runtime, 0o700)
+        with self._hold_signals():
+            self._runtime = Path(tempfile.mkdtemp(prefix='r14nd-', dir='/tmp'))
+            self.record['runtime_dir'] = str(self._runtime)
+            os.chmod(self._runtime, 0o700)
         package = self.record['weston_package']
         lib = self.weston_root / 'usr/lib'
         cmd = [str(self.weston_root / 'usr/bin/weston'), '--backend=headless', '--fake-seat', '--renderer=gl',
