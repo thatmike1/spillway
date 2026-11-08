@@ -52,8 +52,9 @@ reconstruction.
 | ground_speed_clamp | on | off | vanilla-only reconstruction: walking clamps to 250 × stamina factor²; server uses public friction without an auxiliary cap |
 | sv_stepsize / walkable normal / ground probe / non-jump velocity | 18 / 0.7 / 2 u / 140 | same | public Source values |
 
-`wheel_jump` (scroll notches count as jump edges) is opt-in and off by default. Only the lab
-turns it on. It is not added to the InputMap, because root owns the bindings.
+The bare motion settings default `wheel_jump` off. The standalone lab and the integrated
+R14 registry turn it on for the Source presets: scroll notches count as jump edges.
+The player reads these events directly; no wheel action is added to the InputMap.
 
 ## The tick (`r14_source_motion.step`)
 
