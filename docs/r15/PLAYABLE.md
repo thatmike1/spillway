@@ -254,3 +254,5 @@ Evidence is in the outer `checkpoints/spillway/r15/product-loop/` (23 MB): `rout
 ## Root source integration
 
 Root verified the returned source hashes and reran all 186 headless gates in a fresh imported copy with the real crouch runner. The outer log scan first rejected five intentional refusal-control errors; the receipt now classifies exactly those five expected messages and rejects every other error. Root inspected the native map chooser and airborne-crouch frames. Evidence: outer `checkpoints/spillway/r15/product-integration/`. The new scene is available explicitly; the project default stays on the delivered R14 scene until the first new course is integrated. This does not certify future map routes or a final package.
+
+Breakwater is now integrated as the actual default and the project launches the R15 scene. The first integration rerun passes the real default/registry groups on the Breakwater module. This supersedes the two-legacy-map/development-stand-in state recorded earlier; the other four new courses and movement lab remain incomplete.

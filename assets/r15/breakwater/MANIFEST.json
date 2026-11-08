@@ -1,0 +1,835 @@
+{
+ "kit": "Spillway R15 Breakwater kit",
+ "publisher": "Poly Haven (polyhaven.com), primary publisher; every asset CC0-1.0",
+ "verification": "each file's md5 matched the poly haven api at download; sha256 recorded then and re-checked here; files are unmodified upstream bytes",
+ "licence_text": "licences/CC0-1.0-legalcode.txt",
+ "shipped_bytes": 34119248,
+ "shipped_mib": 32.54,
+ "assets": [
+  {
+   "id": "container_side",
+   "name": "Container Side",
+   "kind": "texture",
+   "authors": {
+    "Dimitrios Savva": "All"
+   },
+   "source_page": "https://polyhaven.com/a/container_side",
+   "api_files": "https://api.polyhaven.com/files/container_side",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": [
+    1940.000057220459,
+    1939.9999380111694
+   ],
+   "resolution": "1k jpg (textures, model textures) / 2k hdr (sky); larger upstream sizes not downloaded",
+   "use": "every shipping container: walls, roofs and door ends of the route blocks, yard stacks and wall stacks",
+   "in_game_modifications": "1.94 m repeat from the api dimensions; desaturated and re-tinted per container colour in the kit surface shader (no file edit)",
+   "files": [
+    {
+     "file": "textures/container_side/container_side_arm_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/container_side/container_side_arm_1k.jpg",
+     "upstream_md5_api": "5ae1b41abc50bc7e13782e13c6ce2100",
+     "sha256": "c5238fd9c6d234b1c6c9a62e2b1b97343636a4e42abd429e03faf58a613318b7",
+     "bytes": 387982,
+     "modified": false
+    },
+    {
+     "file": "textures/container_side/container_side_diff_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/container_side/container_side_diff_1k.jpg",
+     "upstream_md5_api": "af4c3140ca86cfba8bbe4d8bf85c5064",
+     "sha256": "9d6a8a9a243b6111f9d13af12d90325f0f1d52e45c2e1731f2d496702f024452",
+     "bytes": 667470,
+     "modified": false
+    },
+    {
+     "file": "textures/container_side/container_side_nor_gl_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/container_side/container_side_nor_gl_1k.jpg",
+     "upstream_md5_api": "4162f65b9d8661fea8a57b43ce0b3963",
+     "sha256": "1e9e54d5816c97e5abeb448c3468b1eafb4add9acb41fcdc26817563c8f21f22",
+     "bytes": 538519,
+     "modified": false
+    }
+   ]
+  },
+  {
+   "id": "box_profile_metal_sheet",
+   "name": "Box Profile Metal Sheet",
+   "kind": "texture",
+   "authors": {
+    "Amal Kumar": "All"
+   },
+   "source_page": "https://polyhaven.com/a/box_profile_metal_sheet",
+   "api_files": "https://api.polyhaven.com/files/box_profile_metal_sheet",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": [
+    2000,
+    2000
+   ],
+   "resolution": "1k jpg (textures, model textures) / 2k hdr (sky); larger upstream sizes not downloaded",
+   "use": "gatehouse, warehouse and terminal office cladding",
+   "in_game_modifications": "2.0 m repeat; desaturated and tinted steel blue or warm brown in the shader",
+   "files": [
+    {
+     "file": "textures/box_profile_metal_sheet/box_profile_metal_sheet_arm_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/box_profile_metal_sheet/box_profile_metal_sheet_arm_1k.jpg",
+     "upstream_md5_api": "3e88a79c15ebe51e24ee966bc5e1a1f3",
+     "sha256": "f5bd4d7d11f3042d50dfb38bfea7af01ec00142a527a452f37090dd1c7f93bf8",
+     "bytes": 667506,
+     "modified": false
+    },
+    {
+     "file": "textures/box_profile_metal_sheet/box_profile_metal_sheet_diff_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/box_profile_metal_sheet/box_profile_metal_sheet_diff_1k.jpg",
+     "upstream_md5_api": "478efb2f3594434ac12eeaad9096cf67",
+     "sha256": "c2c3643bb2e07554f805f56525ec2ffbc23117be95e324af46ac98f56fa7961f",
+     "bytes": 346711,
+     "modified": false
+    },
+    {
+     "file": "textures/box_profile_metal_sheet/box_profile_metal_sheet_nor_gl_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/box_profile_metal_sheet/box_profile_metal_sheet_nor_gl_1k.jpg",
+     "upstream_md5_api": "ac870b33c1f09ae1b95b550a07a30f10",
+     "sha256": "9cc5ca3135164dbc4eef21cf12ea488b02ce7ec252dc2b803be14eb7c3719fcb",
+     "bytes": 550993,
+     "modified": false
+    }
+   ]
+  },
+  {
+   "id": "rusty_painted_metal",
+   "name": "Rusty Painted Metal",
+   "kind": "texture",
+   "authors": {
+    "Amal Kumar": "All"
+   },
+   "source_page": "https://polyhaven.com/a/rusty_painted_metal",
+   "api_files": "https://api.polyhaven.com/files/rusty_painted_metal",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": [
+    2200.000047683716,
+    2200.000047683716
+   ],
+   "resolution": "1k jpg (textures, model textures) / 2k hdr (sky); larger upstream sizes not downloaded",
+   "use": "crane legs, portal beams and booms, the ship, container frames, the gatehouse canopy, light posts, the gangway parapet and lamp poles",
+   "in_game_modifications": "2.2 m repeat; desaturated and tinted crane red, steel grey, hull dark or white in the shader",
+   "files": [
+    {
+     "file": "textures/rusty_painted_metal/rusty_painted_metal_arm_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_painted_metal/rusty_painted_metal_arm_1k.jpg",
+     "upstream_md5_api": "fdbc2e55370ea387899e25d84c49b203",
+     "sha256": "cd3ef3750348bd8afa552ac41120310f740cd4bfd3c303d81e68e3100bdf7fdd",
+     "bytes": 372615,
+     "modified": false
+    },
+    {
+     "file": "textures/rusty_painted_metal/rusty_painted_metal_diff_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_painted_metal/rusty_painted_metal_diff_1k.jpg",
+     "upstream_md5_api": "3846f5567b6e7985b275a6b3867a648f",
+     "sha256": "b086937b45c3628116a838363364a29bd3c5d2542cff906ec1d92d681ee80e15",
+     "bytes": 471866,
+     "modified": false
+    },
+    {
+     "file": "textures/rusty_painted_metal/rusty_painted_metal_nor_gl_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_painted_metal/rusty_painted_metal_nor_gl_1k.jpg",
+     "upstream_md5_api": "b5a2c2b08219304dcd4e0b00837f3e2d",
+     "sha256": "f3372e2f60517df2d0e02c1472eb24071d95182d771c30b7ecd8e1b5142768bb",
+     "bytes": 484158,
+     "modified": false
+    }
+   ]
+  },
+  {
+   "id": "asphalt_02",
+   "name": "Asphalt 02",
+   "kind": "texture",
+   "authors": {
+    "Rob Tuytel": "All"
+   },
+   "source_page": "https://polyhaven.com/a/asphalt_02",
+   "api_files": "https://api.polyhaven.com/files/asphalt_02",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": [
+    3000.000238418579,
+    3000
+   ],
+   "resolution": "1k jpg (textures, model textures) / 2k hdr (sky); larger upstream sizes not downloaded",
+   "use": "terminal roads: the box-row alleys, the crane line, both bends and the land apron",
+   "in_game_modifications": "3.0 m repeat; tinted lighter on the route, darker on the apron",
+   "files": [
+    {
+     "file": "textures/asphalt_02/asphalt_02_arm_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_02/asphalt_02_arm_1k.jpg",
+     "upstream_md5_api": "33820445f43af5e5ee484674b6939271",
+     "sha256": "56bd8e591a3db579846fcb5185f60b0651e0bd4ea85c3529c339e6746243c9cf",
+     "bytes": 296770,
+     "modified": false
+    },
+    {
+     "file": "textures/asphalt_02/asphalt_02_diff_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_02/asphalt_02_diff_1k.jpg",
+     "upstream_md5_api": "fa19772d4817754c3efab708c651f5a8",
+     "sha256": "1aa5ce99f58a625c71d48cfc3e68b65ca85ccb00f39e045c0a928608a0ea25ed",
+     "bytes": 731707,
+     "modified": false
+    },
+    {
+     "file": "textures/asphalt_02/asphalt_02_nor_gl_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_02/asphalt_02_nor_gl_1k.jpg",
+     "upstream_md5_api": "338da8de636ea36133170578cac82e8e",
+     "sha256": "42a1c381b53204e83a982db2864479a30bc127bbdeebb1006f8ee51bff099df3",
+     "bytes": 1240122,
+     "modified": false
+    }
+   ]
+  },
+  {
+   "id": "square_concrete_pavers",
+   "name": "Square Concrete Pavers",
+   "kind": "texture",
+   "authors": {
+    "Amal Kumar": "All"
+   },
+   "source_page": "https://polyhaven.com/a/square_concrete_pavers",
+   "api_files": "https://api.polyhaven.com/files/square_concrete_pavers",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": [
+    1799.9999523162842,
+    1799.9999523162842
+   ],
+   "resolution": "1k jpg (textures, model textures) / 2k hdr (sky); larger upstream sizes not downloaded",
+   "use": "gate deck, breakwater runway and lighthouse roundhead",
+   "in_game_modifications": "1.8 m repeat; desaturated and tinted to a pale precast tone",
+   "files": [
+    {
+     "file": "textures/square_concrete_pavers/square_concrete_pavers_arm_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/square_concrete_pavers/square_concrete_pavers_arm_1k.jpg",
+     "upstream_md5_api": "d85440f154451d129eaeda56b893f026",
+     "sha256": "2f32968744cdc5b2f3080fde2c9d14757c2f559763bd161daca7ccc4e7ef4028",
+     "bytes": 938912,
+     "modified": false
+    },
+    {
+     "file": "textures/square_concrete_pavers/square_concrete_pavers_diff_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/square_concrete_pavers/square_concrete_pavers_diff_1k.jpg",
+     "upstream_md5_api": "8bac51f720962209cd9ac7dcabf791f8",
+     "sha256": "3b28251fd35ede8efccb13f16aa797b1a3e399f7ad9448444b1f02370af1a3f0",
+     "bytes": 787817,
+     "modified": false
+    },
+    {
+     "file": "textures/square_concrete_pavers/square_concrete_pavers_nor_gl_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/square_concrete_pavers/square_concrete_pavers_nor_gl_1k.jpg",
+     "upstream_md5_api": "567e06702250c9fd84d9e43832488052",
+     "sha256": "b1dc1be9f2b16074c1b63f0c54dafd31237ddbc5a79e0d7654636db75b2973ec",
+     "bytes": 941484,
+     "modified": false
+    }
+   ]
+  },
+  {
+   "id": "white_plaster_rough_02",
+   "name": "White Plaster Rough 02",
+   "kind": "texture",
+   "authors": {
+    "Rob Tuytel": "All"
+   },
+   "source_page": "https://polyhaven.com/a/white_plaster_rough_02",
+   "api_files": "https://api.polyhaven.com/files/white_plaster_rough_02",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": [
+    1000,
+    1000
+   ],
+   "resolution": "1k jpg (textures, model textures) / 2k hdr (sky); larger upstream sizes not downloaded",
+   "use": "lighthouse tower and plinth",
+   "in_game_modifications": "1.0 m repeat used at 2.0 m; desaturated and brightened to weathered white, red band by tint",
+   "files": [
+    {
+     "file": "textures/white_plaster_rough_02/white_plaster_rough_02_arm_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/white_plaster_rough_02/white_plaster_rough_02_arm_1k.jpg",
+     "upstream_md5_api": "e7a3cc684fdac1cf41fb20139cb6885f",
+     "sha256": "035f9a307e7e970c54058ccc3278bc4ed9f26beaf6c1649a7ac05493f893a8fd",
+     "bytes": 319583,
+     "modified": false
+    },
+    {
+     "file": "textures/white_plaster_rough_02/white_plaster_rough_02_diff_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/white_plaster_rough_02/white_plaster_rough_02_diff_1k.jpg",
+     "upstream_md5_api": "72b5ae937f3d3d2bec8507eec60f1a53",
+     "sha256": "1449dbca00e0c5c9588306313d910bbc8bfe201b4d8798dd4856fba822e47e09",
+     "bytes": 734866,
+     "modified": false
+    },
+    {
+     "file": "textures/white_plaster_rough_02/white_plaster_rough_02_nor_gl_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/white_plaster_rough_02/white_plaster_rough_02_nor_gl_1k.jpg",
+     "upstream_md5_api": "2aed5eddc51874ce455053eeba090698",
+     "sha256": "95cb88137a13bc33a52c5215862ab2903a686dec7579d86a42aa1d765287349a",
+     "bytes": 489123,
+     "modified": false
+    }
+   ]
+  },
+  {
+   "id": "lateral_sea_marker",
+   "name": "Lateral Sea Marker",
+   "kind": "model",
+   "authors": {
+    "James Ray Cock": "Additional texture wear",
+    "Kuutti Siitonen": "All"
+   },
+   "source_page": "https://polyhaven.com/a/lateral_sea_marker",
+   "api_files": "https://api.polyhaven.com/files/lateral_sea_marker",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": [
+    3004.8038959503174,
+    3004.8047304153442,
+    6838.706851005554
+   ],
+   "resolution": "1k jpg (textures, model textures) / 2k hdr (sky); larger upstream sizes not downloaded",
+   "use": "navigation markers in the harbour mouth beside the breakwater",
+   "in_game_modifications": "placed and uniformly scaled 1.0; not reachable from the route; no collision",
+   "files": [
+    {
+     "file": "models/lateral_sea_marker/lateral_sea_marker.bin",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/lateral_sea_marker/lateral_sea_marker.bin",
+     "upstream_md5_api": "f6ed9426a3ac79b5f48c3a7b295c5a6f",
+     "sha256": "1e02ea4a18efac1221f73e0a2ad3a9999541eff967e62a5d6f572e0de1ebd488",
+     "bytes": 453348,
+     "modified": false
+    },
+    {
+     "file": "models/lateral_sea_marker/lateral_sea_marker_1k.gltf",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/lateral_sea_marker/lateral_sea_marker_1k.gltf",
+     "upstream_md5_api": "befeb928f149deed3fba97a028683950",
+     "sha256": "00d11b93e8ec673a08647560de71b9d04d131b0ee255192d3b1a4fb3f9ee3608",
+     "bytes": 2735,
+     "modified": false
+    },
+    {
+     "file": "models/lateral_sea_marker/textures/lateral_sea_marker_arm_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/lateral_sea_marker/lateral_sea_marker_arm_1k.jpg",
+     "upstream_md5_api": "559c64af29206d0ffda647d0f95ccf6f",
+     "sha256": "1790ee10cf493a01c777e2471f46baaddb59bb33a539f333383d2e82988aeede",
+     "bytes": 782484,
+     "modified": false
+    },
+    {
+     "file": "models/lateral_sea_marker/textures/lateral_sea_marker_diff_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/lateral_sea_marker/lateral_sea_marker_diff_1k.jpg",
+     "upstream_md5_api": "40624517f4f94d7944804580f859eb9e",
+     "sha256": "0a0a82d1f34e4556c4f0380424792b76a87a341148d7ea784b4e987a73f4ba27",
+     "bytes": 687389,
+     "modified": false
+    },
+    {
+     "file": "models/lateral_sea_marker/textures/lateral_sea_marker_nor_gl_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/lateral_sea_marker/lateral_sea_marker_nor_gl_1k.jpg",
+     "upstream_md5_api": "9c1423e9ee0509878d498247c2c00d81",
+     "sha256": "a3493b79b2db9cf4e2831778e319458db2edea9c39bbf326a323db43d4957139",
+     "bytes": 549623,
+     "modified": false
+    }
+   ]
+  },
+  {
+   "id": "ocean_buoy",
+   "name": "Ocean Buoy",
+   "kind": "model",
+   "authors": {
+    "Mateusz Sadek": "All"
+   },
+   "source_page": "https://polyhaven.com/a/ocean_buoy",
+   "api_files": "https://api.polyhaven.com/files/ocean_buoy",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": [
+    1066.6102766990662,
+    952.1479606628418,
+    2656.234323978424
+   ],
+   "resolution": "1k jpg (textures, model textures) / 2k hdr (sky); larger upstream sizes not downloaded",
+   "use": "buoys in the harbour, lit at dusk",
+   "in_game_modifications": "placed, uniformly scaled 1.0; not reachable; no collision",
+   "files": [
+    {
+     "file": "models/ocean_buoy/ocean_buoy.bin",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/ocean_buoy/ocean_buoy.bin",
+     "upstream_md5_api": "fefe553dc26d2657aaea8d5b8455a137",
+     "sha256": "b3c1f9c8170b9c538f8540f324e4b3707b842d37705dda2dfc95d0548b521e80",
+     "bytes": 426240,
+     "modified": false
+    },
+    {
+     "file": "models/ocean_buoy/ocean_buoy_1k.gltf",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/ocean_buoy/ocean_buoy_1k.gltf",
+     "upstream_md5_api": "bb52e28c01f2f1312afaec7b54103025",
+     "sha256": "7a6e3ba5b2258575464b2af622dbe63b89a74cb9885f8105cfc8fdf30c734d5c",
+     "bytes": 3228,
+     "modified": false
+    },
+    {
+     "file": "models/ocean_buoy/textures/ocean_buoy_arm_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ocean_buoy/ocean_buoy_arm_1k.jpg",
+     "upstream_md5_api": "80422c1b2155584b90fbb88cd388f3ba",
+     "sha256": "4d0d02c386250ff163fb661e2ff6f3777c01d28bdf902508ae8a7808041b381c",
+     "bytes": 970585,
+     "modified": false
+    },
+    {
+     "file": "models/ocean_buoy/textures/ocean_buoy_diff_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ocean_buoy/ocean_buoy_diff_1k.jpg",
+     "upstream_md5_api": "00201db15b45d779b6d9d53d965435dc",
+     "sha256": "379e64ed72deca5805df1d5afbd0fdcdd5f8a8d6aa4f156eed9d3643b071b0c2",
+     "bytes": 827912,
+     "modified": false
+    },
+    {
+     "file": "models/ocean_buoy/textures/ocean_buoy_emission_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ocean_buoy/ocean_buoy_emission_1k.jpg",
+     "upstream_md5_api": "963fc96fbf5e2a88023518327e691fe9",
+     "sha256": "c038be2e4074e2a67eee8d5e4cb2d37f0bdcee5c2a569d8bda2b66e1ab35ce53",
+     "bytes": 29089,
+     "modified": false
+    },
+    {
+     "file": "models/ocean_buoy/textures/ocean_buoy_nor_gl_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ocean_buoy/ocean_buoy_nor_gl_1k.jpg",
+     "upstream_md5_api": "edaecc123cbcd740efa29c757c39518d",
+     "sha256": "5d02c9df9b5e76b61bf0845839d9ec99f56f994a9095174076c00b560ece4686",
+     "bytes": 770155,
+     "modified": false
+    }
+   ]
+  },
+  {
+   "id": "lifebuoy",
+   "name": "Lifebuoy",
+   "kind": "model",
+   "authors": {
+    "Hank Kaamura": "All"
+   },
+   "source_page": "https://polyhaven.com/a/lifebuoy",
+   "api_files": "https://api.polyhaven.com/files/lifebuoy",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": [
+    783.1282019615173,
+    155.11851012706757,
+    841.1934077739716
+   ],
+   "resolution": "1k jpg (textures, model textures) / 2k hdr (sky); larger upstream sizes not downloaded",
+   "use": "lifebuoys on the gatehouse face behind the spawn and on alternate crown-wall lamp poles",
+   "in_game_modifications": "placed flush, 2.6 m or more above the deck they face; no collision",
+   "files": [
+    {
+     "file": "models/lifebuoy/lifebuoy.bin",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/lifebuoy/lifebuoy.bin",
+     "upstream_md5_api": "4e38cfbae96b6bdfd4ca4ddad06888dd",
+     "sha256": "aa45c8d43ee11e12a4ab9f46bfb06d1baa6c687d61776ad9b06ea6b5664c0bc2",
+     "bytes": 255280,
+     "modified": false
+    },
+    {
+     "file": "models/lifebuoy/lifebuoy_1k.gltf",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/lifebuoy/lifebuoy_1k.gltf",
+     "upstream_md5_api": "295742069c8a9e56260b769322996e5b",
+     "sha256": "d9c76a8f2471249f314b3efcffe0d3956ba2d3f0b8ba528cc0f2b861561580f3",
+     "bytes": 2724,
+     "modified": false
+    },
+    {
+     "file": "models/lifebuoy/textures/lifebuoy_arm_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/lifebuoy/lifebuoy_arm_1k.jpg",
+     "upstream_md5_api": "a00a461982827a2faaa0c6d940740d51",
+     "sha256": "fe33182e45c2b1049195641a8081ab22e90e520b2c0dafa9cce568a53af7a207",
+     "bytes": 614864,
+     "modified": false
+    },
+    {
+     "file": "models/lifebuoy/textures/lifebuoy_diff_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/lifebuoy/lifebuoy_diff_1k.jpg",
+     "upstream_md5_api": "c956bce9e530911e95771507547e8a6f",
+     "sha256": "f0095beca9e97996692ffdab3d3ace3fae64a3c3adf5c8eff71172add4e4cb2e",
+     "bytes": 841106,
+     "modified": false
+    },
+    {
+     "file": "models/lifebuoy/textures/lifebuoy_nor_gl_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/lifebuoy/lifebuoy_nor_gl_1k.jpg",
+     "upstream_md5_api": "f8a80ee65e4776d228114f37104fbd37",
+     "sha256": "df02aca2cca3aa87daa0f1d4cd5fa2584d60ecea85672517fa334aea725dbf23",
+     "bytes": 907524,
+     "modified": false
+    }
+   ]
+  },
+  {
+   "id": "old_tyre",
+   "name": "Old Tyre",
+   "kind": "model",
+   "authors": {
+    "MP": "All"
+   },
+   "source_page": "https://polyhaven.com/a/old_tyre",
+   "api_files": "https://api.polyhaven.com/files/old_tyre",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": [
+    600.0000238418579,
+    164.99999910593033,
+    600.0000238418579
+   ],
+   "resolution": "1k jpg (textures, model textures) / 2k hdr (sky); larger upstream sizes not downloaded",
+   "use": "quay fenders hung on the quay faces below deck level",
+   "in_game_modifications": "placed on faces below the deck edge, rotated upright; inside the respawn band; no collision",
+   "files": [
+    {
+     "file": "models/old_tyre/old_tyre.bin",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/old_tyre/old_tyre.bin",
+     "upstream_md5_api": "e29bd9703ad64da8883d8389b0cfb797",
+     "sha256": "659e7982c2de92ca1d13194c97bf112b6dec22d91daecc88e3912d37ce1b7252",
+     "bytes": 84160,
+     "modified": false
+    },
+    {
+     "file": "models/old_tyre/old_tyre_1k.gltf",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/old_tyre/old_tyre_1k.gltf",
+     "upstream_md5_api": "e29d7aee130a850f2224ac0dd103617b",
+     "sha256": "ba7b417eb3dc747c356ac3cd1f125754755684eb664737a9f1fc9e490c0b766e",
+     "bytes": 2734,
+     "modified": false
+    },
+    {
+     "file": "models/old_tyre/textures/old_tyre_arm_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/old_tyre/old_tyre_arm_1k.jpg",
+     "upstream_md5_api": "c9256d0d7cac005512cba4744ab29ab4",
+     "sha256": "3bcf192f5b99a7a574f9e21e75927043e6726c601a5da15e3210a31db05e12d4",
+     "bytes": 776823,
+     "modified": false
+    },
+    {
+     "file": "models/old_tyre/textures/old_tyre_diff_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/old_tyre/old_tyre_diff_1k.jpg",
+     "upstream_md5_api": "f52b712b8373b1d1a7c46702613f76cb",
+     "sha256": "0e34ce658c0844c0c94022233226d495930d514c917a5fa15ffee4760567439e",
+     "bytes": 650708,
+     "modified": false
+    },
+    {
+     "file": "models/old_tyre/textures/old_tyre_nor_gl_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/old_tyre/old_tyre_nor_gl_1k.jpg",
+     "upstream_md5_api": "e5eb6dd2cf7a8e80813bbc1bc21a6d3d",
+     "sha256": "34b716e140408985ddbab7d4bf1d8d430edf834cd2fd4639d82b14cb393fa73e",
+     "bytes": 722778,
+     "modified": false
+    }
+   ]
+  },
+  {
+   "id": "street_lamp_02",
+   "name": "Street Lamp 02",
+   "kind": "model",
+   "authors": {
+    "Josh Dean": "All"
+   },
+   "source_page": "https://polyhaven.com/a/street_lamp_02",
+   "api_files": "https://api.polyhaven.com/files/street_lamp_02",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": [
+    386.49316132068634,
+    806.7893021069672,
+    1675.0419437885284
+   ],
+   "resolution": "1k jpg (textures, model textures) / 2k hdr (sky); larger upstream sizes not downloaded",
+   "use": "wall lamps on the gatehouse corners and on five lamp poles along the crown wall",
+   "in_game_modifications": "placed 3.6 m and higher; the poles are untextured kit boxes; an omni light beside three of them; no collision",
+   "files": [
+    {
+     "file": "models/street_lamp_02/street_lamp_02.bin",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/street_lamp_02/street_lamp_02.bin",
+     "upstream_md5_api": "5c89269a65d65cdb33d018012f003ef7",
+     "sha256": "e544c04855dcf728ff2724f691f6784690b8ba3ac323a9a332e56b271ffe1d7c",
+     "bytes": 530092,
+     "modified": false
+    },
+    {
+     "file": "models/street_lamp_02/street_lamp_02_1k.gltf",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/street_lamp_02/street_lamp_02_1k.gltf",
+     "upstream_md5_api": "94023fbd7e6392d9276d91ca36c00144",
+     "sha256": "3a8a42486c5dc4538a8b44aeeef502c64a1c9d0d42fa5610e37886c355337ff8",
+     "bytes": 6429,
+     "modified": false
+    },
+    {
+     "file": "models/street_lamp_02/textures/street_lamp_02_arm_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/street_lamp_02/street_lamp_02_arm_1k.jpg",
+     "upstream_md5_api": "d4d49b0153762ebe5ccde8e87af87dd5",
+     "sha256": "a1e2d654e7d5d48a1fdfbf720840192d171df54e5ea5f055145d0472d617eede",
+     "bytes": 657710,
+     "modified": false
+    },
+    {
+     "file": "models/street_lamp_02/textures/street_lamp_02_diff_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/street_lamp_02/street_lamp_02_diff_1k.jpg",
+     "upstream_md5_api": "381097a4c700b86b1c8f7e0d115b1a0a",
+     "sha256": "19882567313dd43fef60f9fa41a4c55f81a957f9fee539e931fc36a32e386b6c",
+     "bytes": 303714,
+     "modified": false
+    },
+    {
+     "file": "models/street_lamp_02/textures/street_lamp_02_nor_gl_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/street_lamp_02/street_lamp_02_nor_gl_1k.jpg",
+     "upstream_md5_api": "39389c9a5c2c467ea559ac3ad3a03218",
+     "sha256": "fdd9fb26ca853020ed156fdd84e90ce3f9a68bf94edf71c0ffe72add67e316c6",
+     "bytes": 372301,
+     "modified": false
+    }
+   ]
+  },
+  {
+   "id": "Barrel_01",
+   "name": "Barrel_01",
+   "kind": "model",
+   "authors": {
+    "Jorge Camacho": "All"
+   },
+   "source_page": "https://polyhaven.com/a/Barrel_01",
+   "api_files": "https://api.polyhaven.com/files/Barrel_01",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": [
+    563.0351305007935,
+    563.0352199077606,
+    880.0000050105155
+   ],
+   "resolution": "1k jpg (textures, model textures) / 2k hdr (sky); larger upstream sizes not downloaded",
+   "use": "a barrel cluster on the apron outside the yard's right-hand wall",
+   "in_game_modifications": "placed outside reach; random yaw from a fixed seed; no collision",
+   "files": [
+    {
+     "file": "models/Barrel_01/Barrel_01.bin",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/Barrel_01/Barrel_01.bin",
+     "upstream_md5_api": "e9f1036a183a1747aea6d40c556d7410",
+     "sha256": "fe8369c1ac796059b62a091c0db7367dc420aa2cee212672e48f991f4208da98",
+     "bytes": 81756,
+     "modified": false
+    },
+    {
+     "file": "models/Barrel_01/Barrel_01_1k.gltf",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/Barrel_01/Barrel_01_1k.gltf",
+     "upstream_md5_api": "45c109401126ea3e5df2fe2c6b6f6d39",
+     "sha256": "e084945dedd6a3379c6f3e97842cac89df7169797707e123a5e5b42c135d6888",
+     "bytes": 2711,
+     "modified": false
+    },
+    {
+     "file": "models/Barrel_01/textures/Barrel_01_explosive_arm_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Barrel_01/Barrel_01_explosive_arm_1k.jpg",
+     "upstream_md5_api": "ccfe5da162b909fe98f4780e41cc1233",
+     "sha256": "eab507df7719f0e7a3615bd22bb7bc0c09fed83bfc44e72a51451f8069c2d374",
+     "bytes": 243594,
+     "modified": false
+    },
+    {
+     "file": "models/Barrel_01/textures/Barrel_01_explosive_diff_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Barrel_01/Barrel_01_explosive_diff_1k.jpg",
+     "upstream_md5_api": "a36cd738a17cab52dc4c264a03b2848b",
+     "sha256": "a7e5a7b03bbe0c9c56bf1ac09b24121a5d19148428e9e6eac326c803fc297098",
+     "bytes": 179308,
+     "modified": false
+    },
+    {
+     "file": "models/Barrel_01/textures/Barrel_01_explosive_nor_gl_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Barrel_01/Barrel_01_explosive_nor_gl_1k.jpg",
+     "upstream_md5_api": "f49be8d1ab465c944380b9d565c6ab47",
+     "sha256": "fa4750d64c6f568c8de3e36bc631348710329cf2d6d9c8c87bd2e47a96bc4fcb",
+     "bytes": 185578,
+     "modified": false
+    }
+   ]
+  },
+  {
+   "id": "rollershutter_door",
+   "name": "Rollershutter Door",
+   "kind": "model",
+   "authors": {
+    "MP": "All"
+   },
+   "source_page": "https://polyhaven.com/a/rollershutter_door",
+   "api_files": "https://api.polyhaven.com/files/rollershutter_door",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": [
+    3079.9999833106995,
+    300.0857066363096,
+    2399.973489344575
+   ],
+   "resolution": "1k jpg (textures, model textures) / 2k hdr (sky); larger upstream sizes not downloaded",
+   "use": "four doors in the gatehouse face behind the spawn",
+   "in_game_modifications": "only the plain node is shown (the graffiti node is hidden); doors sit inside the gatehouse collision face",
+   "files": [
+    {
+     "file": "models/rollershutter_door/rollershutter_door.bin",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/rollershutter_door/rollershutter_door.bin",
+     "upstream_md5_api": "9df2ea3372b84dca7959d81cd5818d29",
+     "sha256": "155cd44e199d4edd19769503c7ed22b0b4007869166d0193a7e2d5e3134dc38d",
+     "bytes": 46192,
+     "modified": false
+    },
+    {
+     "file": "models/rollershutter_door/rollershutter_door_1k.gltf",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/rollershutter_door/rollershutter_door_1k.gltf",
+     "upstream_md5_api": "e8ad4c4ea26db990d32301cd1f7481cf",
+     "sha256": "913b2689f88f99cb75f8a6575e315ee90437e59976a2a3ce0b260d5636a14d30",
+     "bytes": 5378,
+     "modified": false
+    },
+    {
+     "file": "models/rollershutter_door/textures/rollershutter_door_arm_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rollershutter_door/rollershutter_door_arm_1k.jpg",
+     "upstream_md5_api": "5fc759f9776f232e6039ec5f847073df",
+     "sha256": "0a45cf8585a339ae542ef891f3aa697258079b98f1755b2d6716ea542d3de14a",
+     "bytes": 626069,
+     "modified": false
+    },
+    {
+     "file": "models/rollershutter_door/textures/rollershutter_door_diff_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rollershutter_door/rollershutter_door_diff_1k.jpg",
+     "upstream_md5_api": "2903cbe74c5d9d434951ec8625725458",
+     "sha256": "b8cd7ad14fe5c691484fe240213c379bf18f21336afe6622bfa20c731eca010d",
+     "bytes": 600354,
+     "modified": false
+    },
+    {
+     "file": "models/rollershutter_door/textures/rollershutter_door_graffiti_diff_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rollershutter_door/rollershutter_door_graffiti_diff_1k.jpg",
+     "upstream_md5_api": "1985c43406b33a7a874ea78041dd44db",
+     "sha256": "7438bee86fc32e3b6ca23ec694f179576749554dff7c3b281f30acd917c250af",
+     "bytes": 683274,
+     "modified": false
+    },
+    {
+     "file": "models/rollershutter_door/textures/rollershutter_door_nor_gl_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rollershutter_door/rollershutter_door_nor_gl_1k.jpg",
+     "upstream_md5_api": "bd6f336490c10bdb6ca1a527981054a3",
+     "sha256": "3eaad465ac23e4b3d5fbf2e315b738f8d3039cd244a69ab8adcc7a0e786cdffb",
+     "bytes": 381716,
+     "modified": false
+    }
+   ]
+  },
+  {
+   "id": "concrete_road_barrier",
+   "name": "Concrete Road Barrier",
+   "kind": "model",
+   "authors": {
+    "Amal Kumar": "All"
+   },
+   "source_page": "https://polyhaven.com/a/concrete_road_barrier",
+   "api_files": "https://api.polyhaven.com/files/concrete_road_barrier",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": [
+    1545.3570485115051,
+    640.9457623958588,
+    835.279269143939
+   ],
+   "resolution": "1k jpg (textures, model textures) / 2k hdr (sky); larger upstream sizes not downloaded",
+   "use": "a row of road barriers on the apron behind bend two's outer wall",
+   "in_game_modifications": "placed outside reach; no collision",
+   "files": [
+    {
+     "file": "models/concrete_road_barrier/concrete_road_barrier.bin",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/concrete_road_barrier/concrete_road_barrier.bin",
+     "upstream_md5_api": "f256cb4d2bd9e5623b062502605dfcf2",
+     "sha256": "64a4f9bc6e4af64d714a252c3c13428c430a60569deba3d52ca6b7dd3aa70d8c",
+     "bytes": 1374016,
+     "modified": false
+    },
+    {
+     "file": "models/concrete_road_barrier/concrete_road_barrier_1k.gltf",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/concrete_road_barrier/concrete_road_barrier_1k.gltf",
+     "upstream_md5_api": "6d6feaf068f434e8dc163a1a9d983f4a",
+     "sha256": "c371e87d303fff3f0c9fbe88520f7837514364e5c66aac3244e115ffa673d061",
+     "bytes": 2868,
+     "modified": false
+    },
+    {
+     "file": "models/concrete_road_barrier/textures/concrete_road_barrier_arm_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/concrete_road_barrier/concrete_road_barrier_arm_1k.jpg",
+     "upstream_md5_api": "a289412cc7fe2c265f0975b31d8edda1",
+     "sha256": "b940847648012f2db8c24b16e07ad1e39b3bd33ea493203364deca209606e4b4",
+     "bytes": 619502,
+     "modified": false
+    },
+    {
+     "file": "models/concrete_road_barrier/textures/concrete_road_barrier_diff_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/concrete_road_barrier/concrete_road_barrier_diff_1k.jpg",
+     "upstream_md5_api": "0fc11541996e1ddbdb1875dff35bc1c9",
+     "sha256": "88b2d79829ffec7b11ac4d9c8554328f30b665d2c17f634197fde4f1ca8696fe",
+     "bytes": 792641,
+     "modified": false
+    },
+    {
+     "file": "models/concrete_road_barrier/textures/concrete_road_barrier_nor_gl_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/concrete_road_barrier/concrete_road_barrier_nor_gl_1k.jpg",
+     "upstream_md5_api": "5cc77a0a52de7f3e6c7405b5bfedfc6f",
+     "sha256": "c1072f51ff5c3d7158f0fbb0aa26e82b816b745b9f03639c4816832af2b37c52",
+     "bytes": 961760,
+     "modified": false
+    }
+   ]
+  },
+  {
+   "id": "industrial_sunset_02_puresky",
+   "name": "Industrial Sunset 02 (Pure Sky)",
+   "kind": "hdri",
+   "authors": {
+    "Jarod Guest": "Sky Edits",
+    "Sergej Majboroda": "Original"
+   },
+   "source_page": "https://polyhaven.com/a/industrial_sunset_02_puresky",
+   "api_files": "https://api.polyhaven.com/files/industrial_sunset_02_puresky",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": null,
+   "resolution": "1k jpg (textures, model textures) / 2k hdr (sky); larger upstream sizes not downloaded",
+   "use": "the dusk sky and its ambient light",
+   "in_game_modifications": "panorama sky, rotated in the environment so its sun matches the scene's sun",
+   "files": [
+    {
+     "file": "sky/industrial_sunset_02_puresky_2k.hdr",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/industrial_sunset_02_puresky_2k.hdr",
+     "upstream_md5_api": "b54af864f1868a59cdc391744532776c",
+     "sha256": "439d7e99b34bd3727896d9a06247d4bd80d8276f208f4fdefce919ce74b602c3",
+     "bytes": 4132592,
+     "modified": false
+    }
+   ]
+  }
+ ]
+}
