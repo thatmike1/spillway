@@ -409,10 +409,46 @@ func _check_hud_words(when: String) -> void:
 	report["hud_text_" + when] = texts
 	var preset: Dictionary = game.get("preset")
 	var line := _hud_text("identity")
+	for field: String in ["identity", "speed_label", "speed_unit", "strafe_live", "strafe_last", "strafe_split", "strafe_chain"]:
+		check(when + ": visible on-screen HUD " + field, _label_drawn(field), _hud_text(field))
 	check(when + ": hud names map, preset key, label, rate and air", line.contains(str(game.call("map_name")).to_upper()) and line.contains("F%d %s" % [int(preset.slot), str(preset.label)])
 		and line.contains("%d Hz" % int(game.get("physics_hz"))) and line.contains(str(preset.air)), line)
 	for word: String in expect.get("hud_forbidden", []):
 		check(when + ": hud never says " + word, not joined.to_lower().contains(word.to_lower()), "")
+
+func _label_drawn(field: String) -> bool:
+	var label: Variant = _hud().get(field)
+	if not label is Label or not label.is_visible_in_tree() or str(label.text).is_empty():
+		return false
+	var rect: Rect2 = label.get_global_rect()
+	var alpha := 1.0
+	var node: Node = label
+	while node != null:
+		if node is CanvasItem:
+			alpha *= node.modulate.a
+		node = node.get_parent()
+	return alpha * label.self_modulate.a > 0.05 and rect.size.x > 0.0 and rect.size.y > 0.0 and get_viewport().get_visible_rect().encloses(rect)
+
+func _hud_feedback(when: String) -> void:
+	_check_hud_words(when)
+	var stats: Variant = game.get("stats")
+	if stats == null:
+		check(when + ": live strafe observer exists", false)
+		return
+	check(when + ": displayed speed agrees with measured travel", _hud_text("speed_label") == "%d" % roundi(float(game.call("display_speed_u"))) and _hud_text("speed_unit") == "u/s", _hud_text("speed_label"))
+	var flight: Dictionary = stats.get("flight")
+	var eligible := int(flight.get("eligible", 0)) if not flight.is_empty() else int(stats.get("total_eligible"))
+	var good := int(flight.get("good", 0)) if not flight.is_empty() else int(stats.get("total_good"))
+	var sync := "—" if eligible <= 0 else "%d %% (%d/%d)" % [roundi(100.0 * good / eligible), good, eligible]
+	check(when + ": live sync agrees with sampled A/D counts", _hud_text("strafe_live").contains("sync " + sync), [good, eligible, _hud_text("strafe_live")])
+	var hop: Dictionary = stats.get("last_hop")
+	var expected := "last hop  —"
+	if not hop.is_empty():
+		var gain := roundi(float(hop.gain))
+		var signed_gain := "±0" if gain == 0 else ("+" if gain > 0 else "-") + "%d" % absi(gain)
+		var last_sync := "—" if int(hop.eligible) <= 0 else "%d %% (%d/%d)" % [roundi(100.0 * int(hop.good) / int(hop.eligible)), int(hop.good), int(hop.eligible)]
+		expected = "last hop  %s u/s  ·  sync %s  ·  %d ticks" % [signed_gain, last_sync, int(hop.air_ticks)]
+	check(when + ": displayed jump gain and sync agree with the completed hop", _hud_text("strafe_last") == expected, [_hud_text("strafe_last"), expected])
 
 func _collect_text(node: Node, texts: Array) -> void:
 	if node == null:
@@ -633,6 +669,8 @@ func _on_draw() -> void:
 	var name := str(_capture.name)
 	_capture = {}
 	var state := _state()
+	if str(report.get("mode")) == "play" and not bool(state.paused):
+		_hud_feedback("draw " + name)
 	var image := get_viewport().get_texture().get_image()
 	var full := Vector2i(image.get_width(), image.get_height())
 	image.resize(maxi(1, int(full.x * CAPTURE_SCALE)), maxi(1, int(full.y * CAPTURE_SCALE)), Image.INTERPOLATE_BILINEAR)
@@ -1051,18 +1089,57 @@ func _as_read(value: float) -> float:
 	# package-r14.py compares the written trace again with python's exact reader.
 	return float(JSON.parse_string(JSON.stringify(value, "", false, true)))
 
+func _finite_number(value: Variant) -> bool:
+	return (typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT) and is_finite(float(value))
+
+func _valid_vector(value: Variant) -> bool:
+	return value is Array and value.size() == 3 and value.all(_finite_number)
+
+func _trace_valid(rows: Array, packed: bool) -> bool:
+	if rows.is_empty():
+		return false
+	for tick: int in rows.size():
+		var row: Variant = rows[tick]
+		if not row is Dictionary or not _finite_number(row.get("tick")) or float(row.tick) != float(tick):
+			return false
+		if packed and (typeof(row.tick) != TYPE_INT or not _valid_vector(row.get("pre_p"))):
+			return false
+		var motion: Variant = row if packed else row.get("post")
+		var state: Variant = row if packed else row.get("game")
+		if not motion is Dictionary or not _valid_vector(motion.get("p")) or not _finite_number(motion.get("yaw")) or not state is Dictionary:
+			return false
+		for field: String in ["checkpoint", "elapsed", "finished", "finish_kind", "respawns"]:
+			if not state.has(field):
+				return false
+		if not _finite_number(state.elapsed) or float(state.elapsed) < 0.0 or not state.finished is bool or not state.finish_kind is String:
+			return false
+		for field: String in ["checkpoint", "respawns"]:
+			if not _finite_number(state[field]) or float(state[field]) < 0.0 or float(state[field]) != floorf(float(state[field])):
+				return false
+	return true
+
 func _compare_reference(path: String) -> void:
 	# the source executor's run of the same tape on the frozen commit. positions must match
 	# exactly; yaw allows 1e-12 rad for its trip through json text.
 	var reference: Dictionary = {}
+	var reference_rows: Array = []
+	var parsed_ok := true
 	var file := FileAccess.open(path, FileAccess.READ)
 	while file != null and not file.eof_reached():
 		var line := file.get_line()
 		if line == "":
 			continue
 		var row: Variant = JSON.parse_string(line)
+		if not row is Dictionary:
+			parsed_ok = false
 		if row is Dictionary and row.get("phase") == "tape":
-			reference[int(row.tick)] = row
+			reference_rows.append(row)
+	var valid := parsed_ok and _trace_valid(trace, true) and _trace_valid(reference_rows, false) and trace.size() == reference_rows.size()
+	check("both trace sequences are complete, ordered and finite", valid, [trace.size(), reference_rows.size()])
+	if not valid:
+		return
+	for row: Dictionary in reference_rows:
+		reference[int(row.tick)] = row
 	var worst := 0.0
 	var worst_yaw := 0.0
 	var first_diff := -1
@@ -1081,7 +1158,7 @@ func _compare_reference(path: String) -> void:
 		worst = maxf(worst, gap)
 		worst_yaw = maxf(worst_yaw, absf(float(row.yaw) - float(other.post.yaw)))
 		var g: Dictionary = other.get("game", {})
-		if game_diff.size() < 5 and (int(g.get("checkpoint", -1)) != int(row.checkpoint) or float(g.get("elapsed", -1.0)) != _as_read(row.elapsed) or bool(g.get("finished", false)) != bool(row.finished) or int(g.get("respawns", -1)) != int(row.respawns)):
+		if game_diff.size() < 5 and (int(g.get("checkpoint", -1)) != int(row.checkpoint) or float(g.get("elapsed", -1.0)) != _as_read(row.elapsed) or bool(g.get("finished", false)) != bool(row.finished) or str(g.get("finish_kind", "")) != str(row.finish_kind) or int(g.get("respawns", -1)) != int(row.respawns)):
 			game_diff.append({"tick": row.tick, "pack": [row.checkpoint, row.elapsed, row.finished], "source": [g.get("checkpoint"), g.get("elapsed"), g.get("finished")]})
 	var start: Variant = reference.get(0)
 	var pre_gap := -1.0

@@ -19,6 +19,7 @@ import gzip
 import hashlib
 import io
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -83,7 +84,7 @@ SHIPPED_DIRS = ('scripts/', 'scenes/', 'shaders/', 'assets/', 'data/')
 SHIPPED_EXT = ('.gd', '.tscn', '.tres', '.gdshader', '.png', '.jpg', '.webp', '.gltf', '.glb', '.ogg', '.wav', '.json')
 WINDOWS = {NAME + '.exe': 'windows_release_x86_64.exe', NAME + '.console.exe': 'windows_release_x86_64_console.exe'}
 LINUX = {NAME + '.x86_64': 'linux_release.x86_64'}
-ERRORS = re.compile(r'SCRIPT ERROR:|(^|\s)ERROR:|Parse Error:|Failed to load', re.M)
+ERRORS = re.compile(r'SCRIPT ERROR:|ERROR:|Parse Error:|Failed to load', re.M)
 HELPERS = ('tools/package-r14.py', 'tools/check-r14-pack.sh', 'tools/r14-pack-probe.gd', 'tools/r14_native_display.py',
            'tools/momentum-tape.py', 'tools/momentum-tape.gd')
 EXECUTED_TOOL_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
@@ -353,7 +354,31 @@ def route_game(route, path):
 def read_rows(path):
     opener = gzip.open if str(path).endswith('.gz') else open
     with opener(path, 'rt') as stream:
-        return [json.loads(line) for line in stream if '"phase":"tape"' in line]
+        values = [json.loads(line, parse_constant=lambda value: (_ for _ in ()).throw(ValueError('nonfinite JSON: ' + value)))
+                  for line in stream if line.strip()]
+    return [row for row in values if isinstance(row, dict) and row.get('phase') == 'tape']
+
+
+def trace_error(rows, packed=False, expected=None):
+    """validate evidence independently of its recorder before any numeric comparison."""
+    def finite(value):
+        return type(value) in (int, float) and math.isfinite(value)
+    def vector(value):
+        return isinstance(value, list) and len(value) == 3 and all(finite(n) for n in value)
+    if not isinstance(rows, list) or not rows or expected is not None and len(rows) != expected:
+        return 'empty trace or unexpected duration'
+    for tick, row in enumerate(rows):
+        if not isinstance(row, dict) or type(row.get('tick')) is not int or row['tick'] != tick:
+            return 'ticks must be unique, ordered integers from zero through duration-1'
+        motion, game = (row, row) if packed else (row.get('post'), row.get('game'))
+        if not isinstance(motion, dict) or not vector(motion.get('p')) or not finite(motion.get('yaw')):
+            return 'position must have three finite numbers and yaw must be finite'
+        if not isinstance(game, dict) or any(k not in game for k in ('checkpoint', 'elapsed', 'finished', 'finish_kind', 'respawns')):
+            return 'required game-state fields are missing'
+        if (type(game['checkpoint']) is not int or game['checkpoint'] < 0 or type(game['respawns']) is not int or game['respawns'] < 0
+                or not finite(game['elapsed']) or game['elapsed'] < 0 or type(game['finished']) is not bool or type(game['finish_kind']) is not str):
+            return 'game-state fields have invalid types or values'
+    return None
 
 
 def source_route(route, source, evidence, identity=None):
@@ -390,6 +415,9 @@ def source_route(route, source, evidence, identity=None):
                              '--motor', route['preset']], source, env, out / 'source-run.log', 440, cleanup_grace=35)
     trace = run / 'evaluator/trace.jsonl'
     rows = read_rows(trace) if trace.is_file() else []
+    invalid = trace_error(rows, expected=int(plan['duration_ticks']))
+    if invalid:
+        raise Rejected('route %s has invalid evidence: %s' % (route['name'], invalid))
     last = rows[-1]['game'] if rows else {}
     order = [r['game']['checkpoint'] for r in rows]
     ordered = all(b - a in (0, 1) for a, b in zip(order, order[1:]))
@@ -399,10 +427,18 @@ def source_route(route, source, evidence, identity=None):
               'arm_motor_steps': rows[0]['pre']['tape_step_count'] if rows else None, 'source_finish': last,
               'ordered': ordered, 'rate_ok': (report.get('rate') or {}).get('ok'), 'delivery_ok': (report.get('delivery') or {}).get('ok'),
               'render_fps': route.get('fps', hz), 'warmup': route.get('warmup', 8), 'exit': code, 'route_game_sha256': digest(game)}
-    if code or not last.get('finished') or last.get('finish_kind') != 'clean' or last.get('respawns') or not ordered or not result['rate_ok']:
+    result['order_ok'] = (report.get('order') or {}).get('ok')
+    result['cleanup_ok'] = (report.get('cleanup') or {}).get('clean')
+    result['integrity_flags'] = report.get('integrity_flags')
+    if (code or ERRORS.search(text) or not last.get('finished') or last.get('finish_kind') != 'clean' or last.get('respawns') or not ordered
+            or result['rate_ok'] is not True or result['delivery_ok'] is not True or result['order_ok'] is not True
+            or result['cleanup_ok'] is not True or report.get('neutral') is not True or report.get('end') != 'completed'
+            or result['integrity_flags'] != []):
         raise Rejected('route %s does not finish clean, ordered and at its rate in source mode: %s' % (route['name'], json.dumps(result)[:600]))
     if route.get('reference'):
         result['external_reference'] = compare_traces(rows, read_rows(route['reference']), route.get('game_diff', []))
+        if not result['external_reference']['ok']:
+            raise Rejected('route %s disagrees with its requested external reference: %s' % (route['name'], result['external_reference']))
     return result
 
 
@@ -410,9 +446,16 @@ def shipped_trace_match(path, reference):
     """the probe's own trace against the source reference with python's correctly rounded reader."""
     if not path.is_file() or not reference:
         return {'ok': False, 'missing': str(path) if not path.is_file() else 'reference'}
-    with open(path) as stream:
-        rows = [json.loads(line) for line in stream if line.strip()]
-    by_tick = {r['tick']: r for r in read_rows(reference)}
+    try:
+        with open(path) as stream:
+            rows = [json.loads(line, parse_constant=lambda value: (_ for _ in ()).throw(ValueError('nonfinite JSON: ' + value))) for line in stream if line.strip()]
+        other = read_rows(reference)
+    except (ValueError, OSError) as error:
+        return {'ok': False, 'invalid': str(error)}
+    invalid = trace_error(rows, packed=True) or trace_error(other) or ('duration differs' if len(rows) != len(other) else None)
+    if invalid:
+        return {'ok': False, 'invalid': invalid}
+    by_tick = {r['tick']: r for r in other}
     worst, worst_yaw, game_ticks = 0.0, 0.0, []
     for row in rows:
         ref = by_tick.get(row['tick'])
@@ -432,6 +475,9 @@ def compare_traces(rows, other, known_game_ticks=()):
 
     known_game_ticks: the exact ticks where progress or clock is known to differ (a reference
     from another main); any other differing tick, or a known one that agrees, fails."""
+    invalid = trace_error(rows) or trace_error(other) or ('duration differs' if len(rows) != len(other) else None)
+    if invalid:
+        return {'ok': False, 'invalid': invalid, 'ticks': len(rows), 'reference_ticks': len(other)}
     by_tick = {r['tick']: r for r in other}
     worst, worst_yaw, first, game_diff, game_ticks = 0.0, 0.0, None, [], []
     for row in rows:
@@ -1105,7 +1151,10 @@ def check_runs(extracted, args, evidence, identity, routes, record, work):
         _common(record, 'controls', code, text, titles, out, identity, start)
         record('controls: no profile written without a finish or a setting change', after == before, sorted(set(after) ^ set(before)))
         record('controls: earlier rounds\' records untouched', all(after.get(PROJECT_NAME + '/' + n) == h for n, h in seeded.items()))
-        for route in routes:
+        controls_ok = report.get('failures') == 0 and code == 0 and not ERRORS.search(text)
+        if not controls_ok:
+            runs['routes_skipped'] = 'controls failed; repair before spending native runs on routes'
+        for route in routes if controls_ok else []:
             name = route['route']['name']
             profile = evidence / 'runs' / name / 'profile'
             seeded = seed_old_profiles(profile)
@@ -1228,9 +1277,20 @@ def main():
     check_parser.add_argument('--evidence', type=Path, required=True, help='a new directory for logs and frames')
     source_parser.add_argument('--source', type=Path, required=True, help='an imported source copy outside Git')
     source_parser.add_argument('--evidence', type=Path, required=True, help='a new directory for logs')
+    engine_parser = sub.add_parser('engine', help='owned source-suite child with a deadline and cancellation cleanup')
+    engine_parser.add_argument('--cwd', type=Path, required=True)
+    engine_parser.add_argument('--log', type=Path, required=True)
+    engine_parser.add_argument('--deadline', type=float, default=600)
+    engine_parser.add_argument('argv', nargs=argparse.REMAINDER)
     args = parser.parse_args()
     try:
-        if args.command == 'package':
+        if args.command == 'engine':
+            command = args.argv[1:] if args.argv[:1] == ['--'] else args.argv
+            if not command:
+                raise Rejected('engine needs a command after --')
+            code, _ = run_engine(command, args.cwd, os.environ.copy(), args.log, args.deadline, cleanup_grace=35)
+            sys.exit(code if type(code) is int else 124)
+        elif args.command == 'package':
             package(args)
         elif args.command == 'source':
             sys.exit(0 if source_mode(args) else 1)

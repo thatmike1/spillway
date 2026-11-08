@@ -135,3 +135,17 @@ A tape establishes one execution on one source and machine, not forgiving discov
 binary CS fidelity or enjoyment. See SOURCE-IMPLEMENTATION.md for reconstructed vanilla
 stamina/clamps and contact limits. See QUIT-REVIEW.md for the engine's private-Wayland
 shutdown race. Later GPU checks use X11; a clean bounded series is not universal proof.
+
+## Independent verifier challenge and repairs
+
+DELIVERY-REVIEW.md records reproduced false acceptance in the earlier helper functions,
+not a whole-package exploit. The repaired comparisons validate nonempty duration,
+ordered unique tick identities, three finite coordinates, finite yaw and typed game
+fields before numeric equality. Source runs also require successful delivery/order,
+neutral completion, clean cleanup, no integrity flags and error-free logs. A supplied
+external mismatch now rejects before any package/recheck proceeds. The shell suites
+use bounded Python owners, with cancellation forwarded even when only the shell is
+signalled. Packed drawn-frame HUD checks cover label visibility/bounds, measured speed,
+last jump gain and directional-sync counts. Root's asserting regressions are
+`tests/test_r14_verifier_hardening.py`; the original review script remains an honest
+observational reproduction, not a pass/fail release gate.

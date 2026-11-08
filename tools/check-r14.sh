@@ -58,16 +58,48 @@ echo "source: $label" | tee "$out/SOURCE.txt"
 results=()
 failed=0
 control_failed=0
+r14_child=""
+r14_cancelled=0
+
+cancel_source() {
+	r14_cancelled=1
+	if [[ -n "$r14_child" ]]; then kill -TERM "$r14_child" 2>/dev/null || true; fi
+}
+
+cleanup_source() {
+	if [[ -n "$r14_child" ]]; then
+		kill -TERM "$r14_child" 2>/dev/null || true
+		wait "$r14_child" 2>/dev/null || true
+	fi
+}
+trap cancel_source INT TERM
+trap cleanup_source EXIT
+
+owned_run() {
+	# the python owner forwards cancellation through supervisors and releases engine groups.
+	local log="$1" budget="$2" status=0
+	shift 2
+	python3 -I "$src/tools/package-r14.py" engine --cwd "$src" --log "$log" --deadline "$budget" -- "$@" &
+	r14_child=$!
+	if (( r14_cancelled )); then kill -TERM "$r14_child" 2>/dev/null || true; fi
+	while true; do
+		wait "$r14_child" && status=0 || status=$?
+		kill -0 "$r14_child" 2>/dev/null || break
+	done
+	r14_child=""
+	if (( r14_cancelled )); then exit 130; fi
+	return "$status"
+}
 
 clean_log() {
-	! rg -q 'SCRIPT ERROR:|(^|[[:space:]])ERROR:|Parse Error:|Failed to load script' "$1"
+	! rg -q 'SCRIPT ERROR:|ERROR:|Parse Error:|Failed to load script' "$1"
 }
 
 run_clean() {
 	# label, log name, engine args...: an exit status or any engine error fails the step.
 	local label="$1" log="$out/$2.log" status=0
 	shift 2
-	(cd "$src" && "$GODOT" "$@") >"$log" 2>&1 || status=$?
+	owned_run "$log" 600 "$GODOT" "$@" || status=$?
 	if (( status == 0 )) && clean_log "$log"; then
 		results+=("PASS  $label ($(tail -n 1 "$log" | cut -c1-160))")
 		return 0
@@ -140,7 +172,7 @@ PY
 
 source_review() {
 	local dir="$out/source-review" engine_status=0 status=0
-	(cd "$src" && "$GODOT" --headless --audio-driver Dummy --fixed-fps 128 --path . --script res://tests/r14_source_review.gd -- "--out=$dir") >"$out/source-review.log" 2>&1 || engine_status=$?
+	owned_run "$out/source-review.log" 600 "$GODOT" --headless --audio-driver Dummy --fixed-fps 128 --path . --script res://tests/r14_source_review.gd -- "--out=$dir" || engine_status=$?
 	if (( engine_status != 1 )); then
 		results+=("FAIL  retained: independent source review (expected its retained-case exit 1, got $engine_status)")
 		return 1
@@ -159,7 +191,7 @@ source_review() {
 
 loop_review() {
 	local dir="$out/loop-review" status=0 engine_status=0 analyze_status=0
-	(cd "$src" && "$GODOT" --headless --audio-driver Dummy --fixed-fps 120 --path . --script res://tests/r14_loop_review.gd -- "--out=$dir") >"$out/loop-review.log" 2>&1 || engine_status=$?
+	owned_run "$out/loop-review.log" 600 "$GODOT" --headless --audio-driver Dummy --fixed-fps 120 --path . --script res://tests/r14_loop_review.gd -- "--out=$dir" || engine_status=$?
 	if (( engine_status != 1 )); then
 		results+=("FAIL  retained: loop review (expected its retained-case exit 1, got $engine_status)")
 		return 1
@@ -168,7 +200,7 @@ loop_review() {
 	retained "loop review, the deliberate manual-wheel negative" "$dir/checks.json" \
 		'[c["name"] for c in (d["checks"] if isinstance(d, dict) else d) if not c["ok"]]' \
 		"wheel released before a tick causes another real hop" || status=1
-	(cd "$src" && python3 -I tests/r14_loop_review_analyze.py "$dir/trace.jsonl" "--out=$dir/reductions.json") >"$out/loop-review-reductions.log" 2>&1 || analyze_status=$?
+	owned_run "$out/loop-review-reductions.log" 60 python3 -I tests/r14_loop_review_analyze.py "$dir/trace.jsonl" "--out=$dir/reductions.json" || analyze_status=$?
 	if (( analyze_status != 1 )); then
 		results+=("FAIL  retained: loop review reductions (expected its retained-case exit 1, got $analyze_status)")
 		status=1
@@ -183,7 +215,7 @@ loop_review() {
 identity_routes() {
 	local args=()
 	for r in "${routes[@]}"; do args+=(--route "$r"); done
-	if (cd "$src" && python3 -I tools/package-r14.py source --source "$src" --evidence "$out/identity-routes" "${args[@]}") >"$out/identity-routes.log" 2>&1; then
+	if owned_run "$out/identity-routes.log" 900 python3 -I tools/package-r14.py source --source "$src" --evidence "$out/identity-routes" "${args[@]}"; then
 		while IFS= read -r line; do results+=("PASS  active: ${line#PASS }"); done < <(rg '^PASS ' "$out/identity-routes.log")
 		return 0
 	fi

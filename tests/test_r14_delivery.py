@@ -132,6 +132,8 @@ def gates(evidence):
                    GATE_EXIT=str(child_exit), GATE_LOG=log)
         script = 'set -euo pipefail\n' + '\n'.join(functions) + '\n' + '''
 out="$1"; src="$2"; GODOT="$3"; results=(); failed=0; control_failed=0
+# this reduction controls the child result; full-wrapper ownership is tested separately.
+owned_run() { local log="$1"; shift 2; "$@" >"$log" 2>&1; }
 step retained source_review
 printf '%s\n' "${results[@]}"
 exit "$failed"
