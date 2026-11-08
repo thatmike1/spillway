@@ -651,6 +651,79 @@ def runs(ticks, minimum):
     return out
 
 
+def hull_origin_compensation(row):
+    """prove r15's air-duck interpolation shift from observed hulls and input.
+
+    raw positions and raw order booleans remain untouched. this only explains a previous-
+    origin mismatch when the counter, real box change, anchor, input and float32 origin sum
+    all agree. it is an observer contract, not protection against forged complete evidence.
+    """
+    observed = row.get("hull_origin")
+    motion = row.get("post", {}).get("motion_state") or {}
+    shift = motion.get("duck_shift", [0.0, 0.0, 0.0])
+    if not observed:
+        return None
+    before, after = observed.get("before", {}), observed.get("after", {})
+    if shift == [0.0, 0.0, 0.0]:
+        return None
+
+    def vector(value):
+        return isinstance(value, list) and len(value) == 3 and all(type(n) in (int, float) and math.isfinite(n) and abs(n) <= 3.4028234663852886e38 for n in value)
+
+    def result(valid, reason):
+        return {"valid": valid, "reason": reason, "shift_m": shift}
+
+    order, pre, post = row["order"], row["pre"], row["post"]
+    if type(order.get("step_count_delta")) is not int or order["step_count_delta"] != 1:
+        return result(False, "exactly one motor step is required")
+    if order.get("same_physics_frame") is not True or order.get("in_physics") is not True or order.get("motor_cur_matches_body") is not True:
+        return result(False, "post sample is not counter-verified in this frame")
+    if type(before.get("ducked")) is not bool or type(after.get("ducked")) is not bool or before["ducked"] == after["ducked"]:
+        return result(False, "no observed duck transition")
+    if pre.get("grounded") is not False:
+        return result(False, "ground duck has no airborne origin shift")
+    pressing = after["ducked"]
+    if ("ctrl" in post.get("actions", [])) != pressing:
+        return result(False, "crouch action disagrees with the hull change")
+    event = "duck_air" if pressing else "unduck_air"
+    if event not in motion.get("duck", {}).get("events", []):
+        return result(False, "air duck event is missing")
+    standing, duck = before.get("standing_u"), before.get("duck_u")
+    if any(type(n) not in (int, float) or not math.isfinite(n) for n in (standing, duck)) or not 0 < duck < standing <= 128:
+        return result(False, "invalid hull dimensions")
+    anchor = before.get("anchor")
+    if anchor not in ("center", "head", "feet"):
+        return result(False, "unknown air anchor")
+    if not vector(pre.get("p")):
+        return result(False, "pre-position is malformed")
+    lift = (standing - duck) * {"center": 0.5, "head": 1.0, "feet": 0.0}[anchor]
+    # godot's Vector3 components use float32 in this pinned standard build.
+    f32 = lambda n: struct.unpack("f", struct.pack("f", n))[0]
+    expected_shift = [0.0, f32((lift if pressing else -lift) * 0.0254), 0.0]
+    if not pressing:
+        # unduck returns target minus start, after float32 position addition. reproduce
+        # that cancellation exactly instead of widening the physics tolerance.
+        start_y = pre["p"][1]
+        expected_shift[1] = f32(f32(start_y + expected_shift[1]) - start_y)
+    if not vector(shift) or shift != expected_shift:
+        return result(False, "reported shift disagrees with observed anchor geometry")
+    for hull in (before, after):
+        if not all(vector(hull.get(k)) for k in ("box_size_m", "box_center_m", "scale")):
+            return result(False, "box observations are malformed")
+        size, center = hull["box_size_m"], hull["box_center_m"]
+        height = (duck if hull["ducked"] else standing) * 0.0254
+        if any(abs(n - 1.0) > 1e-6 for n in hull["scale"]) or abs(size[1] - height) > 1e-6 or size[0] <= 0 or size[2] <= 0:
+            return result(False, "observed box does not have the configured size")
+        if abs(center[0]) > 1e-6 or abs(center[2]) > 1e-6 or abs(center[1] - height * 0.5) > 1e-6:
+            return result(False, "observed box is not feet-anchored")
+    if before["box_size_m"][::2] != after["box_size_m"][::2]:
+        return result(False, "horizontal hull dimensions changed")
+    previous, current = observed.get("motor_previous"), before.get("interp_current")
+    if not vector(previous) or not vector(current) or previous != [f32(a + b) for a, b in zip(current, shift)]:
+        return result(False, "actual interpolation origin does not equal the compensated pre-origin")
+    return result(True, "observed air hull change explains the interpolation origin")
+
+
 def evaluate(run_dir):
     run_dir = Path(run_dir)
     plan = json.loads((run_dir / "evaluator/plan.json").read_text())
@@ -687,6 +760,7 @@ def evaluate(run_dir):
             jumps.add(r["tick"])
     held_bad = []
     previous = None
+    origin_compensations = []
     for r in tape:
         t, post = r["tick"], r["post"]
         if previous is not None and r["step"] != previous["step"] + 1:
@@ -699,7 +773,13 @@ def evaluate(run_dir):
                 order.append({"tick": t, "kind": "motor_step_count", "delta": o["step_count_delta"]})
         if not (o["same_physics_frame"] and o["in_physics"]) or o["motor_cur_matches_body"] is False:
             order.append({"tick": t, "kind": "capture_not_after_motor", "order": o})
-        if o["motor_prev_matches_pre"] is False and t not in jumps:
+        compensation = hull_origin_compensation(r) if t not in jumps else None
+        if compensation is not None:
+            origin_compensations.append({"tick": t, **compensation})
+            if not compensation["valid"]:
+                order.append({"tick": t, "kind": "invalid_hull_origin_compensation", "detail": compensation})
+        explained = compensation is not None and compensation["valid"]
+        if o["motor_prev_matches_pre"] is False and t not in jumps and not explained:
             order.append({"tick": t, "kind": "motor_did_not_run_between_samples", "order": o})
         if set(post["actions"]) != expected.get(t, set()):
             held_bad.append(t)
@@ -828,6 +908,7 @@ def evaluate(run_dir):
         "end": end.get("reason"), "neutral": end.get("neutral"),
         "delivery": {"ok": not delivery, "errors": delivery[:60], "error_count": len(delivery)},
         "order": {"ok": not order, "errors": order[:30], "error_count": len(order),
+                  "hull_origin_compensations": origin_compensations,
                   "counter_verified_ticks": counter_verified_ticks,
                   "strength": "counter_verified" if counter_verified_ticks == len(tape) and tape else "state_or_priority_consistency_only",
                   "proof": "per tick: pre sample and mouse in Early (priority -1000), post sample in Late (priority 1000) in the same physics frame; "

@@ -349,6 +349,21 @@ func _engine_metadata() -> Dictionary:
 
 # --- per step -------------------------------------------------------------------------------
 
+## observe the real box separately from the motor's report. r15 moves its interpolation
+## origin when duck changes hull; the evaluator must prove that exception, not ignore it.
+func _hull_origin_snapshot() -> Dictionary:
+	if not player.has_method("hull_height_u") or not player.has_method("air_lift_u"):
+		return {}
+	var shape_node: Variant = player.get("collision")
+	var cvars: Variant = player.get("settings")
+	if not shape_node is CollisionShape3D or not (shape_node as CollisionShape3D).shape is BoxShape3D or not cvars is Dictionary:
+		return {}
+	var box := (shape_node as CollisionShape3D).shape as BoxShape3D
+	return {"box_size_m": _v3(box.size), "box_center_m": _v3(shape_node.position),
+		"scale": _v3(shape_node.global_transform.basis.get_scale()), "ducked": player.get("ducked"),
+		"standing_u": cvars.get("hull_height"), "duck_u": cvars.get("duck_hull_height"),
+		"anchor": cvars.get("duck_air_anchor"), "interp_current": _v3(pre_cur)}
+
 func early_step(delta: float) -> void:
 	var index := step
 	step += 1
@@ -366,6 +381,9 @@ func early_step(delta: float) -> void:
 			"tape_step_count": player.get("tape_step_count") if "tape_step_count" in player else null},
 		"keys": pending.get(tick, []), "mouse": {},
 		"rate": {"dt": delta, "engine_hz": Engine.physics_ticks_per_second, "time_scale": Engine.time_scale, "sim_dt_sum_s": tape_dt_sum if armed else null}}
+	var hull := _hull_origin_snapshot()
+	if not hull.is_empty():
+		row["hull_origin"] = {"before": hull}
 	pending.erase(tick)
 	if not ok:
 		row["rate_fault"] = rate_fault
@@ -423,6 +441,9 @@ func late_step(delta: float) -> void:
 		"motor_cur_matches_body": player.get("_current_position") == p if "_current_position" in player else null,
 		"step_count": player.get("tape_step_count") if "tape_step_count" in player else null,
 		"step_count_delta": int(player.get("tape_step_count")) - int(row.pre.tape_step_count) if row.pre.tape_step_count != null else null}
+	if row.has("hull_origin"):
+		row.hull_origin["after"] = _hull_origin_snapshot()
+		row.hull_origin["motor_previous"] = _v3(player.get("_previous_position"))
 	if world_kind == "lab":
 		row["game"] = {"respawns": game.get("respawn_count"), "checkpoint": game.get("checkpoint_index"), "elapsed": game.get("elapsed"),
 			"finished": game.get("finished"), "finish_kind": game.get("finish_kind"), "paused": game.get("paused")}
