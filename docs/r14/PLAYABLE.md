@@ -47,8 +47,9 @@ acceleration, rate, jump policy and controls (clicking one switches), the map se
 ## Switching (P decisions)
 
 - **Preset switch** keeps the exact feet position, velocity, yaw and pitch, starts no process,
-  and turns a started attempt into practice ("PRACTICE (preset switched mid-run)"). A switch at
-  the untouched spawn keeps the attempt clean. Between the two Source presets the same body
+  and turns an attempt that has used the old law into practice ("PRACTICE (preset switched
+  mid-run)"). This includes an initial hop or short run before the timer's 0.5 m start
+  threshold. A switch at the untouched spawn keeps the attempt clean. Between the Source presets the same body
   takes new cvars; between families the runner is replaced in place. R13's pitch is clamped to
   its own ±1.40 rad.
 - **Hull fit**: before a family change the new standing hull is tested where the runner stands
@@ -57,13 +58,15 @@ acceleration, rate, jump policy and controls (clicking one switches), the map se
   active preset's key cancels the wait. R applies a waiting switch at the spawn when it fits
   there. The runner is never moved to make room.
 - **Map switch** frees the map, builds the other one and starts a clean attempt at its spawn,
-  with the same preset.
+  with the same active preset. It cancels a waiting preset request from the old map and says so.
 - **Rate**: the engine can deliver a few callbacks at the old delta after
   `Engine.physics_ticks_per_second` changes. The main compares every callback's actual delta
   with `1/physics_hz`, logs each mismatch (`rate_log`, bounded), shows "(settling)" beside the
   rate, and turns a started clean attempt that sees one into practice. Observed here: one
   mismatched callback at startup (before the attempt started) and one after a live switch.
 - **Stats** reset on restart, practice, respawn, map and preset changes.
+  The first actual post-reset hop still counts. An airborne runner with no sampled takeoff
+  is labelled airborne, with no invented hop gain.
 
 ## Look settings stay per family
 

@@ -223,10 +223,11 @@ func _strafe_text() -> void:
 	var stats: Node = game.stats
 	var flight: Dictionary = stats.flight
 	if flight.is_empty():
-		strafe_live.text = "on the ground  ·  run sync %s" % sync_text(stats.call("run_sync"), int(stats.total_good), int(stats.total_eligible))
+		var contact := "on the ground" if game.player.call("is_grounded") else "in the air (no takeoff sample)"
+		strafe_live.text = "%s  ·  run A/D sync %s" % [contact, sync_text(stats.call("run_sync"), int(stats.total_good), int(stats.total_eligible))]
 	else:
 		var since := float(stats.call("speed_u")) - float(flight.takeoff)
-		strafe_live.text = "in the air  ·  sync %s  ·  %s u/s since takeoff" % [sync_text(stats.call("live_sync"), int(flight.good), int(flight.eligible)), _signed(since)]
+		strafe_live.text = "in the air  ·  A/D sync %s  ·  %s u/s since takeoff" % [sync_text(stats.call("live_sync"), int(flight.good), int(flight.eligible)), _signed(since)]
 	var hop: Dictionary = stats.last_hop
 	# four short lines, so the panel never reaches the speed in the middle.
 	if hop.is_empty():

@@ -26,7 +26,7 @@ const BUILD_LABEL := "Spillway R14"
 const SAVE_PATH := "user://spillway_r14.cfg"
 const PROFILE_FORMAT := 1
 ## p / bump when what counts as a finish, a split or a clean run changes.
-const TIMING_RULES := "r14-timing-1"
+const TIMING_RULES := "r14-timing-2"
 const PRESETS := preload("res://scripts/r14_presets.gd")
 const STATS := preload("res://scripts/r14_strafe_stats.gd")
 const HUD := preload("res://scripts/r14_hud.gd")
@@ -121,6 +121,9 @@ var physics_calls: int = 0
 var _speed_samples: Array[float] = []
 var _started: bool = false
 var _spawn_origin: Vector3
+## timer arming has a 0.5 m grace; preset purity starts with the first actual movement.
+var _used_preset_physics: bool = false
+var _spawn_jump_count: int = 0
 var _recovery_time: float = 0.0
 var _quitting: bool = false
 var _kill_bounds: AABB = KILL_BOUNDS
@@ -295,7 +298,8 @@ func _switch_to(next: Dictionary, same_body: bool) -> void:
 	var velocity := player.velocity
 	var look_yaw := float(player.get("yaw"))
 	var look_pitch := float(player.get("pitch"))
-	var untouched := not _started and not finished
+	_note_preset_physics()
+	var untouched := not _used_preset_physics and not _started and not finished
 	preset_id = str(next.id)
 	preset = next
 	if same_body:
@@ -307,6 +311,8 @@ func _switch_to(next: Dictionary, same_body: bool) -> void:
 		clean_eligible = false
 		practice_reason = "preset"
 	_apply_settings()
+	if untouched:
+		_spawn_jump_count = int(player.get("jump_count"))
 	stats.call("watch", player)
 	_clear_speed()
 	_refresh_records()
@@ -370,6 +376,10 @@ func select_map(id: String) -> void:
 	if id == map_id:
 		hud.call("notify", "%s is already loaded" % map_name())
 		return
+	# a map selection retains the active preset, not a deferred request from another map.
+	var cancelled := not pending_preset.is_empty()
+	pending_preset = ""
+	pending_message = ""
 	map_id = id
 	remove_child(level)
 	level.free()
@@ -379,7 +389,7 @@ func select_map(id: String) -> void:
 	restart_run()
 	_update_title()
 	hud.call("map_changed")
-	hud.call("notify", "%s  ·  %s" % [map_name(), str(preset.label)])
+	hud.call("notify", "%s  ·  %s%s" % [map_name(), str(preset.label), "  ·  pending preset cancelled" if cancelled else ""])
 
 # --- stages -------------------------------------------------------------------------------------
 
@@ -414,6 +424,8 @@ func restart_run() -> void:
 	_recovery_time = 0.0
 	player.call("reset_to", level.get("spawn"))
 	_spawn_origin = player.global_position
+	_used_preset_physics = false
+	_spawn_jump_count = int(player.get("jump_count"))
 	if level.has_method("reset_state"):
 		level.call("reset_state")
 	_clear_speed()
@@ -471,6 +483,7 @@ func _physics_process(delta: float) -> void:
 	if player == null or paused:
 		return
 	physics_calls += 1
+	_note_preset_physics()
 	_check_rate(delta)
 	if not pending_preset.is_empty():
 		_try_pending()
@@ -505,6 +518,17 @@ func _physics_process(delta: float) -> void:
 	_collect_checkpoints()
 	if level.call("is_finish_at", player.global_position):
 		_finish()
+
+## spawn settling can move down a few centimetres. horizontal travel, upward movement or a
+## real jump means the current law has acted, even before the timer's 0.5 m start threshold.
+func _note_preset_physics() -> void:
+	if _used_preset_physics or player == null:
+		return
+	var offset := player.global_position - _spawn_origin
+	_used_preset_physics = Vector2(offset.x, offset.z).length() > 0.0001 \
+		or Vector2(player.velocity.x, player.velocity.z).length() > 0.0001 \
+		or player.velocity.y > 0.0001 or offset.y > 0.01 \
+		or int(player.get("jump_count")) != _spawn_jump_count
 
 ## the callback's actual delta against the preset's rate. the engine can deliver a few steps at
 ## the old delta after a rate change; a started clean attempt that sees one becomes practice.

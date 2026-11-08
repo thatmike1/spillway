@@ -50,7 +50,6 @@ var _prev_yaw: float = 0.0
 var _prev_jumps: int = 0
 var _ground_ticks: int = 0
 var _pending_chain: Dictionary = {}
-var _armed: bool = false
 
 func _ready() -> void:
 	process_physics_priority = 100
@@ -70,7 +69,6 @@ func reset() -> void:
 	tick_sync = null
 	_pending_chain = {}
 	_ground_ticks = 0
-	_armed = false
 	resets += 1
 	if player != null and is_instance_valid(player):
 		_prev_yaw = float(player.get("yaw"))
@@ -99,13 +97,7 @@ func _physics_process(_delta: float) -> void:
 	var grounded := bool(player.call("is_grounded"))
 	var yaw := float(player.get("yaw"))
 	var jumps := int(player.get("jump_count"))
-	if not _armed:
-		# the first observed step only establishes the baseline.
-		_armed = true
-		_prev_yaw = yaw
-		_prev_jumps = jumps
-		_was_grounded = grounded
-		return
+	# watch/reset already sampled the baseline; the first callback may contain a real hop.
 	var turn := angle_difference(_prev_yaw, yaw)
 	_prev_yaw = yaw
 	var state: Dictionary = player.call("get_motion_state") if player.has_method("get_motion_state") else {}
