@@ -25,6 +25,8 @@ const BUILD_ID := "spillway-2026.11.08-r14"
 const BUILD_LABEL := "Spillway R14"
 const SAVE_PATH := "user://spillway_r14.cfg"
 const PROFILE_FORMAT := 1
+## p / additive record encoding: integer physics ticks are authoritative, floats are readable summaries.
+const RECORD_TICKS_VERSION := 1
 ## p / bump when what counts as a finish, a split or a clean run changes.
 const TIMING_RULES := "r14-timing-2"
 const PRESETS := preload("res://scripts/r14_presets.gd")
@@ -624,21 +626,21 @@ func _finish() -> void:
 	if finish_kind == "clean":
 		var previous := 0.0
 		for i: int in stage_times.size():
-			var segment := stage_times[i] - previous
+			var segment := _record_seconds(_record_ticks(stage_times[i]) - _record_ticks(previous))
 			previous = stage_times[i]
 			split_deltas.append(segment - best_segments[i] if i < best_segments.size() and best_segments[i] > 0.0 else NAN)
 			if i >= best_segments.size():
 				best_segments.append(segment)
-			elif best_segments[i] <= 0.0 or segment < best_segments[i]:
+			elif best_segments[i] <= 0.0 or _record_faster(segment, best_segments[i]):
 				best_segments[i] = segment
-		is_best = best_time < 0.0 or elapsed < best_time
+		is_best = _record_faster(elapsed, best_time)
 		if is_best:
-			best_time = elapsed
-			best_splits = stage_times.duplicate()
+			best_time = _record_seconds(_record_ticks(elapsed))
+			best_splits.assign(_record_times(_record_tick_array(stage_times)))
 	if finish_kind == "clean" or finish_kind == "open":
-		is_open_best = open_best_time < 0.0 or elapsed < open_best_time
+		is_open_best = _record_faster(elapsed, open_best_time)
 		if is_open_best:
-			open_best_time = elapsed
+			open_best_time = _record_seconds(_record_ticks(elapsed))
 		_save()
 	if level.has_method("start_wheel"):
 		level.call("start_wheel")
@@ -831,6 +833,10 @@ func _load_records() -> void:
 	var section := _section()
 	if not config.has_section(section) or str(config.get_value(section, "geometry", "")) != course_geometry or int(config.get_value(section, "stages", 0)) != stage_count() or str(config.get_value(section, "preset", "")) != preset_id:
 		return
+	if config.has_section_key(section, "time_ticks_version"):
+		_load_tick_records(config, section)
+		return
+	# old r14 floats are recovered to the nearest tick at this key's rate. no older build is read.
 	best_time = float(config.get_value(section, "clean_best", -1.0))
 	open_best_time = float(config.get_value(section, "open_best", -1.0))
 	for value: Variant in config.get_value(section, "clean_splits", []):
@@ -841,6 +847,61 @@ func _load_records() -> void:
 		best_time = -1.0
 		best_splits.clear()
 		best_segments.clear()
+	best_time = _record_seconds(_record_ticks(best_time))
+	open_best_time = _record_seconds(_record_ticks(open_best_time))
+	best_splits.assign(_record_times(_record_tick_array(best_splits)))
+	best_segments.assign(_record_times(_record_tick_array(best_segments)))
+
+## tick-domain comparisons keep an equal replay equal after configfile's float formatting.
+func _record_ticks(seconds: float) -> int:
+	if not is_finite(seconds) or seconds < 0.0 or seconds * physics_hz > 9007199254740991.0:
+		return -1
+	return roundi(seconds * physics_hz)
+
+func _record_seconds(ticks: int) -> float:
+	return float(ticks) / physics_hz if ticks >= 0 else -1.0
+
+func _record_faster(candidate: float, incumbent: float) -> bool:
+	var ticks := _record_ticks(candidate)
+	var best := _record_ticks(incumbent)
+	return ticks >= 0 and (best < 0 or ticks < best)
+
+func _record_tick_array(times: Array[float]) -> Array[int]:
+	var ticks: Array[int] = []
+	for seconds: float in times:
+		ticks.append(_record_ticks(seconds))
+	return ticks
+
+func _record_times(ticks: Array) -> Array[float]:
+	var times: Array[float] = []
+	for value: int in ticks:
+		times.append(_record_seconds(value))
+	return times
+
+func _load_tick_records(config: ConfigFile, section: String) -> void:
+	if config.get_value(section, "time_ticks_version", null) != RECORD_TICKS_VERSION or config.get_value(section, "physics_hz", null) != physics_hz:
+		return
+	var clean: Variant = config.get_value(section, "clean_best_ticks", null)
+	var open: Variant = config.get_value(section, "open_best_ticks", null)
+	var splits: Variant = config.get_value(section, "clean_split_ticks", null)
+	var segments: Variant = config.get_value(section, "clean_segment_ticks", null)
+	if typeof(clean) != TYPE_INT or typeof(open) != TYPE_INT or clean < -1 or open < -1 or not splits is Array or not segments is Array:
+		return
+	if splits.any(func(t: Variant) -> bool: return typeof(t) != TYPE_INT or t < 0) or segments.any(func(t: Variant) -> bool: return typeof(t) != TYPE_INT or t < 0):
+		return
+	if clean >= 0 and (splits.size() != stage_count() or segments.size() != stage_count() or splits.back() != clean):
+		return
+	if clean < 0 and (not splits.is_empty() or not segments.is_empty()):
+		return
+	var previous := 0
+	for split: int in splits:
+		if split < previous:
+			return
+		previous = split
+	best_time = _record_seconds(clean)
+	open_best_time = _record_seconds(open)
+	best_splits.assign(_record_times(splits))
+	best_segments.assign(_record_times(segments))
 
 func _setting_value(key: String, value: Variant) -> Variant:
 	# a damaged or foreign profile cannot push a setting outside what the pause panel offers.
@@ -883,6 +944,11 @@ func _save() -> void:
 	for i: int in stage_count():
 		titles.append(segment_title(i))
 	config.set_value(section, "titles", titles)
+	config.set_value(section, "time_ticks_version", RECORD_TICKS_VERSION)
+	config.set_value(section, "clean_best_ticks", _record_ticks(best_time))
+	config.set_value(section, "open_best_ticks", _record_ticks(open_best_time))
+	config.set_value(section, "clean_split_ticks", _record_tick_array(best_splits))
+	config.set_value(section, "clean_segment_ticks", _record_tick_array(best_segments))
 	config.set_value(section, "clean_best", best_time)
 	config.set_value(section, "open_best", open_best_time)
 	config.set_value(section, "clean_splits", best_splits)

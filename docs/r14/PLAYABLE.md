@@ -109,13 +109,18 @@ with the key, not that the turn rate was right.
 ## Records
 
 `user://spillway_r14.cfg`, never the R12 or R13 files, which are neither read nor written. One
-section per key = sha256 of timing rules `r14-timing-1`, map id/level id/version/variant,
+section per key = sha256 of timing rules `r14-timing-2`, map id/level id/version/variant,
 geometry hash, stage titles, preset id, family and family version, physics rate, and the
 physics fingerprint (Source: every cvar and policy except sensitivity, m_yaw, m_pitch, fov,
 wheel_jump; R13: air policy, air tuning, ground tuning, autohop). Each section also stores the
 preset, rate, family version and fingerprint in plain text. Clean, open and practice outcomes
 follow R13. Switching preset never shows another key's best; bests of keys visited earlier in
 the same process are kept in memory and come back on switching back.
+
+Records are ranked and stored as exact integer physics ticks, with the preset rate.
+Floating-point seconds remain readable summaries. Equal-tick runs stay equal after
+reloading; old R14 float records are recovered to the nearest tick. See
+[RECORD-PRECISION.md](RECORD-PRECISION.md) for the encoding and save/reload evidence.
 
 Persistence is off for `new()` construction and for headless runs without an explicit
 `--r14-profile=PATH`; only `scenes/r14.tscn` sets `persist`. `--no-records` turns it off.
