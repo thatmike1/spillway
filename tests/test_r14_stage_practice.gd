@@ -201,7 +201,7 @@ func counts_for(radians: float) -> float:
 func hspeed_u() -> float:
 	return Vector2(p().velocity.x, p().velocity.z).length() / U
 
-## Esc unless already paused; the menu must be open afterwards.
+## press Esc unless already paused; the menu must be open afterwards.
 func open_menu() -> void:
 	if not bool(game.paused):
 		await tap(KEY_ESCAPE)
@@ -259,7 +259,7 @@ func practise_from_menu(index: int) -> bool:
 	await ticks(2)
 	return chosen == index
 
-## W until the level reports a finish (fixture decks run straight to the gate).
+## hold W until the level reports a finish (fixture decks run straight to the gate).
 func run_to_finish(limit: int = 4000) -> bool:
 	key(KEY_W, true)
 	await until(func() -> bool: return bool(game.finished), limit)
@@ -365,7 +365,7 @@ func _group_order() -> void:
 	game.call("practise_stage", -4)
 	check("negative index is clamped to the start", int(game.practice_stage) == 0 and at_pose(0), game.practice_stage)
 
-## F still practises the last reached stage; R always starts clean at the normal spawn.
+## the F key still practises the last reached stage; R always starts clean at the normal spawn.
 func _group_keys() -> void:
 	await make_game()
 	key(KEY_W, true)
@@ -478,7 +478,7 @@ func _group_pending() -> void:
 		var done := await run_to_finish()
 		check("%s: the law never changed during practice" % request[1], str(game.preset_id) == "r13_original120" and (p().get_script() as Script).resource_path.contains("momentum"), [game.preset_id, (p().get_script() as Script).resource_path])
 		check("%s: pending-entry practice finishes unrecorded" % request[1], done and str(game.finish_kind) == "practice" and file_hash(path).is_empty(), [game.finish_kind, file_hash(path)])
-		# F takes the same path: request, then F in the slot.
+		# the F key takes the same path: request, then F in the slot.
 		await tap(KEY_R)
 		await tap(request[0])
 		check("%s waits again after R" % request[1], str(game.pending_preset) == request[1])

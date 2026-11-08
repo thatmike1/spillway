@@ -178,7 +178,7 @@ func pose() -> Dictionary:
 func same_pose(a: Dictionary, b: Dictionary) -> bool:
 	return a.feet == b.feet and a.velocity == b.velocity and a.yaw == b.yaw and a.pitch == b.pitch
 
-## W until the horizontal speed reaches `target` u/s (or the limit), then release W.
+## hold W until the horizontal speed reaches `target` u/s (or the limit), then release W.
 func run_up(target: float, limit: int = 400) -> void:
 	key(KEY_W, true)
 	await until(func() -> bool: return hspeed_u() >= target, limit)
@@ -232,7 +232,7 @@ func _group_vectors() -> void:
 			var state := MOTION.new_state(Vector3(0, 10000, 0))
 			state.velocity = Vector3(row.velocity_u_s[0], 0, row.velocity_u_s[1])
 			var wishdir := Vector3(row.wish_direction[0], 0, row.wish_direction[1])
-			# D at this yaw wishes along the supplied vector; no steering helper is involved.
+			# the D key at this yaw wishes along the supplied vector; no steering helper is involved.
 			var yaw := MOTION.yaw_for_side(wishdir, 1.0)
 			MOTION.step(state, {"side": 1.0, "yaw": yaw}, config, 1.0 / float(row.hz), MOTION.FlatWorld.new())
 			var error := Vector2(state.velocity.x, state.velocity.z).distance_to(Vector2(row.after_u_s[0], row.after_u_s[1]))

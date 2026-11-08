@@ -1,9 +1,9 @@
 extends Node3D
 ## p / r14 comparison game: one process, several real movement laws, two maps. it starts on
-## Penstock Yard with the cs:go bhop-server preset. F1 vanilla, F2 bhop server, F3 the
+## the Penstock Yard with the cs:go bhop-server preset. F1 vanilla, F2 bhop server, F3 the
 ## unchanged r13 runner, F4 a labelled quake iii-inspired projection on the source body, F5 a
-## labelled AA 1000 server config. the pause menu offers the same presets and the map selector (Penstock Yard,
-## Overflow). docs/r14/PLAYABLE.md is the player and integration contract.
+## labelled AA 1000 server config. the pause menu offers the same presets and the map selector (Penstock Yard
+## and Overflow). docs/r14/PLAYABLE.md is the player and integration contract.
 ##
 ## self-contained like the r13 main: it does not extend r12 or r13 mains, so neither build id,
 ## save path nor record namespace can leak in. it borrows r12's static key bindings only.

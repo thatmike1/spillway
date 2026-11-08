@@ -765,7 +765,7 @@ func _controls() -> void:
 		await _frames(3)
 		await captured("reserved-f" + slot, {"preset": before, "clean": true, "message": "~F%s:" % slot})
 	await _purity()
-	# F: practice from the reached stage, R: a clean attempt again.
+	# use F for practice from the reached stage, R: a clean attempt again.
 	await _tap(KEY_F)
 	await _physics(4)
 	await captured("practice-key", {"clean": false, "practice_reason": "practice", "practice_tag": "~PRACTICE"})
@@ -838,7 +838,7 @@ func _restore_preset(id: String) -> void:
 	await _physics(4)
 	check("restored preset %s with a clean attempt" % id, str(game.get("preset_id")) == id and bool(game.get("clean_eligible")), [game.get("preset_id"), game.get("clean_eligible")])
 
-## Esc, a click on a named pause-menu button, and (unless the button keeps it open) the
+## press Esc, a click on a named pause-menu button, and (unless the button keeps it open) the
 ## menu closed again by what the button did.
 func _pause_menu_click(button_name: String, what: String, closes: bool = true) -> void:
 	_key(KEY_ESCAPE, true)

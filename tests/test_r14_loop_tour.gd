@@ -136,7 +136,7 @@ func _tour() -> void:
 	key(KEY_SPACE, false)
 	await frames(0.8)
 	await snap("03-hop-stats", "after landing: last hop gain, contact, sync and chain lines")
-	# F1 in the air.
+	# switch to F1 in the air.
 	key(KEY_W, true)
 	await frames(0.4)
 	key(KEY_SPACE, true)

@@ -172,7 +172,7 @@ func hud_texts(visible_only: bool = true) -> Array[String]:
 func pose() -> Dictionary:
 	return {"feet": p().global_position, "velocity": p().velocity, "yaw": float(p().get("yaw")), "pitch": float(p().get("pitch")), "node": p().get_instance_id(), "script": (p().get_script() as Script).resource_path}
 
-## W until the horizontal speed reaches `target` u/s (or the limit), then release W.
+## hold W until the horizontal speed reaches `target` u/s (or the limit), then release W.
 func run_up(target: float, limit: int = 400) -> void:
 	key(KEY_W, true)
 	await until(func() -> bool: return hspeed_u() >= target, limit)
@@ -354,7 +354,7 @@ func _group_hull() -> void:
 	check("it happened clear of the slot", switched_at.z < -4.0 - 0.40 or absf(switched_at.x - 9.0) > 0.75, switched_at)
 	check("the runner was not moved by the switch", absf(switched_at.x - 9.0) < 0.2, switched_at)
 	await _drop_game()
-	# R with a waiting switch applies it at the spawn of a map where it fits.
+	# pressing R with a waiting switch applies it at the spawn of a map where it fits.
 	await make_game({"spawn": "slot"}, "r13")
 	await tap(KEY_F2)
 	check("pending before R", str(game.pending_preset) == "server128")
@@ -387,7 +387,7 @@ func _group_rate() -> void:
 	file = FileAccess.open(out_dir.path_join("rate-switch.json"), FileAccess.WRITE)
 	file.store_string(JSON.stringify({"stale_callbacks": stale, "deltas": observed, "log": game.rate_log}, "  "))
 	file.close()
-	# R right after a switch: if a stale callback lands after the move starts, the attempt is practice.
+	# pressing R right after a switch: if a stale callback lands after the move starts, the attempt is practice.
 	await tap(KEY_F1)
 	await tap(KEY_R)
 	var calls_at_r := int(game.physics_calls)

@@ -137,7 +137,7 @@ def hop_chain(hz, aa, hops, capped_budget=False, source_standing_order=False,
             s = min(s, takeoff_limit)
         for tick in range(count):
             # midpoint classification is a declared approximation to engine
-            # CategorizePosition timing, useful for a deadstrafe sensitivity.
+            # position categorization timing, useful for a deadstrafe sensitivity.
             vz = effective - GRAVITY * (tick + 0.5) / hz
             surface = 0.25 if deadstrafe and 0.0 < vz <= 140.0 else 1.0
             budget = air_budget(aa, 250.0, hz, surface, capped_budget=capped_budget)

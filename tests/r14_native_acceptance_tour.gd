@@ -136,7 +136,7 @@ func walk_popup(popup: PopupMenu, index: int) -> void:
 			return
 		await ui_key(KEY_DOWN if focus < index else KEY_UP)
 
-## Esc, the runway in the picker (clicked and walked only when it is not already selected),
+## press Esc, the runway in the picker (clicked and walked only when it is not already selected),
 ## then a click on Practise here.
 func practise_runway() -> bool:
 	if not bool(game.paused):
@@ -212,7 +212,7 @@ func run_preset(id: String, hold_w: bool = false) -> void:
 		key(KEY_SPACE, true)
 	for hop: int in HOPS:
 		if not autohop:
-			# F1: one press per hop, on the first grounded step.
+			# for F1: one press per hop, on the first grounded step.
 			while not grounded():
 				await physics_frame
 			key(KEY_SPACE, true)

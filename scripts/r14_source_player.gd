@@ -19,7 +19,7 @@ const RECOVERY_GAP := 0.95
 ## p / the missed-support guard (see _support_inside): overlap tests use godot 4.7.2's
 ## minimum test-motion margin, a contact-free sweep must end at least GUARD_DEPTH inside
 ## geometry to count as a missed cast, a snap whose cast did report the face at least
-## LATE_DEPTH (one margin, so a snap resting on the raw face never counts), and the first touch
+## the threshold LATE_DEPTH (one margin, so a snap resting on the raw face never counts), and the first touch
 ## is bisected to 2^-GUARD_STEPS of the sweep.
 const GUARD_MARGIN := 0.0001
 const GUARD_DEPTH := 0.0002

@@ -22,6 +22,9 @@ and official Godot 4.7.2 release templates, with licences and material provenanc
 Linux SHA256: `9e96522880918c28fc04f82df0fa2587eb1fcefc4467010407bb8d4b01785a80`.
 Windows SHA256: `869807eb95ee9d1bda21c6ff9cc2f97eaa14f0d01a84e66f2e9d63be32b44eac`.
 The copied ZIPs pass their checksums; every retained file equals the completed run.
+Later commits record documentation, test helpers and lowercase comment style. The frozen
+export remains65d205be; the style pass preserves every non-comment line and line count,
+as recorded in outer `checkpoints/spillway/r14/delivery-takeover/comment-style-audit.json`.
 Execution paths inside original JSON refer to the RAM staging root. RETENTION.json
 maps that root to the permanent delivery; the original observations were not rewritten.
 

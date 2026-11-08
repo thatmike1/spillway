@@ -1,5 +1,5 @@
 extends Node3D
-## FIXTURE, not a course: a small labelled level with the overflow level interface for
+## fixture, not a course: a small labelled level with the overflow level interface for
 ## tests/test_r14_loop*.gd. flat decks run along -z with stage decks tagged progress_stage 1-3
 ## and a finish box, then a void. walls line both sides. a bay to the right of the start holds a
 ## slot 0.7 m wide: the r13 capsule (0.6 m) fits in it, the source box (0.81 m) does not.

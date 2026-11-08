@@ -192,7 +192,7 @@ func pre() -> void:
 		key(k, want.has(k))
 
 ## coordinate-aware strafe controller: ground W and jump (an edge each landing for vanilla), air
-## A/D alternating every `period` ticks with the view following the travel heading, so the wish
+## alternate A/D every `period` ticks with the view following the travel heading, so the wish
 ## stays near perpendicular. integer mouse counts, bounded noise. not human play.
 func _strafe(want: Dictionary) -> void:
 	var grounded: bool = player.call("is_grounded")
