@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """run, replay, evaluate and minimize spillway momentum input tapes.
 
-the engine side is tools/momentum-tape.gd; the protocol is docs/momentum/TAPE.md. this
-wrapper expands convenience curves, owns the private display and engine process groups,
-records build identity, separates actor-facing frames from evaluator telemetry and judges
-delivery, ordering and movement from the trace. it never steers a run.
+the engine side is tools/momentum-tape.gd; the protocol is docs/momentum/TAPE.md, and the
+rate-aware version 2 is docs/r14/REPLAY.md. this wrapper expands convenience curves, owns the
+private display and engine process groups, records build identity, separates actor-facing
+frames from evaluator telemetry and judges delivery, ordering, rate and movement from the
+trace. it never steers a run.
 """
 
 import argparse
 import copy
+import gzip
 import hashlib
 import json
 import math
@@ -32,6 +34,16 @@ KEYS = ["w", "a", "s", "d", "space", "ctrl"]
 MOVE_KEYS = {"w", "a", "s", "d"}
 PROFILES = {"tick120": 1, "render30": 4}
 MAX_TICKS = 120 * 600
+# p / r14 version 2: one event slot per physics tick at vanilla 64, server-style 128 or r13's
+# original 120 hz. the v1 profile names are 120 hz claims and never describe another rate.
+V2_PROFILE = "physics_tick"
+V2_RATES = (64, 120, 128)
+MAX_SECONDS = 600
+V2_FIELDS = {"format", "version", "name", "description", "physics_hz", "input_profile", "duration_ticks", "duration_s",
+             "mouse_quantize", "events", "curves", "expanded", "submitted_sha256"}
+# p / storage steering of 8 november: no native capture below this much free space.
+MIN_FREE_GIB = 15.0
+ARCHIVED = ["evaluator/trace.jsonl", "evaluator/frames.jsonl"]
 # files whose bytes decide what a run executes; .godot/ import caches are not covered.
 SOURCE_GLOBS = ["project.godot", "scripts/**/*.gd", "shaders/**/*", "scenes/**/*", "data/**/*", "tools/momentum-tape*"]
 
@@ -63,21 +75,59 @@ def _shape(name, u):
     raise ValueError(f"unknown curve shape {name}")
 
 
+def tape_period(tape):
+    return PROFILES.get(tape.get("input_profile"), 1) if tape.get("version") == 1 else 1
+
+
+def _v2_header(tape, errors):
+    """strict version 2 header: the rate is a declared fact checked twice, never inferred."""
+    unknown = sorted(set(tape) - V2_FIELDS)
+    if unknown:
+        errors.append(f"unknown version 2 header fields {unknown}")
+    hz = tape.get("physics_hz")
+    if type(hz) is not int or hz not in V2_RATES:
+        errors.append(f"version 2 physics_hz must be an integer in {list(V2_RATES)}, not {hz!r}")
+        hz = 0
+    profile = tape.get("input_profile")
+    if profile in PROFILES:
+        errors.append(f"input_profile {profile} is a version 1, 120 hz label; version 2 uses {V2_PROFILE}")
+    elif profile != V2_PROFILE:
+        errors.append(f"version 2 input_profile must be {V2_PROFILE}, not {profile!r}")
+    duration = tape.get("duration_ticks")
+    if type(duration) is not int or not 0 < duration <= max(hz, 1) * MAX_SECONDS:
+        errors.append(f"duration_ticks must be an integer 1..{max(hz, 1) * MAX_SECONDS}")
+        duration = 0
+    seconds = tape.get("duration_s")
+    # the redundant duration makes a header-only rate edit fail: relabelling is not resampling.
+    if type(seconds) not in (int, float) or not hz or abs(seconds - duration / hz) > 1e-9:
+        errors.append(f"duration_s {seconds!r} is not duration_ticks / physics_hz ({duration}/{hz})")
+    if tape.get("mouse_quantize", "float32") not in ("float32", "integer"):
+        errors.append(f"mouse_quantize must be float32 or integer, not {tape.get('mouse_quantize')!r}")
+    if tape.get("expanded") and "curves" in tape:
+        errors.append("an expanded tape cannot also carry curves")
+    return hz, profile, duration
+
+
 def expand(tape):
     """return an expanded, validated copy: explicit events only, mouse merged per tick."""
     errors = []
-    if tape.get("format") != FORMAT or tape.get("version") != 1:
-        raise ValueError(f"not a {FORMAT} version 1 tape")
-    hz = int(tape.get("physics_hz", 0))
-    profile = tape.get("input_profile")
-    if hz != 120:
-        errors.append("physics_hz must be 120 for the current lab")
-    if profile not in PROFILES:
-        errors.append(f"input_profile must be one of {sorted(PROFILES)}")
-    period = PROFILES.get(profile, 1)
-    duration = int(tape.get("duration_ticks", 0))
-    if not 0 < duration <= MAX_TICKS:
-        errors.append(f"duration_ticks must be 1..{MAX_TICKS}")
+    version = tape.get("version")
+    if tape.get("format") != FORMAT or type(version) is not int or version not in (1, 2):
+        raise ValueError(f"not a {FORMAT} version 1 or 2 tape")
+    if version == 1:
+        hz = int(tape.get("physics_hz", 0))
+        profile = tape.get("input_profile")
+        if hz != 120:
+            errors.append("a version 1 tape is a 120 hz claim; physics_hz must be 120 (use version 2 for 64 or 128)")
+        if profile not in PROFILES:
+            errors.append(f"input_profile must be one of {sorted(PROFILES)}")
+        period = PROFILES.get(profile, 1)
+        duration = int(tape.get("duration_ticks", 0))
+        if not 0 < duration <= MAX_TICKS:
+            errors.append(f"duration_ticks must be 1..{MAX_TICKS}")
+    else:
+        hz, profile, duration = _v2_header(tape, errors)
+        period = 1
     keys = []
     mouse = {}
     for event in tape.get("events", []):
@@ -145,6 +195,11 @@ def expand(tape):
     if errors:
         raise ValueError("; ".join(errors))
     events.sort(key=lambda e: (e["tick"], 0 if "key" in e else 1))
+    if version == 2:
+        return {"format": FORMAT, "version": 2, "expanded": True, "name": tape.get("name", ""),
+                "description": tape.get("description", ""), "physics_hz": hz, "input_profile": profile,
+                "duration_ticks": duration, "duration_s": duration / hz, "mouse_quantize": tape.get("mouse_quantize", "float32"),
+                "events": events, "submitted_sha256": sha256_bytes(canonical(tape).encode())}
     return {"format": FORMAT, "version": 1, "expanded": True, "name": tape.get("name", ""),
             "description": tape.get("description", ""), "physics_hz": hz, "input_profile": profile,
             "duration_ticks": duration, "mouse_quantize": tape.get("mouse_quantize", "float32"), "events": events, "submitted_sha256": sha256_bytes(canonical(tape).encode())}
@@ -224,6 +279,13 @@ def stop_group(proc, grace):
         return {"exit": proc.returncode, "signal": "SIGKILL"}
 
 
+def free_bytes(path):
+    probe = Path(path)
+    while not probe.exists():
+        probe = probe.parent
+    return shutil.disk_usage(probe).free
+
+
 def execute(plan, out, cfg):
     """run one expanded plan in a fresh evidence directory; return the evaluated report."""
     out = Path(out).resolve()
@@ -245,6 +307,7 @@ def execute(plan, out, cfg):
     headless = cfg.get("headless", False)
     timing = cfg.get("timing", "fixed")
     frames = "none" if headless else ("movie" if timing == "fixed" else "readback")
+    width, height = (int(v) for v in str(cfg.get("resolution", "1280x720")).split("x"))
     meta = {"run_id": run_id, "config": cfg, "plan_sha256": sha256_bytes(canonical(plan).encode()),
             "engine_sha256": sha256_file(GODOT), "engine_path": str(GODOT),
             "helper_sha256": {"wrapper": sha256_file(Path(__file__)), "executor": sha256_file(executor)},
@@ -252,11 +315,14 @@ def execute(plan, out, cfg):
             "render_fps": None if timing == "realtime" else cfg.get("render_fps", 30),
             "observation_policy": "actor/ holds rendered frames and their sim times only; evaluator/ holds telemetry. "
                                   "this is a directory convention, not filesystem isolation or proof of pixel-only discovery"}
+    meta["storage"] = {"filesystem_of": str(out), "free_bytes_at_start": free_bytes(out),
+                       "min_free_gib": None if headless else float(cfg.get("min_free_gib", MIN_FREE_GIB)),
+                       "max_movie_mib": float(cfg.get("max_movie_mib", 2048)) if frames == "movie" else None}
     args = [str(GODOT), "--path", str(PROJECT), "--audio-driver", "Dummy"]
     if headless:
         args += ["--headless"]
     else:
-        args += ["--display-driver", "x11", "--rendering-driver", "opengl3", "--windowed", "--resolution", "1280x720"]
+        args += ["--display-driver", "x11", "--rendering-driver", "opengl3", "--windowed", "--resolution", f"{width}x{height}"]
     if timing == "fixed":
         args += ["--fixed-fps", str(cfg.get("render_fps", 30))]
     if frames == "movie":
@@ -267,7 +333,9 @@ def execute(plan, out, cfg):
              *([f"--game-script={cfg['game_script']}"] if cfg.get("game_script") else []),
              *([f"--game-class={cfg['game_class']}"] if cfg.get("game_class") is not None else []), f"--sensitivity={cfg.get('sensitivity', 1.0)}",
              f"--inject={cfg.get('inject', 'tick')}", f"--warmup={cfg.get('warmup', 8)}", f"--frames={frames}",
-             f"--readback-every={cfg.get('readback_every', 4)}", f"--wall-budget-s={cfg.get('wall_budget', 120)}", f"--run-id={run_id}"]
+             f"--readback-every={cfg.get('readback_every', 4)}", f"--wall-budget-s={cfg.get('wall_budget', 120)}", f"--run-id={run_id}",
+             # the engine is set to the tape's rate before the tape is validated or the world built.
+             f"--physics-hz={plan.get('physics_hz')}", *(["--undeclared-rate=allow"] if cfg.get("undeclared_rate_ok") else [])]
     env = {k: v for k, v in os.environ.items() if k not in ("DISPLAY", "WAYLAND_DISPLAY", "XAUTHORITY")}
     for name in ["XDG_DATA_HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_STATE_HOME"]:
         env[name] = str(out / "profile" / name.lower())
@@ -291,10 +359,16 @@ def execute(plan, out, cfg):
         for signum in (signal.SIGINT, signal.SIGTERM):
             previous[signum] = signal.signal(signum, on_signal)
         if not headless:
+            stage = "storage_check"
+            floor = meta["storage"]["min_free_gib"] * 2 ** 30
+            if meta["storage"]["free_bytes_at_start"] < floor:
+                raise RuntimeError(f"{meta['storage']['free_bytes_at_start'] / 2 ** 30:.2f} GiB free on the evidence filesystem, "
+                                   f"below the {meta['storage']['min_free_gib']} GiB native-capture floor; nothing was launched")
+            stage = "display_launch"
             display = free_display(int(cfg.get("display", 153)))
             markers.append(f"Xvfb :{display} ")
             with open(out / "evaluator/xvfb.log", "wb") as log:
-                xvfb = subprocess.Popen(["Xvfb", f":{display}", "-screen", "0", "1280x720x24", "-nolisten", "tcp", "-noreset"],
+                xvfb = subprocess.Popen(["Xvfb", f":{display}", "-screen", "0", f"{width}x{height}x24", "-nolisten", "tcp", "-noreset"],
                                         stdout=log, stderr=log, start_new_session=True)
             stage = "display_ready"
             for _ in range(100):
@@ -315,6 +389,10 @@ def execute(plan, out, cfg):
             now = time.monotonic()
             if cfg.get("cancel_after") and now - started > float(cfg["cancel_after"]):
                 cancel["requested"] = cancel["requested"] or "cancel_after"
+            movie = out / "movie.avi"
+            if meta["storage"]["max_movie_mib"] and movie.exists() and movie.stat().st_size > meta["storage"]["max_movie_mib"] * 2 ** 20:
+                # p / a bounded movie: a capture that outgrows its budget is cancelled, not trusted.
+                cancel["requested"] = cancel["requested"] or "movie_budget"
             if cfg.get("hang_after") and not frozen and now - started > float(cfg["hang_after"]):
                 # test-only: simulate an unresponsive engine to prove the hard-kill path.
                 os.kill(godot.pid, signal.SIGSTOP)
@@ -372,15 +450,23 @@ def execute(plan, out, cfg):
     if end.get("reason") == "rejected" or not (out / "evaluator/trace.jsonl").exists():
         return {"run": str(out), "end": end, "cleanup": cleanup}
     if frames == "movie" and (out / "movie.avi").exists():
-        actor_frames(out, int(cfg.get("actor_every", 6)))
+        actor_frames(out, int(cfg.get("actor_every", 6)), cfg.get("actor_limit"))
+        if cfg.get("mp4"):
+            finalize_movie(out, keep_avi=cfg.get("keep_avi", False))
     report = evaluate(out)
     report["cleanup"] = cleanup
     (out / "evaluator/report.json").write_text(json.dumps(report, indent=1))
+    if cfg.get("archive"):
+        report["archive"] = archive_run(out)
+        (out / "evaluator/report.json").write_text(json.dumps(report, indent=1))
     return report
 
 
-def actor_frames(out, every):
-    """sample the native movie for the actor folder: images and sim times, no telemetry."""
+def actor_frames(out, every, limit=None):
+    """sample the native movie for the actor folder: images and sim times, no telemetry.
+
+    `limit` keeps at most that many evenly spaced samples, so a capture retains selected
+    frames rather than every Nth one of a long run."""
     draws = {d["draw"]: d for d in read_jsonl(out / "evaluator/frames.jsonl")}
     target = out / "actor/frames"
     target.mkdir(parents=True, exist_ok=True)
@@ -389,13 +475,21 @@ def actor_frames(out, every):
     subprocess.run(["ffmpeg", "-v", "error", "-i", str(out / "movie.avi"), "-vf", f"select=not(mod(n\\,{every}))",
                     "-fps_mode", "vfr", "-start_number", "0", str(target / "raw_%06d.png")], check=True)
     manifest = []
-    for raw in sorted(target.glob("raw_*.png")):
+    raws = sorted(target.glob("raw_*.png"))
+    if limit and len(raws) > int(limit):
+        step = (len(raws) - 1) / (int(limit) - 1) if int(limit) > 1 else len(raws)
+        keep = {raws[round(i * step)] for i in range(int(limit))}
+        for raw in raws:
+            if raw not in keep:
+                raw.unlink()
+        raws = sorted(keep)
+    for raw in raws:
         draw = int(raw.stem.split("_")[1]) * every
         sim = draws.get(draw, {}).get("sim_s")
         name = f"{len(manifest):04d}_" + (f"t{sim:07.3f}s" if sim is not None else "warmup") + ".png"
         raw.rename(target / name)
         manifest.append({"seq": len(manifest), "file": f"frames/{name}", "sim_s": sim})
-    (out / "actor/manifest.json").write_text(json.dumps({"frames": manifest, "every_nth_rendered_frame": every,
+    (out / "actor/manifest.json").write_text(json.dumps({"frames": manifest, "every_nth_rendered_frame": every, "limit": limit,
                                                           "note": "rendered native frames with the game's own visible hud only"}, indent=1))
     timed = [m for m in manifest if m["sim_s"] is not None]
     pick = timed[:: max(1, len(timed) // 16)][:16]
@@ -414,10 +508,117 @@ def actor_frames(out, every):
                                                                               "frames after the end record are the quit tail"}, indent=1))
 
 
+def probe_movie(path):
+    def ask(*fields):
+        return subprocess.run(["ffprobe", "-v", "error", *fields, "-of", "csv=p=0", str(path)], capture_output=True, text=True).stdout.strip()
+    frames = ask("-count_frames", "-select_streams", "v:0", "-show_entries", "stream=nb_read_frames")
+    size = ask("-select_streams", "v:0", "-show_entries", "stream=width,height")
+    duration = ask("-show_entries", "format=duration")
+    decode = subprocess.run(["ffmpeg", "-v", "error", "-i", str(path), "-f", "null", "-"], capture_output=True, text=True)
+    return {"frames": int(frames) if frames.isdigit() else None, "size": size, "duration_s": float(duration) if duration else None,
+            "decode_exit": decode.returncode, "decode_errors": decode.stderr.strip()[:400], "bytes": path.stat().st_size,
+            "sha256": sha256_file(path)}
+
+
+def finalize_movie(out, keep_avi=False):
+    """encode the native mjpeg as an mp4; remove the avi only after the mp4 checks complete."""
+    out = Path(out)
+    avi, mp4 = out / "movie.avi", out / "movie.mp4"
+    source = probe_movie(avi)
+    encode = subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(avi), "-an", "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+                             "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(mp4)], capture_output=True, text=True)
+    result = probe_movie(mp4) if mp4.exists() else None
+    checks = {"encode_exit": encode.returncode, "encode_errors": encode.stderr.strip()[:400],
+              "same_frame_count": bool(result) and source["frames"] is not None and result["frames"] == source["frames"] and source["frames"] > 0,
+              "same_size": bool(result) and result["size"] == source["size"],
+              "same_duration": bool(result) and None not in (result["duration_s"], source["duration_s"]) and abs(result["duration_s"] - source["duration_s"]) < 0.05,
+              "decodes_cleanly": bool(result) and result["decode_exit"] == 0 and not result["decode_errors"] and source["decode_exit"] == 0}
+    complete = encode.returncode == 0 and all(checks[k] for k in ("same_frame_count", "same_size", "same_duration", "decodes_cleanly"))
+    record = {"avi": source, "mp4": result, "checks": checks, "complete": complete, "encoding": "libx264 crf 18 yuv420p (lossy, for review)",
+              "avi_removed": False, "note": "movie frame i is still the i-th frame_post_draw; ssim on mp4 includes encoder loss"}
+    if complete and not keep_avi:
+        avi.unlink()
+        record["avi_removed"] = True
+    (out / "evaluator/movie.json").write_text(json.dumps(record, indent=1))
+    return record
+
+
+def movie_path(run_dir):
+    for name in ("movie.avi", "movie.mp4"):
+        if (Path(run_dir) / name).exists():
+            return Path(run_dir) / name
+    return None
+
+
+# --- trace archive ----------------------------------------------------------------------------
+
+def archive_run(run_dir):
+    """gzip the evaluator traces losslessly, verify each by decompressing, then drop the raw file."""
+    run_dir = Path(run_dir)
+    manifest_path = run_dir / "evaluator/archive.json"
+    manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {
+        "format": "spillway-tape-archive", "version": 1, "files": {},
+        "note": "gzip of the exact trace bytes; readers verify the uncompressed sha256 before use"}
+    for rel in ARCHIVED:
+        raw = run_dir / rel
+        packed = raw.with_name(raw.name + ".gz")
+        if not raw.exists():
+            continue
+        if packed.exists():
+            raise SystemExit(f"{packed} exists; refusing to overwrite an archive")
+        digest, size, lines = hashlib.sha256(), 0, 0
+        partial = packed.with_name(packed.name + ".partial")
+        with open(raw, "rb") as source, open(partial, "wb") as sink, gzip.GzipFile(filename="", mode="wb", fileobj=sink, mtime=0, compresslevel=6) as zipped:
+            for block in iter(lambda: source.read(1 << 20), b""):
+                digest.update(block)
+                size += len(block)
+                lines += block.count(b"\n")
+                zipped.write(block)
+        check = hashlib.sha256()
+        with gzip.open(partial, "rb") as back:
+            for block in iter(lambda: back.read(1 << 20), b""):
+                check.update(block)
+        if check.hexdigest() != digest.hexdigest():
+            partial.unlink()
+            raise SystemExit(f"archive of {raw} did not decompress to the same bytes; raw kept")
+        partial.rename(packed)
+        manifest["files"][raw.name] = {"gzip": packed.name, "sha256_uncompressed": digest.hexdigest(), "bytes_uncompressed": size,
+                                       "lines": lines, "sha256_gzip": sha256_file(packed), "bytes_gzip": packed.stat().st_size}
+        raw.unlink()
+    manifest_path.write_text(json.dumps(manifest, indent=1))
+    return manifest
+
+
+def jsonl_exists(path):
+    path = Path(path)
+    return path.exists() or path.with_name(path.name + ".gz").exists()
+
+
+def read_trace_bytes(path, info=None):
+    """the raw bytes of a jsonl file, from the file itself or its verified .gz archive."""
+    path = Path(path)
+    info = {} if info is None else info
+    if path.exists():
+        info.update({"file": str(path), "archived": False})
+        return path.read_bytes()
+    packed = path.with_name(path.name + ".gz")
+    data = gzip.decompress(packed.read_bytes())
+    manifest = path.parent / "archive.json"
+    entry = json.loads(manifest.read_text())["files"].get(path.name) if manifest.exists() else None
+    info.update({"file": str(packed), "archived": True, "sha256_uncompressed": sha256_bytes(data)})
+    if entry is None:
+        info["verified"] = "no archive manifest entry: decompressed, hash not checked against a record"
+    elif entry["sha256_uncompressed"] != info["sha256_uncompressed"]:
+        raise ValueError(f"{packed} decompresses to {info['sha256_uncompressed']}, not the recorded {entry['sha256_uncompressed']}")
+    else:
+        info["verified"] = True
+    return data
+
+
 # --- evaluation -------------------------------------------------------------------------------
 
-def read_jsonl(path):
-    lines = [line for line in Path(path).read_text().splitlines() if line.strip()]
+def read_jsonl(path, info=None):
+    lines = [line for line in read_trace_bytes(path, info).decode().splitlines() if line.strip()]
     rows = []
     for i, line in enumerate(lines):
         try:
@@ -456,10 +657,13 @@ def evaluate(run_dir):
     engine = json.loads((run_dir / "evaluator/engine.json").read_text())
     end_path = run_dir / "end.json"
     end = json.loads(end_path.read_text()) if end_path.exists() else {"reason": "killed: no end record", "neutral": None}
-    rows = read_jsonl(run_dir / "evaluator/trace.jsonl")
-    tape = [r for r in rows if r["phase"] == "tape"]
+    trace_info = {}
+    rows = read_jsonl(run_dir / "evaluator/trace.jsonl", trace_info)
+    # a row cut short by a rate fault has no post sample; it stays in the trace and rate report.
+    tape = [r for r in rows if r["phase"] == "tape" and "post" in r]
     by_tick = {r["tick"]: r for r in tape}
     sens = float(engine["settings"]["mouse_sensitivity"])
+    pitch_limit = float(engine["settings"].get("pitch_limit", 1.4))
     hz = engine["physics_hz"]
     dt = 1.0 / hz
     planned_keys = {}
@@ -517,7 +721,7 @@ def evaluate(run_dir):
                 for field in ("relative", "screen_relative"):
                     if abs(m[field][0] - dx) > 1e-9 or abs(m[field][1] - dy) > 1e-9:
                         delivery.append({"tick": t, "kind": f"mouse_{field}_differs", "planned": [dx, dy], "sent": m[field]})
-                want_pitch = min(1.4, max(-1.4, m["pitch_before"] - dy * sens)) - m["pitch_before"]
+                want_pitch = min(pitch_limit, max(-pitch_limit, m["pitch_before"] - dy * sens)) - m["pitch_before"]
                 if abs(turned + dx * sens) > 1e-9 or abs((m["pitch_after"] - m["pitch_before"]) - want_pitch) > 1e-9:
                     delivery.append({"tick": t, "kind": "view_did_not_follow_mouse", "expected_yaw": -dx * sens, "observed_yaw": turned})
         elif m:
@@ -526,8 +730,13 @@ def evaluate(run_dir):
             unexplained = post["yaw"] - previous["post"]["yaw"] - turned
             if abs(unexplained) > 1e-9:
                 delivery.append({"tick": t, "kind": "unplanned_view_change", "radians": unexplained})
-        if abs(wrap(post["motor_rotation_y"] - post["yaw"])) > 1e-5:
-            order.append({"tick": t, "kind": "motor_body_yaw_differs_from_view", "rotation_y": post["motor_rotation_y"], "yaw": post["yaw"]})
+        body_policy = engine.get("body_yaw_policy", "view_yaw")
+        if body_policy not in ("view_yaw", "axis_aligned"):
+            order.append({"tick": t, "kind": "unknown_body_yaw_policy", "policy": body_policy})
+        expected_body_yaw = 0.0 if body_policy == "axis_aligned" else post["yaw"]
+        if abs(wrap(post["motor_rotation_y"] - expected_body_yaw)) > 1e-5:
+            order.append({"tick": t, "kind": "motor_body_yaw_differs_from_policy", "policy": body_policy,
+                          "rotation_y": post["motor_rotation_y"], "expected_yaw": expected_body_yaw})
         previous = r
     for window in runs(held_bad, 1):
         delivery.append({"tick": window[0], "kind": "held_state_differs_from_plan", "until": window[1],
@@ -567,14 +776,22 @@ def evaluate(run_dir):
                           "post_velocity": by_tick[a]["post"]["v"],
                           "displacement_velocity": by_tick[a]["post"]["disp_v"]} for a, b in runs(vector_bad, 30)]
 
-    frames = read_jsonl(run_dir / "evaluator/frames.jsonl") if (run_dir / "evaluator/frames.jsonl").exists() else []
+    frames = read_jsonl(run_dir / "evaluator/frames.jsonl") if jsonl_exists(run_dir / "evaluator/frames.jsonl") else []
     detached = []
+    follow_errors = []
     for f in frames:
         if f.get("sim_s") is None:
             continue
         c, p = f["camera"]["p"], f["feet"]
         if math.hypot(c[0] - p[0], c[2] - p[2]) > 0.35 or not 0.3 <= c[1] - p[1] <= 2.2:
             detached.append(f["draw"])
+        if f.get("motor_prev") is not None and f.get("motor_cur") is not None and f.get("interp_fraction") is not None:
+            # the eye is placed horizontally on the physics interpolation of the body itself.
+            a, b, u = f["motor_prev"], f["motor_cur"], min(1.0, max(0.0, f["interp_fraction"]))
+            error = math.hypot(c[0] - (a[0] + (b[0] - a[0]) * u), c[2] - (a[2] + (b[2] - a[2]) * u))
+            follow_errors.append(error)
+            if error > 1e-3 and f["draw"] not in detached:
+                detached.append(f["draw"])
     jump_edges = [t for t, edges in planned_keys.items() for k, e in edges if k == "space" and e == "press"]
     jump_results = []
     for t in sorted(jump_edges):
@@ -584,6 +801,7 @@ def evaluate(run_dir):
         later = next((u for u in range(t, min(t + 15, plan["duration_ticks"])) if u in by_tick and by_tick[u]["post"]["jumps"] > base), None)
         jump_results.append({"press_tick": t, "jump_tick": later, "grounded_at_press": by_tick[t]["pre"]["grounded"]})
     # wall time against simulated time; under --fixed-fps this is compute cost, not latency.
+    rate = rate_report(plan, engine, rows, end)
     lag = sorted((r["wall_us_pre"] - tape[0]["wall_us_pre"]) / 1e6 - r["tick"] * dt for r in tape) if tape else [0.0]
     timing = {"fixed_fps": "--fixed-fps" in engine["cmdline"], "wall_s": (tape[-1]["wall_us_post"] - tape[0]["wall_us_pre"]) / 1e6 if tape else 0,
               "sim_s": len(tape) * dt, "wall_minus_sim_max_s": lag[-1], "wall_minus_sim_p95_s": lag[int(0.95 * (len(lag) - 1))],
@@ -595,6 +813,9 @@ def evaluate(run_dir):
         "reported_speed_unsupported": mismatch(reported),
         "post_velocity_unsupported": vector_mismatches,
         "camera_detached_draws": detached[:50],
+        "camera_follow": {"draws_checked": len(follow_errors), "max_horizontal_error_m": max(follow_errors, default=None),
+                          "method": "camera xz against lerp(_previous_position, _current_position, physics interpolation fraction) at each draw"
+                          if follow_errors else "coarse only: within 0.35 m horizontally and 0.3..2.2 m above the feet"},
         "jump_presses": jump_results,
         "discontinuities": sorted(jumps),
     }
@@ -612,7 +833,8 @@ def evaluate(run_dir):
                   "proof": "per tick: pre sample and mouse in Early (priority -1000), post sample in Late (priority 1000) in the same physics frame; "
                            "interpolation fields check state consistency; only a tape_step_count delta of one verifies exactly one motor step, "
                            "because unchanged positions alone cannot detect a skipped or repeated stationary step"},
-        "movement_flags": flags, "integrity_flags": integrity, "movement": movement, "timing": timing,
+        "movement_flags": flags, "integrity_flags": integrity, "movement": movement, "timing": timing, "rate": rate,
+        "trace_source": trace_info,
         "outcome": {"ticks": len(tape), "start_p": first, "end_p": last,
                     "travel_m": sum(disp[t] for t in travel_ticks) * dt,
                     "max_displacement_m_s": max((disp[t] for t in travel_ticks), default=0.0),
@@ -620,6 +842,33 @@ def evaluate(run_dir):
                     "end_yaw": tape[-1]["post"]["yaw"] if tape else None, "jumps": tape[-1]["post"]["jumps"] if tape else 0,
                     "respawns": tape[-1].get("game", {}).get("respawns")},
     }
+
+
+def rate_report(plan, engine, rows, end):
+    """the declared rate against what the engine actually handed each sampled step."""
+    hz = plan["physics_hz"]
+    dt = 1.0 / hz
+    tape = [r for r in rows if r["phase"] == "tape"]
+    sampled = [r for r in rows if "rate" in r]
+    if not sampled:
+        return {"ok": None, "declared_hz": hz, "note": "trace predates per-tick rate fields; only the engine metadata rate is known",
+                "engine_hz": engine.get("physics_hz")}
+    bad = [{"step": r["step"], "tick": r["tick"], "rate": r["rate"]} for r in sampled
+           if r["rate"]["dt"] != dt or r["rate"].get("dt_late", dt) != dt or r["rate"]["engine_hz"] != hz
+           or r["rate"].get("engine_hz_late", hz) != hz or r["rate"]["time_scale"] != 1.0]
+    sim_sum = math.fsum(r["rate"]["dt"] for r in tape if "dt_late" in r["rate"])
+    complete = [r for r in tape if "post" in r]
+    # p / labelled consistency: the executor's running sum of actual deltas equals tick count / rate.
+    drift = max((abs(r["rate"]["sim_dt_sum_s"] - r["tick"] * dt) for r in complete if r["rate"].get("sim_dt_sum_s") is not None), default=0.0)
+    return {"ok": not bad and engine.get("physics_hz") == hz and not end.get("rate_fault") and drift < 1e-9,
+            "declared_hz": hz, "tape_version": plan.get("version"), "engine_hz": engine.get("physics_hz"),
+            "requested_hz": engine.get("physics_hz_requested"), "project_hz": engine.get("physics_hz_project"),
+            "declared_by_game": engine.get("rate_declared"), "policy": engine.get("rate_policy"),
+            "dt_expected": dt, "dt_observed": sorted({r["rate"]["dt"] for r in sampled}),
+            "sampled_steps": len(sampled), "tape_ticks": len(complete), "sim_s_from_actual_dt": sim_sum,
+            "sim_s_from_ticks": len(complete) * dt, "dt_sum_drift_s": drift,
+            "bad_steps": bad[:20], "bad_step_count": len(bad), "fault": end.get("rate_fault"),
+            "priorities": engine.get("priorities")}
 
 
 def applied_tape(run_dir):
@@ -636,9 +885,12 @@ def applied_tape(run_dir):
         if r["mouse"]:
             events.append({"tick": r["tick"], "mouse": [r["mouse"]["dx"], r["mouse"]["dy"]]})
     events.sort(key=lambda e: (e["tick"], 0 if "key" in e else 1))
-    return {"format": FORMAT, "version": 1, "expanded": True, "name": plan["name"] + " / applied",
-            "description": f"applied relative events of {run_dir}", "physics_hz": plan["physics_hz"],
-            "input_profile": plan["input_profile"], "duration_ticks": plan["duration_ticks"], "events": events}
+    applied = {"format": FORMAT, "version": plan["version"], "expanded": True, "name": plan["name"] + " / applied",
+               "description": f"applied relative events of {run_dir}", "physics_hz": plan["physics_hz"],
+               "input_profile": plan["input_profile"], "duration_ticks": plan["duration_ticks"], "events": events}
+    if plan["version"] == 2:
+        applied["duration_s"] = plan["duration_s"]
+    return applied
 
 
 def ssim(a, b):
@@ -650,8 +902,10 @@ def ssim(a, b):
 
 def compare(a, b):
     a, b = Path(a), Path(b)
-    ra = {r["tick"]: r for r in read_jsonl(a / "evaluator/trace.jsonl") if r["phase"] == "tape"}
-    rb = {r["tick"]: r for r in read_jsonl(b / "evaluator/trace.jsonl") if r["phase"] == "tape"}
+    info_a, info_b = {}, {}
+    ra = {r["tick"]: r for r in read_jsonl(a / "evaluator/trace.jsonl", info_a) if r["phase"] == "tape" and "post" in r}
+    rb = {r["tick"]: r for r in read_jsonl(b / "evaluator/trace.jsonl", info_b) if r["phase"] == "tape" and "post" in r}
+    hz = [json.loads((d / "evaluator/plan.json").read_text())["physics_hz"] for d in (a, b)]
     common = sorted(set(ra) & set(rb))
     dp = [max(abs(x - y) for x, y in zip(ra[t]["post"]["p"], rb[t]["post"]["p"])) for t in common]
     dv = [max(abs(x - y) for x, y in zip(ra[t]["post"]["v"], rb[t]["post"]["v"])) for t in common]
@@ -661,9 +915,14 @@ def compare(a, b):
               "max_position_m": max(dp, default=None), "max_velocity_m_s": max(dv, default=None), "max_yaw_rad": max(dyaw, default=None),
               "first_position_difference_tick": first,
               "end_yaw": [ra[common[-1]]["post"]["yaw"], rb[common[-1]]["post"]["yaw"]] if common else None,
-              "same_applied_events": applied_tape(a)["events"] == applied_tape(b)["events"]}
-    if (a / "movie.avi").exists() and (b / "movie.avi").exists():
-        result["movie_ssim_all"] = ssim(a / "movie.avi", b / "movie.avi")
+              "same_applied_events": applied_tape(a)["events"] == applied_tape(b)["events"],
+              "physics_hz": hz, "same_rate": hz[0] == hz[1], "trace_source": [info_a, info_b]}
+    if hz[0] != hz[1]:
+        result["note"] = "different rates: tick n is not the same simulated time in both runs"
+    movies = [movie_path(a), movie_path(b)]
+    if None not in movies:
+        result["movie_ssim_all"] = ssim(*movies)
+        result["movie_files"] = [m.name for m in movies]
     return result
 
 
@@ -672,7 +931,7 @@ def compare(a, b):
 def units(plan):
     """removable pieces: each key hold (press with its release) and each mouse stroke."""
     out, open_press, stroke = [], {}, []
-    period = PROFILES[plan["input_profile"]]
+    period = tape_period(plan)
     for i, e in enumerate(plan["events"]):
         if "key" in e:
             if e["edge"] == "press":
@@ -730,12 +989,14 @@ def minimize(plan, out, cfg, spec):
     _, report = trial(current, "locate the first flagged tick")
     found = report["movement"][spec["flag"]][0]
     first = found.get("tick", found.get("from_tick"))
-    period = PROFILES[current["input_profile"]]
+    period = tape_period(current)
     for duration in sorted({min(current["duration_ticks"], first + span) for span in (30, 60, 120)}):
         duration += -duration % period
         if duration >= current["duration_ticks"]:
             continue
         candidate = dict(copy.deepcopy(current), duration_ticks=duration)
+        if candidate["version"] == 2:
+            candidate["duration_s"] = duration / candidate["physics_hz"]
         candidate["events"] = [e for e in candidate["events"] if e["tick"] < duration]
         ok, _ = trial(candidate, f"truncate to {duration}")
         if ok:
@@ -752,7 +1013,8 @@ def minimize(plan, out, cfg, spec):
 
 def run_config(args):
     keys = ["world", "motor", "motor_script", "game_script", "game_class", "fixture", "sensitivity", "inject", "timing", "render_fps", "headless",
-            "wall_budget", "deadline", "display", "executor", "actor_every", "warmup", "cancel_after", "hang_after", "readback_every"]
+            "wall_budget", "deadline", "display", "executor", "actor_every", "warmup", "cancel_after", "hang_after", "readback_every",
+            "undeclared_rate_ok", "resolution", "mp4", "keep_avi", "actor_limit", "archive", "min_free_gib", "max_movie_mib"]
     cfg = {k: getattr(args, k) for k in keys if getattr(args, k, None) is not None}
     if cfg.get("world", "lab").startswith("fixture:"):
         cfg["fixture"] = cfg.pop("world").split(":", 1)[1]
@@ -781,6 +1043,15 @@ def add_run_options(p):
     p.add_argument("--warmup", type=int, default=8)
     p.add_argument("--cancel-after", type=float, help="request cancellation after N wall seconds")
     p.add_argument("--hang-after", type=float, help="test only: SIGSTOP the engine after N seconds")
+    p.add_argument("--undeclared-rate-ok", action="store_true", default=None,
+                   help="allow a non-project rate when neither game nor motor declares physics_hz (an off-design probe)")
+    p.add_argument("--resolution", help="native window and display size, WxH (default 1280x720)")
+    p.add_argument("--mp4", action="store_true", default=None, help="encode movie.avi as mp4 and remove the avi after completeness checks")
+    p.add_argument("--keep-avi", action="store_true", default=None, help="with --mp4, keep the avi too")
+    p.add_argument("--actor-limit", type=int, help="keep at most N evenly spaced actor frames")
+    p.add_argument("--archive", action="store_true", default=None, help="after evaluation, gzip trace/frames losslessly and drop the raw files")
+    p.add_argument("--min-free-gib", type=float, help=f"refuse a native start below this free space (default {MIN_FREE_GIB})")
+    p.add_argument("--max-movie-mib", type=float, help="cancel a native capture whose avi outgrows this (default 2048)")
 
 
 def summary(report):
@@ -789,13 +1060,16 @@ def summary(report):
     s["delivery_ok"] = report.get("delivery", {}).get("ok")
     s["delivery_errors"] = [e["kind"] for e in report.get("delivery", {}).get("errors", [])][:10]
     s["order_ok"] = report.get("order", {}).get("ok")
+    s["rate_ok"] = report.get("rate", {}).get("ok")
+    s["archived"] = bool(report.get("archive"))
     s["clean"] = report.get("cleanup", {}).get("clean")
     return s
 
 
 def execution_exit(report):
     end = report.get("end")
-    return 2 if isinstance(end, dict) and end.get("reason") in {"launch_failed", "wrapper_failed"} else 0
+    reason = end.get("reason") if isinstance(end, dict) else end
+    return 2 if reason in {"launch_failed", "wrapper_failed", "rejected", "rate_changed"} else 0
 
 
 def main():
@@ -816,6 +1090,8 @@ def main():
     p = sub.add_parser("compare", help="compare two runs tick by tick")
     p.add_argument("a", type=Path)
     p.add_argument("b", type=Path)
+    p = sub.add_parser("archive", help="gzip an evaluated run's traces losslessly and drop the raw files")
+    p.add_argument("run", type=Path)
     p = sub.add_parser("cancel", help="ask a running executor to stop with neutral input")
     p.add_argument("run", type=Path)
     p = sub.add_parser("minimize", help="shrink a tape while a movement flag still fires (headless)")
@@ -840,6 +1116,8 @@ def main():
         print(json.dumps(evaluate(args.run), indent=1))
     elif args.command == "compare":
         print(json.dumps(compare(args.a, args.b), indent=1))
+    elif args.command == "archive":
+        print(json.dumps(archive_run(args.run), indent=1))
     elif args.command == "cancel":
         (args.run / "control/cancel").write_text(json.dumps({"reason": "cancel command"}))
     elif args.command == "minimize":

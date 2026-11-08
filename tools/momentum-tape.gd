@@ -2,7 +2,12 @@ extends SceneTree
 ## p / r13 momentum tape executor. plays a finite, already expanded input tape through
 ## ordinary InputEvents and records what the motor actually did after it ran. it never
 ## reads state to choose input, and writes no pose, velocity, camera or progress after the
-## labelled setup. tools/momentum-tape.py drives it; docs/momentum/TAPE.md is the protocol.
+## labelled setup. tools/momentum-tape.py drives it; docs/momentum/TAPE.md is the protocol,
+## docs/r14/REPLAY.md the rate-aware version 2 (64, 120 or 128 hz, one event slot per tick).
+##
+## the physics rate is a run input, not a header label: --physics-hz is applied to the engine
+## before the tape is validated and the world is built, the game must not change or contradict
+## it in _ready, and any later rate, delta or time-scale change ends the run as rate_changed.
 ##
 ## per physics step N: Early (priority -1000) samples the pre-step body and delivers tick N's
 ## mouse motion; the game and the motor run; Late (priority 1000) samples the post-step body,
@@ -20,18 +25,22 @@ const FORMAT := "spillway-momentum-tape"
 const PROFILES := {"tick120": 1, "render30": 4}
 # p / a finite simulation budget: no tape may run longer than ten simulated minutes.
 const MAX_TICKS := 120 * 600
+const MAX_SECONDS := 600
+# p / r14: vanilla 64, server-style 128 and r13's original 120 hz; v2 events sit on any tick.
+const RATES := [64, 120, 128]
+const V2_PROFILE := "physics_tick"
 
 class Early:
 	extends Node
 	var run: Variant
-	func _physics_process(_delta: float) -> void:
-		run.early_step()
+	func _physics_process(delta: float) -> void:
+		run.early_step(delta)
 
 class Late:
 	extends Node
 	var run: Variant
-	func _physics_process(_delta: float) -> void:
-		run.late_step()
+	func _physics_process(delta: float) -> void:
+		run.late_step(delta)
 
 var opts: Dictionary = {}
 var out_dir := ""
@@ -64,6 +73,14 @@ var wall_start_us := 0
 var wall_budget_us := 0
 var setup_writes: Array = []
 var dt := 1.0 / 120.0
+var tape_version := 1
+var tape_hz := 120
+var project_hz := 120
+var requested_hz := 0
+var rate_declared: Dictionary = {}
+var rate_fault: Dictionary = {}
+# sum of the deltas the engine actually handed to tape ticks so far.
+var tape_dt_sum := 0.0
 
 func _initialize() -> void:
 	wall_start_us = Time.get_ticks_usec()
@@ -76,7 +93,10 @@ func _initialize() -> void:
 		quit(2)
 		return
 	DirAccess.make_dir_recursive_absolute(out_dir.path_join("control"))
-	var errors := _load_tape(str(opts.get("tape", "")))
+	project_hz = int(ProjectSettings.get_setting("physics/common/physics_ticks_per_second"))
+	# the requested rate goes into the engine before anything is validated or built.
+	var errors := _request_rate(str(opts.get("physics-hz", "")))
+	errors.append_array(_load_tape(str(opts.get("tape", ""))))
 	inject = str(opts.get("inject", "tick"))
 	warmup = int(opts.get("warmup", "8"))
 	frame_mode = str(opts.get("frames", "movie"))
@@ -94,6 +114,8 @@ func _start(errors: Array) -> void:
 	# the tree is live only after _initialize; the world and runner are built here.
 	if errors.is_empty():
 		errors = _build_world()
+	if errors.is_empty():
+		errors = _rate_after_ready()
 	if not errors.is_empty():
 		_write_json("end.json", {"reason": "rejected", "errors": errors})
 		printerr("momentum-tape: rejected: ", errors)
@@ -114,7 +136,7 @@ func _start(errors: Array) -> void:
 	root.add_child(early)
 	root.add_child(late)
 	_write_json("evaluator/engine.json", _engine_metadata())
-	print("momentum-tape: world=%s motor=%s ticks=%d profile=%s inject=%s" % [world_kind, opts.get("motor", "flow"), duration, tape_profile, inject])
+	print("momentum-tape: world=%s motor=%s ticks=%d profile=%s hz=%d inject=%s" % [world_kind, opts.get("motor", "flow"), duration, tape_profile, tape_hz, inject])
 
 var tape_profile := "tick120"
 
@@ -124,20 +146,38 @@ func _load_tape(path: String) -> Array:
 	if not parsed is Dictionary:
 		return ["tape is missing or not a JSON object: " + path]
 	var tape: Dictionary = parsed
-	if tape.get("format") != FORMAT or int(tape.get("version", 0)) != 1:
-		errors.append("not a %s version 1 tape" % FORMAT)
+	var version: Variant = tape.get("version")
+	if tape.get("format") != FORMAT or not (version is float and (version == 1.0 or version == 2.0)):
+		errors.append("not a %s version 1 or 2 tape" % FORMAT)
+		return errors
+	tape_version = int(version)
 	if not tape.get("expanded", false) or tape.has("curves"):
 		errors.append("tape must be expanded by momentum-tape.py before it runs")
-	if int(tape.get("physics_hz", 0)) != Engine.physics_ticks_per_second:
-		errors.append("tape physics_hz %s does not match the engine's %d" % [tape.get("physics_hz"), Engine.physics_ticks_per_second])
+	var hz: Variant = tape.get("physics_hz")
+	var whole_hz: bool = hz is float and hz == floorf(hz)
+	tape_hz = int(hz) if whole_hz else 0
+	if tape_version == 1 and tape_hz != 120:
+		errors.append("a version 1 tape is a 120 hz claim; physics_hz %s needs a version 2 tape" % [hz])
+	if tape_version == 2 and tape_hz not in RATES:
+		errors.append("version 2 physics_hz %s is not one of %s" % [hz, RATES])
+	if tape_hz != Engine.physics_ticks_per_second:
+		errors.append("tape physics_hz %s does not match the engine's %d" % [hz, Engine.physics_ticks_per_second])
 	dt = 1.0 / float(Engine.physics_ticks_per_second)
 	tape_profile = str(tape.get("input_profile", ""))
-	if not PROFILES.has(tape_profile):
+	if tape_version == 1 and not PROFILES.has(tape_profile):
 		errors.append("unknown input_profile " + tape_profile)
-	period = PROFILES.get(tape_profile, 1)
+	if tape_version == 2 and tape_profile != V2_PROFILE:
+		errors.append("version 2 input_profile must be %s, not %s" % [V2_PROFILE, tape_profile])
+	period = PROFILES.get(tape_profile, 1) if tape_version == 1 else 1
 	duration = int(tape.get("duration_ticks", 0))
-	if duration <= 0 or duration > MAX_TICKS:
-		errors.append("duration_ticks must be 1..%d" % MAX_TICKS)
+	var max_ticks := MAX_TICKS if tape_version == 1 else maxi(tape_hz, 1) * MAX_SECONDS
+	if duration <= 0 or duration > max_ticks:
+		errors.append("duration_ticks must be 1..%d" % max_ticks)
+	if tape_version == 2:
+		# the redundant duration makes a header-only rate edit fail instead of retiming input.
+		var seconds: Variant = tape.get("duration_s")
+		if not seconds is float or tape_hz == 0 or absf(float(seconds) - float(duration) / float(tape_hz)) > 1e-9:
+			errors.append("duration_s %s is not duration_ticks / physics_hz" % [seconds])
 	var down: Dictionary = {}
 	var previous := -1
 	for event: Dictionary in tape.get("events", []):
@@ -169,6 +209,48 @@ func _load_tape(path: String) -> Array:
 			errors.append("tick %d: event is neither key nor mouse" % tick)
 	return errors
 
+func _request_rate(value: String) -> Array:
+	if value == "":
+		return []
+	if not value.is_valid_int() or int(value) not in RATES:
+		return ["requested --physics-hz %s is not one of %s" % [value, RATES]]
+	requested_hz = int(value)
+	Engine.physics_ticks_per_second = requested_hz
+	return []
+
+func _declared_rate() -> Dictionary:
+	# the rate the game or its runner says it is built for, wherever it is exposed.
+	for owner: Object in [game, player]:
+		if "physics_hz" in owner and owner.get("physics_hz") != null:
+			return {"source": "%s.physics_hz" % ("game" if owner == game else "player"), "hz": owner.get("physics_hz")}
+	if player.has_method("get_motion_state"):
+		var state: Variant = player.call("get_motion_state")
+		if state is Dictionary and (state as Dictionary).has("physics_hz"):
+			return {"source": "player.get_motion_state().physics_hz", "hz": state["physics_hz"]}
+	return {"source": "none"}
+
+func _rate_after_ready() -> Array:
+	var errors: Array = []
+	if Engine.physics_ticks_per_second != tape_hz:
+		errors.append("the engine runs at %d hz after the game's _ready; the tape declares %d hz" % [Engine.physics_ticks_per_second, tape_hz])
+	if Engine.time_scale != 1.0:
+		errors.append("engine time_scale is %s after _ready; a tick tape needs 1.0" % Engine.time_scale)
+	rate_declared = _declared_rate()
+	if rate_declared.has("hz") and int(rate_declared.hz) != tape_hz:
+		errors.append("%s declares %s hz; the tape declares %d hz" % [rate_declared.source, rate_declared.hz, tape_hz])
+	elif not rate_declared.has("hz") and tape_hz != project_hz and str(opts.get("undeclared-rate", "")) != "allow":
+		errors.append("nothing declares physics_hz and %d hz is not the project's %d hz; pass --undeclared-rate=allow for an off-design probe" % [tape_hz, project_hz])
+	return errors
+
+func _rate_ok(point: String, delta: float) -> bool:
+	# a tape is a tick sequence at one rate: any change of rate, delta or time scale ends it.
+	var hz := Engine.physics_ticks_per_second
+	if hz == tape_hz and delta == dt and Engine.time_scale == 1.0:
+		return true
+	rate_fault = {"point": point, "step": step, "tick": last_tick + 1 if armed else -1, "engine_hz": hz, "tape_hz": tape_hz,
+		"delta": delta, "expected_delta": dt, "time_scale": Engine.time_scale}
+	return false
+
 func _build_world() -> Array:
 	var motor := str(opts.get("motor", "flow"))
 	var sensitivity := float(opts.get("sensitivity", "1.0"))
@@ -195,7 +277,7 @@ func _build_world() -> Array:
 		player = game.get("player") as CharacterBody3D
 		if player == null:
 			return ["game %s %s exposes no CharacterBody3D `player` after _ready" % [game_script, game_class]]
-		setup_writes.append("%s%s._ready: builds its world and places the runner at its normal spawn (game code)" % [game_script, ":" + game_class if game_class != "" else ""])
+		setup_writes.append("%s%s._ready: builds its world and places the runner at %s (game code)" % [game_script, ":" + game_class if game_class != "" else "", _start_label()])
 		if not is_equal_approx(sensitivity, 1.0):
 			if not ("settings" in game and game.has_method("_apply_settings")):
 				return ["game has no settings/_apply_settings for a sensitivity change"]
@@ -231,6 +313,12 @@ func _build_world() -> Array:
 		current_scene = world
 	return []
 
+func _start_label() -> String:
+	if world_kind == "fixture":
+		return "fixture"
+	# a labelled test game can say it is not a normal spawn; real games leave this unset.
+	return str(game.get("tape_start")) if "tape_start" in game else "normal_spawn"
+
 func _engine_metadata() -> Dictionary:
 	var script := get_script() as Script
 	return {"engine": Engine.get_version_info(), "executable": OS.get_executable_path(),
@@ -241,12 +329,18 @@ func _engine_metadata() -> Dictionary:
 		"viewport_size": _v2(root.get_visible_rect().size), "physics_hz": Engine.physics_ticks_per_second,
 		"max_physics_steps_per_frame": Engine.max_physics_steps_per_frame, "physics_engine": str(ProjectSettings.get_setting("physics/3d/physics_engine")),
 		"accumulated_input": Input.use_accumulated_input, "cmdline": OS.get_cmdline_args(), "user_args": OS.get_cmdline_user_args(),
-		"user_data_dir": OS.get_user_data_dir(), "world": world_kind, "start": "fixture" if world_kind == "fixture" else "normal_spawn",
+		"user_data_dir": OS.get_user_data_dir(), "world": world_kind, "start": _start_label(),
+		"tape_version": tape_version, "physics_hz_requested": requested_hz if requested_hz else null, "physics_hz_project": project_hz,
+		"rate_declared": rate_declared, "rate_policy": "declared" if rate_declared.has("hz") else ("project rate, undeclared" if tape_hz == project_hz else "undeclared off-design probe (--undeclared-rate=allow)"),
+		"time_scale": Engine.time_scale, "physics_dt": dt,
+		"priorities": {"early": -1000, "late": 1000, "game": game.process_physics_priority if game != null else null, "motor": player.process_physics_priority},
+		"body_yaw_policy": player.get("tape_body_yaw_policy") if "tape_body_yaw_policy" in player else "view_yaw",
 		"fixture": opts.get("fixture", ""),
 		"motor": player.get("air_policy") if "air_policy" in player else (player.get("air_profile") if "air_profile" in player else opts.get("motor", "flow")),
 		"motor_requested": opts.get("motor", "flow"),
 		"game": {"script": opts.get("game-script", "res://scripts/momentum_flow_lab.gd"), "class": opts.get("game-class", ""), "node_script": (game.get_script() as Script).resource_path if game.get_script() != null else ""}, "motor_script": (player.get_script() as Script).resource_path,
-		"settings": {"sensitivity": float(opts.get("sensitivity", "1.0")), "mouse_sensitivity": player.get("mouse_sensitivity"),
+		"settings": {"sensitivity": float(opts.get("sensitivity", "1.0")), "mouse_sensitivity": player.get("tape_radians_per_count") if "tape_radians_per_count" in player else player.get("mouse_sensitivity"),
+			"pitch_limit": player.get("pitch_limit") if "pitch_limit" in player else 1.4,
 			"fov_horizontal": player.get("fov_horizontal"), "comfort": player.get("comfort"), "autohop": player.get("autohop")},
 		"setup_writes": setup_writes, "input_profile": tape_profile, "cadence_ticks": period, "inject": inject, "warmup_steps": warmup,
 		"frames": frame_mode, "readback_every": readback_every, "wall_budget_s": wall_budget_us / 1000000.0,
@@ -255,12 +349,13 @@ func _engine_metadata() -> Dictionary:
 
 # --- per step -------------------------------------------------------------------------------
 
-func early_step() -> void:
+func early_step(delta: float) -> void:
 	var index := step
 	step += 1
 	if finished:
 		return
 	var tick := index - arm_step if armed else -1
+	var ok := _rate_ok("early", delta)
 	pre_p = player.global_position
 	pre_cur = player.get("_current_position") if "_current_position" in player else pre_p
 	row = {"phase": "tape" if armed else "warmup", "tick": tick, "step": index,
@@ -269,8 +364,15 @@ func early_step() -> void:
 		"pre": {"p": _v3(pre_p), "v": _v3(player.velocity), "yaw": player.get("yaw"), "pitch": player.get("pitch"),
 			"grounded": player.call("is_grounded"), "mode": player.get("mode"),
 			"tape_step_count": player.get("tape_step_count") if "tape_step_count" in player else null},
-		"keys": pending.get(tick, []), "mouse": {}}
+		"keys": pending.get(tick, []), "mouse": {},
+		"rate": {"dt": delta, "engine_hz": Engine.physics_ticks_per_second, "time_scale": Engine.time_scale, "sim_dt_sum_s": tape_dt_sum if armed else null}}
 	pending.erase(tick)
+	if not ok:
+		row["rate_fault"] = rate_fault
+		trace.store_line(JSON.stringify(row, "", false, true))
+		row = {}
+		_finish("rate_changed", 5)
+		return
 	if armed and inject == "tick":
 		row["mouse"] = _deliver_mouse(tick, "early_physics")
 	elif armed:
@@ -279,9 +381,12 @@ func early_step() -> void:
 	if world_kind == "lab":
 		row["game_pre"] = {"respawns": game.get("respawn_count")}
 
-func late_step() -> void:
+func late_step(delta: float) -> void:
 	if finished or row.is_empty():
 		return
+	var ok := _rate_ok("late", delta)
+	row.rate["dt_late"] = delta
+	row.rate["engine_hz_late"] = Engine.physics_ticks_per_second
 	var p := player.global_position
 	var contacts: Array = []
 	for i: int in player.get_slide_collision_count():
@@ -303,7 +408,7 @@ func late_step() -> void:
 		if Input.is_action_just_released(ACTIONS[key]):
 			just_released.append(key)
 	row["post"] = {"p": _v3(p), "v": _v3(player.velocity), "real_v": _v3(player.get_real_velocity()),
-		"position_delta": _v3(player.get_position_delta()), "disp_v": _v3((p - pre_p) / dt),
+		"position_delta": _v3(player.get_position_delta()), "disp_v": _v3((p - pre_p) / delta),
 		"requested_v": _v3(player.call("tape_requested_velocity")) if player.has_method("tape_requested_velocity") else null,
 		# the motor's own report, kept apart: movement is judged from displacement, not from this.
 		"motion_state": _plain(player.call("get_motion_state")) if player.has_method("get_motion_state") else null,
@@ -322,10 +427,19 @@ func late_step() -> void:
 		row["game"] = {"respawns": game.get("respawn_count"), "checkpoint": game.get("checkpoint_index"), "elapsed": game.get("elapsed"),
 			"finished": game.get("finished"), "finish_kind": game.get("finish_kind"), "paused": game.get("paused")}
 	row["wall_us_post"] = Time.get_ticks_usec() - wall_start_us
+	if not ok:
+		row["rate_fault"] = rate_fault
 	trace.store_line(JSON.stringify(row, "", false, true))
 	var tick := int(row.tick)
 	var was_armed := str(row.phase) == "tape"
 	row = {}
+	if not ok:
+		if was_armed:
+			last_tick = tick
+		_finish("rate_changed", 5)
+		return
+	if was_armed:
+		tape_dt_sum += delta
 	if was_armed:
 		last_tick = tick
 		if tick + 1 >= duration:
@@ -434,7 +548,9 @@ func _finish(reason: String, code: int) -> void:
 	var end := {"reason": reason, "exit_code": code, "last_tick": last_tick, "steps": step, "arm_step": arm_step,
 		"draws": draws, "wall_s": (Time.get_ticks_usec() - wall_start_us) / 1000000.0,
 		"neutralized": released, "still_pressed_after_release": still, "neutral": still.is_empty(),
-		"undelivered": missed}
+		"undelivered": missed, "tape_version": tape_version, "physics_hz": tape_hz, "sim_dt_sum_s": tape_dt_sum}
+	if not rate_fault.is_empty():
+		end["rate_fault"] = rate_fault
 	if reason == "cancelled":
 		_write_json("control/cancel-ack.json", {"tick": last_tick, "wall_s": end.wall_s, "neutral": still.is_empty()})
 	_write_json("end.json", end)
@@ -457,7 +573,12 @@ func _on_draw() -> void:
 	var entry := {"draw": index, "process_frame": Engine.get_process_frames(), "physics_frame": Engine.get_physics_frames(),
 		"steps": step, "last_tick": last_tick, "sim_s": (last_tick + 1) * dt if armed else null,
 		"wall_us": Time.get_ticks_usec() - wall_start_us, "feet": _v3(player.global_position),
-		"camera": {"p": _v3(camera.global_position), "pitch": camera.global_rotation.x, "yaw": camera.global_rotation.y}}
+		"camera": {"p": _v3(camera.global_position), "pitch": camera.global_rotation.x, "yaw": camera.global_rotation.y},
+		# what the presentation interpolates between, so the evaluator can check the camera
+		# follows the physical body rather than only staying near it.
+		"interp_fraction": Engine.get_physics_interpolation_fraction(),
+		"motor_prev": _v3(player.get("_previous_position")) if "_previous_position" in player else null,
+		"motor_cur": _v3(player.get("_current_position")) if "_current_position" in player else null}
 	if frame_mode == "readback" and armed and index % readback_every == 0:
 		var file := out_dir.path_join("frames/draw_%06d.png" % index)
 		DirAccess.make_dir_recursive_absolute(out_dir.path_join("frames"))

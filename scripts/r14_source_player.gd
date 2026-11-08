@@ -13,6 +13,17 @@ const BUMPS := 4
 ## the active cvars and policies (see r14_source_motion.gd). change with apply_preset() or
 ## apply_settings(); both keep position, velocity and view.
 var settings: Dictionary = MOTION.preset("csgo_server")
+## replay declarations use the active source units instead of r13's mouse multiplier.
+var physics_hz: int:
+	get:
+		return int(settings.tickrate)
+var tape_radians_per_count: float:
+	get:
+		return deg_to_rad(float(settings.sensitivity) * float(settings.m_yaw))
+var pitch_limit: float:
+	get:
+		return PITCH_LIMIT
+var tape_body_yaw_policy: String = "axis_aligned"
 ## the tape executor's ordering proof reads this as one increment per motor step.
 var tape_step_count: int = 0
 var motion_tick: int = 0
