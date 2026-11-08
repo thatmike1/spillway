@@ -24,3 +24,19 @@ A source bounds box is for placement, not automatic collision: it would close an
 ## Evidence and retention
 
 Outer `checkpoints/spillway/r15/asset-acquisition/` keeps full-archive hashes and inventories, all acquired licence notices, selected-file hashes, measurement JSON, exact probe/acquisition scripts and error-free import logs. The original staging ZIPs were removed after all 152 retained source-file hashes were verified. CLEANUP.json records the removal. Reacquisition uses fresh signed publisher URLs. Native views, actual map usage, final collisions and packed dependencies remain later acceptance steps.
+
+## Shared placement
+
+`r15_assets.gd` places the acquired scenes using a separate pivot node. Original meshes, root transforms, materials and texture paths stay unchanged. Feet and yaw are in the parent's coordinates; scale is an explicit authored choice.
+
+```gdscript
+const ASSETS := preload("res://scripts/r15_assets.gd")
+var model := "kenney-space/models/satelliteDish_large.glb"
+var dish := ASSETS.place(self, model, Vector3(18, 8, -12), ASSETS.scale_for_height(model, 6.0), deg_to_rad(35))
+```
+
+The helper adds no collision. Place the route's intentional proxy separately, especially for arches and open buildings. Each visual stores its source-model identity for inspection. The 20-gate placement check traverses actual imported meshes under a transformed parent: the offset dish, compound hangar, open arch and subway all reach their requested foot, centre and height with materials intact and no implicit physics. This is a transform/dependency check, not native visual acceptance.
+
+The new non-default `R15 Pack` export preset includes JSON explicitly because the placement helper reads measured bounds with FileAccess. The R14 presets and game default are unchanged. Final R15 packaging also needs recursive source-licence collection: R14's one-kit-level licence selector does not cover `assets/r15/library/licences/` or future per-map nested sources. Keeping licences inside the source tree alone is insufficient for the portable ZIP notices.
+
+The same 20 placement gates pass when the helper, measured bounds and models load from a diagnostic PCK in an empty directory outside the checkout. This uses the pinned headless editor as the pack host, not the official release runtime; it is dependency/transform evidence, not final delivery acceptance. Logs and pack hash remain in outer `checkpoints/spillway/r15/asset-placement/`; the diagnostic pack, imports and profile were removed after checking. The explicit JSON filter follows [Godot's export documentation](https://docs.godotengine.org/en/stable/tutorials/export/exporting_projects.html#resource-options).
