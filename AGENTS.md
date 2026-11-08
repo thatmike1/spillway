@@ -1,6 +1,6 @@
 # Spillway
 
-Before movement, level, presentation or delivery changes, read docs/momentum/BRIEF.md. Mike rejected R12 feel on 7 November, asks for broad research with VHOLUME as a reference, permits an original motor and external assets, and makes surf optional. docs/surf/BRIEF.md and STATUS.md describe the preserved R12 baseline, not current acceptance. The original dam/native direction in docs/reboot/BRIEF.md remains useful where it fits the new brief.
+Before movement, level, presentation or delivery changes, read docs/r14/BRIEF.md and docs/r14/INTERFACES.md. Mike rejected R13 on 8 November: he wants real CS:GO A/D air strafing, a faithful Source baseline, switchable presets and a practice map. R13 stays unchanged as a comparison. docs/momentum/BRIEF.md, docs/surf/BRIEF.md and STATUS.md are historical contracts. R14 owns current acceptance.
 
 R12's baseline uses Godot 4.7.2, GDScript, Compatibility rendering and 120 Hz physics, with spillway_player.gd owning collision and velocity. These are baseline facts, not a requirement to retain this engine or architecture in the new work. In current Godot experiments use metres/seconds/radians, label new tuning P / game choices, and have camera/audio present actual motion. Historical runtime ownership and verification are in docs/reboot/RUNTIME.md and docs/reboot/VERIFICATION.md.
 
