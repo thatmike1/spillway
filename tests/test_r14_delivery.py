@@ -300,7 +300,7 @@ def repack(work, folders, pack=None, manifest_edit=None):
 
 def checker(work, evidence, name, expected):
     out = evidence / ('check-' + name.replace(' ', '-').replace('/', '-'))
-    cmd = [sys.executable, '-I', TOOL, 'check', work, '--evidence', out, '--display', str(ARGS.display)]
+    cmd = [sys.executable, '-I', TOOL, 'check', work, '--evidence', out, '--display', str(ARGS.display), '--native-backend', ARGS.native_backend, '--deadline', '180']
     if ARGS.scratch:
         cmd += ['--scratch', ARGS.scratch]
     result = run(cmd, PROJECT, str(out) + '.log')
@@ -436,27 +436,38 @@ def runtime(package, evidence):
 def cancel(package, evidence):
     """SIGTERM while the native controls run: exit 130, display and processes released."""
     out = evidence / 'cancel-check'
-    cmd = [sys.executable, '-I', TOOL, 'check', package, '--evidence', out, '--display', str(ARGS.display)]
+    cmd = [sys.executable, '-I', TOOL, 'check', package, '--evidence', out, '--display', str(ARGS.display), '--native-backend', ARGS.native_backend]
     if ARGS.scratch:
         cmd += ['--scratch', ARGS.scratch]
     with open(str(out) + '.log', 'wb') as log:
         process = subprocess.Popen([str(c) for c in cmd], cwd=PROJECT, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
-        socket = Path('/tmp/.X11-unix/X%d' % ARGS.display)
+        number = None
         started = False
         for _ in range(1200):
-            if socket.exists() and (out / 'runs/controls/engine.log').exists():
-                started = True
+            for pid in pr.owned_leftovers(out / 'runs/controls'):
+                try:
+                    argv = Path('/proc/%s/cmdline' % pid).read_bytes().split(b'\0')
+                    if Path(os.fsdecode(argv[0])).name != pr.NAME + '.x86_64':
+                        continue
+                    # read only our child's display routing, never expose its other environment.
+                    display = next(value[8:] for value in Path('/proc/%s/environ' % pid).read_bytes().split(b'\0') if value.startswith(b'DISPLAY='))
+                    number = int(display.decode().lstrip(':').split('.')[0])
+                    started = Path('/tmp/.X11-unix/X%d' % number).exists()
+                except (OSError, ValueError, StopIteration):
+                    pass
+            if started:
                 break
             if process.poll() is not None:
                 break
             time.sleep(0.1)
         time.sleep(3)
-        os.kill(process.pid, signal.SIGTERM)
+        if process.poll() is None:
+            os.kill(process.pid, signal.SIGTERM)
         code = process.wait(90)
     time.sleep(1)
     check('cancel reached the native run', started)
     check('cancelled check exits 130', code == 130, code)
-    check('cancel released the private display', not socket.exists() and not Path('/tmp/.X%d-lock' % ARGS.display).exists())
+    check('cancel released the private display', number is not None and not Path('/tmp/.X11-unix/X%d' % number).exists() and not Path('/tmp/.X%d-lock' % number).exists(), {'backend': ARGS.native_backend, 'display': number})
     leftovers = pr.owned_leftovers(out)
     check('cancel left no owned process', not leftovers, leftovers)
 
@@ -468,6 +479,7 @@ def main():
     parser.add_argument('--evidence', type=Path, required=True)
     parser.add_argument('--only', nargs='*', choices=['ownership', 'gates', 'integrity', 'preflight', 'contents', 'runtime', 'cancel'])
     parser.add_argument('--display', type=int, default=182)
+    parser.add_argument('--native-backend', choices=['xvfb', 'amd'], default='xvfb')
     parser.add_argument('--scratch', type=Path, help='a RAM directory for transient copies')
     ARGS = parser.parse_args()
     needs_package = {'contents', 'runtime', 'cancel'}
