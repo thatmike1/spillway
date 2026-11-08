@@ -1,0 +1,129 @@
+{
+ "kit": "Spillway R15 Whiteout Relay kit",
+ "publisher": "Poly Haven (polyhaven.com), primary publisher; every asset CC0-1.0",
+ "verification": "each file's md5 matched the poly haven api at download and again here; files are unmodified upstream bytes",
+ "licence_text": "licences/CC0-1.0-legalcode.txt",
+ "shared_library_use": "models from assets/r15/library (Kenney Space Kit, Nature Kit; CC0-1.0) and its Poly Haven Snow 02 maps, placed through scripts/r15_assets.gd; their provenance is the library's MANIFEST.json",
+ "shipped_bytes": 8858926,
+ "shipped_mib": 8.45,
+ "assets": [
+  {
+   "id": "corrugated_iron_02",
+   "name": "Corrugated Iron 02",
+   "kind": "texture",
+   "authors": {
+    "Jenelle van Heerden": "Processing",
+    "Sergej Majboroda": "Photography"
+   },
+   "source_page": "https://polyhaven.com/a/corrugated_iron_02",
+   "api_files": "https://api.polyhaven.com/files/corrugated_iron_02",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": [
+    2700.000047683716,
+    2700.000047683716
+   ],
+   "use": "cladding of the start hangar, the cable works shed, the checkpoint shelters and the relay house",
+   "in_game_modifications": "2.7 m repeat from the api dimensions; desaturated and tinted (warm oxide red, signal orange, slate) in the shared momentum surface shader (no file edit)",
+   "files": [
+    {
+     "file": "textures/corrugated_iron_02/corrugated_iron_02_diff_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_02/corrugated_iron_02_diff_1k.jpg",
+     "upstream_md5_api": "0437ba7acc3a60e9a00245580ae7e10b",
+     "sha256": "7a7b43099d015c1b08ebb175da5965caeae44b86de65a727b3fffa20a7c69a93",
+     "bytes": 568492,
+     "modified": false
+    },
+    {
+     "file": "textures/corrugated_iron_02/corrugated_iron_02_nor_gl_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_02/corrugated_iron_02_nor_gl_1k.jpg",
+     "upstream_md5_api": "e3a9b41f29a5dee9f0835bddb440efbd",
+     "sha256": "9743c93668689c36a67e9c4dc8d6a0870fe91202f82dcdaf70ddc330c12f9ecb",
+     "bytes": 489773,
+     "modified": false
+    },
+    {
+     "file": "textures/corrugated_iron_02/corrugated_iron_02_arm_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_02/corrugated_iron_02_arm_1k.jpg",
+     "upstream_md5_api": "58d9a11932fae9f85d4cbcde4700abb2",
+     "sha256": "da4197f5b3e199ef693082836ca803f9d5cad2b4998a1c1c3dc4ac384f93a890",
+     "bytes": 904443,
+     "modified": false
+    }
+   ]
+  },
+  {
+   "id": "metal_plate",
+   "name": "Metal Plate",
+   "kind": "texture",
+   "authors": {
+    "Rob Tuytel": "All"
+   },
+   "source_page": "https://polyhaven.com/a/metal_plate",
+   "api_files": "https://api.polyhaven.com/files/metal_plate",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": [
+    500,
+    500
+   ],
+   "use": "dark tread-plate tops of every route deck: hangar floor, service road, pylon tops, saddle, catwalk, receiver deck, shed floor, gantry, terraces",
+   "in_game_modifications": "1.0 m repeat (the api's 500 mm scan doubled); desaturated and darkened to slate in the shared surface shader so the track reads against snow (no file edit)",
+   "files": [
+    {
+     "file": "textures/metal_plate/metal_plate_diff_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_diff_1k.jpg",
+     "upstream_md5_api": "bd9daf4c04046ca392a38b8df955ed26",
+     "sha256": "c6b6739eac2c75ccc898e753d7833df24eafbdb9aa92fb6eabfb92abd1a680a5",
+     "bytes": 692234,
+     "modified": false
+    },
+    {
+     "file": "textures/metal_plate/metal_plate_nor_gl_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_nor_gl_1k.jpg",
+     "upstream_md5_api": "d379e66130ad6ccff217ac9b13de935d",
+     "sha256": "994f851a84d52b51e97906021a1b7070ee6eac9a789fef041132268de47d8e6b",
+     "bytes": 770307,
+     "modified": false
+    },
+    {
+     "file": "textures/metal_plate/metal_plate_arm_1k.jpg",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_arm_1k.jpg",
+     "upstream_md5_api": "13f064ffa4863a4170d902f675eb022e",
+     "sha256": "fc4708b6700a2cc387654b693091dd0ac0cd1797ae803d75c894e62554fbef07",
+     "bytes": 1004043,
+     "modified": false
+    }
+   ]
+  },
+  {
+   "id": "qwantani_late_afternoon_puresky",
+   "name": "Qwantani Late Afternoon (Pure Sky)",
+   "kind": "hdri",
+   "authors": {
+    "Greg Zaal": "Photography",
+    "Jarod Guest": "Processing"
+   },
+   "source_page": "https://polyhaven.com/a/qwantani_late_afternoon_puresky",
+   "api_files": "https://api.polyhaven.com/files/qwantani_late_afternoon_puresky",
+   "licence": "CC0-1.0",
+   "licence_page": "https://polyhaven.com/license",
+   "retrieved": "2026-11-08",
+   "physical_size_mm": null,
+   "use": "the sky panorama and ambient light",
+   "in_game_modifications": "energy 0.42, rotated so its sun sits behind the scene sun's bearing (no file edit)",
+   "files": [
+    {
+     "file": "sky/qwantani_late_afternoon_puresky_2k.hdr",
+     "upstream_url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/qwantani_late_afternoon_puresky_2k.hdr",
+     "upstream_md5_api": "29e6be57b9ce3ead992131fdd2eff285",
+     "sha256": "d1c4d610811b7b94328d67fa48fc107078af21318197e5b937310c825d72074d",
+     "bytes": 4429634,
+     "modified": false
+    }
+   ]
+  }
+ ]
+}
