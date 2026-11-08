@@ -19,7 +19,7 @@ import zipfile
 
 PROJECT = Path(__file__).resolve().parents[1]
 OUTER = Path('/home/thatmike1/foldrunner-build-2026-11-05')
-CANDIDATE = OUTER / 'delivery/work/r14-candidate-5484f10d'
+CANDIDATE = OUTER / 'delivery/spillway-r14'
 spec = importlib.util.spec_from_file_location('os_input_nd', PROJECT / 'tools/r14_native_display.py')
 nd = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(nd)

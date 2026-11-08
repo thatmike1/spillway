@@ -11,7 +11,7 @@ import subprocess
 import tarfile
 
 PROJECT = Path(__file__).resolve().parents[1]
-CANDIDATE = Path('/home/thatmike1/foldrunner-build-2026-11-05/delivery/work/r14-candidate-5484f10d')
+CANDIDATE = Path('/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r14')
 
 
 def main():

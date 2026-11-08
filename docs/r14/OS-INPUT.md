@@ -189,3 +189,5 @@ python3 tests/r14_os_input_analyze.py --package /tmp/r14-negative-base-65d205be 
 
 The temporary baseline copy will be removed after promotion. For a fresh reproduction,
 pass the final outer `delivery/spillway-r14/` package and a new evidence directory.
+
+The current helper default is the promoted `delivery/spillway-r14/`. Historical attempt commands above ran before that default changed; use `--package` to select any other retained package explicitly.
