@@ -16,6 +16,15 @@ const SNAP_REFINE := 0.5
 ## godot depenetrates a hull closer to a face than this share of the margin (its 4.7.2
 ## test-motion minimum contact depth is 5% of the margin).
 const RECOVERY_GAP := 0.95
+## p / the missed-support guard (see _support_inside): overlap tests use godot 4.7.2's
+## minimum test-motion margin, a contact-free sweep must end at least GUARD_DEPTH inside
+## geometry to count as a missed cast, a snap whose cast did report the face at least
+## LATE_DEPTH (one margin, so a snap resting on the raw face never counts), and the first touch
+## is bisected to 2^-GUARD_STEPS of the sweep.
+const GUARD_MARGIN := 0.0001
+const GUARD_DEPTH := 0.0002
+const LATE_DEPTH := 0.001
+const GUARD_STEPS := 20
 
 ## the active cvars and policies (see r14_source_motion.gd). change with apply_preset() or
 ## apply_settings(); both keep position, velocity and view.
@@ -36,6 +45,14 @@ var tape_step_count: int = 0
 var motion_tick: int = 0
 var step_up_count: int = 0
 var snap_count: int = 0
+## p / adapter policy, not a source cvar: catch a sweep that ends inside walkable support with
+## no contact reported, or a snap that ends past the face it reported. off reproduces the
+## unguarded adapter for comparisons.
+var cast_guard: bool = true
+## sweeps the guard turned into support contacts, by caller (snap_late: a snap past its reported
+## face), and sweeps whose end overlapped geometry but stood as the engine made them because the
+## start overlapped or the first touch was not walkable support.
+var cast_guards: Dictionary = {"slide": 0, "probe": 0, "snap": 0, "snap_late": 0, "declined": 0}
 var view_yaw: float:
 	get:
 		return yaw
@@ -119,6 +136,7 @@ func reset_to(pose: Transform3D) -> void:
 	_standoff = Vector3.ZERO
 	step_up_count = 0
 	snap_count = 0
+	cast_guards = {"slide": 0, "probe": 0, "snap": 0, "snap_late": 0, "declined": 0}
 
 func is_grounded() -> bool:
 	return bool(state.grounded)
@@ -299,15 +317,21 @@ func walk_move(s: Dictionary, dt: float) -> void:
 ## hull which ended inside the face's margin without touching it stands off (see _stand_off).
 ## a 2 u cast can stop several thousandths short, so a near face is measured again closely.
 func probe_ground(_s: Dictionary) -> Vector3:
-	var hit := move_and_collide(Vector3.DOWN * float(settings.ground_probe) * U, true, safe_margin, false, 4)
+	var probe := Vector3.DOWN * float(settings.ground_probe) * U
+	var hit := move_and_collide(probe, true, safe_margin, false, 4)
+	var travel := 0.0 if hit == null else -hit.get_travel().y
 	if hit == null:
-		return Vector3.ZERO
+		var caught := _missed_support(global_position, probe, "probe")
+		if caught.is_empty():
+			return Vector3.ZERO
+		hit = caught.hit
+		travel = -probe.y * float(caught.fraction)
 	var best := Vector3.ZERO
 	for i: int in hit.get_collision_count():
 		var n := hit.get_normal(i)
 		if n.y >= float(settings.sv_walkable_normal) and n.y > best.y:
 			best = n
-	if best != Vector3.ZERO and -hit.get_travel().y < 2.0 * safe_margin:
+	if best != Vector3.ZERO and travel < 2.0 * safe_margin:
 		var near := move_and_collide(Vector3.DOWN * 3.0 * safe_margin, true, safe_margin, false, 4)
 		if near != null and -near.get_travel().y < RECOVERY_GAP * safe_margin:
 			_stand_off(Vector3.UP)
@@ -321,13 +345,28 @@ func _stay_on_ground() -> void:
 	var raised := _move(Vector3.UP * probe)
 	var lift := probe if raised == null else raised.get_travel().y
 	var reach := lift + float(settings.sv_stepsize) * U
+	var top := global_position
+	var top_depenetration := _depenetration
 	var drop := move_and_collide(Vector3.DOWN * reach, true, safe_margin, false, 4)
-	if drop != null and drop.get_travel().length() > 1e-6 and _best_up(drop) >= float(settings.sv_walkable_normal):
+	var caught := {} if drop != null else _missed_support(top, Vector3.DOWN * reach, "snap")
+	if not caught.is_empty():
+		# the guard's first touch replaces the missed cast; it has no depenetration to book.
+		global_position = top + Vector3.DOWN * reach * float(caught.fraction)
+		_stand_off(Vector3.UP)
+		if absf(global_position.y - here.y) > 1e-4:
+			snap_count += 1
+	elif drop != null and drop.get_travel().length() > 1e-6 and _best_up(drop) >= float(settings.sv_walkable_normal):
 		_apply_test(Vector3.DOWN * reach, drop)
 		# the coarse cast's bisection can stop short; a short cast from there finds the face.
 		var settle := move_and_collide(Vector3.DOWN * SNAP_REFINE * U, true, safe_margin, false, 4)
 		if settle != null and _best_up(settle) >= float(settings.sv_walkable_normal):
 			_apply_test(Vector3.DOWN * SNAP_REFINE * U, settle)
+		# a cast can also report the face a few millimetres past it; a snap that ended inside
+		# support is redone from the guard's first touch on the same drop.
+		var late := _support_inside(top, Vector3.DOWN * reach, global_position, "snap_late", LATE_DEPTH)
+		if not late.is_empty():
+			global_position = top + Vector3.DOWN * reach * float(late.fraction)
+			_depenetration = top_depenetration
 		_stand_off(Vector3.UP)
 		if absf(global_position.y - here.y) > 1e-4:
 			snap_count += 1
@@ -388,11 +427,24 @@ func _slide(v: Vector3, dt: float) -> Vector3:
 		if motion.length_squared() < 1e-14:
 			advanced += 1.0
 			break
+		var from := global_position
+		var before_depenetration := _depenetration
 		var hit := _move(motion, true, 4)
+		var fraction := 1.0
+		var guarded := false
 		if hit == null:
-			advanced += 1.0
-			break
-		var fraction := clampf(1.0 - hit.get_remainder().length() / motion.length(), 0.0, 1.0)
+			var caught := _missed_support(from, motion, "slide")
+			if caught.is_empty():
+				advanced += 1.0
+				break
+			# the sweep stops where it first touched the support, with no depenetration.
+			global_position = from + motion * float(caught.fraction)
+			_depenetration = before_depenetration
+			fraction = caught.fraction
+			hit = caught.hit
+			guarded = true
+		else:
+			fraction = clampf(1.0 - hit.get_remainder().length() / motion.length(), 0.0, 1.0)
 		advanced += fraction
 		if fraction > 0.0:
 			original = v
@@ -404,7 +456,7 @@ func _slide(v: Vector3, dt: float) -> Vector3:
 			# a face the move heads away from never blocked it; after a full sweep, only a face
 			# the move heads into is a touched plane.
 			var blocking := v.dot(n) <= 0.0 if fraction < 1.0 else v.dot(n) < -1e-6
-			_contacts.append({"phase": _phase, "bump": bump, "body": str(body.name) if body != null else "", "normal": n, "position": hit.get_position(i), "fraction": fraction, "blocking": blocking})
+			_contacts.append({"phase": _phase, "bump": bump, "body": str(body.name) if body != null else "", "normal": n, "position": hit.get_position(i), "fraction": fraction, "blocking": blocking, "guard": guarded})
 			if not blocking:
 				continue
 			var seen := false
@@ -437,6 +489,46 @@ func _slide(v: Vector3, dt: float) -> Vector3:
 	if advanced <= 0.0:
 		v = Vector3.ZERO
 	return v
+
+## p / godot 4.7.2 sweeps can report no contact for a hull that crosses a convex prism's top
+## face (docs/r14/CONTACT-GUARD.md). after a contact-free sweep of `motion` from `from`, see
+## _support_inside for its end pose.
+func _missed_support(from: Vector3, motion: Vector3, caller: String) -> Dictionary:
+	return _support_inside(from, motion, from + motion, caller)
+
+## p / the engine's overlap test checks where a sweep left the hull, `end_at`. when that sits
+## more than `depth` inside geometry and the start is clear, the sweep's straight path from
+## `from` along `motion` is bisected with the overlap test. a first touch on walkable support
+## returns {fraction, hit}: the last clear share of the sweep and the contacts at the touch. a
+## clear end, an overlapping start or a first touch on any other face returns {}, and the sweep
+## stands as the engine made it.
+func _support_inside(from: Vector3, motion: Vector3, end_at: Vector3, caller: String, depth := GUARD_DEPTH) -> Dictionary:
+	if not cast_guard:
+		return {}
+	var walkable := float(settings.sv_walkable_normal)
+	var basis := global_transform.basis
+	var end := KinematicCollision3D.new()
+	if not test_move(Transform3D(basis, end_at), Vector3.ZERO, end, GUARD_MARGIN, true, 4) or end.get_travel().length() < depth:
+		return {}
+	if test_move(Transform3D(basis, from), Vector3.ZERO, null, GUARD_MARGIN, true, 1):
+		cast_guards.declined += 1
+		return {}
+	var lo := 0.0
+	var hi := 1.0
+	var first: KinematicCollision3D = end
+	for i: int in GUARD_STEPS:
+		var mid := (lo + hi) * 0.5
+		var touch := KinematicCollision3D.new()
+		if test_move(Transform3D(basis, from + motion * mid), Vector3.ZERO, touch, GUARD_MARGIN, true, 4):
+			hi = mid
+			first = touch
+		else:
+			lo = mid
+	if _best_up(first) < walkable:
+		cast_guards.declined += 1
+		return {}
+	cast_guards[caller] += 1
+	return {"fraction": lo, "hit": first}
 
 func _process(delta: float) -> void:
 	_update_eye(delta)
@@ -496,6 +588,7 @@ func get_motion_state() -> Dictionary:
 		"contact_count": _contacts.size(),
 		"step_ups": step_up_count,
 		"ground_snaps": snap_count,
+		"cast_guards": cast_guards.duplicate(),
 		"ledger": ledger,
 		"side": _side,
 		"yaw_delta": _yaw_delta,

@@ -16,7 +16,7 @@ const MOTION := preload("res://scripts/r14_source_motion.gd")
 ## how each family's runner is made. `version` enters the record key; bump it when a family's
 ## movement code changes what a run means. `hull` names the collision shape for the fit check.
 const FAMILIES := {
-	"source": {"script": SOURCE_PLAYER, "version": "r14-source-motion-2", "label": "Source", "hull": "source_box"},
+	"source": {"script": SOURCE_PLAYER, "version": "r14-source-motion-3", "label": "Source", "hull": "source_box"},
 	"r13": {"script": R13_PLAYER, "version": "r13-carry-air-candidate-1", "label": "R13", "hull": "r13_capsule"},
 }
 
