@@ -167,3 +167,25 @@ Attempt 04's actual release process command was:
 That scratch directory is removed. The driver recreates it with a fresh name,
 checks the same runtime and pack bytes, and assigns a free private display through
 NativeDisplay. No exports, production edits, delegated agents or commits were made by this task.
+
+## Root repeat on the final helper-pinned pack
+
+The driver and analyzer now accept `--package DIR`, so reproductions can select an
+immutable package explicitly. Root repeated the complete XTest sequence on source
+`65d205be`, pack `fc77461baa5387549ce7ec2b5c2796d656b83aaf2a8fd1e8674d614a7b0b0067`,
+using the exact ZIP copy that the fresh package refusal tests used. Evidence is outer
+`checkpoints/spillway/r14/os-input-final/analysis.json`: **22/22**, no input delivery
+issue, both strafes250to255.0593u/s,100deliveredpixels=5.5degrees, zero velocity drift
+over0.1796875simulatedseconds, correct manual/held/wheel behavior, allpresetkeys,
+stagepicker and error-free Quit0. Three selected JPEGs and compressed telemetry total
+less than0.5MiB. No physical-device, latency or feel claim follows.
+
+From `projects/foldrunner`, the verified repeat commands were:
+
+```sh
+python3 tests/r14_os_input_native.py --package /tmp/r14-negative-base-65d205be --evidence /home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r14/os-input-final/attempt-01 --shots 05-penstock-straight,06-strafe-coast,07-quit-menu
+python3 tests/r14_os_input_analyze.py --package /tmp/r14-negative-base-65d205be --evidence /home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r14/os-input-final --attempt attempt-01
+```
+
+The temporary baseline copy will be removed after promotion. For a fresh reproduction,
+pass the final outer `delivery/spillway-r14/` package and a new evidence directory.

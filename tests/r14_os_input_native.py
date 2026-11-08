@@ -32,6 +32,7 @@ def digest(path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--evidence', type=Path, required=True)
+    parser.add_argument('--package', type=Path, default=CANDIDATE)
     parser.add_argument('--shots', default='01-startup,02-default-held,03-manual-wheel,04-stage-picker,05-penstock-straight,06-strafe-coast,07-quit-menu')
     args = parser.parse_args()
     out = args.evidence.resolve()
@@ -50,7 +51,7 @@ def main():
             raise RuntimeError('HOME below 15 GiB; no native launch')
         scratch = Path(tempfile.mkdtemp(prefix='r14-os-input-', dir='/dev/shm'))
         report['scratch'] = str(scratch)
-        package = next(CANDIDATE.glob('*linux*.zip'))
+        package = next(args.package.glob('*linux*.zip'))
         with zipfile.ZipFile(package) as archive:
             archive.extractall(scratch / 'release')
         release = scratch / 'release/SpillwayR14-linux-x86_64'

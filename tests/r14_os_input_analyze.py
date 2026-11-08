@@ -17,6 +17,7 @@ CANDIDATE = Path('/home/thatmike1/foldrunner-build-2026-11-05/delivery/work/r14-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--evidence', type=Path, required=True)
+    parser.add_argument('--package', type=Path, default=CANDIDATE)
     parser.add_argument('--attempt', default='attempt-03')
     args = parser.parse_args()
     out = args.evidence.resolve()
@@ -37,7 +38,7 @@ def main():
     def speed(row):
         return math.hypot(row['velocity'][0], row['velocity'][2]) / .0254
 
-    build = json.loads((CANDIDATE / 'BUILD.json').read_text())
+    build = json.loads((args.package / 'BUILD.json').read_text())
     commit = build['source_commit']
 
     def git(*parts, binary=False):
@@ -59,7 +60,7 @@ def main():
               'source_manifest_sha256': hashlib.sha256(manifest.encode()).hexdigest(), 'file_count': len(lines)}
     source['matches_build'] = all(source[k] == build[k] for k in ['source_tree', 'source_archive_sha256', 'source_manifest_sha256']) and len(lines) == build['source_files']
     (out / 'source-identity.json').write_text(json.dumps(source, indent=1) + '\n')
-    check('frozen source tree archive and 486-file manifest match candidate', source['matches_build'])
+    check('frozen source tree archive and complete file manifest match candidate', source['matches_build'])
     expected_exe = build['runtime']['members_sha256']['linux_release.x86_64']
     check('runtime and pack match release before and after', run['identity']['executable_sha256'] == expected_exe
           and run['identity_after']['SpillwayR14.x86_64'] == expected_exe
