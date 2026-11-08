@@ -3,12 +3,19 @@ extends "res://scripts/spillway_player.gd"
 ## module owns the order and the velocity law in source units; this adapter is its world:
 ## collide-and-slide with move_and_collide on an axis-aligned box hull, the 18 u step-up, the
 ## stay-on-ground snap and the 2 u ground probe. no r12/r13 ground, air, mantle, slide, surf
-## or camera assist runs here; only r12's camera node, signals and plane-cone helper are reused.
+## or camera assist runs here; only r12's camera node and signals are reused.
 ## the box never rotates with the view, as source's hull does not.
 
 const MOTION := preload("res://scripts/r14_source_motion.gd")
 const U: float = MOTION.U
 const BUMPS := 4
+const MAX_CLIP_PLANES := 5
+## p / the refining drop after the stay-on-ground cast. godot sweeps by eight bisection steps,
+## so a 20 u cast can stop up to about 0.1 u short of the floor; a short second cast lands it.
+const SNAP_REFINE := 0.5
+## godot depenetrates a hull closer to a face than this share of the margin (its 4.7.2
+## test-motion minimum contact depth is 5% of the margin).
+const RECOVERY_GAP := 0.95
 
 ## the active cvars and policies (see r14_source_motion.gd). change with apply_preset() or
 ## apply_settings(); both keep position, velocity and view.
@@ -57,6 +64,10 @@ var _start_velocity := Vector3.ZERO
 var _requested := Vector3.ZERO
 var _displacement := Vector3.ZERO
 var _actual_velocity := Vector3.ZERO
+## godot's depenetration this tick, metres: the kept travel that no swept motion explains.
+var _depenetration := Vector3.ZERO
+## the standoff moves this tick, metres: the hull stepping one margin back off touched faces.
+var _standoff := Vector3.ZERO
 var _last_delta: float = 0.0
 var _box := BoxShape3D.new()
 
@@ -104,6 +115,8 @@ func reset_to(pose: Transform3D) -> void:
 	_requested = Vector3.ZERO
 	_displacement = Vector3.ZERO
 	_actual_velocity = Vector3.ZERO
+	_depenetration = Vector3.ZERO
+	_standoff = Vector3.ZERO
 	step_up_count = 0
 	snap_count = 0
 
@@ -153,6 +166,8 @@ func _physics_process(delta: float) -> void:
 		_current_position = global_position
 		_displacement = Vector3.ZERO
 		_actual_velocity = Vector3.ZERO
+		_depenetration = Vector3.ZERO
+		_standoff = Vector3.ZERO
 		return
 	motion_tick += 1
 	tape_step_count = motion_tick
@@ -171,6 +186,8 @@ func _physics_process(delta: float) -> void:
 	state.velocity = velocity / U
 	_start_velocity = velocity
 	_contacts = []
+	_depenetration = Vector3.ZERO
+	_standoff = Vector3.ZERO
 	var was_grounded: bool = state.grounded
 	var cmd := {"forward": forward, "side": _side, "yaw": yaw, "jump": jump, "ducked": crouched, "in_water": in_water}
 	MOTION.step(state, cmd, settings, delta, self)
@@ -235,39 +252,52 @@ func air_move(s: Dictionary, dt: float) -> void:
 	s.velocity = _slide(s.velocity, dt)
 	s.position = global_position / U
 
-## a walking move: the plain slide, or the same slide from one step up when that goes further
-## and lands on walkable ground, then the stay-on-ground snap.
+## a walking move: the plain slide, or the same slide from one step up when that lands on
+## walkable ground and the plain slide went no further, then the stay-on-ground snap.
 func walk_move(s: Dictionary, dt: float) -> void:
 	var start := global_position
 	var wish: Vector3 = s.velocity
+	var base_depenetration := _depenetration
+	var base_standoff := _standoff
 	_phase = "walk"
 	var down_velocity := _slide(wish, dt)
 	var down_position := global_position
+	var down_depenetration := _depenetration
+	var down_standoff := _standoff
 	var down_contacts := _contacts.size()
 	if down_contacts > 0:
 		var kept := _contacts.duplicate()
 		global_position = start
+		_depenetration = base_depenetration
+		_standoff = base_standoff
 		_phase = "step"
 		var stepsize := float(settings.sv_stepsize) * U
-		var raised := move_and_collide(Vector3.UP * stepsize, false, safe_margin)
+		var raised := _move(Vector3.UP * stepsize)
 		var lift := stepsize if raised == null else raised.get_travel().y
 		var up_velocity := _slide(wish, dt)
-		var drop := move_and_collide(Vector3.DOWN * (lift + 0.0005), false, safe_margin, false, 4)
+		var drop := _move(Vector3.DOWN * (lift + 0.0005), false, 4)
 		var walkable := drop != null and _best_up(drop) >= float(settings.sv_walkable_normal)
 		var down_distance := Vector2(down_position.x - start.x, down_position.z - start.z).length_squared()
 		var up_distance := Vector2(global_position.x - start.x, global_position.z - start.z).length_squared()
-		if walkable and up_distance > down_distance + 1e-10 and global_position.y > down_position.y + 1e-4:
-			step_up_count += 1
-			s.events.append("step")
+		# public stepmove keeps the raised path unless the plain slide went further in 2d; only
+		# the height decides whether it was a step, so the slide's standoff cannot veto a climb.
+		if walkable and up_distance >= down_distance:
+			if global_position.y > down_position.y + 1e-4:
+				step_up_count += 1
+				s.events.append("step")
 			down_velocity = Vector3(up_velocity.x, down_velocity.y, up_velocity.z)
 		else:
 			global_position = down_position
+			_depenetration = down_depenetration
+			_standoff = down_standoff
 			_contacts = kept
 	s.velocity = down_velocity
 	_stay_on_ground()
 	s.position = global_position / U
 
-## ground probe: a walkable face within the probe distance below. no snap.
+## ground probe: a walkable face within the probe distance below. no snap, except that a
+## hull which ended inside the face's margin without touching it stands off (see _stand_off).
+## a 2 u cast can stop several thousandths short, so a near face is measured again closely.
 func probe_ground(_s: Dictionary) -> Vector3:
 	var hit := move_and_collide(Vector3.DOWN * float(settings.ground_probe) * U, true, safe_margin, false, 4)
 	if hit == null:
@@ -277,21 +307,34 @@ func probe_ground(_s: Dictionary) -> Vector3:
 		var n := hit.get_normal(i)
 		if n.y >= float(settings.sv_walkable_normal) and n.y > best.y:
 			best = n
+	if best != Vector3.ZERO and -hit.get_travel().y < 2.0 * safe_margin:
+		var near := move_and_collide(Vector3.DOWN * 3.0 * safe_margin, true, safe_margin, false, 4)
+		if near != null and -near.get_travel().y < RECOVERY_GAP * safe_margin:
+			_stand_off(Vector3.UP)
 	return best
 
 func _stay_on_ground() -> void:
 	var here := global_position
+	var here_depenetration := _depenetration
+	var here_standoff := _standoff
 	var probe := 2.0 * U
-	var raised := move_and_collide(Vector3.UP * probe, false, safe_margin)
+	var raised := _move(Vector3.UP * probe)
 	var lift := probe if raised == null else raised.get_travel().y
 	var reach := lift + float(settings.sv_stepsize) * U
 	var drop := move_and_collide(Vector3.DOWN * reach, true, safe_margin, false, 4)
 	if drop != null and drop.get_travel().length() > 1e-6 and _best_up(drop) >= float(settings.sv_walkable_normal):
-		global_position += drop.get_travel()
+		_apply_test(Vector3.DOWN * reach, drop)
+		# the coarse cast's bisection can stop short; a short cast from there finds the face.
+		var settle := move_and_collide(Vector3.DOWN * SNAP_REFINE * U, true, safe_margin, false, 4)
+		if settle != null and _best_up(settle) >= float(settings.sv_walkable_normal):
+			_apply_test(Vector3.DOWN * SNAP_REFINE * U, settle)
+		_stand_off(Vector3.UP)
 		if absf(global_position.y - here.y) > 1e-4:
 			snap_count += 1
 	else:
 		global_position = here
+		_depenetration = here_depenetration
+		_standoff = here_standoff
 
 func _best_up(hit: KinematicCollision3D) -> float:
 	var best := -1.0
@@ -299,36 +342,100 @@ func _best_up(hit: KinematicCollision3D) -> float:
 		best = maxf(best, hit.get_normal(i).y)
 	return best
 
-## collide and slide in u/s: up to four bumps, each clipping the original velocity against
-## every plane touched so far (r12's feasible-cone projection, overbounce 1). a result that
-## turns against the original motion stops dead, as source does.
+## a real move that also books godot's depenetration: the travel its swept motion does not
+## explain. returns the collision as move_and_collide does.
+func _move(motion: Vector3, recovery_as_collision := false, max_collisions := 1) -> KinematicCollision3D:
+	var from := global_position
+	var hit := move_and_collide(motion, false, safe_margin, recovery_as_collision, max_collisions)
+	var swept := motion if hit == null else motion - hit.get_remainder()
+	_depenetration += global_position - from - swept
+	return hit
+
+## p / step one margin back off a touched face, as a source trace stops 1/32 u short of its
+## plane. a hull left inside godot's margin is pushed out by the next move's depenetration,
+## which the engine folds into that move's travel along its direction: unreported motion at
+## rest and at takeoff. the move is swept, so it cannot enter other geometry; depenetration
+## from the same face is trimmed so the hull ends one margin off it, any other is kept.
+func _stand_off(direction: Vector3) -> void:
+	var from := global_position
+	move_and_collide(direction * safe_margin, false, safe_margin)
+	var along := (global_position - from).dot(direction)
+	if along > safe_margin:
+		global_position -= direction * (along - safe_margin)
+	_standoff += global_position - from
+
+## apply a test move's result, booking its depenetration the same way.
+func _apply_test(motion: Vector3, hit: KinematicCollision3D) -> void:
+	_depenetration += hit.get_travel() - (motion - hit.get_remainder())
+	global_position += hit.get_travel()
+
+## collide and slide in u/s, after the public source trymove rules: up to four bumps. positive
+## swept travel makes the current velocity the working original and clears the plane set, so
+## each contact clips the momentum the previous one left (MOTION.clip_to_planes). a move that
+## never advances stops. godot specifics: the swept fraction comes from the remainder, since
+## get_travel() includes depenetration; one cast may report several faces at once; and a face
+## whose margin the body is already inside, moving into it, is a touched plane even when the
+## short sweep ends before its raw surface, as a source trace would report it at fraction 0.
 func _slide(v: Vector3, dt: float) -> Vector3:
 	var time_left := dt
 	var primal := v
+	var original := v
 	var planes: Array[Vector3] = []
+	var advanced := 0.0
+	var airborne := _phase == "air"
 	for bump: int in BUMPS:
 		var motion := v * U * time_left
 		if motion.length_squared() < 1e-14:
+			advanced += 1.0
 			break
-		# recovery contacts count: resting inside a wall's margin otherwise moves nothing and
-		# reports nothing, and the unclipped velocity creeps up against the wall.
-		var hit := move_and_collide(motion, false, safe_margin, true, 4)
+		var hit := _move(motion, true, 4)
 		if hit == null:
+			advanced += 1.0
 			break
-		time_left *= 1.0 - clampf(hit.get_travel().length() / motion.length(), 0.0, 1.0)
+		var fraction := clampf(1.0 - hit.get_remainder().length() / motion.length(), 0.0, 1.0)
+		advanced += fraction
+		if fraction > 0.0:
+			original = v
+			planes.clear()
+		var touched: Array[Vector3] = []
 		for i: int in hit.get_collision_count():
 			var n := hit.get_normal(i)
 			var body := hit.get_collider(i) as Node
-			_contacts.append({"phase": _phase, "bump": bump, "body": str(body.name) if body != null else "", "normal": n, "position": hit.get_position(i)})
+			# a face the move heads away from never blocked it; after a full sweep, only a face
+			# the move heads into is a touched plane.
+			var blocking := v.dot(n) <= 0.0 if fraction < 1.0 else v.dot(n) < -1e-6
+			_contacts.append({"phase": _phase, "bump": bump, "body": str(body.name) if body != null else "", "normal": n, "position": hit.get_position(i), "fraction": fraction, "blocking": blocking})
+			if not blocking:
+				continue
+			var seen := false
+			for face: Vector3 in touched:
+				seen = seen or face.dot(n) > 0.9999
+			if not seen:
+				touched.append(n)
 			var known := false
 			for plane: Vector3 in planes:
 				known = known or plane.dot(n) > 0.9999
 			if not known:
 				planes.append(n)
-		v = _feasible_velocity(primal, planes)
-		if v.dot(primal) <= 0.0:
+		time_left -= time_left * fraction
+		# a swept stop ends at the raw faces it reports; step back off each one.
+		if fraction < 1.0:
+			for face: Vector3 in touched:
+				_stand_off(face)
+		if touched.is_empty():
+			if fraction >= 1.0:
+				break
+			continue
+		if planes.size() > MAX_CLIP_PLANES:
 			v = Vector3.ZERO
 			break
+		var result := MOTION.clip_to_planes(original, primal, planes, airborne)
+		v = result.velocity
+		original = result.original
+		if result.stop or fraction >= 1.0:
+			break
+	if advanced <= 0.0:
+		v = Vector3.ZERO
 	return v
 
 func _process(delta: float) -> void:
@@ -370,6 +477,10 @@ func get_motion_state() -> Dictionary:
 		"post_contact_velocity": velocity,
 		"displacement": _displacement,
 		"actual_velocity": _actual_velocity,
+		# godot depenetration inside the displacement, m; zero when travel is all swept motion.
+		"depenetration": _depenetration,
+		# the margin standoff inside the displacement, m (see _stand_off).
+		"standoff": _standoff,
 		"actual_speed": get_speed(),
 		"control_speed": control_speed(),
 		"speed_u": Vector2(state.velocity.x, state.velocity.z).length(),

@@ -157,6 +157,50 @@ static func air_accelerate(vel: Vector3, dir: Vector3, wishspeed: float, cvars: 
 		return vel
 	return vel + dir * minf(air_budget(wishspeed, cvars, dt, surface), room)
 
+## sv_maxvelocity, per axis: a safety bound on stored velocity, not a run-speed cap.
+static func bound_velocity(v: Vector3, cvars: Dictionary) -> Vector3:
+	var cap := float(cvars.sv_maxvelocity)
+	return Vector3(clampf(v.x, -cap, cap), clampf(v.y, -cap, cap), clampf(v.z, -cap, cap))
+
+## remove the part of v moving into a plane (overbounce 1 with sv_bounce 0), then once more
+## so rounding never leaves it moving through the plane.
+static func clip_velocity(v: Vector3, normal: Vector3, overbounce := 1.0) -> Vector3:
+	var out := v - normal * (v.dot(normal) * overbounce)
+	var adjust := out.dot(normal)
+	if adjust < 0.0:
+		out -= normal * adjust
+	return out
+
+## the public source trymove plane rule after one blocked trace, with no collision here.
+## planes holds every plane touched since the last positive travel, original is the working
+## velocity at that travel and primal the tick's velocity before any contact. returns
+## {velocity, original, stop}. an airborne first plane clips the working velocity and becomes
+## the new working velocity. otherwise the first plane whose clip leaves every other plane
+## alone wins, then a two-plane crease, else a stop; a result against primal stops dead.
+static func clip_to_planes(original: Vector3, primal: Vector3, planes: Array[Vector3], airborne: bool) -> Dictionary:
+	if planes.size() == 1 and airborne:
+		var clipped := clip_velocity(original, planes[0])
+		return {"velocity": clipped, "original": clipped, "stop": false}
+	var v := Vector3.ZERO
+	var found := false
+	for i: int in planes.size():
+		v = clip_velocity(original, planes[i])
+		found = true
+		for j: int in planes.size():
+			if j != i and v.dot(planes[j]) < 0.0:
+				found = false
+				break
+		if found:
+			break
+	if not found:
+		if planes.size() != 2:
+			return {"velocity": Vector3.ZERO, "original": original, "stop": true}
+		var dir := planes[0].cross(planes[1]).normalized()
+		v = dir * dir.dot(v)
+	if v.dot(primal) <= 0.0:
+		return {"velocity": Vector3.ZERO, "original": original, "stop": true}
+	return {"velocity": v, "original": original, "stop": false}
+
 ## the surface multiplier the next air update uses, chosen when position is categorized.
 static func air_surface_friction(vy: float, cvars: Dictionary) -> float:
 	if cvars.air_surface == "deadstrafe" and vy > 0.0 and vy <= float(cvars.non_jump_velocity):
@@ -192,6 +236,8 @@ static func new_state(position := Vector3.ZERO) -> Dictionary:
 static func step(s: Dictionary, cmd: Dictionary, cvars: Dictionary, dt: float, world: Object) -> void:
 	var events: Array = []
 	var ledger := {}
+	# a fresh report every tick; the world appends its own events (a step) to this same array.
+	s.events = events
 	s.tick += 1
 	var g := float(cvars.sv_gravity)
 	# p / order: recovery first, then a landing's pending cost, so the penalty the first
@@ -262,8 +308,7 @@ static func step(s: Dictionary, cmd: Dictionary, cvars: Dictionary, dt: float, w
 		h = pushed
 	v.x = h.x
 	v.z = h.z
-	var cap := float(cvars.sv_maxvelocity)
-	v = Vector3(clampf(v.x, -cap, cap), clampf(v.y, -cap, cap), clampf(v.z, -cap, cap))
+	v = bound_velocity(v, cvars)
 	s.velocity = v
 	s.requested = v
 	if grounded:
@@ -291,13 +336,13 @@ static func step(s: Dictionary, cmd: Dictionary, cvars: Dictionary, dt: float, w
 		s.grounded = false
 		s.ground_normal = Vector3.ZERO
 		s.surface = air_surface_friction(v.y, cvars)
-		# finish gravity: the second half step.
+		# finish gravity: the second half step, bounded again as public FinishGravity is.
 		v.y -= 0.5 * g * dt
+		v = bound_velocity(v, cvars)
 	s.velocity = v
 	s.ground_ticks = s.ground_ticks + 1 if s.grounded else 0
 	s.air_ticks = 0 if s.grounded else s.air_ticks + 1
 	s.jump_prev = jump
-	s.events = events
 	s.ledger = ledger
 
 ## an infinite walkable plane at y = 0 with no other geometry: the ordering check world.
