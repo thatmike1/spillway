@@ -3,8 +3,8 @@ config_version=5
 
 [application]
 config/name="Spillway"
-config/version="2026.11.07-r13-overflow"
-run/main_scene="res://scenes/momentum_overflow.tscn"
+config/version="2026.11.08-r14"
+run/main_scene="res://scenes/r14.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [display]
