@@ -31,6 +31,13 @@ $G --path .                               # default R14 scene; records enabled
 It starts on Penstock Yard with the CS:GO bhop-server preset. The top-left line always names
 the map, the active preset with its key, the physics rate and the air acceleration.
 
+F1/F2/F5 explicitly teach releasing W in the air, holding A or D and turning the mouse
+the same way. Releasing every key preserves the flight line. F4 instead teaches W+A/D.
+The temporary control hint has the HUD's existing dark backing so it remains readable
+against the sky; it fades after the opening seconds. This wording and backing change
+does not alter movement, settings or record keys. Native start-view pairs are in outer
+`checkpoints/spillway/r14/controls-readability/`.
+
 | Key | Preset | Rate | Air | Jump |
 | --- | --- | ---: | --- | --- |
 | F1 | CS:GO vanilla (shown with "vanilla cvars · stamina reconstructed") | 64 Hz | AA 12 | press Space or scroll for each hop; holding jumps once |

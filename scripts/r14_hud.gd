@@ -104,6 +104,7 @@ func attach(main: Node) -> void:
 	identity = _label("", 17, INK)
 	keys_line = _label(KEYS_LINE, 12, DIM)
 	controls = _label("", 14, INK)
+	_backing(controls, 0.40)
 	_strafe_shade = _shade(0.36)
 	strafe_live = _label("", 15, INK)
 	strafe_last = _label("", 15, INK)

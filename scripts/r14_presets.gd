@@ -31,14 +31,14 @@ const PRESETS := {
 		# the review's qualifier: the cvars are the reference values, the stamina and clamp are fits.
 		"qualifier": "vanilla cvars · stamina reconstructed",
 		"summary": "vanilla cvars · AA 12 · 64 Hz · manual jump · stamina and 275 u/s takeoff clamp reconstructed, not a binary match",
-		"controls": "WASD run · mouse look · Space or mouse wheel jumps; each hop needs a fresh press\nIn the air: hold A or D and turn the mouse the same way · no keys keeps your line",
+		"controls": "WASD run · mouse look · Space or mouse wheel jumps; each hop needs a fresh press\nAir strafe: release W, hold A or D and turn the mouse the same way · release keys to coast",
 	},
 	"server128": {
 		"slot": 2, "family": "source", "source_preset": "csgo_server", "overrides": {}, "rate": 128,
 		"label": "CS:GO bhop server", "short": "bhop server",
 		"air": "AA 100", "jump": "autohop: hold Space (wheel works too)",
 		"summary": "AA 100 · 128 Hz · autohop · no stamina, no takeoff clamp",
-		"controls": "WASD run · mouse look · hold Space to keep hopping (or scroll)\nIn the air: hold A or D and turn the mouse the same way · no keys keeps your line",
+		"controls": "WASD run · mouse look · hold Space to keep hopping (or scroll)\nAir strafe: release W, hold A or D and turn the mouse the same way · release keys to coast",
 	},
 	"r13_original120": {
 		"slot": 3, "family": "r13", "rate": 120,
@@ -76,7 +76,7 @@ const PRESETS := {
 		"label": "P server config AA 1000", "short": "AA 1000",
 		"air": "AA 1000", "jump": "autohop: hold Space (wheel works too)",
 		"summary": "the bhop server profile at AA 1000 · 128 Hz · a configured comparison some servers run, not universal CS",
-		"controls": "WASD run · mouse look · hold Space to keep hopping (or scroll)\nIn the air: hold A or D and turn the mouse the same way · no keys keeps your line",
+		"controls": "WASD run · mouse look · hold Space to keep hopping (or scroll)\nAir strafe: release W, hold A or D and turn the mouse the same way · release keys to coast",
 	},
 }
 
