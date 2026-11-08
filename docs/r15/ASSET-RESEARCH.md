@@ -139,3 +139,7 @@ Essential exact-text SHA-256s:
 | Poly Haven licence page, uncompressed HTML | `6f4f617c936d14d5a80db6a2ebec145c79277a760672501eef51bff7a0d4cbba` |
 
 Space/Nature's in-pack notices and every full archive hash remain to be captured by the actual importer. No licence hash in this table is a hash of a complete asset pack. No quota page is filed as a licence.
+
+## Later acquisition resolves format and radar questions
+
+[ASSET-LIBRARY.md](ASSET-LIBRARY.md) records root's subsequent complete downloads and Godot imports. All eight archives supply GLB files. The selected library preserves 126 models and their actual dependencies, and the Space Kit contains three usable radar-dish variants. The earlier prefix-only/unsourced statements above describe this research stage, not the later acquisition. Full-source hashes, in-pack Space/Nature notices and actual unscaled bounds are now retained separately.

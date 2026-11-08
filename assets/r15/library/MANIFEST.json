@@ -1,0 +1,1621 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-11-08T20:09:03.607042+00:00",
+  "purpose": "selected source library for future R15 course authors; usage is not yet established by a completed map",
+  "transform_policy": "all selected GLB and required texture bytes unchanged; directory relocation preserves relative image URIs; course instance scale remains an authored choice",
+  "sources": [
+    {
+      "id": "kenney-space",
+      "publisher": "Kenney",
+      "page": "https://kenney.nl/assets/space-kit",
+      "licence": "CC0-1.0",
+      "version": "2.0",
+      "archive_bytes": 6677531,
+      "archive_sha256": "d5d7cdf2635ed5a43a9187deaf409b6f47484e402321128341d3c3698e9ef4d9",
+      "archive_crc_verified": true,
+      "selected_meshes": [
+        "satelliteDish",
+        "satelliteDish_large",
+        "satelliteDish_detailed",
+        "machine_generator",
+        "machine_generatorLarge",
+        "hangar_smallA",
+        "hangar_largeA",
+        "platform_large",
+        "platform_high",
+        "platform_long",
+        "stairs",
+        "supports_high",
+        "structure_closed",
+        "machine_wireless",
+        "rail",
+        "pipe_straight"
+      ],
+      "research_version_label": "1.0",
+      "version_source": "original in-archive License.txt, retained unchanged"
+    },
+    {
+      "id": "kenney-nature",
+      "publisher": "Kenney",
+      "page": "https://kenney.nl/assets/nature-kit",
+      "licence": "CC0-1.0",
+      "version": "2.1",
+      "archive_bytes": 10537521,
+      "archive_sha256": "fa7974a0d342bfe63c38664ba9f8ec1a4aab8ea25f099bdc56870e33588c4d9d",
+      "archive_crc_verified": true,
+      "selected_meshes": [
+        "cliff_large_rock",
+        "cliff_top_rock",
+        "cliff_corner_rock",
+        "cliff_steps_rock",
+        "cliff_cave_rock",
+        "rock_largeA",
+        "rock_tallA",
+        "tree_pineDefaultA",
+        "tree_pineTallA",
+        "hanging_moss",
+        "plant_bush",
+        "plant_bushSmall",
+        "grass_leafs",
+        "statue_columnDamaged",
+        "statue_obelisk",
+        "stone_largeA",
+        "log"
+      ],
+      "research_version_label": "1.0",
+      "version_source": "original in-archive License.txt, retained unchanged"
+    },
+    {
+      "id": "kenney-castle",
+      "publisher": "Kenney",
+      "page": "https://kenney.nl/assets/castle-kit",
+      "licence": "CC0-1.0",
+      "version": "2.0",
+      "archive_bytes": 2232589,
+      "archive_sha256": "921f3f73927bb23106cae34bc21d5ab4b033a9fc120475e96f714a406e3169df",
+      "archive_crc_verified": true,
+      "selected_meshes": [
+        "bridge-straight",
+        "bridge-straight-pillar",
+        "tower-square-arch",
+        "tower-square-mid-open",
+        "wall-doorway",
+        "wall-narrow-gate",
+        "wall-pillar",
+        "wall-half-modular",
+        "wall-corner",
+        "stairs-stone",
+        "rocks-large",
+        "wall-narrow-stairs"
+      ]
+    },
+    {
+      "id": "kenney-retro-urban",
+      "publisher": "Kenney",
+      "page": "https://kenney.nl/assets/retro-urban-kit",
+      "licence": "CC0-1.0",
+      "version": "2.0",
+      "archive_bytes": 2161463,
+      "archive_sha256": "19201cbcb0d90080dfc33b54f5b4be2089de927c2a23274180798e7166d6b6ca",
+      "archive_crc_verified": true,
+      "selected_meshes": [
+        "balcony-type-a",
+        "balcony-ladder-top",
+        "balcony-ladder-bottom",
+        "roof-metal-type-a",
+        "roof-metal-type-b",
+        "roof-metal-poles",
+        "scaffolding-floor",
+        "scaffolding-poles",
+        "scaffolding-structure",
+        "wall-a-flat",
+        "wall-a-door",
+        "wall-a-window",
+        "wall-a-roof-detailed",
+        "wall-a-roof-slant",
+        "wall-b-flat",
+        "wall-b-window",
+        "wall-b-roof",
+        "wall-b-open",
+        "wall-broken-type-a",
+        "detail-cables-type-a",
+        "detail-light-single",
+        "detail-awning-small",
+        "detail-dumpster-closed"
+      ]
+    },
+    {
+      "id": "kenney-factory",
+      "publisher": "Kenney",
+      "page": "https://kenney.nl/assets/factory-kit",
+      "licence": "CC0-1.0",
+      "version": "3.0",
+      "archive_bytes": 4511890,
+      "archive_sha256": "7e31fb2308e90304672bd15cd18fa9d9f02c03731a8cbc57a8e3e1c181dfb0a7",
+      "archive_crc_verified": true,
+      "selected_meshes": [
+        "catwalk-corner",
+        "catwalk-cross",
+        "catwalk-junction",
+        "catwalk-stairs",
+        "catwalk-straight",
+        "crane",
+        "machine",
+        "machine-window",
+        "machine-connection-pipe",
+        "pipe-large",
+        "pipe-large-long",
+        "pipe-large-bend",
+        "pipe-large-valve",
+        "pipe-large-junction",
+        "structure-doorway",
+        "structure-doorway-wide",
+        "structure-high",
+        "structure-tall",
+        "structure-wall",
+        "structure-window",
+        "hopper-square",
+        "hopper-high-square",
+        "scanner-high",
+        "scanner-low",
+        "screen-hanging-wide",
+        "box-large",
+        "box-long",
+        "box-small",
+        "robot-arm-a",
+        "door-wide-open",
+        "floor-large"
+      ]
+    },
+    {
+      "id": "kenney-train",
+      "publisher": "Kenney",
+      "page": "https://kenney.nl/assets/train-kit",
+      "licence": "CC0-1.0",
+      "version": "1.1",
+      "archive_bytes": 5266588,
+      "archive_sha256": "cf50d77e8cbacbf38dd50826d4bce5392db8e4f67373d3c4e583b0ed0e474475",
+      "archive_crc_verified": true,
+      "selected_meshes": [
+        "train-electric-subway-a",
+        "train-electric-subway-b",
+        "train-electric-subway-c",
+        "train-electric-city-a",
+        "train-electric-city-b",
+        "train-tram-modern",
+        "train-diesel-box-a",
+        "train-carriage-flatbed-wood",
+        "train-carriage-container-blue",
+        "train-carriage-tank",
+        "railroad-straight",
+        "railroad-corner-large",
+        "track-detailed"
+      ]
+    },
+    {
+      "id": "kenney-industrial",
+      "publisher": "Kenney",
+      "page": "https://kenney.nl/assets/city-kit-industrial",
+      "licence": "CC0-1.0",
+      "version": "2.0",
+      "archive_bytes": 5045077,
+      "archive_sha256": "5b381164e5760f3830a2dbee43b972deee38b2a695d091b56e238ab2910c96d2",
+      "archive_crc_verified": true,
+      "selected_meshes": [
+        "building-a",
+        "building-c",
+        "building-e",
+        "building-h",
+        "building-m",
+        "building-p",
+        "building-t",
+        "chimney-medium",
+        "detail-tank-large",
+        "detail-tank",
+        "shipping-container-a",
+        "shipping-container-b",
+        "water-tower",
+        "solar-panel-landscape"
+      ]
+    },
+    {
+      "id": "polyhaven-snow-02",
+      "publisher": "Poly Haven",
+      "page": "https://polyhaven.com/a/snow_02",
+      "author": "Rob Tuytel",
+      "licence": "CC0-1.0",
+      "published_repeat_m": [
+        2,
+        2
+      ],
+      "files": [
+        {
+          "path": "polyhaven-snow-02/snow_02_diff_1k.jpg",
+          "bytes": 325497,
+          "md5": "fc54766c6b36ff298699115a619d440b"
+        },
+        {
+          "path": "polyhaven-snow-02/snow_02_nor_gl_1k.png",
+          "bytes": 2118417,
+          "md5": "57d7f4e2501db746c862c6efee9fb38f"
+        },
+        {
+          "path": "polyhaven-snow-02/snow_02_arm_1k.png",
+          "bytes": 1050377,
+          "md5": "4dc88ca22b319dc7ac5e1ae139be8ce8"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "kenney-space/models/satelliteDish.glb",
+      "bytes": 19528,
+      "sha256": "db27a561b66fabda45a6ce2bcf41d650852e89e15bb9f63b68133ad1293aed8b",
+      "source": {
+        "pack": "kenney-space",
+        "member": "Models/GLTF format/satelliteDish.glb"
+      }
+    },
+    {
+      "path": "kenney-space/models/satelliteDish_large.glb",
+      "bytes": 13948,
+      "sha256": "8fe696a37081a0a6f1c56ab867f447f33a498ef9f1daabb5aabc62b1ce09277e",
+      "source": {
+        "pack": "kenney-space",
+        "member": "Models/GLTF format/satelliteDish_large.glb"
+      }
+    },
+    {
+      "path": "kenney-space/models/satelliteDish_detailed.glb",
+      "bytes": 26044,
+      "sha256": "143dd36b2c427e3201110967a18fd836bc7aa8002dbf3e44efa42c75fbb44ae5",
+      "source": {
+        "pack": "kenney-space",
+        "member": "Models/GLTF format/satelliteDish_detailed.glb"
+      }
+    },
+    {
+      "path": "kenney-space/models/machine_generator.glb",
+      "bytes": 28044,
+      "sha256": "98e8ac6aceada3b2483ed1eceb59bff7190ee774edac799350ccc11ad140f7f3",
+      "source": {
+        "pack": "kenney-space",
+        "member": "Models/GLTF format/machine_generator.glb"
+      }
+    },
+    {
+      "path": "kenney-space/models/machine_generatorLarge.glb",
+      "bytes": 10220,
+      "sha256": "bbfa33a2e7c7eff7d9ee12f64255249b7e2f5d4b2ada2d681aa35cf38ba599bc",
+      "source": {
+        "pack": "kenney-space",
+        "member": "Models/GLTF format/machine_generatorLarge.glb"
+      }
+    },
+    {
+      "path": "kenney-space/models/hangar_smallA.glb",
+      "bytes": 18860,
+      "sha256": "66cc1f91e0db1dd2c7ec79fa8cf3f3adf703291679c33c293ebd19da45bd53f7",
+      "source": {
+        "pack": "kenney-space",
+        "member": "Models/GLTF format/hangar_smallA.glb"
+      }
+    },
+    {
+      "path": "kenney-space/models/hangar_largeA.glb",
+      "bytes": 25304,
+      "sha256": "cae233b3e53aa5004bc8d7d43bd00763a919064af6b5249f354a71cae5fbf29a",
+      "source": {
+        "pack": "kenney-space",
+        "member": "Models/GLTF format/hangar_largeA.glb"
+      }
+    },
+    {
+      "path": "kenney-space/models/platform_large.glb",
+      "bytes": 6272,
+      "sha256": "aa1fba20818bc1d623953794146d9f9ff0e0f025463b013e325b373deb9be6c4",
+      "source": {
+        "pack": "kenney-space",
+        "member": "Models/GLTF format/platform_large.glb"
+      }
+    },
+    {
+      "path": "kenney-space/models/platform_high.glb",
+      "bytes": 16040,
+      "sha256": "92e3285e7994d923ae3a3692eb8c3a72548691b5be148e845968d49a90c47103",
+      "source": {
+        "pack": "kenney-space",
+        "member": "Models/GLTF format/platform_high.glb"
+      }
+    },
+    {
+      "path": "kenney-space/models/platform_long.glb",
+      "bytes": 6276,
+      "sha256": "610eefdee5b4c5c91bbd8fe24c34444fee48cd8553665751e9c0c3502af8dad4",
+      "source": {
+        "pack": "kenney-space",
+        "member": "Models/GLTF format/platform_long.glb"
+      }
+    },
+    {
+      "path": "kenney-space/models/stairs.glb",
+      "bytes": 14340,
+      "sha256": "882aa6dfcef829638863f232181d82fda48c800cf508265314a6aade7f53f429",
+      "source": {
+        "pack": "kenney-space",
+        "member": "Models/GLTF format/stairs.glb"
+      }
+    },
+    {
+      "path": "kenney-space/models/supports_high.glb",
+      "bytes": 20544,
+      "sha256": "48a8aa7818e0f3731aa7bd825f2030089bc16340fcebdf2a4bf60ef4a933a4da",
+      "source": {
+        "pack": "kenney-space",
+        "member": "Models/GLTF format/supports_high.glb"
+      }
+    },
+    {
+      "path": "kenney-space/models/structure_closed.glb",
+      "bytes": 15604,
+      "sha256": "1020c2f86d3653caf475690c632838ac54e4adc963abc7831c6056f71499bff3",
+      "source": {
+        "pack": "kenney-space",
+        "member": "Models/GLTF format/structure_closed.glb"
+      }
+    },
+    {
+      "path": "kenney-space/models/machine_wireless.glb",
+      "bytes": 13420,
+      "sha256": "9d49e70d51515bc38628fb0d6e43f4eda7f9cd5326882fd02e8815e61f2259d7",
+      "source": {
+        "pack": "kenney-space",
+        "member": "Models/GLTF format/machine_wireless.glb"
+      }
+    },
+    {
+      "path": "kenney-space/models/rail.glb",
+      "bytes": 6600,
+      "sha256": "ce9c3ece35b86e97c21463f491acbe824e4af4220e621db5d7a8f067bc2868fb",
+      "source": {
+        "pack": "kenney-space",
+        "member": "Models/GLTF format/rail.glb"
+      }
+    },
+    {
+      "path": "kenney-space/models/pipe_straight.glb",
+      "bytes": 6492,
+      "sha256": "3386146dbfa9a9f2c7bcc5a6599a3c9d43a9e029c26f61b345ff6b16df80e6a1",
+      "source": {
+        "pack": "kenney-space",
+        "member": "Models/GLTF format/pipe_straight.glb"
+      }
+    },
+    {
+      "path": "licences/kenney-space-License.txt",
+      "bytes": 610,
+      "sha256": "bd4e050e69d41351282c4d53f943cd4d80a80b968593e60653ba5292637941b7",
+      "source": {
+        "pack": "kenney-space",
+        "member": "License.txt"
+      }
+    },
+    {
+      "path": "kenney-nature/models/cliff_large_rock.glb",
+      "bytes": 3560,
+      "sha256": "f9bf79cd3a76bbe11f4887053655585e467e14f2528678215a820896669e4e8e",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "Models/GLTF format/cliff_large_rock.glb"
+      }
+    },
+    {
+      "path": "kenney-nature/models/cliff_top_rock.glb",
+      "bytes": 5312,
+      "sha256": "8c3b4d37fad0bacf39d0315a51850dfe9c55eea03de74854e3d92ce4157bbebb",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "Models/GLTF format/cliff_top_rock.glb"
+      }
+    },
+    {
+      "path": "kenney-nature/models/cliff_corner_rock.glb",
+      "bytes": 2360,
+      "sha256": "4a22b80e18ac1798035867b7ff6e4d78161fa25b507112c903ad6f80765cf181",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "Models/GLTF format/cliff_corner_rock.glb"
+      }
+    },
+    {
+      "path": "kenney-nature/models/cliff_steps_rock.glb",
+      "bytes": 15952,
+      "sha256": "f290e67a836ec459efcedb013f67258c2043fec128f07d6a16454e8505b7530f",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "Models/GLTF format/cliff_steps_rock.glb"
+      }
+    },
+    {
+      "path": "kenney-nature/models/cliff_cave_rock.glb",
+      "bytes": 5480,
+      "sha256": "2d83296b0166ad0e980152ad4f45b4e45349e932a6b6c2adbe7eb606a6472d8d",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "Models/GLTF format/cliff_cave_rock.glb"
+      }
+    },
+    {
+      "path": "kenney-nature/models/rock_largeA.glb",
+      "bytes": 7552,
+      "sha256": "6dd15390fd96501dcd1454765a17ba61dbbd8d47705dfe5149c8dd92b353ce25",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "Models/GLTF format/rock_largeA.glb"
+      }
+    },
+    {
+      "path": "kenney-nature/models/rock_tallA.glb",
+      "bytes": 12072,
+      "sha256": "88250f236a3b75f8b55c1d8afb6af020f8a91b1e81f9fb51f7ef513420d45a2d",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "Models/GLTF format/rock_tallA.glb"
+      }
+    },
+    {
+      "path": "kenney-nature/models/tree_pineDefaultA.glb",
+      "bytes": 17220,
+      "sha256": "60d8f352fa3659ed275e06cbddfecf8f92c8effe2977c2f2d7b29b6c9b582e46",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "Models/GLTF format/tree_pineDefaultA.glb"
+      }
+    },
+    {
+      "path": "kenney-nature/models/tree_pineTallA.glb",
+      "bytes": 7200,
+      "sha256": "e0a56eb196d8a64ba86c7304d607136e17e6f9ad748dffcf86bd53b18b91b196",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "Models/GLTF format/tree_pineTallA.glb"
+      }
+    },
+    {
+      "path": "kenney-nature/models/hanging_moss.glb",
+      "bytes": 4776,
+      "sha256": "2124c2d038054f1ea89d470a6095d35c2fbdb2674916db93400ea6ed5f499cb0",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "Models/GLTF format/hanging_moss.glb"
+      }
+    },
+    {
+      "path": "kenney-nature/models/plant_bush.glb",
+      "bytes": 4396,
+      "sha256": "ae7b1beb39e242b13f5f29e3ec23ef21034b814f82297b8aa00a9bf4e1b09590",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "Models/GLTF format/plant_bush.glb"
+      }
+    },
+    {
+      "path": "kenney-nature/models/plant_bushSmall.glb",
+      "bytes": 3212,
+      "sha256": "a9620a7d1fb165ae68d323676f80dbb2a9e3aafb21110d18d18d90b07026b91d",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "Models/GLTF format/plant_bushSmall.glb"
+      }
+    },
+    {
+      "path": "kenney-nature/models/grass_leafs.glb",
+      "bytes": 4608,
+      "sha256": "8bc4c0b17c2e64c34e1acbf7c4a2fd8c04cfcd7155328e61767887b2ced112c7",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "Models/GLTF format/grass_leafs.glb"
+      }
+    },
+    {
+      "path": "kenney-nature/models/statue_columnDamaged.glb",
+      "bytes": 8824,
+      "sha256": "ce8f21c31ec16ad67759dd171860bd85fd57fc3857963610c4ed8a39c8d91b95",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "Models/GLTF format/statue_columnDamaged.glb"
+      }
+    },
+    {
+      "path": "kenney-nature/models/statue_obelisk.glb",
+      "bytes": 4416,
+      "sha256": "e18013044ad6453a1850226be29f63c37d67e0002141f5f6a4d14a46bde69e00",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "Models/GLTF format/statue_obelisk.glb"
+      }
+    },
+    {
+      "path": "kenney-nature/models/stone_largeA.glb",
+      "bytes": 7124,
+      "sha256": "fe486a13775e833b1aca99413a89e013f300841de80f42ecd44ceaf43720f17b",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "Models/GLTF format/stone_largeA.glb"
+      }
+    },
+    {
+      "path": "kenney-nature/models/log.glb",
+      "bytes": 14288,
+      "sha256": "8c8fe8f6adfc03a3c0cd6cb24961ff74be96c2da284d70322f05797d049972d6",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "Models/GLTF format/log.glb"
+      }
+    },
+    {
+      "path": "licences/kenney-nature-License.txt",
+      "bytes": 611,
+      "sha256": "cb96b75e3560ac78d7a53ce6f083f4cdb5c53faea6141b62d63458dcfe1e4b9d",
+      "source": {
+        "pack": "kenney-nature",
+        "member": "License.txt"
+      }
+    },
+    {
+      "path": "kenney-castle/models/Textures/colormap.png",
+      "bytes": 7529,
+      "sha256": "66fd49be148f32e88f6c8cace67120250d1943a7856601158ad0ff24651db0b0",
+      "source": {
+        "pack": "kenney-castle",
+        "member": "Models/GLB format/Textures/colormap.png"
+      }
+    },
+    {
+      "path": "kenney-castle/models/bridge-straight.glb",
+      "bytes": 16832,
+      "sha256": "ef15989c3d5c7392563888bbedda86de3c1ec4b3013c71c61e25b5257a6f9180",
+      "source": {
+        "pack": "kenney-castle",
+        "member": "Models/GLB format/bridge-straight.glb"
+      }
+    },
+    {
+      "path": "kenney-castle/models/bridge-straight-pillar.glb",
+      "bytes": 14344,
+      "sha256": "c85521e13dcf55ba8d015a04bbdbd0f063c31d01befb69a7c9fb097d128f195b",
+      "source": {
+        "pack": "kenney-castle",
+        "member": "Models/GLB format/bridge-straight-pillar.glb"
+      }
+    },
+    {
+      "path": "kenney-castle/models/tower-square-arch.glb",
+      "bytes": 29724,
+      "sha256": "90ccb41a792ea3c5b8c98a3f18b710b52ebfdcd1e389024168c5ac6e591dd564",
+      "source": {
+        "pack": "kenney-castle",
+        "member": "Models/GLB format/tower-square-arch.glb"
+      }
+    },
+    {
+      "path": "kenney-castle/models/tower-square-mid-open.glb",
+      "bytes": 23568,
+      "sha256": "dd5d242d41654cf4f60b1bbb05ab7263bc8dd9adc671feee08911bba7a46d569",
+      "source": {
+        "pack": "kenney-castle",
+        "member": "Models/GLB format/tower-square-mid-open.glb"
+      }
+    },
+    {
+      "path": "kenney-castle/models/wall-doorway.glb",
+      "bytes": 37560,
+      "sha256": "8daf5cccceace888d51d74b0e0254e192004faf926e07f1b28e94191879af3a6",
+      "source": {
+        "pack": "kenney-castle",
+        "member": "Models/GLB format/wall-doorway.glb"
+      }
+    },
+    {
+      "path": "kenney-castle/models/wall-narrow-gate.glb",
+      "bytes": 17092,
+      "sha256": "f01e3005f2cfe7451a0376a4fdba2408594cb60664e24e53e736e52d5b3ec934",
+      "source": {
+        "pack": "kenney-castle",
+        "member": "Models/GLB format/wall-narrow-gate.glb"
+      }
+    },
+    {
+      "path": "kenney-castle/models/wall-pillar.glb",
+      "bytes": 18156,
+      "sha256": "22d359abfaa3cf3dc5a2fece09a108024a07a4e263b21a4a0689da0e630699ed",
+      "source": {
+        "pack": "kenney-castle",
+        "member": "Models/GLB format/wall-pillar.glb"
+      }
+    },
+    {
+      "path": "kenney-castle/models/wall-half-modular.glb",
+      "bytes": 8016,
+      "sha256": "2241397b813c069858987750eaf7dce4a549fca239ae2e40b30fc7e58ff82b0e",
+      "source": {
+        "pack": "kenney-castle",
+        "member": "Models/GLB format/wall-half-modular.glb"
+      }
+    },
+    {
+      "path": "kenney-castle/models/wall-corner.glb",
+      "bytes": 15264,
+      "sha256": "82d27b869162b6a9ee19b0d7480913f56928b6620708f3b3899131495803cc9a",
+      "source": {
+        "pack": "kenney-castle",
+        "member": "Models/GLB format/wall-corner.glb"
+      }
+    },
+    {
+      "path": "kenney-castle/models/stairs-stone.glb",
+      "bytes": 9836,
+      "sha256": "ec21b1d65c04ba6384734c31ac542bb4015541e652c411796fd7bcf292e6413c",
+      "source": {
+        "pack": "kenney-castle",
+        "member": "Models/GLB format/stairs-stone.glb"
+      }
+    },
+    {
+      "path": "kenney-castle/models/rocks-large.glb",
+      "bytes": 16204,
+      "sha256": "7ea1ee769eb063b192c3c3744cd32a11616320f7ca491fbe23289552f6655595",
+      "source": {
+        "pack": "kenney-castle",
+        "member": "Models/GLB format/rocks-large.glb"
+      }
+    },
+    {
+      "path": "kenney-castle/models/wall-narrow-stairs.glb",
+      "bytes": 26972,
+      "sha256": "51672d47bb3cec6f190334fcb29c3c2f464f605b85f5e13b918e868d72c632e7",
+      "source": {
+        "pack": "kenney-castle",
+        "member": "Models/GLB format/wall-narrow-stairs.glb"
+      }
+    },
+    {
+      "path": "licences/kenney-castle-License.txt",
+      "bytes": 713,
+      "sha256": "aac944f18106b3a3e29c6fdeec02523d4cab4c735abc01f5a8fa88a79ae173ef",
+      "source": {
+        "pack": "kenney-castle",
+        "member": "License.txt"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/Textures/bars.png",
+      "bytes": 2309,
+      "sha256": "960c907c1f0bffa1de5fd4c3e690eac41e3e5907815be09aab17feae4bfebfea",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/Textures/bars.png"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/balcony-type-a.glb",
+      "bytes": 3352,
+      "sha256": "3ec0748d51787d9754444dbdcc17b5aa4cd6c5c01f47614b06a0b06e2ced9acf",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/balcony-type-a.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/balcony-ladder-top.glb",
+      "bytes": 3672,
+      "sha256": "e4bdb19c168791c697c6824866e3a491c5843b6dc48dfa53f2e3e3683674ff48",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/balcony-ladder-top.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/balcony-ladder-bottom.glb",
+      "bytes": 4196,
+      "sha256": "266b04ffb06c53a17988f858646d1fd1072258050ac3d9ba653004a769cc37d1",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/balcony-ladder-bottom.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/Textures/concrete.png",
+      "bytes": 5018,
+      "sha256": "3431cb462e8f8c120d29c23fa06e730ae488fceeb3e8d86945724675ff2be294",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/Textures/concrete.png"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/Textures/roof_plates.png",
+      "bytes": 4887,
+      "sha256": "a4cd8f77250ba871728567a1f9af2f234d9bfa07456bc48a2c991847555f6faf",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/Textures/roof_plates.png"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/roof-metal-type-a.glb",
+      "bytes": 5620,
+      "sha256": "91c5f28be3d30dfd209a6be24786a20d5c279256baaa8274d933e34a058de40a",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/roof-metal-type-a.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/Textures/roof.png",
+      "bytes": 4836,
+      "sha256": "50a09bac9a57a1732af6b6e4de0192efaba3627a997e0b1dc5fc1c1c6369acd6",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/Textures/roof.png"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/roof-metal-type-b.glb",
+      "bytes": 6116,
+      "sha256": "b9c08bcc050c69e8804fc6aff6d1eb4605566659cbbdd4cfe64d51f8ed03df3b",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/roof-metal-type-b.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/Textures/metal_wall.png",
+      "bytes": 4773,
+      "sha256": "2700c58f6063520dd447ea6addc9477898bf4e0924b2ab6eb63b4340f36526c5",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/Textures/metal_wall.png"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/roof-metal-poles.glb",
+      "bytes": 6980,
+      "sha256": "0935e22cc002df2c9c468ff6b7d70a766c9ddac109ae3f139c6e47ae5d3a3a3e",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/roof-metal-poles.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/Textures/metal.png",
+      "bytes": 4930,
+      "sha256": "3893724d52a5788341345e16319fb8f5f7182d588b5d5b2babf577176ca3d701",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/Textures/metal.png"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/scaffolding-floor.glb",
+      "bytes": 5244,
+      "sha256": "64e205f2863a5de7b23089932a06bea1549dd44fb617bb3e310a48cfde36f9a0",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/scaffolding-floor.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/scaffolding-poles.glb",
+      "bytes": 6588,
+      "sha256": "e21203c32f6a0cefbd13d3369190ae06ec62a452fa51f03b1d4f2b80d2605ecf",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/scaffolding-poles.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/scaffolding-structure.glb",
+      "bytes": 11168,
+      "sha256": "07ab47ab16499808ccf73d91e19783d55d0269e361fc1e8252d721b2c89ea5ab",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/scaffolding-structure.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/Textures/wall_lines.png",
+      "bytes": 4725,
+      "sha256": "322d198d1ff4ce006c7029eee416ba96a981ba080756f829110ac8c34faa00f2",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/Textures/wall_lines.png"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/wall-a-flat.glb",
+      "bytes": 1868,
+      "sha256": "c8e2d94e330ee62a476cd4350fb62fe1577ee87843d8d344e12c675c386a9408",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/wall-a-flat.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/Textures/doors.png",
+      "bytes": 4381,
+      "sha256": "8c5b729739cde0c9eae9f62ffe4acd194bbdba99cdd83e628bc638f0a45acf8d",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/Textures/doors.png"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/wall-a-door.glb",
+      "bytes": 6100,
+      "sha256": "554f1c0cedac9b31b73ee8c623395059a4bca05290ecf8f6a8920363d6f487bf",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/wall-a-door.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/Textures/windows.png",
+      "bytes": 4464,
+      "sha256": "9a99b16d1caa9b08dfd72eb74ac624b546df89ed6fcfefabe2e4a0933f632a42",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/Textures/windows.png"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/wall-a-window.glb",
+      "bytes": 6016,
+      "sha256": "4a5ecc11c1c8820f555375ccabb426c6420ebd2bc9c7bcb5f2c472f655c3b03b",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/wall-a-window.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/wall-a-roof-detailed.glb",
+      "bytes": 6012,
+      "sha256": "dbce71e1a0ff4d98ad5369cbce6f873f4e54a188c0e220af6d493f98a20121da",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/wall-a-roof-detailed.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/wall-a-roof-slant.glb",
+      "bytes": 3640,
+      "sha256": "16f631c9df61161bf790c7bb8032b0fa46dffaefdbfac874a16cc28a284c5d10",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/wall-a-roof-slant.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/wall-b-flat.glb",
+      "bytes": 1892,
+      "sha256": "cc8be2348142f7e0d05a746f3c20d258f91b79ee86a03dfe5faab0e6a05542ef",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/wall-b-flat.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/wall-b-window.glb",
+      "bytes": 6004,
+      "sha256": "b579cff0a0c17ff69a37abd87bb9ef9b9cd06ce4538a00368b75d3ed1a47e96f",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/wall-b-window.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/wall-b-roof.glb",
+      "bytes": 4668,
+      "sha256": "667e8db01953bac7534f26cea3e9a0e04d611d0dd581adbed7d9ecc1af60a185",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/wall-b-roof.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/wall-b-open.glb",
+      "bytes": 6976,
+      "sha256": "8e0d33339f95b01401cf4a883d6644feef6592d6cd243f3059b292f7b55e9fdc",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/wall-b-open.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/wall-broken-type-a.glb",
+      "bytes": 5492,
+      "sha256": "0bd361f3821635c11d1cfaa05cb259a478efd51fe94e9b36bf0f0bbf9359684f",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/wall-broken-type-a.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/Textures/signs.png",
+      "bytes": 1715,
+      "sha256": "050cfc96da08cd2af9575c66c3c75f0cbb1f888bb72533d70aaaaf14f99bb08c",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/Textures/signs.png"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/detail-cables-type-a.glb",
+      "bytes": 2152,
+      "sha256": "4cbac18e8b595cdcae10fe20f6c06c260eb0b8e5433b2028c56e46f9157b6d88",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/detail-cables-type-a.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/detail-light-single.glb",
+      "bytes": 7040,
+      "sha256": "aac24987fa7651f8e892f4e661b3bb67c6866edb726e0ab092e9c747f0a69151",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/detail-light-single.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/detail-awning-small.glb",
+      "bytes": 4056,
+      "sha256": "b012c04b39d39a66c7cb45392621d7374f1ff34c6054b4a05bee019abc55b155",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/detail-awning-small.glb"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/Textures/wall.png",
+      "bytes": 4518,
+      "sha256": "18dc996f37c4ac4510d09e6cb505c1decbd249d15108d0bfe6efdbd489425690",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/Textures/wall.png"
+      }
+    },
+    {
+      "path": "kenney-retro-urban/models/detail-dumpster-closed.glb",
+      "bytes": 5056,
+      "sha256": "c2b54e446c95fa413929793f3d89cb0176077fa29e4a449dc03cada558bd07d9",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "Models/GLB format/detail-dumpster-closed.glb"
+      }
+    },
+    {
+      "path": "licences/kenney-retro-urban-License.txt",
+      "bytes": 718,
+      "sha256": "83d0de4f34000323da12cf54bc542dbc24ba48cfad101510dccddaa69483ebeb",
+      "source": {
+        "pack": "kenney-retro-urban",
+        "member": "License.txt"
+      }
+    },
+    {
+      "path": "kenney-factory/models/Textures/colormap.png",
+      "bytes": 11813,
+      "sha256": "35d7bd6900dde0208429eeaec87fa17fbf024ed59f3f4eab54bc92802eba9dd7",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/Textures/colormap.png"
+      }
+    },
+    {
+      "path": "kenney-factory/models/catwalk-corner.glb",
+      "bytes": 49600,
+      "sha256": "aa797b48556a723f96c415c8608a2ededd0d1a4bdce735231047cde8762b7de1",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/catwalk-corner.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/catwalk-cross.glb",
+      "bytes": 21080,
+      "sha256": "9d566e8de315a62ef66e5a86d0cd97e0f75eaaa380a0a57680e3a06b1506d996",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/catwalk-cross.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/catwalk-junction.glb",
+      "bytes": 30332,
+      "sha256": "1297ee248729f9c72d93cb39224c61fbcc811a33d14de4935e1ce27c4f578b66",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/catwalk-junction.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/catwalk-stairs.glb",
+      "bytes": 66256,
+      "sha256": "0356a040ebbf632cd20dfe384a13108270df26426ad1dd51a2c767c8f6a6960c",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/catwalk-stairs.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/catwalk-straight.glb",
+      "bytes": 33492,
+      "sha256": "85797c6ce53e3f4373bc59ecd3ce951a3f6b707651def5e0bae46756051cd18d",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/catwalk-straight.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/crane.glb",
+      "bytes": 53396,
+      "sha256": "ceaf20fb976ce0415d2b3d40e723b6ad377845818fa4fa68b55434108b1a6880",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/crane.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/machine.glb",
+      "bytes": 25620,
+      "sha256": "a39e3042bcb7789274428357383317d70e1c31906e5301c99e7d9e90ac584863",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/machine.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/machine-window.glb",
+      "bytes": 38812,
+      "sha256": "1387bd337354fca7c7cb4163e6bd4bef8711373bbe23dae01ba9d42cd35681b7",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/machine-window.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/machine-connection-pipe.glb",
+      "bytes": 32068,
+      "sha256": "b2893e5f6ae2484b8d5be0d4538bc90e50dba98715976ac8c82f55b413f8985f",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/machine-connection-pipe.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/pipe-large.glb",
+      "bytes": 23156,
+      "sha256": "e30500f8ec6dc1fcc04c350ff9ecfd06470ec73e70d53b7b3b571031f30a3311",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/pipe-large.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/pipe-large-long.glb",
+      "bytes": 27288,
+      "sha256": "8e6650cc662695c28fffb1ffa10f190255f7d9c6c1d4a2a48d375e9bbb89b04f",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/pipe-large-long.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/pipe-large-bend.glb",
+      "bytes": 44512,
+      "sha256": "e234cba2e29bd825b9acdab56c0ff36504a6ceea4c74b21dafbbd98e84bb793b",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/pipe-large-bend.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/pipe-large-valve.glb",
+      "bytes": 42604,
+      "sha256": "57126374dce5b172e06d5d6f8cbaab97c9cffe3e5e726060eb14c50a5bd519b6",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/pipe-large-valve.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/pipe-large-junction.glb",
+      "bytes": 35796,
+      "sha256": "2bfd53a752b418c9307f9c171fbe1ddea41116521a7188eee0697353e29695ec",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/pipe-large-junction.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/structure-doorway.glb",
+      "bytes": 6464,
+      "sha256": "3d06e694412c47b85a85b9f15a60c532900f7bb1a95dba5dc9b942dcdbb4ce12",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/structure-doorway.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/structure-doorway-wide.glb",
+      "bytes": 5572,
+      "sha256": "588655c5594b55d6f715ca6251febb18f9636f6804e0e193e31d68643e7b2107",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/structure-doorway-wide.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/structure-high.glb",
+      "bytes": 25860,
+      "sha256": "3893a7eac2e676d40283372754aba868d6cdc2bc0894f68f3d558f0878d242c2",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/structure-high.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/structure-tall.glb",
+      "bytes": 25828,
+      "sha256": "b019fde05396ab9474a36b8923fd014a88122cda3d0c2f7aa3d89ddf41745167",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/structure-tall.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/structure-wall.glb",
+      "bytes": 4236,
+      "sha256": "3bdcb31d693b4e97a9fa198e9de1a47bfd14e829520da08ceaacadbdb258582c",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/structure-wall.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/structure-window.glb",
+      "bytes": 19104,
+      "sha256": "d0551b5784c24fde97cd42664daec955d79830b0cc967eddd5572ad3459fbaad",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/structure-window.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/hopper-square.glb",
+      "bytes": 10092,
+      "sha256": "1b88e30011629015cea65777c5157026088ea557163bee43596d5083f1df0f39",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/hopper-square.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/hopper-high-square.glb",
+      "bytes": 11308,
+      "sha256": "ebb427e3ab2bc1fabca3a0deadca1f65164943630c073f61d1a01029edb37f01",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/hopper-high-square.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/scanner-high.glb",
+      "bytes": 21656,
+      "sha256": "b71d8ab86fe1a12542eac14e4185e17babf15ac086c3343acf8600a080ed985a",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/scanner-high.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/scanner-low.glb",
+      "bytes": 22192,
+      "sha256": "0baa337bc3c653522ce01baa09cc02b8810640225e823fe735dc8e4167a7913b",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/scanner-low.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/screen-hanging-wide.glb",
+      "bytes": 9764,
+      "sha256": "69029512f8e13e06e6c60803e31b5b3c88f7884584440310fc254266eb64dd7f",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/screen-hanging-wide.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/box-large.glb",
+      "bytes": 7496,
+      "sha256": "f5c7a7b4d7ec48c2695dc5241d62a38dbb54b487e6be0f089548582c91bacdfd",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/box-large.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/box-long.glb",
+      "bytes": 7492,
+      "sha256": "6a6d7bfed3058809a9833606a6a3e78a156b6f3d898fba59fc054c62b5499c94",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/box-long.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/box-small.glb",
+      "bytes": 7500,
+      "sha256": "fd2ea1ac4f24a9515dc9c53a4a589a8897c824fa5865771799f965a252f684f0",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/box-small.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/robot-arm-a.glb",
+      "bytes": 50592,
+      "sha256": "ad3f766791adadd1cfb5ccc27d2b2ac8787848282f2a15b3c407f350dc281b68",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/robot-arm-a.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/door-wide-open.glb",
+      "bytes": 3000,
+      "sha256": "bc8cfb0d899c512d85241c41db4247be11cfe833cab56949f19e2903789133d9",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/door-wide-open.glb"
+      }
+    },
+    {
+      "path": "kenney-factory/models/floor-large.glb",
+      "bytes": 1804,
+      "sha256": "6d4cf453bcacd653389a4a3071468ae1167b98c2b13f042aba55e8fe3de21db0",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "Models/GLB format/floor-large.glb"
+      }
+    },
+    {
+      "path": "licences/kenney-factory-License.txt",
+      "bytes": 700,
+      "sha256": "61e86565dd297e143ad631594980eda0a17fc81a4cd7c6d71acf2f5e0cad30b6",
+      "source": {
+        "pack": "kenney-factory",
+        "member": "License.txt"
+      }
+    },
+    {
+      "path": "kenney-train/models/Textures/colormap.png",
+      "bytes": 12684,
+      "sha256": "e264660f3fc9ecbd642bdb7fb7b7dc10755a061560a66651baf48274c729af09",
+      "source": {
+        "pack": "kenney-train",
+        "member": "Models/GLB format/Textures/colormap.png"
+      }
+    },
+    {
+      "path": "kenney-train/models/train-electric-subway-a.glb",
+      "bytes": 139896,
+      "sha256": "394f305ad8f27ec3af59080bdbc362961946541dca8925301979e75696787f7e",
+      "source": {
+        "pack": "kenney-train",
+        "member": "Models/GLB format/train-electric-subway-a.glb"
+      }
+    },
+    {
+      "path": "kenney-train/models/train-electric-subway-b.glb",
+      "bytes": 119664,
+      "sha256": "07bc007707ff8da1bcba0f536930d72e1a5b0fe6bc6b41509ac75eb024c8a4c5",
+      "source": {
+        "pack": "kenney-train",
+        "member": "Models/GLB format/train-electric-subway-b.glb"
+      }
+    },
+    {
+      "path": "kenney-train/models/train-electric-subway-c.glb",
+      "bytes": 140064,
+      "sha256": "155052faeb23becec3578864d5b1618b73a95b15d6fb7f4d175836b1a04b6950",
+      "source": {
+        "pack": "kenney-train",
+        "member": "Models/GLB format/train-electric-subway-c.glb"
+      }
+    },
+    {
+      "path": "kenney-train/models/train-electric-city-a.glb",
+      "bytes": 104168,
+      "sha256": "9f63a93e65e530982bf5ac3ad15b3c9f3b2608561b3773164d970c67bd2272bd",
+      "source": {
+        "pack": "kenney-train",
+        "member": "Models/GLB format/train-electric-city-a.glb"
+      }
+    },
+    {
+      "path": "kenney-train/models/train-electric-city-b.glb",
+      "bytes": 135720,
+      "sha256": "b22ab193904eb78868ffdf1cca12a938ec63f30c1c573f22f030537bc4615361",
+      "source": {
+        "pack": "kenney-train",
+        "member": "Models/GLB format/train-electric-city-b.glb"
+      }
+    },
+    {
+      "path": "kenney-train/models/train-tram-modern.glb",
+      "bytes": 135128,
+      "sha256": "a4c82a34554adfc27a2847832d82d1cb75f3e1ff98ad2cbaf7aad35bb292aecc",
+      "source": {
+        "pack": "kenney-train",
+        "member": "Models/GLB format/train-tram-modern.glb"
+      }
+    },
+    {
+      "path": "kenney-train/models/train-diesel-box-a.glb",
+      "bytes": 156056,
+      "sha256": "396a7d723d748efb249f16083e9ec5bf9a017a4eab3ed16a30facd3faea8d4b1",
+      "source": {
+        "pack": "kenney-train",
+        "member": "Models/GLB format/train-diesel-box-a.glb"
+      }
+    },
+    {
+      "path": "kenney-train/models/train-carriage-flatbed-wood.glb",
+      "bytes": 103004,
+      "sha256": "a8e0e3d5c8c86414aa8531b0c728e0481f04df4e820edd554f3ac82292f4c18b",
+      "source": {
+        "pack": "kenney-train",
+        "member": "Models/GLB format/train-carriage-flatbed-wood.glb"
+      }
+    },
+    {
+      "path": "kenney-train/models/train-carriage-container-blue.glb",
+      "bytes": 116192,
+      "sha256": "3e76c5367080f8b82efc4ab8ecf50af15c01e5b41e96576515ede0a76a6257e2",
+      "source": {
+        "pack": "kenney-train",
+        "member": "Models/GLB format/train-carriage-container-blue.glb"
+      }
+    },
+    {
+      "path": "kenney-train/models/train-carriage-tank.glb",
+      "bytes": 106752,
+      "sha256": "0de1d92587c0b4d79e6dd1dad7d4d2e8ef849330af07e2f1701b98b9e0cf4e6a",
+      "source": {
+        "pack": "kenney-train",
+        "member": "Models/GLB format/train-carriage-tank.glb"
+      }
+    },
+    {
+      "path": "kenney-train/models/railroad-straight.glb",
+      "bytes": 34736,
+      "sha256": "bcbd501f74b754b61f2ddb5cba2d45d5d694bfd25c497fa72af65202a53930d9",
+      "source": {
+        "pack": "kenney-train",
+        "member": "Models/GLB format/railroad-straight.glb"
+      }
+    },
+    {
+      "path": "kenney-train/models/railroad-corner-large.glb",
+      "bytes": 51344,
+      "sha256": "be0ed13b14aa6753f707a50b6986f09f38a0a42eac5d87fd0f56176d3cbf70a5",
+      "source": {
+        "pack": "kenney-train",
+        "member": "Models/GLB format/railroad-corner-large.glb"
+      }
+    },
+    {
+      "path": "kenney-train/models/track-detailed.glb",
+      "bytes": 13228,
+      "sha256": "b56cab0c6cf54ea1e3e3dbdffc06995b7a432db41ee39bf063d54b171f937351",
+      "source": {
+        "pack": "kenney-train",
+        "member": "Models/GLB format/track-detailed.glb"
+      }
+    },
+    {
+      "path": "licences/kenney-train-License.txt",
+      "bytes": 762,
+      "sha256": "8ad3a0453dc1416d54e9af692dafe875a24069d577fe64edb193d3c8d868881a",
+      "source": {
+        "pack": "kenney-train",
+        "member": "License.txt"
+      }
+    },
+    {
+      "path": "kenney-industrial/models/Textures/colormap.png",
+      "bytes": 11986,
+      "sha256": "950f4f891ebd05a2affac810e6eeb0fea1511bc39039b65a3cbf2e17d17bc6a2",
+      "source": {
+        "pack": "kenney-industrial",
+        "member": "Models/GLB format/Textures/colormap.png"
+      }
+    },
+    {
+      "path": "kenney-industrial/models/building-a.glb",
+      "bytes": 177316,
+      "sha256": "0e6ef8eb1e1bdbb9d06b5496b5daf3066e00eaf74b3fcd61b74072116a1c86cf",
+      "source": {
+        "pack": "kenney-industrial",
+        "member": "Models/GLB format/building-a.glb"
+      }
+    },
+    {
+      "path": "kenney-industrial/models/building-c.glb",
+      "bytes": 175844,
+      "sha256": "94eb05acef8d8e4c1d817eb12e1c2a1287ffed625879170663a8c4f48786b465",
+      "source": {
+        "pack": "kenney-industrial",
+        "member": "Models/GLB format/building-c.glb"
+      }
+    },
+    {
+      "path": "kenney-industrial/models/building-e.glb",
+      "bytes": 129400,
+      "sha256": "d61fed5e9502af9c698367ab69d5bc50b673375929e51c22af247dfb1db6cd16",
+      "source": {
+        "pack": "kenney-industrial",
+        "member": "Models/GLB format/building-e.glb"
+      }
+    },
+    {
+      "path": "kenney-industrial/models/building-h.glb",
+      "bytes": 63644,
+      "sha256": "5a6a6c6824467972ba00b5a3c3cbb19da6e96673bc4e42daf1f09cfd4d2ed0e1",
+      "source": {
+        "pack": "kenney-industrial",
+        "member": "Models/GLB format/building-h.glb"
+      }
+    },
+    {
+      "path": "kenney-industrial/models/building-m.glb",
+      "bytes": 138920,
+      "sha256": "526881cb1851120a60195f76bd4d8c1963653cdda66e4d1d53f085b3395fb8a9",
+      "source": {
+        "pack": "kenney-industrial",
+        "member": "Models/GLB format/building-m.glb"
+      }
+    },
+    {
+      "path": "kenney-industrial/models/building-p.glb",
+      "bytes": 103760,
+      "sha256": "d3e701ba7bf548519731d9c68d5a47d09654bccef6f93be759eaafb55cdb2f78",
+      "source": {
+        "pack": "kenney-industrial",
+        "member": "Models/GLB format/building-p.glb"
+      }
+    },
+    {
+      "path": "kenney-industrial/models/building-t.glb",
+      "bytes": 139896,
+      "sha256": "865f92dc0ca0ce147c2b784bfda0773698e80896c372146e2b53811f1758607f",
+      "source": {
+        "pack": "kenney-industrial",
+        "member": "Models/GLB format/building-t.glb"
+      }
+    },
+    {
+      "path": "kenney-industrial/models/chimney-medium.glb",
+      "bytes": 15020,
+      "sha256": "ef1605601d85b5fff97d6596b6552d936a1d6be06ec0609242f6bcfb640d91f6",
+      "source": {
+        "pack": "kenney-industrial",
+        "member": "Models/GLB format/chimney-medium.glb"
+      }
+    },
+    {
+      "path": "kenney-industrial/models/detail-tank-large.glb",
+      "bytes": 47452,
+      "sha256": "2fbf65dfbae114235dec65cc8730a870cf7d29dd76f9473218e96ee83e9f5f43",
+      "source": {
+        "pack": "kenney-industrial",
+        "member": "Models/GLB format/detail-tank-large.glb"
+      }
+    },
+    {
+      "path": "kenney-industrial/models/detail-tank.glb",
+      "bytes": 31436,
+      "sha256": "9e955732e4ef9ccff4a4d6967d29d8a7d2f9ed16c903923f2568216d9f0b50d2",
+      "source": {
+        "pack": "kenney-industrial",
+        "member": "Models/GLB format/detail-tank.glb"
+      }
+    },
+    {
+      "path": "kenney-industrial/models/shipping-container-a.glb",
+      "bytes": 36624,
+      "sha256": "7b2d5ca874c8e659ee6cfd1614f0470b70410b2ddc7620ac83b8954dedeb861d",
+      "source": {
+        "pack": "kenney-industrial",
+        "member": "Models/GLB format/shipping-container-a.glb"
+      }
+    },
+    {
+      "path": "kenney-industrial/models/shipping-container-b.glb",
+      "bytes": 37052,
+      "sha256": "290b3808149f8a9456ee96ff682fcf6a99f76adeac8e3b7b38234be434ea455c",
+      "source": {
+        "pack": "kenney-industrial",
+        "member": "Models/GLB format/shipping-container-b.glb"
+      }
+    },
+    {
+      "path": "kenney-industrial/models/water-tower.glb",
+      "bytes": 93836,
+      "sha256": "11ac7ae19f32ce889bfe7a9c8e78c8ce8c77b7a76b52fd4ffa439a022ea2ef40",
+      "source": {
+        "pack": "kenney-industrial",
+        "member": "Models/GLB format/water-tower.glb"
+      }
+    },
+    {
+      "path": "kenney-industrial/models/solar-panel-landscape.glb",
+      "bytes": 21776,
+      "sha256": "719ae34e0d312e8b2e94d813da2c4147e7b0fcbc4c4a5304fc32e88b4d97402c",
+      "source": {
+        "pack": "kenney-industrial",
+        "member": "Models/GLB format/solar-panel-landscape.glb"
+      }
+    },
+    {
+      "path": "licences/kenney-industrial-License.txt",
+      "bytes": 708,
+      "sha256": "60a8c5c31191256ec9779dc18745dea6d69c46f4b29703459ce064c1765a59ea",
+      "source": {
+        "pack": "kenney-industrial",
+        "member": "License.txt"
+      }
+    },
+    {
+      "path": "licences/CC0-1.0-legalcode.txt",
+      "bytes": 7048,
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+      "source": {
+        "url": "https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt"
+      }
+    },
+    {
+      "path": "polyhaven-snow-02/snow_02_diff_1k.jpg",
+      "bytes": 325497,
+      "sha256": "523a4e69c90b96d787dd69b897f29a2b3761a017024405c60aa630d1e8e9009a",
+      "source": {
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/snow_02/snow_02_diff_1k.jpg",
+        "upstream_md5": "fc54766c6b36ff298699115a619d440b"
+      }
+    },
+    {
+      "path": "polyhaven-snow-02/snow_02_nor_gl_1k.png",
+      "bytes": 2118417,
+      "sha256": "110f8f0b4668c780412480a459d1276a52633f2d0af6c3eb30fd7ef90c6426fa",
+      "source": {
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/snow_02/snow_02_nor_gl_1k.png",
+        "upstream_md5": "57d7f4e2501db746c862c6efee9fb38f"
+      }
+    },
+    {
+      "path": "polyhaven-snow-02/snow_02_arm_1k.png",
+      "bytes": 1050377,
+      "sha256": "bd13b71b4292a412e0464d96e0b8207cb3e1696330597fd4606f7687093b84ab",
+      "source": {
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/snow_02/snow_02_arm_1k.png",
+        "upstream_md5": "4dc88ca22b319dc7ac5e1ae139be8ce8"
+      }
+    }
+  ],
+  "retained_bytes": 7657993,
+  "selected_glb_count": 126
+}

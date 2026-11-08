@@ -11,7 +11,7 @@ No new deadline, minimum run time or cost limit was specified. The earlier R14 t
 ## Settled foundation
 
 - Preserve F2's AA100/128 Hz ground and air behavior when not crouching. Keep the AA1000 comparison. No W/mouse turn assist, surprise overspeed tax or new landing friction in the approved path.
-- Remove vanilla64 from the main R15 player experience. Keep the delivered R14 build immutable for historical comparisons. No claim that64 Hz alone caused his dislike.
+- Remove vanilla64 from the main R15 player experience. Keep the delivered R14 build immutable for historical comparisons. No claim that 64 Hz alone caused his dislike.
 - Implement actual crouched collision and eye height on the floor and in flight. The player must fit through crouch-only space, crouch jump, land crouched and safely defer standing beneath a ceiling. The policy for airborne hull anchoring is an explicit game decision backed by input trials, not an invisible teleport or jump impulse.
 - Five new original themed maps sit beside Penstock Yard and Overflow. Each has multiple useful checkpoints, discoverable progress, repeatable starts and an actual route through its geometry. A reskin of the same layout does not count as a different map.
 - Redistributable external meshes and textures, with retained provenance, must materially establish each setting. Scene readability at running speed matters more than asset counts.
@@ -31,7 +31,7 @@ These names, themes and layouts are proposals chosen by the agent. The first fin
 
 Default to the approved server profile. Give AA1000 a plainly named comparison. Existing experimental families may remain in an advanced comparison area rather than dominating the main controls. Keep speed, per-hop gain/contact loss and directional sync honest.
 
-Each new course targets about45–120 seconds for its basic authored route, with at least3 useful checkpoint sections and a speed-earned alternative. This is a design target, not a human completion promise. Basic stages must not demand the very edge of a250 u/s jump; progressively teach speed before making speed mandatory. A failed hop should present a visible checkpoint retry or physical return rather than an unexplained wall.
+Each new course targets about 45–120 seconds for its basic authored route, with at least 3 useful checkpoint sections and a speed-earned alternative. This is a design target, not a human completion promise. Basic stages must not demand the very edge of a 250 u/s jump; progressively teach speed before making speed mandatory. A failed hop should present a visible checkpoint retry or physical return rather than an unexplained wall.
 
 Keep restart and checkpoint practice immediate. Clean whole-map records and checkpoint/practice attempts remain separate; exact integer ticks and complete split payloads survive process reload. R15 writes only its own profile. A changed hull/mechanic/map invalidates comparable records by identity.
 
@@ -43,4 +43,4 @@ No test count establishes fun. Keep exact-state checks, imperfect input, screens
 
 Portable Linux and Windows ZIPs land in outer `delivery/spillway-r15/`, with source/runtime/asset identities and licences. Final packed Linux checks run outside the source checkout and exercise new courses, checkpoint recovery, crouch, records and Quit. Label Windows static-only if native play is unavailable. Outer REPORT.md explains the new game and what remains experimental. Commit and push coherent work on `feat/foldrunner-me-build`.
 
-HOME must have at least15 GiB free before every large render/export. Keep full MP4s only for final representative runs, selected JPEG frames and compressed traces. Bound per-experiment evidence and remove scratch after verification. Final R12/R13/R14 downloads remain frozen; don't recreate historical game files or touch the desktop display/socket workaround.
+HOME must have at least 15 GiB free before every large render/export. Keep full MP4s only for final representative runs, selected JPEG frames and compressed traces. Bound per-experiment evidence and remove scratch after verification. Final R12/R13/R14 downloads remain frozen; don't recreate historical game files or touch the desktop display/socket workaround.
