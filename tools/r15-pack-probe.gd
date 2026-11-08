@@ -61,6 +61,7 @@ var next_tick := 0
 var armed := false
 var tape_done := false
 var held: Dictionary = {}
+var delivered_keys: Dictionary = {}
 var trace: Array = []
 var checkpoint_sequence: Array = []
 var capture_ticks: Dictionary = {}
@@ -251,6 +252,7 @@ func _state() -> Dictionary:
 	var pause: Variant = hud.get("pause_panel") if hud != null else null
 	var message: Variant = hud.get("message") if hud != null else null
 	var player: Node3D = game.get("player")
+	var hull := _hull_observation(player)
 	return {"process_frame": Engine.get_process_frames(), "physics_frame": Engine.get_physics_frames(),
 		"map": str(game.get("map_id")), "preset": str(game.get("preset_id")), "physics_hz": int(game.get("physics_hz")),
 		"engine_hz": Engine.physics_ticks_per_second, "rate_ok": bool(game.get("rate_ok")), "last_delta": float(game.get("last_delta")),
@@ -258,6 +260,8 @@ func _state() -> Dictionary:
 		"started": bool(game.get("_started")), "finished": bool(game.get("finished")), "attempts": int(game.get("attempts")),
 		"checkpoint": int(game.get("checkpoint_index")), "practice_stage": int(game.get("practice_stage")),
 		"course_key": str(game.get("course_key")), "runner": _script_path(player), "feet": _v3(player.global_position),
+		"grounded": player.call("is_grounded"), "hull": hull, "crouched": bool(game.call("is_crouched")),
+		"stand_blocked": bool(game.call("stand_blocked")), "crouch_text": _hud_text("crouch_tag") if _label_drawn("crouch_tag") else "",
 		"identity_text": _hud_text("identity"),
 		"practice_tag": str((tag as Label).text) if tag is Label and (tag as Label).visible else "",
 		"message": str((message as Label).text) if message is Label and (message as Label).modulate.a > 0.05 else "",
@@ -265,6 +269,46 @@ func _state() -> Dictionary:
 
 func _v3(value: Vector3) -> Array:
 	return [value.x, value.y, value.z]
+
+func _plain(value: Variant) -> Variant:
+	# motor reports remain distinct from the independently observed hull and input.
+	if value is Vector3:
+		return _v3(value)
+	if value is Vector2:
+		return [value.x, value.y]
+	if value is Dictionary:
+		var out := {}
+		for key: Variant in value:
+			out[str(key)] = _plain(value[key])
+		return out
+	if value is Array:
+		return (value as Array).map(_plain)
+	return value
+
+func _input_observation() -> Dictionary:
+	var out := {"actions": [], "physical": [], "just_pressed": [], "just_released": []}
+	for key: String in ACTIONS:
+		if Input.is_action_pressed(ACTIONS[key]):
+			out.actions.append(key)
+		if Input.is_physical_key_pressed(KEYS[key]):
+			out.physical.append(key)
+		if Input.is_action_just_pressed(ACTIONS[key]):
+			out.just_pressed.append(key)
+		if Input.is_action_just_released(ACTIONS[key]):
+			out.just_released.append(key)
+	return out
+
+func _hull_observation(player: Node3D) -> Dictionary:
+	if not player.has_method("hull_height_u") or not player.has_method("air_lift_u"):
+		return {}
+	var node: Variant = player.get("collision")
+	var settings: Variant = player.get("settings")
+	if not node is CollisionShape3D or not node.shape is BoxShape3D or not settings is Dictionary:
+		return {}
+	return {"box_size_m": _v3(node.shape.size), "box_center_m": _v3(node.position),
+		"scale": _v3(node.global_transform.basis.get_scale()), "ducked": player.get("ducked"),
+		"standing_u": settings.get("hull_height"), "duck_u": settings.get("duck_hull_height"),
+		"anchor": settings.get("duck_air_anchor"), "interp_current": _v3(player.get("_current_position"))}
 
 ## json text with integral numbers written as integers: the frozen identity reaches the probe
 ## through json, which reads every number as a float.
@@ -767,6 +811,7 @@ func _controls() -> void:
 		await _frames(3)
 		await captured("reserved-f" + slot, {"preset": before, "clean": true, "message": "~F%s:" % slot})
 	await _purity()
+	await _crouch_controls()
 	# use F for practice from the reached stage, R: a clean attempt again.
 	await _tap(KEY_F)
 	await _physics(4)
@@ -788,6 +833,56 @@ func _controls() -> void:
 		await _restore_preset(start_preset)
 	await _physics(6)
 	await captured("controls-done", {"map": start_map, "preset": start_preset, "paused": false})
+
+func _crouch_controls() -> void:
+	# actual controls on the default course, without a diagnostic hull or test-only roof.
+	var start := str(game.get("preset_id"))
+	await _restore_preset("server128")
+	await _tap(KEY_R)
+	await _physics(8)
+	_key(KEY_C, true)
+	await _physics(4)
+	var state := await captured("ground-crouch-c", {"crouched": true, "grounded": true, "crouch_text": "~CROUCH"})
+	check("C changes the real standing box to the 54 u crouched box", _crouch_box(state, 54.0), state.hull)
+	_key(KEY_C, false)
+	await _physics(4)
+	state = await captured("ground-stand", {"crouched": false, "grounded": true, "crouch_text": ""})
+	check("releasing C restores the real 72 u standing box", _crouch_box(state, 72.0), state.hull)
+	_key(KEY_SPACE, true)
+	await _physics(5)
+	_key(KEY_SPACE, false)
+	_key(KEY_CTRL, true)
+	await _physics(3)
+	state = await captured("air-crouch-ctrl", {"crouched": true, "grounded": false, "crouch_text": "~CROUCH"})
+	check("Ctrl changes the real box while airborne", _crouch_box(state, 54.0), state.hull)
+	_key(_slot_key("server128_aa1000"), true)
+	await _frames(2)
+	_key(_slot_key("server128_aa1000"), false)
+	await _physics(3)
+	state = await captured("air-crouch-f5", {"preset": "server128_aa1000", "crouched": true, "clean": false,
+		"practice_reason": "preset", "crouch_text": "~CROUCH"})
+	check("F2 to F5 keeps the crouched box", _crouch_box(state, 54.0), state.hull)
+	_key(KEY_CTRL, false)
+	await _physics(4)
+	state = await captured("air-stand", {"crouched": false, "grounded": false, "crouch_text": ""})
+	check("releasing Ctrl restores the box in clear air", _crouch_box(state, 72.0), state.hull)
+	await _tap(KEY_R)
+	await _restore_preset(start)
+	await _physics(4)
+	await captured("crouch-controls-reset", {"preset": start, "clean": true, "started": false, "crouched": false})
+	await _tap(KEY_F1)
+	await captured("vanilla-retired", {"preset": start, "clean": true, "started": false, "message": "~F1:"})
+	var input := _input_observation()
+	check("crouch controls leave neutral keys", input.actions.is_empty() and input.physical.is_empty() and not Input.is_physical_key_pressed(KEY_C), input)
+
+func _crouch_box(state: Dictionary, height_u: float) -> bool:
+	var hull: Dictionary = state.get("hull", {})
+	var size: Array = hull.get("box_size_m", [])
+	var center: Array = hull.get("box_center_m", [])
+	if size.size() != 3 or center.size() != 3:
+		return false
+	return absf(float(size[0]) - 32.0 * 0.0254) < 1e-6 and absf(float(size[2]) - 32.0 * 0.0254) < 1e-6 \
+		and absf(float(size[1]) - height_u * 0.0254) < 1e-6 and absf(float(center[1]) - height_u * 0.0254 * 0.5) < 1e-6
 
 func _stage_picker_controls(map: String) -> void:
 	await _tap(KEY_ESCAPE)
@@ -951,12 +1046,25 @@ func early_step(delta: float) -> void:
 		return
 	var player: Node3D = game.get("player")
 	_row = {"tick": next_tick, "dt": delta, "pre_p": _v3(player.global_position), "pre_steps": player.get("tape_step_count")}
+	var audit := {"physics_frame": Engine.get_physics_frames(), "in_physics_early": Engine.is_in_physics_frame(),
+		"pre": {"p": _v3(player.global_position), "grounded": player.call("is_grounded"),
+			"interp_current": _v3(player.get("_current_position")), "yaw": player.get("yaw"), "pitch": player.get("pitch")},
+		"input_early": _input_observation(), "keys": delivered_keys.get(next_tick, []), "mouse": {}}
+	var hull := _hull_observation(player)
+	if not hull.is_empty():
+		audit["hull_origin"] = {"before": hull}
+	_row["audit"] = audit
+	delivered_keys.erase(next_tick)
 	if mouse_at.has(next_tick):
 		var event := InputEventMouseMotion.new()
 		event.relative = mouse_at[next_tick]
 		event.screen_relative = mouse_at[next_tick]
+		var yaw_before := float(player.get("yaw"))
+		var pitch_before := float(player.get("pitch"))
 		Input.parse_input_event(event)
 		Input.flush_buffered_events()
+		audit.mouse = {"relative": [event.relative.x, event.relative.y], "screen_relative": [event.screen_relative.x, event.screen_relative.y],
+			"yaw_before": yaw_before, "pitch_before": pitch_before, "yaw_after": player.get("yaw"), "pitch_after": player.get("pitch")}
 
 func late_step(delta: float) -> void:
 	if _row.is_empty():
@@ -972,6 +1080,17 @@ func late_step(delta: float) -> void:
 		"p": _v3(player.global_position), "v": _v3((player as CharacterBody3D).velocity), "yaw": player.get("yaw"), "pitch": player.get("pitch"), "checkpoint": index,
 		"elapsed": game.get("elapsed"), "finished": game.get("finished"), "finish_kind": game.get("finish_kind"),
 		"respawns": game.get("respawn_count"), "clean": game.get("clean_eligible")})
+	var audit: Dictionary = _row.audit
+	audit["post"] = _input_observation()
+	var motion: Dictionary = player.call("get_motion_state") if player.has_method("get_motion_state") else {}
+	audit.post["motion_state"] = _plain({"duck_shift": motion.get("duck_shift", Vector3.ZERO), "duck": motion.get("duck", {})})
+	audit["order"] = {"same_physics_frame": int(audit.physics_frame) == Engine.get_physics_frames(), "in_physics": Engine.is_in_physics_frame(),
+		"motor_prev_matches_pre": _v3(player.get("_previous_position")) == audit.pre.interp_current,
+		"motor_cur_matches_body": player.get("_current_position") == player.global_position,
+		"step_count_delta": int(player.get("tape_step_count")) - int(_row.pre_steps)}
+	if audit.has("hull_origin"):
+		audit.hull_origin["after"] = _hull_observation(player)
+		audit.hull_origin["motor_previous"] = _v3(player.get("_previous_position"))
 	trace.append(_row)
 	_row = {}
 	if capture_ticks.has(tick):
@@ -985,6 +1104,10 @@ func _deliver_keys(tick: int) -> void:
 	for edge: Dictionary in keys_at.get(tick, []):
 		var pressed: bool = edge.edge == "press"
 		_key(KEYS[edge.key], pressed)
+		if not delivered_keys.has(tick):
+			delivered_keys[tick] = []
+		delivered_keys[tick].append({"key": edge.key, "edge": edge.edge, "motor_steps": game.get("player").get("tape_step_count"),
+			"physics_frame": Engine.get_physics_frames(), "in_physics": Engine.is_in_physics_frame()})
 		if pressed:
 			held[edge.key] = true
 		else:
@@ -992,7 +1115,7 @@ func _deliver_keys(tick: int) -> void:
 
 func _end_tape() -> void:
 	tape_done = true
-	for key: String in held.keys():
+	for key: String in KEYS:
 		_key(KEYS[key], false)
 	held.clear()
 	var still: Array = []

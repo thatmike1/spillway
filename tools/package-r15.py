@@ -18,6 +18,7 @@ from contextlib import contextmanager
 import gzip
 import hashlib
 import io
+import importlib.util
 import json
 import math
 import os
@@ -384,6 +385,105 @@ def trace_error(rows, packed=False, expected=None):
     return None
 
 
+def packed_input_audit(rows, plan, input_settings):
+    """judge observed input/order, independently of the packed probe's verdict.
+
+    the hull exception is exactly the already challenged source-executor observer. raw
+    mismatch flags stay in the trace; an air crouch needs a real box transition, matching
+    input, geometry, origin and one counted motor step. no reset is allowed in a clean run.
+    """
+    errors, compensations = [], []
+    def fault(tick, kind):
+        errors.append({'tick': tick, 'kind': kind})
+    def finite(value):
+        return type(value) in (int, float) and math.isfinite(value)
+    def pair(value):
+        return isinstance(value, list) and len(value) == 2 and all(finite(v) for v in value)
+    try:
+        invalid = trace_error(rows, packed=True, expected=plan['duration_ticks'])
+        if invalid:
+            raise ValueError(invalid)
+        hz = plan['physics_hz']
+        sensitivity = input_settings['mouse_sensitivity']
+        pitch_limit = input_settings['pitch_limit']
+        if not finite(sensitivity) or not sensitivity > 0 or not finite(pitch_limit) or not pitch_limit > 0:
+            raise ValueError('missing or invalid source input settings')
+        module_spec = importlib.util.spec_from_file_location('r15_tape_observer', PROJECT / 'tools/momentum-tape.py')
+        observer = importlib.util.module_from_spec(module_spec)
+        module_spec.loader.exec_module(observer)
+        planned_keys, planned_mouse = {}, {}
+        for event in plan['events']:
+            if 'key' in event:
+                planned_keys.setdefault(event['tick'], []).append((event['key'], event['edge']))
+            else:
+                planned_mouse[event['tick']] = event['mouse']
+        held, previous = set(), None
+        for tick, row in enumerate(rows):
+            edges = planned_keys.get(tick, [])
+            for key, edge in edges:
+                (held.add if edge == 'press' else held.remove)(key)
+            audit = row['audit']
+            pre, post, order = audit['pre'], audit['post'], audit['order']
+            if any(row.get(k) != 1 / hz for k in ('dt', 'dt_late')) or row.get('engine_hz') != hz or row.get('rate_ok') is not True:
+                fault(tick, 'wrong rate or delta')
+            if (type(row.get('pre_steps')) is not int or type(row.get('motor_steps')) is not int
+                    or row['motor_steps'] - row['pre_steps'] != 1 or type(order.get('step_count_delta')) is not int
+                    or order['step_count_delta'] != 1 or previous is not None and row['pre_steps'] != previous['motor_steps']):
+                fault(tick, 'missing, reset or repeated motor step')
+            if (order.get('same_physics_frame') is not True or order.get('in_physics') is not True
+                    or order.get('motor_cur_matches_body') is not True or audit.get('in_physics_early') is not True
+                    or audit.get('physics_frame') != row.get('physics_frame')):
+                fault(tick, 'capture outside the motor tick')
+            compensation = observer.hull_origin_compensation(audit)
+            if compensation is not None:
+                compensations.append({'tick': tick, **compensation})
+                if not compensation['valid']:
+                    fault(tick, 'invalid hull compensation')
+            if order.get('motor_prev_matches_pre') is not True and not (compensation and compensation['valid']):
+                fault(tick, 'unexplained previous origin')
+            for at in (audit['input_early'], post):
+                for field in ('actions', 'physical'):
+                    values = at[field]
+                    if not isinstance(values, list) or len(set(values)) != len(values) or set(values) != held:
+                        fault(tick, field + ' differs from planned held keys')
+                for field, edge in (('just_pressed', 'press'), ('just_released', 'release')):
+                    if sorted(at[field]) != sorted(k for k, e in edges if e == edge):
+                        fault(tick, field + ' differs from this tick edges')
+            delivered = audit['keys']
+            if sorted((e['key'], e['edge']) for e in delivered) != sorted(edges):
+                fault(tick, 'delivered edges differ from plan')
+            if any(e['motor_steps'] != row['pre_steps'] or e['in_physics'] is not (tick > 0) for e in delivered):
+                fault(tick, 'key edge not between the expected motor steps')
+            mouse = audit['mouse']
+            yaw, pitch = pre['yaw'], pre['pitch']
+            if not all(finite(v) for v in (yaw, pitch, row['yaw'], row['pitch'])):
+                raise ValueError('nonfinite view')
+            if tick in planned_mouse:
+                dx, dy = planned_mouse[tick]
+                if (not mouse or not pair(mouse['relative']) or not pair(mouse['screen_relative'])
+                        or mouse['relative'] != [dx, dy] or mouse['screen_relative'] != [dx, dy]):
+                    fault(tick, 'mouse fields differ from plan')
+                wanted_yaw = yaw - dx * sensitivity
+                wanted_pitch = max(-pitch_limit, min(pitch_limit, pitch - dy * sensitivity))
+                if (not mouse or mouse['yaw_before'] != yaw or mouse['pitch_before'] != pitch
+                        or abs(mouse['yaw_after'] - wanted_yaw) > 1e-9 or abs(mouse['pitch_after'] - wanted_pitch) > 1e-9):
+                    fault(tick, 'view did not follow mouse')
+            else:
+                wanted_yaw, wanted_pitch = yaw, pitch
+                if mouse:
+                    fault(tick, 'unplanned mouse')
+            if abs(row['yaw'] - wanted_yaw) > 1e-9 or abs(row['pitch'] - wanted_pitch) > 1e-9:
+                fault(tick, 'view changed during motor step')
+            if previous is not None and (yaw != previous['yaw'] or pitch != previous['pitch']):
+                fault(tick, 'unplanned view change between steps')
+            previous = row
+    except (KeyError, TypeError, ValueError, AttributeError, IndexError, OverflowError) as error:
+        errors.append({'kind': 'missing or malformed input/order evidence', 'detail': str(error)})
+    return {'ok': not errors, 'ticks': len(rows), 'errors': errors[:20], 'error_count': len(errors),
+            'hull_origin_compensations': compensations,
+            'scope': 'engine input, observed box and motor ordering; not OS or physical-device input'}
+
+
 def source_route(route, source, evidence, identity=None):
     """expand the tape and play it in source mode on the frozen copy: the tick-for-tick reference.
 
@@ -431,6 +531,8 @@ def source_route(route, source, evidence, identity=None):
               'ordered': ordered, 'rate_ok': (report.get('rate') or {}).get('ok'), 'delivery_ok': (report.get('delivery') or {}).get('ok'),
               'render_fps': route.get('fps', hz), 'warmup': route.get('warmup', 8), 'exit': code, 'route_game_sha256': digest(game)}
     result['order_ok'] = (report.get('order') or {}).get('ok')
+    engine_metadata = json.loads((run / 'evaluator/engine.json').read_text())
+    result['input_settings'] = engine_metadata.get('settings', {})
     result['cleanup_ok'] = (report.get('cleanup') or {}).get('clean')
     result['integrity_flags'] = report.get('integrity_flags')
     engine_log = run / 'evaluator/godot.log'
@@ -1217,6 +1319,13 @@ def check_runs(extracted, args, evidence, identity, routes, record, work):
                     exact = shipped_trace_match(out / 'trace.jsonl', route.get('trace', ''))
                     runs[name][mode]['exact_reference'] = exact
                     record('%s play: shipped trace equals the source executor exactly' % name, exact.get('ok'), exact)
+                    try:
+                        observed = [json.loads(line) for line in (out / 'trace.jsonl').read_text().splitlines() if line.strip()]
+                        delivery = packed_input_audit(observed, json.loads(Path(route['tape']).read_text()), route.get('input_settings', {}))
+                    except (OSError, ValueError) as error:
+                        delivery = {'ok': False, 'error': str(error)}
+                    runs[name][mode]['input_order_audit'] = delivery
+                    record('%s play: every key edge, mouse turn and hull origin is verified' % name, delivery['ok'], delivery)
                     runs[name][mode]['movie'] = sparse_movie(out / 'frames', 2.0, out / 'play.mp4')
                     record('%s play: sparse movie encoded and decodes' % name, runs[name][mode]['movie'].get('mp4') is not None, runs[name][mode]['movie'])
                 else:
