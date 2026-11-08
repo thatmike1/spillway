@@ -4,7 +4,8 @@ extends CanvasLayer
 ## the right. the map, the active preset and its physics rate are always on screen. sync with no
 ## eligible samples reads as an em dash, never as 0 %. the pause menu holds the preset list with
 ## each preset's air acceleration, rate, jump policy and controls, the map selector, and the two
-## families' separate look settings.
+## families' separate look settings. above the presets, a stage picker practises any stage of the
+## loaded map (docs/r14/STAGE-PRACTICE.md).
 
 const INK := Color("f4f1dd")
 const ACCENT := Color("f3cd83")
@@ -13,7 +14,7 @@ const BEHIND := Color("eaa17f")
 const DIM := Color(0.957, 0.945, 0.867, 0.72)
 const SHADE := Color(0.055, 0.10, 0.12)
 const NO_SAMPLES := "—"
-const KEYS_LINE := "F1 vanilla · F2 bhop server · F3 R13 · F4 Q3-inspired · F5 AA 1000 · R restart · F practise · Esc menu"
+const KEYS_LINE := "F1 vanilla · F2 bhop server · F3 R13 · F4 Q3-inspired · F5 AA 1000 · R restart · F practise · Esc menu and stage picker"
 
 var game: Node
 var overlay: Control
@@ -44,6 +45,10 @@ var pause_look: Label
 var resume_button: Button
 var restart_button: Button
 var practice_button: Button
+## the pause menu's stage picker: one item per stage of the loaded map, in stage order.
+var stage_picker: OptionButton
+var stage_practice_button: Button
+var _stage_titles: Array[String] = []
 var quit_button: Button
 var preset_buttons: Dictionary = {}
 var map_buttons: Dictionary = {}
@@ -127,6 +132,9 @@ func attach(main: Node) -> void:
 
 func _layout() -> void:
 	var size := get_viewport().get_visible_rect().size
+	# dynamic labels shrink again after a long preset name or notice.
+	for label: Label in [identity, practice_tag, message]:
+		label.reset_size()
 	identity.position = Vector2(22, 14)
 	keys_line.position = Vector2(22, 40)
 	_ident_shade.position = Vector2(14, 10)
@@ -151,6 +159,8 @@ func _layout() -> void:
 	_clock_shade.position = Vector2(minf(clock.position.x, best_line.position.x) - 10.0, size.y - 78)
 	_clock_shade.size = Vector2(right - _clock_shade.position.x + 10.0, 60)
 	practice_tag.position = Vector2(size.x - practice_tag.get_minimum_size().x - 22, 14)
+	if practice_tag.visible and (practice_tag.get_rect().intersects(identity.get_rect()) or practice_tag.get_rect().intersects(keys_line.get_rect())):
+		practice_tag.position.y = controls.position.y + controls.get_minimum_size().y + 8.0
 	message.position = Vector2(size.x * 0.5 - message.get_minimum_size().x * 0.5, size.y - 150)
 	hint.position = Vector2(22, size.y - 152)
 	split_label.position = Vector2(size.x * 0.5 - split_label.get_minimum_size().x * 0.5, size.y * 0.70)
@@ -217,6 +227,8 @@ func _reason(reason: String) -> String:
 			return "respawned"
 		"rate":
 			return "rate settling"
+	if int(game.practice_stage) >= 0:
+		return "stage practice from %s" % game.call("stage_title", int(game.practice_stage))
 	return "stage practice"
 
 func _strafe_text() -> void:
@@ -263,6 +275,7 @@ func preset_changed() -> void:
 	_layout()
 
 func map_changed() -> void:
+	_sync_stage_picker(true)
 	preset_changed()
 
 func run_started() -> void:
@@ -271,9 +284,9 @@ func run_started() -> void:
 	_split_time = 0.0
 	_intro_alpha = 1.0
 
-func practice_started(stage_title: String) -> void:
+func practice_started(stage_title: String, note: String = "") -> void:
 	finish_panel.hide()
-	notify("Practice from %s" % stage_title)
+	notify("Stage practice from %s · not recorded%s" % [stage_title, "" if note.is_empty() else "  ·  " + note])
 
 func respawned(stage_title: String) -> void:
 	_blink_alpha = 1.0
@@ -410,6 +423,22 @@ func _make_pause() -> void:
 	restart_button = _button(buttons, "Restart  R", func() -> void: game.restart_run())
 	practice_button = _button(buttons, "Practise  F", func() -> void: game.practice_restart())
 	quit_button = _button(buttons, "Quit", func() -> void: game.request_quit())
+	var stages := HBoxContainer.new()
+	stages.name = "StageRow"
+	stages.add_theme_constant_override("separation", 8)
+	column.add_child(stages)
+	var stage_label := Label.new()
+	stage_label.text = "Stage practice, not recorded"
+	stage_label.add_theme_font_size_override("font_size", 13)
+	stages.add_child(stage_label)
+	stage_picker = OptionButton.new()
+	stage_picker.name = "StagePicker"
+	stage_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	stage_picker.fit_to_longest_item = false
+	stages.add_child(stage_picker)
+	stage_practice_button = _button(stages, "Practise here", func() -> void: game.practise_stage(stage_picker.get_selected_id()))
+	stage_practice_button.name = "StagePractice"
+	_sync_stage_picker(true)
 	_heading(column, "Movement preset  (keeps your position, speed and view)")
 	var presets: Script = game.PRESETS
 	for id: String in presets.ORDER:
@@ -476,7 +505,33 @@ func set_paused(value: bool) -> void:
 	finish_panel.modulate.a = 0.0 if value else 1.0
 	if value:
 		_refresh_pause()
+		# each opening offers the last stage reached, so Practise here without a change is F.
+		_sync_stage_picker(true)
 		resume_button.grab_focus()
+	elif stage_picker != null:
+		stage_picker.get_popup().hide()
+
+## rebuilds the items when the map's stages changed; `select_current` picks the last stage reached.
+## a preset click while paused refreshes the menu without moving a stage the player picked.
+func _sync_stage_picker(select_current: bool) -> void:
+	if stage_picker == null or game == null or game.level == null:
+		return
+	var titles: Array[String] = []
+	for i: int in int(game.call("stage_count")):
+		titles.append(str(game.call("stage_title", i)))
+	if titles != _stage_titles:
+		_stage_titles = titles
+		stage_picker.clear()
+		for i: int in titles.size():
+			stage_picker.add_item(stage_item_text(i, titles[i]), i)
+		select_current = true
+	if select_current:
+		stage_picker.select(clampi(int(game.checkpoint_index), 0, titles.size() - 1))
+
+## "Start  Gatehouse", "3  Penstock straight": the spawn's stage is the start, and the numbers
+## count the stages after it, so Penstock's runway is stage 3.
+static func stage_item_text(index: int, title: String) -> String:
+	return "Start  %s" % title if index == 0 else "%d  %s" % [index, title]
 
 func _refresh_pause() -> void:
 	(pause_panel.find_child("PauseHeading", true, false) as Label).text = "SPILLWAY R14  ·  %s" % str(game.call("map_name")).to_upper()
@@ -487,6 +542,7 @@ func _refresh_pause() -> void:
 		records.append("open line %s" % _time(float(game.open_best_time)))
 	pause_records.text = "  ·  ".join(records)
 	practice_button.text = "Practise %s  F" % game.call("stage_title", int(game.checkpoint_index))
+	_sync_stage_picker(false)
 	for id: String in preset_buttons:
 		(preset_buttons[id] as Button).set_pressed_no_signal(id == str(game.preset_id))
 	for id: String in map_buttons:

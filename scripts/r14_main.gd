@@ -435,14 +435,34 @@ func restart_run() -> void:
 	stats.call("watch", player)
 	hud.call("run_started")
 
-## segment practice from the last stage the runner reached. never recorded.
+## f: segment practice from the last stage the runner reached. never recorded.
 func practice_restart() -> void:
+	practise_stage(checkpoint_index)
+
+## p / the one practice path, for F and the pause menu's stage picker: a new unrecorded attempt
+## from any stage's authored pose, whether the timer had started, the run had finished or a
+## preset switch was waiting. the index is clamped to the map's stages. the active preset and
+## the look settings stay. a waiting preset request is cancelled, as a map switch cancels it:
+## choosing where to practise is not a request for the other law, and applying it here would
+## change the law the player just chose to compare at that stage (docs/r14/STAGE-PRACTICE.md).
+func practise_stage(stage: int) -> void:
+	var requested := stage
+	stage = clampi(stage, 0, stage_count() - 1)
+	if stage != requested:
+		push_warning("r14: stage %d is outside 0..%d; practising %d" % [requested, stage_count() - 1, stage])
+	var note := ""
+	if not pending_preset.is_empty():
+		note = "%s request cancelled, staying on %s" % [str(PRESETS.entry(pending_preset).label), str(preset.label)]
+		pending_preset = ""
+		pending_message = ""
 	attempts += 1
 	clean_eligible = false
 	practice_reason = "practice"
 	finished = false
 	finish_kind = ""
-	practice_stage = checkpoint_index
+	checkpoint_index = stage
+	practice_stage = stage
+	respawn_count = 0
 	_reset_stage_times()
 	elapsed = 0.0
 	_started = false
@@ -452,12 +472,15 @@ func practice_restart() -> void:
 		level.call("reset_state")
 	set_paused(false)
 	stats.call("reset")
-	hud.call("practice_started", stage_title(checkpoint_index))
+	hud.call("practice_started", stage_title(stage), note)
+	print("r14: stage practice; stage=%d/%d; title=%s; map=%s; preset=%s; attempt=%d" % [stage, stage_count(), stage_title(stage), map_id, preset_id, attempts])
 
 func respawn() -> void:
 	respawn_count += 1
 	clean_eligible = false
-	practice_reason = "respawn"
+	# p / a fall during stage practice stays labelled stage practice.
+	if practice_stage < 0:
+		practice_reason = "respawn"
 	finished = false
 	finish_kind = ""
 	_restore_checkpoint()
