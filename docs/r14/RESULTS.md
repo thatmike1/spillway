@@ -1,13 +1,11 @@
-# R14 source validation, release pending
+# R14 validation and delivery candidate
 
 8 November 2026. Current source has five live presets, the original Penstock Yard,
-Overflow, a strafe HUD and stage practice. Final ZIP and exact-pack acceptance are still
-pending. This document records measured behavior, not a claim that Mike likes the result.
+Overflow, a strafe HUD and stage practice. The exact portable candidate has passed its package checks; independent review and promotion remain pending. This document records measured behavior, not a claim that Mike likes the result.
 
 The root diagnostic source wrapper passes every active gate, all three exact retained
 failure sets and the R13 controls. All five current Overflow replays match their
-actual-R14-main references exactly on position, view and progress. The committed
-delivery refusal/ownership tests pass 43/43. These checks precede the final portable pack.
+actual-R14-main references exactly on position, view and progress. The committed delivery refusal/ownership tests pass 43/43, and the later verifier-hardening regressions pass 43/43. The final source run is preserved in outer `checkpoints/spillway/r14/source-final-5484f10d/`.
 
 ## Source movement
 
@@ -84,10 +82,33 @@ ConfigFile rounding. Isolated R12/R13 sentinel files stay unchanged. See
 - Forced private Wayland can hang in engine teardown. Private X11 is used for later GPU
   checks. Finished records are saved before Quit. The earlier repaired desktop-socket
   incident and the temporary X0 symlink are documented in [QUIT-REVIEW.md](QUIT-REVIEW.md).
-- Screenshot-only discovery did not finish in 60 decisions. Its best clean attempt
+- The first screenshot-only discovery did not finish in 60 decisions. Its best clean attempt
   crossed four opening gaps, then hit the 4.0 m landing face. No collision defect was
   confirmed; takeoff placement and distinguishing landing tops from faces were the
-  main problems. A separate visual-only response is in progress. This failure remains
+  main problems. The visual-only response is integrated in source/export commit `5484f10d`. A second 58-decision screenshot test compared F1/F2/F3 in stage practice and landed four opening gaps, with no finish. It retained an initial pause-helper failure and disclosed reading more documentation than controls only. See [DISCOVERY-READABILITY.md](DISCOVERY-READABILITY.md). This failure remains
   recorded in outer `checkpoints/spillway/r14/discovery-source/REVIEW.md`.
-- Current portable ZIPs, final exact-pack record/control checks and the final independent
-  release/trail review have not yet closed this iteration.
+- The final independent release/trail review and promotion remain pending.
+
+## Exact portable candidate
+
+Source/export commit `5484f10d1c1ef009fd22de76651431db7e1e065e`. Both ZIPs carry pack
+`4e6446043e8f17c07673cead946e06e4c1f9e3473e73604bdef81cc5cf0654a8` and official
+release templates, with licences and external material provenance. Outer
+`delivery/work/r14-candidate-5484f10d/VERIFICATION.json` passes **204/204** checks.
+
+The Linux release starts from an empty working directory, switches all five presets
+and both maps, selects stage practice, shows identity/speed/jump/sync after drawing,
+keeps mixed attempts unrecorded and quits without engine errors. Ten normal-spawn
+input routes finish clean in order with zero respawns: five practice routes (F2 basic,
+advanced and final-gap recovery; F1 basic; F3 basic) and all five Overflow presets.
+Every packed trace equals its fresh source trace with zero position/view/game-state
+differences. Each route saves the full integer record and a second process restores it
+without rewriting the profile. The Linux runtime renders through verified amdgpu
+`renderD128` on a private X11 display; Windows is static acceptance only.
+
+All runtime checks run outside the source checkout. The embedded diagnostic harness
+is confined to a temporary copy; shipped folders contain no override or loose source.
+The Linux ZIP hash is `b849ce5ebb177b95a7b1c1a7683869d87e515142048542b41b2579d85593c7b4`;
+Windows is `7a39d10362966254e502c7a7254325e221f77234957f4cbfbf7b3b8c28b8f108`.
+The new report draft is [REPORT-DRAFT.md](REPORT-DRAFT.md). Contents/runtime/cancel
+negative controls and independent reviews are still pending at this snapshot.
