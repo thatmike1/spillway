@@ -35,6 +35,7 @@ const STATS := preload("res://scripts/r14_strafe_stats.gd")
 const HUD := preload("res://scripts/r14_hud.gd")
 const AUDIO := preload("res://scripts/momentum_overflow_audio.gd")
 const ART := preload("res://scripts/momentum_overflow_art.gd")
+const READABILITY := preload("res://scripts/r14_practice_readability.gd")
 const PRACTICE_LEVEL := preload("res://scripts/r14_practice_level.gd")
 const OVERFLOW_LEVEL := preload("res://scripts/momentum_overflow_level.gd")
 const R12_MAIN := preload("res://scripts/spillway_main.gd")
@@ -228,6 +229,7 @@ func _build_level() -> void:
 	add_child(level)
 	level.call("build")
 	ART.apply(level)
+	READABILITY.apply(level)
 	_kill_bounds = level.get("kill_bounds") if level.get("kill_bounds") is AABB else KILL_BOUNDS
 	course_geometry = _geometry_id()
 

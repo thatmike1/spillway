@@ -192,7 +192,7 @@ func _gatehouse() -> void:
 	_wall_z("s0_left", -8, 8, RUNIN_END, -1)
 	_wall_z("s0_right", 8, 8, RUNIN_END, 1)
 	_strip_x("s0_start_line", -8, 8, 0.0, 0.3)
-	_strip_x("s0_runin_edge", -8, 8, RUNIN_END, -0.35)
+	_strip_x("s0_runin_edge", -8, 8, RUNIN_END, 0.35)
 
 func _stop_logs() -> void:
 	# stage 1: eight stop-log blocks over a 2.5 m pit. five straight, each gap 0.5 m wider than
@@ -207,10 +207,10 @@ func _stop_logs() -> void:
 		var near: float = b[0]
 		var far: float = near - float(b[1])
 		_deck("s1_block_%d" % (i + 1), b[2], b[3], near, far, TRACK_Y, &"landing", 1)
-		_strip_x("s1_nose_%d" % (i + 1), b[2], b[3], far, -0.25)
-		_floor_label("s1_gap_%d" % (i + 1), Vector3(clampf(-2.0, b[2] + 1.5, b[3] - 1.5), TRACK_Y, previous - 0.6), 0.0, _gap_text(previous - near))
+		_strip_x("s1_nose_%d" % (i + 1), b[2], b[3], far, 0.25)
+		_floor_label("s1_gap_%d" % (i + 1), Vector3(clampf(-2.0, b[2] + 1.5, b[3] - 1.5), TRACK_Y, previous + 0.9), 0.0, _gap_text(previous - near))
 		previous = far
-	_floor_label("s1_gap_bend", Vector3(0.5, TRACK_Y, previous - 0.6), 0.0, _gap_text(previous - BEND_START))
+	_floor_label("s1_gap_bend", Vector3(0.5, TRACK_Y, previous + 0.9), 0.0, _gap_text(previous - BEND_START))
 	_wall_z("s1_left", -8, RUNIN_END, BEND_START, -1, pit_y)
 	_wall_z("s1_right", 8, RUNIN_END, BEND_START, 1, pit_y)
 
@@ -550,19 +550,19 @@ func route_hint(stage: int, feet: Vector3) -> String:
 		return "In the tail pit: walk east and up the lane ramp to the run-in."
 	match stage:
 		0:
-			return "Run in and line up on the first block. R restarts here."
+			return "Run in and jump from the red pad. Esc opens stage practice; stage 3 is the long runway."
 		1:
-			return "Hop the stop logs. Each gap is half a metre wider; the last three zig left and right."
+			return "Jump from the red pads. A short hop from behind the pad was early; from on it, check your speed."
 		2:
-			return "Strafe left round the bend. Inside gaps are short; the outside keeps speed and needs it."
+			return "Strafe left. The red pads mark the short inside line; the outside gaps need more speed."
 		3:
 			return "Build speed down the straight: hop, A/D with the mouse. The wall marks are 16 m apart."
 		4:
-			return "Pick a width at each gauge: the paint says what it needs. The wide ends alternate sides."
+			return "The red pad marks a run-speed gauge crossing. Wider lines need more speed; the wide ends alternate."
 		5:
 			return "Round to the right. Walk the inside band, or carry speed over the outer notch."
 		6:
-			return "Last gauge, 1.5 m down: 3.5 m on the right, 14 m on the left. Finish on the platform."
+			return "Last gauge, 1.5 m down: red pad on the right for run speed, 14 m on the left. Finish on the platform."
 	return "Cross the line on the platform."
 
 func start_wheel() -> void:

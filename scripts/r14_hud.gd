@@ -162,7 +162,7 @@ func _layout() -> void:
 	practice_tag.position = Vector2(size.x - practice_tag.get_minimum_size().x - 22, 14)
 	if practice_tag.visible and (practice_tag.get_rect().intersects(identity.get_rect()) or practice_tag.get_rect().intersects(keys_line.get_rect())):
 		practice_tag.position.y = controls.position.y + controls.get_minimum_size().y + 8.0
-	message.position = Vector2(size.x * 0.5 - message.get_minimum_size().x * 0.5, size.y - 150)
+	message.position = Vector2(size.x * 0.5 - message.get_minimum_size().x * 0.5, size.y - 184)
 	hint.position = Vector2(22, size.y - 152)
 	split_label.position = Vector2(size.x * 0.5 - split_label.get_minimum_size().x * 0.5, size.y * 0.70)
 	finish_panel.position = Vector2(30, maxf(110.0, size.y * 0.5 - finish_panel.size.y * 0.5))
@@ -205,7 +205,7 @@ func _process(delta: float) -> void:
 	var text := _hint_text()
 	if not text.is_empty():
 		hint.text = text
-	_hint_alpha = move_toward(_hint_alpha, 0.0 if text.is_empty() or _message_time > 0.0 or started else 0.9, delta * 3.0)
+	_hint_alpha = move_toward(_hint_alpha, 0.0 if text.is_empty() or started else 0.9, delta * 3.0)
 	hint.modulate.a = _hint_alpha
 	_layout()
 
