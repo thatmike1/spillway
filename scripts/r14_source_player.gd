@@ -358,7 +358,8 @@ func get_motion_state() -> Dictionary:
 		"tickrate": settings.tickrate,
 		"physics_hz": Engine.physics_ticks_per_second,
 		"delta": _last_delta,
-		"rate_matches": Engine.physics_ticks_per_second == int(settings.tickrate),
+		# the engine property can change before a queued batch of old-delta callbacks finishes.
+		"rate_matches": Engine.physics_ticks_per_second == int(settings.tickrate) and absf(_last_delta - 1.0 / float(settings.tickrate)) < 1e-9,
 		"mode": mode,
 		"grounded": is_grounded(),
 		"support_normal": state.ground_normal,

@@ -73,6 +73,17 @@ func _run() -> void:
 	for group: String in GROUPS:
 		if group in groups:
 			await call("group_" + group)
+	# a labelled telemetry-only seed: a requested rate is not proof of the callback's delta.
+	var original_delta: float = player.get("_last_delta")
+	var original_hz := Engine.physics_ticks_per_second
+	var expected_hz := int((player.get("settings") as Dictionary).tickrate)
+	Engine.physics_ticks_per_second = expected_hz
+	player.set("_last_delta", 1.0 / expected_hz)
+	check("rate_metadata_accepts_matching_callback", bool(player.call("get_motion_state").rate_matches))
+	player.set("_last_delta", 1.0 / 120.0)
+	check("rate_metadata_rejects_old_callback_delta", not bool(player.call("get_motion_state").rate_matches))
+	player.set("_last_delta", original_delta)
+	Engine.physics_ticks_per_second = original_hz
 	check("ordering_one_motor_step_per_tick", order_violations.is_empty(), "%d violations %s" % [order_violations.size(), order_violations.slice(0, 3)])
 	var failed := checks.filter(func(c: Dictionary) -> bool: return not c.pass)
 	var summary := {
