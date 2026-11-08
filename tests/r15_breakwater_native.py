@@ -4,7 +4,7 @@
 views: the fixed authored cameras of tests/r15_breakwater_views.gd, saved as JPEGs. not the
        player's camera; art and readability only.
 movie: a version 2 tape from tests/r15_breakwater_driver.gd replayed OPEN LOOP through the same
-       driver on the actual r14 main, rendered from the player's own camera with the hud, with
+       driver on the actual r15 main, rendered from the player's own camera with the hud, with
        godot's movie writer. the AVI lives in /dev/shm, is encoded to an MP4 here, selected
        frames are cut to JPEG, and the AVI is deleted. the replay's trace is compared tick for
        tick with a headless replay of the same tape.
@@ -20,6 +20,7 @@ import gzip
 import hashlib
 import importlib.util
 import json
+import math
 import os
 import shutil
 import subprocess
@@ -115,16 +116,36 @@ def views(args):
 
 
 def compare(a, b):
+    # the driver's samples round positions to 1 mm and velocities to 0.001 u/s.
+    # compare every captured field, not a zip of potentially incomplete vectors.
     rows = []
+    def finite(value):
+        if isinstance(value, dict):
+            return all(finite(v) for v in value.values())
+        if isinstance(value, list):
+            return all(finite(v) for v in value)
+        return not isinstance(value, float) or math.isfinite(value)
     for path in (a, b):
         with gzip.open(path, "rt") as f:
-            rows.append([json.loads(line) for line in f if line.strip()])
+            captured = [json.loads(line) for line in f if line.strip()]
+        for tick, row in enumerate(captured):
+            if type(row.get("t")) is not int or row["t"] != tick or not finite(row):
+                raise ValueError("invalid trace tick or nonfinite value")
+            for key in ("p", "v"):
+                if not isinstance(row.get(key), list) or len(row[key]) != 3 or not all(type(n) in (int, float) for n in row[key]):
+                    raise ValueError("invalid three-component vector")
+        rows.append(captured)
     worst = {"p": 0.0, "v": 0.0, "yaw": 0.0}
-    for x, y in zip(*rows):
-        worst["p"] = max(worst["p"], max(abs(i - j) for i, j in zip(x["p"], y["p"])))
-        worst["v"] = max(worst["v"], max(abs(i - j) for i, j in zip(x["v"], y["v"])))
+    different = []
+    for tick, (x, y) in enumerate(zip(*rows)):
+        for key in ("p", "v"):
+            worst[key] = max(worst[key], max(abs(i - j) for i, j in zip(x[key], y[key])))
         worst["yaw"] = max(worst["yaw"], abs(x["yaw"] - y["yaw"]))
-    return {"ticks": [len(rows[0]), len(rows[1])], "max_abs_diff": worst, "identical": len(rows[0]) == len(rows[1]) and worst == {"p": 0.0, "v": 0.0, "yaw": 0.0}}
+        if x != y:
+            different.append(tick)
+    return {"ticks": [len(rows[0]), len(rows[1])], "max_abs_diff": worst,
+            "different_sample_ticks": different, "identical": bool(rows[0]) and len(rows[0]) == len(rows[1]) and not different,
+            "precision": "driver samples: p 0.001 m, v 0.001 u/s, yaw 0.000001 rad; all fields compared"}
 
 
 def movie(args):
@@ -132,7 +153,7 @@ def movie(args):
     evidence.mkdir(parents=True, exist_ok=False)
     tape = args.tape.resolve()
     scratch = Path(tempfile.mkdtemp(prefix="bw-movie-", dir="/dev/shm"))
-    record = {"label": "OPEN LOOP replay of a driver tape on the actual r14 main hosting Breakwater; the player's own camera and hud; key and mouse events only after the main's labelled spawn",
+    record = {"label": "OPEN LOOP replay of a driver tape on the actual r15 main hosting Breakwater; the player's own camera and hud; key and mouse events only after the main's labelled spawn",
               "tape": str(tape), "tape_sha256": sha(tape), "driver_sha256": sha(PROJECT / "tests/r15_breakwater_driver.gd")}
     try:
         # the headless reference replay of the same tape first.

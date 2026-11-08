@@ -1,7 +1,7 @@
 extends "res://tests/r14_practice_driver.gd"
-## p / Breakwater route driver on the actual r14 main. CLOSED LOOP, STATE AWARE: an execution
+## p / Breakwater route driver on the actual r15 main. CLOSED LOOP, STATE AWARE: an execution
 ## proof that a line exists for the approved source runner, not imperfect play and not discovery.
-## it builds r14_main.gd with level_script = the Breakwater level, lets the main's own
+## it builds r15_main.gd with the named Breakwater map, lets the main's own
 ## restart_run() place the runner at the labelled spawn, and after that writes no pose, velocity,
 ## camera or progress: it reads the runner and answers with key edges and relative mouse counts,
 ## saved as a version 2 tape at the runner's actual rate. --tape= plays a tape back open loop.
@@ -12,11 +12,10 @@ extends "res://tests/r14_practice_driver.gd"
 ##   --out=DIR --route=NAME [--preset=server128|server128_aa1000] [--turn-cap=DEG_PER_S] [--tape=PLAN.json]
 ## --fixed-fps 128 (one draw per tick) is optional headless; native recordings pass their own.
 
-const MAIN := preload("res://scripts/r14_main.gd")
-const REGISTRY := preload("res://scripts/r14_presets.gd")
-const BREAKWATER := "res://scripts/r15_breakwater_level.gd"
+const MAIN := preload("res://scripts/r15_main.gd")
+const REGISTRY := preload("res://scripts/r15_presets.gd")
 const BW_SOURCES := ["res://scripts/r15_breakwater_level.gd", "res://scripts/r15_breakwater_art.gd", "res://tests/r15_breakwater_driver.gd",
-	"res://tests/r14_practice_driver.gd", "res://scripts/r14_main.gd", "res://scripts/r14_presets.gd", "res://scripts/r14_source_player.gd", "res://scripts/r14_source_motion.gd"]
+	"res://tests/r14_practice_driver.gd", "res://scripts/r15_main.gd", "res://scripts/r15_presets.gd", "res://scripts/r15_source_player.gd", "res://scripts/r14_source_player.gd", "res://scripts/r14_source_motion.gd"]
 
 ## route nodes, world (x, z), with r14_practice_driver.gd's meanings: land/e/drop/chain/fit/vt/hop/p.
 const GATE := [{"p": Vector2(-3.0, -18.0)}]
@@ -109,12 +108,12 @@ func _start() -> void:
 	max_ticks = int(opts.get("max-ticks", "20000"))
 	amp = deg_to_rad(float(opts.get("amp", "30")))
 	game = MAIN.new()
-	game.name = "R14"
+	game.name = "R15"
 	game.set("motor", str(opts.get("preset", "server128")))
-	game.set("level_script", load(BREAKWATER))
+	game.set("map_id", "breakwater")
 	game.set("set_window_title", false)
 	root.add_child(game)
-	# the base controller reads the game through `lab`; r14_main has the same run fields.
+	# the base controller reads the game through `lab`; r15_main preserves the same run fields.
 	lab = game
 	level = game.get("level")
 	player = game.get("player")
@@ -168,7 +167,7 @@ func _end(reason: String, tick: int) -> void:
 		sources[path] = FileAccess.get_sha256(path)
 	var mode := "OPEN LOOP replay of a fixed tape: no state was read to choose input" if not replay.is_empty() else "CLOSED LOOP state-aware execution proof; not imperfect input, not discovery"
 	var final := player.global_position
-	var summary := {"label": "P actual R14 main hosting Breakwater through level_script; normal spawn; " + mode,
+	var summary := {"label": "P actual R15 main hosting the named Breakwater map; normal spawn; " + mode,
 		"reason": reason, "route": opts.get("route", ""), "tape": opts.get("tape", ""), "preset": game.get("preset_id"), "physics_hz": hz,
 		"engine_hz": Engine.physics_ticks_per_second, "runner": (player.get_script() as Script).resource_path,
 		"turn_cap_deg_s": snappedf(rad_to_deg(turn_cap * hz), 0.1), "amp_deg": snappedf(rad_to_deg(amp), 0.1), "warmup_steps": warmup,
@@ -181,12 +180,12 @@ func _end(reason: String, tick: int) -> void:
 		"min_y": snappedf(min_y, 0.001), "max_display_speed_ups": snappedf(max_speed / U, 0.1), "missed": missed,
 		"wall_contact_ticks": wall_ticks, "wall_bodies": wall_bodies, "cast_guards": player.get("cast_guards"), "hops": hops, "flights": flights, "sinks": sinks, "supports": supports,
 		"final": _v(final), "final_support": _support(final), "events": events.size(),
-		"setup_writes": ["r14_main._ready -> restart_run(): the main's own reset to the level's labelled spawn"]}
+		"setup_writes": ["r15_main._ready -> restart_run(): the main's own reset to the level's labelled spawn"]}
 	_write("summary.json", summary)
 	var tape := {"format": "spillway-momentum-tape", "version": 2, "name": "r15-breakwater-%s-%s" % [opts.get("route", "tape"), game.get("preset_id")],
-		"description": "%s; driver-applied events on the actual r14 main hosting Breakwater, physics tick %d Hz, warmup %d steps" % [mode, hz, warmup],
+		"description": "%s; driver-applied events on the actual r15 main hosting Breakwater, physics tick %d Hz, warmup %d steps, look %.17f rad/count" % [mode, hz, warmup, radians_per_count],
 		"physics_hz": hz, "input_profile": "physics_tick", "duration_ticks": tick + 1, "duration_s": float(tick + 1) / hz, "mouse_quantize": "float32",
-		"radians_per_count": radians_per_count, "events": events}
+		"events": events}
 	var file := FileAccess.open(out_dir.path_join("events.tape.json"), FileAccess.WRITE)
 	file.store_string(JSON.stringify(tape, " ", false, true))
 	file.close()

@@ -2,18 +2,15 @@
 
 The first R15 map slice: an original dusk container-port bhop course, built 8 November 2026.
 It runs through a container yard, past a crane-line quay and out along a breakwater to a
-lighthouse. It is hosted unchanged by the R14 main through `level_script` and played by the
-approved Source runner. No part of it needs crouch.
-
-Uncommitted for root review. Root owns main, HUD, registry and packaging.
+lighthouse. It is the default named map in the actual R15 host, played by the real crouch runner. No part of the basic route needs crouch.
 
 ## Files
 
 | file | what |
 |---|---|
-| `scripts/r15_breakwater_level.gd` | geometry, progress, routes, gaps, the R14 level interface |
+| `scripts/r15_breakwater_level.gd` | geometry, progress, routes, gaps, the common level interface |
 | `scripts/r15_breakwater_art.gd` | dressing (sky, sun, water, surfaces, containers, scenery, props, labels), called from `build()` |
-| `scripts/r15_breakwater_lab.gd` | standalone launcher: R14 main with this level |
+| `scripts/r15_breakwater_lab.gd` | standalone launcher: real R15 main on the named map |
 | `assets/r15/breakwater/` | sourced kit, `MANIFEST.json`, `build_manifest.py`, CC0 text |
 | `tests/test_r15_breakwater.gd` | headless interface, geometry, headroom and hosting checks |
 | `tests/r15_breakwater_driver.gd` | closed-loop route driver and open-loop tape replay (extends `r14_practice_driver.gd`) |
@@ -23,8 +20,8 @@ Uncommitted for root review. Root owns main, HUD, registry and packaging.
 
 ## Host interface
 
-The R14 main takes the script as-is: `main.level_script = preload("res://scripts/r15_breakwater_level.gd")`.
-It hosts it as map `fixture`, named "Breakwater", 5 stages, default preset `server128`.
+The R15 main selects `map_id = "breakwater"`: 5 stages, default preset `server128`.
+The map also implements the common level interface for labelled fixture hosts.
 
 - Identity: `level_id` `r15-breakwater`, `level_name` `Breakwater`, `level_version` 1,
   `variant` `breakwater`, `material_mode` `kit`. The variant is deliberately not `course`:
@@ -38,7 +35,7 @@ It hosts it as map `fixture`, named "Breakwater", 5 stages, default preset `serv
   `geometry_hash()`, `geometry_manifest()`, `course_manifest()`, `reset_state()`,
   `start_wheel()`.
 - Geometry hash `231b7675ad7dde95f4cf9afbf5a2a25eadf400fc08d232d522a6a7c8952058d3`; course
-  key on `server128` `70fd0c2f3938bc78`. Bump `LEVEL_VERSION` with any change to geometry,
+  key on the current R15 `server128` runner `63f231d3f9641506` (the worker's earlier R14-host key was `70fd0c2f3938bc78`). Bump `LEVEL_VERSION` with any change to geometry,
   progress or timing.
 
 ## Layout
@@ -74,7 +71,7 @@ pointed at scratch.
 
 ```
 # play it
-godot --path . --script res://scripts/r15_breakwater_lab.gd [-- --r14-preset=server128_aa1000]
+godot --path . --script res://scripts/r15_breakwater_lab.gd [-- --r15-preset=server128_aa1000]
 # checks (1712 checks, 0 failures)
 godot --headless --audio-driver Dummy --path . --script res://tests/test_r15_breakwater.gd
 # a route: ordinary | earned | earned_lip | alley_recovery | harbour_recovery
@@ -94,7 +91,7 @@ python3 -I assets/r15/breakwater/build_manifest.py --api DIR
 
 Under `/home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r15/breakwater/`, 26 MiB.
 
-The routes are closed-loop controller runs, headless at 128 Hz. Each one has its
+The original worker routes below are closed-loop controller runs in a labelled R14 host, headless at 128 Hz. Each one has its
 `summary.json`, its `events.tape.json` (key edges and mouse counts after the labelled spawn)
 and a gzipped trace.
 
@@ -104,11 +101,11 @@ and a gzipped trace.
 | F2 server128 | earned | clean | 35.82 s | breach jumped at about 755 u/s; max 895 u/s |
 | F2 server128 | alley_recovery | clean | 55.48 s | deliberate box-rows miss, walks back up the ramp, no respawn |
 | F2 server128 | harbour_recovery | practice | 58.64 s | deliberately leaves bend two into the harbour; 1 respawn at Crane line |
-| F5 server128_aa1000 | ordinary | clean | 44.60 s | identical to F2: the 30 u wish cap saturates either way |
+| F5 server128_aa1000 | ordinary | clean | 44.60 s | same ordinary line as F2; not a claim that the profiles always agree |
 | F5 server128_aa1000 | earned | **failed** | budget | reaches 899 u/s, falls short of the breach 23 times |
 | F5 server128_aa1000 | earned_lip | **failed** | budget | later takeoff variant, 7 respawns |
 
-All runs: 0 wall-contact ticks and no sinks. The F5 earned failure is the inherited
+The successful runs have zero wall-contact ticks and no recorded sinks. The F5 earned failure is the inherited
 controller, not shown to be the map. Its fitted hop brakes in the air and takes off about 6 m
 early at 498 u/s, so it lands about 2 m short. I did not tune it further, so the breach on F5
 is unproven either way.
@@ -181,4 +178,10 @@ changes. Every change is in shaders and placement, never in the files.
 
 Root verified every one of the 61 upstream file MD5s and SHA-256s before copying the 15-asset kit, reran the 1712 geometry/interface checks in a fresh source/import/profile copy, and exercised the real R15 default/registry groups (32 checks, zero failures). The R15 host selects Breakwater automatically, so `project.godot` now launches `scenes/r15.tscn`. Root inspected the worker's ordinary-route, runway and breach native frames. Receipt: outer `checkpoints/spillway/r15/breakwater-integration/`.
 
-The worker's routes and AMD movies above use its labelled R14 host and unchanged Source runner; they are not final R15-host or packed-route acceptance. Those replays and independent contact/discovery review remain required. The AA1000 earned attempt remains failed, not promoted as a pass.
+The worker's routes and AMD movies above use its labelled R14 host. Root has now replayed all five retained successful tapes through the actual R15 named-map main and motor version 2. Ordinary F2/F5, F2 earned, physical alley return and harbour checkpoint respawn retain their exact finish times and outcomes. Source evidence: outer `checkpoints/spillway/r15/breakwater-r15-host/final-port/RESULTS.json`.
+
+All five also run through the strict standard executor: 30,952 ticks, correct rate and delivered events, no engine warnings/errors or integrity flags, neutral input and clean process cleanup. The harbour run deliberately respawns at tick 3075; the evaluator excludes that row from its counter-verified total, while the raw counter still advances once on every tick. The custom driver's position, velocity and yaw samples are rounded, so cross-tool agreement is checked within their documented half-quantum after reproducing float32 unit division. This is not an unrounded bit-identity claim.
+
+The old driver added an unsupported top-level `radians_per_count` annotation. The new exporter puts look information in `description`; root's normalized input copies remove only that extra annotation and preserve every event, tick and rate. The actual Source sensitivity is 2.5, not the old approved-golden override of 5.7296. Header normalization and source hashes are recorded beside the runs. Both early audit assertion failures are retained and explained; no actor was changed to repair them.
+
+Native R15 views, independent contact/discovery review and final packed acceptance remain pending. The AA1000 earned attempt remains failed, not promoted as a pass.
