@@ -40,11 +40,16 @@ spec.loader.exec_module(pr)
 results = []
 ARGS = None
 ORIGINAL_SIGNALS = {sig: signal.getsignal(sig) for sig in (signal.SIGINT, signal.SIGTERM)}
+RESULT_PATH = None
 
 
 def check(name, ok, detail=''):
     results.append({'name': name, 'ok': bool(ok), 'detail': detail})
-    print('%s %s%s' % ('PASS' if ok else 'FAIL', name, '' if not detail else ' (%s)' % str(detail)[:300]))
+    if RESULT_PATH is not None:
+        temporary = RESULT_PATH.with_suffix('.json.tmp')
+        temporary.write_text(json.dumps(results, indent=2) + '\n')
+        temporary.replace(RESULT_PATH)
+    print('%s %s%s' % ('PASS' if ok else 'FAIL', name, '' if not detail else ' (%s)' % str(detail)[:300]), flush=True)
 
 
 def run(cmd, cwd, log):
@@ -473,7 +478,7 @@ def cancel(package, evidence):
 
 
 def main():
-    global ARGS
+    global ARGS, RESULT_PATH
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--package', type=Path)
     parser.add_argument('--evidence', type=Path, required=True)
@@ -489,6 +494,7 @@ def main():
     if evidence.exists() and any(evidence.iterdir()):
         sys.exit('evidence directory must be new or empty')
     evidence.mkdir(parents=True, exist_ok=True)
+    RESULT_PATH = evidence / 'partial-summary.json'
     for group, function in [('ownership', lambda: ownership(evidence)), ('gates', lambda: gates(evidence)),
                             ('integrity', lambda: integrity(evidence)), ('preflight', lambda: preflight(evidence)),
                             ('contents', lambda: contents(package, evidence)), ('runtime', lambda: runtime(package, evidence)),
