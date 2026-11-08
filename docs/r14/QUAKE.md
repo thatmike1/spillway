@@ -10,7 +10,7 @@ the air ceiling, where Source caps the air projection at 30 u.
 F4 is one entry in `scripts/r14_presets.gd` (`quake3_inspired128`, aliases `quake`, `f4`).
 It is a configuration of the same original projection module (`r14_source_motion.gd`) and
 the same repaired Source collision adapter (`r14_source_player.gd`, family version
-`r14-source-motion-2`). No motor was cloned and no engine code was copied. Switching between
+`r14-source-motion-3`, including the later contact guard). No motor was cloned and no engine code was copied. Switching between
 F2 and F4 keeps the same body; the main loop treats it like any other Source preset.
 
 | Setting | F4 | Where it comes from |
@@ -91,6 +91,9 @@ Groups: vectors, preset, ballistics, switch, strafe, records, pause, maps. The m
 a smoke check on whatever geometry the checkout has.
 
 ## Overflow route and native renders
+
+The following is the earlier F4 integration evidence. Its geometry, times and family-2
+contacts are historical; current family-3 packed acceptance is indexed in RESULTS.md.
 
 A fresh input-only route, recorded for F4 and not a retimed Source tape: the old closed-loop
 ordinary driver ran inside the actual R14 main on the unchanged Overflow geometry

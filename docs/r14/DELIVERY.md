@@ -34,7 +34,9 @@ The input tape declares 64, 120 or 128 Hz. No events are retimed.
 Source tapes for the practice and Overflow Source runners use sensitivity
 **5.729577951308232** Source units. This is a recorded replay setting, not the player's
 2.5 default. R13 retains its original sensitivity. `warmup` defaults to eight neutral
-steps; practice references use 32. The executor arms on a drawn-frame boundary, so a
+steps. Historical 30 fps practice references used 32. The final one-frame-per-tick
+practice goldens use 33 for F2, 32 for F1 and 34 for F3, matching the reference's
+actual initial motor counter. No input events are shifted. The executor arms on a drawn-frame boundary, so a
 reference recorded at another cadence can have a different settled initial state.
 Fresh frozen-source goldens are generated for packed runs at the packed cadence.
 
