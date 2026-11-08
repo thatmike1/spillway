@@ -34,6 +34,10 @@ FLOOR = 15 * 2 ** 30
 spec = importlib.util.spec_from_file_location("bw_nd", PROJECT / "tools/r14_native_display.py")
 nd = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(nd)
+# reuse the verified process-group owner, including deferred launch/cancel cleanup.
+owner_spec = importlib.util.spec_from_file_location("bw_owner", PROJECT / "tools/package-r14.py")
+owner = importlib.util.module_from_spec(owner_spec)
+owner_spec.loader.exec_module(owner)
 
 
 def sha(path):
@@ -45,14 +49,8 @@ def home_free():
 
 
 def godot(args, env, cwd, log, timeout):
-    with log.open("w") as out:
-        proc = subprocess.Popen([str(GODOT), *args], env=env, cwd=cwd, stdout=out, stderr=subprocess.STDOUT, start_new_session=True)
-        try:
-            return proc, proc.wait(timeout=timeout)
-        except subprocess.TimeoutExpired:
-            os.killpg(proc.pid, 15)
-            proc.wait(10)
-            return proc, "timeout"
+    code, _text = owner.run_engine([str(GODOT), *args], cwd, env, log, timeout)
+    return None, code
 
 
 def scratch_env(scratch):
@@ -76,16 +74,12 @@ def native_run(evidence, args, scratch, timeout):
         record["display"] = display.display
         watch = display.gpu_watch()
         started = time.monotonic()
-        with (evidence / "engine.log").open("w") as out:
-            proc = subprocess.Popen([str(GODOT), *cmd], env=env, cwd=scratch, stdout=out, stderr=subprocess.STDOUT, start_new_session=True)
-            watch.follow(proc.pid)
-            try:
-                record["exit"] = proc.wait(timeout=timeout)
-            except subprocess.TimeoutExpired:
-                os.killpg(proc.pid, 15)
-                proc.wait(10)
-                record["exit"] = "timeout"
+        try:
+            record["exit"], _text = owner.run_engine([str(GODOT), *cmd], scratch, env,
+                                                   evidence / "engine.log", timeout, watch=watch)
+        finally:
             watch.stop()
+        record["process_owner_sha256"] = sha(PROJECT / "tools/package-r14.py")
         record["wall_s"] = round(time.monotonic() - started, 2)
         record["gpu"] = watch.verdict()
         text = (evidence / "engine.log").read_text(errors="replace")
