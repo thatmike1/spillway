@@ -500,7 +500,9 @@ func _missed_support(from: Vector3, motion: Vector3, caller: String) -> Dictiona
 ## more than `depth` inside geometry and the start is clear, the sweep's straight path from
 ## `from` along `motion` is bisected with the overlap test. a first touch on walkable support
 ## returns {fraction, hit}: the last clear share of the sweep and the contacts at the touch. a
-## clear end, an overlapping start or a first touch on any other face returns {}, and the sweep
+## this boundary search assumes contiguous overlap: disjoint occupied intervals can hide an
+## earlier contact (CONTACT-GUARD-REVIEW.md). it is not a general collision sweep replacement.
+## clear end, an overlapping start or a selected touch on any other face returns {}, and the sweep
 ## stands as the engine made it.
 func _support_inside(from: Vector3, motion: Vector3, end_at: Vector3, caller: String, depth := GUARD_DEPTH) -> Dictionary:
 	if not cast_guard:

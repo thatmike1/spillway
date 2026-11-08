@@ -4,7 +4,9 @@
 `scripts/r14_source_player.gd` now checks the end of every sweep the engine reports as
 contact-free, and the end of every stay-on-ground snap. When that pose sits inside geometry
 and the sweep started clear, it bisects the same straight path with the engine's overlap test.
-It corrects the sweep only when the first touch is walkable support. Anything else is left as
+It corrects the sweep only when the bisection-selected contact is walkable support.
+This assumes a contiguous occupied interval; it is not a general earliest-contact guarantee.
+Anything else is left as
 the engine made it and counted as declined. `r14_source_motion.gd` is unchanged. No cvar,
 preset, course geometry, R13 file or main/HUD file was touched.
 
@@ -40,7 +42,7 @@ and through the real adapter.
   counts
 - the start pose must be clear, otherwise declined. This rejects initial overlaps such as the
   review's invalid `s1_return` setup
-- 20 bisection steps find the first overlapping pose on the swept line
+- 20 bisection steps refine a clear/occupied boundary on the swept line
 - the first touch's contacts must include a walkable normal (`sv_walkable_normal`),
   otherwise declined. So a wall, the side of a top edge or a 50° face is never turned into
   support
@@ -150,6 +152,12 @@ not alter `physics_fingerprint`, because `cast_guard` is not a setting. **Root s
 server128_aa1000. R13 is unaffected.
 
 ## Limits
+
+- Independent review reproduced a helper-only disjoint-interval limitation: an earlier
+  brief wall overlap can be skipped before a later floor is selected. The actual engine
+  cast caught that wall in every reduced full tick, so no production failure was reproduced.
+  Below, "first touch" refers to the selected interval's boundary. Do not reuse this helper
+  as a general collision sweep. See CONTACT-GUARD-REVIEW.md for the reduced cases.
 
 - It is a repair of Godot casts by Godot overlap tests. It is not a Source trace, and no CS
   binary fidelity or feel is claimed.
