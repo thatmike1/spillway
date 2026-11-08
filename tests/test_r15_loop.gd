@@ -412,20 +412,19 @@ func _group_registry() -> void:
 	# a registered breakwater module becomes the default, without the stand-in label.
 	var extra := {"breakwater": {"name": "Breakwater (FIXTURE)", "theme": "fixture standing in for the module", "kind": "course", "script": FIXTURE_MAPS.Long},
 		"practice": MAPS.CATALOG.practice, "broken": {"name": "Not a level", "kind": "course", "script": "res://scripts/r15_presets.gd"},
-		"rainline": MAPS.CATALOG.rainline}
+		"unbuilt-fixture": {"name": "Unbuilt fixture", "kind": "course", "script": "res://tests/no_such_r15_level.gd"}}
 	var fixtures := FIXTURE_MAPS.registry(2, ["breakwater", "practice"], extra)
 	await make_game({}, "", {"registry": fixtures})
 	check("with a breakwater module, breakwater is the default", str(game.map_id) == "breakwater" and not bool(game.default_map_standin) and int(game.call("stage_count")) == 6, [game.map_id, game.default_map_standin])
 	check("a module that is not a level is not playable", not "broken" in game.call("map_ids"), game.call("map_ids"))
-	check("rainline is listed only if its module exists", ("rainline" in game.call("map_ids")) == FileAccess.file_exists(str(MAPS.CATALOG.rainline.script)))
+	check("a registered absent fixture module is not playable", not "unbuilt-fixture" in game.call("map_ids"))
 	await _drop_game()
 	fixtures.catalog.erase("breakwater")
 	await make_game({}, "", {"registry": fixtures})
 	check("without breakwater the chain falls to Penstock, labelled", str(game.map_id) == "practice" and bool(game.default_map_standin), [game.map_id, game.default_map_standin])
 	await _drop_game()
-	await make_game({}, "", {"registry": fixtures, "map": "rainline"})
-	if not FileAccess.file_exists(str(MAPS.CATALOG.rainline.script)):
-		check("asking for an unbuilt map starts the default instead", str(game.map_id) == "practice", game.map_id)
+	await make_game({}, "", {"registry": fixtures, "map": "unbuilt-fixture"})
+	check("asking for an unbuilt map starts the default instead", str(game.map_id) == "practice", game.map_id)
 
 func _chooser_geometry(label: String) -> Dictionary:
 	var side: Control = hud().get("_pause_side")

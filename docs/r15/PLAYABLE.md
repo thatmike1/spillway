@@ -1,10 +1,10 @@
 # R15 playable shell: maps, presets, checkpoints, records
 
 8 November 2026. The R15 game host is `scenes/r15.tscn` (`scripts/r15_main.gd`). It runs the
-approved R14 bhop movement with the real crouch runner. It sits beside R14, and no R14 file
-changed. `project.godot` still starts R14; root switches the main scene after full integration.
+approved R14 bhop movement with the real crouch runner. `project.godot` now launches R15
+Breakwater. The delivered R14 game and its approved motion modules remain unchanged.
 
-Launch without changing the main scene:
+Standalone launch with explicit options:
 `godot --path . --script res://scripts/r15_launch.gd [-- --r15-map=ID] [-- --r15-preset=ID] [-- --no-records]`
 
 ## What the player gets
@@ -34,8 +34,9 @@ fits: 3 at 1280×720 and at 4:3, 4 on ultrawide. The menu scrolls, so any number
 Twelve fixture maps were reached with the wheel. A card loads its map at the spawn and keeps the
 active preset.
 
-**Default map.** The default is Breakwater when its module exists. Until then it is Penstock
-Yard, labelled as the development stand-in. Today only Penstock Yard and Overflow are playable.
+**Default map.** Breakwater is the default. Penstock Yard and Overflow remain available in the
+map grid. A deliberately incomplete development tree falls back to Penstock with an explicit
+stand-in label; a final release must contain all five themed courses and the separate lab.
 
 ## Maps: `scripts/r15_maps.gd`
 
@@ -259,3 +260,5 @@ Root verified the returned source hashes and reran all 186 headless gates in a f
 Breakwater is now integrated as the actual default and the project launches the R15 scene. The first integration rerun passes the real default/registry groups on the Breakwater module. This supersedes the two-legacy-map/development-stand-in state recorded earlier; the other four new courses and movement lab remain incomplete.
 
 The real R15 host and crouch motor version 2 now replay all three approved F2/F5 routes with exact position, velocity, yaw, applied input and game state across 16,356 ticks (`crouch-harness/approved-routes/RESULTS.json` outside Git). Five Breakwater tapes also pass the standard executor, including physical recovery and a deliberate checkpoint respawn; see BREAKWATER.md for their times and evidence precision. No final R15 package has been accepted yet.
+
+The registry's absent-module refusal control now uses an explicitly nonexistent fixture, rather than a future real course. Fresh source shell verification on the Breakwater default passes 184 checks, with exactly five labelled refusal errors and no unexpected errors (`product-integration/available-map-control/RESULTS.json`). The earlier 186-check total included two missing-module/stand-in checks that no longer apply once Breakwater exists; none was retired to hide a failure.
