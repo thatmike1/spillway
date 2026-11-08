@@ -26,7 +26,7 @@ F1 is timing-sensitive. Late hops expose friction and reconstructed stamina loss
 
 Switching keeps position, speed and view; a used attempt becomes practice. **R** starts clean, **F** practises the last stage, **Esc** opens presets, maps, settings and stage practice, and **F11** toggles fullscreen. The map buttons switch between Penstock Yard and Overflow.
 
-Penstock has opening blocks, two bends and widening speed gauges. Missed gaps have return paths to retry. Red pads mark a takeoff zone calibrated for a flat 250 u/s jump. Jump near the pad's far yellow edge for longer gaps; pale noses and dark faces distinguish landings from front walls. Pads are not calibrated for R13. The advanced line is unavailable to vanilla at its clamps.
+Penstock has opening blocks, two bends and widening speed gauges. Missed gaps have return paths to retry. Red pads mark a takeoff zone calibrated for a flat 250 u/s jump. Jump near the pad's far yellow edge for longer gaps; pale noses and dark faces distinguish landings from front walls. For a slower basic line, release Space between jumps and move to each far edge before jumping again. Holding it autohops immediately on landing. Pads are not calibrated for R13. The advanced line is unavailable to vanilla at its clamps.
 
 ## Read the HUD
 
@@ -46,7 +46,7 @@ A separate X11 keyboard/mouse test on this exact pack passes **22/22**: Space, w
 
 - Source contacts are independently implemented on Godot casts, with an 18 u step and a conservative missed-floor guard. There is no crouched hull, crouch jump, ladder or faithful water model. Rising-air surface friction is modelled and reduces AA12 gain in its window.
 - Some landings are tight. Two tested inward-angle return approaches still stall until a sideways input escapes. F4/F5 have no full Penstock route proof; all five presets do have clean Overflow proofs.
-- The first two screenshot-driven discovery attempts did not finish. The second landed four opening gaps, but used frequent pauses and read more documentation than allowed. Scripted finishes do not prove that the practice route is easy to learn.
+- None of three screenshot-driven discovery attempts finished. The latest used the delivered pack for 54 decisions: it earned Stop logs, cleared the 3.5 m gap in practice and hit the 4.0 m landing face. No collision defect was established. That attempt was editor-hosted packed play, separate from the release-runtime checks. Scripted finishes do not prove that the route is easy to learn.
 - Forced private Wayland can hang in Godot teardown. The final X11 runs quit cleanly. If Quit leaves a process running, end it; finished records are already saved. A historical initialization difference up to 1.697 cm remains unexplained between the old R13 product and its R14 host, without changing tested finish times. Current packed references match exactly.
 - Native Windows play, physical gamepad use, audio listening, physical latency and human enjoyment remain unverified.
 

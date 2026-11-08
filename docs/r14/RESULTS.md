@@ -23,7 +23,7 @@ Linux SHA256: `9e96522880918c28fc04f82df0fa2587eb1fcefc4467010407bb8d4b01785a80`
 Windows SHA256: `869807eb95ee9d1bda21c6ff9cc2f97eaa14f0d01a84e66f2e9d63be32b44eac`.
 The copied ZIPs pass their checksums; every retained file equals the completed run.
 Later commits record documentation, test helpers and lowercase comment style. The frozen
-export remains65d205be; the style pass preserves every non-comment line and line count,
+export remains 65d205be; the style pass preserves every non-comment line and line count,
 as recorded in outer `checkpoints/spillway/r14/delivery-takeover/comment-style-audit.json`.
 Execution paths inside original JSON refer to the RAM staging root. RETENTION.json
 maps that root to the permanent delivery; the original observations were not rewritten.
@@ -100,7 +100,7 @@ between A/D and the mouse turn on eligible air ticks, not turn-rate efficiency.
 The exact 65d205be pack also passes **22/22 OS-input checks** on private AMD/X11:
 manual Space, held autohop, wheel, all preset keys/rates, stage picker, mouse calibration,
 both A/D strafes, short no-key coast and Quit. The 100-pixel delivered mouse delta
-turns 5.5 degrees at sensitivity2.5. Both strafes build 250 to 255.0593 u/s; the 0.1796875 s
+turns 5.5 degrees at sensitivity 2.5. Both strafes build 250 to 255.0593 u/s; the 0.1796875 s
 coast has zero horizontal-velocity drift. This is XTest synthetic OS input, not a
 physical-device, whole-route or feel claim. [OS-INPUT.md](OS-INPUT.md),
 [final analysis](../../../../../checkpoints/spillway/r14/os-input-final/analysis.json).
@@ -152,8 +152,13 @@ that had extended beyond the solid deck. Six tapes remained identical.
 The second 58-decision comparison used F1/F2/F3 practice and then landed four opening
 gaps after a clean restart, with no finish. Its pause-helper failure and broader-than-
 allowed documentation read are disclosed. [DISCOVERY-READABILITY.md](DISCOVERY-READABILITY.md).
-A final delivered-pack player-view attempt is still running at this publication snapshot;
-its result will be added before goal closure. Scripted finishes do not prove easy discovery.
+The final delivered-pack attempt stopped after 54 decisions without a finish. It earned
+Stop logs, then clearly cleared the 3.5 m gap in practice and hit the 4.0 m far face.
+It used screenshots only, with no hidden-state steering or documentation overread.
+This was editor-hosted packed play, not release-runtime acceptance. No collision defect
+was established. [DISCOVERY-DELIVERED.md](DISCOVERY-DELIVERED.md). The play guide now
+explains releasing Space between slow basic jumps to approach each far edge, since
+held autohop can take off too early. Scripted finishes do not prove easy discovery.
 
 Some advanced landings are tight. F1 cannot take the advanced line at its clamps;
 F4/F5 have no full Penstock route proof, and the pump notch is unproven. The tapered
