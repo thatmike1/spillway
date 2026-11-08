@@ -260,6 +260,7 @@ func _state() -> Dictionary:
 		"started": bool(game.get("_started")), "finished": bool(game.get("finished")), "attempts": int(game.get("attempts")),
 		"checkpoint": int(game.get("checkpoint_index")), "practice_stage": int(game.get("practice_stage")),
 		"course_key": str(game.get("course_key")), "runner": _script_path(player), "feet": _v3(player.global_position),
+		"lab": bool(game.call("is_lab")), "lab_moves": game.call("lab_moves"),
 		"grounded": player.call("is_grounded"), "hull": hull, "crouched": bool(game.call("is_crouched")),
 		"stand_blocked": bool(game.call("stand_blocked")), "crouch_text": _hud_text("crouch_tag") if _label_drawn("crouch_tag") else "",
 		"identity_text": _hud_text("identity"),
@@ -797,6 +798,8 @@ func _controls() -> void:
 			_check_hud_words("%s %s" % [map, id])
 		await _restore_preset(start_preset)
 		await _stage_picker_controls(map)
+		if map == "experiment":
+			await _lab_controls(start_map, start_preset)
 	if str(game.get("map_id")) != start_map:
 		await _pause_menu_click("Map_" + start_map, "map %s from the pause menu" % start_map)
 		await _physics(6)
@@ -834,6 +837,81 @@ func _controls() -> void:
 		await _restore_preset(start_preset)
 	await _physics(6)
 	await captured("controls-done", {"map": start_map, "preset": start_preset, "paused": false})
+
+func _lab_controls(home_map: String, home_preset: String) -> void:
+	# exercise the real lab keys, menu and host transitions, never a runner setter.
+	await _restore_preset("server128")
+	await _tap(KEY_R)
+	await _physics(4)
+	var all_on := {"slide": true, "wall_jump": true, "grapple": true}
+	var default_key := str(game.get("course_key"))
+	await captured("lab-default", {"map": "experiment", "lab": true, "lab_moves": all_on, "clean": true,
+		"runner": "res://scripts/r15_experiment_player.gd"})
+	check("lab title and visible HUD identify the experiment", str(game.call("window_title")).contains("EXPERIMENTAL")
+		and _label_drawn("lab_tag") and _hud_text("lab_tag").contains("EXPERIMENTAL")
+		and _label_drawn("lab_panel") and _label_drawn("reticle"), _hud_text("lab_panel"))
+	for slot: int in [3, 4]:
+		await _tap(KEY_F1 + slot - 1)
+		await captured("lab-refuses-f%d" % slot, {"preset": "server128", "clean": true, "message": "~F2 and F5 only"})
+	var ids := ["slide", "wall_jump", "grapple"]
+	for i: int in ids.size():
+		var off := all_on.duplicate()
+		off[ids[i]] = false
+		await _tap(KEY_1 + i)
+		await captured("lab-" + str(ids[i]) + "-off", {"lab_moves": off, "clean": true})
+		check("lab %s has a separate record key" % ids[i], str(game.get("course_key")) != default_key, game.get("course_key"))
+		await _tap(KEY_1 + i)
+		await captured("lab-" + str(ids[i]) + "-restored", {"lab_moves": all_on, "clean": true, "course_key": default_key})
+	await _pause_menu_click("LabMove_grapple", "lab grapple switch", false)
+	var menu_off := all_on.duplicate()
+	menu_off.grapple = false
+	await captured("lab-menu-grapple-off", {"lab_moves": menu_off, "paused": true, "clean": true})
+	await _tap(KEY_ESCAPE)
+	await _tap(KEY_3)
+	await captured("lab-menu-key-agree", {"lab_moves": all_on, "paused": false, "course_key": default_key})
+	await _tap(KEY_2)
+	var wall_off := all_on.duplicate()
+	wall_off.wall_jump = false
+	await _tap(KEY_F5)
+	await _physics(4)
+	await captured("lab-f5-keeps-loadout", {"preset": "server128_aa1000", "lab_moves": wall_off, "clean": true,
+		"runner": "res://scripts/r15_experiment_player.gd"})
+	await _restore_preset("server128")
+	await _tap(KEY_2)
+	await _tap(KEY_R)
+	_key(KEY_W, true)
+	await _physics(4)
+	_key(KEY_W, false)
+	var used := bool(game.get("_used_preset_physics"))
+	var started := bool(game.get("_started"))
+	await _tap(KEY_1)
+	await captured("lab-moved-toggle-is-practice", {"clean": false, "practice_reason": "mechanics", "practice_tag": "~lab moves changed"})
+	check("lab toggle purity includes motion before the timer starts", used and not started, [used, started])
+	await _tap(KEY_R)
+	await _tap(KEY_1)
+	await captured("lab-reset-default-loadout", {"clean": true, "lab_moves": all_on, "course_key": default_key})
+	await _pause_menu_click("Map_" + home_map, "leave lab for the normal course")
+	await _physics(6)
+	check("leaving the lab restores the frozen approved runner", _script_chain(game.get("player")) == expect.identity.keys[home_map]["server128"].runner_chain)
+	check("normal course hides experimental state and restores its record key", game.call("lab_moves").is_empty()
+		and not _label_drawn("lab_tag") and not _label_drawn("lab_panel") and not _label_drawn("reticle")
+		and str(game.get("course_key")) == str(expect.identity.keys[home_map]["server128"].course_key))
+	_key(KEY_SHIFT, true)
+	_key(KEY_E, true)
+	await _physics(4)
+	await captured("course-ignores-lab-keys", {"lab": false, "lab_moves": {}, "crouched": false, "clean": true})
+	_key(KEY_SHIFT, false)
+	_key(KEY_E, false)
+	await _tap(KEY_F3)
+	await _physics(8)
+	await _pause_menu_click("Map_experiment", "enter lab from the R13 comparison")
+	await _physics(6)
+	await captured("lab-from-f3-uses-f2", {"map": "experiment", "preset": "server128", "lab": true,
+		"lab_moves": all_on, "clean": true, "runner": "res://scripts/r15_experiment_player.gd", "message": "~switched from"})
+	await _pause_menu_click("Map_" + home_map, "return from lab")
+	await _restore_preset(home_preset)
+	var input := _input_observation()
+	check("lab controls leave all keys neutral", input.actions.is_empty() and input.physical.is_empty(), input)
 
 func _crouch_controls() -> void:
 	# actual controls on the default course, without a diagnostic hull or test-only roof.
