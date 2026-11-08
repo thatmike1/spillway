@@ -385,14 +385,14 @@ def trace_error(rows, packed=False, expected=None):
     return None
 
 
-def packed_input_audit(rows, plan, input_settings):
+def packed_input_audit(rows, plan, input_settings, *, observer_path=None, expected_observer_sha256=None):
     """judge observed input/order, independently of the packed probe's verdict.
 
     the hull exception is exactly the already challenged source-executor observer. raw
     mismatch flags stay in the trace; an air crouch needs a real box transition, matching
     input, geometry, origin and one counted motor step. no reset is allowed in a clean run.
     """
-    errors, compensations = [], []
+    errors, compensations, observer_sha256 = [], [], None
     def fault(tick, kind):
         errors.append({'tick': tick, 'kind': kind})
     def finite(value):
@@ -408,9 +408,15 @@ def packed_input_audit(rows, plan, input_settings):
         pitch_limit = input_settings['pitch_limit']
         if not finite(sensitivity) or not sensitivity > 0 or not finite(pitch_limit) or not pitch_limit > 0:
             raise ValueError('missing or invalid source input settings')
-        module_spec = importlib.util.spec_from_file_location('r15_tape_observer', PROJECT / 'tools/momentum-tape.py')
+        observer_path = Path(observer_path or PROJECT / 'tools/momentum-tape.py')
+        observer_bytes = observer_path.read_bytes()
+        observer_sha256 = hashlib.sha256(observer_bytes).hexdigest()
+        if expected_observer_sha256 is not None and observer_sha256 != expected_observer_sha256:
+            raise ValueError('hull observer differs from the package helper manifest')
+        module_spec = importlib.util.spec_from_file_location('r15_tape_observer', observer_path)
         observer = importlib.util.module_from_spec(module_spec)
-        module_spec.loader.exec_module(observer)
+        # execute exactly the bytes hashed above, even if a sibling file changes afterwards.
+        exec(compile(observer_bytes, str(observer_path), 'exec'), observer.__dict__)
         planned_keys, planned_mouse = {}, {}
         for event in plan['events']:
             if 'key' in event:
@@ -424,6 +430,27 @@ def packed_input_audit(rows, plan, input_settings):
                 (held.add if edge == 'press' else held.remove)(key)
             audit = row['audit']
             pre, post, order = audit['pre'], audit['post'], audit['order']
+            duck_state = post['motion_state'].get('duck', {})
+            hull_origin = audit.get('hull_origin')
+            if duck_state or hull_origin:
+                if not isinstance(hull_origin, dict):
+                    raise ValueError('missing Source hull observation')
+                for phase in ('before', 'after'):
+                    hull = hull_origin[phase]
+                    size, center, scale = hull['box_size_m'], hull['box_center_m'], hull['scale']
+                    if (type(hull['ducked']) is not bool or not finite(hull['standing_u']) or not finite(hull['duck_u'])
+                            or not 0 < hull['duck_u'] < hull['standing_u']
+                            or any(not isinstance(v, list) or len(v) != 3 or not all(finite(x) for x in v) for v in (size, center, scale))):
+                        raise ValueError('malformed Source hull dimensions')
+                    height = hull['duck_u'] if hull['ducked'] else hull['standing_u']
+                    if (abs(size[1] - height * .0254) > 1e-6 or min(size) <= 0 or abs(size[0] - size[2]) > 1e-6
+                            or any(abs(x-y) > 1e-6 for x, y in zip(center, (0, size[1]/2, 0)))
+                            or any(abs(x-1) > 1e-6 for x in scale)):
+                        fault(tick, phase + ' actual box differs from crouch state')
+                after = hull_origin['after']
+                if (duck_state.get('ducked') is not after['ducked']
+                        or 'ctrl' in held and after['ducked'] is not True):
+                    fault(tick, 'crouch input, reported state and actual hull disagree')
             if any(row.get(k) != 1 / hz for k in ('dt', 'dt_late')) or row.get('engine_hz') != hz or row.get('rate_ok') is not True:
                 fault(tick, 'wrong rate or delta')
             if (type(row.get('pre_steps')) is not int or type(row.get('motor_steps')) is not int
@@ -477,10 +504,11 @@ def packed_input_audit(rows, plan, input_settings):
             if previous is not None and (yaw != previous['yaw'] or pitch != previous['pitch']):
                 fault(tick, 'unplanned view change between steps')
             previous = row
-    except (KeyError, TypeError, ValueError, AttributeError, IndexError, OverflowError) as error:
+    except (KeyError, TypeError, ValueError, AttributeError, IndexError, OverflowError, OSError) as error:
         errors.append({'kind': 'missing or malformed input/order evidence', 'detail': str(error)})
     return {'ok': not errors, 'ticks': len(rows), 'errors': errors[:20], 'error_count': len(errors),
             'hull_origin_compensations': compensations,
+            'hull_observer_sha256': observer_sha256,
             'scope': 'engine input, observed box and motor ordering; not OS or physical-device input'}
 
 
@@ -658,6 +686,11 @@ def source_identity(source, evidence, files, probe):
                        sorted(set(REQUIRED_MAPS) ^ set(identity['maps'])))
     if identity['registry']['default_preset'] != DEFAULT_PRESET or 'vanilla64' in identity['registry']['order']:
         raise Rejected('R15 starts on F2 and excludes vanilla64')
+    available = {p for p, value in identity['registry']['presets'].items() if value['available']}
+    for map_id in REQUIRED_MAPS:
+        expected = {'server128', 'server128_aa1000'} if map_id == 'experiment' else available
+        if set(identity['keys'].get(map_id, {})) != expected:
+            raise Rejected('source identity omitted a supported map/preset pair on ' + map_id)
     pending = [(m, p) for m, keys in identity['keys'].items() for p, k in keys.items() if k['pending'] or not k['clean'] or k['preset'] != p]
     if pending:
         raise Rejected('identity could not switch cleanly at the spawn: %s' % pending)
@@ -946,6 +979,8 @@ def package(args):
         (stage / 'dist' / 'BUILD.json').write_text(json.dumps(build, indent=2, ensure_ascii=False) + '\n')
         args.probe = evidence / 'frozen-probe.gd'
         shutil.copy2(source / 'tools/r15-pack-probe.gd', args.probe)
+        args.hull_observer = evidence / 'frozen-hull-observer.py'
+        shutil.copy2(source / 'tools/momentum-tape.py', args.hull_observer)
         shutil.rmtree(source)
         args.pack_required = sorted(set(resources(facts['files'])) | set(args.require))
         result = check_package(stage / 'dist', args, evidence / 'check', routes, pack_expect=digest(pack))
@@ -1116,7 +1151,7 @@ def check_package(dist, args, evidence, routes, pack_expect=None):
     runs = {}
     try:
         if static_ok and 'linux-x86_64' in extracted:
-            runs = check_runs(extracted['linux-x86_64'], args, evidence, identity, routes, record, work)
+            runs = check_runs(extracted['linux-x86_64'], args, evidence, identity, routes, record, work, build['helpers_sha256'])
     finally:
         # the bulky runtimes stay in the zips; the evidence keeps their hashes.
         shutil.rmtree(work, ignore_errors=True)
@@ -1230,7 +1265,7 @@ def sparse_movie(frames_dir, fps, target):
             'error': code.stderr[-300:] if code.returncode else ''}
 
 
-def check_runs(extracted, args, evidence, identity, routes, record, work):
+def check_runs(extracted, args, evidence, identity, routes, record, work, helpers):
     folder, _ = extracted
     runs = {}
     start = identity.get('start', {})
@@ -1321,7 +1356,9 @@ def check_runs(extracted, args, evidence, identity, routes, record, work):
                     record('%s play: shipped trace equals the source executor exactly' % name, exact.get('ok'), exact)
                     try:
                         observed = [json.loads(line) for line in (out / 'trace.jsonl').read_text().splitlines() if line.strip()]
-                        delivery = packed_input_audit(observed, json.loads(Path(route['tape']).read_text()), route.get('input_settings', {}))
+                        delivery = packed_input_audit(observed, json.loads(Path(route['tape']).read_text()), route.get('input_settings', {}),
+                                                      observer_path=getattr(args, 'hull_observer', None),
+                                                      expected_observer_sha256=helpers['tools/momentum-tape.py'])
                     except (OSError, ValueError) as error:
                         delivery = {'ok': False, 'error': str(error)}
                     runs[name][mode]['input_order_audit'] = delivery
@@ -1464,6 +1501,8 @@ def recheck_routes(build, args, evidence):
     args.probe = stage / 'tools/r15-pack-probe.gd'
     shutil.copy2(args.probe, evidence / 'frozen-probe.gd')
     args.probe = evidence / 'frozen-probe.gd'
+    args.hull_observer = evidence / 'frozen-hull-observer.py'
+    shutil.copy2(stage / 'tools/momentum-tape.py', args.hull_observer)
     shutil.rmtree(stage, ignore_errors=True)
     return routes
 

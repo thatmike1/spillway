@@ -143,10 +143,21 @@ def main():
             alter("missing motor step", lambda r: r[50].update(motor_steps=r[50]["pre_steps"]))
             alter("previous-origin lie", lambda r: r[50]["audit"]["order"].update(motor_prev_matches_pre=False))
             alter("wrong real crouch box", lambda r: r[35]["audit"]["hull_origin"]["after"]["box_size_m"].__setitem__(1, 72 * .0254))
+            alter("standing box during steady crouch", lambda r: r[50]["audit"]["hull_origin"]["after"]["box_size_m"].__setitem__(1, 72 * .0254))
+            alter("Ctrl held but crouch state absent", lambda r: r[50]["audit"]["hull_origin"]["after"].update(ducked=False))
+            alter("missing steady Source hull capture", lambda r: r[50]["audit"].pop("hull_origin"))
             alter("wrong reported crouch shift", lambda r: r[35]["audit"]["post"]["motion_state"].update(duck_shift=[0, 1, 0]))
             alter("skipped step hidden by crouch", lambda r: r[35]["audit"]["order"].update(step_count_delta=0))
             alter("missing observation", lambda r: r[50].pop("audit"))
             alter("out-of-physics capture", lambda r: r[50]["audit"]["order"].update(in_physics=False))
+            observer_path = source / "tools/momentum-tape.py"
+            observer_hash = hashlib.sha256(observer_path.read_bytes()).hexdigest()
+            pinned = module.packed_input_audit(rows, plan, settings, expected_observer_sha256=observer_hash)
+            check("executed hull helper hash is pinned and recorded", pinned["ok"] and pinned["hull_observer_sha256"] == observer_hash)
+            changed_helper = Path(temp) / "changed-observer.py"
+            changed_helper.write_bytes(observer_path.read_bytes() + b"\n# a different helper must be refused before execution\n")
+            refused = module.packed_input_audit(rows, plan, settings, observer_path=changed_helper, expected_observer_sha256=observer_hash)
+            check("changed sibling hull helper refused", not refused["ok"] and any("helper manifest" in str(e) for e in refused["errors"]))
     summary = {"checks": results, "passed": sum(r["ok"] for r in results), "failed": sum(not r["ok"] for r in results),
                "scope": "source-mode packed-probe component and corrupt-capture controls; no release runtime/export or native render",
                "scratch_removed": not Path(temp).exists()}

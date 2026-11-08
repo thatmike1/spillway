@@ -21,8 +21,8 @@ extends Node
 ## mode calls select_map/select_preset; every other mode drives the game only through input.
 ## spec: -- --pack-probe=/abs/spec.json, written by package-r15.py.
 
-const KEYS := {"w": KEY_W, "a": KEY_A, "s": KEY_S, "d": KEY_D, "space": KEY_SPACE, "ctrl": KEY_CTRL}
-const ACTIONS := {"w": "move_forward", "a": "move_left", "s": "move_back", "d": "move_right", "space": "jump", "ctrl": "crouch"}
+const KEYS := {"w": KEY_W, "a": KEY_A, "s": KEY_S, "d": KEY_D, "space": KEY_SPACE, "ctrl": KEY_CTRL, "shift": KEY_SHIFT, "e": KEY_E}
+const ACTIONS := {"w": "move_forward", "a": "move_left", "s": "move_back", "d": "move_right", "space": "jump", "ctrl": "crouch", "shift": "r15_slide", "e": "r15_grapple"}
 ## the screen points (fractions of the view) whose physics hit must be a drawn floor.
 const FLOOR_PROBES := [Vector2(0.5, 0.92), Vector2(0.5, 0.82), Vector2(0.5, 0.72), Vector2(0.38, 0.88), Vector2(0.62, 0.88)]
 const CAPTURE_SCALE := 0.5
@@ -401,7 +401,7 @@ func _identity() -> void:
 		maps[map] = _map_identity()
 		keys[map] = {}
 		for id: String in registry.order:
-			if not bool(registry.presets[id].available):
+			if not bool(registry.presets[id].available) or (bool(game.call("is_lab")) and not id in ["server128", "server128_aa1000"]):
 				continue
 			if id != str(game.get("preset_id")):
 				game.call("select_preset", id)
@@ -761,7 +761,8 @@ func _slot_key(id: String) -> int:
 
 func _available() -> Array:
 	var registry: Dictionary = expect.identity.registry
-	return (registry.order as Array).filter(func(id: String) -> bool: return bool(registry.presets[id].available))
+	var available: Dictionary = expect.identity.keys.get(str(game.get("map_id")), {})
+	return (registry.order as Array).filter(func(id: String) -> bool: return available.has(id))
 
 func _controls() -> void:
 	var registry: Dictionary = expect.identity.registry
