@@ -437,6 +437,10 @@ func _make_pause() -> void:
 	stage_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	stage_picker.fit_to_longest_item = false
 	stages.add_child(stage_picker)
+	# linux release templates mismanage embedded popup focus connections (godot #89657).
+	# a native picker avoids that path; editor/headless and other platforms keep their defaults.
+	if OS.get_name() == "Linux" and OS.has_feature("template_release") and DisplayServer.has_feature(DisplayServer.FEATURE_SUBWINDOWS):
+		stage_picker.get_popup().force_native = true
 	stage_practice_button = _button(stages, "Practise here", func() -> void: game.practise_stage(stage_picker.get_selected_id()))
 	stage_practice_button.name = "StagePractice"
 	_sync_stage_picker(true)

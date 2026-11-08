@@ -186,7 +186,15 @@ func _ui_tap(code: int) -> void:
 		event.keycode = code
 		event.physical_keycode = code
 		event.pressed = pressed
-		get_viewport().push_input(event, true)
+		var picker := _hud().get("stage_picker") as OptionButton
+		var popup := picker.get_popup() if picker != null else null
+		if popup != null and popup.visible and not popup.is_embedded():
+			# native subwindows receive their own window id, as real display events do.
+			event.window_id = popup.get_window_id()
+			Input.parse_input_event(event)
+			Input.flush_buffered_events()
+		else:
+			get_viewport().push_input(event, true)
 		await get_tree().process_frame
 
 ## a left click through the viewport's gui picking, at the centre of a visible control.
@@ -756,6 +764,7 @@ func _stage_picker_controls(map: String) -> void:
 	check(map + ": stage picker clicked", await _click(picker))
 	var popup := picker.get_popup()
 	check(map + ": stage picker popup opened", popup.visible)
+	check(map + ": Linux release picker uses the native focus workaround", not (OS.get_name() == "Linux" and OS.has_feature("template_release") and DisplayServer.has_feature(DisplayServer.FEATURE_SUBWINDOWS)) or not popup.is_embedded())
 	for i: int in popup.item_count * 2 + 2:
 		var focus := popup.get_focused_item()
 		if focus == stage:
