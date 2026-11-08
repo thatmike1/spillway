@@ -238,14 +238,15 @@ Evidence is in the outer `checkpoints/spillway/r15/product-loop/` (23 MB): `rout
 - **Fixtures.** Every lifecycle, chooser, crouch and record check runs on labelled fixture levels
   (`tests/r15_loop_fixture_level.gd`, `tests/r15_loop_fixture_maps.gd`). They say nothing about a
   real course.
-- **Not yet built.** Breakwater, the other four courses and the lab do not exist in this tree.
-  Their ids are registered but not playable, and none of them was exercised.
+- **Current maps.** Breakwater, Penstock Yard and Overflow are available. Breakwater is the
+  actual default. Whiteout Relay, Sunken Court, Rainline, Night Shift and the Movement Lab
+  remain unavailable until their modules land; planned cards never appear as finished maps.
 - **Root, after the maps land:**
   - rerun this suite
   - add per-map route proofs
-  - set Breakwater's spawn and checkpoint data
+  - challenge new contacts, recovery and map discovery
   - decide whether to make `_duck_compensation_u` public
-  - switch `project.godot` to `scenes/r15.tscn`
+  - verify the final portable pack outside the checkout
 - **Not measured.** Speed or feel with Mike; physical-device input; a packed build.
 - **Stray files.** A Godot import regenerates `.uid` files for three R14 scripts (see
   docs/r15/CROUCH.md). It also generates `.import` files for the asset library. They were not
@@ -253,6 +254,8 @@ Evidence is in the outer `checkpoints/spillway/r15/product-loop/` (23 MB): `rout
 
 ## Root source integration
 
-Root verified the returned source hashes and reran all 186 headless gates in a fresh imported copy with the real crouch runner. The outer log scan first rejected five intentional refusal-control errors; the receipt now classifies exactly those five expected messages and rejects every other error. Root inspected the native map chooser and airborne-crouch frames. Evidence: outer `checkpoints/spillway/r15/product-integration/`. The new scene is available explicitly; the project default stays on the delivered R14 scene until the first new course is integrated. This does not certify future map routes or a final package.
+Root verified the returned source hashes and reran all 186 headless gates in a fresh imported copy with the real crouch runner. The outer log scan first rejected five intentional refusal-control errors; the receipt now classifies exactly those five expected messages and rejects every other error. Root inspected the native map chooser and airborne-crouch frames. Evidence: outer `checkpoints/spillway/r15/product-integration/`. The original shell check predates the first map. The project now defaults to R15 Breakwater. This does not certify future map routes or a final package.
 
 Breakwater is now integrated as the actual default and the project launches the R15 scene. The first integration rerun passes the real default/registry groups on the Breakwater module. This supersedes the two-legacy-map/development-stand-in state recorded earlier; the other four new courses and movement lab remain incomplete.
+
+The real R15 host and crouch motor version 2 now replay all three approved F2/F5 routes with exact position, velocity, yaw, applied input and game state across 16,356 ticks (`crouch-harness/approved-routes/RESULTS.json` outside Git). Five Breakwater tapes also pass the standard executor, including physical recovery and a deliberate checkpoint respawn; see BREAKWATER.md for their times and evidence precision. No final R15 package has been accepted yet.

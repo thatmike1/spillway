@@ -95,6 +95,8 @@ func dress(level: Node3D) -> void:
 	_labels(level)
 	if not _neutral:
 		_props(level)
+		# prop supports are authored after the main prism/container batches.
+		_commit(level, "PropSupports_", "prop_support_triangles")
 	report["neutral"] = _neutral
 	report["apply_ms"] = (Time.get_ticks_usec() - started) / 1000.0
 	report["scenery_bodies"] = scenery_bodies
@@ -334,11 +336,11 @@ func _st(kind: StringName) -> SurfaceTool:
 		_surfaces[kind] = st
 	return _surfaces[kind]
 
-func _commit(level: Node3D) -> void:
+func _commit(level: Node3D, prefix := "Mesh_", report_key := "prism_triangles") -> void:
 	var counts := {}
 	for kind: StringName in _surfaces:
 		var instance := MeshInstance3D.new()
-		instance.name = "Mesh_" + String(kind)
+		instance.name = prefix + String(kind)
 		instance.mesh = (_surfaces[kind] as SurfaceTool).commit()
 		instance.material_override = material(kind)
 		if String(kind).begins_with("paint"):
@@ -346,7 +348,7 @@ func _commit(level: Node3D) -> void:
 		level.add_child(instance)
 		counts[String(kind)] = instance.mesh.get_faces().size() / 3
 	_surfaces.clear()
-	report["prism_triangles"] = counts
+	report[report_key] = counts
 
 # --- containers -----------------------------------------------------------------------------
 

@@ -164,8 +164,7 @@ changes. Every change is in shaders and placement, never in the files.
   measured.
 - The crane line reads darkish under the cranes, and the far land is a flat slab with simple
   boxes.
-- The lighthouse beam is a plain additive cone, and the lamp heads on the crown poles are small
-  and read as floating from a distance.
+- The lighthouse beam is a plain additive cone. Crown-wall lamps now have visible support poles; the earlier missing support batch was found in a moving R15 view and repaired.
 - The tyre fenders sit on the quay and breakwater faces below the deck edge with no collision.
   They are cosmetic, and inside the respawn band.
 - Box-rows gaps are all vanilla tier. The challenge sits in the bends, the chicane and the
@@ -185,3 +184,9 @@ All five also run through the strict standard executor: 30,952 ticks, correct ra
 The old driver added an unsupported top-level `radians_per_count` annotation. The new exporter puts look information in `description`; root's normalized input copies remove only that extra annotation and preserve every event, tick and rate. The actual Source sensitivity is 2.5, not the old approved-golden override of 5.7296. Header normalization and source hashes are recorded beside the runs. Both early audit assertion failures are retained and explained; no actor was changed to repair them.
 
 Native R15 views, independent contact/discovery review and final packed acceptance remain pending. The AA1000 earned attempt remains failed, not promoted as a pass.
+
+## Crown lamp repair
+
+The first R15 native ordinary run showed genuinely floating lamp fixtures. `_props()` added their five support boxes after the prism batch had already been committed, leaving 50 authored triangles undrawn. The pass now commits that separate support batch. Its footprint stays behind the crown wall; no physics object is added or changed.
+
+Outer `breakwater-r15-host/pole-fix-final/RESULTS.json` verifies the same 250 physics nodes and geometry hash before/after, the 50 now-drawn support triangles, all 1712 geometry checks, and all five standard replays. Across 30,952 full-precision executor ticks, position, velocity, yaw, game state and applied input match exactly (wall-clock capture stamps excluded). The initial diagnostic assumed closed-bottom boxes and expected 60 triangles; the actual authored prisms have no bottom and contain 50. That failed assertion is retained in `pole-fix/`.
