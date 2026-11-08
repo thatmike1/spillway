@@ -5,9 +5,9 @@ This is the integration checklist, not release acceptance. The delivered R14 ZIP
 - [x] Actual R15 default scene, separate profile, F2/F5, crouch, map grid and checkpoint practice.
 - [x] Approved uncrouched route parity through the real R15 host and motor version 2.
 - [x] Breakwater route proofs through the strict executor, including physical return and checkpoint respawn.
-- [ ] All five new course modules, plus the separate optional movement playground, integrated and played through the R15 host.
-- [ ] Per-course F2 ordinary route, deliberate recovery and F5 basic route. Preserve failed and unfinished attempts.
-- [ ] Experimental slide, wall jump and bounded grapple with explicit controls, state and record identity. Normal maps retain approved movement.
+- [x] All five new course modules, plus the separate optional movement playground, integrated and played through the R15 host.
+- [x] Source/native per-course F2 ordinary route, deliberate recovery and F5 basic route. Failed and unfinished attempts are retained.
+- [x] Experimental slide, wall jump and bounded grapple with explicit controls, state and record identity. Normal maps retain approved movement.
 - [ ] Independent contact/checkpoint/crouch/record challenges, actual player-view discovery and OS-input checks on the final candidate.
 - [ ] Fresh portable Linux and Windows release ZIPs, packed Linux checks outside the checkout, player report and pushed source.
 
@@ -28,3 +28,5 @@ Packed route evidence uses explicit rate, sensitivity and warmup from each sourc
 HOME needs at least 15 GiB free before every export/native launch. Keep the pinned Weston package used by `r14_native_display.py`; it is a current R15 dependency despite its historical checkpoint path. Bound scratch, retain compressed traces, selected JPEGs and final MP4s, and remove owned import/profile/shader caches. Do not touch the desktop display or current final R12/R13/R14 deliveries.
 
 Promote only the accepted immutable ZIPs and their BUILD, checksum, verification and licence evidence into outer `delivery/spillway-r15/`. Windows remains static-only unless it is actually run on Windows. The outer REPORT tells Mike how to launch, choose maps/checkpoints, crouch, use F2/F5 and enter the experimental playground; it states actual caveats and leaves feel to him.
+
+Current packed route admission remains clean, ordered and zero-respawn. Deliberate fall/respawn proofs are reported separately as source/native recovery evidence; packed checkpoint-picker and practice controls do not upgrade them into packed recovery routes. A reset exception would need its own narrow rule and independent challenge before recovery tapes could be admitted.

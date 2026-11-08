@@ -19,6 +19,10 @@ const DIM := Color(0.957, 0.945, 0.867, 0.72)
 const SHADE := Color(0.055, 0.10, 0.12)
 const NO_SAMPLES := "—"
 const KEYS_LINE := "F2 bhop server · F5 AA 1000 · Ctrl crouch · R restart · F last checkpoint · Esc maps, stages and settings"
+## the movement lab's line: its presets, its three moves and their toggles.
+const LAB_KEYS_LINE := "F2 / F5 only · Shift slide · Space at a wall: wall jump · hold E: grapple · 1 / 2 / 3 turn moves on or off · Ctrl crouch · R · F · Esc"
+const LAB_CONTROLS := "Movement Lab, EXPERIMENTAL moves (labelled game choices, not the approved bhop):\nShift from a run slides under the pipe rack · Space as you touch a wall jumps off it · hold E at a ring to grapple, let go to coast"
+const LAB_WORDS := {"slide": "Slide  (Shift)", "wall_jump": "Wall jump  (Space at a wall)", "grapple": "Grapple  (hold E)"}
 ## map cards: the narrowest card, the gap between cards and the most columns.
 const CARD_MIN_WIDTH := 200.0
 const CARD_HEIGHT := 62.0
@@ -67,6 +71,11 @@ var advanced_toggle: Button
 var advanced_box: VBoxContainer
 var preset_buttons: Dictionary = {}
 var map_buttons: Dictionary = {}
+var lab_tag: Label
+var lab_panel: Label
+var reticle: Label
+var lab_box: VBoxContainer
+var lab_switches: Dictionary = {}
 var _stage_titles: Array[String] = []
 var _map_ids: Array = []
 var _pause_side: ColorRect
@@ -138,6 +147,11 @@ func attach(main: Node) -> void:
 	best_line = _label("", 13, DIM)
 	split_label = _label("", 22, INK)
 	practice_tag = _label("", 15, ACCENT)
+	lab_tag = _label("EXPERIMENTAL  ·  MOVEMENT LAB", 18, WARN)
+	_backing(lab_tag, 0.55)
+	lab_panel = _label("", 14, INK)
+	_backing(lab_panel, 0.45)
+	reticle = _label("+", 22, INK)
 	message = _label("", 17, INK)
 	hint = _label("", 15, Color(INK, 0.9))
 	for label: Label in [split_label, message, hint, practice_tag]:
@@ -153,7 +167,7 @@ func attach(main: Node) -> void:
 
 func _layout() -> void:
 	var size := get_viewport().get_visible_rect().size
-	for label: Label in [identity, practice_tag, message, crouch_tag]:
+	for label: Label in [identity, practice_tag, message, crouch_tag, lab_tag, lab_panel, reticle]:
 		label.reset_size()
 	identity.position = Vector2(22, 14)
 	keys_line.position = Vector2(22, 40)
@@ -182,6 +196,9 @@ func _layout() -> void:
 	practice_tag.position = Vector2(size.x - practice_tag.get_minimum_size().x - 22, 14)
 	if practice_tag.visible and (practice_tag.get_rect().intersects(identity.get_rect()) or practice_tag.get_rect().intersects(keys_line.get_rect())):
 		practice_tag.position.y = controls.position.y + controls.get_minimum_size().y + 8.0
+	lab_tag.position = Vector2(size.x - lab_tag.get_minimum_size().x - 22, practice_tag.position.y + (34.0 if practice_tag.visible else 0.0))
+	lab_panel.position = Vector2(size.x - lab_panel.get_minimum_size().x - 22, lab_tag.position.y + 36.0)
+	reticle.position = size * 0.5 - reticle.get_minimum_size() * 0.5
 	message.position = Vector2(size.x * 0.5 - message.get_minimum_size().x * 0.5, size.y - 184)
 	hint.position = Vector2(22, size.y - 152)
 	split_label.position = Vector2(size.x * 0.5 - split_label.get_minimum_size().x * 0.5, size.y * 0.70)
@@ -230,6 +247,7 @@ func _process(delta: float) -> void:
 		best_line.text = "no clean time yet, this preset"
 	practice_tag.text = "" if bool(game.clean_eligible) else "PRACTICE (%s) · R for a clean run" % _reason(str(game.practice_reason))
 	practice_tag.visible = not practice_tag.text.is_empty()
+	_lab_text()
 	_strafe_text()
 	_split_time = maxf(0.0, _split_time - delta)
 	split_label.modulate.a = minf(1.0, _split_time * 1.5)
@@ -266,8 +284,41 @@ func identity_text() -> String:
 		line += "  ·  STAND-IN runner (R14, no crouch hull)"
 	return line
 
+## the lab's tag, its moves' live state and the aim mark. hidden on every other map.
+func _lab_text() -> void:
+	var lab := bool(game.call("is_lab"))
+	lab_tag.visible = lab
+	reticle.visible = lab
+	var moves: Dictionary = game.call("lab_moves")
+	lab_panel.visible = lab and not moves.is_empty()
+	keys_line.text = LAB_KEYS_LINE if lab else KEYS_LINE
+	if not lab_panel.visible:
+		return
+	var live: Dictionary = game.player.call("experiment_hud") if game.player.has_method("experiment_hud") else {}
+	var lines: Array[String] = []
+	for id: String in LAB_WORDS:
+		lines.append("%s  %s  ·  %s" % ["ON " if bool(moves.get(id, false)) else "OFF", str(LAB_WORDS[id]), str(live.get(id, ""))])
+	lab_panel.text = "\n".join(lines)
+	var target := str(live.get("target", "none"))
+	reticle.add_theme_color_override("font_color", AHEAD if target == "ok" or bool(live.get("attached", false)) else (BEHIND if target in ["blocked", "far"] else INK))
+
+func mechanics_changed() -> void:
+	_sync_lab_switches()
+	if pause_panel != null and pause_panel.visible:
+		_refresh_pause()
+
+func _sync_lab_switches() -> void:
+	if lab_box == null:
+		return
+	var moves: Dictionary = game.call("lab_moves")
+	lab_box.visible = not moves.is_empty()
+	for id: String in lab_switches:
+		(lab_switches[id] as CheckButton).set_pressed_no_signal(bool(moves.get(id, false)))
+
 func _reason(reason: String) -> String:
 	match reason:
+		"mechanics":
+			return "lab moves changed mid-run"
 		"preset":
 			return "preset switched mid-run"
 		"respawn":
@@ -315,6 +366,8 @@ func _hint_text() -> String:
 
 func preset_changed() -> void:
 	controls.text = str(game.preset.get("controls", ""))
+	if bool(game.call("is_lab")):
+		controls.text += "\n" + LAB_CONTROLS
 	_intro_alpha = 1.0
 	if bool(game.preset.get("advanced", false)):
 		_show_advanced(true)
@@ -324,6 +377,7 @@ func preset_changed() -> void:
 
 func map_changed() -> void:
 	_sync_stage_picker(true)
+	_sync_lab_switches()
 	preset_changed()
 
 func run_started() -> void:
@@ -500,6 +554,20 @@ func _make_pause() -> void:
 	stage_practice_button = _button(stages, "Practise here", func() -> void: game.practise_stage(stage_picker.get_selected_id()))
 	stage_practice_button.name = "StagePractice"
 	_sync_stage_picker(true)
+	lab_box = VBoxContainer.new()
+	lab_box.name = "LabMoves"
+	lab_box.add_theme_constant_override("separation", 5)
+	column.add_child(lab_box)
+	_heading(lab_box, "Movement Lab moves  (EXPERIMENTAL, game choices; a change mid-run makes it practice)")
+	for id: String in LAB_WORDS:
+		var switch := CheckButton.new()
+		switch.name = "LabMove_" + id
+		switch.text = "%s   ·   key %d" % [str(LAB_WORDS[id]), (["slide", "wall_jump", "grapple"] as Array).find(id) + 1]
+		switch.toggled.connect(func(on: bool) -> void: game.set_mechanic(id, on))
+		lab_box.add_child(switch)
+		lab_switches[id] = switch
+	_small(lab_box, "All three start on in the lab. Off means the key does nothing and the approved F2/F5 movement plays unchanged. Records keep each loadout apart.")
+	_sync_lab_switches()
 	_heading(column, "Movement  (a switch keeps your position, speed and view)")
 	var presets: Script = game.PRESETS
 	for id: String in presets.PRIMARY:
@@ -657,8 +725,11 @@ func _refresh_pause() -> void:
 	practice_button.text = "Practise %s  F" % game.call("stage_title", int(game.checkpoint_index))
 	_build_map_cards()
 	_sync_stage_picker(false)
+	var lab := bool(game.call("is_lab"))
 	for id: String in preset_buttons:
 		(preset_buttons[id] as Button).set_pressed_no_signal(id == str(game.preset_id))
+		(preset_buttons[id] as Button).disabled = not bool(game.PRESETS.call("available", id)) or (lab and not id in game.PRESETS.PRIMARY)
+	_sync_lab_switches()
 	for id: String in map_buttons:
 		(map_buttons[id] as Button).set_pressed_no_signal(id == str(game.map_id))
 	pause_look.text = str(game.call("look_description"))

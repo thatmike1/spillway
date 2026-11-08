@@ -31,6 +31,9 @@ EVIDENCE = Path("/home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillwa
 EXECUTOR = PROJECT / "tools/momentum-tape.gd"
 FORMAT = "spillway-momentum-tape"
 KEYS = ["w", "a", "s", "d", "space", "ctrl"]
+# p / r15 movement lab: Shift (slide) and E (grapple) exist in version 2 tapes only; a version 1
+# tape keeps the alphabet above.
+V2_KEYS = KEYS + ["shift", "e"]
 MOVE_KEYS = {"w", "a", "s", "d"}
 PROFILES = {"tick120": 1, "render30": 4}
 MAX_TICKS = 120 * 600
@@ -159,10 +162,11 @@ def expand(tape):
             errors.append(f"unknown curve kind {curve['kind']}")
     down = {}
     # within a tick releases precede presses, so a release and re-press can share a boundary.
-    keys.sort(key=lambda k: (k[0], 0 if k[2] == "release" else 1, KEYS.index(k[1]) if k[1] in KEYS else 99))
+    alphabet = V2_KEYS if version == 2 else KEYS
+    keys.sort(key=lambda k: (k[0], 0 if k[2] == "release" else 1, alphabet.index(k[1]) if k[1] in alphabet else 99))
     events = []
     for tick, key, edge in keys:
-        if key not in KEYS or edge not in ("press", "release"):
+        if key not in alphabet or edge not in ("press", "release"):
             errors.append(f"tick {tick}: unknown key {key} or edge {edge}")
         elif (edge == "press") == (key in down):
             errors.append(f"tick {tick}: {edge} of {key} does not match its held state")

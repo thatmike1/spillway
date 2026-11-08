@@ -19,8 +19,11 @@ extends SceneTree
 const MAIN := preload("res://scripts/spillway_main.gd")
 const FIXTURE := preload("res://tools/momentum-tape-fixture.gd")
 const MOTORS := {"flow": "res://scripts/momentum_flow_player.gd", "r12": "res://scripts/spillway_player.gd"}
-const KEYS := {"w": KEY_W, "a": KEY_A, "s": KEY_S, "d": KEY_D, "space": KEY_SPACE, "ctrl": KEY_CTRL}
-const ACTIONS := {"w": "move_forward", "a": "move_left", "s": "move_back", "d": "move_right", "space": "jump", "ctrl": "crouch"}
+const KEYS := {"w": KEY_W, "a": KEY_A, "s": KEY_S, "d": KEY_D, "space": KEY_SPACE, "ctrl": KEY_CTRL, "shift": KEY_SHIFT, "e": KEY_E}
+const ACTIONS := {"w": "move_forward", "a": "move_left", "s": "move_back", "d": "move_right", "space": "jump", "ctrl": "crouch",
+	"shift": "r15_slide", "e": "r15_grapple"}
+# p / r15 movement lab keys: version 2 tapes only, and only against a game that binds their actions.
+const V2_ONLY_KEYS := ["shift", "e"]
 const FORMAT := "spillway-momentum-tape"
 const PROFILES := {"tick120": 1, "render30": 4}
 # p / a finite simulation budget: no tape may run longer than ten simulated minutes.
@@ -116,6 +119,8 @@ func _start(errors: Array) -> void:
 		errors = _build_world()
 	if errors.is_empty():
 		errors = _rate_after_ready()
+	if errors.is_empty():
+		errors = _actions_bound()
 	if not errors.is_empty():
 		_write_json("end.json", {"reason": "rejected", "errors": errors})
 		printerr("momentum-tape: rejected: ", errors)
@@ -189,7 +194,7 @@ func _load_tape(path: String) -> Array:
 		if event.has("key"):
 			var key := str(event.key)
 			var press := str(event.get("edge")) == "press"
-			if not KEYS.has(key) or str(event.get("edge")) not in ["press", "release"] or press == down.has(key):
+			if not KEYS.has(key) or (tape_version == 1 and key in V2_ONLY_KEYS) or str(event.get("edge")) not in ["press", "release"] or press == down.has(key):
 				errors.append("tick %d: invalid edge %s %s" % [tick, key, event.get("edge")])
 				continue
 			if press:
@@ -207,6 +212,16 @@ func _load_tape(path: String) -> Array:
 			mouse_at[tick] = Vector2(float(motion[0]), float(motion[1]))
 		else:
 			errors.append("tick %d: event is neither key nor mouse" % tick)
+	return errors
+
+## every key the tape uses has its action in the game's input map, so no edge goes undelivered.
+func _actions_bound() -> Array:
+	var errors: Array = []
+	for tick: int in keys_at:
+		for edge: Dictionary in keys_at[tick]:
+			var action: String = ACTIONS[edge.key]
+			if not InputMap.has_action(action) and not errors.has("tape key %s needs the %s action, which this game does not bind" % [edge.key, action]):
+				errors.append("tape key %s needs the %s action, which this game does not bind" % [edge.key, action])
 	return errors
 
 func _request_rate(value: String) -> Array:
@@ -419,6 +434,8 @@ func late_step(delta: float) -> void:
 	var just_pressed: Array = []
 	var just_released: Array = []
 	for key: String in ACTIONS:
+		if not InputMap.has_action(ACTIONS[key]):
+			continue
 		if Input.is_action_pressed(ACTIONS[key]):
 			actions.append(key)
 		if Input.is_action_just_pressed(ACTIONS[key]):
@@ -555,6 +572,8 @@ func _finish(reason: String, code: int) -> void:
 	Input.flush_buffered_events()
 	var still: Array = []
 	for key: String in ACTIONS:
+		if not InputMap.has_action(ACTIONS[key]):
+			continue
 		if Input.is_action_pressed(ACTIONS[key]):
 			still.append(key)
 			# last-resort cleanup so nothing stays held; the report marks it as a delivery fault.

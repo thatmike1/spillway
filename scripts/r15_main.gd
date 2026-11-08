@@ -45,6 +45,12 @@ const R12_MAIN := preload("res://scripts/spillway_main.gd")
 const U := 0.0254
 const DEFAULT_PRESET := "server128"
 const STANDIN := "standin-r14"
+## the movement lab's runner: r15's runner plus the optional slide, wall jump and grapple. only a
+## map of kind "lab" plays it; every other map plays PRESETS.SOURCE_PLAYER (docs/r15/EXPERIMENT.md).
+const EXPERIMENT_RUNNER := "res://scripts/r15_experiment_player.gd"
+## p / the lab's live toggles, beside its pause-menu switches.
+const LAB_KEYS := {"slide": KEY_1, "wall_jump": KEY_2, "grapple": KEY_3}
+const LAB_MOVE_WORDS := {"slide": "Slide", "wall_jump": "Wall jump", "grapple": "Grapple"}
 ## the r14 look defaults; the two families' settings stay separate.
 const DEFAULT_SETTINGS := {"source_sensitivity": 2.5, "source_fov": 90.0, "r13_sensitivity": 1.0, "r13_fov": 90.0, "volume": 0.70, "show_ms": true}
 ## r14's dam-sized fallback, kept for the two r14 maps so their runs stay what they were.
@@ -183,6 +189,7 @@ func _ready() -> void:
 			push_error("r15: map '%s' is not playable here; using the default" % map_id)
 		map_id = MAPS.default_id(maps)
 		default_map_standin = MAPS.default_is_standin(maps, map_id)
+	var lab_note := _lab_restrict()
 	startup_error = _runner_problem()
 	if startup_error.is_empty() and map_id.is_empty():
 		startup_error = "no playable map is registered"
@@ -205,6 +212,8 @@ func _ready() -> void:
 	_apply_settings()
 	_refresh_records()
 	restart_run()
+	if not lab_note.is_empty():
+		hud.call("notify", lab_note)
 	if args.has("--no-hud"):
 		hud.hide()
 	_update_title()
@@ -223,6 +232,17 @@ func _bind_keys() -> void:
 		var event := InputEventKey.new()
 		event.physical_keycode = KEY_F1 + slot - 1
 		InputMap.action_add_event(action, event)
+	# the lab's move keys and toggles exist in every r15 game; only the lab's runner reads them.
+	var lab := {"r15_slide": KEY_SHIFT, "r15_grapple": KEY_E}
+	for id: String in LAB_KEYS:
+		lab["r15_lab_" + id] = LAB_KEYS[id]
+	for action: String in lab:
+		if InputMap.has_action(action):
+			InputMap.erase_action(action)
+		InputMap.add_action(action)
+		var event := InputEventKey.new()
+		event.physical_keycode = lab[action]
+		InputMap.action_add_event(action, event)
 
 # --- runner -------------------------------------------------------------------------------------
 
@@ -237,7 +257,7 @@ func _source_script_path() -> String:
 		return (source_runner as Script).resource_path
 	var named := str(source_runner)
 	if named.is_empty():
-		return PRESETS.SOURCE_PLAYER
+		return EXPERIMENT_RUNNER if is_lab() else PRESETS.SOURCE_PLAYER
 	if named == STANDIN:
 		return PRESETS.STANDIN_PLAYER
 	return named
@@ -331,6 +351,66 @@ func is_crouched() -> bool:
 func stand_blocked() -> bool:
 	return player != null and player.get("stand_blocked") == true
 
+# --- movement lab -------------------------------------------------------------------------------
+
+## the separate movement playground: its own runner, F2/F5 only, its moves toggled live.
+func is_lab() -> bool:
+	return map_kind() == "lab"
+
+## p / the lab runs the two main presets only. entering it from an advanced comparison
+## switches to F2 and says so; returns that sentence, or "".
+func _lab_restrict() -> String:
+	if not is_lab() or preset_id in PRESETS.PRIMARY:
+		return ""
+	var was := str(preset.get("label", preset_id))
+	preset_id = DEFAULT_PRESET
+	preset = PRESETS.entry(preset_id)
+	Engine.physics_ticks_per_second = physics_hz
+	return "The Movement Lab runs F2 and F5 only: switched from %s to F2 %s" % [was, str(preset.label)]
+
+## the lab runner's moves, {id: on}; empty on every other runner.
+func lab_moves() -> Dictionary:
+	if player == null or not player.has_method("mechanic_enabled"):
+		return {}
+	var out := {}
+	for id: String in LAB_KEYS:
+		out[id] = bool(player.call("mechanic_enabled", id))
+	return out
+
+## turns one lab move on or off. a change after the attempt moved makes it practice; the record
+## identity follows the new loadout, so no best is shared between loadouts.
+func set_mechanic(id: String, on: bool) -> void:
+	if not is_lab() or not lab_moves().has(id) or bool(lab_moves()[id]) == on:
+		return
+	_note_preset_physics()
+	var untouched := not _used_preset_physics and not _started and not finished
+	player.call("set_mechanic", id, on)
+	if not untouched and not finished and clean_eligible:
+		clean_eligible = false
+		practice_reason = "mechanics"
+	_refresh_records()
+	hud.call("mechanics_changed")
+	hud.call("notify", "%s %s  ·  experimental%s" % [str(LAB_MOVE_WORDS[id]), "ON" if on else "OFF", "" if clean_eligible or finished else "  ·  this attempt is now practice, R for a clean run"])
+
+func toggle_mechanic(id: String) -> void:
+	if lab_moves().has(id):
+		set_mechanic(id, not bool(lab_moves()[id]))
+
+## the runner the map needs: the experiment runner on the lab, the approved runner elsewhere. a
+## different script is a new body; restart_run then places it at the map's spawn.
+func _sync_runner() -> void:
+	var current := (player.get_script() as Script).resource_path if player != null and player.get_script() != null else ""
+	if player != null and current == runner_path():
+		return
+	if player != null:
+		remove_child(player)
+		player.free()
+	player = _make_runner(preset)
+	add_child(player)
+	player.set("input_enabled", not paused)
+	_apply_settings()
+	stats.call("watch", player)
+
 # --- world --------------------------------------------------------------------------------------
 
 func map_entry(id: String = "") -> Dictionary:
@@ -421,6 +501,9 @@ func select_preset(name: String) -> void:
 		return
 	if not PRESETS.available(id):
 		hud.call("notify", "%s is not available" % str(PRESETS.entry(id).get("label", id)))
+		return
+	if is_lab() and not id in PRESETS.PRIMARY:
+		hud.call("notify", "The Movement Lab runs F2 and F5 only. %s stays on the courses." % str(PRESETS.entry(id).get("label", id)))
 		return
 	if id == preset_id:
 		if not pending_preset.is_empty():
@@ -552,12 +635,19 @@ func select_map(id: String) -> void:
 	remove_child(level)
 	level.free()
 	_build_level()
+	# the lab plays its own runner and the courses the approved one: a change of runner is a new
+	# body, so the audio and stats below attach to the live one only.
+	var lab_note := _lab_restrict()
+	_sync_runner()
 	_build_audio()
 	_refresh_records()
 	restart_run()
 	_update_title()
 	hud.call("map_changed")
-	hud.call("notify", "%s  ·  %s%s" % [map_name(), str(preset.label), "  ·  pending preset cancelled" if cancelled else ""])
+	var note := "  ·  pending preset cancelled" if cancelled else ""
+	if not lab_note.is_empty():
+		note += "  ·  " + lab_note
+	hud.call("notify", "%s  ·  %s%s" % [map_name(), str(preset.label), note])
 
 # --- stages -------------------------------------------------------------------------------------
 
@@ -873,11 +963,20 @@ func _input(event: InputEvent) -> void:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if is_full else DisplayServer.WINDOW_MODE_FULLSCREEN)
 	elif event is InputEventMouseButton and event.pressed and not paused and DisplayServer.get_name() != "headless":
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	elif is_lab() and _lab_toggle(event):
+		return
 	else:
 		for slot: int in range(1, 6):
 			if event.is_action_pressed("r15_preset_%d" % slot):
 				select_slot(slot)
 				return
+
+func _lab_toggle(event: InputEvent) -> bool:
+	for id: String in LAB_KEYS:
+		if event.is_action_pressed("r15_lab_" + id):
+			toggle_mechanic(id)
+			return true
+	return false
 
 func set_paused(value: bool) -> void:
 	paused = value
@@ -904,7 +1003,8 @@ func _notification(what: int) -> void:
 		request_quit(0 if startup_error.is_empty() else 3)
 
 func window_title() -> String:
-	return "%s · %s · %s · %d Hz%s" % [BUILD_LABEL, map_name(), str(preset.label), physics_hz, " · STAND-IN runner" if runner_is_standin() else ""]
+	return "%s · %s · %s · %d Hz%s%s" % [BUILD_LABEL, map_name(), str(preset.label), physics_hz, " · STAND-IN runner" if runner_is_standin() else "",
+		" · EXPERIMENTAL" if is_lab() else ""]
 
 func _update_title() -> void:
 	if set_window_title and is_inside_tree():
@@ -958,8 +1058,14 @@ func physics_fingerprint() -> Dictionary:
 func family_version() -> String:
 	if str(preset.family) == "source" and runner_is_standin():
 		return str(PRESETS.STANDIN_FAMILY.version)
-	var own: Variant = (player.get_script() as Script).get_script_constant_map().get("MOTOR_VERSION") if player != null else null
-	return str(own) if own != null else str((PRESETS.FAMILIES[str(preset.family)] as Dictionary).version)
+	# constants are not inherited by get_script_constant_map: the lab runner's motor is its base's.
+	var script: Script = player.get_script() as Script if player != null else null
+	while script != null:
+		var own: Variant = script.get_script_constant_map().get("MOTOR_VERSION")
+		if own != null:
+			return str(own)
+		script = script.get_base_script()
+	return str((PRESETS.FAMILIES[str(preset.family)] as Dictionary).version)
 
 ## the collision body the run used. the duck values also sit in the physics fingerprint; they
 ## are repeated here so a section says plainly which hulls it was run with.
