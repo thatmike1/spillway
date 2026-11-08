@@ -846,7 +846,7 @@ func _lab_controls(home_map: String, home_preset: String) -> void:
 	var all_on := {"slide": true, "wall_jump": true, "grapple": true}
 	var default_key := str(game.get("course_key"))
 	await captured("lab-default", {"map": "experiment", "lab": true, "lab_moves": all_on, "clean": true,
-		"runner": "res://scripts/r15_experiment_player.gd"})
+		"runner": "res://scripts/r15_experiment_player.gd", "message": ""})
 	check("lab title and visible HUD identify the experiment", str(game.call("window_title")).contains("EXPERIMENTAL")
 		and _label_drawn("lab_tag") and _hud_text("lab_tag").contains("EXPERIMENTAL")
 		and _label_drawn("lab_panel") and _label_drawn("reticle"), _hud_text("lab_panel"))
@@ -991,13 +991,15 @@ func _stage_picker_controls(map: String) -> void:
 	await _reveal(button)
 	check(map + ": Practise here clicked", await _click(button))
 	await _physics(4)
-	var state := await captured(map + "-stage-practice", {"paused": false, "clean": false, "practice_reason": "practice", "practice_stage": stage, "checkpoint": stage, "practice_tag": "~stage practice"})
+	var state := await captured(map + "-stage-practice", {"paused": false, "clean": false, "practice_reason": "practice", "practice_stage": stage, "checkpoint": stage,
+		"practice_tag": "~checkpoint practice from " + str(points[stage].title)})
+	check(map + ": checkpoint practice is visibly labelled", _label_drawn("practice_tag"), state.practice_tag)
 	var feet: Array = points[stage].feet
 	var target := Vector3(float(feet[0]), float(feet[1]), float(feet[2]))
 	check(map + ": practice reached the frozen stage pose", (game.get("player") as Node3D).global_position.distance_to(target) < 0.15, [state.feet, feet])
 	await _tap(KEY_R)
 	await _physics(4)
-	await captured(map + "-stage-practice-restart", {"paused": false, "clean": true, "practice_stage": -1, "checkpoint": 0, "started": false})
+	await captured(map + "-stage-practice-restart", {"paused": false, "clean": true, "practice_stage": -1, "checkpoint": 0, "started": false, "message": ""})
 
 func _same_feet(a: Array, b: Array) -> bool:
 	return Vector3(a[0], a[1], a[2]).distance_to(Vector3(b[0], b[1], b[2])) < 0.05

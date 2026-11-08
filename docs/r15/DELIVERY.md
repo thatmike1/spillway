@@ -1,14 +1,14 @@
 # R15 portable release tools: integration in progress
 
-No R15 package has been accepted. This is the first R15-specific port of the verified R14 release tools, alongside the unchanged R14 tools. It is not a release result. The remaining integration gates are in DELIVERY-PLAN.md.
+No R15 package has been accepted. All eight maps are integrated. The first actual release-runtime diagnostic was rejected; its failure and the restart-notice repair are recorded below. The remaining release gates are in DELIVERY-PLAN.md.
 
 `tools/package-r15.py` has `package`, `check`, `source` and owned-child `engine` commands. `tools/check-r15-pack.sh` wraps `check`. The package tool freezes committed source outside Git, pins the official Godot 4.7.2 editor and Linux/Windows release templates, imports/exports the R15 preset and verifies published ZIPs with the shipped Linux runtime. Dirty source is refused. Source mode reads identities and replays tapes from an already imported external snapshot. `tools/check-r15.sh` creates and imports its own frozen snapshot outside Git before running the current R15 source suites.
 
-The fixed identity is R15 Breakwater / F2, `scenes/r15.tscn`, `scripts/r15_main.gd`, `user://spillway_r15.cfg` and `R15 Pack`. The map set must contain all five new courses, both retained courses and the movement lab. Non-diagnostic packaging requires F2 play proofs on all seven courses and an F5 comparison; startup-only output cannot be a release candidate. The incomplete map set is correctly refused.
+The fixed identity is R15 Breakwater / F2, `scenes/r15.tscn`, `scripts/r15_main.gd`, `user://spillway_r15.cfg` and `R15 Pack`. The map set must contain all five new courses, both retained courses and the movement lab. Non-diagnostic packaging requires F2 play proofs on all seven courses and an F5 comparison; startup-only output cannot be a release candidate. An incomplete map set is refused.
 
 The new probe reads the R15 runtime registry, actual motor version, hull/mechanics identities and R15's integer-tick record format. Recursive licence collection preserves complete asset paths, including the new nested kits and their notices. Resource coverage includes raw bounds JSON and imported HDR skies. Both source and packed trace comparators require complete finite three-component position and velocity vectors, sequential unique ticks, exact velocity/position agreement and the existing clock/progress checks. The inherited ownership, alpha/text visibility, nested error-log, manifest-reconciliation and external-reference protections remain.
 
-## Evidence so far
+## Earlier development evidence
 
 Outer `checkpoints/spillway/r15/delivery-port/` holds a frozen diagnostic using the real R15 scene and motor, with the uncommitted initial helper bytes recorded in `identity/executed-probe.gd` and its logs. The identity probe runs without errors: all three current maps and all four presets produce 12 identities, and every Source-derived preset reports motor version 2. The enclosing source-identity gate then refuses the five missing modules. This is intentional incomplete-build rejection, not final source acceptance.
 
@@ -16,9 +16,9 @@ Outer `checkpoints/spillway/r15/delivery-port/` holds a frozen diagnostic using 
 
 ## Still required
 
-- Integrate and run the remaining map/lab test contracts through the source wrapper, then run its full eight-map identity and route gate on final committed source.
+- Rerun the full eight-map source and route gate on the final committed source. All map/lab contracts passed the earlier integration snapshot.
 - Exercise the probe on an exported release runtime, including the new map grid, crouch/blocked standing, F2/F5 switching, checkpoint practice, record purity, exact save/reload and Quit.
-- Add and prove the movement lab's optional mechanics controls; source-only fixture results do not cover them in a pack.
+- Rerun the corrected checkpoint/restart controls in the release runtime. The first diagnostic already executed the lab toggles and runner-restoration controls successfully.
 - Challenge the tools independently, including cancellation and deliberate broken packages, then rerun the repaired helpers on a fresh candidate.
 - Promote only the accepted immutable Linux/Windows ZIPs and their provenance/evidence into outer `delivery/spillway-r15/`; replace the outer REPORT then.
 
@@ -57,3 +57,11 @@ Map/preset admission now follows the final host: four comparisons on each normal
 The actual release coroutine now checks F3/F4 refusal in the lab, visible experiment labels, keys1/2/3, the pause-menu grapple switch, per-loadout record keys, loadout preservation under F5, and practice after changing a move following even pre-timer motion. It leaves the lab through the real map button, checks the approved runner and empty lab state, holds Shift/E on the normal course, and re-enters from F3 to verify the explicit F2 restriction. No pose, velocity, progress or record setter is used.
 
 `tests/test_r15_pack_lab.py --out DIR` runs that exact coroutine on an external frozen source copy: 37/37 observations pass. Three deliberately broken runtimes are refused for their intended failures: dead toggle keys, a lab body sticking on a course, and a hidden experiment label. Source hashes are restored and scratch removed. Evidence: `checkpoints/spillway/r15/packed-lab-controls/attempt1/`. Headless label/layout state is not proof of drawing; the forthcoming exported diagnostic must execute the same coroutine on the release runtime.
+
+### First exported diagnostic and restart correction
+
+Committed `40b8ee9b` exported both official-runtime ZIPs and ran the actual Linux release runtime on the private AMD/X11 backend. Static/startup, real titles, old-profile preservation, Quit and process/display cleanup passed. The aggregate was **33/34**, with **730/738** probe assertions passing. All eight failures expected the old words “stage practice”; the actual HUD correctly said “checkpoint practice from <authored title>”. The probe now requires that current title-specific wording and a drawn practice label.
+
+The native frames also revealed a real UI defect: R restored a clean run but left the previous practice notification visible. `r15_hud.run_started()` now clears it. The new empty-notification assertion fails against the old HUD and passes against the repaired HUD. The exact lab coroutine passes 37/37 again, and its three runtime mutations remain refused. The release probe now also requires an empty notice after every map's checkpoint-practice restart.
+
+Evidence is under `checkpoints/spillway/r15/packed-lab-controls/`: `rejected-40b8ee9b/`, `stale-toast-red/` and `stale-toast-green/`. The rejected build played no routes and is explicitly startup-only diagnostic output. A fresh export must execute the corrected helpers before any promotion.

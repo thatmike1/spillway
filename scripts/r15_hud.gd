@@ -382,6 +382,7 @@ func map_changed() -> void:
 
 func run_started() -> void:
 	finish_panel.hide()
+	notify("")
 	split_label.text = ""
 	_split_time = 0.0
 	_intro_alpha = 1.0
