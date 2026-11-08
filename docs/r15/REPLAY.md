@@ -23,3 +23,9 @@ python3 tests/test_r15_tape_crouch.py --run RUN --out RESULT.json
 ```
 
 The strict tape header does not accept arbitrary annotations such as `radians_per_count`. Put explanatory metadata in `description` or a sidecar. Never relabel a tape's rate or silently retime events. Look sensitivity and warmup remain explicit run inputs.
+
+## Native runtime dependency
+
+The private AMD/X11 backend uses the verified extracted Weston 15.0.1-3 package at outer `checkpoints/spillway/r14/hardware-render/weston/`, even during R15 work. It is a live harness dependency, not disposable historical render output. Its archive SHA-256 is `92fe0bfe2cf1ae02105b0e6573f6695c6bbd4637c9a6b20299a6fea8c3d23b4d`; the helper independently pins `.MTREE` and verifies all 29 executable/library files.
+
+Root's historical-checkpoint cleanup mistakenly removed this package. The first R15 Breakwater native attempt refused before starting a compositor. Root restored identical bytes from the official Arch archive and verified all hashes; `R15-RUNTIME-DEPENDENCY.json` beside the restored package records the receipt. The failed attempt remains in `breakwater-r15-host/native-035a0606/`; subsequent captures use a new directory. Future cleanup must follow shared helper dependencies as well as R15 document links.
