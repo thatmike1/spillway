@@ -178,3 +178,5 @@ source movies, selected frames and final packed evidence remain. Rebuildable cac
 three superseded stand-in/Quake videos and duplicate old candidate ZIPs were retired
 with per-file hashes in outer `checkpoints/spillway/r14/storage/`. No historical game
 folder was recreated. Earlier R12/R13 game records remain unchanged. The private-display incident and its repair are documented in QUIT-REVIEW.md; no desktop configuration was edited.
+
+[Final closure audit](../../../../../checkpoints/spillway/r14/FINAL-AUDIT.json) rechecks the promoted bytes, all route verdicts, local report links, pushed branch and storage floor after the 20:00 Prague minimum. No delegate or native run is pending. Human feel and native Windows execution remain unverified.
