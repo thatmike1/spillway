@@ -65,6 +65,10 @@ func run() -> void:
 				check(swap.new is StandardMaterial3D and swap.new.albedo_color == Color("d95b30"),id+": functional edge cue lost its orange contrast")
 			if key == "ReadabilityPads":
 				check(swap.new.albedo_color != Color(game.look_layer.palette.top),id+": functional take-off pad flattened")
+		if id == "whiteout-relay":
+			for key: String in ["Mesh_cladding_red_hangar", "Mesh_roof_hangar", "Mesh_cladding_slate_shed", "Mesh_roof_shed", "Mesh_machine_shed"]:
+				var mesh := game.level.get_node(NodePath(key)) as MeshInstance3D
+				check(mesh.material_override is ShaderMaterial and mesh.material_override.shader == game.look_layer.INTERIOR,id+": actual area-scoped indoor mesh missed role bands: "+key)
 		var before := snapshot(game)
 		for i: int in 20:
 			var state := var_to_str([game.player.global_transform,game.player.velocity,game.elapsed,game.checkpoint_index,game.attempts,game.finished,game.clean_eligible,game.session.style.snapshot(),game.session.ghost_state])

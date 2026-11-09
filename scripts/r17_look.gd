@@ -144,14 +144,20 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 		return null
 	var kind := key.trim_prefix("Mesh_").trim_prefix("Art_")
 	# indoor movement faces get separate values even when no sun reaches the room.
-	if _map_id in ["experiment", "whiteout-relay"] and kind in ["wall_panel", "housing", "rack_low", "roof", "cladding_slate", "machine", "frame"]:
+	var indoor_role := ""
+	if _map_id in ["experiment", "whiteout-relay"]:
+		for role: String in ["wall_panel", "housing", "rack_low", "roof", "cladding_slate", "cladding_red", "machine", "frame"]:
+			if kind == role or kind.begins_with(role+"_"):
+				indoor_role = role
+				break
+	if not indoor_role.is_empty():
 		if not _materials.has(kind):
 			var interior := ShaderMaterial.new()
 			interior.shader = INTERIOR
 			var value := 0.22
-			if kind in ["wall_panel", "cladding_slate"]:
+			if indoor_role in ["wall_panel", "cladding_slate", "cladding_red"]:
 				value = 0.40
-			elif kind in ["roof", "rack_low"]:
+			elif indoor_role in ["roof", "rack_low"]:
 				value = 0.55
 			interior.set_shader_parameter("base_color",Color(palette.side).lightened(value))
 			_materials[kind] = interior
