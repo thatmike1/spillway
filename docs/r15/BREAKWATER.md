@@ -159,7 +159,7 @@ changes. Every change is in shaders and placement, never in the files.
 - No human has played it. Every route proof is a controller, so feel, the first 30 s and
   corner flow are unjudged.
 - The ordinary route is 44.6 s for the controller, just under the 45 to 90 s target. Human completion time is unmeasured; the course is on the short side.
-- The F5 breach is unproven (see above). The earned line is shown on F2 only.
+- The original F5 breach controller failed. The later source-only line in F5-BREACH.md now proves it; the delivered packed route set does not include that F5 breach line.
 - The cast-miss rate is 1.5 times Penstock's. The guard covers it, but it is still the highest
   measured.
 - The crane line reads darkish under the cranes, and the far land is a flat slab with simple
@@ -183,7 +183,7 @@ All five also run through the strict standard executor: 30,952 ticks, correct ra
 
 The old driver added an unsupported top-level `radians_per_count` annotation. The new exporter puts look information in `description`; root's normalized input copies remove only that extra annotation and preserve every event, tick and rate. The actual Source sensitivity is 2.5, not the old approved-golden override of 5.7296. Header normalization and source hashes are recorded beside the runs. Both early audit assertion failures are retained and explained; no actor was changed to repair them.
 
-Native R15 views are complete below. Independent contact/discovery review and final packed acceptance remain pending. The AA1000 earned attempt remains failed, not promoted as a pass.
+At this integration checkpoint the native R15 views were complete while independent review and packed acceptance were still pending. That status is superseded by MAPS-REVIEW.md, DISCOVERY.md and the accepted delivery in RESULTS.md. The original AA1000 earned attempt remains a retained failure; the later F5-BREACH.md line uses different inputs.
 
 ## Crown lamp repair
 
@@ -197,11 +197,11 @@ Root captured complete ordinary, earned and harbour-recovery runs on the frozen 
 
 Root inspected the actual runway support poles, breach approach, landing, clean finish card, checkpoint return message and practice finish card. The latter says `PRACTICE FINISH` and `Not recorded (respawned)`. The two precisely classified platform warnings concern absent private-X11 XIM and MovieWriter's low-space warning on the source tmpfs; HOME met the 15 GiB launch floor, the bounded movie lived on separate tmpfs, and every full encode/decode completed. No game error or other warning occurred. The earlier warning-rejecting audit is retained rather than relabelled.
 
-The F2 earned input tape was also held out unchanged under F5 through the standard executor. It remains unfinished at the end of its tape, before reaching the breach, with zero respawns and no integrity flags. `f5-f2-earned-tape/RESULTS.json` retains this additional failure; it does not close F5's earned-route gap.
+The F2 earned input tape was also held out unchanged under F5 through the standard executor. It remains unfinished at the end of its tape, before reaching the breach, with zero respawns and no integrity flags. `f5-f2-earned-tape/RESULTS.json` retains this additional failure; it did not close the gap at that stage. The later F5-BREACH.md probe closes the source-only gap with different inputs.
 
 ## Independent contact and checkpoint review
 
-The review on source962ab021 found no confirmed runtime defect. Its fresh actual-F5 ordinary run finished clean in44.6015625s; the F5 earned breach still has no proven line. Breakwater's deliberate alley recovery has18 ticks with a blocking side contact when counted by actual contact normals, although the inherited body-role `wall` counter says0. These include the missed block's face; the physical return still finishes clean. Harbour falls return to Crane line as practice and save no record. The review's113 assertions cover19 selected episodes across Breakwater and Whiteout, not113 independent plays of this map. See MAPS-REVIEW.md and outer `checkpoints/spillway/r15/maps-review/`.
+The review on source962ab021 found no confirmed runtime defect. Its fresh actual-F5 ordinary run finished clean in44.6015625s; the F5 earned breach had no proven line at that snapshot; F5-BREACH.md supersedes that status. Breakwater's deliberate alley recovery has18 ticks with a blocking side contact when counted by actual contact normals, although the inherited body-role `wall` counter says0. These include the missed block's face; the physical return still finishes clean. Harbour falls return to Crane line as practice and save no record. The review's113 assertions cover19 selected episodes across Breakwater and Whiteout, not113 independent plays of this map. See MAPS-REVIEW.md and outer `checkpoints/spillway/r15/maps-review/`.
 
 ## Later F5 breach proof (9 November)
 

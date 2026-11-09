@@ -61,3 +61,7 @@ Evidence: outer `checkpoints/spillway/r15/delivery-negatives/run2-03d970be/summa
 After the independent boundary and lab-title repairs, root reran the unchanged78-control suite on the new8a254d16 candidate, using the same committed HEAD and helpers. **78/78 passed, zero failures**, in529seconds. The three real broken runtimes and wrapper-only cancellation passed their named expectations. All4candidate file hashes were rechecked unchanged afterward, and executed helpers equal the candidate manifest.
 
 Evidence: outer `checkpoints/spillway/r15/delivery-negatives/run3-8a254d16/summary.json`, `run3-8a254d16.log.gz`, `RERUN-8a254d16.json` and `release-plan/NEGATIVE-BASE-8a254d16.json`. The positive15-route run remains a separate verdict.
+
+## Cleanup-summary wording
+
+The retained `scratch_left_at_end` field lists the suite's own logs immediately before its final scratch removal. It is a pre-removal snapshot, not a claim that those files still exist. The exact run3 scratch directory is gone; final cancellation and process/display cleanup are independently checked. The historical JSON remains unchanged.
