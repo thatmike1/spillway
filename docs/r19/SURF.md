@@ -91,3 +91,7 @@ It refused with `desktop :0 does not answer before the private session; nothing 
 The two fins connect into distinct hop sections, and the faster surf line has useful physical exits. I expect it to read as an introductory surf course: the 2 m gaps and broad terraces are forgiving, while the long fins ask for sustained control. That is a model judgement, not a playtest verdict. Mike should judge the surf feel, the length of the fins and whether the crescent and salt steps offer enough variation after native/release integration.
 
 The trail has a self-audit only. This implementation child was explicitly forbidden to start other agents, so the show-me-your-work skill's independent cross-family review was not run. Scrutinize the directional 2 cm seam relief, recovery coverage and unverified native presentation when integrating.
+
+## Production integration checkpoint
+
+The R19 configured scene now registers Saltglass beside the original eight maps and attaches exactly one Look C layer. `tests/r19_maps.gd` passed 13 integration checks on the actual configured scene: default registry preserved, approved F2 runner, clear standing spawn, painted sky, actual L off/on with identical feet and motion identity, Lab experimental title, faithful runner after leaving Lab, and return to the same Saltglass identity. Normal asynchronous Quit exited zero without warning/error logs. This is source integration, separate from the component route, native visual and final portable gates.

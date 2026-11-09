@@ -4,6 +4,7 @@ extends "res://scripts/r17_main.gd"
 const COURSE_REVISIONS := preload("res://scripts/r19_course_revisions.gd")
 const SHARE := preload("res://scripts/r19_ghost_share.gd")
 const R19_HUD := preload("res://scripts/r19_hud.gd")
+const SURF_LEVEL := preload("res://scripts/r19_surf_level.gd")
 var map_revision: Dictionary = {}
 var ghost_share: Node
 ## isolated test seams; never supplied by a shared ghost file.
@@ -12,6 +13,10 @@ var ghost_share_storage := ""
 var ghost_folder_opener: Callable
 
 func _ready() -> void:
+	if map_registry.is_empty():
+		map_registry = MAPS.make().duplicate(true)
+		map_registry.catalog[SURF_LEVEL.MAP_ID] = SURF_LEVEL.MAP_ENTRY.duplicate(true)
+		map_registry.order.append(SURF_LEVEL.MAP_ID)
 	ghost_share = SHARE.new()
 	ghost_share.name = "GhostShare"
 	ghost_share.folder_opener = ghost_folder_opener
@@ -22,6 +27,14 @@ func _ready() -> void:
 		ghost_share.scan()
 		if not map_revision.is_empty():
 			hud.call("notify", map_revision_description())
+
+func _build_level() -> void:
+	super._build_level()
+	if map_id == SURF_LEVEL.MAP_ID and level != null:
+		look_layer = PRESENTATION.new()
+		level.add_child(look_layer)
+		look_layer.attach(level, "practice")
+		look_layer.set_enabled(look_enabled)
 
 func interface_startup_message() -> String:
 	return "r19: %s; R19 style, ghost sharing and course revisions; inherited F2 motor; R18 interface; L compares presentation; F9 telemetry" % SHARE.BUILD
