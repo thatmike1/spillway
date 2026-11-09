@@ -206,40 +206,162 @@ def reader_difference(a, b, path='$'):
     return difference(a,b,path)
 
 
-def geometry_guard(a, b, revision):
-    """geometry can change travel/contact/progress, never input/view/laws or an unknown field."""
-    dynamic = {'p','v','reference_p','actual_v','grounded','ducked','motion','stats','elapsed','checkpoint','finished',
-               'finish_kind','started','clean','practice_reason','course_key','identity','style','live_hull','view'}
-    bad = []
-    for i,(x,y) in enumerate(itertools.zip_longest(stream(a),stream(b))):
-        if x is None or y is None:
-            return {'ok':False,'difference':'route length changed'}
-        found = difference({k:v for k,v in x.items() if k not in dynamic},{k:v for k,v in y.items() if k not in dynamic})
-        if not found:
-            found = difference({k:v for k,v in x['view'].items() if k != 'p'},{k:v for k,v in y['view'].items() if k != 'p'})
-        if not found:
-            found = difference(x['identity'],revision['baseline_identity']) or difference(y['identity'],revision['candidate_identity'])
-        if found and len(bad)<4:
-            bad.append({'row':i,**found})
-    return {'ok':not bad,'first_differences':bad}
+def runtime_freeze_guard(manifest):
+    path = OUTER/'look/evidence/r19-final-contracts/RUNTIME-FREEZE.json'
+    frozen = json.loads(path.read_text())
+    files = manifest['archive_files']
+    runtime = {k:v for k,v in files.items() if k.split('/')[0] in ['assets','scripts','shaders','scenes','project.godot','export_presets.cfg']}
+    assert frozen['runtime_frozen'] and runtime == frozen['runtime_files'], 'runtime provenance mismatch: freeze reopened or runtime bytes added/deleted/changed'
+    changed = subprocess.check_output(['git','diff','--name-only',frozen['runtime_commit'],manifest['commit']],cwd=REPO,text=True).splitlines()
+    allowed = lambda p: p.startswith(PREFIX+('tests/')) or p.startswith(PREFIX+'docs/') or p in [PREFIX+'tools/check-r19-parity.py',PREFIX+'tools/r19-windows-wine.py']
+    assert all(allowed(p) for p in changed), ('intervening diff is not solely verification/docs',changed)
+    return {'ok':True,'path':str(path),'sha256':sha(path),'runtime_commit':frozen['runtime_commit'],'candidate_commit':manifest['commit'],
+            'runtime_files':len(runtime),'intervening_files':changed}
 
 
-def geometry_record_guard(old, new):
-    """preserve all format, law and view metadata when a map is deliberately revised."""
-    a,_,_ = record_compare_view(old)
-    b,_,_ = record_compare_view(new)
-    a,b = a['header'],b['header']
-    for header in [a,b]:
-        meta = header['metadata']
-        # retain timing, preset, runner, rate, physics/hull/mechanics entries of the ordered time identity.
-        identity = meta.pop('record_identity')
-        meta['preserved_record_identity'] = [identity[0],*identity[4:]]
-        for key in ['identity','course_key']:
-            meta.pop(key)
-        meta['opportunities'].pop('base_geometry')
-        for key in ['course_key','geometry']:
-            header['identity'].pop(key)
-    return {'ok':difference(a,b) is None,'first_difference':difference(a,b)}
+def validate_style_fixture(contract, baseline_sha, candidate_sha):
+    assert contract['baseline_style_sha256'] == baseline_sha and contract['candidate_style_sha256'] == candidate_sha
+    path = Path(contract['fixture_evidence']['path'])
+    assert sha(path) == contract['fixture_evidence']['sha256']
+    proof = json.loads(path.read_text())
+    assert proof['ok'] and proof['source_hashes']['baseline_style_sha256'] == baseline_sha and proof['source_hashes']['candidate_style_sha256'] == candidate_sha
+    raw_path = Path(proof['raw_summary']['path'])
+    assert sha(raw_path) == proof['raw_summary']['sha256']
+    raw = json.loads(raw_path.read_text())
+    assert raw['failed'] == 0 and len(raw['checks']) == 25 and raw['checks'] == proof['checks'] and all(c['pass'] for c in raw['checks'])
+    required = {'backwards_earned_and_growing','sideways_earned_and_smaller','multiplier_caps','actual_hops_and_real_speed',
+                'idle_no_direction_award','slow_no_direction_award','walk_no_direction_award','tiny_no_direction_award',
+                'fake_hop_counters_and_grounded_jump_events_do_not_pay','respawn_requires_two_new_hops','teleport_detected',
+                'teleport_requires_two_new_hops','revisited_line_cannot_farm','reversing_heading_breaks_chain',
+                'forward_exact_r18_events_and_score','forward_existing_events_present','observer_never_writes_body'}
+    assert required <= {c['name'] for c in raw['checks']}
+    forward = next(c for c in raw['checks'] if c['name'] == 'forward_exact_r18_events_and_score')
+    assert proof['forward_exact_samples'] == int(forward['detail'].split()[0]) >= 2000
+    for relative,digest in proof['raw_files'].items():
+        assert sha(path.parent/relative) == digest, ('style raw evidence changed',relative)
+    binding = Path(proof['bindings']['path'])
+    assert sha(binding) == proof['bindings']['sha256']
+    sources = json.loads(binding.read_text())
+    assert sources['injected']['tests/r19_baseline_style.gd'] == baseline_sha
+    assert sources['injected']['tests/r19_style_bhop.gd'] == proof['source_hashes']['test_sha256']
+    return proof
+
+
+def validate_revision(revision):
+    assert set(revision) == {'baseline_identity','candidate_identity','routes','off_line_routes','evidence','presets'}, 'unknown revision contract schema'
+    assert set(revision['routes']) == set(revision['off_line_routes']) == {'breakwater-basic','breakwater-return'}, 'only proven off-line retained routes supported'
+    old,new = revision['baseline_identity'],revision['candidate_identity']
+    keys = {'format','map','preset','course_key','geometry','overlay','physics_hz','motor','runner','timing'}
+    assert set(old) == set(new) == keys
+    assert old['map'] == new['map'] == 'breakwater'
+    assert old['overlay'].startswith('r16-opportunities-1:') and new['overlay'].startswith('r19-breakwater-flow-1:')
+    assert all(old[k] != new[k] for k in ['geometry','overlay','course_key'])
+    assert difference({k:v for k,v in old.items() if k not in ['geometry','overlay','course_key']},
+                      {k:v for k,v in new.items() if k not in ['geometry','overlay','course_key']}) is None
+    proof = Path(revision['evidence']['path'])
+    assert sha(proof) == revision['evidence']['sha256'], 'targeted proof hash mismatch'
+    evidence = json.loads(proof.read_text())
+    assert evidence['ok'] and evidence['failed'] == 0 and evidence['checks'] and all(c['ok'] for c in evidence['checks'])
+    row = next(r for r in evidence['maps'] if r['map'] == 'breakwater')
+    assert row['before']['identity'] == old and row['after']['identity'] == new, 'proof does not bind both supplied identities'
+    assert revision['presets'] == {side:row[which]['presets'] for side,which in [('baseline','before'),('candidate','after')]}
+    assert set(revision['presets']['baseline']) == set(revision['presets']['candidate']) == {'server128','server128_aa1000'}
+    for preset in revision['presets']['baseline']:
+        a,b = [revision['presets'][side][preset]['metadata'] for side in ['baseline','candidate']]
+        assert a['record_identity'][1] == b['record_identity'][1] and a['record_identity'][3] == b['record_identity'][3]
+        assert a['opportunities']['applied'] == b['opportunities']['applied'] and a['opportunities']['passages'] == b['opportunities']['passages']
+        assert len(a['record_identity']) == len(b['record_identity']) == 13
+        assert difference([v for i,v in enumerate(a['record_identity']) if i not in [2,12]],
+                          [v for i,v in enumerate(b['record_identity']) if i not in [2,12]]) is None
+        assert {k:v for k,v in a['opportunities'].items() if k not in ['version','reason','hash','base_geometry']} == {k:v for k,v in b['opportunities'].items() if k not in ['version','reason','hash','base_geometry']}
+        for meta in [a,b]:
+            assert meta['overlay'] == meta['opportunities']['version']+':'+meta['opportunities']['hash']
+            assert meta['identity']['geometry'] == meta['opportunities']['base_geometry'] == meta['record_identity'][2]
+        assert b['opportunities']['version'] == 'r19-breakwater-flow-1'
+        assert b['opportunities']['reason'] == 'widen_optional_thread_after_repeated_front_contacts'
+    return revision
+
+
+def validate_record_identity(header, text):
+    meta, identity = header['metadata'],header['identity']
+    ordered = meta['record_identity']
+    assert len(ordered) == 13 and len(ordered[1]) == 5, 'ordered record identity schema changed'
+    assert reader_difference(json.loads(text),ordered) is None, 'identity text/header mismatch'
+    assert hashlib.sha256(text.encode()).hexdigest()[:16] == identity['course_key'] == meta['course_key'], 'record identity course key hash mismatch'
+    assert identity == meta['identity'], 'own header and metadata identities differ'
+    for key,value in [('map',ordered[1][0]),('geometry',ordered[2]),('preset',ordered[4]),('motor',ordered[6]),
+                      ('runner',ordered[7]),('physics_hz',ordered[8]),('timing',ordered[0]),('overlay',ordered[12])]:
+        assert identity[key] == value, ('record identity/header relation',key)
+    assert meta['map'] == ordered[1][0] and meta['map_kind'] == ordered[1][1] and meta['preset'] == ordered[4] and meta['family'] == ordered[5]
+    for index,key in [(9,'fingerprint'),(10,'hull'),(11,'mechanics')]:
+        assert reader_difference(json.loads(ordered[index]),meta['physics'][key]) is None, ('ordered physics/header relation',key)
+
+
+def revision_state(state, revisions, side):
+    state = copy.deepcopy(state)
+    identity = state['identity']
+    if identity['map'] not in revisions:
+        return state
+    revision = revisions[identity['map']]
+    contract = revision['presets'][side][identity['preset']]['metadata']
+    assert identity == contract['identity'] and state['course_key'] == identity['course_key'], 'unexpected revised motion identity'
+    for key in ['geometry','overlay','course_key']:
+        state['identity'][key] = '<verified revision '+key+'>'
+    state['course_key'] = '<verified revision course_key>'
+    return state
+
+
+def revision_record(value, revisions, side):
+    value = copy.deepcopy(value)
+    header = value['header']
+    meta = header['metadata']
+    if meta['map'] not in revisions:
+        return value
+    revision = revisions[meta['map']]
+    contract = revision['presets'][side][meta['preset']]['metadata']
+    assert header['identity'] == meta['identity'] == contract['identity'], 'unexpected revised recording identity'
+    assert meta['course_key'] == header['identity']['course_key']
+    ordered = meta['record_identity']
+    assert len(ordered) == 13 and len(ordered[1]) == 5, 'ordered record identity schema changed'
+    assert ordered[1] == contract['record_identity'][1] and ordered[3] == contract['record_identity'][3], 'map identity or stage titles changed'
+    assert ordered[2] == contract['record_identity'][2] and ordered[12] == contract['record_identity'][12]
+    assert meta['overlay'] == contract['overlay'] and meta['opportunities'] == contract['opportunities'], 'unexpected revision metadata/opportunities'
+    assert set(meta['opportunities']) == {'version','applied','reason','hash','base_geometry','passages'}
+    for identity in [header['identity'],meta['identity']]:
+        for key in ['geometry','overlay','course_key']:
+            identity[key] = '<verified revision '+key+'>'
+    meta['course_key'] = '<verified revision course_key>'
+    meta['overlay'] = ordered[12] = '<verified revision overlay>'
+    ordered[2] = '<verified revision geometry>'
+    for key in ['version','reason','hash','base_geometry']:
+        meta['opportunities'][key] = '<verified revision '+key+'>'
+    return value
+
+
+def geometry_guard(a, b, revisions):
+    """off-line retained lines require every physical/view/input/clock field to match exactly."""
+    bad,count = [],0
+    try:
+        for count,(x,y) in enumerate(itertools.zip_longest(stream(a),stream(b)),1):
+            if x is None or y is None:
+                return {'ok':False,'difference':'route length changed'}
+            found = difference(physical(revision_state(x,revisions,'baseline')),physical(revision_state(y,revisions,'candidate')))
+            if found and len(bad)<4:
+                bad.append({'row':count-1,**found})
+    except (AssertionError,KeyError,TypeError) as exc:
+        return {'ok':False,'difference':str(exc)}
+    return {'ok':not bad,'rows':count,'first_differences':bad}
+
+
+def geometry_record_guard(old, new, revisions):
+    """preserve the complete recording after verifying and normalizing only exact revision identities."""
+    try:
+        a,_,_ = record_compare_view(old)
+        b,_,_ = record_compare_view(new)
+        found = difference(revision_record(a,revisions,'baseline'),revision_record(b,revisions,'candidate'))
+        return {'ok':found is None,'first_difference':found}
+    except (AssertionError,KeyError,TypeError) as exc:
+        return {'ok':False,'first_difference':str(exc)}
 
 
 def packed_columns(columns, vectors=False):
@@ -302,6 +424,7 @@ def observation_audit(run_dir, analyzer):
     for row in readers:
         path = run_dir/'runs'/row['file']
         rec, canonical = OLD.recording(path, analyzer)
+        validate_record_identity(rec.header,row['identity_text'])
         godot_expected = godot_expected_reader.read(path)
         assert godot_expected.ok, godot_expected.errors
         by_id[rec.header['run_id']] = (rec, row)
@@ -612,18 +735,20 @@ def main():
         analyzer = module(source/'tools/analyze-r16-runs.py','r19_frozen_reader')
         report['executed_python_sha256'] = {name:sha(source/name) for name in ['tools/momentum-tape.py','tools/analyze-r16-runs.py']}
         if args.candidate:
+            report['runtime_freeze'] = runtime_freeze_guard(source_manifest)
             pinned = json.loads((OUTER/'look/evidence/r19-baseline/SOURCE.json').read_text())
             assert all(source_manifest['archive_files'][k.removeprefix(PREFIX)] == pinned['files'][k]['sha256'] for k in pinned['protected_F2_motor_sources']), 'protected F2 law changed'
             score_contract = json.loads(args.scoring_contract.read_text())
             prior_source = json.loads((baseline/'source-r18.json').read_text())
             style_path = 'scripts/r16_style.gd'
-            assert score_contract['baseline_style_sha256'] == prior_source['executed_files'][style_path]
-            assert score_contract['candidate_style_sha256'] == source_manifest['executed_files'][style_path]
-            fixture = Path(score_contract['fixture_evidence']['path'])
-            assert sha(fixture) == score_contract['fixture_evidence']['sha256'] and json.loads(fixture.read_text())['ok'], 'style fixture evidence is not verified'
+            validate_style_fixture(score_contract,prior_source['executed_files'][style_path],source_manifest['executed_files'][style_path])
             report['scoring_contract'] = score_contract
         revisions = json.loads(args.map_revisions.read_text()) if args.map_revisions else {}
-        assert set(revisions) <= {r['map'] for r in routes}, 'unknown geometry map allowlist entry'
+        assert set(revisions) <= {'breakwater'}, 'unknown geometry map allowlist entry'
+        for revision in revisions.values():
+            validate_revision(revision)
+        report['map_revisions'] = revisions
+        report['baseline_dir'] = str(baseline) if baseline else None
         profile = out/'profile'
         profile.mkdir()
         env = OLD.environment(profile)
@@ -708,35 +833,41 @@ def main():
                         found = difference(baseline_records,records)
                         comparisons['recordings'] = {'ok':found is None,'first_difference':found}
                         comparisons['controls'] = {'ok':difference(prior_run['summary']['tour'],run['summary']['tour']) is None}
-                    if route['map'] in revisions:
-                        # an explicit allowlist is never an automatic pass: require exact before/after identity, route and targeted proof.
-                        revision = revisions[route['map']]
-                        assert route['name'] in revision['routes'], 'changed route not listed'
-                        assert revision['baseline_identity'] == prior_run['summary']['finish']['identity']
-                        assert revision['candidate_identity'] == run['summary']['finish']['identity']
-                        proof = Path(revision['evidence']['path'])
-                        assert sha(proof) == revision['evidence']['sha256'] and json.loads(proof.read_text())['ok']
-                        assert difference({k:v for k,v in revision['baseline_identity'].items() if k not in ['geometry','course_key']},
-                                          {k:v for k,v in revision['candidate_identity'].items() if k not in ['geometry','course_key']}) is None, 'map revision changed a nongeometry compatibility identity'
-                        # all raw differences remain; these guards still reject changed input/view/laws and unknown metadata.
-                        result['geometry_revision'] = revision
-                        comparisons['geometry_invariants'] = geometry_guard(reference_dir/'r18-ghost/evaluator/trace.jsonl.gz',
-                                                                           folder/variant/'evaluator/trace.jsonl.gz',revision)
-                        guards = [geometry_record_guard(a,b) for a,b in zip(baseline_records,records)]
-                        comparisons['geometry_record_invariants'] = {'ok':all(g['ok'] for g in guards),'records':guards}
-                        comparisons['geometry_exception'] = {'ok':True,'scope':'listed targeted map revision; exact parity not established'}
-                        if route['name'] not in revision.get('off_line_routes',[]):
-                            for key in ['motion','recordings','controls','ghost_probes','live_ghost','scoring']:
-                                if key in comparisons:
-                                    comparisons[key]['accepted_geometry_exception'] = True
-                        golden = path
+                    if prior and revisions:
+                        # raw failures stay visible; only exact, proof-bound identity changes normalize.
+                        comparisons['raw_motion'] = comparisons.pop('motion')
+                        comparisons['raw_motion']['informational'] = True
+                        comparisons['motion'] = geometry_guard(reference_dir/'r18-ghost/evaluator/trace.jsonl.gz',folder/variant/'evaluator/trace.jsonl.gz',revisions)
+                        comparisons['raw_recordings'] = comparisons.pop('recordings')
+                        comparisons['raw_recordings']['informational'] = True
+                        guards = [geometry_record_guard(a,b,revisions) for a,b in zip(baseline_records,records)]
+                        comparisons['recordings'] = {'ok':all(g['ok'] for g in guards),'records':guards}
+                        comparisons['raw_controls'] = comparisons.pop('controls')
+                        comparisons['raw_controls']['informational'] = True
+                        control_a = [{**r,'game':physical(revision_state(r['game'],revisions,'baseline'))} for r in prior_run['summary']['tour']]
+                        control_b = [{**r,'game':physical(revision_state(r['game'],revisions,'candidate'))} for r in run['summary']['tour']]
+                        found = difference(control_a,control_b)
+                        comparisons['controls'] = {'ok':found is None,'first_difference':found}
+                        if route['map'] in revisions:
+                            revision = revisions[route['map']]
+                            assert route['name'] in revision['routes'] == revision['off_line_routes']
+                            assert prior_run['summary']['finish']['identity'] == revision['baseline_identity']
+                            assert run['summary']['finish']['identity'] == revision['candidate_identity']
+                            result['geometry_revision'] = revision
+                            if variant == 'old':
+                                # this play explicitly refuses the incompatible R18 ghost; the next play loads its own clean candidate record.
+                                comparisons['raw_live_ghost'] = comparisons.pop('live_ghost')
+                                comparisons['raw_live_ghost']['informational'] = True
+                                comparisons['old_revision_refusal'] = {'ok':len([c for c in run['summary']['checks'] if c['name'].startswith('old') and c['ok']]) == 2,
+                                                                     'scope':'old revision refused explicitly; own candidate ghost poses checked on new/toggle plays'}
+                            golden = path
                     result['comparisons'][variant] = comparisons
                 write(folder/'result.json',result)
             if not args.candidate:
                 result['retained_reference'] = OLD.compare_reference(folder/'r18/evaluator/trace.jsonl.gz',Path(route['reference']))
                 # an R16 reference is corroboration, not a substitute for the executed R18 baseline.
                 assert result['retained_reference']['ok'], 'R18 no longer matches retained physical acceptance route'
-            result['ok'] = all(r['ok'] for r in result['runs'].values()) and all(c['ok'] or c.get('accepted_geometry_exception',False)
+            result['ok'] = all(r['ok'] for r in result['runs'].values()) and all(c['ok'] or c.get('informational',False)
                 for comparisons in result['comparisons'].values() for c in comparisons.values())
             write(folder/'result.json',result)
             report['routes'].append({'name':route['name'],'map':route['map'],'preset':route['preset'],'ok':result['ok'],

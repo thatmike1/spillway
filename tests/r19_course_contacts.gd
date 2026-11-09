@@ -46,7 +46,11 @@ func run() -> void:
 			var row := {"identity": game.motion_identity(), "geometry": game.course_geometry,
 				"spawn": var_to_str(game.level.spawn), "checkpoints": var_to_str(game.level.checkpoints),
 				"finish": var_to_str(game.level.finish_position), "kill": var_to_str(game._kill_bounds),
-				"queries": []}
+				"queries": [], "presets": {}}
+			for motor: String in ["server128", "server128_aa1000"]:
+				game.select_preset(motor)
+				row.presets[motor] = {"metadata": game.recording_metadata("revision_query"), "identity_text": game.record_identity_text()}
+			game.select_preset("server128")
 			if map_id == "breakwater":
 				if host == AFTER:
 					var installation := game.level.get_node("R16Opportunities/RunwayThread") as Node3D

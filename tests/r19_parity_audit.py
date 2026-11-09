@@ -12,6 +12,7 @@ import json
 import math
 from pathlib import Path
 import sys
+import tempfile
 
 sys.dont_write_bytecode = True
 PROJECT = Path(__file__).resolve().parents[1]
@@ -85,6 +86,93 @@ def self_test():
         check(C.godot_number(literal) == want,'exact Godot JSON numeric reference '+literal)
     check(C.reader_difference({'n':128},{'n':128.0}) is None,'JSON int/double parser tags normalize without changing value')
     check(C.reader_difference({'n':128},{'n':128.00000000000003}) is not None,'JSON decoded numeric ULP still fails without tolerance')
+    # a complete representative header keeps the actual 13-entry identity order.
+    identities = {}
+    for side,geometry,overlay,key in [('baseline','old-geometry','r16-opportunities-1:old','old-key'),('candidate','new-geometry','r19-breakwater-flow-1:new','new-key')]:
+        identity = {'format':'r16-motion-1','map':'breakwater','preset':'server128','course_key':key,'geometry':geometry,'overlay':overlay,
+                    'physics_hz':128,'motor':'r15-source-crouch-2','runner':'res://scripts/r15_source_player.gd','timing':'r16-timing-1'}
+        ordered = ['r16-timing-1',['breakwater','course','r15-breakwater',1,0],geometry,['Stage one','Stage two'],'server128','source',
+                   identity['motor'],identity['runner'],128,'{"air_accelerate":100}','{"height":1.3}','{}',overlay]
+        opp = {'version':'r16-opportunities-1' if side=='baseline' else 'r19-breakwater-flow-1','applied':True,
+               'reason':'original' if side=='baseline' else 'widen_optional_thread_after_repeated_front_contacts',
+               'hash':side+'-hash','base_geometry':geometry,'passages':['RunwayThread']}
+        identities[side] = {'identity':identity,'record_identity':ordered,'course_key':key,'map':'breakwater','map_kind':'course','overlay':overlay,
+                            'preset':'server128','family':'source','opportunities':opp,'look':{'fov':100.0},'physics':{'hull':{'height':1.3},'fingerprint':{'air_accelerate':100},'mechanics':{}}}
+    revision = {'presets':{s:{'server128':{'metadata':m}} for s,m in identities.items()}}
+    revisions = {'breakwater':revision}
+    def fixture(side):
+        return {'header':{'format':'recording-1','metadata':copy.deepcopy(identities[side]),'identity':copy.deepcopy(identities[side]['identity'])},
+                'columns':{'tick':[0,1],'p_x':[1.,2.],'elapsed':[0.,1.]},'inputs':{'tick':[0,0],'code':[87,32]},
+                'events':[],'seal':{'outcome':{'kind':'finish','style':{}},'counts':{'bytes':10,'events':0}}}
+    baseline,candidate = fixture('baseline'),fixture('candidate')
+    check(C.geometry_record_guard(baseline,candidate,revisions)['ok'],'exact targeted revision normalizes complete recording')
+    changes = {
+        'map identity':lambda x:x['header']['metadata']['record_identity'][1].__setitem__(0,'other-map'),
+        'level version':lambda x:x['header']['metadata']['record_identity'][1].__setitem__(3,2),
+        'level variant':lambda x:x['header']['metadata']['record_identity'][1].__setitem__(4,1),
+        'stage titles':lambda x:x['header']['metadata']['record_identity'][3].__setitem__(0,'renamed'),
+        'overlay outside revision':lambda x:x['header']['metadata'].__setitem__('overlay','r19-breakwater-flow-2:other'),
+        'opportunity passages':lambda x:x['header']['metadata']['opportunities']['passages'].append('new gate'),
+        'opportunity applied':lambda x:x['header']['metadata']['opportunities'].__setitem__('applied',False),
+        'opportunity unknown key':lambda x:x['header']['metadata']['opportunities'].__setitem__('unknown',1),
+        'unknown metadata':lambda x:x['header']['metadata'].__setitem__('unknown',1),
+        'hull':lambda x:x['header']['metadata']['physics']['hull'].__setitem__('height',1.31),
+        'F2 laws':lambda x:x['header']['metadata']['physics']['fingerprint'].__setitem__('air_accelerate',101),
+        'preset':lambda x:x['header']['metadata'].__setitem__('preset','server128_aa1000'),
+        'timing':lambda x:x['header']['metadata']['record_identity'].__setitem__(0,'r16-timing-2'),
+        'FOV':lambda x:x['header']['metadata']['look'].__setitem__('fov',101.),
+        'ordered inputs':lambda x:x['inputs']['code'].reverse(),
+        'physical position':lambda x:x['columns']['p_x'].__setitem__(0,math.nextafter(1.,math.inf)),
+        'record identity schema':lambda x:x['header']['metadata']['record_identity'].append('unknown'),
+        'record format':lambda x:x['header'].__setitem__('format','recording-2'),
+    }
+    for name,mutate in changes.items():
+        bad=copy.deepcopy(candidate);mutate(bad)
+        check(not C.geometry_record_guard(baseline,bad,revisions)['ok'],'revision guard rejects '+name)
+    # lifecycle records on Movement Lab keep every identity field strict.
+    lab_a=fixture('baseline');lab_a['header']['metadata']['map']='experiment'
+    lab_a['header']['identity']['map']=lab_a['header']['metadata']['identity']['map']='experiment'
+    lab_b=copy.deepcopy(lab_a)
+    check(C.geometry_record_guard(lab_a,lab_b,revisions)['ok'],'unrevised lifecycle map stays exact')
+    lab_b['header']['metadata']['record_identity'][2]='changed-lab-geometry'
+    check(not C.geometry_record_guard(lab_a,lab_b,revisions)['ok'],'unrevised lifecycle geometry cannot normalize')
+    # the hash is checked against actual captured Godot identity text, independently of revision normalization.
+    header=copy.deepcopy(baseline['header']);meta=header['metadata']
+    text=json.dumps(meta['record_identity']);key=hashlib.sha256(text.encode()).hexdigest()[:16]
+    header['identity']['course_key']=meta['identity']['course_key']=meta['course_key']=key
+    C.validate_record_identity(header,text)
+    for name,mutate in [('course key hash',lambda x:x['identity'].__setitem__('course_key','bad-key')),
+                        ('ordered map',lambda x:x['metadata']['record_identity'][1].__setitem__(0,'other')),
+                        ('own header relation',lambda x:x['identity'].__setitem__('overlay','other'))]:
+        bad=copy.deepcopy(header);mutate(bad)
+        try:C.validate_record_identity(bad,text);rejected=False
+        except (AssertionError,KeyError):rejected=True
+        check(rejected,'identity binding rejects '+name)
+    f5_a,f5_b=copy.deepcopy(baseline),copy.deepcopy(candidate)
+    f5_revision=copy.deepcopy(revisions)
+    for side,value in [('baseline',f5_a),('candidate',f5_b)]:
+        meta=value['header']['metadata']
+        meta['preset']=meta['record_identity'][4]='server128_aa1000'
+        meta['physics']['fingerprint']['air_accelerate']=1000
+        meta['record_identity'][9]='{"air_accelerate":1000}'
+        for identity in [meta['identity'],value['header']['identity']]:
+            identity['preset']='server128_aa1000';identity['course_key']=side+'-f5-key'
+        meta['course_key']=side+'-f5-key'
+        f5_revision['breakwater']['presets'][side]['server128_aa1000']={'metadata':copy.deepcopy(meta)}
+    check(C.geometry_record_guard(f5_a,f5_b,f5_revision)['ok'],'F5 lifecycle uses its own revision key and preserves its laws')
+    with tempfile.TemporaryDirectory(prefix='r19-guard-mutations-') as directory:
+        directory=Path(directory)
+        old_row=copy.deepcopy(row);new_row=copy.deepcopy(row)
+        old_row['identity']=copy.deepcopy(identities['baseline']['identity']);old_row['course_key']=old_row['identity']['course_key']
+        new_row['identity']=copy.deepcopy(identities['candidate']['identity']);new_row['course_key']=new_row['identity']['course_key']
+        def trace(path,value):
+            with gzip.open(path,'wt') as target:target.write(json.dumps(value)+'\n')
+        trace(directory/'old.gz',old_row);trace(directory/'new.gz',new_row)
+        check(C.geometry_guard(directory/'old.gz',directory/'new.gz',revisions)['ok'],'off-line trace normalizes only exact identity')
+        for name,mutate in {**mutations,'unknown physical field':lambda x:x.__setitem__('unknown',1),
+                            'ordered inputs':lambda x:x['input'].append({'type':'mouse','x':1})}.items():
+            bad=copy.deepcopy(new_row);mutate(bad);trace(directory/'bad.gz',bad)
+            check(not C.geometry_guard(directory/'old.gz',directory/'bad.gz',revisions)['ok'],'off-line revision trace rejects '+name)
     return {'ok':all(c['ok'] for c in checks),'checks':checks}
 
 
@@ -106,6 +194,17 @@ def audit(folder):
     if report['mode'] == 'baseline-only':
         check(manifest['commit'] == C.BASE and manifest['archive']['parent_pinned_files_verified'] == 346,'all 346 parent-pinned R18 sources match Git archive')
         check(report['r19_final_gate'] == 'pending','baseline does not claim final R19 acceptance')
+    revisions = report.get('map_revisions',{})
+    for revision in revisions.values():
+        C.validate_revision(revision)
+    if report['mode'] == 'candidate':
+        check(C.runtime_freeze_guard(manifest)['ok'],'all frozen runtime files exact with verification-only intervening diff')
+        baseline = Path(report['baseline_dir'])
+        base_report = json.loads((baseline/'REPORT.json').read_text())
+        check(base_report['ok'] and base_report['verification_source_sha256'] == report['verification_source_sha256'],'fresh complete baseline used identical final helpers')
+        old_source = json.loads((baseline/'source-r18.json').read_text())
+        proof = C.validate_style_fixture(report['scoring_contract'],old_source['executed_files']['scripts/r16_style.gd'],manifest['executed_files']['scripts/r16_style.gd'])
+        check(proof['ok'],'style contract binds actual fixture coverage and exact source hashes')
     reader = C.module(PROJECT/'tools/analyze-r16-runs.py','r19_audit_reader')
     check(C.sha(PROJECT/'tools/analyze-r16-runs.py') == report['executed_python_sha256']['tools/analyze-r16-runs.py'],
           'audit independent reader has the executed reader hash')
@@ -155,6 +254,34 @@ def audit(folder):
                             route_metrics['lab_events'].append({'kind':kind,'tick':row['tick'],'held':row['held']})
                     if 'jump' in row['motion'].get('events',[]):
                         route_metrics['lab_events'].append({'kind':'hop','tick':row['tick'],'held':row['held']})
+        if report['mode'] == 'candidate':
+            prior_dir = baseline/route['name']
+            prior = json.loads((prior_dir/'result.json').read_text())
+            _,old_records = C.observation_audit(prior_dir/'r18',reader)
+            check(set(result['runs']) == {'old','new','toggle'},'all three candidate variants '+route['name'])
+            for variant,run in result['runs'].items():
+                run_dir=route_dir/variant
+                _,records=C.observation_audit(run_dir,reader)
+                motion=C.geometry_guard(prior_dir/'r18-ghost/evaluator/trace.jsonl.gz',run_dir/'evaluator/trace.jsonl.gz',revisions)
+                check(motion['ok'],'independent exact physical/view/input parity '+route['name']+'/'+variant,motion)
+                guards=[C.geometry_record_guard(a,b,revisions) for a,b in zip(old_records,records)]
+                check(len(old_records)==len(records) and all(g['ok'] for g in guards),'independent complete recording parity '+route['name']+'/'+variant,guards)
+                detectors=[C.detector_comparison(C.record_compare_view(a)[1],C.record_compare_view(b)[1]) for a,b in zip(old_records,records)]
+                check(all(g['ok'] for g in detectors),'independent existing detector parity '+route['name']+'/'+variant,detectors)
+                controls=[]
+                for side,summary in [('baseline',prior['runs']['r18-ghost']['summary']),('candidate',run['summary'])]:
+                    controls.append([{**r,'game':C.physical(C.revision_state(r['game'],revisions,side))} for r in summary['tour']])
+                check(C.difference(*controls) is None,'independent complete lifecycle controls '+route['name']+'/'+variant)
+                check(C.difference(prior['runs']['r18-ghost']['summary']['finish']['ghost_probes'],run['summary']['finish']['ghost_probes']) is None,'independent exact ghost pose probes '+route['name']+'/'+variant)
+                if route['map'] in revisions and variant == 'old':
+                    refused=[c for c in run['summary']['checks'] if c['name'].startswith('old')]
+                    check(len(refused)==2 and all(c['ok'] for c in refused),'explicit old revision ghost refusal '+route['name'])
+                else:
+                    ghost=C.OLD.compare_traces(prior_dir/'r18-ghost/evaluator/ghost.jsonl.gz',run_dir/'evaluator/ghost.jsonl.gz')
+                    check(ghost['ok'],'independent every-tick live ghost poses '+route['name']+'/'+variant,ghost)
+        else:
+            check(set(result['runs']) == {'r18','r18-ghost'},'both baseline plays '+route['name'])
+        check(result['ok'] and all(c['ok'] or c.get('informational',False) for v in result['comparisons'].values() for c in v.values()),'driver comparison results '+route['name'])
         if route['name'] == 'r16-whiteout-apron':
             check(route_metrics['airborne_duck_ticks'] > 0,'whiteout route includes actual airborne crouch')
         if route['name'] == 'r16-lab-flow':

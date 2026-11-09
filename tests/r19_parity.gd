@@ -5,6 +5,7 @@ var last_observation := ""
 var host_scene := ""
 var host_script := ""
 var reader_results: Array = []
+var identity_texts: Dictionary = {}
 
 func _build_world() -> Array:
 	variant = str(opts.get("variant", "r18"))
@@ -54,6 +55,8 @@ func late_step(delta: float) -> void:
 	var session: Node = game.session
 	if session.tick > 0 and int(session.last_sample.get("tick", -1)) == session.tick - 1:
 		var run_id := str(session.last_begin.get("run_id", ""))
+		if not identity_texts.has(run_id):
+			identity_texts[run_id] = game.record_identity_text()
 		var key := run_id + ":" + str(session.last_sample.tick)
 		if key != last_observation:
 			last_observation = key
@@ -89,7 +92,7 @@ func _write_summary() -> void:
 			var values: Variant = run.inputs[column]
 			inputs[column] = _bytes_hash(values.to_byte_array())
 		reader_results.append({"file": name, "sha256": FileAccess.get_sha256(path), "columns_sha256": columns,
-			"inputs_sha256": inputs, "header": run.header, "events": run.events, "seal": run.seal})
+			"identity_text": identity_texts.get(str(run.header.run_id), ""), "inputs_sha256": inputs, "header": run.header, "events": run.events, "seal": run.seal})
 	# check every motion identity key independently, rather than testing only an invented key.
 	var good := str(opts.get("ghost", frozen.record_path))
 	var identity: Dictionary = frozen.identity

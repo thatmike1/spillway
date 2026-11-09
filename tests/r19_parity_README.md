@@ -10,8 +10,8 @@ Run from the project directory:
 
 ```sh
 python3 tests/r19_parity_audit.py --self-test
-python3 tools/check-r19-parity.py --out /tmp/r19-parity-baseline
-python3 tests/r19_parity_audit.py /tmp/r19-parity-baseline
+python3 tools/check-r19-parity.py --out /tmp/r19-parity-baseline-v2
+python3 tests/r19_parity_audit.py /tmp/r19-parity-baseline-v2
 ```
 
 `--routes breakwater-basic` selects a bounded smoke test in a different, new
@@ -24,13 +24,17 @@ captured evidence with `--baseline-dir`, and a new RAM directory with `--out`.
 `--host-script=res://scripts/r19_main.gd` optionally asserts the root script.
 The scene is instantiated normally, with only test configuration set before ready.
 
-The final candidate also requires `--scoring-contract PATH`, containing
-`baseline_style_sha256`, `candidate_style_sha256` (the exact `scripts/r16_style.gd`
-source hashes) and `fixture_evidence: {path, sha256}`. That JSON evidence must
-have `ok: true` and cover the new awards, sustained hops, speed thresholds,
-standing/tiny-speed farming, reset/discontinuity boundaries and neutral forward
-behavior. The harness validates the referenced bytes. The parent must inspect
-the fixture's coverage; a file named evidence is not proof by itself.
+The final candidate requires `--scoring-contract PATH` with exact baseline and
+candidate style source SHA256s and `fixture_evidence: {path, sha256}`. The reviewed
+fixture wrapper binds the raw summary, every raw fixture file, executed test and
+baseline sources, all 25 named checks, and at least 2,000 exact forward samples.
+The raw summary must have `failed: 0`; an empty `ok` flag is insufficient.
+
+The candidate archive must match every file/hash and the complete runtime file
+set in outer `look/evidence/r19-final-contracts/RUNTIME-FREEZE.json`. The Git diff
+from that frozen commit may contain only verification/tests/docs. A changed,
+added or deleted runtime file fails provenance and requires the parent to reopen
+the freeze. Six protected F2 sources also match the original R18 pin.
 
 Each baseline route runs twice: normal authored spawn without a ghost, then
 with that route's actual clean recording present from startup. Each candidate
@@ -74,17 +78,46 @@ multipliers are separate. Forward awards with multiplier one retain exact points
 Unknown detector/schema changes fail. New award eligibility itself requires the
 separate style fixture suite; retained route tapes do not establish anti-farming.
 
-Geometry exceptions require `--map-revisions PATH`, a JSON object keyed by exact
-map id. Each value contains exact `baseline_identity`, `candidate_identity`,
-`routes` (explicit retained route names), optional `off_line_routes` (still exact),
-and `evidence: {path, sha256}` for passing targeted before/after JSON proof.
-Unknown maps, unlisted routes, stale proof bytes or identities fail. Listed
-changed routes retain every raw difference in the report and are labelled
-geometry exceptions, never exact parity. They must still earn complete clean
-finishes, pass observation/reader/input checks, reject the old revision ghost
-with an explicit error, and load their own new clean ghost. No exception permits
-changes to the six parent-pinned F2 motor/law/preset sources. New map and
-experiment earned-input tests remain separate from this retained-route suite.
+The targeted Breakwater revision requires `--map-revisions PATH`, keyed only by
+`breakwater`. Its exact keys are `baseline_identity`, `candidate_identity`,
+`routes`, `off_line_routes`, `presets`, and `evidence: {path, sha256}`. Both route
+lists must be `breakwater-basic` and `breakwater-return`. These retained lines
+are off the changed gate and require full exact physical parity.
+
+The proof is the passing before/after collision-query JSON, including both exact
+supplied identities and `presets` captured from each host for `server128` and
+`server128_aa1000`. The contract's `presets` has `baseline` and `candidate` maps
+of those captures. Each capture contains `metadata` and `identity_text`.
+`tests/r19_course_contacts.gd` produces them. The reviewed proof adds `ok` from
+its 45 actual checks and keeps its raw failed count, source binding and results.
+Unknown schemas, stale hashes or unrelated identities fail.
+
+Only the exact geometry/overlay/course-key revision fields normalize. The actual
+13-entry recording identity retains timing, map identity (including level
+version/variant), stage titles, preset, family, motor, runner, rate, physics,
+hull and mechanics. Opportunities normalize only version/reason/hash/base
+geometry after checking the complete exact old/new metadata. Applied/passages,
+all other metadata and unknown fields remain strict. Every actual recording's
+captured Godot identity text must hash to its own header's course key and agree
+with all readable header identity fields. F5 uses its own key. Only actual
+Breakwater records normalize; the later Movement Lab records remain strict.
+Lifecycle tours from other routes that switch into Breakwater use the same rule.
+
+Raw motion/recording/control differences remain in `result.json`, marked
+informational. The normalized complete physical traces, complete recordings,
+controls, detector events and ghost probes must pass without exceptions or
+tolerances. The `old` variant explicitly refuses the incompatible R18 ghost;
+its live ghost difference is retained. It then loads its own clean candidate
+record for pose probes. `new` and `toggle` start with the candidate record and
+must match every original ghost pose. No physical or scoring mismatch is
+accepted merely because geometry changed. New-map/experiment input tests,
+packaging, rendered/native checks and enjoyment stay separate.
+
+The independent audit repeats the normalized physical, complete recording,
+existing-detector, lifecycle and live ghost comparisons from raw evidence.
+`--self-test` includes targeted revision mutations, unknown schema/metadata,
+map identity/version/variant/titles, opportunities, laws/hull/preset, clocks,
+FOV, physical ULPs, ordered inputs, F5 keys and strict unrevised-map records.
 
 All source, import, isolated HOME/XDG profiles and evidence live under the new
 `/tmp` or `/dev/shm` output directory. Only the project subtree is archived.
@@ -103,7 +136,7 @@ file. Godot rejects FIFO paths, so no pipe-backed FileAccess is used. Source/imp
 are removed in `finally`. Retained compact raw observations and recordings stay
 in RAM for the parent's final proof and subsequent external preservation.
 
-A resource-only resume uses `--resume --out /tmp/r19-parity-baseline`. It requires
+A resource-only resume uses `--resume --out /tmp/r19-parity-baseline-v2`. It requires
 `preflight/check-r19-parity-before-streaming.py` and the prior report/source
 manifests. All archived engine source hashes and the injected adapter must match;
 acceptance functions must have identical Python ASTs. Only process/output resource
