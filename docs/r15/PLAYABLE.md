@@ -1,5 +1,7 @@
 # R15 playable shell: maps, presets, checkpoints, records
 
+Updated 9 November 2026: R15 is delivered. See [RESULTS.md](RESULTS.md) for the exact package acceptance and outer REPORT.md for downloads and controls. The later sections retain dated shell-development evidence, rather than claiming every old fixture count applies to the final maps.
+
 8 November 2026. The R15 game host is `scenes/r15.tscn` (`scripts/r15_main.gd`). It runs the
 approved R14 bhop movement with the real crouch runner. `project.godot` now launches R15
 Breakwater. The delivered R14 game and its approved motion modules remain unchanged.
@@ -234,7 +236,7 @@ Evidence is in the outer `checkpoints/spillway/r15/product-loop/` (23 MB): `rout
 - **Headless, early:** wrong test assumptions, since fixed. The loaded map's card stays in the
   menu by design. Penstock has its own kill box. Ticks come back from JSON as floats.
 
-## What is stand-in or fixture, and what remains
+## Historical shell handoff (8 November, before map integration)
 
 - **Fixtures.** Every lifecycle, chooser, crouch and record check runs on labelled fixture levels
   (`tests/r15_loop_fixture_level.gd`, `tests/r15_loop_fixture_maps.gd`). They say nothing about a
@@ -257,7 +259,7 @@ Root verified the returned source hashes and reran all 186 headless gates in a f
 
 Breakwater is now integrated as the actual default and the project launches the R15 scene. The first integration rerun passes the real default/registry groups on the Breakwater module. This supersedes the two-legacy-map/development-stand-in state recorded earlier; all five new courses and the optional lab have since been integrated as recorded below.
 
-The real R15 host and crouch motor version 2 now replay all three approved F2/F5 routes with exact position, velocity, yaw, applied input and game state across 16,356 ticks (`crouch-harness/approved-routes/RESULTS.json` outside Git). Five Breakwater tapes also pass the standard executor, including physical recovery and a deliberate checkpoint respawn; see BREAKWATER.md for their times and evidence precision. No final R15 package has been accepted yet.
+The real R15 host and crouch motor version 2 now replay all three approved F2/F5 routes with exact position, velocity, yaw, applied input and game state across 16,356 ticks (`crouch-harness/approved-routes/RESULTS.json` outside Git). Five Breakwater tapes also pass the standard executor, including physical recovery and a deliberate checkpoint respawn; see BREAKWATER.md for their times and evidence precision. At that source-integration stage no final package had been accepted. The 9 November delivery in RESULTS.md supersedes that status.
 
 The registry's absent-module refusal control now uses an explicitly nonexistent fixture, rather than a future real course. Fresh source shell verification on the Breakwater default passes 184 checks, with exactly five labelled refusal errors and no unexpected errors (`product-integration/available-map-control/RESULTS.json`). The earlier 186-check total included two missing-module/stand-in checks that no longer apply once Breakwater exists; none was retired to hide a failure.
 
@@ -265,4 +267,4 @@ The registry's absent-module refusal control now uses an explicitly nonexistent 
 
 The map grid now contains all eight entries. See BREAKWATER.md, WHITEOUT.md, SUNKEN.md, RAINLINE.md and NIGHTSHIFT.md for route proofs, licensed assets and limitations. The Movement Lab is separate: Shift slides, a fresh Space near a wall jumps off it, and holding E on a ring grapples. Keys 1/2/3 or menu switches toggle these experiments; changing a move during an attempt makes it practice, and every loadout has separate records. Its HUD says EXPERIMENTAL. Leaving it restores the approved course runner. The lab's current wall jump needs the key pushing toward the wall released before the tap; AA100 otherwise cancels its outward push. See EXPERIMENT.md for the labelled tuning and actual input proofs.
 
-The full source wrapper now passes every map, the 179-check current loop and both unchanged R13 controls. All 16,356 approved F2/F5 ticks still match after lab integration. New map recovery and crouch proofs are source-mode evidence; final packed delivery and player-view discovery are still required. No human feel is inferred from the check counts.
+The full source wrapper now passes every map, the 179-check current loop and both unchanged R13 controls. All 16,356 approved F2/F5 ticks still match after lab integration. That source-only stage still required packed delivery and player-view discovery. The completed delivery is now in RESULTS.md; the unfinished discovery is retained in DISCOVERY.md. No human feel is inferred from the check counts.

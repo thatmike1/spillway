@@ -1,6 +1,6 @@
-# R15 release work still required
+# R15 release checklist: completed 9 November 2026
 
-This is the integration checklist, not release acceptance. The delivered R14 ZIPs and outer REPORT stay current until an R15 package passes its own checks.
+R15 is accepted in outer `delivery/spillway-r15/`; the outer REPORT is the R15 player guide. See RESULTS.md and the immutable verification/promotion receipts for the exact scope. The historical plan below remains the acceptance checklist.
 
 - [x] Actual R15 default scene, separate profile, F2/F5, crouch, map grid and checkpoint practice.
 - [x] Approved uncrouched route parity through the real R15 host and motor version 2.
@@ -8,8 +8,8 @@ This is the integration checklist, not release acceptance. The delivered R14 ZIP
 - [x] All five new course modules, plus the separate optional movement playground, integrated and played through the R15 host.
 - [x] Source/native per-course F2 ordinary route, deliberate recovery and F5 basic route. Failed and unfinished attempts are retained.
 - [x] Experimental slide, wall jump and bounded grapple with explicit controls, state and record identity. Normal maps retain approved movement.
-- [ ] Independent contact/checkpoint/crouch/record challenges, actual player-view discovery and OS-input checks on the final candidate.
-- [ ] Fresh portable Linux and Windows release ZIPs, packed Linux checks outside the checkout, player report and pushed source.
+- [x] Independent contact/checkpoint/crouch/record challenges; unfinished source player-view discovery retained; exact final-byte Linux OS-input smoke. No human-feel claim.
+- [x] Fresh portable Linux and Windows release ZIPs; 304/304 packed Linux checks outside the checkout, 15 play/reload cycles, 78/78 exact-byte negatives, player report and pushed source. Windows remains static-only.
 
 ## Delivery tooling
 
