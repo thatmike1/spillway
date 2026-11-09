@@ -21,6 +21,8 @@ static func apply(level: Node3D) -> Dictionary:
 	for side: int in [-1, 1]:
 		var body := installation.get_node("WestWall" if side < 0 else "EastWall") as StaticBody3D
 		body.position.x = side * 1.175
+	# the visual cue follows the widened west wall; it does not change the collision identity.
+	(installation.get_node("Cue") as Node3D).position.x = -1.175
 	for opportunity: Dictionary in report.opportunities:
 		if str(opportunity.name) != "RunwayThread":
 			continue

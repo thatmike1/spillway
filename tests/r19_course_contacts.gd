@@ -48,6 +48,9 @@ func run() -> void:
 				"finish": var_to_str(game.level.finish_position), "kill": var_to_str(game._kill_bounds),
 				"queries": []}
 			if map_id == "breakwater":
+				if host == AFTER:
+					var installation := game.level.get_node("R16Opportunities/RunwayThread") as Node3D
+					check(is_equal_approx(installation.get_node("Cue").position.x, installation.get_node("WestWall").position.x), "style cue stays on its moved wall")
 				for x: float in [-80.8, -81.7, -77.98]:
 					row.queries.append(query(game, x))
 			pair.append(row)
