@@ -919,9 +919,13 @@ def package(args):
     evidence = output / 'evidence'
     evidence.mkdir()
     # transient bulk (source copy, pack, folders, extracted zips) lives in the scratch area.
-    stage = Path(tempfile.mkdtemp(prefix='r15-package-', dir=args.scratch or output))
-    args.work = stage / 'work'
+    stage = None
     try:
+        with deferred_signals() as pending:
+            stage = Path(tempfile.mkdtemp(prefix='r15-package-', dir=args.scratch or output))
+            args.work = stage / 'work'
+        if pending:
+            raise KeyboardInterrupt('cancelled during package allocation')
         # freeze: exactly the committed tree, never the working checkout or its import cache.
         tar = source_archive(facts['commit'], facts['prefix'], top)
         facts['archive_sha256'] = hashlib.sha256(tar).hexdigest()
@@ -995,8 +999,12 @@ def package(args):
         if not result['ok']:
             raise Rejected('packed checks failed; zips kept under %s, see VERIFICATION.json' % destination)
     finally:
-        shutil.rmtree(stage, ignore_errors=True)
-        compress_evidence(evidence)
+        with deferred_signals() as pending:
+            if stage is not None:
+                shutil.rmtree(stage, ignore_errors=True)
+            compress_evidence(evidence)
+        if pending:
+            raise KeyboardInterrupt('cancelled during package cleanup')
 
 
 def compress_evidence(evidence):
@@ -1459,36 +1467,45 @@ def main():
     engine_parser.add_argument('argv', nargs=argparse.REMAINDER)
     args = parser.parse_args()
     try:
-        if args.command == 'engine':
-            command = args.argv[1:] if args.argv[:1] == ['--'] else args.argv
-            if not command:
-                raise Rejected('engine needs a command after --')
-            code, _ = run_engine(command, args.cwd, os.environ.copy(), args.log, args.deadline, cleanup_grace=35)
-            sys.exit(code if type(code) is int else 124)
-        elif args.command == 'package':
-            package(args)
-        elif args.command == 'source':
-            sys.exit(0 if source_mode(args) else 1)
-        else:
-            evidence = args.evidence.expanduser().resolve()
-            if evidence.exists() and any(evidence.iterdir()):
-                raise Rejected('evidence directory %s already has files' % evidence)
-            evidence.mkdir(parents=True, exist_ok=True)
-            args.work = Path(tempfile.mkdtemp(prefix='r15-check-', dir=args.scratch or evidence))
-            try:
-                # the required resources and route freeze belong to the package's own commit.
-                build = json.loads((args.package_dir / 'BUILD.json').read_text())
-                files = git('ls-tree', '-r', '--name-only', '--full-tree', build['source_commit'] + ':' + build['source_project_path']).split('\n')
-                args.pack_required = sorted(set(resources(files)) | set(args.require))
-                routes = []
-                packed_cadence(args.route)
-                if args.route:
-                    routes = recheck_routes(build, args, evidence)
-                result = check_package(args.package_dir.resolve(), args, evidence, routes)
-                compress_evidence(evidence)
-                sys.exit(0 if result['ok'] else 1)
-            finally:
-                shutil.rmtree(args.work, ignore_errors=True)
+        with cancellation_signals():
+            if args.command == 'engine':
+                command = args.argv[1:] if args.argv[:1] == ['--'] else args.argv
+                if not command:
+                    raise Rejected('engine needs a command after --')
+                code, _ = run_engine(command, args.cwd, os.environ.copy(), args.log, args.deadline, cleanup_grace=35)
+                sys.exit(code if type(code) is int else 124)
+            elif args.command == 'package':
+                package(args)
+            elif args.command == 'source':
+                sys.exit(0 if source_mode(args) else 1)
+            else:
+                evidence = args.evidence.expanduser().resolve()
+                if evidence.exists() and any(evidence.iterdir()):
+                    raise Rejected('evidence directory %s already has files' % evidence)
+                evidence.mkdir(parents=True, exist_ok=True)
+                args.work = None
+                try:
+                    with deferred_signals() as pending:
+                        args.work = Path(tempfile.mkdtemp(prefix='r15-check-', dir=args.scratch or evidence))
+                    if pending:
+                        raise KeyboardInterrupt('cancelled during check allocation')
+                    # the required resources and route freeze belong to the package's own commit.
+                    build = json.loads((args.package_dir / 'BUILD.json').read_text())
+                    files = git('ls-tree', '-r', '--name-only', '--full-tree', build['source_commit'] + ':' + build['source_project_path']).split('\n')
+                    args.pack_required = sorted(set(resources(files)) | set(args.require))
+                    routes = []
+                    packed_cadence(args.route)
+                    if args.route:
+                        routes = recheck_routes(build, args, evidence)
+                    result = check_package(args.package_dir.resolve(), args, evidence, routes)
+                    compress_evidence(evidence)
+                    sys.exit(0 if result['ok'] else 1)
+                finally:
+                    with deferred_signals() as pending:
+                        if args.work is not None:
+                            shutil.rmtree(args.work, ignore_errors=True)
+                    if pending:
+                        raise KeyboardInterrupt('cancelled during check cleanup')
     except (Rejected, nd.NativeDisplayError) as error:
         print('package-r15: ' + str(error), file=sys.stderr)
         sys.exit(1)
@@ -1511,8 +1528,11 @@ def recheck_routes(build, args, evidence):
         shutil.copy2(stage / 'tools/momentum-tape.py', args.hull_observer)
         return routes
     finally:
-        shutil.rmtree(stage, ignore_errors=True)
-        shutil.rmtree(evidence / 'freeze-profile', ignore_errors=True)
+        with deferred_signals() as pending:
+            shutil.rmtree(stage, ignore_errors=True)
+            shutil.rmtree(evidence / 'freeze-profile', ignore_errors=True)
+        if pending:
+            raise KeyboardInterrupt('cancelled during source recheck cleanup')
 
 
 if __name__ == '__main__':

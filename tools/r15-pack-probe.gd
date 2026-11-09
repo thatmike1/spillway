@@ -468,7 +468,17 @@ func _label_drawn(field: String) -> bool:
 	if not label is Label or not label.is_visible_in_tree() or str(label.text).strip_edges().is_empty() \
 		or (label.visible_characters >= 0 and label.visible_characters < label.get_total_character_count()):
 		return false
+	if label.lines_skipped > 0 or label.get_visible_line_count() < label.get_line_count():
+		return false
 	var rect: Rect2 = label.get_global_rect()
+	var own_rect := Rect2(Vector2.ZERO, label.size).grow(0.5)
+	for index: int in label.text.length():
+		if label.text.substr(index, 1).strip_edges().is_empty():
+			continue
+		var glyph: Rect2 = label.get_character_bounds(index)
+		if not glyph.has_area() or ((label.clip_text or label.text_overrun_behavior != TextServer.OVERRUN_NO_TRIMMING) and not own_rect.encloses(glyph)):
+			return false
+		rect = rect.merge(label.get_global_transform() * glyph)
 	var alpha := 1.0
 	var node: Node = label
 	while node != null:
@@ -562,7 +572,7 @@ func _check_registry() -> void:
 ## drawable geometry under a node: names with vertices, shaders and textures. with `vertices`
 ## off it lists what is meant to be drawn without reading mesh arrays (headless has none).
 func _drawn(root: Node, vertices: bool) -> Dictionary:
-	var out := {"nodes": {}, "shaders": {}, "textures": {}, "in_view": {}, "surfaces": {}}
+	var out := {"nodes": {}, "shaders": {}, "textures": {}, "in_view": {}, "surfaces": {}, "instances": {}}
 	_scan(root, out, vertices)
 	return out
 
@@ -606,6 +616,7 @@ func _scan(node: Node, out: Dictionary, vertices: bool) -> void:
 			if not surfaces.is_empty() and (not vertices or count >= 3):
 				out.nodes[str(node.name)] = count
 				out.surfaces[str(node.name)] = surfaces
+				out.instances[str(node.get_instance_id())] = {"path": str(node.get_path()), "surfaces": surfaces}
 			if in_view > 0:
 				out.in_view[str(node.name)] = in_view
 	for child: Node in node.get_children():
@@ -613,8 +624,15 @@ func _scan(node: Node, out: Dictionary, vertices: bool) -> void:
 
 ## reject known invisible standard materials; shader visibility still needs native inspection.
 func _material_drawable(material: Material) -> bool:
-	if material is BaseMaterial3D and material.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED and material.albedo_color.a <= 0.05:
-		return material.next_pass != null and _material_drawable(material.next_pass)
+	if material is BaseMaterial3D:
+		var visible := true
+		match material.transparency:
+			BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR:
+				visible = material.albedo_color.a >= material.alpha_scissor_threshold
+			BaseMaterial3D.TRANSPARENCY_ALPHA, BaseMaterial3D.TRANSPARENCY_ALPHA_HASH, BaseMaterial3D.TRANSPARENCY_ALPHA_DEPTH_PRE_PASS:
+				visible = material.albedo_color.a > 0.0
+		if not visible:
+			return material.next_pass != null and _material_drawable(material.next_pass)
 	return true
 
 func _materials(material: Material, out: Dictionary) -> void:
@@ -677,7 +695,7 @@ func _floor_hits(drawn: Dictionary) -> Array:
 		var surface := _triangle_hit(game.get("level"), point, drawn)
 		hits.append({"screen": [at.x, at.y], "hit": true, "point": _v3(point), "normal": _v3(normal), "collider": str(body.name) if body != null else "",
 			"role": str(body.get_meta("surface", "")) if body != null else "", "walkable": normal.y > 0.7,
-			"drawn_by": str(surface.get("mesh", "")), "drawn_surface": int(surface.get("surface", -1))})
+			"drawn_by": str(surface.get("mesh", "")), "drawn_path": str(surface.get("path", "")), "drawn_surface": int(surface.get("surface", -1))})
 	return hits
 
 ## the name of a drawn mesh with a triangle through this point (within 3 cm), or "".
@@ -687,14 +705,15 @@ func _triangle_at(root: Node, point: Vector3, drawn: Dictionary) -> String:
 func _triangle_hit(root: Node, point: Vector3, drawn: Dictionary) -> Dictionary:
 	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
 		var instance := node as MeshInstance3D
-		if not drawn.nodes.has(str(instance.name)) or instance.mesh == null:
+		var eligible: Dictionary = drawn.get("instances", {}).get(str(instance.get_instance_id()), {})
+		if eligible.is_empty() or instance.mesh == null:
 			continue
 		var box := instance.global_transform * instance.mesh.get_aabb()
 		if not box.grow(0.05).has_point(point):
 			continue
 		var local := instance.global_transform.affine_inverse() * point
 		for i: int in instance.mesh.get_surface_count():
-			if not i in drawn.get("surfaces", {}).get(str(instance.name), []):
+			if not i in eligible.get("surfaces", []):
 				continue
 			var arrays := instance.mesh.surface_get_arrays(i)
 			var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
@@ -705,7 +724,7 @@ func _triangle_hit(root: Node, point: Vector3, drawn: Dictionary) -> Dictionary:
 				var b := points[index[t + 1] if not index.is_empty() else t + 1]
 				var c := points[index[t + 2] if not index.is_empty() else t + 2]
 				if _on_triangle(local, a, b, c, 0.03):
-					return {"mesh": str(instance.name), "surface": i}
+					return {"mesh": str(instance.name), "path": str(eligible.path), "surface": i}
 	return {}
 
 func _on_triangle(p: Vector3, a: Vector3, b: Vector3, c: Vector3, tolerance: float) -> bool:
