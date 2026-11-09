@@ -323,7 +323,10 @@ def native_checks(folder, build, files, args, evidence, work, routes):
     args.identity = build['identity']
     args.controls_fps = 60
     runs = {}
-    with r16.nd.NativeDisplay(evidence / 'native-display', displays=(args.display,), min_free_gib=FLOOR / 2**30) as display:
+    # --headless-host: a remote run (the laptop over ssh) has no reachable desktop to guard; recorded in the evidence.
+    desktop = None if getattr(args, 'headless_host', False) else r16.nd.DESKTOP
+    (evidence / 'desktop-guard.json').write_text(json.dumps({'desktop_guard': desktop, 'headless_host': desktop is None}) + '\n')
+    with r16.nd.NativeDisplay(evidence / 'native-display', displays=(args.display,), desktop=desktop, min_free_gib=FLOOR / 2**30) as display:
         args._active_display = display
         cases = [('controls', None)]
         for route in routes:
@@ -479,6 +482,7 @@ def main():
         p.add_argument('--scratch', type=Path, default=Path('/tmp'))
         p.add_argument('--display', type=int, choices=range(190, 200), default=198)
         p.add_argument('--deadline', type=float, default=600)
+        p.add_argument('--headless-host', action='store_true', help='no local desktop display to guard (remote run over ssh)')
         if name == 'package':
             p.add_argument('--output', type=Path, required=True)
         else:
