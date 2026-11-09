@@ -168,9 +168,13 @@ R16 kick: tangent 370 → 370 u/s, outward −146 → 230, horizontal 398 → 43
 
 ## Limits
 
-- Headless only. Native private AMD/X11 OS-input and player-camera evidence was **deferred**: HOME
-  was just above the 15 GiB floor. Root's later replay through the actual R16 host is still owed.
+- This original 167-check component run was headless; its native work was deferred at the disk
+  floor. Later actual-R16 host, full packed/native chains and the focused OS-keyboard chain are
+  complete: [RESULTS.md](RESULTS.md), [NATIVE-ACCEPTANCE.md](NATIVE-ACCEPTANCE.md) and
+  [LAB-OS-INPUT.md](LAB-OS-INPUT.md). The original fixture run is not retroactively native evidence.
 - The fixture walls and wedge are labelled test geometry added at runtime, not lab map changes.
 - An unrelated base observation: on the 60° fixture face, holding W in the air climbs it
   (AA 100 clip, R14 law). The lab code does not touch it.
 - Nothing here says how any of it feels; Mike decides.
+
+The R16 checkpoint-practice hints teach Shift on descent and a fresh Space hop out, and name the two-kick, one-use-per-wall budget. They override only the R16 HUD text; the frozen R15 lab geometry, hints and art remain unchanged. The recording menu gives the actual local directory and asks for the `r16_runs` folder back for analysis. Root regression: actual host118 engine plus13 driver checks and10 visibility checks, all passing (`checkpoints/spillway/r16/hud-words/`). Native inspection remains separate.
