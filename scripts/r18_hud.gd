@@ -596,6 +596,9 @@ func _build_map_cards() -> void:
 	super()
 	for id: String in map_buttons:
 		(map_buttons[id] as Button).custom_minimum_size = Vector2(CARD_MIN_WIDTH, CARD_HEIGHT + 4.0)
+		var entry: Dictionary = game.call("map_entry", id)
+		if str(entry.get("kind", "")) == "legacy":
+			(map_buttons[id] as Button).text = "%s\n%s" % [str(entry.name), str(entry.theme)]
 	if map_heading != null:
 		map_heading.text = "Maps"
 	if map_note != null:

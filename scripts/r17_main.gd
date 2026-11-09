@@ -44,6 +44,16 @@ func _build_level() -> void:
 		look_layer.set_enabled(look_enabled)
 	_refresh_look_label()
 
+## player-facing descriptions live here so the frozen map registry and physical ids stay exact.
+func map_entry(id: String = "") -> Dictionary:
+	var entry := super(id).duplicate(true)
+	var key := map_id if id.is_empty() else id
+	if key == "practice":
+		entry["theme"] = "Open yard for speed, strafes and gap practice"
+	elif key == "overflow":
+		entry["theme"] = "Dam-top run through spillways and service decks"
+	return entry
+
 func set_look(value: bool) -> void:
 	look_enabled = value
 	if is_instance_valid(look_layer):
