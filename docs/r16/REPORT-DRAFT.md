@@ -1,6 +1,6 @@
-# Spillway R16 player guide draft
+# Spillway R16 player guide
 
-This is the guide for the current source candidate. The portable downloads and native checks are still pending; it does not announce a release.
+This guide accompanies accepted source 67e608a0. The outer REPORT.md supplies the final portable download links; [RESULTS.md](RESULTS.md) records the exact bytes and verification scope.
 
 R16 adds style points, local recordings and a ghost to the bhop and maps from R15. F2 remains the default. F5, all five themed courses, Penstock Yard and Overflow remain available. R15's downloads stay separate for comparison.
 
@@ -20,7 +20,7 @@ The compact panel shows your total, combo multiplier and one brief callout. It u
 | --- | --- | --- |
 | Speed | Cover a new 32 m stretch at 400 u/s or faster. | 20–80 |
 | Clean strafe | Finish a hop with at least 80% eligible sync, enough turning samples, at least 8 u/s of real air gain and positive total gain. | 15 + 1.5 × air gain, capped at 150 |
-| Gap | Clear at least 1.5 m of measured unsupported space and land across it. Deep falls and shallow trenches do not qualify. | 25 × gap width in metres to the power 1.5, capped at 900 |
+| Gap | Clear at least 1.5 m of measured unsupported space and land across it, no more than 1.25 m below takeoff. This conservative rule excludes deep falls and some legitimate drop jumps; shallow trenches also do not qualify. | 25 × gap width in metres to the power 1.5, capped at 900 |
 | Edge landing | Land across a gap or onto a raised ledge with no more than 8 u, about 20 cm, of landing margin along your flight line. | 50–300 |
 | Near miss | Pass within about 20 cm of a side or overhead obstacle at 380 u/s or faster, without touching it. Enter and leave clear space; a long wall hug does not count. | Clearance and speed determine it; threading both sides pays more. |
 | Crouch save | Actually pass an obstacle that the standing collision box would have hit. It pays after you clear it, not when you press crouch. | 600–1500, including an airborne bonus |
@@ -62,8 +62,12 @@ The lab stays separate from the approved course runner. F2/F5 work there, and **
 
 **Grapple:** aim at a marked ring and hold **E**, then release E to let go. Its tuning and law are unchanged from R15.
 
-## Release evidence to complete before promotion
+## What was verified and what remains open
 
-The current source has component and integration proofs, including preserved course tapes, geometry-backed score controls, copied-folder analysis and the actual R16 lab runner. These are not portable-package acceptance or a verdict on feel.
+The official Linux release passed 354/354 package checks, 771 native menu/control assertions and 16 clean play/save/reload cycles. All 98,465 packed trace ticks match fresh source exactly, including the 14 retained R15 course lines. The new Whiteout run finishes with a 900-point airborne crouch save; the new lab run chains landing slide, hop, two A/D-held wall kicks and the unchanged grapple. Both restore their time/style bests and fastest-run ghost after relaunch.
 
-Before this draft replaces the outer report: inspect the current native style panel, ghost, optional passages and lab chain; verify clean committed Linux/Windows packages outside the checkout with current helpers; retain the exact ZIP/pack hashes and positive/negative results; link the accepted downloads and document remaining limitations. Windows execution, physical input latency and Mike's verdict remain unverified unless new evidence establishes them.
+All 96 broken-package controls pass, including actual broken exported games and cancellation cleanup. A separate normal Linux launch passes synthetic OS-input checks with default recordings, no game probe and a clean Quit. Native images of style, passages, lab and ghosts were inspected. R15's downloads and guide remain separate; the R16 map additions are optional and approved motion is unchanged.
+
+The scoring weights and lab protections are new game choices. Some valid drop jumps do not get a gap reward, and the sync percentage is directional matching rather than a quality grade. The original map roughness remains, including Rainline's slower duct and tight shortcut landings. Two instrumented native source runs produced small ObjectDB shutdown warnings; a repeat and the final packed/normal runs exited cleanly. Their unresolved cause is tracked separately. If an actual window remains after Quit, end the process; finish records are saved before Quit.
+
+Windows has only static package checks. Physical keyboard/mouse latency, audio listening, gamepad, cross-machine replay and your verdict on the new scoring and moves remain unverified. [Detailed results and retained failures](RESULTS.md) separate those limits from the scripted proofs.

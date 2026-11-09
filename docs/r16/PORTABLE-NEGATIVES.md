@@ -6,7 +6,7 @@ Run from this project with a new evidence directory:
 
 ```sh
 python3 -I tests/test_r16_portable_negatives.py \
-  --candidate /tmp/r16-negative-base-67e608a0 \
+  --candidate /home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r16 \
   --source-commit 67e608a0f2b9dbb31b31ff8f63bdc3fd8491a1e3 \
   --evidence /home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r16/portable-negatives/new-run \
   --scratch /tmp

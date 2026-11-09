@@ -56,6 +56,8 @@ The scoring service used in these proofs has source SHA-256 `833e02db5cb42a8b467
 
 Native player-camera capture is not accepted here: HOME fell below the mandatory 15 GiB floor during the run, so no private display or capture was started. The native capture path is provided using the existing private AMD/X11 helper and explicit display 198, but is unexecuted. Visibility/material appearance remains source/headless-only. Root must inspect native approaching/passing/normal views when the floor permits and repeat acceptance on the actual R16 host. No fun, feel, Windows or packaged-release claim is made.
 
+That paragraph describes this builder's original run. Later actual-R16 AMD acceptance inspected both Breakwater passages and Whiteout's apron, including approach, passage, exit and unchanged ordinary lines. See [NATIVE-ACCEPTANCE.md](NATIVE-ACCEPTANCE.md). The complete Whiteout apron tape finishes clean with its 900-point airborne save. Final exported-pack checking is a separate result in the round's release results.
+
 Verified commands, from `projects/foldrunner`:
 
 ```bash

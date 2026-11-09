@@ -6,7 +6,7 @@ Run from `projects/foldrunner` with a new evidence directory:
 
 ```sh
 python3 -I tests/r16_release_os_smoke.py \
-  --candidate /tmp/r16-negative-base-67e608a0 \
+  --candidate /home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r16 \
   --out /home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r16/release-os-smoke-new
 ```
 
