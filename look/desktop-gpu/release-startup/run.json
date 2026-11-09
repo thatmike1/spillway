@@ -1,0 +1,1003 @@
+{
+  "command": [
+    "/home/thatmike1/.local/state/spillway-desktop-gpu/package/SpillwayLookC-linux-x86_64/SpillwayLookC.x86_64",
+    "--verbose",
+    "--display-driver",
+    "x11",
+    "--rendering-driver",
+    "opengl3",
+    "--audio-driver",
+    "Dummy",
+    "--windowed",
+    "--position",
+    "0,0",
+    "--resolution",
+    "1280x720",
+    "--quit-after",
+    "180"
+  ],
+  "cwd": "/home/thatmike1/.local/state/spillway-desktop-gpu/empty",
+  "exit": 0,
+  "watch": [
+    {
+      "time": 1794220199.6959064,
+      "pid": 235910,
+      "fds": [],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    187      0    t3code-v2 --gpu\n    0      20955     G     16     11      -      -      -      -    564      0    firefox        \n    0     232054     G     12      3      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      7      0    Xwayland       \n"
+      }
+    },
+    {
+      "time": 1794220199.9563305,
+      "pid": 235910,
+      "fds": [],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    187      0    t3code-v2 --gpu\n    0      20955     G     16     11      -      -      -      -    564      0    firefox        \n    0     232054     G     12      3      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      7      0    Xwayland       \n"
+      }
+    },
+    {
+      "time": 1794220200.2171113,
+      "pid": 235910,
+      "fds": [],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      3      1      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    224      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     12      3      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      7      0    Xwayland       \n"
+      }
+    },
+    {
+      "time": 1794220200.4766467,
+      "pid": 235910,
+      "fds": [],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      3      1      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    224      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     12      3      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      7      0    Xwayland       \n"
+      }
+    },
+    {
+      "time": 1794220200.7684505,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      3      1      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    224      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     12      3      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -     20      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220201.028225,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      7      2      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    224      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -     70      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220201.2884843,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      7      2      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    224      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    103      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220201.5495117,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      7      2      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    224      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    160      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220201.8101184,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      7      2      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    224      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    214      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220202.0732036,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      3      1      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    212      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      4      1      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    236      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220202.333446,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      3      1      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    212      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      4      1      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    330      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220202.5933099,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      3      1      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    212      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      4      1      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    330      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220202.8539689,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      3      1      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    212      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      4      1      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    330      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220203.1137888,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    204      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     10      2      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    330      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220203.373284,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    204      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     10      2      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    330      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220203.6336715,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    204      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     10      2      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    330      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220203.8966656,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    204      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     10      2      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    330      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220204.157416,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G     10      3      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    204      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      6      1      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    330      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220204.4202378,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G     10      3      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    204      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      6      1      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    330      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220204.6846828,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G     10      3      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    204      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      6      1      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    330      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220204.949022,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G     10      3      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    204      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      6      1      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    330      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220205.2108836,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G     10      3      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    204      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     17      9      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    330      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220205.4715722,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G     10      3      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    204      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     17      9      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    330      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220205.7322922,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G     10      3      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    204      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     17      9      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    330      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220205.9929388,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    202      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     34     19      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      -      -      -      -      -      -    330      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220206.2534704,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    202      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     17      9      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      8      2      -      -      -      -    330      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220206.5136478,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    202      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     17      9      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      8      2      -      -      -      -    330      0    SpillwayLookC.x\n"
+      }
+    },
+    {
+      "time": 1794220206.7746468,
+      "pid": 235910,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    202      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     17      9      -      -      -      -     33      0    telegram-deskto\n    0     235901     G      -      -      -      -      -      -      6      0    weston         \n    0     235903     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     235910     G      8      2      -      -      -      -      2      0    SpillwayLookC.x\n"
+      }
+    }
+  ]
+}

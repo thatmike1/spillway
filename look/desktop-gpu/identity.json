@@ -1,0 +1,15 @@
+{
+  "zip": "962cf93d63e5372ecb8d5b3e6b64630ff780adc30b548bdef9e4cd768d2febfc",
+  "runtime": "d9f79ab89b5ae369aeed11c6052d402e8218cd503bf85b4a235f9c30c46a7c63",
+  "pck": "9180812f4ea3ad87b136f0c45faf19d79e712fcbd13a9b5562e228fc8d637441",
+  "editor": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e",
+  "editor_version": {
+    "cmd": [
+      "/home/thatmike1/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64",
+      "--version"
+    ],
+    "exit": 0,
+    "text": "4.7.2.stable.official.ed1daf0bf\n"
+  },
+  "source_commit": "76c025facc6e0a937fb2f31dd763dcc5438aa2b5"
+}

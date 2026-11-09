@@ -1,0 +1,9 @@
+[1366] viewport_get_measured_render_time_gpu()
+Note: Requires measurements to be enabled on the specified viewport using
+[1367] viewport_set_measure_render_time()
+. Otherwise, this method returns 0.0.
+viewport_get_measured_render_time_gpu (viewport: ) const
+[1368] Returns the GPU time taken to render the last frame in milliseconds. To get a complete readout of GPU time spent to render the scene, sum the render times of all viewports that are drawn every frame. Unlike
+[1369] Engine.get_frames_per_second()
+, this method accurately reflects GPU utilization even if framerate is capped via V-Sync or
+[1370] Engine.max_fps

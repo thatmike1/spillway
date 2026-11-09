@@ -1,0 +1,968 @@
+{
+  "command": [
+    "/home/thatmike1/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64",
+    "--main-pack",
+    "/home/thatmike1/.local/state/spillway-desktop-gpu/package/SpillwayLookC-linux-x86_64/SpillwayLookC.pck",
+    "--display-driver",
+    "x11",
+    "--rendering-driver",
+    "opengl3",
+    "--audio-driver",
+    "Dummy",
+    "--windowed",
+    "--position",
+    "0,0",
+    "--resolution",
+    "2560x1440",
+    "--script",
+    "/home/thatmike1/.local/state/spillway-desktop-gpu/evidence/helpers/desktop-profile.gd",
+    "--",
+    "--out=/home/thatmike1/.local/state/spillway-desktop-gpu/evidence/editor-2560x1440"
+  ],
+  "cwd": "/home/thatmike1/.local/state/spillway-desktop-gpu/empty",
+  "exit": 0,
+  "watch": [
+    {
+      "time": 1794220212.6322563,
+      "pid": 236348,
+      "fds": [],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     39     15      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G     47     17      -      -      -      -     19      0    Xwayland       \n"
+      }
+    },
+    {
+      "time": 1794220212.8913808,
+      "pid": 236348,
+      "fds": [],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     39     15      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G     47     17      -      -      -      -     19      0    Xwayland       \n"
+      }
+    },
+    {
+      "time": 1794220213.1406379,
+      "pid": 236348,
+      "fds": [],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     42     16      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -     19      0    Xwayland       \n"
+      }
+    },
+    {
+      "time": 1794220213.390242,
+      "pid": 236348,
+      "fds": [],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     42     16      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -     19      0    Xwayland       \n"
+      }
+    },
+    {
+      "time": 1794220213.6665728,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     42     16      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G      -      -      -      -      -      -     56      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220213.9270017,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G     42     16      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G      -      -      -      -      -      -    114      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220214.1888285,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      6      2      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G      -      -      -      -      -      -    164      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220214.4494958,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      6      2      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G      -      -      -      -      -      -    208      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220214.7102454,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      6      2      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G      -      -      -      -      -      -    270      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220214.9706893,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      6      2      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G      -      -      -      -      -      -    296      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220215.2305415,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      3      1      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G      4      1      -      -      -      -    472      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220215.4908829,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      3      1      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G      4      1      -      -      -      -    480      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220215.75095,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      3      1      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G      4      1      -      -      -      -    478      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220216.0115285,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G      9      2      -      -      -      -    478      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220216.270914,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G     49     22      -      -      -      -    478      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220216.5307782,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G     49     22      -      -      -      -    478      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220216.7900891,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G     49     22      -      -      -      -    478      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220217.0498478,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G     90     42      -      -      -      -    478      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220217.31155,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G     94     46      -      -      -      -    478      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220217.5721672,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G     94     46      -      -      -      -    478      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220217.8320358,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G     94     46      -      -      -      -    478      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220218.092269,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G      -      -      -      -      -      -      3      0    Xwayland       \n    0     236348     G     99     50      -      -      -      -    478      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220218.3521552,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G     49     22      -      -      -      -      3      0    Xwayland       \n    0     236348     G     49     25      -      -      -      -    478      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220218.6118522,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G     49     22      -      -      -      -      3      0    Xwayland       \n    0     236348     G     49     25      -      -      -      -    478      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220218.872302,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    186      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G     49     22      -      -      -      -      3      0    Xwayland       \n    0     236348     G     49     25      -      -      -      -    478      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220219.132698,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    278      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G     49     22      -      -      -      -      3      0    Xwayland       \n    0     236348     G     49     24      -      -      -      -    478      0    Godot_v4.7.2-st\n"
+      }
+    },
+    {
+      "time": 1794220219.3919637,
+      "pid": 236348,
+      "fds": [
+        "/dev/nvidiactl",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/nvidiactl",
+        "/dev/nvidia-modeset",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidiactl",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/dri/renderD128",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia0",
+        "/dev/nvidia-modeset"
+      ],
+      "nvidia_smi": {
+        "cmd": [
+          "nvidia-smi",
+          "pmon",
+          "-c",
+          "1",
+          "-s",
+          "um"
+        ],
+        "exit": 0,
+        "text": "# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command \n# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name \n    0      15477     G      -      -      -      -      -      -    262      0    gnome-shell    \n    0      15671   C+G      -      -      -      -      -      -     10      0    handy          \n    0      15877     G      -      -      -      -      -      -      8      0    Xwayland       \n    0      16485     G      -      -      -      -      -      -     18      0    easyeffects    \n    0      16569   C+G      -      -      -      -      -      -    278      0    t3code-v2 --gpu\n    0      20955     G      -      -      -      -      -      -    564      0    firefox        \n    0     232054     G      -      -      -      -      -      -     33      0    telegram-deskto\n    0     236337     G      -      -      -      -      -      -     18      0    weston         \n    0     236341     G     49     22      -      -      -      -      3      0    Xwayland       \n    0     236348     G     49     24      -      -      -      -    478      0    Godot_v4.7.2-st\n"
+      }
+    }
+  ]
+}
