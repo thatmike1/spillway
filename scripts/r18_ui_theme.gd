@@ -17,7 +17,7 @@ const SEA_DEEP := Color("23705f")
 const EDGE := Color("e15a2b")
 const CORAL := Color("f2a483")
 const CORAL_DEEP := Color("a9471f")
-const OUTLINE := Color(0.07, 0.12, 0.15, 0.62)
+const OUTLINE := Color(0.07, 0.12, 0.15, 0.78)
 
 static var _fonts: Dictionary = {}
 

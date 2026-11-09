@@ -89,7 +89,7 @@ def main():
             pick = f or b
             label = '%s · %s · %s · tick %d · %d u/s' % (m, pick[3], res, pick[0], round(pick[1]))
             run_html.append('<h3>%s</h3>%s' % (html.escape(label), figure(b[2] if b else None, f[2] if f else None, label)))
-    sections.append('<section id="runs"><h2>Mid-run at speed</h2><p class="take">Real retained-input play on the actual player camera, frames picked at 300+ u/s. The same tape and tick in both builds.</p>%s</section>' % ''.join(run_html))
+    sections.append('<section id="runs"><h2>Mid-run at speed</h2><p class="take">Real retained-input play on the actual player camera, frames picked at 300+ u/s. The same retained tape in both builds; frames are the nearest readbacks, so ticks can differ by a few.</p>%s</section>' % ''.join(run_html))
     nav.append('<a href="#runs">Mid-run</a>')
     if a.release and a.release.exists():
         shots = sorted(a.release.glob('*/release-*.png'))
