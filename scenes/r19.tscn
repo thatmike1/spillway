@@ -4,3 +4,5 @@
 
 [node name="Spillway" type="Node3D"]
 script = ExtResource("1")
+persist = true
+record_runs = true
