@@ -15,7 +15,7 @@ const ACCENT := Color("f3cd83")
 const DIM := Color(0.957, 0.945, 0.867, 0.72)
 const SHADE := Color(0.055, 0.10, 0.12)
 ## callout ranks: a fresh lower-ranked event never replaces a higher one still in its hold.
-const RANK := {"crouch_save": 5, "gap": 4, "edge": 4, "near_miss": 3, "sync": 2, "speed": 1}
+const RANK := {"crouch_save": 5, "backward_bhop": 4, "sideways_bhop": 3, "gap": 4, "edge": 4, "near_miss": 3, "sync": 2, "speed": 1}
 const HOLD_S := 0.9
 const FADE_S := 0.5
 const BAR_WIDTH := 132.0

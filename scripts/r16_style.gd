@@ -31,7 +31,7 @@ extends RefCounted
 ## piece and heading, a near miss and a crouch save once per obstacle, sync only 4 m or more
 ## from every earlier paid landing, all per attempt. scoring runs only between the timer start and the finish line.
 
-const STYLE_VERSION := "r16-style-2"
+const STYLE_VERSION := "r19-style-1"
 const EVENT_FORMAT := 1
 const U := 0.0254
 
@@ -50,6 +50,12 @@ const RULES := {
 		"speed_cap": 2.0, "thread": 1.5, "lift_u": 1.0, "touch_u": 0.1},
 	"crouch": {"min_ups": 200.0, "bonk_ticks": 8, "max_s": 3.0, "base": 600.0, "speed_ref_ups": 300.0,
 		"speed_cap": 2.0, "air_bonus": 300.0},
+	# p / sustained real jumps, facing against/across actual travel, on fresh ground.
+	"direction": {"min_ups": 300.0, "back_dot": -0.75, "side_dot": 0.75,
+		"min_air_s": 0.18, "max_air_s": 1.2, "min_rise_m": 0.25, "min_fall_m": 0.20,
+		"min_track_m": 3.0, "min_efficiency": 0.85, "max_ground_s": 0.06,
+		"spacing_m": 4.0, "heading_dot": 0.5, "back_start": 2.0, "back_step": 0.5, "back_cap": 4.0,
+		"side_start": 1.2, "side_step": 0.15, "side_cap": 1.8, "back_base": 80.0, "side_base": 40.0},
 	"limits": {"teleport_m": 0.05},
 	"finish": {"sample": "first_finished_inclusive"},
 }
@@ -91,6 +97,14 @@ var _stretch_m: float = 0.0
 var _stretch_weighted: float = 0.0
 var _stale_fast_m: float = 0.0
 # sync
+# direction: continuity is short-lived; visited landing spots survive every discontinuity.
+var _direction_flight: Dictionary = {}
+var _direction_chain: int = 0
+var _direction_kind: String = ""
+var _direction_mult: float = 1.0
+var _direction_heading := Vector3.ZERO
+var _direction_ground_s: float = 0.0
+var _direction_spots: Array[Vector3] = []
 var _stats_hops: int = -1
 var _sync_last: Dictionary = {}
 ## landing points of paid sync hops this attempt.
@@ -146,6 +160,8 @@ func reset(next_context: Dictionary = {}) -> void:
 	_stretch_m = 0.0
 	_stretch_weighted = 0.0
 	_stale_fast_m = 0.0
+	_break_direction()
+	_direction_spots = []
 	_stats_hops = -1
 	_sync_last = {}
 	_sync_spots = []
@@ -172,6 +188,7 @@ func discontinuity(reason: String) -> void:
 	_discontinuities.append(reason)
 	if _discontinuities.size() > 16:
 		_discontinuities.pop_front()
+	_break_direction()
 	_flight = {}
 	_near = {}
 	_near_open_before = false
@@ -202,12 +219,14 @@ func step(sample: Dictionary, body: CharacterBody3D, level: Node3D = null) -> Ar
 	# the first finish sample belongs to the attempt; later samples never score.
 	var active := _started and _body != null and _body.is_inside_tree()
 	if active:
+		_direction_step(sample, dt, out)
 		_speed(sample, dt, out)
 		_sync(sample, out)
 		_flight_step(sample, out)
 		_near_step(sample, out)
 		_crouch_step(sample, out)
 	else:
+		_break_direction()
 		_stats_hops = int((sample.get("stats", {}) as Dictionary).get("hops", -1))
 		_flight = {}
 		_near = {}
@@ -235,6 +254,7 @@ func snapshot() -> Dictionary:
 	var left := maxf(0.0, window - (_time - _last_combo_time)) if combo > 0 else 0.0
 	return {
 		"version": STYLE_VERSION, "identity_key": identity_key(), "score": score, "combo": combo, "mult": multiplier,
+		"direction": {"kind": _direction_kind, "hops": _direction_chain, "mult": _direction_mult},
 		"combo_left_s": left, "combo_window_s": window, "last_combo": _last_combo.duplicate(),
 		"recent": recent, "last": events[-1].duplicate(true) if not events.is_empty() else {},
 		"by_kind": summary().by_kind, "clean": _clean, "finished": _finished, "sealed": _sealed,
@@ -257,13 +277,14 @@ func _award(kind: String, sample: Dictionary, base: float, label: String, measur
 		combo += 1
 		_last_combo_time = _time
 		multiplier = minf(float(RULES.combo.max_mult), 1.0 + float(RULES.combo.step) * float(combo - 1))
-	var mult := multiplier if combo > 0 else 1.0
+	var combo_mult := multiplier if combo > 0 else 1.0
+	var mult := combo_mult * _direction_mult
 	var points := roundi(base * mult)
 	score += points
 	var event := {
 		"v": EVENT_FORMAT, "kind": kind, "tick": int(sample.get("tick", 0)), "time_s": snappedf(_time, 1e-6),
 		"elapsed": snappedf(float(sample.get("elapsed", 0.0)), 1e-6), "points": points, "base": roundi(base),
-		"mult": mult, "combo": combo if extends_chain else 0, "label": label, "m": measures, "geo": geo,
+		"mult": mult, "direction_mult": _direction_mult, "combo_mult": combo_mult, "combo": combo if extends_chain else 0, "label": label, "m": measures, "geo": geo,
 		"p": _arr(sample.get("p", Vector3.ZERO)), "clean": _clean,
 	}
 	events.append(event)
@@ -372,6 +393,96 @@ func _speed(sample: Dictionary, dt: float, out: Array[Dictionary]) -> void:
 			"visited_cells": _visited.size()}, {}, out)
 		_stretch_m = 0.0
 		_stretch_weighted = 0.0
+
+# --- directional bhops ------------------------------------------------------------------------
+
+func _break_direction() -> void:
+	_direction_flight = {}
+	_direction_chain = 0
+	_direction_kind = ""
+	_direction_mult = 1.0
+	_direction_heading = Vector3.ZERO
+	_direction_ground_s = 0.0
+
+## direction is signed horizontal physical travel against yaw, never held keys or duck lift.
+func _travel_kind(v: Vector3, yaw: float) -> String:
+	var horizontal := Vector3(v.x, 0.0, v.z)
+	if _hspeed_u(horizontal) < float(RULES.direction.min_ups):
+		return ""
+	var facing := Vector3(-sin(yaw), 0.0, -cos(yaw))
+	var dot := horizontal.normalized().dot(facing)
+	if dot <= float(RULES.direction.back_dot):
+		return "backward_bhop"
+	if absf(dot) < float(RULES.direction.side_dot):
+		return "sideways_bhop"
+	return ""
+
+func _direction_step(sample: Dictionary, dt: float, out: Array[Dictionary]) -> void:
+	var rules: Dictionary = RULES.direction
+	var v: Vector3 = sample.get("actual_v", Vector3.ZERO)
+	var kind := _travel_kind(v, float(sample.get("yaw", 0.0)))
+	var grounded := bool(sample.get("grounded", false))
+	var motion: Dictionary = sample.get("motion", {})
+	var at: Vector3 = sample.get("reference_p", sample.get("p", Vector3.ZERO))
+	if _prev.is_empty() or kind.is_empty() or (not _direction_kind.is_empty() and kind != _direction_kind):
+		_break_direction()
+		return
+	var was_grounded := bool(_prev.grounded)
+	if grounded and was_grounded:
+		_direction_ground_s += dt
+		if _direction_ground_s > float(rules.max_ground_s):
+			_break_direction()
+		return
+	if was_grounded and not grounded:
+		# an actual motor jump, from known support, is required; hop counters are not evidence.
+		if not "jump" in (motion.get("events", []) as Array):
+			_break_direction()
+			return
+		var start: Vector3 = _prev.reference_p
+		_direction_kind = kind
+		_direction_ground_s = 0.0
+		_direction_flight = {"from": start, "peak_y": start.y, "track_m": 0.0, "air_s": 0.0}
+	if _direction_flight.is_empty():
+		return
+	var flight := _direction_flight
+	flight.air_s = float(flight.air_s) + dt
+	flight.track_m = float(flight.track_m) + Vector2(v.x, v.z).length() * dt
+	flight.peak_y = maxf(float(flight.peak_y), at.y)
+	if float(flight.air_s) > float(rules.max_air_s):
+		_break_direction()
+		return
+	if not grounded:
+		return
+	var from: Vector3 = flight.from
+	var delta := Vector3(at.x - from.x, 0.0, at.z - from.z)
+	var heading := delta.normalized()
+	var valid := float(flight.air_s) >= float(rules.min_air_s) and float(flight.track_m) >= float(rules.min_track_m)
+	valid = valid and float(flight.peak_y) - from.y >= float(rules.min_rise_m) and float(flight.peak_y) - at.y >= float(rules.min_fall_m)
+	valid = valid and delta.length() >= float(flight.track_m) * float(rules.min_efficiency)
+	valid = valid and (_direction_heading == Vector3.ZERO or heading.dot(_direction_heading) >= float(rules.heading_dot))
+	for spot: Vector3 in _direction_spots:
+		if Vector2(at.x - spot.x, at.z - spot.z).length() < float(rules.spacing_m):
+			valid = false
+			_blocked["direction"] = int(_blocked.get("direction", 0)) + 1
+			break
+	if not valid:
+		_break_direction()
+		return
+	_direction_spots.append(at)
+	_direction_heading = heading
+	_direction_chain += 1
+	_direction_ground_s = 0.0
+	_direction_flight = {}
+	if _direction_chain < 2:
+		return
+	var backwards := kind == "backward_bhop"
+	_direction_mult = minf(float(rules.back_cap if backwards else rules.side_cap),
+		float(rules.back_start if backwards else rules.side_start) + float(_direction_chain - 2) * float(rules.back_step if backwards else rules.side_step))
+	var label := "%s %d hops ×%.2f" % ["Backwards" if backwards else "Half-sideways", _direction_chain, _direction_mult]
+	_award(kind, sample, float(rules.back_base if backwards else rules.side_base), label,
+		{"hops": _direction_chain, "direction_mult": _direction_mult, "air_s": flight.air_s, "track_m": flight.track_m,
+		"progress_m": delta.length(), "rise_m": float(flight.peak_y) - from.y, "fall_m": float(flight.peak_y) - at.y,
+		"landing_ups": _hspeed_u(v)}, {}, out)
 
 # --- sync -------------------------------------------------------------------------------------
 

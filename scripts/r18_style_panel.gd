@@ -5,6 +5,7 @@ extends "res://scripts/r16_style_panel.gd"
 
 const UI := preload("res://scripts/r18_ui_theme.gd")
 var caption: Label
+var direction_label: Label
 
 func attach(main: Node, style_service: RefCounted) -> void:
 	super(main, style_service)
@@ -25,8 +26,22 @@ func attach(main: Node, style_service: RefCounted) -> void:
 	caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(caption)
 	UI.world_label(caption, "small", 12, Color(UI.CREAM, 0.86), 3)
+	direction_label = Label.new()
+	direction_label.name = "DirectionBonus"
+	direction_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(direction_label)
+	UI.world_label(direction_label, "label", 13, UI.EDGE)
 	bar_track.color = Color(UI.CREAM, 0.30)
 	bar.color = UI.EDGE
+
+func update_from(snap: Dictionary, delta: float) -> void:
+	var direction: Dictionary = snap.get("direction", {})
+	if direction_label != null:
+		var mult := float(direction.get("mult", 1.0))
+		direction_label.visible = mult > 1.0
+		direction_label.text = "%s · %d hops · ×%s" % ["Backwards" if str(direction.get("kind", "")) == "backward_bhop" else "Half-sideways",
+			int(direction.get("hops", 0)), _mult_text(mult)] if mult > 1.0 else ""
+	super(snap, delta)
 
 func _layout() -> void:
 	var size := get_viewport_rect().size if is_inside_tree() else Vector2(1280, 720)
@@ -53,3 +68,6 @@ func _layout() -> void:
 	shade.position = score_label.position
 	shade.size = Vector2.ZERO
 	callout.position = Vector2(right - callout.get_minimum_size().x, score_label.position.y - callout.get_minimum_size().y - 6.0)
+	if direction_label != null:
+		direction_label.reset_size()
+		direction_label.position = Vector2(right - direction_label.get_minimum_size().x, callout.position.y - direction_label.get_minimum_size().y - 5.0)
