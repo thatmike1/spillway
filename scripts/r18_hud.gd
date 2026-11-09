@@ -227,6 +227,15 @@ func _input(event: InputEvent) -> void:
 
 func set_telemetry(on: bool) -> void:
 	telemetry = on
+	# telemetry is for reading the game now: it lifts the title card at once instead of fading it.
+	if on:
+		_title_dismissed = true
+		_title_alpha = 0.0
+		if title_card != null:
+			title_card.visible = false
+		for node: CanvasItem in [map_title, preset_line, clock, best_line, run_line, speed_label, speed_unit, speed_metric, style_panel, lab_tag, lab_panel, reticle]:
+			if node != null:
+				node.modulate.a = 1.0
 	for node: CanvasItem in [identity, strafe_live, strafe_last, strafe_split, strafe_chain, telemetry_extra, _ident_shade]:
 		node.visible = on
 	if pause_identity != null:
