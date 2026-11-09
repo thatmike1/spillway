@@ -49,3 +49,9 @@ Development runs corrected five expectations in this suite and nothing in produc
 Observation, not a negative: two exports of the unmodified committed source with the pinned editor gave pack hashes `5c6ac777…` and `0ae8d898…`, and neither equals the candidate's `cf6c95ac…`. Pack bytes do not reproduce, so a pack can be verified only against the hash its own manifest records, not rebuilt from source.
 
 Not run here: positive packed routes and controls on the candidate, which are the root's job in `/tmp/r15-candidate-406640de`; Windows execution; a pack that ships `res://tests/` (the probe's stray-file check; only the loose folder copy is covered); and recovery-route admission. The older offline23, observer44 and lab37 results, and the three lab runtime mutations, remain component evidence. None of them stands in for these package-level controls.
+
+## Fresh rerun on source03d970be
+
+Root reran the unchanged suite against an immutable copy of the fresh03d970be ZIPs, from an exact03d970be scratch clone so the candidate commit and helper hashes both matched. All **78/78** named expectations passed again, with zero failures. This includes the repaired helper bytes, three broken runtime variants and wrapper-only SIGTERM cleanup. The complete suite took 518s. All four candidate file hashes still equal the pre-run manifest afterward. The scratch clone was removed and its size recorded.
+
+Evidence: outer `checkpoints/spillway/r15/delivery-negatives/run2-03d970be/summary.json`, `run2-03d970be.log.gz` and `RERUN-03d970be.json`. The immutable baseline receipt is `release-plan/NEGATIVE-BASE-03d970be.json`. The positive15-route package run is separate; these negative controls alone do not promote it. Re-exported pack bytes differed again, an informational reproducibility limitation rather than a false acceptance or a gameplay failure.
