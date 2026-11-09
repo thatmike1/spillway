@@ -377,8 +377,8 @@ def check(dist, args, evidence, work, routes):
     folder = extracted['linux-x86_64']
     code, text = normal_start(folder, evidence / 'normal-startup')
     line = r16.STARTUP.search(text)
-    if code or r16.ERRORS.search(text) or not line or line['build'] != r16.BUILD or line['key'] != build['identity']['start']['course_key'] or 'r17: ' + BUILD not in text:
-        raise Rejected('normal uninstrumented R17 startup failed')
+    if code or r16.ERRORS.search(text) or not line or line['build'] != r16.BUILD or line['key'] != build['identity']['start']['course_key'] or 'r18: ' + BUILD not in text:
+        raise Rejected('normal uninstrumented R18 startup failed')
     if r16.profile_files(evidence / 'normal-startup/profile') or any((evidence / 'normal-startup/cwd').iterdir()):
         raise Rejected('headless startup wrote user files or empty cwd')
     negatives = pack_negatives(folder, work, evidence / 'negatives')
