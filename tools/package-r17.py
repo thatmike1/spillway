@@ -282,6 +282,11 @@ def normal_start(folder, out, extra=()):
     return code, text
 
 
+def packed_rows(path):
+    # packed probe rows have no source executor's phase field; preserve every observed tick.
+    return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+
+
 def pack_negatives(folder, work, evidence):
     """mutate private copies only; no export and no link writes to positive package bytes."""
     results = []
@@ -347,7 +352,7 @@ def native_checks(folder, build, files, args, evidence, work, routes):
             if mode == 'play':
                 best = {key: report['run'].get(key) for key in ['best_time', 'open_best_time', 'best_splits', 'best_segments', 'record_ticks', 'style_best', 'ghost_pointer']}
                 result['exact_source_trace'] = r16.shipped_trace_match(out / 'trace.jsonl', route['trace'])
-                result['input_order'] = r16.packed_input_audit(r16.read_rows(out / 'trace.jsonl'), json.loads(Path(route['tape']).read_text()), route['input_settings'], observer_path=PROJECT / 'tools/momentum-tape.py', expected_observer_sha256=build['helpers_sha256']['tools/momentum-tape.py'])
+                result['input_order'] = r16.packed_input_audit(packed_rows(out / 'trace.jsonl'), json.loads(Path(route['tape']).read_text()), route['input_settings'], observer_path=PROJECT / 'tools/momentum-tape.py', expected_observer_sha256=build['helpers_sha256']['tools/momentum-tape.py'])
                 result['best'] = best
             if mode == 'reload':
                 after = r16.profile_files(profile)

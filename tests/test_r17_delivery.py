@@ -90,6 +90,13 @@ class Delivery(unittest.TestCase):
             self.assertFalse(report['refused'])
             self.assertTrue(report['engine_errors'])
 
+    def test_packed_rows_without_source_phase_are_not_discarded(self):
+        with tempfile.TemporaryDirectory(prefix='r17-packed-rows-') as tmp:
+            trace = Path(tmp) / 'trace.jsonl'
+            rows = [{'tick': i, 'post': {'p': [0, 0, i]}} for i in range(3)]
+            trace.write_text('\n'.join(json.dumps(row) for row in rows) + '\n')
+            self.assertEqual(m.packed_rows(trace), rows)
+
 
 if __name__ == '__main__':
     unittest.main()
