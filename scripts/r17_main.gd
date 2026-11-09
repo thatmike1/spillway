@@ -77,7 +77,7 @@ func _input(event: InputEvent) -> void:
 ## swap the inherited hud for the r18 one, carrying over what it was already showing.
 func _install_hud() -> void:
 	var old := hud
-	var fresh: CanvasLayer = UI_HUD.new()
+	var fresh: CanvasLayer = _new_hud()
 	hud = fresh
 	add_child(fresh)
 	fresh.call("attach", self)
@@ -92,6 +92,9 @@ func _install_hud() -> void:
 		old.free()
 	if not note.is_empty():
 		fresh.call("notify", note)
+
+func _new_hud() -> CanvasLayer:
+	return UI_HUD.new()
 
 func _refresh_look_label() -> void:
 	if is_instance_valid(look_label):
