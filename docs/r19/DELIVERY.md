@@ -41,9 +41,9 @@ The parent writes an external JSON freeze with these fields:
 | `schema` | integer `1` |
 | `runtime_frozen` | boolean `true`, only after every runtime author is done |
 | `source_commit` | full 40-character commit that identity examined |
-| `new_maps` | explicit final new playable IDs, in intended order; an empty list is an explicit scope decision |
+| `new_maps` | explicit final new playable IDs, including a regular course and three to five new experiments, in intended order |
 | `required_maps` | `breakwater`, `whiteout-relay`, `sunken-court`, `rainline`, `night-shift`, `practice`, `overflow`, `experiment`, then every `new_maps` ID |
-| `experimental_maps` | explicit IDs whose titles must retain EXPERIMENTAL, including `experiment` and every new experiment |
+| `experimental_maps` | explicit IDs whose titles must retain EXPERIMENTAL: `experiment` plus three to five distinct new experimental IDs |
 | `intentional_changes` | exact path-to-SHA256 dictionary from final `prepare` preservation output |
 | `identity_sha256` | reviewed canonical hash printed by `identity` |
 | `breakwater_geometry` | exact revised `maps.breakwater.geometry` from that identity |
