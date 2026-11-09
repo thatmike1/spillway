@@ -1,0 +1,7 @@
+# R17 painted skies
+
+Seven original PNG game assets generated with OpenAI's built-in image generator on 9 November 2026. Each panorama was generated separately from its retained `*-sky-prompt.txt` text. No private concept art, third-party image or other image input was supplied. These assets are intended for redistribution in Spillway; no third-party texture is incorporated by this workflow. Generation does not establish uniqueness against every possible existing image.
+
+Whiteout has cold winter blue and ivory cloud banks. Sunken Court uses Mediterranean cyan and warm cream. Rainline uses restrained slate storm clouds; Night Shift uses indigo and lavender. Penstock Yard uses pale blue-green daylight, Overflow uses warm late-afternoon clouds, and the lab uses diffuse pearl-grey skylight. Breakwater keeps the original Look C panorama and provenance in the parent folder.
+
+The runtime sky shader is static and feathers opposite edge strips at the panorama wrap. This handles the imperfect image seam without animated uniforms, TIME or camera-position dependencies. Original PNGs are retained; no private reference image is shipped. MANIFEST.json records SHA256 for each PNG and prompt. Inspect the per-map native views and movies for the actual panorama framing rather than judging the flattened texture alone.

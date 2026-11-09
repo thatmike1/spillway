@@ -1,0 +1,20 @@
+{
+  "format": "spillway-r17-painted-skies-1",
+  "origin": "original OpenAI image generation; text-only prompts; no reference images supplied",
+  "files": {
+    "lab-sky-prompt.txt": "a3a872220e63ebc8db2b7b257fe193b14b1af77e2939b906ab6bdd28d9e05d86",
+    "lab-sky.png": "36dc0093983432a9c4b6a277b0e2b7d99010a57aede5041fcc6f504ba857e3fe",
+    "night-sky-prompt.txt": "7239d27408f362951c6230e4e28581f121fb671e42df541986db23f621b54891",
+    "night-sky.png": "128046bfa7d6e7a83ff52b120b1b300e5cbf971acdd08a1b6a3523acba8a4117",
+    "overflow-sky-prompt.txt": "08b65df14003109b6a8f38130644ce4291326285a2005cde2a3536ed4f869a54",
+    "overflow-sky.png": "eb4eb5509f7acaf75d878477cee51829fadd6e7088f7e94458fc799600747374",
+    "practice-sky-prompt.txt": "4639a0a63bcf0f081741541afa7a29bbaaf26fc4584c5c2a768335d5d05ea02a",
+    "practice-sky.png": "07a1f3f1baf1690ac89b7733d15939d8b75e84fef2d2d84423990681bdf25c80",
+    "rainline-sky-prompt.txt": "af48c386f28a307738111c4b438c7a9c070344adf00df0d5e52484a4a3d0d31a",
+    "rainline-sky.png": "5ae6417a40b69d91a7dd740a52a6d36cc9ff2e5cd346a878483f5e51bde1baae",
+    "sunken-sky-prompt.txt": "4571215ebefd3166234a6c96d5147036241de83b9bcb0449c96ddb9fcb18c325",
+    "sunken-sky.png": "cdfe8f041ea64171632899a697d720d029e68a0fb759c939dd84472b84ece046",
+    "whiteout-sky-prompt.txt": "abda8fb3d6e30a57b31a5b9e55357b0b677452071e53dd35033d344b5c47c924",
+    "whiteout-sky.png": "d6f602c1c3140c7ba8611b7ec5a2e3b9e39ee53bfdd3563a1c9369bf569fb85c"
+  }
+}
