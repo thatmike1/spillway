@@ -2,3 +2,5 @@
 builds/
 *.tmp
 __pycache__/
+.godot
+*.import

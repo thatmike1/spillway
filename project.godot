@@ -2,9 +2,9 @@
 config_version=5
 
 [application]
-config/name="Spillway"
-config/version="2026.11.08-r14"
-run/main_scene="res://scenes/r15.tscn"
+config/name="Spillway Look C"
+config/version="look-c-1"
+run/main_scene="res://scenes/look.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [display]
