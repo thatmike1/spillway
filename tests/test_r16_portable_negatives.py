@@ -188,6 +188,17 @@ def verify_candidate():
 def ownership(evidence):
     """cancel at the exact process-acquisition boundary, before assignment returns."""
     g = 'ownership'
+    with tempfile.TemporaryDirectory(prefix='truncate-isolation-', dir=ARGS.scratch) as fixture:
+        fixture = Path(fixture)
+        baseline = fixture / 'baseline-linux-x86_64.zip'
+        original = b'baseline bytes for the hard-link isolation control' * 200
+        baseline.write_bytes(original)
+        case = fixture / 'case'; case.mkdir()
+        target = case / baseline.name
+        os.link(baseline, target)
+        truncate_dist_zip(case)
+        check('truncation changes only its case copy and splits the borrowed inode', baseline.read_bytes() == original
+              and target.read_bytes() == original[:len(original) // 2] and baseline.stat().st_ino != target.stat().st_ino, '', g)
     real_popen = subprocess.Popen
     for kind in ('engine', 'display'):
         for sig in (signal.SIGINT, signal.SIGTERM):
@@ -386,6 +397,15 @@ def write_build(path, edit):
     return (json.dumps(manifest, indent=2, ensure_ascii=False) + '\n').encode()
 
 
+def truncate_dist_zip(dist):
+    # unlink only the mutable case path before writing, so a borrowed baseline inode stays intact.
+    z = next(dist.glob('*-linux-*.zip'))
+    data = z.read_bytes()
+    z.unlink()
+    z.write_bytes(data[:len(data) // 2])
+    (dist / 'SHA256SUMS').write_text(''.join('%s  %s\n' % (pr.digest(p), p.name) for p in sorted(dist.glob('*.zip'))))
+
+
 def rewrite_zip(source, target, platform, edits=None, adds=None, modes=None, build_edit=None):
     """copy a candidate zip member by member; one member replaced, removed or added, modes kept."""
     edits, adds, modes = dict(edits or {}), dict(adds or {}), dict(modes or {})
@@ -571,13 +591,7 @@ def contents(evidence):
     static_case('linux pack alone differs', [L + 'manifest names this pack and build', 'both platforms carry the same pack'],
                 linux={'edits': {pr.NAME + '.pck': flip_last}})
     static_case('zip checksum mismatch', ['zip checksums match'], sums_edit=lambda s: ('0' if s[0] != '0' else '1') + s[1:])
-    def truncate(dist):
-        z = next(ARGS.candidate.glob('*-linux-*.zip'))
-        data = z.read_bytes()
-        z.unlink()
-        z.write_bytes(data[:len(data) // 2])
-        (dist / 'SHA256SUMS').write_text(''.join('%s  %s\n' % (pr.digest(p), p.name) for p in sorted(dist.glob('*.zip'))))
-    static_case('truncated linux zip with a matching checksum', [L + 'zip opens'], after=truncate)
+    static_case('truncated linux zip with a matching checksum', [L + 'zip opens'], after=truncate_dist_zip)
     def extra(dist):
         z = next(ARGS.candidate.glob('*-linux-*.zip'))
         os.link(z, dist / (pr.BUILD + '-linux-x86_64-deadbeef.zip'))

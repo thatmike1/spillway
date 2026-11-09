@@ -6,9 +6,9 @@ Run from this project with a new evidence directory:
 
 ```sh
 python3 -I tests/test_r16_portable_negatives.py \
-  --candidate /tmp/r16-candidate-a26d94c0 \
-  --source-commit a26d94c0ccaa7fd764bbff6ed751892682b9fa05 \
-  --evidence /home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r16/portable-negatives/run1 \
+  --candidate /tmp/r16-negative-base-67e608a0 \
+  --source-commit 67e608a0f2b9dbb31b31ff8f63bdc3fd8491a1e3 \
+  --evidence /home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r16/portable-negatives/new-run \
   --scratch /tmp
 ```
 
@@ -30,7 +30,7 @@ The candidate is read-only and rehashed at the end. All copies, disposable spars
 
 ## Runtime expectations declared before execution
 
-These exact sets are hypotheses derived from the current helper and probe until exercised. Execution retains both expected and actual results, including failed development expectations.
+These exact sets were declared before execution and all were exercised successfully on the final 67e608a0 bytes. Execution retains both expected and actual results, including failed development expectations.
 
 | Variant | Exact failed top-level checks | Exact failed probe checks / audit reason |
 |---|---|---|
@@ -50,6 +50,14 @@ The final harness was then exercised with `--only ownership preflight` in `run2-
 
 Final executed suite SHA-256: `1337df1c591e8058720e73c132a66f5247afb4c87579419b83070ec90a81efb3`. The helper hashes and full expected/observed preflight refusals are in `run2-offline/summary.json`; per-command logs sit beside it. The package tool's executed hash is `ea90d32ed9d9abf3fdd090fb63095a1c28be3e81c57771119e078df20b5cb00d`. The two retained run directories together occupied 37,601 bytes after execution, below the shared 8 MiB evidence cap. No executed development expectation failed.
 
-Root should run the complete command above against the completed immutable output, or its explicit `rejected/` directory with the required label. Runtime refusal sets in this document remain source-derived hypotheses until that happens. Root owns source suites and final release acceptance.
+Those offline results are historical component checks. The first native candidate was subsequently rejected before course play. Its helpers are superseded by committed 67e608a0. Pass the source pin explicitly; the script's historical default remains a26d94c0.
 
-The first native candidate was subsequently rejected by root before course play. Those old helper bytes are superseded. The repaired candidate is pinned to67e608a0; pass `--source-commit 67e608a0` explicitly when executing this harness against it. Root separately rechecked42 verifier assertions with28 delivery and79 recording-integrity controls on that commit. Package-dependent negative expectations remain unexecuted until the actual final-byte run.
+## Final-byte execution
+
+`final2-67e608a0/summary.json` passes **96/96 controls**, exit 0, no pending groups and no exception. The full run took 718 seconds. Counts are ownership 10, preflight 20, setup 3, provenance 19, baseline 1, contents 20, runtime 7, cancel 6 and cleanup 10. All five broken-runtime variants reached exactly their predeclared refusal sets on AMD. Wrapper-only SIGTERM exited 130, removed every observed descendant and released the display, socket, lock and runtime directory. The unchanged baseline's four file hashes and every executing helper hash matched after the run.
+
+The executed suite is `14df1d4198eaed7721283534af6b2cb56cb21dec956aabad79a4eb13fee1a59e`; the packager is `734c7364f453b70bc3c8c9d7834181844aca3513e43880b61c0a9808807bcf9e`. The candidate Linux ZIP is `f8ae42da4c55d9675056033a462310642519bba194001ecfa92c03058a841320`, Windows ZIP `e7892c682a43be0ec627b3a8b35aacb5a92092b9f535650a4cec59198ce20801`, and shared pack `845d727694efee6bbbf143d770db7a9971ecd2e69124949064945265701493f1`. Re-exported variant packs differ byte-for-byte, retained as informational rather than a reproducible-export claim.
+
+The failed first actual invocation remains in `final-67e608a0/`: 75 controls, two failures. Its truncation callback mistakenly targeted the independent negative baseline rather than the mutation folder, so it damaged that copy. Root verified the separate positive export's four hashes were unchanged, restored the negative baseline from it and fixed the callback. A real hard-link fixture now executes the callback and proves that only the case copy is truncated, with the baseline intact and a distinct inode. The complete 96-control rerun includes that fixture. No production helper or game bytes changed for this harness repair.
+
+Final retained evidence is 3,740,872 bytes; sampled scratch peaked at 400,820,866 bytes and was removed. The original failed invocation and earlier offline receipts remain labelled. Source acceptance and positive release acceptance are separate results owned by root.
