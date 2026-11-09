@@ -66,6 +66,28 @@ func _input(event: InputEvent) -> void:
 func _refresh_look_label() -> void:
 	if is_instance_valid(look_label):
 		look_label.text = "R17 · %s · L compare" % ("paint + ink" if look_enabled else "original R16 look")
+		_place_look_label()
+
+func _place_look_label() -> void:
+	if not is_instance_valid(look_label):
+		return
+	var top := 18.0
+	if is_instance_valid(hud) and hud.visible:
+		var occupied := false
+		for field: String in ["lab_tag", "lab_panel", "practice_tag"]:
+			var control := hud.get(field) as Control
+			if control != null and control.is_visible_in_tree():
+				top = maxf(top, control.get_global_rect().end.y + 10.0)
+				occupied = true
+		# the inherited instructions can extend below the lab panel or practice banner.
+		if occupied and hud.controls.is_visible_in_tree():
+			top = maxf(top, hud.controls.get_global_rect().end.y + 10.0)
+	look_label.position.y = top
+
+func _process(_delta: float) -> void:
+	# place after the inherited hud has laid out its current lab and practice messages.
+	if is_instance_valid(look_label) and look_label.is_visible_in_tree():
+		_place_look_label.call_deferred()
 
 func window_title() -> String:
 	return super.window_title().replace("Spillway R16", "Spillway R17")

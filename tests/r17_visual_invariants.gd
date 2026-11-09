@@ -32,6 +32,9 @@ func run() -> void:
 		game.set_paused(true)
 		await process_frame
 		await process_frame
+		for field: String in ["lab_tag", "lab_panel", "practice_tag"]:
+			var control := game.hud.get(field) as Control
+			check(not control.is_visible_in_tree() or not game.look_label.get_global_rect().intersects(control.get_global_rect()),id+": look label covers inherited " + field)
 		var before := snapshot(game)
 		for i: int in 20:
 			var state := var_to_str([game.player.global_transform,game.player.velocity,game.elapsed,game.checkpoint_index,game.attempts,game.finished,game.clean_eligible,game.session.style.snapshot(),game.session.ghost_state])
@@ -51,6 +54,20 @@ func run() -> void:
 			check(game.look_layer.world.environment == game.look_layer.old_environment,id+": original environment not restored")
 		for state: Dictionary in game.look_layer.light_states:
 			check(state.node.rotation == state.rotation and state.node.light_color == state.color and state.node.light_energy == state.energy,id+": original light not restored")
+		game.set_paused(false)
+		for pressed: bool in [true,false]:
+			var event := InputEventKey.new()
+			event.physical_keycode = KEY_F
+			event.pressed = pressed
+			Input.parse_input_event(event)
+			Input.flush_buffered_events()
+		game.set_paused(true)
+		await process_frame
+		await process_frame
+		check(game.hud.practice_tag.is_visible_in_tree(),id+": F did not exercise the inherited practice banner")
+		for field: String in ["lab_tag", "lab_panel", "practice_tag"]:
+			var control := game.hud.get(field) as Control
+			check(not control.is_visible_in_tree() or not game.look_label.get_global_rect().intersects(control.get_global_rect()),id+": look label covers practice-state " + field)
 		reports.append({"map":id,"snapshot":before,"look":game.look_layer.report})
 		root.remove_child(game)
 		game.free()

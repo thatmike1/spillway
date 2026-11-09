@@ -1,6 +1,16 @@
 extends "r16-pack-probe.gd"
 ## exact normal r17 scene; reuse the delivered r16 input, recording and ghost observer.
 
+func captured(name: String, wanted: Dictionary) -> Dictionary:
+	var state: Dictionary = await super.captured(name,wanted)
+	var label := game.look_label as Control
+	for field: String in ["lab_tag", "lab_panel", "practice_tag"]:
+		var control := game.hud.get(field) as Control
+		check(name+": R17 label clears inherited "+field,not control.is_visible_in_tree() or not label.get_global_rect().intersects(control.get_global_rect()),
+			{"look":str(label.get_global_rect()),"inherited":str(control.get_global_rect())})
+	check(name+": R17 label stays in view",get_viewport().get_visible_rect().encloses(label.get_global_rect()),str(label.get_global_rect()))
+	return state
+
 func _check_identity() -> void:
 	super._check_identity()
 	check("R17 inherits the delivered R16 main", _script_chain(game).slice(0, 2) == ["res://scripts/r17_main.gd", "res://scripts/r16_main.gd"], _script_chain(game))
