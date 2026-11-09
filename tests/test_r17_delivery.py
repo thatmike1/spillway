@@ -72,6 +72,24 @@ class Delivery(unittest.TestCase):
         self.assertIn('scripts/r17_main.gd', files)
         self.assertIn('assets/look/r17/whiteout-sky.png', files)
 
+    def test_error_log_with_success_exit_does_not_prove_runtime_refusal(self):
+        with tempfile.TemporaryDirectory(prefix='r17-delivery-negative-') as tmp:
+            root = Path(tmp)
+            folder = root / 'game'
+            folder.mkdir()
+            (folder / (m.NAME + '.x86_64')).write_bytes(b'private test runtime')
+            (folder / (m.NAME + '.pck')).write_bytes(b'private pack whiteout-sky.png')
+            work = root / 'work'
+            work.mkdir()
+            def start(_folder, out, _args):
+                out.mkdir(parents=True)
+                return (0 if out.name == 'missing-critical-r17-sky' else 1, 'ERROR: missing resource')
+            with patch.object(m, 'normal_start', side_effect=start), self.assertRaisesRegex(m.Rejected, 'silently accepted'):
+                m.pack_negatives(folder, work, root / 'evidence')
+            report = json.loads((root / 'evidence/missing-critical-r17-sky/result.json').read_text())
+            self.assertFalse(report['refused'])
+            self.assertTrue(report['engine_errors'])
+
 
 if __name__ == '__main__':
     unittest.main()

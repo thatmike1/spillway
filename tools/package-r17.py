@@ -298,11 +298,12 @@ def pack_negatives(folder, work, evidence):
                 raise Rejected('critical asset negative did not find its target')
             (case / (NAME + '.pck')).write_bytes(data.replace(b'whiteout-sky.png', b'whiteouX-sky.png'))
         code, text = normal_start(case, evidence / kind, ['--r16-map=whiteout-relay'])
-        refused = code != 0 or bool(r16.ERRORS.search(text))
+        refused = code != 0 and code != 'timeout'
         if kind != 'missing-critical-r17-sky':
             refused = refused and 'r17: spillway-' not in text
         results.append({'case': kind, 'refused': refused, 'exit': code, 'engine_errors': bool(r16.ERRORS.search(text)),
-                        'scope': 'exact official runtime, empty cwd; malformed critical asset must cause an engine error or failure, never accepted as success'})
+                        'scope': 'exact official runtime, empty cwd; a broken pack/critical asset must fail with a nonzero exit, not merely log an error and continue'})
+        (evidence / kind / 'result.json').write_text(json.dumps(results[-1], indent=2) + '\n')
         shutil.rmtree(case)
         if not refused:
             raise Rejected('broken package was silently accepted: ' + kind)
@@ -324,6 +325,7 @@ def native_checks(folder, build, files, args, evidence, work, routes):
             cases += [('play', route), ('reload', route)]
         best = {}
         for mode, route in cases:
+            space(100_000_000)
             label = mode if route is None else route['route']['name'] + '-' + mode
             out = evidence / label
             profile = evidence / ('controls-profile' if route is None else route['route']['name'] + '-profile')
@@ -416,10 +418,12 @@ def package(args):
         if any(r16.digest(source / p) != r16.digest(PROJECT / p) for p in HELPERS):
             raise Rejected('executed helpers differ from committed freeze')
         assets = asset_manifest(source)
+        space(150_000_000, args.scratch)
         env = r16.engine_env(work / 'import-profile')
         r16.checked([r16.EDITOR, '--headless', '--path', source, '--import'], source, env, evidence / 'import.log')
         # relative inheritance needs the unchanged R16 probe beside the executed R17 probe.
         identity = source_identity(source, evidence, facts['files'])
+        space(150_000_000, args.scratch)
         pack = work / (NAME + '.pck')
         r16.checked([r16.EDITOR, '--headless', '--path', source, '--export-pack', 'R17 Pack', pack], source, env, evidence / 'export.log')
         routes = route_freeze(source, evidence / 'source-routes', identity)
