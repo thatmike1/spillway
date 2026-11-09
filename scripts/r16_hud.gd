@@ -149,7 +149,7 @@ func _refresh_pause() -> void:
 		ghost_switch.set_pressed_no_signal(bool(game.settings.ghost))
 		ghost_switch.text = "Ghost of the fastest clean recorded run%s  ·  %s" % [("  (G)" if not ghost_key_missing() else ""), ghost_menu_state()]
 	if recording_line != null:
-		recording_line.text = str(game.session.call("recording_text")) + "\nRecordings are local files; nothing is uploaded. docs/r16/RECORDINGS.md has the format and the analysis tool."
+		recording_line.text = str(game.session.call("recording_text")) + "\nRecordings stay on this machine. Copy the r16_runs folder back for analysis."
 
 func ghost_menu_state() -> String:
 	var state := str(game.session.ghost_state)
@@ -166,3 +166,15 @@ func mechanics_changed() -> void:
 func map_changed() -> void:
 	super()
 	_r16_lab_words()
+
+## the lab keeps r15 geometry; its practice hints teach r16 landing slides and bounded kicks.
+func _hint_text() -> String:
+	if game != null and bool(game.call("is_lab")):
+		if bool(game.finished):
+			return ""
+		match int(game.checkpoint_index):
+			1:
+				return "Shift on descent: slide at landing speed. Release Space, then tap it to hop out."
+			2:
+				return "Tap Space at a wall; A/D may stay held. Two kicks per landing, each wall once."
+	return super()

@@ -174,3 +174,5 @@ R16 kick: tangent 370 → 370 u/s, outward −146 → 230, horizontal 398 → 43
 - An unrelated base observation: on the 60° fixture face, holding W in the air climbs it
   (AA 100 clip, R14 law). The lab code does not touch it.
 - Nothing here says how any of it feels; Mike decides.
+
+The R16 checkpoint-practice hints teach Shift on descent and a fresh Space hop out, and name the two-kick, one-use-per-wall budget. They override only the R16 HUD text; the frozen R15 lab geometry, hints and art remain unchanged. The recording menu gives the actual local directory and asks for the `r16_runs` folder back for analysis. Root regression: actual host118 engine plus13 driver checks and10 visibility checks, all passing (`checkpoints/spillway/r16/hud-words/`). Native inspection remains separate.
