@@ -255,8 +255,11 @@ func _process(delta: float) -> void:
 	keys_line.modulate.a = _intro_alpha * (1.0 - _title_alpha)
 	controls.modulate.a = _intro_alpha * (1.0 - _title_alpha)
 	hint.modulate.a = hint.modulate.a * (1.0 - _title_alpha)
-	for node: CanvasItem in [map_title, preset_line, clock, best_line, run_line, speed_label, speed_unit, speed_metric, style_panel]:
+	for node: CanvasItem in [map_title, preset_line, clock, best_line, run_line, speed_label, speed_unit, speed_metric, style_panel, lab_tag, lab_panel, reticle]:
 		node.modulate.a = 1.0 - _title_alpha
+	if bool(game.finished):
+		controls.modulate.a = 0.0
+		keys_line.modulate.a = 0.0
 	if telemetry:
 		telemetry_extra.text = "%s  ·  record key %s  ·  records %s  ·  runner %s\n%s" % [game.BUILD_ID, str(game.course_key).left(8), game.profile_state,
 			str(game.call("runner_path")).get_file(), str(game.session.call("recording_text"))]
