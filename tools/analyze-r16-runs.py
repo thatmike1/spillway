@@ -192,10 +192,17 @@ def parse(data: bytes, rec: Recording) -> Recording:
         rec.status = "sealed-unrenamed"
         rec.errors.append("sealed stream still named .part: the rename never happened")
     if rec.status == "complete":
-        counted = (rec.seal.get("counts") or {}).get("ticks")
-        if counted != len(rec.columns["tick"]):
-            rec.errors.append(f"seal counts {counted} ticks, the stream holds {len(rec.columns['tick'])}")
+        counts = rec.seal.get("counts")
+        if not isinstance(counts, dict):
+            rec.errors.append("seal counts is not an object")
             rec.status = "partial"
+        else:
+            for name, actual in [("ticks", len(rec.columns["tick"])), ("inputs", len(rec.inputs["tick"])), ("events", len(rec.events))]:
+                counted = counts.get(name)
+                if (isinstance(counted, bool) or not isinstance(counted, (int, float))
+                        or not math.isfinite(counted) or counted != actual):
+                    rec.errors.append(f"seal counts {counted} {name}, the stream holds {actual}")
+                    rec.status = "partial"
     return rec
 
 

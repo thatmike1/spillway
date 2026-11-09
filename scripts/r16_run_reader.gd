@@ -234,9 +234,16 @@ static func parse(data: PackedByteArray, path: String = "", decode: bool = true,
 	if out.status == "complete" and decode:
 		var seal: Dictionary = out.seal
 		var count := (out.columns.tick as PackedInt32Array).size()
-		if int((seal.get("counts", {}) as Dictionary).get("ticks", -1)) != count:
-			errors.append("seal counts %s ticks, the stream holds %d" % [str((seal.get("counts", {}) as Dictionary).get("ticks")), count])
+		var counts: Variant = seal.get("counts")
+		if not counts is Dictionary:
+			errors.append("seal counts is not an object")
 			out.status = "partial"
+		else:
+			for name: String in ["ticks", "inputs", "events"]:
+				var actual := count if name == "ticks" else ((out.inputs.tick as PackedInt32Array).size() if name == "inputs" else events.size())
+				if not _whole(counts.get(name)) or int(counts[name]) != actual:
+					errors.append("seal counts %s %s, the stream holds %d" % [str(counts.get(name)), name, actual])
+					out.status = "partial"
 	out.ok = out.status == "complete" and errors.is_empty()
 	return out
 
@@ -361,13 +368,76 @@ static func clean_finish(run: Dictionary) -> Dictionary:
 	var seal: Dictionary = run.seal
 	var outcome: Variant = seal.get("outcome", {})
 	var final: Variant = seal.get("final", {})
-	if not outcome is Dictionary or str((outcome as Dictionary).get("kind", "")) != "finish" or not bool((outcome as Dictionary).get("clean", false)):
+	if not outcome is Dictionary or outcome.get("kind") != "finish" or typeof(outcome.get("clean")) != TYPE_BOOL or not outcome.clean:
 		return {"ok": false, "error": "the outcome is not a clean finish"}
-	if not final is Dictionary or not bool((final as Dictionary).get("finished", false)) or not bool((final as Dictionary).get("clean", false)) or int((final as Dictionary).get("respawns", 1)) != 0:
+	if not final is Dictionary:
 		return {"ok": false, "error": "the last sample is not a clean finished state"}
-	if int(seal.get("timer_start_tick", -1)) < 0 or int(seal.get("finish_tick", -1)) < 0:
-		return {"ok": false, "error": "the run has no timer start or finish line tick"}
-	return {"ok": true, "time": float((final as Dictionary).get("elapsed", 0.0))}
+	for flag: String in ["started", "finished", "clean"]:
+		if typeof(final.get(flag)) != TYPE_BOOL or not final[flag]:
+			return {"ok": false, "error": "the last sample is not a clean finished state"}
+	if not _whole(final.get("respawns")) or final.respawns != 0:
+		return {"ok": false, "error": "the last sample is not a clean finished state"}
+	if not _number(final.get("elapsed")) or float(final.elapsed) <= 0:
+		return {"ok": false, "error": "the finish time is not finite and positive"}
+	var c: Dictionary = run.get("columns", {})
+	if c.is_empty() or not c.has("tick") or (c.tick as PackedInt32Array).is_empty():
+		return {"ok": false, "error": "a ghost requires fully decoded ticks, not a summary-only scan"}
+	var n := (c.tick as PackedInt32Array).size()
+	var start := -1
+	var hz := 0
+	var previous := 0.0
+	for i: int in n:
+		if c.tick[i] != i or c.respawns[i] != 0 or c.flags[i] & 4 == 0 or c.flags[i] & ~31 != 0:
+			return {"ok": false, "error": "not a dense clean zero-respawn tick stream at row %d" % i}
+		for name: String in ["dt", "elapsed", "yaw", "pitch"]:
+			if not is_finite(c[name][i]):
+				return {"ok": false, "error": "non-finite %s at tick %d" % [name, i]}
+		for name: String in ["p", "reference_p", "v", "actual_v"]:
+			if not (c[name][i] as Vector3).is_finite():
+				return {"ok": false, "error": "non-finite %s at tick %d" % [name, i]}
+		if c.dt[i] <= 0 or c.elapsed[i] < 0 or c.physics_hz[i] <= 0:
+			return {"ok": false, "error": "invalid clock or rate at tick %d" % i}
+		var started: bool = c.flags[i] & 1 != 0
+		if started and start < 0:
+			start = i
+			hz = c.physics_hz[i]
+		if start >= 0:
+			if not started or c.physics_hz[i] != hz or absf(c.dt[i] - 1.0 / hz) > 1e-10:
+				return {"ok": false, "error": "timed rate or start state changes at tick %d" % i}
+			var advance: float = c.elapsed[i] - previous
+			if (i > start and absf(advance - c.dt[i]) > 1e-9) or (i == start and c.elapsed[i] > c.dt[i] + 1e-9):
+				return {"ok": false, "error": "course clock disagrees with physics at tick %d" % i}
+		elif c.elapsed[i] != 0:
+			return {"ok": false, "error": "the clock runs before timer start"}
+		if (c.flags[i] & 2 != 0) != (i == n - 1):
+			return {"ok": false, "error": "the finish flag does not end the tick stream"}
+		previous = c.elapsed[i]
+	if start < 0:
+		return {"ok": false, "error": "the run has no timer start"}
+	for name: String in ["first_tick", "last_tick", "timer_start_tick", "finish_tick"]:
+		var expected := 0 if name == "first_tick" else (start if name == "timer_start_tick" else n - 1)
+		if not _whole(seal.get(name)) or int(seal[name]) != expected:
+			return {"ok": false, "error": "seal %s disagrees with the tick stream" % name}
+	if not _whole(final.get("tick")) or int(final.tick) != n - 1 or not _whole(final.get("checkpoint")) or final.checkpoint != c.checkpoint[n - 1] \
+			or absf(float(final.elapsed) - c.elapsed[n - 1]) > 1e-9:
+		return {"ok": false, "error": "the final sample disagrees with the tick stream"}
+	var p: Variant = final.get("p")
+	if not p is Array or p.size() != 3 or not p.all(_number) or Vector3(float(p[0]), float(p[1]), float(p[2])) != c.p[n - 1]:
+		return {"ok": false, "error": "the final position disagrees with the tick stream"}
+	if outcome.has("time") and (not _number(outcome.time) or absf(float(outcome.time) - float(final.elapsed)) > 1e-9):
+		return {"ok": false, "error": "the outcome time disagrees with the tick stream"}
+	if outcome.has("respawns") and (not _whole(outcome.respawns) or outcome.respawns != 0):
+		return {"ok": false, "error": "the outcome has respawns"}
+	for event: Dictionary in run.get("events", []):
+		if event.get("k") in ["sample_missing", "tick_gap"]:
+			return {"ok": false, "error": "the recorder reported incomplete samples"}
+	return {"ok": true, "time": float(final.elapsed)}
+
+static func _number(value: Variant) -> bool:
+	return typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value))
+
+static func _whole(value: Variant) -> bool:
+	return _number(value) and float(value) >= 0 and float(value) == floorf(float(value)) and float(value) < 9e15
 
 ## fastest clean complete run in a directory for this identity, by the recorded course clock.
 ## every candidate is fully verified (chain and seal); ties keep the earlier file name.
@@ -380,7 +450,7 @@ static func fastest_clean(directory: String, expected_identity: Dictionary) -> D
 		if not name.ends_with(SUFFIX):
 			continue
 		best.considered += 1
-		var run := read(dir.path_join(name), false)
+		var run := read(dir.path_join(name), true)
 		var why := identity_matches(run.header.get("identity") if run.header is Dictionary else null, expected_identity) if run.ok else str(run.errors)
 		var clean := clean_finish(run) if why.is_empty() else {"ok": false, "error": why}
 		if not clean.ok:

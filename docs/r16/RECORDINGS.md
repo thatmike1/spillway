@@ -137,7 +137,11 @@ Write failures: after each chunk the recorder flushes and compares the file's le
 
 `READER.read(path, decode := true)` returns `ok, status, errors, header, seal, abort, chunks, valid_bytes, columns, inputs, events`. `status` is `complete`, `aborted`, `partial`, `sealed-unrenamed` or `invalid`; `ok` is true only for a complete, error-free stream in a `.r16run` file. `columns` holds `PackedInt32Array`/`PackedFloat64Array`/`PackedInt64Array` columns and `PackedVector3Array` vectors; `inputs` the nine input columns. `decode = false` verifies the whole chain and reads header, seal and abort without inflating tick chunks.
 
-Helpers for root: `identity_matches(recorded, expected) -> String` ("" when equal), `clean_finish(run) -> {ok, time | error}`, and `fastest_clean(directory, expected_identity) -> {ok, path, time, considered, rejected}`. That last one verifies every candidate's chain, so call it once per map/preset load, not per frame. Root chooses and remembers the best path in its own R16 config.
+Helpers for root: `identity_matches(recorded, expected) -> String` ("" when equal), `clean_finish(run) -> {ok, time | error}`, and `fastest_clean(directory, expected_identity) -> {ok, path, time, considered, rejected}`. That last one fully decodes candidates, so call it once per map/preset load, not per frame. Root chooses and remembers the best path in its own R16 config.
+
+Ghost eligibility requires more than a valid digest chain. `clean_finish` requires decoded ticks: dense attempt-local indices from zero, finite poses and clocks, zero respawns and clean flags throughout, one stable timed physics rate, a course clock advancing by its recorded delta, and a finish on the last row. The seal's first/start/finish/last ticks, final pose, time and checkpoint must agree with those rows. A stale startup callback before the timer starts is allowed. String booleans and string times are refused. Tick/input/event counts must match their decoded payloads. Summary-only scans cannot establish a clean finish.
+
+These checks guard the ghost selector against inconsistent copied data. They do not authenticate a consistently fabricated run. Diagnostic recordings with tick gaps remain readable for analysis, but cannot become ghosts. Malformed seal counts are labelled partial without a script error; the valid prefix remains available.
 
 The reader parses JSON with `JSON.parse_string` and binary with fixed offsets only. It never uses `str_to_var`, `bytes_to_var`, `load()` or resources, so a copied file cannot execute code or pull in a resource.
 
@@ -194,6 +198,14 @@ The log must hold exactly five deliberate refusal lines (`EXPECTED_LOG` in the P
 - **A real OS write failure:** the Godot suite's `--phase=rlimit` under `RLIMIT_FSIZE` 48 KiB with SIGXFSZ ignored. The kernel refuses the write with EFBIG, the recorder reports `disk-error`, counts the dropped ticks and leaves a `.part` the Python reader recovers as partial.
 
 Evidence lives outside Git in `checkpoints/spillway/r16/recordings/`.
+
+An additional root integrity reduction uses a retained real clean run with recomputed hashes after deliberate semantic edits:
+
+```sh
+python3 -I tests/test_r16_record_integrity.py --record RUN.r16run --out OUT --godot GODOT
+```
+
+Its tiny isolated project exercises the production reader, `clean_finish`, ghost loader and fastest selector. The unmodified recording stays eligible; inconsistent finish summaries, non-finite poses/deltas, duplicate or missing ticks, rate changes and unclean rows are refused as ghosts. The final reduction passes 79 checks; before repair, 44 assertions failed, including selection of a claimed zero-second best and a script error on malformed counts. The original 59 Godot and 38 Python checks also pass after the repair, including partial recovery and the OS write-refusal case. Evidence: `checkpoints/spillway/r16/record-integrity/`. These remain component checks, independent of the actual R16 host and final package.
 
 ## Limits
 
