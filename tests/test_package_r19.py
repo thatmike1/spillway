@@ -21,8 +21,9 @@ spec.loader.exec_module(pkg)
 
 
 def freeze():
-    return {'schema':1, 'runtime_frozen':True, 'source_commit':'a'*40, 'new_maps':[],
-        'required_maps':list(pkg.ORIGINAL_MAPS), 'experimental_maps':['experiment'], 'identity_sha256':'b'*64, 'intentional_changes':{},
+    new = ['surf', 'grapple', 'launch', 'fall']
+    return {'schema':1, 'runtime_frozen':True, 'source_commit':'a'*40, 'new_maps':new,
+        'required_maps':[*pkg.ORIGINAL_MAPS, *new], 'experimental_maps':['experiment', 'grapple', 'launch', 'fall'], 'identity_sha256':'b'*64, 'intentional_changes':{},
         'breakwater_geometry':'c'*64, 'breakwater_overlay':'r19-breakwater-flow-1:'+'d'*64}
 
 
@@ -59,13 +60,28 @@ class ReleaseGates(unittest.TestCase):
         self.refused(pkg.validate_freeze,freeze(),'e'*40)
 
     def test_explicit_new_map_requirements_cannot_be_discovered_away(self):
-        good = freeze(); good['new_maps'] = ['surf', 'grapple']; good['required_maps'] += good['new_maps']
+        good = freeze()
         self.assertEqual(pkg.validate_freeze(good,'a'*40),good)
         bad = copy.deepcopy(good); bad['required_maps'].remove('surf')
         self.refused(pkg.validate_freeze,bad,'a'*40)
         for value in [['surf','surf'], ['breakwater'], None]:
             bad=freeze();bad['new_maps']=value
             self.refused(pkg.validate_freeze,bad,'a'*40)
+
+    def test_experiments_wing_requires_three_to_five_new_maps_and_a_regular_course(self):
+        for count in [0, 2, 3, 5, 6]:
+            fr = freeze()
+            experiments = ['experimental-' + str(i) for i in range(count)]
+            fr.update(new_maps=['surf', *experiments], required_maps=[*pkg.ORIGINAL_MAPS, 'surf', *experiments],
+                experimental_maps=['experiment', *experiments])
+            if count in [3, 5]:
+                self.assertEqual(pkg.validate_freeze(fr, 'a'*40), fr)
+            else:
+                self.refused(pkg.validate_freeze, fr, 'a'*40)
+        fr = freeze(); fr['experimental_maps'][-1] = 'rainline'
+        self.refused(pkg.validate_freeze, fr, 'a'*40)
+        fr = freeze(); fr['new_maps'].remove('surf'); fr['required_maps'].remove('surf')
+        self.refused(pkg.validate_freeze, fr, 'a'*40)
 
     def test_only_exact_old_files_may_change(self):
         before = {p:'a' for p in pkg.OLD_CHANGES}; before['scripts/r15_source_player.gd']='motor';before['assets/sky.png']='sky'
@@ -118,6 +134,10 @@ class ReleaseGates(unittest.TestCase):
     def test_identity_boundary_preserves_all_original_presets(self):
         old=pkg.pinned_json(pkg.R18_BUILD,pkg.R18_BUILD_SHA)['identity']
         identity=copy.deepcopy(old);fr=freeze()
+        for map_id in fr['new_maps']:
+            identity['registry']['maps'].append(map_id)
+            identity['maps'][map_id] = {'level_id':map_id, 'geometry':map_id+'-geometry'}
+            identity['keys'][map_id] = {'server128':{'fixture':'distinct new catalog entry'}}
         identity['maps']['breakwater']['geometry']=fr['breakwater_geometry']
         for key in identity['keys']['breakwater'].values():
             rec=json.loads(key['record_identity']);rec[2]=fr['breakwater_geometry'];rec[-1]=fr['breakwater_overlay']

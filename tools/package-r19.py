@@ -141,6 +141,10 @@ def validate_freeze(freeze, commit):
     experimental = freeze.get('experimental_maps')
     require(isinstance(experimental, list) and len(experimental) == len(set(experimental))
         and 'experiment' in experimental and set(experimental) <= set([*ORIGINAL_MAPS, *new]), 'explicit experimental_maps list must include Movement Lab and only required maps')
+    new_experiments = set(experimental) - {'experiment'}
+    require(3 <= len(new_experiments) <= 5 and new_experiments <= set(new),
+        'R19 requires three to five distinct new experimental maps, separately from Movement Lab')
+    require(bool(set(new) - new_experiments), 'R19 requires a new regular surf or bhop course as well as its experiments')
     require(freeze.get('required_maps') == [*ORIGINAL_MAPS, *new], 'required_maps must be original eight followed by explicit new_maps')
     require(isinstance(freeze.get('intentional_changes'), dict) and set(freeze['intentional_changes']) <= OLD_CHANGES,
         'freeze intentional_changes must contain only exact allowed old files')

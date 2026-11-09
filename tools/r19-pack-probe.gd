@@ -70,6 +70,10 @@ func _controls() -> void:
 			await _physics(5)
 		await _tap(KEY_ESCAPE)
 		check(map+": paused for atomic L comparison",game.paused)
+		var card := game.hud.find_child("Map_"+map,true,false) as Button
+		var new_experiment: bool = map != "experiment" and map in expect.get("experimental_maps",[])
+		check(map+": card is in its actual main or Experiments section",card != null and card.get_parent() == (game.hud.experiments_grid if new_experiment else game.hud.map_grid))
+		check(map+": Experiments heading is presented in the pause menu",game.hud.experiments_heading.is_visible_in_tree())
 		var geometry := _geometry()
 		var state := _behavior()
 		var original: bool = game.look_enabled
@@ -124,6 +128,9 @@ func _friend_release() -> void:
 	var raw := FileAccess.get_file_as_bytes(str(game.session.ghost_path))
 	await _tap(KEY_ESCAPE)
 	var before := _behavior()
+	check("friend file controls initially collapsed",not game.hud.share_section.visible)
+	await _friend_button("GhostSharingToggle")
+	check("actual disclosure opens friend file controls",game.hud.share_section.is_visible_in_tree())
 	# intercept only opening a file manager; the button and real portable folder still run.
 	service.folder_opener = func(path: String) -> int:
 		_folder_opened = path
@@ -175,11 +182,14 @@ func _friend_release() -> void:
 	check("friend UI never writes physical state, records or scoring",before == _behavior())
 	var files := {}
 	var prefs: String = service.storage.path_join("selection.json")
-	files["Spillway/r19_ghost_share/selection.json"] = FileAccess.get_sha256(prefs)
+	if check("real sharing flow writes preferences",FileAccess.file_exists(prefs)):
+		files["Spillway/r19_ghost_share/selection.json"] = FileAccess.get_sha256(prefs)
 	var cached: String = service.storage.path_join("cache").path_join(RUN_READER.sha256(raw).hex_encode()+".r16run")
 	if FileAccess.file_exists(cached):
 		files["Spillway/r19_ghost_share/cache/"+cached.get_file()] = FileAccess.get_sha256(cached)
 	report["friend_profile_files"] = files
+	await _friend_button("GhostSharingToggle")
+	check("actual disclosure restores collapsed friend controls",not game.hud.share_section.visible)
 	report["friend"] = {"ok":checks.slice(begin).all(func(c: Dictionary) -> bool: return c.ok),"portable_folder":folder,"file_manager_intercepted":true,"real_clean_recording":true}
 	service.folder_opener = Callable()
 	await _tap(KEY_ESCAPE)
