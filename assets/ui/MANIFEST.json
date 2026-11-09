@@ -1,0 +1,30 @@
+{
+ "kit": "Spillway R18 UI typeface",
+ "assets": [
+  {
+   "id": "bricolage-grotesque",
+   "name": "Bricolage Grotesque (variable: opsz 12-96, wght 200-800, wdth 75-100)",
+   "kind": "font",
+   "authors": "Mathieu Triay and the Bricolage Grotesque Project Authors",
+   "copyright": "Copyright 2022 The Bricolage Grotesque Project Authors (https://github.com/ateliertriay/bricolage)",
+   "licence": "OFL-1.1",
+   "licence_text": "licences/BricolageGrotesque-OFL.txt",
+   "source_page": "https://fonts.google.com/specimen/Bricolage+Grotesque",
+   "upstream_repository": "https://github.com/ateliertriay/bricolage",
+   "upstream_url": "https://raw.githubusercontent.com/google/fonts/main/ofl/bricolagegrotesque/BricolageGrotesque%5Bopsz,wdth,wght%5D.ttf",
+   "google_fonts_source_commit": "84745e5b96261ae5f8c6c856e262fe78d1d6efdd",
+   "retrieved": "2026-11-09",
+   "files": [
+    {
+     "file": "fonts/BricolageGrotesque-variable.ttf",
+     "upstream_name": "BricolageGrotesque[opsz,wdth,wght].ttf",
+     "sha256": "413e7357809ddd12fd80a96a8a396de0e401638d4acd3cb3e37532f0472ac682",
+     "bytes": 408496,
+     "modified": false
+    }
+   ],
+   "use": "every player-facing UI string: title wordmark, HUD, menus, finish card, toasts",
+   "in_game_modifications": "axis values and OpenType features (tnum) set per style in scripts/r18_ui_theme.gd; file unmodified; renamed only to drop brackets from the path"
+  }
+ ]
+}
