@@ -4,7 +4,7 @@ Finish a clean run on the desired map and preset. In Esc, enter your player name
 
 Release builds use `ghosts/` beside the executable, on Linux and Windows. Extract the whole release into a writable folder. An unwritable release folder reports a failure rather than silently moving files elsewhere. Source/editor runs use isolated `user://r19_ghosts/`; they never create a ghosts folder beside the Godot editor. Selection/name and a private replay cache live in `user://r19_ghost_share/`. These are separate from `r16_runs/` and the local-best profile.
 
-Only the session's verified clean best for the exact current motion identity, recorded by `spillway-2026.11.09-r19`, exports. The wrapper preserves the sealed `.r16run` bytes exactly. A local recording from R18 can still race on unchanged geometry under the original time identity, but cannot be exported as an R19 recording. Style/scoring identity remains separate from time/motion identity.
+Export uses the fastest verified clean recording for the exact current motion identity recorded by `spillway-2026.11.09-r19`. A faster older local PB does not block a new R19 export: the service searches the recordings folder for the fastest current-build finish without changing the local PB. The wrapper preserves the sealed `.r16run` bytes exactly. A local recording from R18 can still race on unchanged geometry under the original time identity, but cannot be exported as an R19 recording. Style/scoring identity remains separate from time/motion identity.
 
 Imported rows show the player, validated time, map/preset and compatibility note. Different game builds, unsupported schemas, changed map revisions and different movement identities are disabled. Breakwater's new geometry retains the explicit older-ghost explanation from `map_revision_description()`. A different preset can be selected on its own matching course. An invalid neighboring file never prevents valid rows from appearing.
 
@@ -28,17 +28,20 @@ A scan visits at most 1,024 directory entries, lists at most 64 ghost files and 
 
 ## Verification
 
+The parent refresh passed 96 headless checks and 96 native AMD/X11 checks, including the faster older local PB regression. The native renderer held `/dev/dri/renderD128` and accumulated hardware graphics time; the observed desktop socket/server baseline stayed identical. The multi-host fixture logs eight ObjectDB instances at shutdown; this is disclosed rather than called a clean normal-release Quit. Final release lifecycle checks remain separate.
+
 From `projects/foldrunner`:
 
 ```sh
 python3 -I tests/r19_ghost_share.py
 python3 -I tests/r19_ghost_share.py --native
+python3 -I tests/r19_ghost_share.py --native --desktop-unavailable
 ```
 
 The runner verifies the pinned Godot 4.7.2 binary, copies source into `/tmp/r19-ghost-share/source`, isolates XDG state, imports there, runs the actual R19 host and drives its real menu buttons through Enter input events. Tests drop actual wrapper files into its canonical test folder. The folder opener is injected and records the requested path; tests never invoke the production `OS.shell_open` action. The runner checks source hashes after execution and keeps scratch below 350 MiB. It checks `/home` has at least 15,000,000,000 bytes free before launching. No release export is built by this runner.
 
 Headless evidence is in `/tmp/r19-ghost-share/headless/`: `summary.json`, `suite.log`, `SOURCE.json`, `python-reader.json` and the exact extracted `cross-*.r16run` files. Synthetic sealed fixtures cover names, two motion identities, malformed/bounded files, compatibility, persistence and immutable raw bytes. They are explicitly **not genuine completed courses**. A separate route earns a finish on the labelled R16 loop fixture through W/Space input on the actual R19 host/session/runner. Its recording exports through the real menu. Repeating that earned route with the selected friend must produce exactly equal position, velocity, yaw, course clock and checkpoint traces, without sharing reads/scans during the route. Both the unchanged Godot and independent Python readers decode the extracted files.
 
-The native attempt on 9 November stopped at the existing display safety check: `xdpyinfo -display :0` failed before any private app launched. The evidence is `/tmp/r19-ghost-share/native/display/native-display.json`. No native screenshot or native Windows execution is claimed. `--native` retains the private AMD/X11 helper's explicit free-display selection and safety guard; it must run where the desktop preflight succeeds. Final Linux/Windows packaging and full retained-route parity remain the parent's release checks.
+The initial native attempt on 9 November stopped before launch because `xdpyinfo -display :0` already failed. The explicit `--desktop-unavailable` option instead preserves that observed baseline: it pins the existing Hyprland and desktop Xwayland process identities, reserved socket inodes, kernel listeners and answering status before and after. It never repairs, restarts or renames the desktop server or sockets. The original native helper still uses only verified free displays 190–199 and its AMD driver checks; GPU observation follows the actual game PID. Without the explicit option, unavailable `:0` remains a refusal. Native Windows execution and final packed-release/full-route gates are separate checks.
 
 Framework facts were checked against current official Godot documentation: [OS.shell_open and executable path](https://docs.godotengine.org/en/stable/classes/class_os.html), [DirAccess.is_link and iteration](https://docs.godotengine.org/en/stable/classes/class_diraccess.html), [the template feature tag](https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html), and [TextServer autowrap modes](https://docs.godotengine.org/en/stable/classes/class_textserver.html). Runtime behavior above was tested with the project's pinned binary.

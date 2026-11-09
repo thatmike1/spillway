@@ -13,6 +13,8 @@ const MAX_DECODE := 12 * 1024 * 1024
 const MAX_TICKS := 80000
 const MAX_FILES := 64
 const MAX_SCAN := 16 * 1024 * 1024
+const MAX_EXPORT_FILES := 512
+const MAX_EXPORT_SCAN := 64 * 1024 * 1024
 
 var game: Node
 var folder := ""
@@ -185,17 +187,52 @@ func _read_file(path: String, limit: int) -> PackedByteArray:
 		return PackedByteArray()
 	return file.get_buffer(file.get_length())
 
+## an older PB must not prevent sharing the fastest clean run earned on this build.
+## the export scan never promotes or replaces the local pointer.
+func _export_candidate() -> Dictionary:
+	var expected: Dictionary = game.call("motion_identity")
+	var pointer := str(game.session.ghost_path)
+	var raw := _read_file(pointer, MAX_RUN) if not pointer.is_empty() else PackedByteArray()
+	var checked := verify_run(raw, expected)
+	if bool(checked.ok) and str(checked.get("build", "")) == BUILD and int(game.session.ghost_ticks) == roundi(float(checked.time) * float(game.physics_hz)):
+		return checked
+	var directory := ProjectSettings.globalize_path(str(game.recordings_dir))
+	var dir := DirAccess.open(directory)
+	if dir == null:
+		return {"ok": false}
+	var best := {"ok": false}
+	var bytes_read := 0
+	var entries := 0
+	dir.list_dir_begin()
+	var filename := dir.get_next()
+	while not filename.is_empty():
+		entries += 1
+		if entries > MAX_EXPORT_FILES or bytes_read >= MAX_EXPORT_SCAN:
+			dir.list_dir_end()
+			return {"ok": false, "note": "Too many local recordings to verify an R19 best. Archive older runs outside the recordings folder, then export again."}
+		if filename.ends_with(READER.SUFFIX) and not dir.current_is_dir() and not dir.is_link(filename):
+			raw = _read_file(directory.path_join(filename), mini(MAX_RUN, MAX_EXPORT_SCAN - bytes_read))
+			bytes_read += raw.size()
+			if run_bounds(raw).is_empty():
+				var summary := READER.parse(raw, filename, false)
+				var meta: Variant = summary.header.get("metadata", {})
+				if bool(summary.ok) and meta is Dictionary and meta.get("build") == BUILD and READER.identity_matches(summary.header.get("identity"), expected).is_empty():
+					checked = verify_run(raw, expected)
+					if bool(checked.ok) and (not bool(best.ok) or float(checked.time) < float(best.time)):
+						best = checked
+		filename = dir.get_next()
+	dir.list_dir_end()
+	return best
+
 func export_best(name: String) -> Dictionary:
 	player_name = clean_name(name)
 	if player_name.is_empty():
 		status = "Enter a player name (1 to 32 characters)."
 		return {"ok": false}
 	_save_preferences()
-	var path := str(game.session.ghost_path)
-	var raw := _read_file(path, MAX_RUN) if not path.is_empty() else PackedByteArray()
-	var checked := verify_run(raw, game.call("motion_identity"))
-	if not bool(checked.ok) or str(checked.get("build", "")) != BUILD or int(game.session.ghost_ticks) != roundi(float(checked.get("time", -1)) * float(game.physics_hz)):
-		status = "No verified clean best from this build for this exact map and preset. Finish a clean run first."
+	var checked := _export_candidate()
+	if not bool(checked.ok):
+		status = str(checked.get("note", "No verified clean best from this build for this exact map and preset. Finish a clean run first."))
 		return {"ok": false}
 	if not _ensure_folder():
 		return {"ok": false}
@@ -208,7 +245,7 @@ func export_best(name: String) -> Dictionary:
 	if file == null:
 		status = "Could not write the export. Move the release to a writable folder."
 		return {"ok": false}
-	var bytes := envelope(raw, player_name)
+	var bytes := envelope(checked.raw, player_name)
 	file.store_buffer(bytes)
 	file.flush()
 	var error := file.get_error()

@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import signal
 import subprocess
 import sys
 
@@ -31,6 +32,7 @@ def load(name, path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--native', action='store_true')
+    parser.add_argument('--desktop-unavailable', action='store_true', help='preserve an already unavailable :0 using socket/server identity checks')
     args = parser.parse_args()
     if shutil.disk_usage('/home').free < FLOOR:
         raise SystemExit('HOME below 15,000,000,000 bytes; nothing launched')
@@ -67,12 +69,26 @@ def main():
     evidence.mkdir()
     commands = []
 
-    def run(label, cmd, child_env=env):
+    def run(label, cmd, child_env=env, watch=None):
         commands.append([str(v) for v in cmd])
         with (evidence / (label + '.log')).open('w') as stream:
-            result = subprocess.run(cmd, env=child_env, stdout=stream, stderr=subprocess.STDOUT, timeout=180, cwd=SCRATCH)
+            with subprocess.Popen(cmd, env=child_env, stdout=stream, stderr=subprocess.STDOUT, cwd=SCRATCH, start_new_session=True) as process:
+                try:
+                    if watch is not None:
+                        watch.follow(process.pid)
+                    code = process.wait(timeout=180)
+                finally:
+                    if process.poll() is None:
+                        os.killpg(process.pid, signal.SIGTERM)
+                        try:
+                            process.wait(timeout=5)
+                        except subprocess.TimeoutExpired:
+                            os.killpg(process.pid, signal.SIGKILL)
+                            process.wait(timeout=5)
+                    if watch is not None:
+                        watch.stop()
         text = (evidence / (label + '.log')).read_text()
-        if result.returncode or 'SCRIPT ERROR' in text:
+        if code or 'SCRIPT ERROR' in text:
             print('\n'.join(line for line in text.splitlines() if any(word in line for word in ['ERROR', 'at:', 'FAIL', 'failed'])))
             raise SystemExit(label + ' failed')
         print('PASS ' + label, flush=True)
@@ -84,17 +100,16 @@ def main():
     if args.native:
         nd = load('r19_nd', stage / 'tools/r14_native_display.py')
         nd.MIN_FREE_GIB = FLOOR / 2**30
-        with nd.NativeDisplay(evidence / 'display', displays=range(190, 200), min_free_gib=FLOOR / 2**30) as display:
-            child_env = display.child_env(env)
-            watch = display.gpu_watch()
-            try:
-                run('suite', cmd + ['--display-driver', 'x11', '--rendering-driver', 'opengl3', '--windowed', '--resolution', '1280x720'] + user_args, child_env)
-            finally:
-                watch.stop()
-            gpu = watch.verdict()
-            (evidence / 'gpu.json').write_text(json.dumps(gpu, indent=2))
-            if not gpu['ok']:
-                raise SystemExit('native GPU work unproven')
+        guard = load('r19_desktop_guard', stage / 'tools/r19_native_guard.py')
+        with guard.DesktopGuard(evidence / 'desktop-guard', args.desktop_unavailable) as desktop:
+            with nd.NativeDisplay(evidence / 'display', displays=range(190, 200), desktop=desktop.desktop, min_free_gib=FLOOR / 2**30) as display:
+                child_env = display.child_env(env)
+                watch = display.gpu_watch()
+                run('suite', cmd + ['--display-driver', 'x11', '--rendering-driver', 'opengl3', '--windowed', '--resolution', '1280x720'] + user_args, child_env, watch)
+                gpu = watch.verdict()
+                (evidence / 'gpu.json').write_text(json.dumps(gpu, indent=2))
+                if not gpu['ok']:
+                    raise SystemExit('native GPU work unproven')
     else:
         run('suite', cmd + ['--headless'] + user_args)
     changed = [n for n, h in source_hashes.items() if not (stage / n).is_file() or hashlib.sha256((stage / n).read_bytes()).hexdigest() != h]

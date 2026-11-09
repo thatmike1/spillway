@@ -206,6 +206,7 @@ func _main() -> void:
 	service.choose("../external.spillghost")
 	check("arbitrary external selection ignored", service.selected.is_empty())
 	await bounds_tests(raw)
+	await older_best_export()
 	for resolution: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(3440, 1440)]:
 		root.size = resolution
 		game.hud._layout()
@@ -214,6 +215,10 @@ func _main() -> void:
 		var section: Control = game.hud.share_section
 		var outer: Control = game.hud._pause_scroll
 		check("sharing section stays within scrolling sheet at " + str(resolution), section.size.x <= outer.size.x and section.get_minimum_size().x <= outer.size.x, [section.size, section.get_minimum_size(), outer.size])
+		if DisplayServer.get_name() != "headless":
+			game.hud._pause_scroll.scroll_vertical = 200
+			await RenderingServer.frame_post_draw
+			root.get_texture().get_image().save_png(out.path_join("menu-%dx%d.png" % [resolution.x, resolution.y]))
 	check("base map cards and Advanced preserved", game.hud.map_buttons.size() == game.maps.catalog.size() and is_instance_valid(game.hud.advanced_toggle))
 	check("F9 look label stays hidden without telemetry", not game.look_label.visible)
 	# screenshot uses Godot readback on a private display only, never the desktop.
@@ -230,6 +235,31 @@ func _main() -> void:
 	await process_frame
 	await earned_routes()
 	_finish()
+
+func older_best_export() -> void:
+	var service: Node = game.ghost_share
+	var expected: Dictionary = game.motion_identity()
+	var prior_directory: String = game.recordings_dir
+	var local := fixture(expected, "spillway-2026.11.09-r16", out.path_join("older-fast-best"), 12)
+	check("older faster local fixture becomes the local best", game.session.offer_ghost(local, 11))
+	game.recordings_dir = out.path_join("r19-export-candidates")
+	var fastest := fixture(expected, SHARE.BUILD, game.recordings_dir, 48)
+	fixture(expected, SHARE.BUILD, game.recordings_dir, 60)
+	check("slower R19 finish cannot replace the older local PB", not game.session.offer_ghost(fastest, 47) and game.session.ghost_path == local)
+	var saved := await export_from_button(service)
+	check("export chooses fastest clean R19 run despite older faster PB", bool(saved.get("ok", false)) and saved.get("raw") == FileAccess.get_file_as_bytes(fastest), saved.get("note", ""))
+	if bool(saved.get("ok", false)):
+		put(out.path_join("cross-older-pb-fallback.r16run"), saved.raw)
+	check("export preserves old local best pointer and ticks", game.session.ghost_path == local and game.session.ghost_ticks == 11)
+	game.recordings_dir = prior_directory
+
+func export_from_button(service: Node) -> Dictionary:
+	var before: Array = DirAccess.get_files_at(service.folder)
+	await press("ExportGhost")
+	for name: String in DirAccess.get_files_at(service.folder):
+		if name.ends_with(SHARE.SUFFIX) and not name in before:
+			return SHARE.inspect(FileAccess.get_file_as_bytes(str(service.folder).path_join(name)))
+	return {"ok": false, "note": service.status}
 
 func has_collision(node: Node) -> bool:
 	if node is CollisionObject3D:
