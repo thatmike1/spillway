@@ -13,7 +13,7 @@ All 32 sealed recordings passed the project’s strict R16 reader. The recording
 | Sunken Court | 1 | 39.02 s | 0 | 1 | 0 | 37.609 s |
 | Movement Lab | 1 | 20.95 s | 0 | 0 | 0 | none |
 
-Breakwater has the most attempts and restarts; Night Shift has the most recorded play time. Recorded time includes waiting, title/menu pauses between physics steps and post-finish ticks, so it is not a measure of enjoyment. Clean finish times come from the sealed outcome, rather than total tick duration. A restart or Quit says what was pressed, not why.
+Breakwater has the most attempts and restarts; Night Shift has the most recorded play time. Recorded time is the sum of recorded physics deltas. It includes unpaused waiting and post-finish ticks, excludes wall-clock time in the paused menu, and is not a measure of enjoyment. Clean finish times come from the sealed outcome, rather than total tick duration. A restart or Quit says what was pressed, not why.
 
 ## Breakwater
 
