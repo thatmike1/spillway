@@ -362,7 +362,7 @@ def native_checks(folder, build, files, args, evidence, work, routes):
                 cfg = 'Spillway/spillway_r16.cfg'
                 result['config_not_rewritten'] = before.get(cfg) is not None and before.get(cfg) == after.get(cfg)
             result['ok'] = (code == 0 and report.get('failures') == 0 and audit['ok'] and not r16.ERRORS.search(text)
-                            and result['cwd_empty'] and any(t.startswith('Spillway R17 · ') for t in titles)
+                            and result['cwd_empty'] and any(t.startswith(r16.TITLE_PREFIX) for t in titles)
                             and (mode != 'controls' or len(result['r17_maps']) == 8)
                             and result.get('exact_source_trace', {'ok': True})['ok'] and result.get('input_order', {'ok': True})['ok']
                             and result.get('config_not_rewritten', True))
