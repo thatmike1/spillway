@@ -45,6 +45,8 @@ func make_game(earned: bool = false) -> void:
 
 func press(name: String) -> void:
 	var button := game.hud.find_child(name, true, false) as Button
+	if button != null and game.hud.share_section.is_ancestor_of(button) and not game.hud.share_section.visible:
+		await press("GhostSharingToggle")
 	check("button exists: " + name, button != null)
 	if button != null:
 		button.grab_focus()
@@ -84,6 +86,11 @@ func _main() -> void:
 	identity = game.motion_identity()
 	var service: Node = game.ghost_share
 	game.set_paused(true)
+	check("sharing starts collapsed with maps accessible", not game.hud.share_section.visible and game.hud.share_toggle.visible)
+	await press("GhostSharingToggle")
+	check("real disclosure button opens file controls", game.hud.share_section.visible)
+	await press("GhostSharingToggle")
+	check("real disclosure button collapses file controls", not game.hud.share_section.visible)
 	await press("OpenGhostFolder")
 	check("folder opener seam gets exact canonical path without launching shell", opened == [out.path_join("ghosts")], opened)
 	await press("ExportGhost")
@@ -220,6 +227,17 @@ func _main() -> void:
 			await RenderingServer.frame_post_draw
 			root.get_texture().get_image().save_png(out.path_join("menu-%dx%d.png" % [resolution.x, resolution.y]))
 	check("base map cards and Advanced preserved", game.hud.map_buttons.size() == game.maps.catalog.size() and is_instance_valid(game.hud.advanced_toggle))
+	await press("GhostSharingToggle")
+	check("selection and revision stay visible when controls collapse", not game.hud.share_section.visible and game.hud.share_selection.is_visible_in_tree() and game.hud.share_revision.visible == not game.map_revision_description().is_empty())
+	if DisplayServer.get_name() != "headless":
+		root.size = Vector2i(1280, 720)
+		game.hud._layout()
+		game.hud._pause_scroll.scroll_vertical = 0
+		for i: int in 8:
+			await process_frame
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png(out.path_join("menu-collapsed-1280x720.png"))
+	await press("GhostSharingToggle")
 	check("F9 look label stays hidden without telemetry", not game.look_label.visible)
 	# screenshot uses Godot readback on a private display only, never the desktop.
 	if DisplayServer.get_name() != "headless":

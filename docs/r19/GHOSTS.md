@@ -1,6 +1,6 @@
 # Sharing a ghost in R19
 
-Finish a clean run on the desired map and preset. In Esc, enter your player name and press **Export my clean best**. Send the resulting `.spillghost` file to your friend. They put that file in their **ghosts** folder, reopen Esc or press **Refresh**, then choose its player/time button. **Open ghosts folder** opens the exact folder printed in the menu. There is no network or upload feature.
+Finish a clean run on the desired map and preset. In Esc, expand **Race a friend (ghost files)**, enter your player name and press **Export my clean best**. Send the resulting `.spillghost` file to your friend. They put that file in their **ghosts** folder, reopen Esc or press **Refresh**, then choose its player/time button. **Open ghosts folder** opens the exact folder printed in the menu. There is no network or upload feature.
 
 Release builds use `ghosts/` beside the executable, on Linux and Windows. Extract the whole release into a writable folder. An unwritable release folder reports a failure rather than silently moving files elsewhere. Source/editor runs use isolated `user://r19_ghosts/`; they never create a ghosts folder beside the Godot editor. Selection/name and a private replay cache live in `user://r19_ghost_share/`. These are separate from `r16_runs/` and the local-best profile.
 
@@ -8,7 +8,7 @@ Export uses the fastest verified clean recording for the exact current motion id
 
 Imported rows show the player, validated time, map/preset and compatibility note. Different game builds, unsupported schemas, changed map revisions and different movement identities are disabled. Breakwater's new geometry retains the explicit older-ghost explanation from `map_revision_description()`. A different preset can be selected on its own matching course. An invalid neighboring file never prevents valid rows from appearing.
 
-One friend is chosen at a time. The choice survives restarting a run or the app. Changing map/preset suspends an incompatible friend and restores the local best; returning to its exact identity restores the chosen friend. **Race my local best** clears that choice. G controls whichever ghost is racing. Imported runs never replace local bests, local recording pointers, or style records. HUD and pause text name the chosen friend.
+One friend is chosen at a time. The choice survives restarting a run or the app. Changing map/preset suspends an incompatible friend and restores the local best; returning to its exact identity restores the chosen friend. **Race my local best** clears that choice. G controls whichever ghost is racing. Imported runs never replace local bests, local recording pointers, or style records. HUD and pause text name the chosen friend. File controls start collapsed so the map chooser stays near the top; the selection and map-revision warning remain outside the disclosure.
 
 ## Data and bounds
 
@@ -28,7 +28,7 @@ A friend-folder scan visits at most 1,024 directory entries, lists at most 64 gh
 
 ## Verification
 
-The parent refresh passed 96 headless checks and 96 native AMD/X11 checks, including the faster older local PB regression. The native renderer held `/dev/dri/renderD128` and accumulated hardware graphics time; the observed desktop socket/server baseline stayed identical. The multi-host fixture logs eight ObjectDB instances at shutdown; this is disclosed rather than called a clean normal-release Quit. Final release lifecycle checks remain separate.
+The parent refresh passed 107 headless checks and 107 native AMD/X11 checks, including the faster older local PB regression. The native renderer held `/dev/dri/renderD128` and accumulated hardware graphics time; the observed desktop socket/server baseline stayed identical. The multi-host fixture logs eight ObjectDB instances at shutdown; this is disclosed rather than called a clean normal-release Quit. Final release lifecycle checks remain separate.
 
 From `projects/foldrunner`:
 

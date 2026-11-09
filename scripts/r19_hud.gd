@@ -8,16 +8,24 @@ var share_status: Label
 var share_path: Label
 var share_selection: Label
 var share_revision: Label
+var share_toggle: Button
 var _list_signature := ""
 
 func attach(main: Node) -> void:
 	super(main)
+	share_toggle = _button(_pause_column, "", func() -> void: _show_share(not share_section.visible))
+	share_toggle.name = "GhostSharingToggle"
+	share_toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_pause_column.move_child(share_toggle, map_heading.get_index())
+	share_selection = _small(_pause_column, "")
+	_pause_column.move_child(share_selection, map_heading.get_index())
+	share_revision = _small(_pause_column, "")
+	_pause_column.move_child(share_revision, map_heading.get_index())
 	share_section = VBoxContainer.new()
 	share_section.name = "GhostSharing"
 	share_section.add_theme_constant_override("separation", 8)
 	_pause_column.add_child(share_section)
 	_pause_column.move_child(share_section, map_heading.get_index())
-	_heading(share_section, "Race a friend")
 	_small(share_section, "Send one best-run file. Your friend drops it in their ghosts folder, then opens Esc or presses Refresh. Nothing is uploaded.")
 	share_path = _small(share_section, str(game.ghost_share.folder))
 	share_path.name = "GhostFolderPath"
@@ -60,8 +68,6 @@ func attach(main: Node) -> void:
 		_refresh_share()).name = "ExportGhost"
 	share_status = _small(share_section, "")
 	share_status.name = "GhostShareStatus"
-	share_selection = _small(share_section, "")
-	share_revision = _small(share_section, "")
 	var scroll := ScrollContainer.new()
 	scroll.name = "ImportedGhostsScroll"
 	scroll.custom_minimum_size = Vector2(0, 200)
@@ -76,7 +82,12 @@ func attach(main: Node) -> void:
 		game.ghost_share.choose("")
 		_list_signature = ""
 		_refresh_share()).name = "ClearFriendGhost"
+	_show_share(false)
 	_refresh_share()
+
+func _show_share(on: bool) -> void:
+	share_section.visible = on
+	share_toggle.text = "%s  Race a friend (ghost files)" % ("▾" if on else "▸")
 
 func _refresh_pause() -> void:
 	super()
