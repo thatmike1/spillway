@@ -55,3 +55,9 @@ Not run here: positive packed routes and controls on the candidate, which are th
 Root reran the unchanged suite against an immutable copy of the fresh03d970be ZIPs, from an exact03d970be scratch clone so the candidate commit and helper hashes both matched. All **78/78** named expectations passed again, with zero failures. This includes the repaired helper bytes, three broken runtime variants and wrapper-only SIGTERM cleanup. The complete suite took 518s. All four candidate file hashes still equal the pre-run manifest afterward. The scratch clone was removed and its size recorded.
 
 Evidence: outer `checkpoints/spillway/r15/delivery-negatives/run2-03d970be/summary.json`, `run2-03d970be.log.gz` and `RERUN-03d970be.json`. The immutable baseline receipt is `release-plan/NEGATIVE-BASE-03d970be.json`. The positive15-route package run is separate; these negative controls alone do not promote it. Re-exported pack bytes differed again, an informational reproducibility limitation rather than a false acceptance or a gameplay failure.
+
+## Final-helper rerun on source8a254d16
+
+After the independent boundary and lab-title repairs, root reran the unchanged78-control suite on the new8a254d16 candidate, using the same committed HEAD and helpers. **78/78 passed, zero failures**, in529seconds. The three real broken runtimes and wrapper-only cancellation passed their named expectations. All4candidate file hashes were rechecked unchanged afterward, and executed helpers equal the candidate manifest.
+
+Evidence: outer `checkpoints/spillway/r15/delivery-negatives/run3-8a254d16/summary.json`, `run3-8a254d16.log.gz`, `RERUN-8a254d16.json` and `release-plan/NEGATIVE-BASE-8a254d16.json`. The positive15-route run remains a separate verdict.
