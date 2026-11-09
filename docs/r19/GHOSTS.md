@@ -1,6 +1,6 @@
 # Sharing a ghost in R19
 
-Finish a clean run on the desired map and preset. In Esc, expand **Race a friend (ghost files)**, enter your player name and press **Export my clean best**. Send the resulting `.spillghost` file to your friend. They put that file in their **ghosts** folder, reopen Esc or press **Refresh**, then choose its player/time button. **Open ghosts folder** opens the exact folder printed in the menu. There is no network or upload feature.
+Finish a clean run on the desired map and preset. In Esc, expand **Race a friend (ghost files)**, enter your player name and press **Export my clean best**. Send the resulting `.spillghost` file to your friend. They put that file in their **ghosts** folder, reopen Esc or press **Refresh**, then choose its player/time button. **Open ghosts folder** opens the exact folder printed in the menu. The printed folder path is a read-only selectable field, so it can be copied when the OS folder opener fails. There is no network or upload feature.
 
 Release builds use `ghosts/` beside the executable, on Linux and Windows. Extract the whole release into a writable folder. An unwritable release folder reports a failure rather than silently moving files elsewhere. Source/editor runs use isolated `user://r19_ghosts/`; they never create a ghosts folder beside the Godot editor. Selection/name and a private replay cache live in `user://r19_ghost_share/`. These are separate from `r16_runs/` and the local-best profile.
 

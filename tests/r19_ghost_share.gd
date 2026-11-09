@@ -93,6 +93,15 @@ func _main() -> void:
 	check("real disclosure button collapses file controls", not game.hud.share_section.visible)
 	await press("OpenGhostFolder")
 	check("folder opener seam gets exact canonical path without launching shell", opened == [out.path_join("ghosts")], opened)
+	var working_opener: Callable = service.folder_opener
+	service.folder_opener = func(_path: String) -> int: return ERR_UNAVAILABLE
+	await press("OpenGhostFolder")
+	check("failed opener explains copyable fallback", "Could not open the folder" in str(service.status) and "copied" in str(service.status), service.status)
+	var folder_path: LineEdit = game.hud.share_path
+	folder_path.select_all()
+	check("folder path is read-only and selectable after opener failure", not folder_path.editable and folder_path.get_selected_text() == str(service.folder))
+	folder_path.deselect()
+	service.folder_opener = working_opener
 	await press("ExportGhost")
 	check("no clean best refuses export", str(service.status).begins_with("No verified clean best"), service.status)
 	var local := fixture(identity, SHARE.BUILD, out.path_join("local"))

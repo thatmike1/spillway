@@ -5,7 +5,7 @@ var share_section: VBoxContainer
 var share_list: VBoxContainer
 var share_name: LineEdit
 var share_status: Label
-var share_path: Label
+var share_path: LineEdit
 var share_selection: Label
 var share_revision: Label
 var share_toggle: Button
@@ -30,12 +30,17 @@ func attach(main: Node) -> void:
 	_pause_column.add_child(share_section)
 	_pause_column.move_child(share_section, map_heading.get_index())
 	_small(share_section, "Send one best-run file. Your friend drops it in their ghosts folder, then opens Esc or presses Refresh. Nothing is uploaded.")
-	share_path = _small(share_section, str(game.ghost_share.folder))
+	share_path = LineEdit.new()
 	share_path.name = "GhostFolderPath"
-	share_path.autowrap_mode = TextServer.AUTOWRAP_ARBITRARY
-	share_path.mouse_filter = Control.MOUSE_FILTER_STOP
+	share_path.editable = false
+	share_path.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	share_path.add_theme_font_override("font", UI.font("body"))
+	share_path.add_theme_font_size_override("font_size", 12)
+	share_path.add_theme_color_override("font_uneditable_color", UI.INK_SOFT)
+	share_path.add_theme_stylebox_override("read_only", UI.flat(Color(UI.INK, 0.04), 2, Vector4(8, 6, 8, 6)))
 	share_path.text = str(game.ghost_share.folder)
-	share_path.tooltip_text = "Canonical ghosts folder"
+	share_path.tooltip_text = "Ghosts folder: select and copy this path if opening the folder fails."
+	share_section.add_child(share_path)
 	var actions := HFlowContainer.new()
 	actions.add_theme_constant_override("h_separation", 8)
 	share_section.add_child(actions)
