@@ -202,3 +202,7 @@ The F2 earned input tape was also held out unchanged under F5 through the standa
 ## Independent contact and checkpoint review
 
 The review on source962ab021 found no confirmed runtime defect. Its fresh actual-F5 ordinary run finished clean in44.6015625s; the F5 earned breach still has no proven line. Breakwater's deliberate alley recovery has18 ticks with a blocking side contact when counted by actual contact normals, although the inherited body-role `wall` counter says0. These include the missed block's face; the physical return still finishes clean. Harbour falls return to Crane line as practice and save no record. The review's113 assertions cover19 selected episodes across Breakwater and Whiteout, not113 independent plays of this map. See MAPS-REVIEW.md and outer `checkpoints/spillway/r15/maps-review/`.
+
+## Later F5 breach proof (9 November)
+
+The earlier inherited F5 controller failure remains retained. A separate input-only probe on the unchanged R15 game now finishes the earned breach clean in 33.9765625 s with ordered checkpoints and no respawn, followed by one exact open-loop replay at the driver's recorded precision. It leaves `s4_runway_4` at 987.832 u/s and lands on `s4_head_nw`, with actual AA1000 and no gangway support. See [F5-BREACH.md](F5-BREACH.md) for the full-precision flight endpoints, input tape and limits. This is source headless evidence, not packed acceptance or human robustness.
