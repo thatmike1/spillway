@@ -125,6 +125,22 @@ def main():
         check('real selected shader retained', 'res://review_shader.gdshader' in required)
         check('real selected texture retained', 'res://review_texture.png' in required)
 
+        # the lab advertises its experimental status in the actual OS window title.
+        title_out = temp / 'title-controls'
+        (title_out / 'cwd').mkdir(parents=True)
+        for map_id, pairs in identity['keys'].items():
+            for preset, pair in pairs.items():
+                wanted = 'Spillway R15 · %s · %s · %s Hz' % (identity['maps'][map_id]['name'], identity['registry']['presets'][preset]['label'], pair['physics_hz'])
+                lab = pair['map_kind'] == 'lab'
+                if lab:
+                    wanted += ' · EXPERIMENTAL'
+                for correct in [True, False]:
+                    supplied = wanted if correct else (wanted.removesuffix(' · EXPERIMENTAL') if lab else wanted + ' · EXPERIMENTAL')
+                    actual_checks = []
+                    owner._common(lambda name, ok, *detail: actual_checks.append((name, ok)), 'title-fixture', 0, 'valid fixture log', {supplied}, title_out, identity, dict(map=map_id, preset=preset))
+                    actual = next(ok for name, ok in actual_checks if name.endswith(': os window title'))
+                    check(('complete title admitted ' if correct else 'incorrect experimental suffix refused ') + map_id + '/' + preset, actual, correct)
+
         # failure while copying helpers and corrupt archives still unwind the freeze.
         blob = io.BytesIO()
         with tarfile.open(fileobj=blob, mode='w') as tar:

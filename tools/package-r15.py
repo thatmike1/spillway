@@ -1394,6 +1394,8 @@ def _common(record, label, code, text, titles, out, identity, where):
     maps, presets = identity.get('maps', {}), identity.get('registry', {}).get('presets', {})
     wanted = '%s%s · %s · %s Hz' % (TITLE_PREFIX, maps.get(where['map'], {}).get('name', '?'), presets.get(where['preset'], {}).get('label', '?'),
                                     identity.get('keys', {}).get(where['map'], {}).get(where['preset'], {}).get('physics_hz', '?'))
+    if identity.get('keys', {}).get(where['map'], {}).get(where['preset'], {}).get('map_kind') == 'lab':
+        wanted += ' · EXPERIMENTAL'
     record(label + ': os window title', wanted in titles, sorted(titles))
     record(label + ': working directory stays empty', not any((out / 'cwd').iterdir()))
 
