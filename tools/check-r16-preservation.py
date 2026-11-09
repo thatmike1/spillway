@@ -99,11 +99,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", type=Path, default=PROJECT)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--git-project", type=Path, default=PROJECT, help="read-only Git project containing the pinned R15 commit (for external snapshots)")
     parser.add_argument("--r15-delivery", type=Path)
     parser.add_argument("--allow-r15-default", action="store_true", help="development diagnostic only; never release acceptance")
     args = parser.parse_args()
     try:
-        report = verify(args.project, baseline(PROJECT), allow_r15_default=args.allow_r15_default, delivery=args.r15_delivery)
+        report = verify(args.project, baseline(args.git_project), allow_r15_default=args.allow_r15_default, delivery=args.r15_delivery)
     except (OSError, subprocess.CalledProcessError, tarfile.TarError) as error:
         parser.exit(2, "preservation comparison unavailable: %s\n" % error)
     args.out.parent.mkdir(parents=True, exist_ok=True)
