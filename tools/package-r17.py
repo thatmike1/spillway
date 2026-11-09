@@ -83,7 +83,8 @@ def space(expected, scratch=None):
 
 def status_ok(status):
     allowed = ('?? tests/r17_parity', '?? tools/check-r17-parity.py')
-    bad = [line for line in status.splitlines() if line and not line.startswith(allowed)]
+    lines = [line[:3] + line[3:].removeprefix('projects/foldrunner/') for line in status.splitlines()]
+    bad = [line for line in lines if line and not line.startswith(allowed)]
     if bad:
         raise Rejected('commit owned helpers first; runtime and other dirty files refused:\n' + '\n'.join(bad))
 

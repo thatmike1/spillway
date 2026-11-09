@@ -16,6 +16,7 @@ spec.loader.exec_module(m)
 class Delivery(unittest.TestCase):
     def test_other_worker_untracked_files_only(self):
         m.status_ok('?? tests/r17_parity.gd\n?? tools/check-r17-parity.py\n')
+        m.status_ok('?? projects/foldrunner/tests/r17_parity.gd\n?? projects/foldrunner/tools/check-r17-parity.py\n')
         for status in [' M scripts/r17_main.gd\n', '?? scripts/other.gd\n', ' M tests/r17_parity.gd\n', '?? tools/package-r17.py\n']:
             with self.subTest(status=status), self.assertRaises(m.Rejected):
                 m.status_ok(status)
