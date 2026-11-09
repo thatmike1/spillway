@@ -168,8 +168,10 @@ R16 kick: tangent 370 → 370 u/s, outward −146 → 230, horizontal 398 → 43
 
 ## Limits
 
-- Headless only. Native private AMD/X11 OS-input and player-camera evidence was **deferred**: HOME
-  was just above the 15 GiB floor. Root's later replay through the actual R16 host is still owed.
+- This original 167-check component run was headless; its native work was deferred at the disk
+  floor. Later actual-R16 host, full packed/native chains and the focused OS-keyboard chain are
+  complete: [RESULTS.md](RESULTS.md), [NATIVE-ACCEPTANCE.md](NATIVE-ACCEPTANCE.md) and
+  [LAB-OS-INPUT.md](LAB-OS-INPUT.md). The original fixture run is not retroactively native evidence.
 - The fixture walls and wedge are labelled test geometry added at runtime, not lab map changes.
 - An unrelated base observation: on the 60° fixture face, holding W in the air climbs it
   (AA 100 clip, R14 law). The lab code does not touch it.
