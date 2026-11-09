@@ -465,12 +465,15 @@ func _check_hud_words(when: String) -> void:
 
 func _label_drawn(field: String) -> bool:
 	var label: Variant = _hud().get(field)
-	if not label is Label or not label.is_visible_in_tree() or str(label.text).strip_edges().is_empty() or label.visible_characters == 0:
+	if not label is Label or not label.is_visible_in_tree() or str(label.text).strip_edges().is_empty() \
+		or (label.visible_characters >= 0 and label.visible_characters < label.get_total_character_count()):
 		return false
 	var rect: Rect2 = label.get_global_rect()
 	var alpha := 1.0
 	var node: Node = label
 	while node != null:
+		if node is Control and node.clip_contents and not node.get_global_rect().encloses(rect):
+			return false
 		if node is CanvasItem:
 			alpha *= node.modulate.a
 		node = node.get_parent()
@@ -559,7 +562,7 @@ func _check_registry() -> void:
 ## drawable geometry under a node: names with vertices, shaders and textures. with `vertices`
 ## off it lists what is meant to be drawn without reading mesh arrays (headless has none).
 func _drawn(root: Node, vertices: bool) -> Dictionary:
-	var out := {"nodes": {}, "shaders": {}, "textures": {}, "in_view": {}}
+	var out := {"nodes": {}, "shaders": {}, "textures": {}, "in_view": {}, "surfaces": {}}
 	_scan(root, out, vertices)
 	return out
 
@@ -582,10 +585,14 @@ func _scan(node: Node, out: Dictionary, vertices: bool) -> void:
 		if visible:
 			var count := 0
 			var in_view := 0
+			var surfaces: Array = []
 			for i: int in mesh.get_surface_count():
 				var material := (node as MeshInstance3D).get_active_material(i) if node is MeshInstance3D else geometry.material_override
 				if material == null:
 					material = mesh.surface_get_material(i)
+				if not _material_drawable(material):
+					continue
+				surfaces.append(i)
 				_materials(material, out)
 				if vertices:
 					var arrays := mesh.surface_get_arrays(i)
@@ -596,12 +603,19 @@ func _scan(node: Node, out: Dictionary, vertices: bool) -> void:
 						for k: int in range(0, points.size(), maxi(1, points.size() / 400)):
 							if camera.is_position_in_frustum(to_world * points[k]):
 								in_view += 1
-			if not vertices or count >= 3:
+			if not surfaces.is_empty() and (not vertices or count >= 3):
 				out.nodes[str(node.name)] = count
+				out.surfaces[str(node.name)] = surfaces
 			if in_view > 0:
 				out.in_view[str(node.name)] = in_view
 	for child: Node in node.get_children():
 		_scan(child, out, vertices)
+
+## reject known invisible standard materials; shader visibility still needs native inspection.
+func _material_drawable(material: Material) -> bool:
+	if material is BaseMaterial3D and material.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED and material.albedo_color.a <= 0.05:
+		return material.next_pass != null and _material_drawable(material.next_pass)
+	return true
 
 func _materials(material: Material, out: Dictionary) -> void:
 	if material is ShaderMaterial and (material as ShaderMaterial).shader != null:
@@ -660,13 +674,17 @@ func _floor_hits(drawn: Dictionary) -> Array:
 		var point: Vector3 = hit.position
 		var normal: Vector3 = hit.normal
 		var body := hit.collider as Node
+		var surface := _triangle_hit(game.get("level"), point, drawn)
 		hits.append({"screen": [at.x, at.y], "hit": true, "point": _v3(point), "normal": _v3(normal), "collider": str(body.name) if body != null else "",
 			"role": str(body.get_meta("surface", "")) if body != null else "", "walkable": normal.y > 0.7,
-			"drawn_by": _triangle_at(game.get("level"), point, drawn)})
+			"drawn_by": str(surface.get("mesh", "")), "drawn_surface": int(surface.get("surface", -1))})
 	return hits
 
 ## the name of a drawn mesh with a triangle through this point (within 3 cm), or "".
 func _triangle_at(root: Node, point: Vector3, drawn: Dictionary) -> String:
+	return str(_triangle_hit(root, point, drawn).get("mesh", ""))
+
+func _triangle_hit(root: Node, point: Vector3, drawn: Dictionary) -> Dictionary:
 	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
 		var instance := node as MeshInstance3D
 		if not drawn.nodes.has(str(instance.name)) or instance.mesh == null:
@@ -676,6 +694,8 @@ func _triangle_at(root: Node, point: Vector3, drawn: Dictionary) -> String:
 			continue
 		var local := instance.global_transform.affine_inverse() * point
 		for i: int in instance.mesh.get_surface_count():
+			if not i in drawn.get("surfaces", {}).get(str(instance.name), []):
+				continue
 			var arrays := instance.mesh.surface_get_arrays(i)
 			var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 			var index: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
@@ -685,8 +705,8 @@ func _triangle_at(root: Node, point: Vector3, drawn: Dictionary) -> String:
 				var b := points[index[t + 1] if not index.is_empty() else t + 1]
 				var c := points[index[t + 2] if not index.is_empty() else t + 2]
 				if _on_triangle(local, a, b, c, 0.03):
-					return str(instance.name)
-	return ""
+					return {"mesh": str(instance.name), "surface": i}
+	return {}
 
 func _on_triangle(p: Vector3, a: Vector3, b: Vector3, c: Vector3, tolerance: float) -> bool:
 	var n := (b - a).cross(c - a)

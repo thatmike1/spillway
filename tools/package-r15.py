@@ -1192,11 +1192,15 @@ def seed_old_profiles(profile):
 
 
 def spec_for(mode, folder, out, args, identity, extra, where=None):
-    # a route starts on its own preset: the default start's runner chain is swapped for the route's.
+    # a route needs its own live map and runner resources, not the default map's textures.
     loaded = set(identity.get('loaded_at_start', []))
     if where:
-        loaded -= set(identity.get('start', {}).get('runner_chain', []))
-        loaded |= set(identity.get('keys', {}).get(where['map'], {}).get(where['preset'], {}).get('runner_chain', []))
+        key = identity['keys'][where['map']][where['preset']]
+        world = identity['maps'][where['map']]
+        loaded = {identity[field] for field in ('main_script', 'hud_script', 'stats_script', 'audio_script')}
+        loaded |= set(key['runner_chain']) | {world['level_script']} | set(world['shaders']) | set(world['textures'])
+        # generated materials use descriptive sentinels, not loadable resource paths.
+        loaded = {path for path in loaded if path.startswith('res://')}
     expect = dict(EXPECT, identity=identity, pack_sha256=digest(folder / (NAME + '.pck')), pack_required=args.pack_required,
                   loaded_required=sorted(loaded | set(args.require)), **extra)
     return {'mode': mode, 'out': str(out), 'pack': str(folder / (NAME + '.pck')), 'expect': expect, 'settle_frames': 45}
@@ -1471,18 +1475,20 @@ def main():
                 raise Rejected('evidence directory %s already has files' % evidence)
             evidence.mkdir(parents=True, exist_ok=True)
             args.work = Path(tempfile.mkdtemp(prefix='r15-check-', dir=args.scratch or evidence))
-            # the resources a package must hold come from its own source commit, not this checkout.
-            build = json.loads((args.package_dir / 'BUILD.json').read_text())
-            files = git('ls-tree', '-r', '--name-only', '--full-tree', build['source_commit'] + ':' + build['source_project_path']).split('\n')
-            args.pack_required = sorted(set(resources(files)) | set(args.require))
-            routes = []
-            packed_cadence(args.route)
-            if args.route:
-                # a recheck replays each route in source mode on a fresh freeze of the package's commit.
-                routes = recheck_routes(build, args, evidence)
-            result = check_package(args.package_dir.resolve(), args, evidence, routes)
-            compress_evidence(evidence)
-            sys.exit(0 if result['ok'] else 1)
+            try:
+                # the required resources and route freeze belong to the package's own commit.
+                build = json.loads((args.package_dir / 'BUILD.json').read_text())
+                files = git('ls-tree', '-r', '--name-only', '--full-tree', build['source_commit'] + ':' + build['source_project_path']).split('\n')
+                args.pack_required = sorted(set(resources(files)) | set(args.require))
+                routes = []
+                packed_cadence(args.route)
+                if args.route:
+                    routes = recheck_routes(build, args, evidence)
+                result = check_package(args.package_dir.resolve(), args, evidence, routes)
+                compress_evidence(evidence)
+                sys.exit(0 if result['ok'] else 1)
+            finally:
+                shutil.rmtree(args.work, ignore_errors=True)
     except (Rejected, nd.NativeDisplayError) as error:
         print('package-r15: ' + str(error), file=sys.stderr)
         sys.exit(1)
@@ -1494,17 +1500,19 @@ def main():
 def recheck_routes(build, args, evidence):
     top = Path(git('rev-parse', '--show-toplevel').strip())
     stage = evidence / 'source-freeze'
-    with tarfile.open(fileobj=io.BytesIO(source_archive(build['source_commit'], build['source_project_path'], top))) as frozen:
-        frozen.extractall(stage, filter='data')
-    checked([EDITOR, '--headless', '--path', stage, '--import'], stage, engine_env(evidence / 'freeze-profile'), evidence / 'freeze-import.log')
-    routes = [source_route(route, stage, evidence / 'source-routes', build['identity']) for route in args.route]
-    args.probe = stage / 'tools/r15-pack-probe.gd'
-    shutil.copy2(args.probe, evidence / 'frozen-probe.gd')
-    args.probe = evidence / 'frozen-probe.gd'
-    args.hull_observer = evidence / 'frozen-hull-observer.py'
-    shutil.copy2(stage / 'tools/momentum-tape.py', args.hull_observer)
-    shutil.rmtree(stage, ignore_errors=True)
-    return routes
+    try:
+        with tarfile.open(fileobj=io.BytesIO(source_archive(build['source_commit'], build['source_project_path'], top))) as frozen:
+            frozen.extractall(stage, filter='data')
+        checked([EDITOR, '--headless', '--path', stage, '--import'], stage, engine_env(evidence / 'freeze-profile'), evidence / 'freeze-import.log')
+        routes = [source_route(route, stage, evidence / 'source-routes', build['identity']) for route in args.route]
+        shutil.copy2(stage / 'tools/r15-pack-probe.gd', evidence / 'frozen-probe.gd')
+        args.probe = evidence / 'frozen-probe.gd'
+        args.hull_observer = evidence / 'frozen-hull-observer.py'
+        shutil.copy2(stage / 'tools/momentum-tape.py', args.hull_observer)
+        return routes
+    finally:
+        shutil.rmtree(stage, ignore_errors=True)
+        shutil.rmtree(evidence / 'freeze-profile', ignore_errors=True)
 
 
 if __name__ == '__main__':
