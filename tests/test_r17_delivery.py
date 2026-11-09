@@ -66,6 +66,12 @@ class Delivery(unittest.TestCase):
     def test_delivered_r16_is_preserved_in_live_committed_source(self):
         self.assertEqual(m.preservation(m.r16.git('rev-parse', 'HEAD').strip(), 'projects/foldrunner')['files'], 475)
 
+    def test_subtree_listing_is_complete_from_project_cwd(self):
+        files = m.r16.git('ls-tree', '-r', '--name-only', '--full-tree', 'HEAD:./').splitlines()
+        self.assertGreater(len(files), 1000)
+        self.assertIn('scripts/r17_main.gd', files)
+        self.assertIn('assets/look/r17/whiteout-sky.png', files)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -137,7 +137,7 @@ def preflight():
         if r16.digest(r16.LICENCES / name) != value:
             raise Rejected('pinned Godot licence changed: ' + name)
     return {'commit': commit, 'prefix': prefix, 'tree': r16.git('rev-parse', 'HEAD:./').strip(),
-            'files': r16.git('ls-tree', '-r', '--name-only', 'HEAD:./').splitlines(),
+            'files': r16.git('ls-tree', '-r', '--name-only', '--full-tree', 'HEAD:./').splitlines(),
             'stamp': r16.git('show', '-s', '--format=%ct', commit).strip(), 'engine': engine,
             'templates': r16.templates(), 'project_name': 'Spillway', 'preservation': preservation(commit, prefix)}
 
@@ -450,6 +450,7 @@ def package(args):
         build['platforms'] = sorted(p.name for p in dist.glob('*.zip'))
         (dist / 'BUILD.json').write_text(json.dumps(build, indent=2) + '\n')
         (dist / 'SHA256SUMS').write_text(''.join('%s  %s\n' % (r16.digest(z), z.name) for z in sorted(dist.glob('*.zip'))))
+        (evidence / 'candidate-BUILD.json').write_text(json.dumps(build, indent=2) + '\n')
         # loose source is gone before any exact-release launch; routes retain data, no fallback.
         shutil.rmtree(source)
         result = check(dist, args, evidence / 'check', work / 'verify', routes)
