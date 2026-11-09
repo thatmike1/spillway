@@ -37,7 +37,7 @@ func run() -> void:
 	root.add_child(game)
 	game.set_paused(true)
 	check("normal host loads Saltglass", game.startup_error.is_empty() and game.map_id == "saltglass")
-	var required := ["breakwater", "whiteout-relay", "sunken-court", "rainline", "night-shift", "practice", "overflow", "experiment", "saltglass", "tether-yard", "fall-line"]
+	var required := ["breakwater", "whiteout-relay", "sunken-court", "rainline", "night-shift", "practice", "overflow", "experiment", "saltglass", "tether-yard", "fall-line", "line-drive"]
 	check("explicit complete catalog retains default and new course", game.map_ids() == required and game.maps.default_chain == ["breakwater", "practice"] and game.map_kind() == "course")
 	check("surf uses approved F2 body", game.player.get_script().resource_path == "res://scripts/r15_source_player.gd" and game.preset_id == "server128" and Engine.physics_ticks_per_second == 128)
 	check("new course clears standing hull at spawn", game.hull_fits(game.preset, game.level.spawn.origin))

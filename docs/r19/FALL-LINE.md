@@ -45,3 +45,5 @@ Acceptance here is headless component evidence on this Godot/Linux environment. 
 ## Production integration refresh
 
 The R19 production catalog now includes Fall Line under Experiments. The component test host has been reduced to selecting the real registered map; production supplies its trusted pure R15 runner and one Look C layer. The complete verifier was rerun against that host and all35 checks pass, including both earned lines, exact replay, collapse timing, pause, R/F/checkpoint/return and original-map isolation. Native visual and final packed-release acceptance remain separate gates. Proof: /tmp/r19-fall-line/production-integration/AUDIT.json.
+
+Both native AMD/X11 looks also finish in23.5625s, with all3042 body/platform/clock observations exactly equal to each other and the headless production run. Eight actual-camera frames per mode at1296x736 retain the countdown and moving deck views. Parent inspected frames650 and2000; countdown numerals lie near the feet and need Mike's readability verdict. Proof: outer look/evidence/r19-fall-line-integration/native/.
