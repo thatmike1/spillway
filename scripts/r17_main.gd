@@ -64,10 +64,13 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.physical_keycode == KEY_L:
 		if event.pressed and not event.echo:
 			set_look(not look_enabled)
+		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventKey and event.physical_keycode == KEY_F9:
 		if event.pressed and not event.echo and is_instance_valid(hud) and hud.has_method("set_telemetry"):
 			hud.call("set_telemetry", not bool(hud.get("telemetry")))
+			_place_look_label()
+		get_viewport().set_input_as_handled()
 		return
 	super._input(event)
 
@@ -116,7 +119,7 @@ func _place_look_label() -> void:
 
 func _process(_delta: float) -> void:
 	# place after the inherited hud has laid out its current lab and practice messages.
-	if is_instance_valid(look_label) and look_label.is_visible_in_tree():
+	if is_instance_valid(look_label):
 		_place_look_label.call_deferred()
 
 func window_title() -> String:

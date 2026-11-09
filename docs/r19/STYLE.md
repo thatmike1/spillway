@@ -42,3 +42,9 @@ Penstock Yard is “Open yard for speed, strafes and gap practice”; Overflow i
 ## Advanced settings
 
 R13 mouse sensitivity and literal horizontal FOV share the initially collapsed Advanced container with F3/F4 comparison presets. Source sensitivity, Source FOV and volume remain in Look and sound. The original sliders, ranges, callbacks and `settings.r13_sensitivity` / `settings.r13_fov` persistence keys are retained. The Advanced toggle says what it contains. The scene test opens and closes it through keyboard dispatch, changes both sliders through arrow-key dispatch, reads the saved config and loads those values in a fresh host.
+
+## Look telemetry
+
+The small look label is visible only with F9 telemetry on, the title fully dismissed and the game unpaused. L changes presentation in every state. F9 updates visibility immediately on both edges of the toggle; the host keeps refreshing placement even when the label is hidden, so a hidden label can become visible again. L/F9 press, release and echo events are consumed at the presentation host and do not reach unhandled gameplay input. The existing host recording path already excludes these two presentation shortcuts; it remains excluded.
+
+`tests/r19_asks_ui.gd` runs all three UI asks by default. It checks actual controls, keyboard dispatch, slider persistence, title/pause state and a real `_unhandled_input` observer. `--asks=maps`, `--asks=maps,advanced` or `--asks=look` restrict it. Native execution also saves the collapsed/expanded Advanced section and telemetry view under the supplied output folder.

@@ -748,7 +748,7 @@ func show_finish(is_best: bool, is_open_best: bool) -> void:
 
 # --- host hooks ---------------------------------------------------------------------------------
 
-## the r17 host's look label: small, top right, hidden under the title.
+## the r17 host's look label is telemetry, with the same title and pause suppression.
 func place_look_label(label: Label) -> void:
 	if not label.has_meta("r18_styled"):
 		UI.world_label(label, "small", 12, Color(UI.CREAM, 0.86), 3)
@@ -756,4 +756,5 @@ func place_look_label(label: Label) -> void:
 	var frame := UI.safe_frame(get_viewport().get_visible_rect().size)
 	label.reset_size()
 	label.position = Vector2(frame.end.x - 32.0 - label.get_minimum_size().x, 24.0)
-	label.modulate.a = (1.0 - _title_alpha) * (0.0 if game != null and bool(game.paused) else 1.0)
+	label.visible = telemetry and visible and _title_alpha <= 0.0 and game != null and not bool(game.paused)
+	label.modulate.a = 1.0

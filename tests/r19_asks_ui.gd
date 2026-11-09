@@ -5,7 +5,14 @@ const BASE := preload("res://scripts/r16_main.gd")
 var game: Node
 var checks: Array = []
 var output := ""
-var asks := "maps"
+var asks := "maps,advanced,look"
+
+class LeakProbe:
+	extends Node
+	var leaked: Array = []
+	func _unhandled_input(event: InputEvent) -> void:
+		if event is InputEventKey and event.physical_keycode in [KEY_L, KEY_F9]:
+			leaked.append([event.physical_keycode, event.pressed, event.echo])
 
 func _initialize() -> void:
 	for arg: String in OS.get_cmdline_user_args():
@@ -38,6 +45,8 @@ func run() -> void:
 		await maps_check()
 	if asks.contains("advanced"):
 		await advanced_check()
+	if asks.contains("look"):
+		await look_check()
 	await finish()
 
 func maps_check() -> void:
@@ -125,10 +134,89 @@ func advanced_check() -> void:
 	check(not legacy_sens.is_visible_in_tree() and not legacy_fov.is_visible_in_tree() and source_sens.is_visible_in_tree() and source_fov.is_visible_in_tree(), "closing Advanced hides only legacy sliders")
 	game.persist = false
 
+func edge(code: Key, pressed: bool, echo := false) -> void:
+	var key := InputEventKey.new()
+	key.physical_keycode = code
+	key.keycode = code
+	key.pressed = pressed
+	key.echo = echo
+	Input.parse_input_event(key)
+	Input.flush_buffered_events()
+
+func live_state() -> String:
+	return var_to_str([game.player.global_transform, game.player.velocity, game.player.yaw, game.player.pitch,
+		game.elapsed, game.attempts, game.checkpoint_index, game.session.pending, game.session.style.snapshot(), game.motion_identity()])
+
+func look_check() -> void:
+	game.set_paused(false)
+	root.remove_child(game)
+	game.free()
+	game = MAIN.new()
+	game.persist = false
+	game.seed_from_r15 = false
+	game.record_runs = false
+	root.add_child(game)
+	await frames()
+	var leak := LeakProbe.new()
+	leak.process_mode = Node.PROCESS_MODE_ALWAYS
+	root.add_child(leak)
+	check(not game.hud.telemetry and not game.look_label.is_visible_in_tree(), "look label hidden by default and on title")
+	check(game.hud.title_card.is_visible_in_tree(), "actual title still visible before telemetry")
+	var state := live_state()
+	edge(KEY_L, true)
+	check(not game.look_enabled and game.look_label.text.contains("original R16") and not game.look_label.is_visible_in_tree(), "L changes look while label remains hidden")
+	check(state == live_state(), "L press does not write game state or recording inputs")
+	edge(KEY_L, true, true)
+	check(not game.look_enabled, "held L echo does not toggle again")
+	edge(KEY_L, false)
+	edge(KEY_F9, true)
+	check(game.hud.telemetry and game.look_label.is_visible_in_tree(), "F9 reveals actual hidden label immediately")
+	check(not game.hud.title_card.is_visible_in_tree(), "telemetry dismisses title")
+	edge(KEY_F9, true, true)
+	check(game.hud.telemetry, "held F9 echo does not toggle again")
+	edge(KEY_F9, false)
+	check(state == live_state(), "F9 does not write movement, style, identity or recording inputs")
+	edge(KEY_L, true)
+	edge(KEY_L, false)
+	check(game.look_enabled and game.look_label.text.contains("Look C") and game.look_label.is_visible_in_tree(), "L restores look with telemetry visible")
+	await save_ui("look-telemetry", game.look_label)
+	edge(KEY_F9, true)
+	edge(KEY_F9, false)
+	check(not game.hud.telemetry and not game.look_label.is_visible_in_tree(), "second F9 hides label immediately")
+	await frames(5)
+	check(not game.look_label.is_visible_in_tree(), "frame updates keep telemetry-off label hidden")
+	edge(KEY_F9, true)
+	edge(KEY_F9, false)
+	await frames(5)
+	check(game.look_label.is_visible_in_tree(), "F9 can show label again after hidden frame updates")
+	game.set_paused(true)
+	await frames()
+	check(not game.look_label.is_visible_in_tree(), "look label hidden while paused with telemetry on")
+	state = live_state()
+	edge(KEY_L, true)
+	edge(KEY_L, false)
+	check(not game.look_enabled and state == live_state(), "paused L changes only presentation")
+	edge(KEY_F9, true)
+	edge(KEY_F9, false)
+	check(not game.hud.telemetry and not game.look_label.is_visible_in_tree(), "paused F9 hides telemetry without showing label")
+	edge(KEY_F9, true)
+	edge(KEY_F9, false)
+	await frames()
+	check(game.hud.telemetry and not game.look_label.is_visible_in_tree(), "paused F9 can enable telemetry while label stays hidden")
+	game.set_paused(false)
+	await frames()
+	check(game.look_label.is_visible_in_tree(), "unpausing restores telemetry label")
+	check(leak.leaked.is_empty(), "L and F9 press, echo and release never reach unhandled gameplay", leak.leaked)
+	root.remove_child(leak)
+	leak.free()
+
 func save_ui(label: String, control: Control) -> void:
 	if DisplayServer.get_name() == "headless":
 		return
-	game.hud._pause_scroll.ensure_control_visible(control)
+	if bool(game.paused):
+		control.grab_focus()
+		await frames(3)
+		game.hud._pause_scroll.ensure_control_visible(control)
 	await frames(6)
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png(output.path_join(label + ".png"))
@@ -140,5 +228,8 @@ func finish() -> void:
 	file.close()
 	game.set_paused(false)
 	game.request_quit(0)
+	root.remove_child(game)
+	game.free()
+	await frames(8)
 	print("r19 asks: %d checks, %d failed" % [checks.size(), failed.size()])
 	quit(0 if failed.is_empty() else 1)
