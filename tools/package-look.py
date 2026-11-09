@@ -62,7 +62,7 @@ def main():
         shutil.copy2(RUNTIME, folder / 'SpillwayLookC.x86_64')
         (folder / 'SpillwayLookC.x86_64').chmod(0o755)
         launcher = folder / 'play.sh'
-        launcher.write_text('#!/usr/bin/env bash\nset -euo pipefail\ncd "$(dirname "$0")"\nexec ./SpillwayLookC.x86_64 --main-pack "$PWD/SpillwayLookC.pck" "$@"\n')
+        launcher.write_text('#!/usr/bin/env bash\nset -euo pipefail\ncd "$(dirname "$0")"\nexec ./SpillwayLookC.x86_64 "$@"\n')
         launcher.chmod(0o755)
         (folder / 'README.txt').write_text(
             'SPILLWAY / LOOK C / SLICE 1\n\nExtract the entire folder, then run ./play.sh.\n'
@@ -93,7 +93,7 @@ def main():
         empty = root / 'empty'
         empty.mkdir()
         with (out / 'packed-startup.log').open('w') as log:
-            checked = subprocess.run([str(folder / 'SpillwayLookC.x86_64'), '--headless', '--audio-driver', 'Dummy', '--main-pack', str(pack), '--', '--verify-startup', '--no-records'], cwd=empty, stdout=log, stderr=subprocess.STDOUT, timeout=90)
+            checked = subprocess.run([str(folder / 'SpillwayLookC.x86_64'), '--headless', '--audio-driver', 'Dummy', '--', '--verify-startup', '--no-records'], cwd=empty, stdout=log, stderr=subprocess.STDOUT, timeout=90)
         text = (out / 'packed-startup.log').read_text()
         if checked.returncode or 'look-c: spillway-look-c-1' not in text or 'ERROR' in text:
             raise RuntimeError('exact packed startup failed outside source')
