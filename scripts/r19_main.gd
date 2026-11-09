@@ -5,6 +5,7 @@ const COURSE_REVISIONS := preload("res://scripts/r19_course_revisions.gd")
 const SHARE := preload("res://scripts/r19_ghost_share.gd")
 const R19_HUD := preload("res://scripts/r19_hud.gd")
 const SURF_LEVEL := preload("res://scripts/r19_surf_level.gd")
+const R19_MAPS := preload("res://scripts/r19_map_catalog.gd")
 var map_revision: Dictionary = {}
 var ghost_share: Node
 ## isolated test seams; never supplied by a shared ghost file.
@@ -14,9 +15,7 @@ var ghost_folder_opener: Callable
 
 func _ready() -> void:
 	if map_registry.is_empty():
-		map_registry = MAPS.make().duplicate(true)
-		map_registry.catalog[SURF_LEVEL.MAP_ID] = SURF_LEVEL.MAP_ENTRY.duplicate(true)
-		map_registry.order.append(SURF_LEVEL.MAP_ID)
+		map_registry = R19_MAPS.make()
 	ghost_share = SHARE.new()
 	ghost_share.name = "GhostShare"
 	ghost_share.folder_opener = ghost_folder_opener
@@ -30,11 +29,36 @@ func _ready() -> void:
 
 func _build_level() -> void:
 	super._build_level()
-	if map_id == SURF_LEVEL.MAP_ID and level != null:
+	if (map_id == SURF_LEVEL.MAP_ID or is_experiment_map()) and level != null:
 		look_layer = PRESENTATION.new()
 		level.add_child(look_layer)
 		look_layer.attach(level, "practice")
 		look_layer.set_enabled(look_enabled)
+
+func is_experiment_map() -> bool:
+	return map_kind() == "experiment"
+
+func is_lab() -> bool:
+	return super() or is_experiment_map()
+
+func lab_moves() -> Dictionary:
+	return {} if is_experiment_map() else super()
+
+func _source_script_path() -> String:
+	if is_experiment_map() and source_runner is String and str(source_runner).is_empty():
+		return str(map_entry().get("runner", PRESETS.SOURCE_PLAYER))
+	return super()
+
+func _lab_restrict() -> String:
+	var note := super()
+	return note.replace("The Movement Lab", "Experiments") if is_experiment_map() else note
+
+func law_labels() -> Dictionary:
+	var labels := super()
+	if is_experiment_map():
+		labels["course_law"] = "experimental"
+		labels["experimental"] = ["%s: %s" % [map_name(), family_version()], str(map_entry().get("instructions", ""))]
+	return labels
 
 func interface_startup_message() -> String:
 	return "r19: %s; R19 style, ghost sharing and course revisions; inherited F2 motor; R18 interface; L compares presentation; F9 telemetry" % SHARE.BUILD

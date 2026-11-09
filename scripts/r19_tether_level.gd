@@ -8,7 +8,9 @@ const LEVEL_NAME := "Tether Yard"
 const LEVEL_VERSION := 1
 const MAP_ID := "tether-yard"
 const MAP_ENTRY := {"name": LEVEL_NAME, "theme": "Hold, swing and release across the transfer yard", "kind": "experiment",
-	"experimental": true, "runner": "res://scripts/r19_tether_player.gd", "script": "res://scripts/r19_tether_level.gd"}
+	"experimental": true, "runner": "res://scripts/r19_tether_player.gd", "script": "res://scripts/r19_tether_level.gd",
+	"reticle": true, "key_hint": " · Hold E at a ring; release to coast",
+	"instructions": "EXPERIMENTAL grapple course. Aim at a marked ring, hold E to attach and reel, release E to coast. Jump into a transfer, then aim at the next ring. Slide and wall jump are off."}
 const ANCHORS := [Vector3(0, 12, -8), Vector3(10, 12, -38), Vector3(-2, 12, -68)]
 const DECKS := [[-6.0, 6.0, 0.0, 16.0], [-8.0, 12.0, -30.0, -16.0], [4.0, 22.0, -60.0, -46.0], [-14.0, 8.0, -92.0, -76.0]]
 var level_id := LEVEL_ID

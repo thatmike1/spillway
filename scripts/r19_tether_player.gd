@@ -54,3 +54,8 @@ func get_motion_state() -> Dictionary:
 	out.experiment["tether_law"] = TETHER_LAW
 	out.experiment["locked"] = true
 	return out
+
+func experiment_status() -> String:
+	if not grapple.is_empty():
+		return "Line attached · release E to coast"
+	return "Anchor in reach · hold E" if str(grapple_target.get("state", "none")) == "ok" else "Aim at a marked ring · hold E"

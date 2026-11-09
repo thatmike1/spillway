@@ -9,6 +9,9 @@ var share_path: Label
 var share_selection: Label
 var share_revision: Label
 var share_toggle: Button
+var experiments_heading: Label
+var experiments_note: Label
+var experiments_grid: GridContainer
 var _list_signature := ""
 
 func attach(main: Node) -> void:
@@ -92,6 +95,74 @@ func _show_share(on: bool) -> void:
 func _refresh_pause() -> void:
 	super()
 	_refresh_share()
+	_refresh_map_note()
+
+func _build_map_cards() -> void:
+	var ids: Array = game.call("map_ids")
+	if ids != _map_ids and experiments_grid != null:
+		for child: Node in experiments_grid.get_children():
+			experiments_grid.remove_child(child)
+			child.queue_free()
+	super()
+	if experiments_grid == null:
+		experiments_heading = _heading(_pause_column, "Experiments")
+		experiments_heading.name = "ExperimentsHeading"
+		_pause_column.move_child(experiments_heading, map_grid.get_index() + 1)
+		experiments_note = _small(_pause_column, "Separate maps with experimental rules. The main maps keep their movement.")
+		_pause_column.move_child(experiments_note, experiments_heading.get_index() + 1)
+		experiments_grid = GridContainer.new()
+		experiments_grid.name = "ExperimentsGrid"
+		experiments_grid.add_theme_constant_override("h_separation", CARD_GAP)
+		experiments_grid.add_theme_constant_override("v_separation", CARD_GAP)
+		_pause_column.add_child(experiments_grid)
+		_pause_column.move_child(experiments_grid, experiments_note.get_index() + 1)
+	for id: String in map_buttons:
+		var entry: Dictionary = game.call("map_entry", id)
+		if str(entry.get("kind", "")) != "experiment":
+			continue
+		var button: Button = map_buttons[id]
+		if button.get_parent() != experiments_grid:
+			button.reparent(experiments_grid)
+		button.text = "%s\nEXPERIMENTAL · %s" % [str(entry.name), str(entry.theme)]
+	var present := experiments_grid.get_child_count() > 0
+	experiments_heading.visible = present
+	experiments_note.visible = present
+	experiments_grid.visible = present
+	experiments_grid.columns = map_grid.columns
+	_refresh_map_note()
+
+func _refresh_map_note() -> void:
+	if map_note != null:
+		map_note.text = "%d maps. Each starts at its spawn and keeps your preset." % map_grid.get_child_count()
+
+func _layout_pause(size: Vector2) -> void:
+	super(size)
+	if experiments_grid != null:
+		experiments_grid.columns = map_grid.columns
+
+func lab_controls_text() -> String:
+	return str(game.map_entry().get("instructions", "EXPERIMENTAL")) if game.is_experiment_map() else super()
+
+func _lab_text() -> void:
+	super()
+	if game.is_experiment_map():
+		lab_tag.text = "EXPERIMENTAL · " + str(game.map_name()).to_upper()
+		reticle.visible = bool(game.map_entry().get("reticle", false))
+		if game.player.has_method("experiment_status"):
+			lab_panel.text = str(game.player.call("experiment_status"))
+			lab_panel.visible = not lab_panel.text.is_empty()
+	else:
+		lab_tag.text = "EXPERIMENTAL  ·  MOVEMENT LAB"
+
+func _hint_text() -> String:
+	if game.is_experiment_map():
+		return "" if game.finished else str(game.level.call("route_hint", game.checkpoint_index, game.player.position))
+	return super()
+
+func _process(delta: float) -> void:
+	super(delta)
+	if game != null and game.is_experiment_map():
+		keys_line.text = R16_KEYS_LINE + str(game.map_entry().get("key_hint", ""))
 
 func _refresh_share() -> void:
 	if share_section == null or game == null:

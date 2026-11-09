@@ -41,3 +41,7 @@ Canonical evidence: `/tmp/r19-fall-line/accepted-v2/AUDIT.json`, with commands, 
 Model expectation: short, readable time pressure may make ordinary landings more consequential, while solid rests and the lower line allow recovery. The two-second warning is generous for a run-speed crossing; faster bhop players may find the upper line easy. These are design expectations, not a human enjoyment verdict.
 
 Acceptance here is headless component evidence on this Godot/Linux environment. It does not prove native countdown legibility, camera composition, frame rate, Windows execution or cross-platform deterministic replay. Parent native inspection and packaged release gates remain necessary. Mike's eventual taste call is whether this pressure is worth keeping and whether the warning should be tighter.
+
+## Production integration refresh
+
+The R19 production catalog now includes Fall Line under Experiments. The component test host has been reduced to selecting the real registered map; production supplies its trusted pure R15 runner and one Look C layer. The complete verifier was rerun against that host and all35 checks pass, including both earned lines, exact replay, collapse timing, pause, R/F/checkpoint/return and original-map isolation. Native visual and final packed-release acceptance remain separate gates. Proof: /tmp/r19-fall-line/production-integration/AUDIT.json.
