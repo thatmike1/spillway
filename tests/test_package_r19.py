@@ -6,6 +6,7 @@ import io
 import json
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -29,6 +30,25 @@ class ReleaseGates(unittest.TestCase):
     def refused(self, fn, *args):
         with self.assertRaises(pkg.Rejected):
             fn(*args)
+
+    def test_nested_project_inventory_covers_committed_resources(self):
+        with tempfile.TemporaryDirectory(dir=pkg.SCRATCH) as td:
+            root = Path(td)
+            project = root / 'projects/foldrunner'
+            expected = ['assets/sky.png', 'project.godot', 'scenes/r19.tscn']
+            for name in expected:
+                path = project / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('fixture')
+            (root / 'unrelated.txt').write_text('not a game resource')
+            subprocess.run(['git', 'init', '-q', root], check=True)
+            subprocess.run(['git', '-C', root, 'add', '.'], check=True)
+            subprocess.run(['git', '-C', root, '-c', 'user.name=fixture', '-c',
+                'user.email=fixture@example.invalid', 'commit', '-qm', 'fixture'], check=True)
+            self.assertEqual(pkg.project_files('HEAD', 'projects/foldrunner', root), expected)
+            # a nested cwd must never silently filter the subtree inventory to zero.
+            self.assertEqual(pkg.r16.git('ls-tree', '-r', '--name-only', 'HEAD:./', cwd=project).splitlines(), [])
+            self.refused(pkg.project_files, 'HEAD', '', root)
 
     def test_freeze_requires_explicit_parent_commit(self):
         self.refused(pkg.validate_freeze, {}, 'a'*40)

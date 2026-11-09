@@ -124,6 +124,13 @@ def preservation(commit, prefix, approved=None):
         'baseline_sha256': BASELINE_SHA}
 
 
+def project_files(commit, prefix, top):
+    files = r16.git('ls-tree', '-r', '--name-only', commit + ':' + prefix, cwd=top).splitlines()
+    require('project.godot' in files and 'scenes/r19.tscn' in files,
+        'committed project inventory is empty or missing the configured R19 scene')
+    return files
+
+
 def validate_freeze(freeze, commit):
     require(isinstance(freeze, dict) and freeze.get('schema') == 1 and freeze.get('runtime_frozen') is True,
         'parent must explicitly freeze all runtime (schema=1, runtime_frozen=true)')
@@ -206,7 +213,7 @@ def preflight(freeze=None, strict=False):
     for name, digest in r16.LICENCE_SHA256.items():
         require(r16.digest(r16.LICENCES / name) == digest, 'Godot licence changed: ' + name)
     return {'commit': commit, 'prefix': prefix, 'tree': r16.git('rev-parse', 'HEAD:./').strip(),
-        'files': r16.git('ls-tree', '-r', '--name-only', 'HEAD:./').splitlines(),
+        'files': project_files(commit, prefix, top),
         'stamp': r16.git('show', '-s', '--format=%ct', commit).strip(), 'engine': engine, 'templates': r16.templates(),
         'project_name': 'Spillway', 'preservation': preservation(commit, prefix, freeze['intentional_changes'] if strict else None)}
 
@@ -278,7 +285,7 @@ def verify_manifest(build):
     top = Path(r16.git('rev-parse', '--show-toplevel').strip())
     require(prefix == str(PROJECT.relative_to(top)), 'wrong source project path')
     tar = r16.source_archive(commit, prefix, top)
-    files = r16.git('ls-tree', '-r', '--name-only', commit + ':' + prefix, cwd=top).splitlines()
+    files = project_files(commit, prefix, top)
     hashes = {p: hashlib.sha256(r16.git('show', commit + ':' + prefix + '/' + p, binary=True, cwd=top)).hexdigest() for p in HELPERS}
     require(build['source_tree'] == r16.git('rev-parse', commit + ':' + prefix, cwd=top).strip()
         and build['source_archive_sha256'] == hashlib.sha256(tar).hexdigest()
