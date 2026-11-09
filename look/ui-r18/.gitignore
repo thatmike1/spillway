@@ -1,0 +1,4 @@
+# local comparison page and its screenshots stay out of git (captures live outside the repo).
+*
+!.gitignore
+!.gdignore
