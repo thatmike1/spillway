@@ -32,7 +32,10 @@ func _ready() -> void:
 	look_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	canvas.add_child(look_label)
 	_refresh_look_label()
-	print("r18: spillway-2026.11.09-r18; delivered R16 behavior; R17 look, R18 interface; L compares presentation; F9 telemetry")
+	print(interface_startup_message())
+
+func interface_startup_message() -> String:
+	return "r18: spillway-2026.11.09-r18; delivered R16 behavior; R17 look, R18 interface; L compares presentation; F9 telemetry"
 
 func _build_level() -> void:
 	super._build_level()

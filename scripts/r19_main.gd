@@ -20,9 +20,11 @@ func _ready() -> void:
 	super._ready()
 	if startup_error.is_empty():
 		ghost_share.scan()
-		print("r19: explicit course revisions; R19 style; inherited F2 motor")
 		if not map_revision.is_empty():
 			hud.call("notify", map_revision_description())
+
+func interface_startup_message() -> String:
+	return "r19: %s; R19 style, ghost sharing and course revisions; inherited F2 motor; R18 interface; L compares presentation; F9 telemetry" % SHARE.BUILD
 
 ## this inherited hook runs after optional solids exist and before look contours are built.
 func _geometry_id() -> String:
