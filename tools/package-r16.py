@@ -377,8 +377,8 @@ def trace_error(rows, packed=False, expected=None):
         if not isinstance(row, dict) or type(row.get('tick')) is not int or row['tick'] != tick:
             return 'ticks must be unique, ordered integers from zero through duration-1'
         motion, game = (row, row) if packed else (row.get('post'), row.get('game'))
-        if not isinstance(motion, dict) or not vector(motion.get('p')) or not vector(motion.get('v')) or not finite(motion.get('yaw')):
-            return 'position and velocity need three finite numbers; yaw must be finite'
+        if not isinstance(motion, dict) or not vector(motion.get('p')) or not vector(motion.get('v')) or not finite(motion.get('yaw')) or not finite(motion.get('pitch')):
+            return 'position and velocity need three finite numbers; yaw and pitch must be finite'
         if not isinstance(game, dict) or any(k not in game for k in ('checkpoint', 'elapsed', 'finished', 'finish_kind', 'respawns')):
             return 'required game-state fields are missing'
         if (type(game['checkpoint']) is not int or game['checkpoint'] < 0 or type(game['respawns']) is not int or game['respawns'] < 0
@@ -596,7 +596,7 @@ def shipped_trace_match(path, reference):
     if invalid:
         return {'ok': False, 'invalid': invalid}
     by_tick = {r['tick']: r for r in other}
-    worst, worst_velocity, worst_yaw, game_ticks = 0.0, 0.0, 0.0, []
+    worst, worst_velocity, worst_yaw, worst_pitch, game_ticks = 0.0, 0.0, 0.0, 0.0, []
     for row in rows:
         ref = by_tick.get(row['tick'])
         if ref is None:
@@ -605,10 +605,11 @@ def shipped_trace_match(path, reference):
         worst = max(worst, max(abs(a - b) for a, b in zip(row['p'], ref['post']['p'])))
         worst_velocity = max(worst_velocity, max(abs(a-b) for a,b in zip(row['v'], ref['post']['v'])))
         worst_yaw = max(worst_yaw, abs(row['yaw'] - ref['post']['yaw']))
+        worst_pitch = max(worst_pitch, abs(row['pitch'] - ref['post']['pitch']))
         if any(row.get(k) != ref['game'].get(k) for k in ('checkpoint', 'elapsed', 'finished', 'finish_kind', 'respawns')):
             game_ticks.append(row['tick'])
-    return {'ok': len(rows) == len(by_tick) and worst == 0.0 and worst_velocity == 0.0 and worst_yaw == 0.0 and not game_ticks, 'ticks': len(rows),
-            'reference_ticks': len(by_tick), 'max_position_m': worst, 'max_velocity_m_s': worst_velocity, 'max_yaw_rad': worst_yaw, 'game_difference_ticks': game_ticks[:20]}
+    return {'ok': len(rows) == len(by_tick) and worst == 0.0 and worst_velocity == 0.0 and worst_yaw == 0.0 and worst_pitch == 0.0 and not game_ticks, 'ticks': len(rows),
+            'reference_ticks': len(by_tick), 'max_position_m': worst, 'max_velocity_m_s': worst_velocity, 'max_yaw_rad': worst_yaw, 'max_pitch_rad': worst_pitch, 'game_difference_ticks': game_ticks[:20]}
 
 
 def compare_traces(rows, other, known_game_ticks=()):
@@ -620,7 +621,7 @@ def compare_traces(rows, other, known_game_ticks=()):
     if invalid:
         return {'ok': False, 'invalid': invalid, 'ticks': len(rows), 'reference_ticks': len(other)}
     by_tick = {r['tick']: r for r in other}
-    worst, worst_velocity, worst_yaw, first, game_diff, game_ticks = 0.0, 0.0, 0.0, None, [], []
+    worst, worst_velocity, worst_yaw, worst_pitch, first, game_diff, game_ticks = 0.0, 0.0, 0.0, 0.0, None, [], []
     for row in rows:
         ref = by_tick.get(row['tick'])
         if ref is None:
@@ -632,15 +633,16 @@ def compare_traces(rows, other, known_game_ticks=()):
         worst = max(worst, gap)
         worst_velocity = max(worst_velocity, max(abs(a-b) for a,b in zip(row['post']['v'], ref['post']['v'])))
         worst_yaw = max(worst_yaw, abs(row['post']['yaw'] - ref['post']['yaw']))
+        worst_pitch = max(worst_pitch, abs(row['post']['pitch'] - ref['post']['pitch']))
         mine, theirs = row.get('game', {}), ref.get('game', {})
         if any(mine.get(k) != theirs.get(k) for k in ('checkpoint', 'elapsed', 'finished', 'finish_kind', 'respawns')):
             game_ticks.append(row['tick'])
             if len(game_diff) < 5:
                 game_diff.append({'tick': row['tick'], 'this': mine, 'reference': theirs})
-    return {'ticks': len(rows), 'reference_ticks': len(other), 'max_position_m': worst, 'max_velocity_m_s': worst_velocity, 'max_yaw_rad': worst_yaw,
+    return {'ticks': len(rows), 'reference_ticks': len(other), 'max_position_m': worst, 'max_velocity_m_s': worst_velocity, 'max_yaw_rad': worst_yaw, 'max_pitch_rad': worst_pitch,
             'first_position_difference_tick': first, 'game_differences': game_diff, 'game_difference_ticks': game_ticks,
             'known_game_difference_ticks': list(known_game_ticks),
-            'ok': len(rows) == len(other) and worst == 0.0 and worst_velocity == 0.0 and worst_yaw <= 1e-12 and game_ticks == list(known_game_ticks)}
+            'ok': len(rows) == len(other) and worst == 0.0 and worst_velocity == 0.0 and worst_yaw <= 1e-12 and worst_pitch <= 1e-12 and game_ticks == list(known_game_ticks)}
 
 
 def resources(files):
@@ -1497,6 +1499,21 @@ def audit_profile(profile, before, after, report, helpers, allow_config=False):
         spec.loader.exec_module(analyzer)
         attempts = report['recordings']['attempts']
         observer = report['recordings']['observed']
+        if report['recordings'].get('audit_version') != 2 or not isinstance(report['recordings'].get('delivered_inputs'), list):
+            raise Rejected('independent raw input observations are missing')
+        deliveries = report['recordings']['delivered_inputs']
+        expected_ids = {a['run_id'] for a in attempts}
+        if any(r.get('run_id') not in expected_ids or type(r.get('tick')) is not int or r['tick'] < 0 for r in deliveries):
+            raise Rejected('unknown attempt or invalid raw input tick')
+        tape_rows_all = report.get('recorded_tape_inputs', [])
+        if not isinstance(tape_rows_all, list) or any(r.get('run_id') not in expected_ids or type(r.get('recording_tick')) is not int or r['recording_tick'] < 0 for r in tape_rows_all):
+            raise Rejected('unknown attempt or invalid tape input tick')
+        if report.get('mode') == 'play':
+            if (type(report.get('recorded_tape_tick_count')) is not int or report['recorded_tape_tick_count'] < 1
+                    or len(tape_rows_all) != report['recorded_tape_tick_count']
+                    or [r.get('tape_tick') for r in tape_rows_all] != list(range(len(tape_rows_all)))):
+                raise Rejected('packed play lacks its complete recorded tape input coverage')
+        carry = []
         root = profile_root(profile).resolve()
         allowed = {PROJECT_NAME + '/' + SAVE_PATH.removeprefix('user://')} if allow_config else set()
         if not attempts:
@@ -1554,24 +1571,86 @@ def audit_profile(profile, before, after, report, helpers, allow_config=False):
             for field, fmt, _ in analyzer.INPUT_LAYOUT:
                 if b''.join(struct.pack('<' + fmt, value) for value in rec.inputs[field]).hex() != engine['input_hex'][field]:
                     raise Rejected('engine/Python input bytes disagree: ' + field)
-            tape_rows = [r for r in report.get('recorded_tape_inputs', []) if r['run_id'] == attempt['run_id'] and r['recording_tick'] >= 0]
+            # the raw observer sees Input before serialization; reset tails live in boundary events.
+            codes_set = {87, 65, 83, 68, 32, 4194326, 4194325, 69}
+            def canonical(data):
+                if data.get('type') == 'key' and (data.get('physical_keycode') or data.get('keycode')) in codes_set:
+                    return (1, data['keycode'], data['physical_keycode'], int(data['pressed']) | (int(data.get('echo', False)) << 1), 0., 0., 0., 0.)
+                if data.get('type') == 'mouse_motion':
+                    return (3, 0, 0, 0, *[f32(v) for v in data['screen_relative']], *[f32(v) for v in data['relative']])
+                return None
+            wanted_inputs = [[] for _ in range(n)]
+            wanted_inputs[0].extend(carry)
+            carry = []
+            tail = []
+            for delivery in (r for r in deliveries if r['run_id'] == attempt['run_id']):
+                value = canonical(delivery['data'])
+                if value is None or delivery['tick'] > n:
+                    raise Rejected('invalid or unconsumed raw input observation')
+                (wanted_inputs[delivery['tick']] if delivery['tick'] < n else tail).append(value)
+            if tail:
+                boundaries = [e for e in rec.events if e.get('s') == 'event' and e.get('k') == outcome.get('kind')]
+                if not boundaries:
+                    raise Rejected('raw input tail has no observed lifecycle boundary')
+                boundary = boundaries[-1]['d']
+                if outcome.get('kind') in ('spawn', 'restart', 'practice', 'map', 'quit'):
+                    saved_tail = [canonical(v) for v in boundary.get('inputs', [])]
+                    if tail != [v for v in saved_tail if v is not None]:
+                        raise Rejected('raw input tail differs from the reset boundary')
+                elif type(boundary.get('inputs_carried')) is int and boundary['inputs_carried'] >= len(tail):
+                    carry = tail
+                else:
+                    raise Rejected('raw input tail was not consumed or carried')
+            recorded_inputs = [[] for _ in range(n)]
+            for j, tick in enumerate(rec.inputs['tick']):
+                if rec.inputs['kind'][j] == 3 or (rec.inputs['kind'][j] == 1 and (rec.inputs['aux'][j] or rec.inputs['code'][j]) in codes_set):
+                    if type(tick) is not int or tick < 0 or tick >= n:
+                        raise Rejected('recorded input lies outside its tick stream')
+                    recorded_inputs[tick].append(tuple(rec.inputs[k][j] for k in ('kind', 'code', 'aux', 'flags', 'x', 'y', 'x2', 'y2')))
+            if recorded_inputs != wanted_inputs:
+                raise Rejected('recorded motion input differs from independently delivered raw input')
+            tape_rows = [r for r in tape_rows_all if r['run_id'] == attempt['run_id']]
+
             codes = {'w': 87, 'a': 65, 's': 83, 'd': 68, 'space': 32, 'ctrl': 4194326, 'shift': 4194325, 'e': 69}
             for row in tape_rows:
                 at = row['recording_tick']
                 if at >= n:
-                    continue
+                    raise Rejected('unconsumed tape observation beyond the seal')
                 indices = [j for j, tick in enumerate(rec.inputs['tick']) if tick == at]
                 keys = [(rec.inputs['aux'][j] or rec.inputs['code'][j], bool(rec.inputs['flags'][j] & 1))
                         for j in indices if rec.inputs['kind'][j] == 1]
                 want = [(codes[e['key']], e['edge'] == 'press') for e in row['keys']]
-                mouse = [(rec.inputs['x2'][j], rec.inputs['y2'][j]) for j in indices if rec.inputs['kind'][j] == 3]
+                mouse = [(rec.inputs['x'][j], rec.inputs['y'][j]) for j in indices if rec.inputs['kind'][j] == 3]
                 want_mouse = [tuple(f32(v) for v in row['mouse']['screen_relative'])] if row['mouse'] else []
                 if keys != want or mouse != want_mouse:
                     raise Rejected('delivered input edges/mouse differ on their actual tick %d' % at)
+            if [e.get('q') for e in rec.events] != list(range(len(rec.events))) or any(type(e.get('t')) is not int or not -1 <= e['t'] < n for e in rec.events):
+                raise Rejected('event sequence or tick attribution is invalid')
             styled = [e for e in rec.events if e.get('s') == 'capture']
-            total = sum(int(e['d']['points']) for e in styled)
-            if type(outcome.get('style', {}).get('score')) is not int or outcome['style']['score'] != total or total < 0:
-                raise Rejected('style total differs from recorded scored events')
+            style_by_tick = [[] for _ in range(n)]
+            total, by_kind = 0, {}
+            for event in styled:
+                value, at = event['d'], event['t']
+                if (event.get('k') != 'style' or at < 0 or value.get('tick') != at or value.get('v') != 1
+                        or value.get('kind') not in ('speed', 'sync', 'gap', 'edge', 'near_miss', 'crouch_save')
+                        or type(value.get('points')) is not int or not 0 < value['points'] <= 4500
+                        or type(value.get('base')) is not int or not 0 < value['base'] <= 1500
+                        or type(value.get('mult')) not in (float, int) or value['mult'] not in (1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3)
+                        or not isinstance(value.get('m'), dict) or not isinstance(value.get('geo'), dict)
+                        or not isinstance(value.get('label'), str) or not value['label']):
+                    raise Rejected('style event schema or lifecycle attribution is invalid')
+                style_by_tick[at].append(value)
+                entry = by_kind.setdefault(value['kind'], {'n': 0, 'points': 0})
+                entry['n'] += 1; entry['points'] += value['points']
+            for i, row in enumerate(rows):
+                if 'style_events' not in row or not json_numbers_match(style_by_tick[i], row['style_events']):
+                    raise Rejected('recorded style events differ from live scoring observations')
+                total += sum(value['points'] for value in style_by_tick[i])
+                if type(row.get('style_score')) is not int or row['style_score'] != total:
+                    raise Rejected('style score differs from live scoring observation')
+            if (type(outcome.get('style', {}).get('score')) is not int or outcome['style']['score'] != total
+                    or not json_numbers_match(outcome['style'].get('by_kind'), by_kind)):
+                raise Rejected('style total differs from recorded and observed scored events')
             if outcome.get('kind') == 'finish':
                 if rec.seal.get('finish_tick') != n - 1 or not (c['flags'][-1] & 2):
                     raise Rejected('finish did not include and seal its final observed tick')
@@ -1579,6 +1658,8 @@ def audit_profile(profile, before, after, report, helpers, allow_config=False):
                     raise Rejected('practice recording claimed clean style eligibility')
             result['runs'].append({'path': str(path), 'sha256': digest(path), 'ticks': n, 'kind': outcome.get('kind'),
                                    'score': total, 'inputs': len(rec.inputs['tick']), 'both_readers': True})
+        if carry:
+            raise Rejected('unconsumed raw input at final attempt boundary')
         changed = {name for name in after if before.get(name) != after[name]}
         deleted = set(before) - set(after)
         if deleted or changed - allowed or not paths or not all(after.get(PROJECT_NAME + '/' + str(Path(p).relative_to(root))) for p in paths):

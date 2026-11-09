@@ -54,7 +54,7 @@ def main():
     check('independent reader and preservation hashes mandatory', {'tools/analyze-r16-runs.py', 'scripts/r16_run_reader.gd', 'tools/check-r16-preservation.py'} <= set(m.HELPERS))
     check('official runtime member digests equal frozen R15 pins', m.TEMPLATE_MEMBERS == load('package_r15', PROJECT / 'tools/package-r15.py').TEMPLATE_MEMBERS)
     check('all eight maps required', len(set(m.REQUIRED_MAPS)) == 8)
-    rows = [{'phase': 'tape', 'tick': i, 'post': {'p': [0., 0., float(i)], 'v': [0., 0., 1.], 'yaw': 0.},
+    rows = [{'phase': 'tape', 'tick': i, 'post': {'p': [0., 0., float(i)], 'v': [0., 0., 1.], 'yaw': 0., 'pitch': 0.},
              'game': {'checkpoint': 0, 'elapsed': i / 128, 'finished': False, 'finish_kind': '', 'respawns': 0}} for i in range(2)]
     check('identical source traces admitted', m.compare_traces(rows, copy.deepcopy(rows))['ok'])
     for name, mutate in [('velocity lie', lambda r: r[0]['post'].update(v=[0., 0., -1.])), ('duplicate tick', lambda r: r[1].update(tick=0)),
@@ -151,7 +151,7 @@ def main():
                 code = rec.inputs['aux'][j] or rec.inputs['code'][j]
                 row['keys'].append({'key': codes[code], 'edge': 'press' if rec.inputs['flags'][j] & 1 else 'release'})
             elif rec.inputs['kind'][j] == 3:
-                row['mouse'] = {'screen_relative': [rec.inputs['x2'][j], rec.inputs['y2'][j]]}
+                row['mouse'] = {'screen_relative': [rec.inputs['x'][j], rec.inputs['y'][j]]}
         planned = copy.deepcopy(report)
         planned['recorded_tape_inputs'] = list(by_tick.values())
         check('labelled tape predicate fixture accepted', m.audit_profile(profile, before, after, planned, helpers)['ok'])

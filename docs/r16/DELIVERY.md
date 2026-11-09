@@ -55,3 +55,11 @@ The reader preserves explicit diagnostic/partial states. A complete recording do
 Executed receipts and retained failures live outside Git in outer `checkpoints/spillway/r16/delivery-tools/`. Each source run keeps its source/helper hashes, command, logs and assertion summaries. Large traces and diagnostics are compressed; source/import scratch is disposable. The implementation handoff lists the executed hashes and explicitly distinguishes those bytes from later reader/host/overlay changes.
 
 Packed execution, native player-view/fade inspection, the current committed export, Linux candidate promotion and the final player report belong to root's final run. Native Windows, physical input latency and human feel are not established by these tools or any assertion count.
+
+## Independent attribution hardening
+
+The R16 delivery observation protocol is version2 (the player recording format remains version1). The probe independently receives raw motion key and mouse events through `_input`, before serialization. Both screen-relative and viewport-relative mouse columns must match, including their legitimate difference under a scaled headless viewport. Lifecycle-reset tails are checked against the boundary event; preset/loadout-carried inputs must reach the next attempt. Unknown attempts, invalid ticks, unconsumed observations and missing packed tape coverage fail closed.
+
+Each observed physics sample also freezes the newly emitted live style events and cumulative score. The auditor validates event order/ticks, known reward types, bounded integer points and multiplier, then reconciles each recorded event and the sealed total/by-kind summary with that live stream. This checks serialization and attribution; geometry correctness remains the separate real-collision scoring suite and full passage routes. The generic recording readers do not authenticate forged files.
+
+Both exact trace paths include pitch alongside position, velocity and yaw. The full-glyph structural predicate supports plain HUD labels and rejects unsupported canvas materials/parent-material inheritance; actual native views still provide pixel evidence. The lab picker control can remain at the selected chamber for its movement check, rather than exercising R and then inadvertently starting the chamber script at the hub.

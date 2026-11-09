@@ -500,6 +500,9 @@ func _drawn_label(label: Variant) -> bool:
 		if node is Control and node.clip_contents and not node.get_global_rect().encloses(rect):
 			return false
 		if node is CanvasItem:
+			# arbitrary canvas shaders can discard glyphs; this structural check supports plain labels only.
+			if node.material != null or node.use_parent_material:
+				return false
 			alpha *= node.modulate.a
 		node = node.get_parent()
 	alpha *= label.self_modulate.a * label.get_theme_color("font_color").a
@@ -946,7 +949,7 @@ func _lab_controls(home_map: String, home_preset: String) -> void:
 	await captured("lab-reset-default-loadout", {"clean": true, "lab_moves": all_on, "course_key": default_key})
 	await _r16_slide_chain()
 	await _tap(KEY_R)
-	await _stage_picker_controls("experiment", 2)
+	await _stage_picker_controls("experiment", 2, false)
 	await _r16_wall_chamber()
 	await _tap(KEY_R)
 	await _pause_menu_click("Map_" + home_map, "leave lab for the normal course")
@@ -1022,7 +1025,7 @@ func _crouch_box(state: Dictionary, height_u: float) -> bool:
 	return absf(float(size[0]) - 32.0 * 0.0254) < 1e-6 and absf(float(size[2]) - 32.0 * 0.0254) < 1e-6 \
 		and absf(float(size[1]) - height_u * 0.0254) < 1e-6 and absf(float(center[1]) - height_u * 0.0254 * 0.5) < 1e-6
 
-func _stage_picker_controls(map: String, requested_stage: int = -1) -> void:
+func _stage_picker_controls(map: String, requested_stage: int = -1, restart_after: bool = true) -> void:
 	await _tap(KEY_ESCAPE)
 	var picker := _hud().get("stage_picker") as OptionButton
 	var button := _hud().get("stage_practice_button") as Button
@@ -1056,9 +1059,10 @@ func _stage_picker_controls(map: String, requested_stage: int = -1) -> void:
 	var feet: Array = points[stage].feet
 	var target := Vector3(float(feet[0]), float(feet[1]), float(feet[2]))
 	check(map + ": practice reached the frozen stage pose", (game.get("player") as Node3D).global_position.distance_to(target) < 0.15, [state.feet, feet])
-	await _tap(KEY_R)
-	await _physics(4)
-	await captured(map + "-stage-practice-restart", {"paused": false, "clean": true, "practice_stage": -1, "checkpoint": 0, "started": false, "message": ""})
+	if restart_after:
+		await _tap(KEY_R)
+		await _physics(4)
+		await captured(map + "-stage-practice-restart", {"paused": false, "clean": true, "practice_stage": -1, "checkpoint": 0, "started": false, "message": ""})
 
 func _same_feet(a: Array, b: Array) -> bool:
 	return Vector3(a[0], a[1], a[2]).distance_to(Vector3(b[0], b[1], b[2])) < 0.05
@@ -1383,7 +1387,7 @@ func _trace_valid(rows: Array, packed: bool) -> bool:
 			return false
 		var motion: Variant = row if packed else row.get("post")
 		var state: Variant = row if packed else row.get("game")
-		if not motion is Dictionary or not _valid_vector(motion.get("p")) or not _valid_vector(motion.get("v")) or not _finite_number(motion.get("yaw")) or not state is Dictionary:
+		if not motion is Dictionary or not _valid_vector(motion.get("p")) or not _valid_vector(motion.get("v")) or not _finite_number(motion.get("yaw")) or not _finite_number(motion.get("pitch")) or not state is Dictionary:
 			return false
 		for field: String in ["checkpoint", "elapsed", "finished", "finish_kind", "respawns"]:
 			if not state.has(field):
@@ -1420,6 +1424,7 @@ func _compare_reference(path: String) -> void:
 	var worst := 0.0
 	var worst_velocity := 0.0
 	var worst_yaw := 0.0
+	var worst_pitch := 0.0
 	var first_diff := -1
 	var game_diff: Array = []
 	var compared := 0
@@ -1436,6 +1441,7 @@ func _compare_reference(path: String) -> void:
 		worst = maxf(worst, gap)
 		worst_velocity = maxf(worst_velocity, Vector3(row.v[0], row.v[1], row.v[2]).distance_to(Vector3(other.post.v[0], other.post.v[1], other.post.v[2])))
 		worst_yaw = maxf(worst_yaw, absf(float(row.yaw) - float(other.post.yaw)))
+		worst_pitch = maxf(worst_pitch, absf(float(row.pitch) - float(other.post.pitch)))
 		var g: Dictionary = other.get("game", {})
 		if game_diff.size() < 5 and (int(g.get("checkpoint", -1)) != int(row.checkpoint) or float(g.get("elapsed", -1.0)) != _as_read(row.elapsed) or bool(g.get("finished", false)) != bool(row.finished) or str(g.get("finish_kind", "")) != str(row.finish_kind) or int(g.get("respawns", -1)) != int(row.respawns)):
 			game_diff.append({"tick": row.tick, "pack": [row.checkpoint, row.elapsed, row.finished], "source": [g.get("checkpoint"), g.get("elapsed"), g.get("finished")]})
@@ -1443,9 +1449,9 @@ func _compare_reference(path: String) -> void:
 	var pre_gap := -1.0
 	if start != null and not trace.is_empty():
 		pre_gap = Vector3(trace[0].pre_p[0], trace[0].pre_p[1], trace[0].pre_p[2]).distance_to(Vector3(start.pre.p[0], start.pre.p[1], start.pre.p[2]))
-	report["reference"] = {"path": path, "ticks_compared": compared, "reference_ticks": reference.size(), "max_position_m": worst, "max_velocity_m_s": worst_velocity, "max_yaw_rad": worst_yaw,
+	report["reference"] = {"path": path, "ticks_compared": compared, "reference_ticks": reference.size(), "max_position_m": worst, "max_velocity_m_s": worst_velocity, "max_yaw_rad": worst_yaw, "max_pitch_rad": worst_pitch,
 		"first_position_difference_tick": first_diff, "tick0_pre_position_gap_m": pre_gap, "game_state_differences": game_diff, "tolerance_m": 0.0}
-	check("packed run matches the source executor tick for tick", compared == trace.size() and compared == reference.size() and worst == 0.0 and worst_velocity == 0.0 and worst_yaw <= 1e-12 and pre_gap == 0.0, report.reference)
+	check("packed run matches the source executor tick for tick", compared == trace.size() and compared == reference.size() and worst == 0.0 and worst_velocity == 0.0 and worst_yaw <= 1e-12 and worst_pitch <= 1e-12 and pre_gap == 0.0, report.reference)
 	check("progress, clock and finish match the source executor every tick", game_diff.is_empty(), game_diff)
 
 # --- end: records shown, pause, quit through the panel --------------------------------------
@@ -1533,7 +1539,8 @@ func _wrap_up() -> void:
 func _end(reason: String) -> void:
 	if game != null and "session" in game and game.get("session") != null and str(report.mode) not in ["identity", "reader"]:
 		report["recordings"] = _recording_receipt()
-		report["recorded_tape_inputs"] = trace.map(func(r: Dictionary) -> Dictionary: return {"run_id": r.get("run_id", ""), "recording_tick": r.get("recording_tick", -1), "keys": r.audit.keys, "mouse": r.audit.mouse})
+		report["recorded_tape_inputs"] = trace.filter(func(r: Dictionary) -> bool: return int(r.get("recording_tick", -1)) >= 0).map(func(r: Dictionary) -> Dictionary: return {"tape_tick": r.tick, "run_id": r.get("run_id", ""), "recording_tick": r.recording_tick, "keys": r.audit.keys, "mouse": r.audit.mouse})
+		report["recorded_tape_tick_count"] = report.recorded_tape_inputs.size()
 	report["checks"] = checks
 	report["frames"] = frames
 	report["failures"] = checks.filter(func(c: Dictionary) -> bool: return not c.ok).size() + (1 if reason != "" else 0)
@@ -1567,6 +1574,24 @@ const HELD_ACTIONS := ["move_forward", "move_back", "move_left", "move_right", "
 var observed_samples: Array = []
 var lab_observations: Array = []
 var _seen_sample: Dictionary = {}
+var delivered_inputs: Array = []
+var _style_seen: Dictionary = {}
+
+## independent raw motion-input receipt, before serialization; lifecycle edges have their own audit.
+func _input(event: InputEvent) -> void:
+	var host := get_tree().current_scene
+	if host == null or not ("session" in host) or host.get("session") == null or bool(host.get("paused")):
+		return
+	var session: Node = host.get("session")
+	if not bool(session.get("attempt_live")) or not session.get("recorder").call("is_open"):
+		return
+	var data := {}
+	if event is InputEventKey and not event.echo and (event.physical_keycode in KEYS.values() or event.keycode in KEYS.values()):
+		data = {"type": "key", "keycode": event.keycode, "physical_keycode": event.physical_keycode, "pressed": event.pressed, "echo": event.echo}
+	elif event is InputEventMouseMotion:
+		data = {"type": "mouse_motion", "relative": [event.relative.x, event.relative.y], "screen_relative": [event.screen_relative.x, event.screen_relative.y]}
+	if not data.is_empty():
+		delivered_inputs.append({"run_id": session.get("recorder").get("run_id"), "tick": session.get("tick"), "data": data})
 
 class SampleObserver extends Node:
 	var probe: Node
@@ -1591,7 +1616,12 @@ func observe_actual(delta: float) -> void:
 		exact[field] = PackedFloat64Array([float(player.get(field))]).to_byte_array().hex_encode()
 	exact["dt"] = PackedFloat64Array([delta]).to_byte_array().hex_encode()
 	exact["elapsed"] = PackedFloat64Array([float(host.get("elapsed"))]).to_byte_array().hex_encode()
-	observed_samples.append({"scalar_hex": exact,"run_id": session.get("recorder").get("run_id"), "tick": int(sample.tick), "p": _v3(player.global_position),
+	var run_id := str(session.get("recorder").get("run_id"))
+	var style: RefCounted = session.get("style")
+	var all_style: Array = style.get("events")
+	var scored: Array = RUN_READER.json_safe(all_style.slice(int(_style_seen.get(run_id, 0))))
+	_style_seen[run_id] = all_style.size()
+	observed_samples.append({"style_events": scored, "style_score": style.get("score"), "scalar_hex": exact,"run_id": session.get("recorder").get("run_id"), "tick": int(sample.tick), "p": _v3(player.global_position),
 		"v": _v3(player.velocity), "yaw": player.get("yaw"), "pitch": player.get("pitch"), "dt": delta,
 		"physics_hz": Engine.physics_ticks_per_second, "elapsed": host.get("elapsed"), "checkpoint": host.get("checkpoint_index"),
 		"respawns": host.get("respawn_count"), "held": held_now})
@@ -1607,7 +1637,7 @@ func _recording_receipt() -> Dictionary:
 	var recorder: RefCounted = session.get("recorder")
 	if bool(session.get("attempt_live")) and recorder.call("is_open"):
 		attempts.append({"kind": "quit", "ok": true, "path": recorder.get("final_path"), "run_id": recorder.get("run_id")})
-	return {"attempts": attempts, "observed": observed_samples, "lab": RUN_READER.json_safe(lab_observations)}
+	return {"audit_version": 2, "delivered_inputs": delivered_inputs, "attempts": attempts, "observed": observed_samples, "lab": RUN_READER.json_safe(lab_observations)}
 
 func _reader_mode() -> void:
 	var decoded := {}
