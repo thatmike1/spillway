@@ -557,12 +557,13 @@ func _make_pause() -> void:
 	pause_look = _small(column, "", INK)
 	for item: Array in [["Source sensitivity (Source units, m_yaw 0.022)", "source_sensitivity", 0.2, 10.0, 0.05], ["Source FOV (4:3 reference, widened for the screen)", "source_fov", 70.0, 110.0, 1.0],
 			["R13 mouse (× 0.0022 rad per count, advanced F3 only)", "r13_sensitivity", 0.3, 2.5, 0.05], ["R13 horizontal FOV (literal, F3 only)", "r13_fov", 70.0, 110.0, 1.0], ["Volume", "volume", 0.0, 1.0, 0.05]]:
+		var setting_parent: Control = advanced_box if str(item[1]).begins_with("r13_") else column
 		var label := Label.new()
 		label.text = item[0]
 		label.add_theme_font_override("font", UI.font("label"))
 		label.add_theme_font_size_override("font_size", 13)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		column.add_child(label)
+		setting_parent.add_child(label)
 		var slider := HSlider.new()
 		slider.name = "Setting_" + str(item[1])
 		slider.min_value = item[2]
@@ -572,7 +573,7 @@ func _make_pause() -> void:
 		slider.value_changed.connect(func(value: float) -> void:
 			game.change_setting(str(item[1]), value)
 			pause_look.text = str(game.call("look_description")))
-		column.add_child(slider)
+		setting_parent.add_child(slider)
 	var metric := CheckButton.new()
 	metric.name = "Setting_show_ms"
 	metric.text = "Show m/s under u/s"
@@ -585,6 +586,11 @@ func _make_pause() -> void:
 	pause_keys = _small(column, "", INK)
 	pause_panel.hide()
 	_layout_pause(get_viewport().get_visible_rect().size)
+
+func _show_advanced(on: bool) -> void:
+	super(on)
+	if advanced_toggle != null:
+		advanced_toggle.text = "%s  Advanced (comparison presets and R13 look)" % ("▾" if on else "▸")
 
 func _spacer(parent: Control) -> void:
 	var gap := Control.new()

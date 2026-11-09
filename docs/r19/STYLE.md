@@ -38,3 +38,7 @@ The bhop suite uses the unchanged R15 body on the existing real collision fixtur
 ## Map cards
 
 Penstock Yard is “Open yard for speed, strafes and gap practice”; Overflow is “Dam-top run through spillways and service decks”. The R17 presentation host overrides only the `theme` returned by `map_entry`; R18 legacy cards omit the developer kind subtitle. Map ids, `legacy` kinds, registry, physical level files, geometry hashes and time identities stay unchanged. `tests/r19_asks_ui.gd -- --asks=maps --out=/tmp/r19-item1/maps` checks actual card and tooltip controls and compares each loaded map against the frozen R16 host.
+
+## Advanced settings
+
+R13 mouse sensitivity and literal horizontal FOV share the initially collapsed Advanced container with F3/F4 comparison presets. Source sensitivity, Source FOV and volume remain in Look and sound. The original sliders, ranges, callbacks and `settings.r13_sensitivity` / `settings.r13_fov` persistence keys are retained. The Advanced toggle says what it contains. The scene test opens and closes it through keyboard dispatch, changes both sliders through arrow-key dispatch, reads the saved config and loads those values in a fresh host.
