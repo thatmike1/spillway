@@ -1,6 +1,7 @@
 extends "res://scripts/r16_main.gd"
 ## r17 adds presentation after the delivered r16 world is complete. all game hooks stay inherited.
 const PRESENTATION := preload("res://scripts/r17_look.gd")
+const PALETTES := preload("res://scripts/r17_palettes.gd")
 var look_enabled := true
 var look_layer: Node3D
 var look_label: Label
@@ -9,6 +10,14 @@ func _ready() -> void:
 	for arg: String in OS.get_cmdline_user_args():
 		if arg == "--look=old":
 			look_enabled = false
+	# required presentation assets must fail before the inherited host starts, including release builds.
+	for id: String in PALETTES.MAPS:
+		var path := str(PALETTES.MAPS[id].sky)
+		if not ResourceLoader.exists(path) or not load(path) is Texture2D:
+			startup_error = "r17: painted sky is missing or invalid: " + path
+			push_error(startup_error)
+			get_tree().quit(3)
+			return
 	super._ready()
 	if not startup_error.is_empty():
 		return
@@ -59,4 +68,4 @@ func _refresh_look_label() -> void:
 		look_label.text = "R17 · %s · L compare" % ("paint + ink" if look_enabled else "original R16 look")
 
 func window_title() -> String:
-	return "Spillway R17 · %s · %s · %d Hz" % [map_name(), str(preset.label), physics_hz]
+	return super.window_title().replace("Spillway R16", "Spillway R17")

@@ -28,6 +28,7 @@ func run() -> void:
 		game.map_id = id
 		game.seed_from_r15 = false
 		root.add_child(game)
+		check(game.window_title().contains("EXPERIMENTAL") == game.is_lab(),id+": experiment title marker differs from delivered R16")
 		game.set_paused(true)
 		await process_frame
 		await process_frame
