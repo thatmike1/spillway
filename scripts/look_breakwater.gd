@@ -3,6 +3,7 @@ extends Node3D
 const SURFACE := preload("res://shaders/look/surface.gdshader")
 const INK := preload("res://shaders/look/ink.gdshader")
 const WATER := preload("res://shaders/look/water.gdshader")
+const SKY := preload("res://shaders/look/sky.gdshader")
 var enabled := false
 var swaps: Array[Dictionary] = []
 var world: WorldEnvironment
@@ -42,11 +43,12 @@ func attach(level: Node3D) -> void:
 				swaps.append({"node": mesh, "old": mesh.material_override, "new": replacement})
 	painted_environment = old_environment.duplicate()
 	var sky := Sky.new()
-	var panorama := PanoramaSkyMaterial.new()
-	panorama.panorama = load("res://assets/look/cloud-sky.png")
+	var panorama := ShaderMaterial.new()
+	panorama.shader = SKY
+	panorama.set_shader_parameter("panorama",load("res://assets/look/cloud-sky.png"))
 	sky.sky_material = panorama
 	painted_environment.sky = sky
-	painted_environment.sky_rotation = Vector3(0, 1.1, 0)
+	painted_environment.sky_rotation = Vector3(0, PI, 0)
 	painted_environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	painted_environment.ambient_light_color = Color("a6bfc3")
 	painted_environment.ambient_light_energy = 0.32
@@ -85,7 +87,7 @@ func _material(key: String) -> Material:
 		var flat := StandardMaterial3D.new()
 		flat.albedo_color = Color("d95b30") if key.ends_with("yellow") else (Color("e0daca") if key.ends_with("white") else Color("213e45"))
 		flat.roughness = 1.0
-		if key.ends_with("yellow"):
+		if key.ends_with("yellow") or key.ends_with("white"):
 			flat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		flat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 		return flat
@@ -116,7 +118,7 @@ func _material(key: String) -> Material:
 	mat.set_shader_parameter("top_color", top)
 	mat.set_shader_parameter("side_color", side)
 	mat.set_shader_parameter("deck", 1.0 if is_deck else 0.0)
-	mat.set_shader_parameter("wear_amount", 0.8 if key == "Mesh_concrete" else 0.4)
+	mat.set_shader_parameter("wear_amount", 0.55 if key == "Mesh_concrete" else (0.10 if key in ["Mesh_plaster","Mesh_plaster_red"] else 0.18))
 	return mat
 
 func set_enabled(value: bool) -> void:
@@ -148,6 +150,8 @@ func _structure_ink(level: Node3D) -> void:
 			var key := _edge_key(polygon[i],polygon[(i+1)%polygon.size()])
 			joins[key] = int(joins.get(key,0))+1
 	for prism: Dictionary in level.get("prisms"):
+		if str(prism.kind).begins_with("paint_"):
+			continue
 		var top: Array = prism.top
 		if str(prism.kind) == "concrete" and (top[0] as Vector3).y > 0.5:
 			for i: int in range(1,top.size()-1):

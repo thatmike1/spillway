@@ -12,18 +12,18 @@ void vertex(){ wp=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; wn=normalize(MODEL_NORMAL
 void fragment(){
  float top=smoothstep(0.65,0.92,wn.y);
  vec2 uv=abs(wn.x)>abs(wn.z)?wp.zy:wp.xy;
- float w=texture(wear,uv/vec2(9.0,6.0)).r;
+ float w=texture(wear,uv/vec2(3.0,3.0)).r;
  float grain=texture(wear,wp.xz/17.0).g;
  float farfade=1.0-smoothstep(22.0,85.0,distance(wp,CAMERA_POSITION_WORLD));
- vec3 side=mix(side_color.rgb,vec3(0.61,0.66,0.61),smoothstep(0.57,0.69,w)*wear_amount);
+ vec3 side=mix(side_color.rgb,vec3(0.57,0.43,0.28),smoothstep(0.66,0.74,w)*wear_amount*mix(0.35,1.0,farfade));
  side*=1.0-0.12*(1.0-smoothstep(-2.8,-1.1,wp.y));
  float ribs=pow(0.5+0.5*cos((abs(wn.x)>abs(wn.z)?wp.z:wp.x)*24.0),6.0);
  side*=1.0-metal*ribs*0.13*farfade;
  vec3 cap=top_color.rgb*(0.98+grain*0.035);
- vec2 cell=abs(fract(wp.xz/vec2(6.0,8.0)+0.5)-0.5)*vec2(6.0,8.0);
+ vec2 cell=abs(fract(wp.xz/vec2(8.0,32.0)+0.5)-0.5)*vec2(8.0,32.0);
  vec2 aa=max(fwidth(wp.xz),vec2(0.004));
  float seam=1.0-min(smoothstep(0.012-aa.x,0.012+aa.x,cell.x),smoothstep(0.012-aa.y,0.012+aa.y,cell.y));
- cap=mix(cap,vec3(0.38,0.43,0.41),seam*0.52*deck*farfade);
+ cap=mix(cap,vec3(0.38,0.43,0.41),seam*0.28*deck*farfade);
  ALBEDO=mix(side,cap,top); ROUGHNESS=0.95; SPECULAR=0.0;
 }
 void light(){

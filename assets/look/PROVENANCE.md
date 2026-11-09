@@ -1,6 +1,6 @@
 # Original look-C assets
 
-`cloud-sky.png` was generated for this experiment on 9 November 2026 using OpenAI's built-in image generation tool. No external image was supplied to that generation call. The local concept images informed the written direction only; they are private references and are not packed into the game. No named artist, copyrighted character or borrowed texture was requested. The generated image is an original project asset, not a downloaded stock asset. Its generation prompt is in `sky-prompt.txt`.
+`cloud-sky.png` was generated for this experiment on 9 November 2026 using OpenAI's built-in image generation tool. No external image was supplied to that generation call. The local concept images informed the written direction only; they are private references and are not packed into the game. No named artist, copyrighted character or borrowed texture was requested. The generated image is an original project asset, not a downloaded stock asset. Its left/right boundary is not intrinsically seamless. `shaders/look/sky.gdshader` feathers the opposite edge strips to a shared boundary value at runtime; the source PNG is preserved. Its generation prompt is in `sky-prompt.txt`.
 
 `painted-wear.png` is original deterministic mathematical texture work. `tools/generate-look-wear.py` regenerates its periodic multiscale value-noise mask using seed 431 and only the Python standard library. The red channel controls broad paint chips; the green channel supplies restrained top-plane variation. It has no photographic or third-party input.
 
