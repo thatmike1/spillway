@@ -2,6 +2,9 @@ extends "res://scripts/r16_main.gd"
 ## r17 adds presentation after the delivered r16 world is complete. all game hooks stay inherited.
 const PRESENTATION := preload("res://scripts/r17_look.gd")
 const PALETTES := preload("res://scripts/r17_palettes.gd")
+## r18: the player-facing interface. it replaces the inherited hud object after the r16 host has
+## built its world; the hud is presentation only, so every game call reaches the same methods.
+const UI_HUD := preload("res://scripts/r18_hud.gd")
 var look_enabled := true
 var look_layer: Node3D
 var look_label: Label
@@ -21,24 +24,15 @@ func _ready() -> void:
 	super._ready()
 	if not startup_error.is_empty():
 		return
+	_install_hud()
 	var canvas := CanvasLayer.new()
 	canvas.layer = 20
 	add_child(canvas)
 	look_label = Label.new()
-	look_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	look_label.offset_left = -410
-	look_label.offset_right = -18
-	look_label.offset_top = 18
-	look_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	look_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	look_label.add_theme_font_size_override("font_size", 16)
-	look_label.add_theme_color_override("font_color", Color("fff1d6"))
-	look_label.add_theme_color_override("font_shadow_color", Color("162b32"))
-	look_label.add_theme_constant_override("shadow_offset_x", 1)
-	look_label.add_theme_constant_override("shadow_offset_y", 1)
 	canvas.add_child(look_label)
 	_refresh_look_label()
-	print("r17: spillway-2026.11.09-r17; delivered R16 behavior; L compares presentation")
+	print("r18: spillway-2026.11.09-r18; delivered R16 behavior; R17 look, R18 interface; L compares presentation; F9 telemetry")
 
 func _build_level() -> void:
 	super._build_level()
@@ -61,15 +55,41 @@ func _input(event: InputEvent) -> void:
 		if event.pressed and not event.echo:
 			set_look(not look_enabled)
 		return
+	if event is InputEventKey and event.physical_keycode == KEY_F9:
+		if event.pressed and not event.echo and is_instance_valid(hud) and hud.has_method("set_telemetry"):
+			hud.call("set_telemetry", not bool(hud.get("telemetry")))
+		return
 	super._input(event)
+
+## swap the inherited hud for the r18 one, carrying over what it was already showing.
+func _install_hud() -> void:
+	var old := hud
+	var fresh: CanvasLayer = UI_HUD.new()
+	hud = fresh
+	add_child(fresh)
+	fresh.call("attach", self)
+	fresh.call("map_changed")
+	var note := ""
+	if is_instance_valid(old):
+		var message := old.get("message") as Label
+		if message != null and message.modulate.a > 0.0:
+			note = message.text
+		fresh.visible = old.visible
+		remove_child(old)
+		old.free()
+	if not note.is_empty():
+		fresh.call("notify", note)
 
 func _refresh_look_label() -> void:
 	if is_instance_valid(look_label):
-		look_label.text = "R17 · %s · L compare" % ("paint + ink" if look_enabled else "original R16 look")
+		look_label.text = "%s  ·  L" % ("Look C" if look_enabled else "original R16 look")
 		_place_look_label()
 
 func _place_look_label() -> void:
 	if not is_instance_valid(look_label):
+		return
+	if is_instance_valid(hud) and hud.has_method("place_look_label"):
+		hud.call("place_look_label", look_label)
 		return
 	var top := 18.0
 	if is_instance_valid(hud) and hud.visible:
@@ -90,4 +110,4 @@ func _process(_delta: float) -> void:
 		_place_look_label.call_deferred()
 
 func window_title() -> String:
-	return super.window_title().replace("Spillway R16", "Spillway R17")
+	return super.window_title().replace("Spillway R16", "Spillway R18")

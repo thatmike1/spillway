@@ -89,8 +89,11 @@ def stills(a):
         out.mkdir(parents=True, exist_ok=True)
         args = ['--out=' + str(out)] + (['--states=' + a.states] if a.states else [])
         code = with_display(width, height, a.out / 'evidence', lambda d, env: launch(
-            engine_command(a.project, width, height, 'res://tools/r18-ui-shots.gd', args), env, a.project, out / 'engine.log'))
+            engine_command(a.project, width, height, a.script, args), env, a.project, out / 'engine.log'))
         text = (out / 'engine.log').read_text()
+        if a.script != 'res://tools/r18-ui-shots.gd':
+            print(json.dumps({'res': [width, height], 'exit': code}), flush=True)
+            continue
         rows = json.loads((out / 'stills.json').read_text())['rows']
         bad = [r for r in rows if r['size'] != [width, height]]
         print(json.dumps({'res': [width, height], 'exit': code, 'stills': len(rows), 'wrong_size': bad,
@@ -201,6 +204,7 @@ def main():
     s.add_argument('--out', type=Path, required=True)
     s.add_argument('--res', default='1920x1080,2560x1440,3440x1440')
     s.add_argument('--states', default='')
+    s.add_argument('--script', default='res://tools/r18-ui-shots.gd')
     r = sub.add_parser('run')
     r.add_argument('--project', type=Path, default=PROJECT)
     r.add_argument('--out', type=Path, required=True)

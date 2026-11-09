@@ -100,6 +100,9 @@ func run() -> void:
 					game.hud.call("dismiss_title")
 				_stage_finish(game)
 				await _frames(40)
+				# the session seals the staged attempt and shows its own finish; stage again over it.
+				_stage_finish(game)
+				await _frames(10)
 			"telemetry":
 				if game.hud.has_method("dismiss_title"):
 					game.hud.call("dismiss_title")
