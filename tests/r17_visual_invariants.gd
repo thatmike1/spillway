@@ -1,6 +1,10 @@
 extends SceneTree
 ## rendering toggles through real input dispatch preserve r16 geometry, identities and live state.
 const MAIN := preload("res://scripts/r17_main.gd")
+class DrawnFixture extends Node3D:
+	var prisms: Array = []
+	var manifest: Array = []
+	var jump_gaps: Array = []
 var checks := 0
 var failures: Array = []
 func _initialize() -> void:
@@ -14,7 +18,24 @@ func snapshot(game: Node) -> String:
 	for node: Node in game.level.find_children("*","CollisionShape3D",true,false):
 		rows.append([str(game.level.get_path_to(node.get_parent())),node.global_transform,node.disabled,node.shape.get_debug_mesh().get_faces()])
 	return var_to_str(rows).sha256_text()
+func check_contours() -> void:
+	var fixture := DrawnFixture.new()
+	for bounds: Vector2 in [Vector2(0,2),Vector2(1,3)]:
+		fixture.prisms.append({"kind":"deck","top":[Vector3(bounds.x,0,0),Vector3(bounds.y,0,0),Vector3(bounds.y,0,2),Vector3(bounds.x,0,2)]})
+	# a hidden imported-model proxy must not add a floating silhouette.
+	fixture.manifest.append({"kind":"model:wall","shape":"prism","role":"wall","points":[Vector3(0,9,0),Vector3(2,9,0),Vector3(2,9,2),Vector3(0,9,2),Vector3.ZERO,Vector3.ZERO,Vector3.ZERO,Vector3.ZERO]})
+	var contour := preload("res://scripts/r17_contours.gd").new()
+	var shape: Node3D = contour.build(fixture)
+	check(contour.line_count == 4,"coplanar overlapping slabs must have only their four outer edges")
+	var vertices: PackedVector3Array = shape.get_node("Ink").mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+	var clean := true
+	for v: Vector3 in vertices:
+		clean = clean and v.y < 0.02 and (absf(v.x)<0.01 or absf(v.x-3)<0.01 or absf(v.z)<0.01 or absf(v.z-2)<0.01)
+	check(clean,"ink crossed the landing or floated over an invisible model proxy")
+	shape.free()
+	fixture.free()
 func run() -> void:
+	check_contours()
 	var maps := ["breakwater","whiteout-relay"]
 	var output := ""
 	for arg: String in OS.get_cmdline_user_args():
@@ -22,6 +43,8 @@ func run() -> void:
 			maps = Array(arg.trim_prefix("--maps=").split(","))
 		if arg.begins_with("--out="):
 			output = arg.trim_prefix("--out=")
+	var contour := preload("res://scripts/r17_contours.gd").new()
+	check(contour.LIP_TOP >= 0.30 and contour.LIP_FACE >= 0.14,"jump lips retain a broad top and visible face")
 	var reports: Array = []
 	for id: String in maps:
 		var game := MAIN.new()
@@ -35,6 +58,13 @@ func run() -> void:
 		for field: String in ["lab_tag", "lab_panel", "practice_tag"]:
 			var control := game.hud.get(field) as Control
 			check(not control.is_visible_in_tree() or not game.look_label.get_global_rect().intersects(control.get_global_rect()),id+": look label covers inherited " + field)
+		# inspect the actual replacements, so a cream wash cannot silently erase functional cues.
+		for swap: Dictionary in game.look_layer.swaps:
+			var key := str(swap.node.name)
+			if "paint_yellow" in key or "paint_hazard" in key or key == "ReadabilityNosing":
+				check(swap.new is StandardMaterial3D and swap.new.albedo_color == Color("d95b30"),id+": functional edge cue lost its orange contrast")
+			if key == "ReadabilityPads":
+				check(swap.new.albedo_color != Color(game.look_layer.palette.top),id+": functional take-off pad flattened")
 		var before := snapshot(game)
 		for i: int in 20:
 			var state := var_to_str([game.player.global_transform,game.player.velocity,game.elapsed,game.checkpoint_index,game.attempts,game.finished,game.clean_eligible,game.session.style.snapshot(),game.session.ghost_state])

@@ -7,6 +7,7 @@ const SURFACE := preload("res://shaders/look/surface.gdshader")
 const SKY := preload("res://shaders/look/sky.gdshader")
 const WATER := preload("res://shaders/look/water.gdshader")
 const PROP := preload("res://shaders/look/r17_prop.gdshader")
+const INTERIOR := preload("res://shaders/look/r17_interior.gdshader")
 var enabled := false
 var swaps: Array[Dictionary] = []
 var world: WorldEnvironment
@@ -17,6 +18,7 @@ var base: Node3D
 var palette: Dictionary
 var _materials := {}
 var _route_kinds: Array[String] = []
+var _map_id := ""
 var _label_colors: Array[Dictionary] = []
 var report := {}
 
@@ -24,6 +26,7 @@ func attach(level: Node3D, map_id: String) -> void:
 	name = "R17Look"
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	palette = PALETTES.MAPS[map_id]
+	_map_id = map_id
 	for solid: Dictionary in level.get("manifest"):
 		var kind := str(solid.get("kind", ""))
 		if str(solid.get("role", "")) in ["route","recovery","baffle"] and not kind.is_empty() and not kind in _route_kinds:
@@ -69,7 +72,7 @@ func attach(level: Node3D, map_id: String) -> void:
 	for node: Node in level.find_children("*","GeometryInstance3D",true,false):
 		if node.is_queued_for_deletion() or is_ancestor_of(node) or not node is MeshInstance3D and not node is MultiMeshInstance3D:
 			continue
-		if map_id == "breakwater" and not "R16Opportunities" in str(level.get_path_to(node)):
+		if map_id == "breakwater" and not "R16Opportunities" in str(level.get_path_to(node)) and not str(node.name).begins_with("Mesh_paint"):
 			continue
 		var key := str(node.name)
 		var old: Material = node.material_override
@@ -85,8 +88,15 @@ func attach(level: Node3D, map_id: String) -> void:
 	set_meta("report",report)
 
 func material_for(key: String, old: Material, node: GeometryInstance3D) -> Material:
-	if key.begins_with("Mesh_paint"):
-		return flat(Color(palette.side) if "dark" in key else Color(palette.top))
+	if key.begins_with("Mesh_paint") or key.begins_with("Art_paint") or key.begins_with("Readability"):
+		# these are functional timing, hazard and landing cues, at their inherited widths.
+		if key == "ReadabilityPads":
+			return flat(Color("9b7770"))
+		if key == "ReadabilityNosing" or "yellow" in key or "hazard" in key or "lip" in key or "duck" in key:
+			return flat(Color("d95b30"))
+		if "dark" in key:
+			return flat(Color("263d45"))
+		return flat(Color("fff5db"))
 	if node is MeshInstance3D and old == null:
 		var ancestor: Node = node.get_parent()
 		var architectural := false
@@ -133,9 +143,19 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 	if not key.begins_with("Mesh_") and not key.begins_with("Art_") and key not in ["SolidMesh","RollingStock","Rails","ReadabilityPads","ReadabilityBars","ReadabilityNosing"]:
 		return null
 	var kind := key.trim_prefix("Mesh_").trim_prefix("Art_")
-	if kind.begins_with("paint") or key.begins_with("Readability"):
-		# the independent jump-lip mesh carries orange. old floor pads become quiet cream.
-		return flat(Color(palette.top) if not "dark" in kind else Color(palette.side))
+	# indoor movement faces get separate values even when no sun reaches the room.
+	if _map_id in ["experiment", "whiteout-relay"] and kind in ["wall_panel", "housing", "rack_low", "roof", "cladding_slate", "machine", "frame"]:
+		if not _materials.has(kind):
+			var interior := ShaderMaterial.new()
+			interior.shader = INTERIOR
+			var value := 0.22
+			if kind in ["wall_panel", "cladding_slate"]:
+				value = 0.40
+			elif kind in ["roof", "rack_low"]:
+				value = 0.55
+			interior.set_shader_parameter("base_color",Color(palette.side).lightened(value))
+			_materials[kind] = interior
+		return _materials[kind]
 	var material_key := kind
 	if _materials.has(material_key):
 		return _materials[material_key]

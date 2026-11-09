@@ -1,17 +1,18 @@
 extends RefCounted
-## structural top boundaries from the immutable solid manifest, never triangle or texture edges.
+## ink follows visible prism unions; immutable collision manifests only locate jump lips.
 const INK := preload("res://shaders/look/ink.gdshader")
 var lines := SurfaceTool.new()
 var paint := SurfaceTool.new()
 var seen := {}
 var line_count := 0
 var lip_count := 0
+const LIP_TOP := 0.30
+const LIP_FACE := 0.14
 
 func build(level: Node3D, with_ink: bool = true) -> Node3D:
 	lines.begin(Mesh.PRIMITIVE_TRIANGLES)
 	paint.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var pieces: Array = []
-	var joined := {}
 	for solid: Dictionary in level.get("manifest"):
 		var points: Array = solid.get("points", [])
 		if solid.get("shape", "") != "prism" or points.size() < 6 or points.size() % 2 != 0:
@@ -21,25 +22,8 @@ func build(level: Node3D, with_ink: bool = true) -> Node3D:
 		if role in ["prop","rail","hazard","ceiling"] or str(solid.get("kind", "")) in ["prop_proxy","train"]:
 			continue
 		pieces.append({"top":top,"route":role in ["route","recovery","baffle"],"points":points})
-		for i: int in top.size():
-			var key := edge_key(top[i],top[(i+1)%top.size()])
-			joined[key] = int(joined.get(key,0))+1
 	if with_ink:
-		for piece: Dictionary in pieces:
-			var top: Array = piece.top
-			var low := INF
-			var high := -INF
-			for point: Vector3 in top:
-				low = minf(low,point.y)
-				high = maxf(high,point.y)
-			# arch collision wedges are not visible silhouette edges. keep their route caps only.
-			if not piece.route and high-low > 0.05:
-				continue
-			for i: int in top.size():
-				var a: Vector3 = top[i]
-				var b: Vector3 = top[(i+1)%top.size()]
-				if int(joined.get(edge_key(a,b),0)) == 1:
-					line(a+Vector3.UP*0.009,b+Vector3.UP*0.009,0.005 if piece.route else 0.009)
+		visible_boundaries(level)
 	var gaps: Variant = level.get("jump_gaps")
 	if gaps is Array:
 		for gap: Dictionary in gaps:
@@ -113,10 +97,66 @@ func gap_lip(at: Vector3, pieces: Array) -> void:
 		inward = -inward
 	a += Vector3.UP*0.012
 	b += Vector3.UP*0.012
-	for point: Vector3 in [a,b,b+inward*0.10,a,b+inward*0.10,a+inward*0.10]:
+	for point: Vector3 in [a,b,b+inward*LIP_TOP,a,b+inward*LIP_TOP,a+inward*LIP_TOP]:
 		paint.set_normal(Vector3.UP)
 		paint.add_vertex(point)
+	# a small vertical face remains visible on the next landing at mid-distance.
+	var proud := -inward*0.006
+	for point: Vector3 in [a+proud,b+proud,b+proud-Vector3.UP*LIP_FACE,a+proud,b+proud-Vector3.UP*LIP_FACE,a+proud-Vector3.UP*LIP_FACE]:
+		paint.set_normal(-inward)
+		paint.add_vertex(point)
 	lip_count += 1
+
+func visible_boundaries(level: Node3D) -> void:
+	# model:* manifest pieces are hidden collision proxies, absent from this drawn-prism list.
+	var prisms: Variant = level.get("prisms")
+	if not prisms is Array:
+		# the original merged-mesh maps draw their authored manifest prisms directly.
+		prisms = []
+		for solid: Dictionary in level.get("manifest"):
+			var points: Array = solid.get("points", [])
+			if solid.get("shape", "") == "prism" and points.size() >= 6 and str(solid.get("role", "")) in ["route", "recovery", "baffle", "wall"]:
+				prisms.append({"kind":solid.get("kind", ""),"top":points.slice(0,points.size()/2)})
+	var floors := {}
+	for prism: Dictionary in prisms:
+		var kind := str(prism.get("kind", ""))
+		var top: Array = prism.get("top", [])
+		if top.size() < 3 or kind.begins_with("paint"):
+			continue
+		var y: float = top[0].y
+		var flat := true
+		var polygon := PackedVector2Array()
+		for point: Vector3 in top:
+			flat = flat and absf(point.y-y) < 0.001
+			polygon.append(Vector2(point.x,point.z))
+		if not flat:
+			continue
+		if Geometry2D.is_polygon_clockwise(polygon):
+			polygon.reverse()
+		var height := roundi(y*1000.0)
+		if not floors.has(height):
+			floors[height] = []
+		# join submillimetre cracks before union, so curved segment seams never get ink.
+		for expanded: PackedVector2Array in Geometry2D.offset_polygon(polygon,0.002,Geometry2D.JOIN_MITER):
+			var merged := expanded
+			var polygons: Array = floors[height]
+			var i := 0
+			while i < polygons.size():
+				var union := Geometry2D.merge_polygons(merged,polygons[i])
+				if union.size() == 1:
+					merged = union[0]
+					polygons.remove_at(i)
+					i = 0
+				else:
+					i += 1
+			polygons.append(merged)
+	for height: int in floors:
+		for polygon: PackedVector2Array in floors[height]:
+			for boundary: PackedVector2Array in Geometry2D.offset_polygon(polygon,-0.002,Geometry2D.JOIN_MITER):
+				for i: int in boundary.size():
+					var a := boundary[i]
+					var b := boundary[(i+1)%boundary.size()]
+					line(Vector3(a.x,height/1000.0+0.009,a.y),Vector3(b.x,height/1000.0+0.009,b.y),0.005)
 
 func line(a: Vector3, b: Vector3, radius: float) -> void:
 	if a.distance_to(b) < 0.7:
