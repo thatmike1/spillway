@@ -76,7 +76,7 @@ def main():
             data = json.loads(capture.read_text())
             for pick in data['picks']:
                 src = Path(pick['file'])
-                rel = jpeg(src, OUT / 'img/run' / side / src.name)
+                rel = jpeg(src, OUT / 'img/run' / side / (src.stem + '.jpg'))
                 runs.append((data['route']['map'], data['preset'], 'x'.join(map(str, data['res'])), pick['tick'], pick['speed_u_s'], side, rel))
     rows = {}
     for m, preset, res, tick, speed, side, rel in runs:
