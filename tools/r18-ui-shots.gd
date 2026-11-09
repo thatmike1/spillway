@@ -88,6 +88,7 @@ func run() -> void:
 			"toast":
 				if game.hud.has_method("dismiss_title"):
 					game.hud.call("dismiss_title")
+				await _frames(40)
 				game.call("select_preset", "server128_aa1000")
 				await _frames(12)
 			"practice":

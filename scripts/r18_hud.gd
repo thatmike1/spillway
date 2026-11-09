@@ -14,6 +14,10 @@ const R18_PANEL := preload("res://scripts/r18_style_panel.gd")
 const WORDMARK := preload("res://shaders/r18_wordmark.gdshader")
 const TELEMETRY_KEY := "F9"
 const PLAYER_KEYS := "Space hop  ·  A / D with the mouse to strafe  ·  Ctrl crouch  ·  R restart  ·  F last checkpoint  ·  G ghost  ·  L look  ·  Esc maps and settings  ·  F9 telemetry"
+## the title sheet already carries the preset's own movement text, so it adds only the other keys.
+const TITLE_KEYS := "R restart  ·  F last checkpoint  ·  G ghost  ·  L look  ·  Esc maps and settings  ·  F9 telemetry"
+## teaching text leaves once the run is under way: four seconds in, or at this speed, whichever is first.
+const TEACH_SPEED_U := 280.0
 
 var telemetry: bool = false
 var map_title: Label
@@ -39,6 +43,9 @@ var _pause_edge: ColorRect
 var _title_alpha: float = 1.0
 var _title_dismissed: bool = false
 var _title_mark: Label
+var _teach_alpha: float = 0.0
+var _teach_gone: bool = false
+var _last_elapsed: float = 0.0
 
 # --- construction --------------------------------------------------------------------------
 
@@ -104,7 +111,7 @@ func attach(main: Node) -> void:
 
 func _style_world() -> void:
 	UI.world_label(identity, "smallnum", 12)
-	UI.world_label(keys_line, "small", 12, Color(UI.CREAM, 0.92), 3)
+	UI.ticket(keys_line, "small", 12, SIDE_LEFT, 0.82)
 	UI.ticket(controls, "body", 14)
 	controls.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	UI.ticket(hint, "label", 14)
@@ -126,8 +133,8 @@ func _style_world() -> void:
 	UI.world_label(best_line, "small", 12, Color(UI.CREAM, 0.88), 3)
 	UI.world_label(split_label, "title", 17)
 	UI.ticket(practice_tag, "label", 13)
-	UI.world_label(lab_tag, "title", 15, UI.EDGE)
-	UI.world_label(lab_panel, "small", 12, Color(UI.CREAM, 0.92), 3)
+	UI.ticket(lab_tag, "label", 13, SIDE_RIGHT)
+	UI.ticket(lab_panel, "small", 12, SIDE_RIGHT, 0.9)
 	UI.world_label(reticle, "title", 22)
 	map_title = _label("", 17)
 	UI.world_label(map_title, "title", 18)
@@ -211,7 +218,7 @@ func _make_title() -> void:
 		title_card.add_child(label)
 	UI.world_label(title_card.get_node("TitleMap"), "title", 22, UI.CREAM, 0)
 	UI.ticket(title_card.get_node("TitlePrompt"), "label", 16)
-	UI.world_label(title_card.get_node("TitleKeys"), "body", 13, Color(UI.CREAM, 0.92), 0)
+	UI.ticket(title_card.get_node("TitleKeys"), "body", 13, SIDE_LEFT, 0.9)
 	(title_card.get_node("TitleKeys") as Label).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	(title_card.get_node("TitlePrompt") as Label).text = "Move to start  ·  Esc for maps and settings"
 
@@ -261,11 +268,23 @@ func _process(delta: float) -> void:
 	var preset: Dictionary = game.preset
 	preset_line.text = "F%d  ·  %s" % [int(preset.slot), str(preset.label)]
 	run_line.text = _run_text()
-	keys_line.modulate.a = _intro_alpha * (1.0 - _title_alpha)
-	controls.modulate.a = _intro_alpha * (1.0 - _title_alpha)
-	hint.modulate.a = hint.modulate.a * (1.0 - _title_alpha)
+	# teaching text waits until the title has fully cleared, then leaves once the run is under way.
+	var elapsed := float(game.elapsed)
+	if not started or elapsed < _last_elapsed:
+		_teach_gone = false
+	elif elapsed > 4.0 or float(game.call("display_speed_u")) > TEACH_SPEED_U:
+		_teach_gone = true
+	_last_elapsed = elapsed
+	_teach_alpha = move_toward(_teach_alpha, 0.0 if _teach_gone or _title_alpha > 0.0 else 1.0, delta * 2.5)
+	# the pause sheet stands alone: run HUD and teaching text step out while it is open.
+	var shown := 0.0 if bool(game.paused) else 1.0
+	keys_line.modulate.a = _teach_alpha * shown
+	controls.modulate.a = _teach_alpha * shown
+	hint.modulate.a = hint.modulate.a * (1.0 - _title_alpha) * shown
+	message.modulate.a = message.modulate.a * shown
+	practice_tag.modulate.a = shown
 	for node: CanvasItem in [map_title, preset_line, clock, best_line, run_line, speed_label, speed_unit, speed_metric, style_panel, lab_tag, lab_panel, reticle]:
-		node.modulate.a = 1.0 - _title_alpha
+		node.modulate.a = (1.0 - _title_alpha) * shown
 	if bool(game.finished):
 		controls.modulate.a = 0.0
 		keys_line.modulate.a = 0.0
@@ -274,7 +293,7 @@ func _process(delta: float) -> void:
 			str(game.call("runner_path")).get_file(), str(game.session.call("recording_text"))]
 	if title_card != null and title_card.visible:
 		(title_card.get_node("TitleMap") as Label).text = "%s  —  %s" % [str(game.call("map_name")), str(game.call("map_entry", str(game.map_id)).get("theme", ""))]
-		(title_card.get_node("TitleKeys") as Label).text = str(preset.get("controls", "")).replace("\n", "\n") + "\n" + PLAYER_KEYS
+		(title_card.get_node("TitleKeys") as Label).text = str(preset.get("controls", "")) + "\n" + TITLE_KEYS
 	_layout()
 
 ## the ghost and recording line under the clock.
@@ -345,8 +364,14 @@ func _layout() -> void:
 	if lab_tag.visible:
 		top_right += lab_tag.get_minimum_size().y + 2.0
 	lab_panel.position = Vector2(right - lab_panel.get_minimum_size().x, top_right)
-	# top centre: toasts.
+	# top centre: toasts. when the practice tag is up they stack under it on the right instead.
 	message.position = Vector2(size.x * 0.5 - message.get_minimum_size().x * 0.5, 22)
+	var tag_rect := Rect2(practice_tag.position, practice_tag.get_minimum_size()).grow(8.0)
+	if practice_tag.visible and tag_rect.intersects(Rect2(message.position, message.get_minimum_size())):
+		message.position = Vector2(right - message.get_minimum_size().x, tag_rect.end.y)
+		top_right = message.position.y + message.get_minimum_size().y + 8.0
+		lab_tag.position.y = top_right
+		lab_panel.position.y = top_right + (lab_tag.get_minimum_size().y + 2.0 if lab_tag.visible else 0.0)
 	# low centre: speed, its unit, m/s, the crouch tag and stage splits above it.
 	var speed_size := speed_label.get_minimum_size()
 	speed_label.position = Vector2(size.x * 0.5 - speed_size.x * 0.5, size.y - 44.0 - speed_size.y)
@@ -722,4 +747,4 @@ func place_look_label(label: Label) -> void:
 	var frame := UI.safe_frame(get_viewport().get_visible_rect().size)
 	label.reset_size()
 	label.position = Vector2(frame.end.x - 32.0 - label.get_minimum_size().x, 24.0)
-	label.modulate.a = 1.0 - _title_alpha
+	label.modulate.a = (1.0 - _title_alpha) * (0.0 if game != null and bool(game.paused) else 1.0)
