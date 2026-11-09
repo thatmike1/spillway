@@ -226,15 +226,15 @@ def input_alignment(rec, rows, offset):
 
 
 def style_sealing(rec):
-    """the seal's style total is the sum of the style events in the file, all before the finish."""
+    """the seal's style total includes its first finish sample and never later samples."""
     styled = [e for e in rec.events if e.get('s') == 'capture']
     total = sum(int((e.get('d') or {}).get('points', 0)) for e in styled)
     outcome = (rec.seal or {}).get('outcome', {})
     finish = rec.seal.get('finish_tick')
-    late = [e for e in styled if finish is not None and e.get('t', -1) >= finish]
+    late = [e for e in styled if finish is not None and e.get('t', -1) > finish]
     score = (outcome.get('style') or {}).get('score')
     return {'ok': score == total and not late and (outcome.get('style') or {}).get('best_eligible') is True, 'score': score, 'event_sum': total,
-            'events': len(styled), 'events_on_or_after_finish': len(late)}
+            'events': len(styled), 'events_after_finish': len(late)}
 
 
 def main(argv):

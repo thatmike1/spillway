@@ -252,7 +252,7 @@ func _physics_process(delta: float) -> void:
 		return
 	var sample := build_sample(delta)
 	var scored: Array[Dictionary] = style.step(sample, game.player, game.level)
-	if recorder.is_open():
+	if recorder.is_open() or recorder.status == "disk-error":
 		recorder.capture(sample, scored)
 		if recorder.status == "disk-error":
 			_report("Recording stopped: %s. Play continues; this attempt's file stays partial." % recorder.last_error)

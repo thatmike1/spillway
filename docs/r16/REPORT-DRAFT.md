@@ -29,6 +29,8 @@ Chain moves within **2.5 seconds** to raise the multiplier by 0.25, up to **×3*
 
 Sync still means that your turn direction matched the held A or D key on eligible air ticks. Holding a key without turning is not an eligible sample, and 100% does not mean the turn rate was optimal.
 
+The final captured finish step can still score. Nothing afterwards does.
+
 Time best and style best are separate. Only a clean whole-map finish saves them, and each map/preset/loadout has its own identity. A future scoring change can start a fresh style best without discarding the time best or ghost.
 
 The existing maps keep their original lines. Optional additions sit beside those lines: a **CROUCH** frame and narrow **STYLE** passage on Breakwater's runway, plus a **CROUCH** frame on Whiteout's apron. The open deck beside each remains available. Jump, then crouch through the raised frame; approach the narrow passage with earned strafe speed. Other low roofs and raised lips can score from their real geometry too.

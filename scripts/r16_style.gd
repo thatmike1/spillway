@@ -31,7 +31,7 @@ extends RefCounted
 ## piece and heading, a near miss and a crouch save once per obstacle, sync only 4 m or more
 ## from every earlier paid landing, all per attempt. scoring runs only between the timer start and the finish line.
 
-const STYLE_VERSION := "r16-style-1"
+const STYLE_VERSION := "r16-style-2"
 const EVENT_FORMAT := 1
 const U := 0.0254
 
@@ -51,6 +51,7 @@ const RULES := {
 	"crouch": {"min_ups": 200.0, "bonk_ticks": 8, "max_s": 3.0, "base": 600.0, "speed_ref_ups": 300.0,
 		"speed_cap": 2.0, "air_bonus": 300.0},
 	"limits": {"teleport_m": 0.05},
+	"finish": {"sample": "first_finished_inclusive"},
 }
 
 ## combo-break reasons that keep the chain: nothing moved the body.
@@ -186,6 +187,8 @@ func discontinuity(reason: String) -> void:
 ## one post-step sample; returns the events it scored (each also kept in `events`).
 func step(sample: Dictionary, body: CharacterBody3D, level: Node3D = null) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
+	if _sealed:
+		return out
 	_body = body
 	_level = level
 	var dt := float(sample.get("dt", 1.0 / float(sample.get("physics_hz", 128))))
@@ -193,12 +196,11 @@ func step(sample: Dictionary, body: CharacterBody3D, level: Node3D = null) -> Ar
 	_clean = bool(sample.get("clean", true))
 	_finished = bool(sample.get("finished", false))
 	_started = bool(sample.get("started", false))
-	if _finished:
-		_sealed = true
 	_check_continuity(sample)
 	_book_bonks(sample)
 	_combo_clock(sample, dt)
-	var active := _started and not _finished and _body != null and _body.is_inside_tree()
+	# the first finish sample belongs to the attempt; later samples never score.
+	var active := _started and _body != null and _body.is_inside_tree()
 	if active:
 		_speed(sample, dt, out)
 		_sync(sample, out)
@@ -213,6 +215,7 @@ func step(sample: Dictionary, body: CharacterBody3D, level: Node3D = null) -> Ar
 			_cancel_save("inactive")
 	_prev = {"tick": int(sample.get("tick", 0)), "p": sample.get("p", Vector3.ZERO), "grounded": bool(sample.get("grounded", false)),
 		"ducked": bool(sample.get("ducked", false)), "reference_p": sample.get("reference_p", sample.get("p", Vector3.ZERO))}
+	_sealed = _finished
 	return out
 
 ## the summary the recorder and the root keep at the end of an attempt.
@@ -783,6 +786,9 @@ func _follow_save(sample: Dictionary, out: Array[Dictionary]) -> void:
 	var motion: Dictionary = sample.get("motion", {})
 	if _duck_touched(motion, str(_save.name)):
 		_save.duck_contact = true
+		_crouch_counts.duck_hit += 1
+		_cancel_save("duck_contact")
+		return
 	if _time - float(_save.open_time) > float(RULES.crouch.max_s):
 		_cancel_save("timeout")
 		return
@@ -865,7 +871,9 @@ func _is_support_overlap(slab: Dictionary) -> bool:
 func _duck_touched(motion: Dictionary, name: String) -> bool:
 	for contact: Variant in (motion.get("contacts", []) as Array):
 		if contact is Dictionary and bool((contact as Dictionary).get("blocking", false)) and str((contact as Dictionary).get("body", "")) == name:
-			return true
+			# landing on a cleared ledge is support, not a failed passage into its face.
+			if ((contact as Dictionary).get("normal", Vector3.UP) as Vector3).y < _walkable():
+				return true
 	return false
 
 func _duck_via(motion: Dictionary) -> String:

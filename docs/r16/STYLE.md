@@ -1,6 +1,6 @@
 # R16 style scoring
 
-`scripts/r16_style.gd` (service, `STYLE_VERSION = "r16-style-1"`) and `scripts/r16_style_panel.gd` (HUD block). Both only read the game: every geometry question is a query with the runner's own hull (`body.test_move`) or a direct space query with a box of the runner's hull size. Nothing writes position, velocity, grounding, input or progress.
+`scripts/r16_style.gd` (service, `STYLE_VERSION = "r16-style-2"`) and `scripts/r16_style_panel.gd` (HUD block). Both only read the game: every geometry question is a query with the runner's own hull (`body.test_move`) or a direct space query with a box of the runner's hull size. Nothing writes position, velocity, grounding, input or progress.
 
 All weights, windows and thresholds below are agent game choices (labelled `p /` in code), not tuned on Mike's play. They live in one `RULES` table whose hash enters the style identity, so changing any of them starts fresh style bests.
 
@@ -19,7 +19,7 @@ STYLE.identity() / STYLE.identity_key()   # style-best key part: version, event 
 ```
 
 - `step()` takes the INTERFACES post-step sample unchanged. Fields it reads: `tick, dt, elapsed, started, finished, clean, p, reference_p, actual_v, grounded, ducked, motion` (needs `displacement`, `origin_delta`, `contacts`, `hull`, `duck`, `cvars`, optional `experiment`) and `stats` (`hops`, `last_hop`). `held` and `input_events` are not used.
-- Scoring runs only while `started and not finished`. The finish seals the total; untimed exploration afterwards scores nothing.
+- Scoring starts with the timer and includes the first captured sample marked finished. Its eligible landing, passage or sync event is scored before the session seals the score and recording. The service then stays sealed until reset; untimed exploration never scores. This uses the preserved R15 host convention: finish bookkeeping observes the previous motor pose, and the recording captures the current motor step. It does not move the physical finish or change its clock.
 - `discontinuity(reason)` ends any flight, passage, open crouch save, speed stretch and recent-contact memory. It keeps the total, because a respawn stays inside one attempt. The combo ends unless the reason is `pause`, `settings` or `loadout`. `reset()` is the only call that clears the total.
 - Self-guard: a sample whose tick is not the previous tick + 1, or whose feet are more than 5 cm from `previous p + motion.origin_delta`, is treated as `discontinuity("auto:tick_gap" | "auto:teleport")`. A respawn the host forgets to report therefore never reads as a gap, an edge or speed.
 - Style best (root): save `summary().score` only when `summary().best_eligible` (`clean and finished`) under a key that includes `identity_key()` plus the map/preset/geometry/mechanics identity. Practice shows points but never saves.
@@ -63,7 +63,7 @@ Measurements:
 - `gap`: `cleared_m`, `void_m`, `hull_width_m`, `void_from`, `void_to` (refined boundary feet), `air_ticks`, `rise_u`, `takeoff`, `ducked_in_flight`; `geo` is `{from, to}`.
 - `edge`: `slack_u`, `slack_m`, `line`, `why` (`gap` or `climb`), `rise_u`, `hull_width_u`; `geo` is `{landing}`.
 - `near_miss`: `clear_u`, `side` (`left`, `right`, `up`), `sides_u`, `thread`, `max_ups`, `track_m`, `start_tick`; `geo` is `{obstacle, others}`.
-- `crouch_save`: `entry_ups`, `airborne`, `slab` (`head` or `foot`), `normal`, `room_u` (smallest free room between the duck hull and the obstacle while passing), `standing_intrusion_u` (how far the standing hull would have been inside it), `lift_u`, `progress_m`, `open_tick`, `ticks`, `duck_contact`, `via` (`crouch` or the lab's `slide`), `sweep_fraction`; `geo` is `{obstacle}`.
+- `crouch_save`: `entry_ups`, `airborne`, `slab` (`head` or `foot`), `normal`, `room_u` (smallest free room between the duck hull and the obstacle while passing), `standing_intrusion_u` (how far the standing hull would have been inside it), `lift_u`, `progress_m`, `open_tick`, `ticks`, `duck_contact`, `via` (`crouch` or the lab's `slide`), `sweep_fraction`; `geo` is `{obstacle}`. A paid save has `duck_contact: false`: a blocking wall or ceiling contact with that obstacle cancels the open candidate. Landing on its walkable top after clearing its lip remains valid support.
 
 ## Scoring rules
 
@@ -92,6 +92,8 @@ Anti-farm, all per attempt: a gap pays once per takeoff piece, landing piece and
 Not covered: wall runs, surf or slope speed bonuses, side-edge landings, lab grapple or wall-jump style (the lab's slide duck counts for crouch saves, labelled `via: slide`). The service treats every map alike; root decides whether the lab scores at all.
 
 ## Evidence
+
+The independent actual-host review subsequently found that a candidate could pay after the crouched body hit the same beam. Version 2 cancels on that later blocking wall/ceiling contact and explicitly scores the first finish sample before sealing. The root repair run passes 115 actual-host review assertions, the original 60 scoring assertions, copied-folder checks and the selected preserved R15 route. The touched-beam replay pays no crouch save; the clean beam passage still pays, and a 33-point finish-hop sync is included in the actual clean style best and sealed recording. Evidence: `checkpoints/spillway/r16/host-repair-final/` and `style-repair/`. The earlier component measurements below describe the original detector calibration; native and final-package acceptance remain separate.
 
 Headless only so far, Godot 4.7.2 on an isolated source copy. Native views are written but not yet run (`tests/r16_style_views.gd` via `tests/r16_style_native.py`). The 9 Nov check found 14.93 GiB free on /home, under the 15 GiB floor. Record: `checkpoints/spillway/r16/style/RESULTS.json`.
 
