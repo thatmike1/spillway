@@ -32,7 +32,12 @@ func run() -> void:
 		var event := InputEventKey.new()
 		event.physical_keycode = KEY_L
 		event.pressed = true
-		game._input(event)
+		Input.parse_input_event(event)
+		Input.flush_buffered_events()
+		var release := event.duplicate() as InputEventKey
+		release.pressed = false
+		Input.parse_input_event(release)
+		Input.flush_buffered_events()
 		check(game.player.global_transform == p and game.player.velocity == v,"toggle changed body")
 		check(state == [game.elapsed,game.checkpoint_index,game.course_key,game.attempts,game.finished,game.clean_eligible],"toggle changed run")
 	check(before == snapshot(game.level),"collision/progress changed")

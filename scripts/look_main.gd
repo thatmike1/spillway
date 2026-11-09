@@ -17,7 +17,11 @@ func _ready() -> void:
 	canvas.layer = 20
 	add_child(canvas)
 	look_label = Label.new()
-	look_label.position = Vector2(18, 72)
+	look_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	look_label.offset_left = -490
+	look_label.offset_right = -18
+	look_label.offset_top = 18
+	look_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	look_label.add_theme_font_size_override("font_size", 16)
 	look_label.add_theme_color_override("font_color", Color("fff1d6"))
 	look_label.add_theme_color_override("font_shadow_color", Color("162b32"))
@@ -51,7 +55,7 @@ func _input(event: InputEvent) -> void:
 
 func _refresh_look_label() -> void:
 	if look_label != null:
-		look_label.text = "LOOK C EXPERIMENT  ·  %s  ·  L compare  ·  records off" % ("paint + ink" if look_enabled else "original") if map_id == "breakwater" else "LOOK C EXPERIMENT  ·  original map  ·  Breakwater only  ·  records off"
+		look_label.text = "LOOK C / slice 1  ·  %s  ·  L compare  ·  records off" % ("paint + ink" if look_enabled else "original") if map_id == "breakwater" else "LOOK C / slice 1  ·  original map  ·  Breakwater only"
 
 func window_title() -> String:
 	return "Spillway · Look C experiment · %s · L compare" % map_name()
