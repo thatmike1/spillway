@@ -1,6 +1,16 @@
 extends "r16-pack-probe.gd"
 ## adapted from r19-pack-probe.gd at 065f7b279; exact R20 delivery observer. inherited controls, input/recording and real local ghost
 ## checks stay behavioral. the new checks use the packed host and its actual buttons.
+const RAW_DRIVER := preload("r20-raw-input-driver.gd")
+signal tether_step
+var _tether_active := false
+var _tether_armed := false
+var _tether_driver: RefCounted
+var _tether_tick := 0
+var _tether_motor_start := 0
+var _tether_trace: Array = []
+var _tether_attaches: Dictionary = {}
+var _tether_cues: Array = []
 const DIRECTION_DRIVER := preload("r20-direction-driver.gd")
 signal direction_step
 var _direction_active := false
@@ -46,6 +56,9 @@ func early_step(delta: float) -> void:
 		_direction_moving_l = true
 
 func late_step(delta: float) -> void:
+	if _tether_active:
+		_tether_late()
+		return
 	if _direction_active:
 		var sample: Dictionary = game.session.last_sample
 		_direction_row = {"p": game.player.global_position, "v": game.player.velocity,
@@ -217,6 +230,7 @@ func _controls() -> void:
 		await _physics(5)
 	report["r20_maps"] = results
 	await _directional_controls()
+	await _tether_controls()
 
 func _friend_button(name: String) -> bool:
 	var button := game.hud.find_child(name,true,false) as Button
@@ -428,3 +442,98 @@ func _directional_controls() -> void:
 	if home != "practice":
 		await _pause_menu_click("Map_"+home, "restore after directional routes")
 	report["directional_stack"] = {"ok": checks.slice(begin).all(func(c: Dictionary) -> bool:return c.ok), "routes":results, "geometry":"authored Penstock straight, actual GUI stage practice, input-only"}
+
+func _tether_late() -> void:
+	if not _tether_armed:
+		if game.player.tape_step_count - _tether_motor_start < 33:
+			return
+		check("Tether raw route arms after exactly 33 untouched motor steps", game.player.tape_step_count - _tether_motor_start == 33, [game.player.tape_step_count,_tether_motor_start])
+		_tether_armed = true
+	else:
+		var motion: Dictionary = game.player.get_motion_state()
+		var experiment: Dictionary = motion.experiment
+		_tether_trace.append({"tick":_tether_tick-1,"p":_v3(game.player.global_position),"v":_v3(game.player.velocity),
+			"yaw":game.player.yaw,"pitch":game.player.pitch,"grounded":game.player.is_grounded(),
+			"checkpoint":game.checkpoint_index,"elapsed":game.elapsed,"respawns":game.respawn_count})
+		if bool(experiment.grapple.attached):
+			_tether_attaches[str(experiment.grapple.anchor)] = true
+		if "grapple_release" in experiment.events:
+			_tether_cues.append(experiment.tether.last_cue.duplicate(true))
+		if _tether_tick in [350, 650, 900]:
+			_capture = {"name":"tether-"+str(game.settings.tether_model)+"-"+str(_tether_tick)}
+	if _tether_tick >= _tether_driver.duration or game.respawn_count > 0:
+		_tether_active = false
+		tether_step.emit()
+		return
+	_tether_driver.step(_tether_tick)
+	_tether_tick += 1
+	tether_step.emit()
+
+func _tether_controls() -> void:
+	var begin := checks.size()
+	var fixtures: Dictionary = spec.get("feature_tapes", {}).get("tether", {})
+	if not check("Tether controls have explicit reader-derived fixture tapes", fixtures.has("classic") and fixtures.has("pendulum") and fixtures.has("elastic"), fixtures.keys()):
+		return
+	var home: String = game.map_id
+	var preset: String = game.preset_id
+	if home != "tether-yard":
+		await _pause_menu_click("Map_tether-yard", "Tether mouse routes")
+	await _restore_preset("server128")
+	var late := Late.new()
+	late.run = self
+	late.process_physics_priority = 1001
+	late.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(late)
+	var routes: Array = []
+	var classic: Array = []
+	for label: String in ["classic", "pendulum", "elastic", "automatic"]:
+		var model := "classic" if label == "automatic" else label
+		await _tap(KEY_ESCAPE)
+		var button: Button = game.hud.tether_models[model]
+		var changed_model := not button.disabled
+		if changed_model:
+			await _reveal(button)
+			check(label+": choose actual model button", await _click(button))
+		button = game.hud.reel_automatic if label == "automatic" else game.hud.reel_manual
+		if changed_model and not button.disabled:
+			# keep the inherited sampled-attempt audit and exercise held-input isolation between changes.
+			await _tap(KEY_ESCAPE)
+			await _physics(1)
+			check(label+": resuming between preference changes cannot attach", game.player.grapple.is_empty())
+			await _tap(KEY_ESCAPE)
+		if not button.disabled:
+			await _reveal(button)
+			check(label+": choose actual reel preference", await _click(button))
+		check(label+": actual preferences selected", str(game.settings.tether_model) == model and bool(game.settings.tether_auto_reel) == (label == "automatic"))
+		await _reveal(button)
+		await captured("tether-"+label+"-preferences", {"paused":true})
+		await _tap(KEY_ESCAPE)
+		_tether_driver = RAW_DRIVER.new()
+		if not check(label+": load bounded reader-derived tape", _tether_driver.configure(str(fixtures[model]), label == "automatic")):
+			break
+		_tether_tick = 0
+		_tether_armed = false
+		_tether_trace = []
+		_tether_attaches = {}
+		_tether_cues = []
+		_tether_motor_start = game.player.tape_step_count
+		_tether_active = true
+		await _tap(KEY_R)
+		while _tether_active:
+			await tether_step
+		_tether_driver.release()
+		check(label+": real packed route finishes cleanly through three anchors", game.finished and game.finish_kind == "clean" and game.respawn_count == 0 and _tether_attaches.size() == 3, [game.elapsed,_tether_attaches])
+		check(label+": every exercised release activates a self-made cue", _tether_cues.size() >= 3 and _tether_cues.all(func(c: Dictionary) -> bool:return c.get("active",false) and str(c.get("pcm_sha256","")).length() == 64), _tether_cues)
+		if label == "classic":
+			classic = _tether_trace.duplicate(true)
+		if label == "automatic":
+			check("automatic reel exactly preserves both-button physical trace", classic == _tether_trace)
+		await captured("tether-"+label+"-finished", {"finished":true,"clean":true})
+		routes.append({"label":label,"ticks":_tether_trace.size(),"elapsed":game.elapsed,"anchors":_tether_attaches.keys(),"cues":_tether_cues})
+		report["tether_trace_"+label] = _tether_trace.duplicate(true)
+	late.queue_free()
+	await _tap(KEY_R)
+	await _restore_preset(preset)
+	if home != "tether-yard":
+		await _pause_menu_click("Map_"+home, "restore after Tether routes")
+	report["tether_controls"] = {"ok":checks.slice(begin).all(func(c: Dictionary) -> bool:return c.ok) and routes.size() == 4,"routes":routes}
