@@ -4,6 +4,33 @@ const R20_HUD := preload("res://scripts/r20_hud.gd")
 const R20_TETHER := preload("res://scripts/r20_tether_player.gd")
 const R20_MAPS := preload("res://scripts/r20_map_catalog.gd")
 
+const RUN_EXPORT := preload("res://scripts/r20_run_export.gd")
+var run_export := RUN_EXPORT.new()
+var run_export_directory := "user://run_exports"
+var run_export_folder_opener: Callable
+var last_run_export: Dictionary = {}
+
+func _input(event: InputEvent) -> void:
+	if paused and event is InputEventKey and is_instance_valid(hud):
+		var field := get_viewport().gui_get_focus_owner()
+		if field != null and field in [hud.get("export_name"), hud.get("export_path")]:
+			var code: int = event.physical_keycode if event.physical_keycode != 0 else event.keycode
+			if code != KEY_ESCAPE and (code < KEY_F1 or code > KEY_F12):
+				return
+	super._input(event)
+
+func export_my_runs(label: String) -> Dictionary:
+	if not paused:
+		return {"ok": false, "error": "Pause before exporting runs."}
+	var flushed := run_export.flush_open_attempt(session.recorder)
+	if not flushed.ok:
+		last_run_export = flushed
+	else:
+		run_export.folder_opener = run_export_folder_opener
+		last_run_export = run_export.collect(session.directory if not str(session.directory).is_empty() else recordings_dir, OS.get_user_data_dir(), profile_path, settings,
+			run_export_directory, label, str(ProjectSettings.get_setting("application/config/version")))
+	return last_run_export
+
 func _ready() -> void:
 	if map_registry.is_empty():
 		map_registry = R20_MAPS.make()
