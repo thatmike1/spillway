@@ -601,6 +601,15 @@ def direction_boundary_matches(rec, event, value):
 
 def audit_style_stream(rec, rows):
     """reconcile scored events and non-scored state transitions with post-step observations."""
+    ticks = rec.columns.get('tick')
+    require(isinstance(ticks, list) and ticks
+        and all(type(tick) is int and tick == i for i, tick in enumerate(ticks)),
+        'recorded style samples must have a complete ordered tick stream')
+    require(len(rows) == len(ticks), 'style observations must cover every recorded sample')
+    for i, row in enumerate(rows):
+        sample = row.get('sample', row)
+        require(isinstance(sample, dict) and type(sample.get('tick')) is int
+            and sample['tick'] == ticks[i], 'style observations must follow recorded tick order')
     n = len(rows)
     scored = [[] for _ in rows]
     captures = [[] for _ in rows]

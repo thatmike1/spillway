@@ -90,7 +90,7 @@ def stack_stream_fixture(terminal='bank'):
     by_kind = {'speed': {'n': 1, 'points': 80}}
     if terminal == 'bank':
         by_kind['backward_bhop_bank'] = {'n': 1, 'points': 480}
-    rec = SimpleNamespace(events=events, columns={'actual_v_x': [0.] * 12,
+    rec = SimpleNamespace(events=events, columns={'tick': list(range(12)), 'actual_v_x': [0.] * 12,
         'actual_v_z': [350 * 0.0254] * 12}, seal={'outcome': {'style': {'score': score, 'by_kind': by_kind}}})
     if terminal == 'stall':
         rec.columns['actual_v_z'][9] = 0
@@ -565,6 +565,32 @@ class ReleaseGates(unittest.TestCase):
 
     def test_bank_speed_uses_the_pinned_float32_vector_magnitude(self):
         self.assertEqual(pkg.source_horizontal_ups(5., 12.), 13. / 0.0254)
+
+    def test_style_observations_cover_every_recorded_tick_without_reordering(self):
+        rec, rows = stack_stream_fixture('bank')
+        for nested in (False, True):
+            observed = copy.deepcopy(rows)
+            if nested:
+                for row in observed:
+                    row['sample'] = {'tick': row.pop('tick')}
+            pkg.audit_style_stream(rec, observed)
+            for mutate in (
+                lambda s: s.pop(),
+                lambda s: s.pop(0),
+                lambda s: s.pop(5),
+                lambda s: s.append(copy.deepcopy(s[-1])),
+                lambda s: s.reverse(),
+                lambda s: s.__setitem__(5, copy.deepcopy(s[4])),
+                lambda s: (s[0].get('sample', s[0])).update(tick=True),
+                lambda s: (s[0].get('sample', s[0])).update(tick='0'),
+            ):
+                bad = copy.deepcopy(observed)
+                mutate(bad)
+                self.refused(pkg.audit_style_stream, rec, bad)
+        for ticks in ([], [0, 1, 1], [0, True, 2], ['0'], None):
+            bad = copy.deepcopy(rec)
+            bad.columns['tick'] = ticks
+            self.refused(pkg.audit_style_stream, bad, rows)
 
     def test_tether_stack_loss_requires_its_actual_typed_loadout_boundary(self):
         rec, rows = stack_stream_fixture('quit')
