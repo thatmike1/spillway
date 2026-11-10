@@ -42,6 +42,61 @@ def freeze(commit='a'*40):
         'intentional_changes': {}, 'identity_sha256': 'b'*64}
 
 
+def stack_stream_fixture(terminal='bank'):
+    """synthetic transport fixture; no gameplay or eligibility claim."""
+    pending = lambda hop, at: {'record_kind': 'direction', 'v': 1, 'kind': 'direction_pending',
+        'reason': 'eligible', 'serial': hop, 'tick': at, 'time_s': (at + 1) / 128,
+        'direction': 'backward_bhop', 'hops': hop, 'pending': 160 * hop * (hop - 1) // 2,
+        'unit': 160, 'formula': 'unit*n*(n-1)/2', 'm': {'air_s': 0.75, 'track_m': 6., 'progress_m': 5.8, 'rise_m': 0.75, 'fall_m': 0.75, 'heading_dot': 1., 'landing_ups': 350.}}
+    ordinary = {'tick': 0, 'v': 1, 'kind': 'speed', 'base': 80, 'points': 80,
+        'mult': 1, 'direction_mult': 1, 'combo_mult': 1, 'm': {}, 'geo': {}, 'label': 'Speed'}
+    at = 11 if terminal == 'quit' else 9
+    end = pending(3, at)
+    end.update(kind='direction_banked' if terminal == 'bank' else 'direction_lost',
+        reason={'bank': 'facing', 'stall': 'stall', 'queued': 'settings', 'quit': 'quit'}[terminal],
+        serial=4, tick=8 if terminal == 'queued' else at, m={})
+    if terminal == 'queued':
+        end['time_s'] = 9 / 128
+    bank = {'v': 2, 'kind': 'backward_bhop_bank', 'tick': at, 'time_s': (at + 1) / 128,
+        'elapsed': at / 128, 'points': 480, 'base': 480, 'mult': 1, 'direction_mult': 1,
+        'combo_mult': 1, 'combo': 0, 'label': 'Backwards banked', 'm': {'direction': 'backward_bhop',
+            'hops': 3, 'unit': 160, 'formula': 'unit*n*(n-1)/2', 'reason': 'facing',
+            'start_tick': 1, 'last_hop_tick': 7, 'end_ups': 350.}, 'geo': {}, 'p': [0., 2., 30.], 'clean': True}
+    events, rows = [], []
+    active = {'kind': '', 'hops': 0, 'pending': 0, 'unit': 0}
+    last, verdict, score = {}, {}, 0
+    def emit(kind, data, tick, source='capture'):
+        events.append({'q': len(events), 'k': kind, 's': source, 't': tick, 'd': copy.deepcopy(data)})
+    for tick in range(12):
+        scored = []
+        if tick == 0:
+            scored.append(ordinary); emit('style', ordinary, tick); score += 80
+        if tick in (1, 4, 7):
+            d = pending((tick + 2) // 3, tick); emit('direction', d, tick)
+            active = {'kind': d['direction'], 'hops': d['hops'], 'pending': d['pending'], 'unit': d['unit']}
+            verdict = {'verdict': 'eligible', 'tick': tick, 'm': copy.deepcopy(d['m'])}
+        if terminal != 'quit' and tick == at:
+            if terminal == 'bank':
+                scored.append(bank); emit('style', bank, tick); score += 480
+            emit('direction', end, tick)
+            active = {'kind': '', 'hops': 0, 'pending': 0, 'unit': 0}; last = end
+        rows.append({'tick': tick, 'style_score': score, 'style_events': copy.deepcopy(scored),
+            'style_time_s': (tick + 1) / 128, 'style_direction_verdict': copy.deepcopy(verdict), 'style_direction': dict(active, formula=pkg.DIRECTION_FORMULA,
+                suspended=False, last=copy.deepcopy(last))})
+        if terminal == 'queued' and tick == 8:
+            emit('settings', {'key': 'fov', 'value': 90}, tick, 'event')
+        if terminal == 'quit' and tick == at:
+            emit('direction', end, tick, 'event'); emit('quit', {}, tick, 'event')
+    by_kind = {'speed': {'n': 1, 'points': 80}}
+    if terminal == 'bank':
+        by_kind['backward_bhop_bank'] = {'n': 1, 'points': 480}
+    rec = SimpleNamespace(events=events, columns={'actual_v_x': [0.] * 12,
+        'actual_v_z': [350 * 0.0254] * 12}, seal={'outcome': {'style': {'score': score, 'by_kind': by_kind}}})
+    if terminal == 'stall':
+        rec.columns['actual_v_z'][9] = 0
+    return rec, rows
+
+
 def identity_fixture():
     old = pkg.baseline_identity()
     current = copy.deepcopy(old)
@@ -254,8 +309,15 @@ class ReleaseGates(unittest.TestCase):
                 source = source.replace("canonical(v) for v in boundary.get('inputs', [])", "raw_motion_input(v) for v in boundary.get('inputs', [])")
                 source = source.replace("rec.inputs['kind'][j] == 3 or (rec.inputs['kind'][j] == 1 and (rec.inputs['aux'][j] or rec.inputs['code'][j]) in codes_set)",
                                         "rec.inputs['kind'][j] in (2, 3) or (rec.inputs['kind'][j] == 1 and (rec.inputs['aux'][j] or rec.inputs['code'][j]) in MOTION_KEYS)")
+                # scored totals and the new non-scored stream move together into a
+                # separately mutation-tested auditor; every other old check stays exact.
+                start = source.index("            styled = [e for e in rec.events if e.get('s') == 'capture']")
+                stop = source.index("            if outcome.get('kind') == 'finish':", start)
+                source = source[:start] + '            total, by_kind = audit_style_stream(rec, rows)\n' + source[stop:]
             tree = ast.parse(source)
-            node = next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name==name)
+            actual_name = 'strict_legacy_style' if name == 'strict_style' and path.name == 'package-r20.py' else name
+            node = next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name==actual_name)
+            node.name = name
             for item in ast.walk(node):
                 if isinstance(item,ast.Constant) and isinstance(item.value,str):
                     item.value=item.value.replace('R20','R19')
@@ -385,10 +447,11 @@ class ReleaseGates(unittest.TestCase):
 
     def test_new_direction_style_schema_keeps_totals_bounded(self):
             value={'tick':1,'v':1,'kind':'backward_bhop','base':80,'points':960,'mult':12,'direction_mult':4,'combo_mult':3,'m':{},'geo':{},'label':'Backwards'}
-            pkg.strict_style(value,1)
+            pkg.strict_legacy_style(value,1)
+            self.refused(pkg.strict_style,value,1)
             for key,bad_value in [('kind','unknown'),('points',9610),('mult',float('nan')),('direction_mult',5),('combo_mult',4),('tick',2)]:
                 bad=dict(value);bad[key]=bad_value
-                self.refused(pkg.strict_style,bad,1)
+                self.refused(pkg.strict_legacy_style,bad,1)
 
     def test_stack_bank_can_exceed_legacy_ceiling_without_combo_amplification(self):
         value = {'v': 2, 'kind': 'backward_bhop_bank', 'tick': 1300, 'time_s': 10.15625,
@@ -398,7 +461,8 @@ class ReleaseGates(unittest.TestCase):
                 'formula': 'unit*n*(n-1)/2', 'reason': 'facing', 'start_tick': 50,
                 'last_hop_tick': 1290, 'end_ups': 350.}, 'geo': {}, 'p': [0., 2., 30.], 'clean': True}
         pkg.strict_stack_style(value, 1300)
-        self.refused(pkg.strict_style, value, 1300)
+        self.refused(pkg.strict_legacy_style, value, 1300)
+        pkg.strict_style(value, 1300)
         for key, wrong in [('points', 30401), ('base', 30401), ('mult', 2), ('combo_mult', 2),
                 ('direction_mult', 2), ('combo', 1), ('tick', 1301), ('v', True),
                 ('clean', 1), ('p', [0., float('nan'), 30.]), ('record_kind', 'direction')]:
@@ -418,7 +482,7 @@ class ReleaseGates(unittest.TestCase):
         value = {'record_kind': 'direction', 'v': 1, 'kind': 'direction_pending',
             'reason': 'eligible', 'serial': 20, 'tick': 1290, 'time_s': 10.078125,
             'direction': 'backward_bhop', 'hops': 20, 'pending': 30400, 'unit': 160,
-            'formula': 'unit*n*(n-1)/2', 'm': {'landing_ups': 350.}}
+            'formula': 'unit*n*(n-1)/2', 'm': {'air_s': 0.75, 'track_m': 6., 'progress_m': 5.8, 'rise_m': 0.75, 'fall_m': 0.75, 'heading_dot': 1., 'landing_ups': 350.}}
         pkg.strict_direction(value, 1290)
         for key, wrong in [('pending', 30401), ('hops', 19), ('unit', 50), ('tick', 1291),
                 ('v', True), ('serial', 0), ('serial', True), ('time_s', float('nan')),
@@ -434,6 +498,47 @@ class ReleaseGates(unittest.TestCase):
         self.refused(pkg.strict_direction, dict(value, kind='direction_banked', reason='quit', m={}), 1290)
         armed = dict(value, serial=1, hops=1, pending=0)
         pkg.strict_direction(armed, 1290)
+
+    def test_scored_and_non_scored_streams_match_independent_pending_and_score(self):
+        for terminal in ['bank', 'stall', 'queued', 'quit']:
+            rec, rows = stack_stream_fixture(terminal)
+            total, by_kind = pkg.audit_style_stream(rec, rows)
+            self.assertEqual(total, 560 if terminal == 'bank' else 80)
+            self.assertEqual(by_kind, rec.seal['outcome']['style']['by_kind'])
+        rec, rows = stack_stream_fixture('bank')
+        rows[0]['style_direction'].update(kind='backward_bhop', unit=160)
+        rows[10]['style_direction'].update(kind='sideways_bhop', unit=50)
+        pkg.audit_style_stream(rec, rows)
+        for mutation in [
+            lambda r,s: r.events[1]['d'].update(points=0),
+            lambda r,s: r.events[2]['d'].update(serial=1),
+            lambda r,s: r.events[2]['d'].update(tick=5),
+            lambda r,s: r.events[2]['d'].update(time_s=100),
+            lambda r,s: r.events[4]['d'].update(points=481),
+            lambda r,s: r.events[4]['d']['m'].update(start_tick=2),
+            lambda r,s: r.events[5]['d'].update(kind='direction_lost', reason='stall'),
+            lambda r,s: r.events[4].update(s='event'),
+            lambda r,s: r.events[1].update(k='unknown'),
+            lambda r,s: s[4]['style_direction'].update(pending=0),
+            lambda r,s: s[4]['style_direction_verdict']['m'].update(heading_dot=0.6),
+            lambda r,s: r.events[0].update(t=-1),
+            lambda r,s: s[9]['style_direction'].update(last={}),
+            lambda r,s: s[9].update(style_score=80),
+            lambda r,s: s[9].update(style_events=[]),
+            lambda r,s: r.seal['outcome']['style'].update(score=80),
+            lambda r,s: r.seal['outcome']['style']['by_kind'].update(backward_bhop_bank={'n': 2, 'points': 480}),
+            lambda r,s: r.columns['actual_v_z'].__setitem__(9, 299 * 0.0254),
+        ]:
+            bad, observed = copy.deepcopy(rec), copy.deepcopy(rows)
+            mutation(bad, observed)
+            self.refused(pkg.audit_style_stream, bad, observed)
+        for terminal in ['queued', 'quit']:
+            rec, rows = stack_stream_fixture(terminal)
+            if terminal == 'queued':
+                rec.events[-1]['d']['tick'] = 10
+            else:
+                rec.events[-1]['k'] = 'pause'
+            self.refused(pkg.audit_style_stream, rec, rows)
 
     def test_native_default_preserves_unavailable_desktop_refusal(self):
             # the real guard is used unchanged; no display server is launched.

@@ -9,6 +9,17 @@ var _salt_pieces: Dictionary = {}
 var _salt_contacts := {"west": 0, "east": 0}
 var _salt_steep_grounded := 0
 
+func observe_actual(delta: float) -> void:
+	var count := observed_samples.size()
+	super.observe_actual(delta)
+	if observed_samples.size() == count:
+		return
+	var host := get_tree().current_scene
+	var snapshot: Dictionary = host.get("session").get("style").call("snapshot")
+	observed_samples[-1]["style_direction"] = RUN_READER.json_safe(snapshot.direction)
+	observed_samples[-1]["style_time_s"] = snapshot.time_s
+	observed_samples[-1]["style_direction_verdict"] = RUN_READER.json_safe(snapshot.diag.direction.last)
+
 func late_step(delta: float) -> void:
 	if not _row.is_empty() and game.map_id == "saltglass":
 		_observe_saltglass(int(_row.tick))

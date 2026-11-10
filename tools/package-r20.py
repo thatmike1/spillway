@@ -457,7 +457,7 @@ def pack_negatives(folder, work, evidence):
     return results
 
 
-def strict_style(value, at):
+def strict_legacy_style(value, at):
     require(isinstance(value, dict) and value.get('tick') == at and value.get('v') == 1, 'invalid R20 style tick/schema')
     require(value.get('kind') in ('speed', 'sync', 'gap', 'edge', 'near_miss', 'crouch_save', 'backward_bhop', 'sideways_bhop'), 'unknown R20 style kind')
     base, mult, points = value.get('base'), value.get('mult'), value.get('points')
@@ -478,7 +478,10 @@ DIRECTION_BANK_REASONS = frozenset(('finish', 'facing', 'ground_dwell', 'no_moto
 
 
 def finite_number(value):
-    return type(value) in (int, float) and math.isfinite(value)
+    try:
+        return type(value) in (int, float) and math.isfinite(value)
+    except OverflowError:
+        return False
 
 
 def strict_stack_style(value, at):
@@ -537,13 +540,142 @@ def strict_direction(value, at):
     require(value['kind'] in ('direction_pending', 'direction_banked', 'direction_lost'), 'invalid direction diagnostic kind')
     if value['kind'] == 'direction_pending':
         require(value['reason'] == 'eligible', 'invalid pending reason')
+        measures = value['m']
+        require(set(measures) == {'air_s', 'track_m', 'progress_m', 'rise_m', 'fall_m',
+            'heading_dot', 'landing_ups'} and all(finite_number(component) for component in measures.values()),
+            'invalid pending flight measures')
+        require(0.18 <= measures['air_s'] <= 1.2 and measures['track_m'] >= 3
+            and measures['progress_m'] >= measures['track_m'] * 0.85
+            and measures['rise_m'] >= 0.25 and measures['fall_m'] >= 0.2
+            and measures['heading_dot'] >= 0.5 and measures['landing_ups'] >= 300,
+            'pending diagnostic violates R19 flight eligibility')
     elif value['kind'] == 'direction_banked':
         require(value['reason'] in DIRECTION_BANK_REASONS and value['m'] == {}, 'invalid bank diagnostic reason')
     else:
         require(value['m'] == {} and value['reason'] not in ('pause', 'resume'), 'invalid loss diagnostic reason')
 
 
-# retain the strict R19 v1 style schema and full R16 audit; R20 additions require a versioned integration.
+def strict_style(value, at):
+    if isinstance(value, dict) and value.get('v') == 2:
+        strict_stack_style(value, at)
+        return
+    strict_legacy_style(value, at)
+    require(type(value['v']) is int and type(value['tick']) is int
+        and value['kind'] not in DIRECTION_UNITS and value['direction_mult'] == 1,
+        'R20 ordinary style must not multiply or immediately score direction')
+
+
+def audit_style_stream(rec, rows):
+    """reconcile scored events and non-scored state transitions with post-step observations."""
+    n = len(rows)
+    scored = [[] for _ in rows]
+    captures = [[] for _ in rows]
+    lifecycle = [[] for _ in rows]
+    banks = {}
+    by_kind = {}
+    diagnostics = []
+    for event in rec.events:
+        source, kind, at, value = event.get('s'), event.get('k'), event['t'], event['d']
+        if source == 'capture' and kind == 'style':
+            require(type(at) is int and 0 <= at < n, 'invalid style lifecycle attribution')
+            strict_style(value, at)
+            scored[at].append(value)
+            entry = by_kind.setdefault(value['kind'], {'n': 0, 'points': 0})
+            entry['n'] += 1; entry['points'] += value['points']
+            if value['v'] == 2:
+                key = (at, value['m']['direction'], value['m']['hops'])
+                require(key not in banks, 'duplicate direction bank')
+                banks[key] = value
+        elif kind == 'direction':
+            require(source in ('capture', 'event') and type(at) is int and 0 <= at < n,
+                'invalid direction lifecycle attribution')
+            require(isinstance(value, dict) and type(value.get('tick')) is int
+                and 0 <= value['tick'] <= at, 'direction diagnostic refers to a future or missing sample')
+            strict_direction(value, value['tick'])
+            require(value['kind'] == 'direction_lost' or value['tick'] == at,
+                'only a queued loss may precede its capture tick')
+            require(source != 'event' or value['kind'] == 'direction_lost',
+                'lifecycle must never bank or synthesize a pending landing')
+            (captures if source == 'capture' else lifecycle)[at].append(value)
+            diagnostics.append(value)
+        elif source == 'capture':
+            raise Rejected('unknown capture kind')
+        elif kind == 'style':
+            raise Rejected('scored style must belong to a physical capture')
+    require([d['serial'] for d in diagnostics] == list(range(1, len(diagnostics) + 1)),
+        'missing, duplicate or reordered direction diagnostics')
+    inactive = {'kind': '', 'hops': 0, 'pending': 0, 'unit': 0}
+    active, last, start_tick, last_hop_tick, total = dict(inactive), {}, -1, -1, 0
+
+    def transition(value, at):
+        nonlocal active, last, start_tick, last_hop_tick
+        if value['kind'] == 'direction_pending':
+            require((active['kind'] == '' and value['hops'] == 1)
+                or (active['kind'] == value['direction'] and value['hops'] == active['hops'] + 1),
+                'direction pending does not extend the observed chain')
+            if active['kind'] == '':
+                start_tick = value['tick']
+            last_hop_tick = value['tick']
+            active = {'kind': value['direction'], 'hops': value['hops'],
+                'pending': value['pending'], 'unit': value['unit']}
+            return
+        require(active == {'kind': value['direction'], 'hops': value['hops'],
+            'pending': value['pending'], 'unit': value['unit']}, 'direction terminal does not match the observed pending chain')
+        key = (at, value['direction'], value['hops'])
+        bank = banks.pop(key, None) if value['kind'] == 'direction_banked' else None
+        if value['kind'] == 'direction_banked' and value['pending'] > 0:
+            require(bank is not None and bank['points'] == value['pending']
+                and bank['m']['reason'] == value['reason'] and bank['m']['start_tick'] == start_tick
+                and bank['m']['last_hop_tick'] == last_hop_tick, 'direction bank differs from its earned diagnostic chain')
+            speed = math.hypot(rec.columns['actual_v_x'][at], rec.columns['actual_v_z'][at]) / 0.0254
+            require(speed >= 300, 'direction bank paid below minimum actual speed')
+        else:
+            require(bank is None and key not in banks, 'lost or zero pending chain awarded a bank')
+        last = value
+        active = dict(inactive)
+
+    for i, row in enumerate(rows):
+        for value in captures[i]:
+            if value['kind'] == 'direction_pending':
+                require(finite_number(row.get('style_time_s'))
+                    and math.isclose(value['time_s'], row['style_time_s'], abs_tol=0.00000051, rel_tol=0),
+                    'pending diagnostic time differs from the physical style clock')
+                require(json_numbers_match(row.get('style_direction_verdict'),
+                    {'verdict': 'eligible', 'tick': value['tick'], 'm': value['m']}),
+                    'pending diagnostic flight differs from the live detector verdict')
+            transition(value, i)
+        state = row.get('style_direction')
+        require(isinstance(state, dict) and set(state) == {'kind', 'hops', 'pending', 'unit',
+            'formula', 'suspended', 'last'} and state['formula'] == DIRECTION_FORMULA
+            and state['suspended'] is False, 'independent direction observation is missing or suspended')
+        require(isinstance(state['kind'], str) and state['kind'] in ('', *DIRECTION_UNITS)
+            and all(type(state[key]) is int for key in ('hops', 'pending', 'unit')),
+            'invalid observed direction state types')
+        # a first physical flight names its direction before its zero-point landing arms.
+        expected = active if active['hops'] else dict(active, kind=state['kind'],
+            unit=DIRECTION_UNITS.get(state['kind'], 0))
+        require({key: state[key] for key in active} == expected
+            and json_numbers_match(state['last'], last), 'recorded direction transitions differ from live pending state')
+        require('style_events' in row and json_numbers_match(scored[i], row['style_events']),
+            'recorded style events differ from live scoring observations')
+        total += sum(value['points'] for value in scored[i])
+        require(type(row.get('style_score')) is int and row['style_score'] == total,
+            'style score differs from live scoring observation')
+        # lifecycle events are emitted after the recorder's last physical sample.
+        for value in lifecycle[i]:
+            require(any(event.get('s') == 'event' and event.get('k') == value['reason']
+                and event.get('t') == value['tick'] for event in rec.events),
+                'direction lifecycle loss has no matching host boundary')
+            transition(value, i)
+    require(not banks, 'direction bank has no matching bank diagnostic')
+    outcome = rec.seal['outcome']
+    require(type(outcome.get('style', {}).get('score')) is int and outcome['style']['score'] == total
+        and json_numbers_match(outcome['style'].get('by_kind'), by_kind),
+        'style total differs from recorded and observed scored events')
+    return total, by_kind
+
+
+# retain the strict R19 v1 schema and physical/input audit; versioned banks are reconciled separately.
 digest, profile_root, json_numbers_match = r16.digest, r16.profile_root, r16.json_numbers_match
 PROJECT_NAME, SAVE_PATH = r16.PROJECT_NAME, r16.SAVE_PATH
 
@@ -693,25 +825,7 @@ def audit_profile(profile, before, after, report, helpers, allow_config=False):
                     raise Rejected('delivered input edges/mouse differ on their actual tick %d' % at)
             if [e.get('q') for e in rec.events] != list(range(len(rec.events))) or any(type(e.get('t')) is not int or not -1 <= e['t'] < n for e in rec.events):
                 raise Rejected('event sequence or tick attribution is invalid')
-            styled = [e for e in rec.events if e.get('s') == 'capture']
-            style_by_tick = [[] for _ in range(n)]
-            total, by_kind = 0, {}
-            for event in styled:
-                value, at = event['d'], event['t']
-                require(event.get('k') == 'style' and at >= 0, 'invalid style lifecycle attribution')
-                strict_style(value, at)
-                style_by_tick[at].append(value)
-                entry = by_kind.setdefault(value['kind'], {'n': 0, 'points': 0})
-                entry['n'] += 1; entry['points'] += value['points']
-            for i, row in enumerate(rows):
-                if 'style_events' not in row or not json_numbers_match(style_by_tick[i], row['style_events']):
-                    raise Rejected('recorded style events differ from live scoring observations')
-                total += sum(value['points'] for value in style_by_tick[i])
-                if type(row.get('style_score')) is not int or row['style_score'] != total:
-                    raise Rejected('style score differs from live scoring observation')
-            if (type(outcome.get('style', {}).get('score')) is not int or outcome['style']['score'] != total
-                    or not json_numbers_match(outcome['style'].get('by_kind'), by_kind)):
-                raise Rejected('style total differs from recorded and observed scored events')
+            total, by_kind = audit_style_stream(rec, rows)
             if outcome.get('kind') == 'finish':
                 if rec.seal.get('finish_tick') != n - 1 or not (c['flags'][-1] & 2):
                     raise Rejected('finish did not include and seal its final observed tick')
