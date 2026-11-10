@@ -912,6 +912,7 @@ def native_checks(folder, build, files, args, evidence, work, routes):
                     'native_backend': report.get('native_backend'), 'titles': sorted(titles), 'frames': len(report.get('frames', [])),
                     'r20_maps': report.get('r20_maps', []), 'friend': report.get('friend', {}),
                     'directional_stack': report.get('directional_stack', {}), 'tether_controls': report.get('tether_controls', {}), 'through_controls': report.get('through_controls', {}),
+                    'r20_route_identity': report.get('r20_route_identity', {}),
                     'cwd_empty': not any((out / 'cwd').iterdir())}
                 if mode == 'play':
                     best = {key: report['run'].get(key) for key in ['best_time','open_best_time','best_splits','best_segments','record_ticks','style_best','ghost_pointer']}
@@ -927,7 +928,7 @@ def native_checks(folder, build, files, args, evidence, work, routes):
                     and (mode != 'controls' or (set(r['map'] for r in result['r20_maps']) == set(build['freeze']['required_maps'])
                         and result['directional_stack'].get('ok') is True and result['tether_controls'].get('ok') is True
                         and result['through_controls'].get('ok') is True))
-                    and (mode != 'play' or result['friend'].get('ok') is True)
+                    and (mode != 'play' or (result['friend'].get('ok') is True and result['r20_route_identity'].get('ok') is True))
                     and result.get('exact_source_trace', {'ok': True})['ok'] and result.get('input_order', {'ok': True})['ok']
                     and result.get('config_not_rewritten', True))
                 runs[label] = result

@@ -378,10 +378,23 @@ func _wrap_up() -> void:
 		await _r20_features()
 	await super._wrap_up()
 
-# the parent must implement these against final controls before clearing the pending gate.
-# this intentionally fails closed rather than accepting invented field assignments.
+# controls mode exercises the feature routes; play mode retains its earned course and ghost.
 func _r20_features() -> void:
-	check("R20 exact-pack feature integration pending", false, ["saltglass-route", "directional-stack", "tether-controls", "through-line", "export-my-runs"])
+	var begin := checks.size()
+	var metadata: Dictionary = game.recording_metadata("release")
+	var style: Dictionary = metadata.scoring.style
+	check("earned route retains the R20 recording and stack identity", metadata.build == "spillway-2026.11.10-r20"
+		and metadata.build_label == "Spillway R20" and style.version == "r20-style-stack-1"
+		and int(style.event_format) == 2 and style.rules_sha256 == "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688")
+	check("earned route remains clean after friend sharing", game.finished and game.finish_kind == "clean" and game.respawn_count == 0)
+	check("earned route uses unchanged F2 and the observed map identity", game.preset_id == "server128"
+		and game.course_geometry == expect.identity.maps[game.map_id].geometry
+		and game.course_key == expect.identity.keys[game.map_id][game.preset_id].course_key)
+	if game.map_id == "saltglass":
+		check("earned Saltglass route retained its packed surf observations", report.has("saltglass")
+			and report.saltglass.pieces.size() == 16 and report.saltglass.steep_grounded_ticks == 0)
+	report["r20_route_identity"] = {"ok":checks.slice(begin).all(func(c: Dictionary) -> bool:return c.ok),
+		"map":game.map_id,"geometry":game.course_geometry,"scoring":metadata.scoring}
 
 func _direction_input(command: Array) -> void:
 	if command[0] == "mouse":
