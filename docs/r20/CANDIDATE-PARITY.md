@@ -64,7 +64,7 @@ The scoring contract has exactly `schema`, `kind`, `status`, `reviewed_by`, `bas
       "rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
       "version": "r20-style-stack-1"
     },
-    "style_key": "r20-style-stack-1/2/b133b80f118247cf9",
+    "style_key": "r20-style-stack-1/2/b133b80f118247cf",
     "timing": "r16-timing-1"
   }
 }
@@ -143,3 +143,11 @@ Editor-generated sidecars are retained for independent re-audit: `.import` files
 All 144 trace streams keep their streamed raw hashes/lengths and original capture reports/results. Canonical transport verifies zero header time/name, losslessness and identical compressed bytes with different chunk sizes. Independent re-audit reconstructs the complete source archive from Git and verifies raw/canonical transport receipts without changing baseline evidence. Original 56 actual-data negatives run unchanged into the new evidence tree. Additional candidate controls rebuild valid recording chains for every binary sample/input column and challenge every metadata/identity field plus actually present scored/diagnostic/live-state cases. Successful source parity still grants no packaging, native, Windows or promotion acceptance.
 
 Preparation receipts live only in `/tmp/r20-candidate-prep`: unit logs, the private rerun of original 56 actual-data negatives, resource stages and unreviewed templates. The immutable baseline manifest SHA256 is `f939eba5f2fbbcb13f6833f3f1067e961795685fbac1c6987dfb6a7bedb7fffb`; its verified remote raw archive SHA256 is `b8019e3d36c8826977d85275a2aaee5ad7f0ebc9a4004dd6e3805c20a7412e88`. No baseline bug was established during this preparation.
+
+## Actual-snapshot auditor repair
+
+The style key is derived from the same 16-character rules-hash prefix as the runtime and checked against the independently pinned component contract. Ordinary detector verdict buckets remain type-exact against the frozen scorer. Directional verdict counters are reconstructed separately from the closed, finite-valued verdict schema, with one newly observed verdict per physical sample tick; repeated snapshots preserve the existing count. Pending/bank/loss accounting remains in the separate tagged-stream auditor.
+
+`python3 -B tests/test_r20_candidate_snapshots.py` requires the actual first Breakwater attempt at `/tmp/r20-candidate-parity/breakwater-basic/old/evaluator/observations.jsonl.gz`. It fails if that evidence is absent. It checks the actual snapshots, malformed actual-tick rejection, independent identity, verdict schema and bounded normal-core transport. Run it after capture and before archiving that evidence. Synthetic transport controls remain in `tests/test_r20_transport_continuation.py`.
+
+Normal-core compression now inventories unchanged evidence before and after each stream, checks the output allocation and HOME floor each chunk, and checks the final gzip flush against the same scratch cap. It retains the same byte-level output and separate chunk-size challenge. The earlier separately pinned continuation was diagnostic history; final acceptance uses a fresh normal capture and independent audit from the repaired clean commit.

@@ -6,6 +6,7 @@ import hashlib
 import itertools
 import json
 import math
+import stat
 from pathlib import Path
 import re
 import struct
@@ -40,7 +41,7 @@ BASELINE_MANIFEST_SHA = 'f939eba5f2fbbcb13f6833f3f1067e961795685fbac1c6987dfb6a7
 RECEIPT_SHA = '109e1f0dc3ef973fec7a94399ec2ce46808991884d1dc07d7d11af1115662b4e'
 ARCHIVE_SHA = '13d61f62129e452ea2418552dd56f93ca06b16350fefadeb533793b195331b95'
 STYLE_ID = {'event_format': 2, 'rules_sha256': 'b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688', 'version': 'r20-style-stack-1'}
-STYLE_KEY = 'r20-style-stack-1/2/b133b80f118247cf9'
+STYLE_KEY = STYLE_ID['version'] + '/' + str(STYLE_ID['event_format']) + '/' + STYLE_ID['rules_sha256'][:16]
 VARIANTS = ('old', 'new', 'toggle')
 IDENTITY_KEYS = {'course_key','format','geometry','map','motor','overlay','physics_hz','preset','runner','timing'}
 META_KEYS = {'attempt','build','build_label','clean_at_start','course_key','elapsed_at_start','family','held_actions','identity','lab','laws','look','map','map_kind','map_name','opportunities','overlay','paused_at_start','physics','practice_reason','practice_stage','preset','preset_label','record_identity','sample','scoring','start_reason','timer_running_at_start'}
@@ -389,23 +390,45 @@ def matrix_guard(report):
     need(sum(len(r['variants']) for r in report['routes']) == 48,'48 fresh candidate plays required')
 
 
+def transport_tree_state(root, exclude=None):
+    result = {}
+    for path in root.rglob('*'):
+        if path == exclude or not path.is_file():
+            continue
+        info = path.stat()
+        need(not path.is_symlink() and stat.S_ISREG(info.st_mode), 'transport requires regular evidence files')
+        result[str(path.relative_to(root))] = (info.st_ino, info.st_size, info.st_mtime_ns, info.st_blocks)
+    return result
+
+
 def transport(source, target, chunk=65536):
-    need(not target.exists(),'transport scratch already exists')
-    raw = hashlib.sha256(); length = 0
-    with gzip.open(source,'rb') as incoming, target.open('wb') as packed:
-        with gzip.GzipFile(filename='',mode='wb',fileobj=packed,mtime=0,compresslevel=6) as output:
-            for block in iter(lambda:incoming.read(chunk),b''):
-                output.write(block); raw.update(block); length += len(block)
+    need(type(chunk) is int and chunk > 0, 'positive transport chunk required')
+    need(not target.exists() and not target.is_symlink(), 'transport scratch already exists')
+    need(source.is_relative_to(FINAL) and target.is_relative_to(FINAL), 'transport outside final evidence')
+    need(source.is_file() and not source.is_symlink(), 'transport source is not regular')
+    before = transport_tree_state(FINAL)
+    initial = sum(info[3] * 512 for info in before.values())
+    need(initial <= B.CAP, 'final scratch cap before compression')
+    digest = hashlib.sha256()
+    length = 0
+    with gzip.open(source, 'rb') as incoming, target.open('xb') as packed:
+        with gzip.GzipFile(filename='', mode='wb', fileobj=packed, mtime=0, compresslevel=6) as outgoing:
+            for block in iter(lambda: incoming.read(chunk), b''):
+                outgoing.write(block)
+                digest.update(block)
+                length += len(block)
                 B.gate()
-                need(B.allocated_footprint(FINAL) <= B.CAP,'final scratch cap')
-    return {'raw_sha256':raw.hexdigest(),'raw_bytes':length,'gzip_sha256':sha(target)}
+                need(initial + target.stat().st_blocks * 512 <= B.CAP, 'final scratch cap during compression')
+    need(transport_tree_state(FINAL, target) == before, 'other evidence changed during compression')
+    need(initial + target.stat().st_blocks * 512 <= B.CAP, 'final scratch cap after compression flush')
+    return {'raw_sha256': digest.hexdigest(), 'raw_bytes': length, 'gzip_sha256': sha(target)}
 
 
 def style_snapshots(rows):
     fields = {'version','identity_key','score','combo','mult','direction','combo_left_s','combo_window_s',
         'last_combo','recent','last','by_kind','clean','finished','sealed','best_eligible','time_s','context','diag'}
     diag_fields = {'speed','sync','direction','flight','gap','edge','near','crouch','verdicts','farm_blocked','discontinuities','auto_breaks'}
-    cumulative=[]; total=0; tally={}
+    cumulative=[]; total=0; tally={}; direction_counts={}; prior_direction=None; seen_direction_ticks=set()
     for row in rows:
         snap=row['actual']['style'];ref=row['ordinary_snapshot']
         keys(snap,fields,'style snapshot');keys(ref,fields,'reference snapshot')
@@ -423,8 +446,37 @@ def style_snapshots(rows):
         need(type(snap['score']) is int and snap['score']==total==row['style_score'],'actual live score includes pending or differs')
         for key in fields-{'version','identity_key','score','direction','recent','last','by_kind','diag'}:
             exact(snap[key],ref[key],'ordinary reference snapshot '+key)
-        for key in diag_fields-{'direction','farm_blocked'}:
+        for key in diag_fields-{'direction','farm_blocked','verdicts'}:
             exact(snap['diag'][key],ref['diag'][key],'ordinary detector live diagnostics '+key)
+        for side in (snap,ref):
+            need(type(side['diag']['verdicts']) is dict,'detector verdict map')
+        exact({k:v for k,v in snap['diag']['verdicts'].items() if k!='direction'},
+            {k:v for k,v in ref['diag']['verdicts'].items() if k!='direction'},'ordinary detector verdict counts')
+        verdict=snap['diag']['direction']['last']
+        need(type(verdict) is dict,'direction verdict object')
+        current_tick=row['sample']['tick']
+        need(type(current_tick) is int and current_tick>=0,'physical sample tick')
+        if verdict:
+            reason=verdict.get('verdict')
+            need(type(reason) is str and reason in {'stall','facing','ground_dwell','no_motor_jump','flight_timeout','flight_short','travel_short','rise_short','fall_short','efficiency','heading','novelty','eligible'},'unknown direction verdict')
+            keys(verdict, {'verdict','tick'} if reason=='stall' else {'verdict','tick','m'},'direction verdict')
+            verdict_tick=verdict['tick']
+            need(type(verdict_tick) is int and 0<=verdict_tick<=current_tick,'direction verdict tick type/range')
+            if reason!='stall':
+                measures=verdict['m']
+                need(type(measures) is dict,'direction verdict measurements')
+                expected={'air_s','track_m','progress_m','rise_m','fall_m','heading_dot','landing_ups'} if reason in {'flight_short','travel_short','rise_short','fall_short','efficiency','heading','novelty','eligible'} else set()
+                keys(measures,expected,'direction verdict measurements')
+                for value in measures.values():
+                    need(type(value) in (int,float) and math.isfinite(value),'finite numeric direction measurement')
+            if verdict!=prior_direction:
+                need(verdict_tick==current_tick and verdict_tick not in seen_direction_ticks,'new direction verdict must belong to one current physical sample')
+                seen_direction_ticks.add(verdict_tick)
+                if reason!='stall':direction_counts[reason]=direction_counts.get(reason,0)+1
+        else:
+            need(prior_direction in (None,{}),'direction verdict erased without attempt reset')
+        exact(snap['diag']['verdicts'].get('direction',{}),direction_counts,'independent direction verdict counts')
+        prior_direction=copy.deepcopy(verdict)
         for side in (snap,ref):
             count=side['diag']['farm_blocked'].get('direction',0)
             need(type(count) is int and count>=0,'direction anti-farm counter')
