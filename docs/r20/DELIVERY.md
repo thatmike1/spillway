@@ -133,3 +133,13 @@ python3 -B tools/check-r20-windows-release.py --help
 ```
 
 This gate has not executed a final artifact yet. Successful Wine execution will still not establish native Windows, rendering, menu operation or feel. The old R19 helper is protected and unchanged.
+
+## Export-controller preparation and review repairs
+
+The packed direction controller now requests an export while a real backwards stack is paused and pending. It types the export name through GUI input, clicks the production button, checks every recording/settings member against the live source inventory and SHA256, and reads the flushed active tail as an honest partial. Physics, pending style, counts of ticks/inputs/events and the open attempt must stay unchanged; only flushed chunk/byte counts grow. Folder opening is intercepted and its failure must leave a visible selectable path. This controller compiles with the pinned editor; actual item-6 packed execution remains pending.
+
+`run_export_profile_audit` permits only the exact observed ZIP path/hash. It preserves the original profile audit for everything else, compares the exported active prefix with its later sealed recording, invokes the real manual ingest script, requires every attempt and partial sample in its analysis, checks duplicate idempotence, and refuses mutations of that actual ZIP (traversal, changed member and truncated transport). No Mike playtest data enters these generated release fixtures.
+
+Independent first-five review found two concrete auditor false rejections. Controls now admit only the same exact cfg path as play, with actual persisted-settings readback and a final cfg SHA receipt. Startup and reload remain read-only. A `tether_settings` directional loss matches only a same-tick event-source `loadout` on Tether Yard, with a real changed boolean reel preference or a changed known model pair. Generic or unmatched boundaries remain rejected; producer, scorer, recorder and motor bytes are unchanged. Two focused regressions, including eight negative boundary mutations, bring the helper suite to 34 passing tests. The actual retained component boundary pair also passes the narrow matcher.
+
+Outer evidence: `look/REVIEW-R20-FIRST5.md`, `look/evidence/r20-review-repairs/`, and `look/evidence/r20-export-release-prep/`. The first compile attempt caught an unsupported PackedStringArray filter call; the corrected adapter explicitly converts to Array. That failed attempt remains labelled. All final integration gates remain closed pending the complete item-6 runtime and real package execution.

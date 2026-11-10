@@ -548,6 +548,41 @@ class ReleaseGates(unittest.TestCase):
 
     def test_bank_speed_uses_the_pinned_float32_vector_magnitude(self):
         self.assertEqual(pkg.source_horizontal_ups(5., 12.), 13. / 0.0254)
+
+    def test_tether_stack_loss_requires_its_actual_typed_loadout_boundary(self):
+        rec, rows = stack_stream_fixture('quit')
+        rec.header = {'metadata': {'map': 'tether-yard'}}
+        rec.events[-2]['d']['reason'] = 'tether_settings'
+        rec.events[-1].update(k='loadout', d={'key':'tether_auto_reel','from':False,'to':True})
+        pkg.audit_style_stream(rec, rows)
+        model = copy.deepcopy(rec)
+        model.events[-1]['d'] = {'key':'tether_model','from':'classic','to':'elastic'}
+        pkg.audit_style_stream(model, rows)
+        for mutation in [
+            lambda r: r.header['metadata'].update(map='breakwater'),
+            lambda r: r.events[-1].update(k='tether_settings'),
+            lambda r: r.events[-1].update(s='capture'),
+            lambda r: r.events[-1].update(t=10),
+            lambda r: r.events[-1]['d'].update(key='volume'),
+            lambda r: r.events[-1]['d'].update(to=False),
+            lambda r: r.events[-1]['d'].update(to=1),
+            lambda r: r.events[-1]['d'].update(key='tether_model', **{'from':'classic','to':'zip'}),
+        ]:
+            bad = copy.deepcopy(rec)
+            mutation(bad)
+            self.refused(pkg.audit_style_stream, bad, rows)
+
+    def test_controls_config_permission_keeps_startup_and_reload_readonly(self):
+        for mode, allowed in [('controls',True),('play',True),('startup',False),('reload',False),('identity',False),('unknown',False)]:
+            self.assertEqual(pkg.profile_config_allowed(mode), allowed)
+            with patch.object(pkg,'audit_profile',return_value={'ok':True}) as audit:
+                pkg.run_export_profile_audit(Path('/tmp/profile'), {}, {}, {}, {}, pkg.profile_config_allowed(mode), Path('/tmp/unused-export-evidence'), Path('/tmp/unused-export-work'))
+                self.assertIs(audit.call_args.args[-1], allowed)
+        tree = ast.parse((PROJECT/'tools/package-r20.py').read_text())
+        native = next(node for node in tree.body if isinstance(node,ast.FunctionDef) and node.name == 'native_checks')
+        calls = [node for node in ast.walk(native) if isinstance(node,ast.Call) and isinstance(node.func,ast.Name) and node.func.id == 'run_export_profile_audit']
+        self.assertEqual(len(calls),1)
+        self.assertEqual(ast.dump(calls[0].args[5]), ast.dump(ast.parse('profile_config_allowed(mode)', mode='eval').body))
         self.assertEqual(pkg.source_horizontal_ups(0., 8.89), 350.0000135166439)
         self.assertNotEqual(pkg.source_horizontal_ups(0., 8.89), 350.)
 

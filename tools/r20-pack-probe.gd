@@ -247,6 +247,25 @@ func _controls() -> void:
 	await _directional_controls()
 	await _tether_controls()
 	await _through_controls()
+	_controls_profile()
+
+func _controls_profile() -> void:
+	var begin := checks.size()
+	var config := ConfigFile.new()
+	check("controls persisted the exact shared profile", config.load(game.profile_path) == OK
+		and config.get_value("profile","format",null) == game.PROFILE_FORMAT
+		and config.get_value("profile","build",null) == game.BUILD_ID)
+	var saved: Dictionary = {}
+	for key: String in game.settings:
+		var actual: Variant = config.get_value("settings",key,null)
+		var wanted: Variant = game.settings[key]
+		var equal: bool = actual == wanted
+		if actual is float and wanted is float:
+			equal = is_equal_approx(actual,wanted)
+		check("controls persisted actual setting "+key, config.has_section_key("settings",key) and equal, [actual,wanted])
+		saved[key] = actual
+	report["control_profile"] = {"ok":checks.slice(begin).all(func(c: Dictionary) -> bool:return c.ok),
+		"sha256":FileAccess.get_sha256(game.profile_path),"settings":saved}
 
 func _friend_button(name: String) -> bool:
 	var button := game.hud.find_child(name,true,false) as Button
@@ -445,6 +464,8 @@ func _directional_controls() -> void:
 				var pending: Dictionary = game.session.style.snapshot().direction.duplicate(true)
 				check(label+": pending is separate from banked score", int(pending.pending) > 0 and int(game.session.style.summary().score) < int(pending.pending), pending)
 				await captured(label+"-pending", {"paused":true,"clean":false})
+				if not report.has("run_export"):
+					await _run_export_controls()
 				await _tap(KEY_L)
 				await _tap(KEY_L)
 				check(label+": pause and L preserve pending exactly", game.session.style.snapshot().direction == pending)
@@ -649,3 +670,96 @@ func _through_controls() -> void:
 	await _restore_preset(preset)
 	if home != "through-line":await _pause_menu_click("Map_"+home, "restore after Through Line")
 	report["through_controls"] = {"ok":routes.size() == 2 and checks.slice(begin).all(func(c: Dictionary) -> bool:return c.ok),"routes":routes}
+
+func _run_export_sources(directory: String, prefix: String, rows: Dictionary) -> void:
+	for name: String in DirAccess.get_files_at(directory):
+		var path := directory.path_join(name)
+		var file := FileAccess.open(path, FileAccess.READ)
+		if check("export source readable: "+prefix+name, file != null):
+			rows[prefix+name] = {"size":file.get_length(),"sha256":FileAccess.get_sha256(path)}
+			file.close()
+	for name: String in DirAccess.get_directories_at(directory):
+		_run_export_sources(directory.path_join(name), prefix+name+"/", rows)
+
+func _run_export_controls() -> void:
+	var begin := checks.size()
+	check("run export exercises a paused earned pending stack", game.paused and int(game.session.style.snapshot().direction.pending) > 0)
+	var before := _behavior()
+	var recorder: RefCounted = game.session.recorder
+	var run_id := str(recorder.run_id)
+	var path := str(recorder.path)
+	var counts: Dictionary = recorder.counts().duplicate(true)
+	var tail := int(recorder.get("_tick_col").size())
+	check("run export begins on an open attempt with a real buffered tail", recorder.is_open() and tail > 0)
+	var calls: Array = []
+	game.run_export_folder_opener = func(folder: String) -> int:
+		calls.append(folder)
+		return ERR_UNAVAILABLE
+	var field: LineEdit = game.hud.export_name
+	await _reveal(field)
+	check("actual export-name field takes GUI focus", await _click(field))
+	await _frames(2)
+	await _friend_text_event(KEY_A,true,0,true)
+	await _friend_text_event(KEY_A,false,0,true)
+	for ch: String in "RFLG":
+		await _friend_text_event(ch.unicode_at(0),true,ch.unicode_at(0))
+		await _friend_text_event(ch.unicode_at(0),false)
+	check("typing export name cannot trigger restart, practice, look or ghost shortcuts", field.text == "RFLG" and _behavior() == before and game.paused)
+	var button: Button = game.hud.export_button
+	await _reveal(button)
+	check("visible production Export my runs button is in the pause viewport", button.text == "Export my runs" and get_viewport().get_visible_rect().encloses(button.get_global_rect()))
+	check("click Export my runs through actual GUI", await _click(button))
+	await _frames(3)
+	var result: Dictionary = game.last_run_export
+	if not check("actual packed service publishes a run ZIP", result.get("ok",false), result):
+		game.run_export_folder_opener = Callable()
+		game.run_export.folder_opener = Callable()
+		return
+	var zip := ZIPReader.new()
+	check("Godot opens the service-created ZIP", zip.open(str(result.path)) == OK)
+	var expected: Dictionary = {}
+	_run_export_sources(str(game.session.directory), "recordings/", expected)
+	var settings_root := OS.get_user_data_dir()
+	for name: String in ["spillway_r12.cfg","spillway_r13.cfg","spillway_r15.cfg","spillway_r16.cfg","spillway_v1.cfg"]:
+		var setting_path := settings_root.path_join(name)
+		if FileAccess.file_exists(setting_path):
+			var file := FileAccess.open(setting_path,FileAccess.READ)
+			expected["settings/"+name] = {"size":file.get_length(),"sha256":FileAccess.get_sha256(setting_path)}
+			file.close()
+	var manifest: Dictionary = JSON.parse_string(zip.read_file("manifest.json").get_string_from_utf8())
+	check("run ZIP declares the real player, version and data-only schema", manifest.get("format","") == "spillway-run-bundle" and int(manifest.get("schema",0)) == 1
+		and manifest.get("player","") == "RFLG" and manifest.get("build","") == str(ProjectSettings.get_setting("application/config/version")))
+	var inventory: Dictionary = {}
+	for entry: Dictionary in manifest.get("entries",[]):
+		var raw := zip.read_file(str(entry.path))
+		check("run ZIP size and SHA match "+str(entry.path), raw.size() == int(entry.size) and RUN_READER.sha256(raw).hex_encode() == str(entry.sha256))
+		inventory[entry.path] = {"size":int(entry.size),"sha256":str(entry.sha256)}
+	var live: Dictionary = JSON.parse_string(zip.read_file("settings/effective-settings.json").get_string_from_utf8())
+	check("run ZIP includes actual live settings", live.get("format","") == "spillway-effective-settings" and int(live.get("schema",0)) == 1 and live.get("settings",{}) == game.settings)
+	var archived: Dictionary = inventory.duplicate(true)
+	archived.erase("settings/effective-settings.json")
+	check("run ZIP contains every recording and historical settings file exactly", archived == expected and inventory.size() + 1 == Array(zip.get_files()).filter(func(name: String) -> bool:return not name.ends_with("/")).size())
+	zip.close()
+	var partial: Dictionary = RUN_READER.read(path)
+	check("export flush retains every buffered tick as an honest partial", partial.status == "partial" and str(partial.header.get("run_id","")) == run_id
+		and partial.columns.tick.size() == int(counts.ticks) and partial.errors == ["the stream ends without a seal or abort chunk"])
+	var after_counts: Dictionary = recorder.counts()
+	var same_counts := true
+	for key: String in ["ticks","inputs","events","gaps"]:
+		same_counts = same_counts and after_counts[key] == counts[key]
+	check("export preserves live physics, pending stack, inputs and the same open recording", _behavior() == before and recorder.is_open()
+		and str(recorder.path) == path and str(recorder.run_id) == run_id and same_counts and recorder.get("_tick_col").is_empty()
+		and int(after_counts.chunks) > int(counts.chunks) and int(after_counts.bytes) > int(counts.bytes))
+	check("failed folder open leaves a usable selectable ZIP path", calls == [result.folder] and not result.folder_opened
+		and game.hud.export_path.text == result.path and game.hud.export_path.is_visible_in_tree() and not game.hud.export_path.editable
+		and game.hud.export_open.is_visible_in_tree() and "could not open" in game.hud.export_status.text.to_lower())
+	await captured("run-export-pending-stack",{"paused":true,"clean":false})
+	field.release_focus()
+	game.hud.export_path.release_focus()
+	var relative := "Spillway/run_exports/"+str(result.path).get_file()
+	report["export_profile_files"] = {relative:FileAccess.get_sha256(result.path)}
+	report["run_export"] = {"ok":checks.slice(begin).all(func(c: Dictionary) -> bool:return c.ok),"path":result.path,
+		"profile_file":relative,"sha256":FileAccess.get_sha256(result.path),"entries":inventory,"settings":game.settings.duplicate(true),
+		"active_run_id":run_id,"partial_path":path,"partial_ticks":counts.ticks,"buffered_tail":tail,"manifest":manifest,"folder_opener":"intercepted"}
+	game.run_export_folder_opener = Callable()
+	game.run_export.folder_opener = Callable()

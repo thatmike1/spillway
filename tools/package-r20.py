@@ -576,6 +576,21 @@ def source_horizontal_ups(x, z):
     return f32(math.sqrt(f32(f32(x * x) + f32(z * z)))) / 0.0254
 
 
+def direction_boundary_matches(rec, event, value):
+    if event.get('s') != 'event' or event.get('t') != value['tick']:
+        return False
+    if value['reason'] != 'tether_settings':
+        return event.get('k') == value['reason']
+    if event.get('k') != 'loadout' or getattr(rec, 'header', {}).get('metadata', {}).get('map') != 'tether-yard':
+        return False
+    data = event.get('d', {})
+    if data.get('key') == 'tether_auto_reel':
+        return type(data.get('from')) is bool and type(data.get('to')) is bool and data['from'] != data['to']
+    if data.get('key') == 'tether_model':
+        return all(type(data.get(key)) is str and data[key] in ('classic','pendulum','elastic') for key in ('from','to')) and data['from'] != data['to']
+    return False
+
+
 def audit_style_stream(rec, rows):
     """reconcile scored events and non-scored state transitions with post-step observations."""
     n = len(rows)
@@ -675,8 +690,7 @@ def audit_style_stream(rec, rows):
             'style score differs from live scoring observation')
         # lifecycle events are emitted after the recorder's last physical sample.
         for value in lifecycle[i]:
-            require(any(event.get('s') == 'event' and event.get('k') == value['reason']
-                and event.get('t') == value['tick'] for event in rec.events),
+            require(any(direction_boundary_matches(rec, event, value) for event in rec.events),
                 'direction lifecycle loss has no matching host boundary')
             transition(value, i)
     require(not banks, 'direction bank has no matching bank diagnostic')
@@ -876,6 +890,100 @@ def friend_profile_audit(profile, before, after, report, helpers, allow_config):
     return result
 
 
+def run_export_profile_audit(profile, before, after, report, helpers, allow_config, evidence, work):
+    permitted = report.get('export_profile_files', {})
+    feature = report.get('run_export', {})
+    if not permitted:
+        require(not feature, 'export feature has no filesystem receipt')
+        return friend_profile_audit(profile, before, after, report, helpers, allow_config)
+    require(feature.get('ok') is True and set(permitted) == {feature.get('profile_file')}, 'incomplete export controls receipt')
+    require(len(permitted) == 1, 'run export controls require exactly one published ZIP')
+    name, wanted = next(iter(permitted.items()))
+    require(re.fullmatch(r'Spillway/run_exports/Spillway-runs-rflg-[A-Za-z0-9]+-[0-9a-f]{8}\.zip', name), 'unrecognized export profile filename')
+    archive = r16.profile_root(profile).parent / name
+    require(after.get(name) == wanted == feature.get('sha256') == digest(archive), 'export ZIP receipt differs from actual profile')
+    for helper in ['tools/ingest-r20-runs.py', 'tools/r20_run_bundle.py', 'tools/analyze-r16-runs.py']:
+        require(helpers.get(helper) == digest(PROJECT / helper), 'export analysis helper differs from frozen source: ' + helper)
+    evidence.mkdir(parents=True)
+    work.mkdir(parents=True)
+    with zipfile.ZipFile(archive) as packed:
+        require(packed.testzip() is None, 'export ZIP CRC failed')
+        manifest = json.loads(packed.read('manifest.json'))
+        require(manifest == feature['manifest'] and manifest['format'] == 'spillway-run-bundle'
+            and manifest['schema'] == 1 and manifest['player'] == 'RFLG' and manifest['build'] == VERSION,
+            'packed export manifest differs from actual service result')
+        entries = {entry['path']: {'size': entry['size'], 'sha256': entry['sha256']} for entry in manifest['entries']}
+        require(len(entries) == len(manifest['entries']) and entries == feature['entries'], 'export inventory differs from observed source bytes')
+        raw_members = {entry: packed.read(entry) for entry in entries}
+    final_recordings = report['recordings']['attempts']
+    active = [row for row in final_recordings if row['run_id'] == feature['active_run_id']]
+    require(len(active) == 1 and int(feature['buffered_tail']) > 0, 'export did not exercise one buffered live attempt')
+    for entry, raw in raw_members.items():
+        require(len(raw) == entries[entry]['size'] and hashlib.sha256(raw).hexdigest() == entries[entry]['sha256'], 'export member bytes differ')
+        if entry.startswith('recordings/'):
+            relative = entry.removeprefix('recordings/')
+            if relative == Path(feature['partial_path']).name:
+                require(Path(active[0]['path']).read_bytes().startswith(raw), 'exported live prefix differs from its eventual sealed recording')
+            else:
+                source = r16.profile_root(profile) / 'r16_runs' / relative
+                require(source.is_file() and digest(source) == entries[entry]['sha256'], 'exported attempt differs from final original recording')
+    live = json.loads(raw_members['settings/effective-settings.json'])
+    require(live == {'format':'spillway-effective-settings','schema':1,'settings':feature['settings']}, 'effective exported settings differ')
+    command = [sys.executable, '-I', str(PROJECT / 'tools/ingest-r20-runs.py'), str(archive), '--player', 'Packed R20 check', '--output', str(work / 'players')]
+    def ingest(label, argv, expected):
+        completed = subprocess.run(argv, cwd=work, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=90)
+        (evidence / (label + '.json')).write_text(json.dumps({'command':argv,'exit':completed.returncode,'stdout':completed.stdout,'stderr':completed.stderr},indent=2))
+        require((completed.returncode == 0) == expected, 'actual export ingest ' + label + ' has wrong result')
+        return json.loads(completed.stdout) if expected else None
+    first = ingest('import', command, True)
+    require(first.get('ok') is True and first.get('duplicate') is False, 'actual exported ZIP did not create a new per-player analysis')
+    target = Path(first['path']).resolve()
+    require(target.is_relative_to(work.resolve()) and (target / 'ANALYSIS.md').is_file(), 'export analysis is outside the owned per-player destination')
+    analysis = json.loads((target / 'analysis.json').read_text())
+    attempts = analysis['attempts']
+    require({row['file']:row['sha256'] for row in attempts} == {key:entry['sha256'] for key,entry in entries.items() if key.startswith('recordings/')}, 'ingest omitted or changed an attempt')
+    require(sum(row['classification'] == 'partial' for row in attempts) == 1
+        and all(row['classification'] in ('complete','partial') for row in attempts), 'complete/active-partial attempts were misclassified')
+    active_analysis = next(row for row in attempts if row['file'] == 'recordings/' + Path(feature['partial_path']).name)
+    require(active_analysis['sample_count'] == feature['partial_ticks'], 'ingest lost an exported buffered tail')
+    before_duplicate = {str(p.relative_to(target)):digest(p) for p in target.rglob('*') if p.is_file()}
+    duplicate = ingest('duplicate', command, True)
+    require(duplicate.get('ok') is True and duplicate.get('duplicate') is True and duplicate['path'] == str(target)
+        and before_duplicate == {str(p.relative_to(target)):digest(p) for p in target.rglob('*') if p.is_file()}, 'duplicate ingest changed original session bytes')
+    negatives = []
+    for label in ['traversal','bad-member-hash','truncated']:
+        bad = work / (label + '.zip')
+        if label == 'truncated':
+            bad.write_bytes(archive.read_bytes()[:-16])
+        else:
+            with zipfile.ZipFile(bad, 'w') as packed:
+                packed.writestr('manifest.json', json.dumps(manifest))
+                for entry, raw in raw_members.items():
+                    if label == 'bad-member-hash' and entry == next(iter(raw_members)):
+                        raw = raw + b'changed'
+                    packed.writestr(entry, raw)
+                if label == 'traversal':
+                    packed.writestr('../escape', b'refuse')
+        argv = list(command)
+        argv[3] = str(bad)
+        argv[-1] = str(work / ('rejected-' + label))
+        ingest('negative-' + label, argv, False)
+        require(not (work / 'escape').exists(), 'ingest escaped its destination')
+        negatives.append(label)
+    for name in ['ANALYSIS.md','analysis.json','import.json','manifest.json']:
+        shutil.copyfile(target / name, evidence / name)
+    filtered = {key:value for key,value in after.items() if key not in permitted}
+    previous = {key:value for key,value in before.items() if key not in permitted}
+    result = friend_profile_audit(profile, previous, filtered, report, helpers, allow_config)
+    result['run_export'] = {'ok':True,'zip_sha256':wanted,'files':len(entries),'attempts':len(attempts),
+        'active_prefix_matches_sealed_recording':True,'partial_ticks':feature['partial_ticks'],'duplicate_unchanged':True,'negative_controls':negatives}
+    return result
+
+
+def profile_config_allowed(mode):
+    return mode in ('play', 'controls')
+
+
 def native_checks(folder, build, files, args, evidence, work, routes):
     host = harness(folder, work / 'harness')
     args.pack_required = r16.resources(files)
@@ -906,13 +1014,16 @@ def native_checks(folder, build, files, args, evidence, work, routes):
                         spec.update(tape=route['tape'], arm_motor_steps=route['arm_motor_steps'], reference_trace=route['trace'], capture_ticks=[0, route['ticks'] // 2, route['ticks'] - 1])
                 code, text, report, titles = r16.native(host, out, spec, args, profile, route['physics_hz'] if route else 60, r16.route_args(route['route']) if route else ())
                 r16.read_recordings(host, out / 'reader', profile, report)
-                audit = friend_profile_audit(profile, before, r16.profile_files(profile), report, build['helpers_sha256'], mode == 'play')
+                audit = run_export_profile_audit(profile, before, r16.profile_files(profile), report, build['helpers_sha256'], profile_config_allowed(mode),
+                    out / 'run-export-audit', work / ('export-' + label))
                 result = {'exit': code, 'checks': len(report.get('checks', [])), 'failures': report.get('failures'),
                     'failed': [c for c in report.get('checks', []) if not c['ok']], 'recordings': audit,
                     'native_backend': report.get('native_backend'), 'titles': sorted(titles), 'frames': len(report.get('frames', [])),
                     'r20_maps': report.get('r20_maps', []), 'friend': report.get('friend', {}),
                     'directional_stack': report.get('directional_stack', {}), 'tether_controls': report.get('tether_controls', {}), 'through_controls': report.get('through_controls', {}),
                     'r20_route_identity': report.get('r20_route_identity', {}),
+                    'run_export': report.get('run_export', {}),
+                    'control_profile': report.get('control_profile', {}),
                     'cwd_empty': not any((out / 'cwd').iterdir())}
                 if mode == 'play':
                     best = {key: report['run'].get(key) for key in ['best_time','open_best_time','best_splits','best_segments','record_ticks','style_best','ghost_pointer']}
@@ -927,7 +1038,9 @@ def native_checks(folder, build, files, args, evidence, work, routes):
                     and any(t.startswith(r16.TITLE_PREFIX) for t in titles)
                     and (mode != 'controls' or (set(r['map'] for r in result['r20_maps']) == set(build['freeze']['required_maps'])
                         and result['directional_stack'].get('ok') is True and result['tether_controls'].get('ok') is True
-                        and result['through_controls'].get('ok') is True))
+                        and result['through_controls'].get('ok') is True and result['run_export'].get('ok') is True
+                        and audit.get('run_export',{}).get('ok') is True and result['control_profile'].get('ok') is True
+                        and result['control_profile'].get('sha256') == r16.profile_files(profile).get('Spillway/spillway_r16.cfg')))
                     and (mode != 'play' or (result['friend'].get('ok') is True and result['r20_route_identity'].get('ok') is True))
                     and result.get('exact_source_trace', {'ok': True})['ok'] and result.get('input_order', {'ok': True})['ok']
                     and result.get('config_not_rewritten', True))
