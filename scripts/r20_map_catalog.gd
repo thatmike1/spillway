@@ -1,6 +1,7 @@
 extends RefCounted
 ## compose current courses while retaining shelved experiment source in the R19 catalog.
 const BASE := preload("res://scripts/r19_map_catalog.gd")
+const THROUGH := preload("res://scripts/r20_through_level.gd")
 const SURF := preload("res://scripts/r20_surf_level.gd")
 
 static func make() -> Dictionary:
@@ -14,4 +15,6 @@ static func make() -> Dictionary:
 	for id: String in ["line-drive", "fall-line"]:
 		maps.catalog.erase(id)
 		maps.order.erase(id)
+	maps.catalog[THROUGH.MAP_ID] = THROUGH.MAP_ENTRY.duplicate(true)
+	maps.order.append(THROUGH.MAP_ID)
 	return maps

@@ -102,6 +102,8 @@ func _make_runner(entry: Dictionary) -> CharacterBody3D:
 	if runner.has_method("configure_tether"):
 		runner.call("configure_tether", str(settings.get("tether_model", "classic")), bool(settings.get("tether_auto_reel", false)))
 		runner.connect("tether_diagnostic", _tether_diagnostic)
+	if runner.has_signal("through_diagnostic"):
+		runner.connect("through_diagnostic", _through_diagnostic)
 	return runner
 
 func _tether_diagnostic(data: Dictionary) -> void:
@@ -109,7 +111,15 @@ func _tether_diagnostic(data: Dictionary) -> void:
 	if session != null and session.recorder != null and session.recorder.is_open():
 		session.recorder.event("tether", data)
 
+func _through_diagnostic(data: Dictionary) -> void:
+	if str(data.get("kind", "")) == "launch" and is_instance_valid(hud):
+		hud.call("notify", "RISE · horizontal speed carried · land on Second Run")
+	if session != null and session.recorder != null and session.recorder.is_open():
+		session.recorder.event("through", data)
+
 func _block_tether(reason: String) -> void:
+	if is_instance_valid(player) and player.has_method("clear_through"):
+		player.call("clear_through", reason)
 	if is_instance_valid(player) and player.has_method("block_tether"):
 		player.call("block_tether", reason)
 
@@ -126,6 +136,11 @@ func mechanics() -> Array:
 func _apply_settings() -> void:
 	super()
 	if is_instance_valid(player) and player.has_method("configure_tether"):
+		var cue: AudioStreamPlayer = player.get("cue_player")
+		if cue != null:
+			cue.volume_db = linear_to_db(float(settings.volume)) if float(settings.volume) > 0.0 else -80.0
+
+	if is_instance_valid(player) and player.has_signal("through_diagnostic"):
 		var cue: AudioStreamPlayer = player.get("cue_player")
 		if cue != null:
 			cue.volume_db = linear_to_db(float(settings.volume)) if float(settings.volume) > 0.0 else -80.0
