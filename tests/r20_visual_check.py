@@ -39,7 +39,8 @@ def main():
     assert out.is_relative_to(Path('/tmp')) and not out.exists(), 'new RAM evidence directory required'
     assert shutil.disk_usage('/home').free >= FLOOR
     assert shutil.disk_usage('/tmp').free >= CAP + 100 * 2**20
-    assert not subprocess.check_output(['git', 'status', '--porcelain', '--untracked-files=all', '--', '.'], cwd=PROJECT).strip(), 'commit all project work first'
+    committed_helper = subprocess.check_output(['git', 'show', args.commit + ':' + PREFIX + 'tests/r20_visual_check.py'], cwd=REPO)
+    assert committed_helper == Path(__file__).read_bytes(), 'executing visual helper differs from the explicit commit'
     out.mkdir()
     source = out / 'source'
     source.mkdir()
@@ -107,7 +108,8 @@ def main():
                    'source_sha256': original, 'inherited_fixture_sha256': hashlib.sha256(inherited).hexdigest(),
                    'adapter_sha256': sha(adapter), 'only_fixture_change': 'preload scripts/r20_main.gd instead of scripts/r17_main.gd',
                    'stages': stages, 'peak_scratch_bytes': peak, 'minimum_home_free_bytes': minimum,
-                   'scope': 'headless inherited visual/state invariants on the R20 host; no native visual-quality claim'}
+                   'working_tree_runtime_used': False,
+                   'scope': 'headless inherited visual/state invariants on the explicit committed R20 host; no final-runtime or native visual-quality claim'}
         (out / 'RESULT.json').write_text(json.dumps(receipt, indent=2) + '\n')
         print(json.dumps({'ok': True, 'checks': result['checks'], 'maps': len(MAPS)}))
     finally:
