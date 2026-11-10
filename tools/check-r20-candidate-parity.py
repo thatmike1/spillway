@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -24,6 +25,31 @@ O = K.module('r20_candidate_observations',K.PROJECT/'tests/r20_candidate_observa
 
 def write(path,value):
     Path(path).write_text(json.dumps(value,indent=2,allow_nan=False)+'\n')
+
+
+def import_metadata_guard(root, generated, executed):
+    # only bounded editor sidecars paired with the frozen source may appear after import.
+    for name, digest in generated.items():
+        relative = Path(name)
+        K.need(not relative.is_absolute() and '..' not in relative.parts and relative.as_posix() == name,
+            'unsafe generated metadata path: '+name)
+        path = root / name
+        K.need(path.is_file() and not path.is_symlink() and path.stat().st_size <= 65536,
+            'unsupported generated metadata file: '+name)
+        K.need(K.sha(path) == digest, 'generated metadata changed: '+name)
+        data = path.read_bytes()
+        if name.endswith('.uid'):
+            paired = name[:-4]
+            K.need(paired in executed and Path(paired).suffix in ('.gd', '.gdshader')
+                and re.fullmatch(rb'uid://[a-z0-9]{1,13}\n', data) is not None,
+                'unpaired or malformed generated UID: '+name)
+        elif name.endswith('.import'):
+            paired = name[:-7]
+            K.need(paired in executed and Path(paired).suffix in ('.png', '.jpg', '.hdr', '.gltf', '.glb', '.ttf')
+                and data.startswith(b'[remap]\n'), 'unpaired or malformed generated import: '+name)
+        else:
+            raise K.Refused('unexpected injected source after import: '+name)
+    return True
 
 
 def templates(commit=None):
@@ -263,6 +289,11 @@ def verify(args,preflight_result):
     expected_injected={'tests/r20_parity.gd':K.sha(K.PROJECT/'tests/r20_parity.gd')}
     K.exact(source['injected'],expected_injected,'fixture injection')
     K.exact(source['executed_files'],{**source['archive_files'],**expected_injected},'complete executed source')
+    metadata = folder/'generated-import-metadata'
+    generated = report['generated_import_metadata']
+    K.exact({str(p.relative_to(metadata)):K.sha(p) for p in metadata.rglob('*') if p.is_file()},
+        generated, 'retained generated metadata inventory')
+    import_metadata_guard(metadata, generated, source['executed_files'])
     transport=transport_guard(folder,report)
     for receipt in transport['receipts']:
         path=folder/receipt['path'];K.need(K.sha(path)==receipt['gzip_sha256'],'trace gzip changed')
@@ -308,8 +339,15 @@ def execute(args,preflight_result):
         report['import']=B.bounded([str(B.GODOT),'--headless','--editor','--path',str(source),'--import'],env,source,out/'import.log',out)
         K.need(report['import']['exit']==0 and not any(word in (out/'import.log').read_text() for word in ('ERROR','Parse Error','Assertion failed')),'candidate import failed')
         generated={str(p.relative_to(source)):K.sha(p) for p in source.rglob('*') if p.is_file() and str(p.relative_to(source)) not in manifest['executed_files']}
-        K.need(all(name.endswith('.import') for name in generated),'unexpected injected source after import')
         report['generated_import_metadata']=generated
+        write(out/'REPORT.json',report)
+        import_metadata_guard(source, generated, manifest['executed_files'])
+        metadata=out/'generated-import-metadata';metadata.mkdir()
+        for name in generated:
+            target=metadata/name;target.parent.mkdir(parents=True,exist_ok=True)
+            shutil.copy2(source/name,target)
+        for name,digest in manifest['executed_files'].items():
+            K.need(K.sha(source/name)==digest,'import mutated frozen source: '+name)
         for route in K.routes():
             directory=out/route['name'];directory.mkdir()
             original=K.load(K.BASELINE/route['name']/'result.json')

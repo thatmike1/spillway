@@ -43,6 +43,30 @@ class CandidatePreparation(unittest.TestCase):
         self.assertGreater(result['members'],600)
         self.assertEqual(K.sha(K.BASELINE/'MANIFEST.json'),K.BASELINE_MANIFEST_SHA)
 
+    def test_import_allows_only_bounded_paired_resource_metadata(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            executed={'scripts/main.gd':'a'*64,'shaders/toon.gdshader':'b'*64,'assets/deck.png':'c'*64}
+            values={'scripts/main.gd.uid':b'uid://abc123\n','shaders/toon.gdshader.uid':b'uid://z9\n',
+                'assets/deck.png.import':b'[remap]\nimporter="texture"\n'}
+            for name,data in values.items():
+                path=root/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(data)
+            generated={name:K.sha(root/name) for name in values}
+            self.assertTrue(D.import_metadata_guard(root,generated,executed))
+            for name,data in [('scripts/extra.gd',b'extends Node\n'),('scripts/missing.gd.uid',b'uid://abc\n'),
+                ('scripts/main.py.uid',b'uid://abc\n'),('assets/missing.png.import',b'[remap]\n'),
+                ('scripts/main.gd.import',b'[remap]\n'),('scripts/main.gd.uid',b'uid://abc\nextends Node\n'),
+                ('scripts/main.gd.uid',b'uid://../abc\n'),('scripts/main.gd.uid',b'uid://'+b'a'*14+b'\n'),
+                ('assets/deck.png.import',b'extends Node\n'),('assets/deck.png.import',b'x'*65537)]:
+                path=root/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(data)
+                self.refuse(D.import_metadata_guard,root,{name:K.sha(path)},executed)
+            path=root/'scripts/main.gd.uid';path.write_bytes(b'uid://abc123\n')
+            self.refuse(D.import_metadata_guard,root,{'scripts/main.gd.uid':'0'*64},executed)
+            self.refuse(D.import_metadata_guard,root,{'../escape.gd.uid':'0'*64},executed)
+            link=root/'scripts/link.gd.uid';link.symlink_to(path)
+            self.refuse(D.import_metadata_guard,root,{'scripts/link.gd.uid':K.sha(path)},
+                dict(executed,**{'scripts/link.gd':'d'*64}))
+
     def test_policy_comes_from_both_baseline_plays_all_original_maps(self):
         self.assertEqual(set(k.split('/')[0] for k in self.policy['identities']),set(K.P.ORIGINAL_MAPS))
         self.assertEqual(set(self.policy['metadata_fields']),K.META_KEYS)
