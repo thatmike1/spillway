@@ -128,13 +128,15 @@ class ReleaseGates(unittest.TestCase):
     def test_release_routes_retain_breakwater_and_add_earned_saltglass(self):
         with patch.object(pkg.r18,'route_freeze',return_value=[{'route':'original-breakwater'}]) as original, \
              patch.object(pkg,'saltglass_route_freeze',return_value={'route':'earned-saltglass'}) as surf, \
-             patch.object(pkg,'tether_feature_freeze',return_value={'tether':{'classic':'reader-derived'}}) as tether:
+             patch.object(pkg,'tether_feature_freeze',return_value={'tether':{'classic':'reader-derived'}}) as tether, \
+             patch.object(pkg,'through_feature_freeze',return_value={'through':{'fast':'reader-derived'}}) as through:
             self.assertEqual(pkg.route_freeze('source','evidence','identity'),
-                             [{'route':'original-breakwater','feature_tapes':{'tether':{'classic':'reader-derived'}}},
-                              {'route':'earned-saltglass','feature_tapes':{'tether':{'classic':'reader-derived'}}}])
+                             [{'route':'original-breakwater','feature_tapes':{'tether':{'classic':'reader-derived'},'through':{'fast':'reader-derived'}}},
+                              {'route':'earned-saltglass','feature_tapes':{'tether':{'classic':'reader-derived'},'through':{'fast':'reader-derived'}}}])
             original.assert_called_once_with('source','evidence','identity')
             surf.assert_called_once_with('source','evidence','identity')
             tether.assert_called_once_with('source','evidence','identity')
+            through.assert_called_once_with('source','evidence','identity')
 
     def test_generator_closing_releases_are_executed_without_dropping_any_edge(self):
         plan = {'duration_ticks':2,'physics_hz':128,'events':[

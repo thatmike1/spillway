@@ -72,7 +72,7 @@ HELPERS = tuple(dict.fromkeys((*r18.HELPERS, 'tools/package-r19.py', 'tools/r19-
     'tools/r19_native_guard.py', 'tools/package-r20.py', 'tools/r20-pack-probe.gd',
     'tests/test_package_r20.py', 'tools/check-r20-preservation.py',
     'tests/r20_release_style_observer.gd', 'tools/check-r20-style-events.py',
-    'tools/r20-direction-driver.gd', 'tests/r20_pack_direction_route.gd', 'tools/r20-raw-input-driver.gd', 'tests/r20_tether_route.gd', 'tests/r20_tether_native.gd')))
+    'tools/r20-direction-driver.gd', 'tests/r20_pack_direction_route.gd', 'tools/r20-raw-input-driver.gd', 'tests/r20_tether_route.gd', 'tests/r20_tether_native.gd', 'tests/r20_through_route.gd', 'tests/r20_through_native.gd')))
 for module in (r18, r16):
     module.NAME = NAME
     module.HELPERS = HELPERS
@@ -911,7 +911,7 @@ def native_checks(folder, build, files, args, evidence, work, routes):
                     'failed': [c for c in report.get('checks', []) if not c['ok']], 'recordings': audit,
                     'native_backend': report.get('native_backend'), 'titles': sorted(titles), 'frames': len(report.get('frames', [])),
                     'r20_maps': report.get('r20_maps', []), 'friend': report.get('friend', {}),
-                    'directional_stack': report.get('directional_stack', {}), 'tether_controls': report.get('tether_controls', {}),
+                    'directional_stack': report.get('directional_stack', {}), 'tether_controls': report.get('tether_controls', {}), 'through_controls': report.get('through_controls', {}),
                     'cwd_empty': not any((out / 'cwd').iterdir())}
                 if mode == 'play':
                     best = {key: report['run'].get(key) for key in ['best_time','open_best_time','best_splits','best_segments','record_ticks','style_best','ghost_pointer']}
@@ -925,7 +925,8 @@ def native_checks(folder, build, files, args, evidence, work, routes):
                     and 'ObjectDB instances leaked' not in text and result['cwd_empty']
                     and any(t.startswith(r16.TITLE_PREFIX) for t in titles)
                     and (mode != 'controls' or (set(r['map'] for r in result['r20_maps']) == set(build['freeze']['required_maps'])
-                        and result['directional_stack'].get('ok') is True and result['tether_controls'].get('ok') is True))
+                        and result['directional_stack'].get('ok') is True and result['tether_controls'].get('ok') is True
+                        and result['through_controls'].get('ok') is True))
                     and (mode != 'play' or result['friend'].get('ok') is True)
                     and result.get('exact_source_trace', {'ok': True})['ok'] and result.get('input_order', {'ok': True})['ok']
                     and result.get('config_not_rewritten', True))
@@ -1053,9 +1054,48 @@ def tether_feature_freeze(source, evidence, identity):
     return {'tether': tapes}
 
 
+def through_feature_freeze(source, evidence, identity):
+    spec = importlib.util.spec_from_file_location('r20_through_original_reader', source / 'tools/analyze-r16-runs.py')
+    reader = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = reader
+    spec.loader.exec_module(reader)
+    tapes = {}
+    for label, speed in [('slow', 0), ('fast', 500)]:
+        generated = evidence / ('generated-through-' + label)
+        generated.mkdir(parents=True)
+        r16.checked([r16.EDITOR, '--headless', '--audio-driver', 'Dummy', '--fixed-fps', '128',
+            '--path', source, '--script', 'res://tests/r20_through_route.gd', '--',
+            '--out=' + str(generated), '--speed=' + str(speed)], source,
+            r16.engine_env(generated / 'engine-profile'), generated / 'engine.log', 120)
+        summary = json.loads((generated / 'summary.json').read_text())
+        require(summary.get('pass') is True and summary.get('finished') is True
+            and summary.get('finish_kind') == 'clean' and summary.get('respawns') == 0
+            and summary.get('continued') is True and summary.get('runner') == 'res://scripts/r20_through_player.gd'
+            and summary.get('physics_hz') == 128
+            and summary.get('geometry_hash') == identity['maps']['through-line']['geometry'],
+            'Through Line source fixture did not earn its continuous production route: ' + label)
+        clean = [run for run in summary['recordings'] if run.get('clean_finish', {}).get('ok')]
+        require(len(clean) == 1, 'Through Line fixture needs one sealed clean run')
+        rec = reader.read(Path(clean[0]['path']))
+        require(rec.ok and len(rec.columns['tick']) > 33 and set(rec.inputs['kind']) <= {1,2,3,4}, 'Through Line fixture original reader refusal')
+        events = []
+        for i, kind in enumerate(rec.inputs['kind']):
+            if kind in (1,2,3):
+                row = {key: values[i] for key, values in rec.inputs.items()}
+                require(row['tick'] >= 33, 'Through Line fixture input precedes warmup')
+                events.append({'tick':row['tick']-33,'raw':row})
+        tape = generated / 'recorded.tape.json'
+        tape.write_text(json.dumps({'version':2,'physics_hz':128,'duration_ticks':len(rec.columns['tick'])-33,'events':events}) + '\n')
+        tapes[label] = str(tape)
+        (generated / 'FIXTURE.json').write_text(json.dumps({'source_script_sha256':digest(source / 'tests/r20_through_route.gd'),
+            'recording_sha256':digest(Path(clean[0]['path'])),'tape_sha256':digest(tape),
+            'scope':'input-earned frozen-source fixture for separate exact-pack transfer controls'},indent=2)+'\n')
+    return {'through':tapes}
+
+
 def route_freeze(source, evidence, identity):
     routes = [*r18.route_freeze(source, evidence, identity), saltglass_route_freeze(source, evidence, identity)]
-    features = tether_feature_freeze(source, evidence, identity)
+    features = {**tether_feature_freeze(source, evidence, identity), **through_feature_freeze(source, evidence, identity)}
     for route in routes:
         route['feature_tapes'] = features
     return routes

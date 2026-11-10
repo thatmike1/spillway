@@ -2,6 +2,18 @@ extends "r16-pack-probe.gd"
 ## adapted from r19-pack-probe.gd at 065f7b279; exact R20 delivery observer. inherited controls, input/recording and real local ghost
 ## checks stay behavioral. the new checks use the packed host and its actual buttons.
 const RAW_DRIVER := preload("r20-raw-input-driver.gd")
+signal through_step
+var _through_active := false
+var _through_armed := false
+var _through_driver: RefCounted
+var _through_tick := 0
+var _through_motor_start := 0
+var _through_trace: Array = []
+var _through_ids: Array = []
+var _through_ids_ok := true
+var _through_clock_ok := true
+var _through_clock := 0.0
+var _through_captures: Dictionary = {}
 signal tether_step
 var _tether_active := false
 var _tether_armed := false
@@ -56,6 +68,9 @@ func early_step(delta: float) -> void:
 		_direction_moving_l = true
 
 func late_step(delta: float) -> void:
+	if _through_active:
+		_through_late()
+		return
 	if _tether_active:
 		_tether_late()
 		return
@@ -231,6 +246,7 @@ func _controls() -> void:
 	report["r20_maps"] = results
 	await _directional_controls()
 	await _tether_controls()
+	await _through_controls()
 
 func _friend_button(name: String) -> bool:
 	var button := game.hud.find_child(name,true,false) as Button
@@ -537,3 +553,86 @@ func _tether_controls() -> void:
 	if home != "tether-yard":
 		await _pause_menu_click("Map_"+home, "restore after Tether routes")
 	report["tether_controls"] = {"ok":checks.slice(begin).all(func(c: Dictionary) -> bool:return c.ok) and routes.size() == 4,"routes":routes}
+
+func _through_late() -> void:
+	if not _through_armed:
+		if game.player.tape_step_count - _through_motor_start < 33:
+			return
+		check("Through Line raw route arms after exactly 33 relative motor steps", game.player.tape_step_count - _through_motor_start == 33)
+		_through_armed = true
+	else:
+		_through_ids_ok = _through_ids_ok and _through_ids == [game.get_instance_id(),game.level.get_instance_id(),game.player.get_instance_id(),game.session.get_instance_id(),game.attempts]
+		_through_clock_ok = _through_clock_ok and game.elapsed >= _through_clock
+		_through_clock = game.elapsed
+		_through_trace.append({"tick":_through_tick-1,"p":_v3(game.player.global_position),"v":_v3(game.player.velocity),
+			"elapsed":game.elapsed,"checkpoint":game.checkpoint_index,"respawns":game.respawn_count})
+		var label := ""
+		if not game.player.last_landing.is_empty():label = "landing"
+		elif not game.player.apex.is_empty():label = "apex"
+		elif not game.player.last_launch.is_empty():label = "launch"
+		if not label.is_empty() and not _through_captures.has(label):
+			_through_captures[label] = true
+			_capture = {"name":"through-"+str(_through_driver.duration)+"-"+label}
+	if _through_tick >= _through_driver.duration or game.respawn_count > 0:
+		_through_active = false
+		through_step.emit()
+		return
+	_through_driver.step(_through_tick)
+	_through_tick += 1
+	through_step.emit()
+
+func _through_controls() -> void:
+	var begin := checks.size()
+	var fixtures: Dictionary = spec.get("feature_tapes", {}).get("through", {})
+	if not check("Through Line controls have both reader-derived speed fixtures", fixtures.has("slow") and fixtures.has("fast")):
+		return
+	var home: String = game.map_id
+	var preset: String = game.preset_id
+	if home != "through-line":
+		await _pause_menu_click("Map_through-line", "Through Line transfer routes")
+	await _restore_preset("server128")
+	var late := Late.new()
+	late.run = self
+	late.process_physics_priority = 1001
+	late.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(late)
+	var routes: Array = []
+	for label: String in ["slow", "fast"]:
+		_through_driver = RAW_DRIVER.new()
+		if not check(label+": load bounded Through Line input", _through_driver.configure(str(fixtures[label]))):break
+		_through_tick = 0
+		_through_armed = false
+		_through_trace = []
+		_through_ids = [game.get_instance_id(),game.level.get_instance_id(),game.player.get_instance_id(),game.session.get_instance_id(),game.attempts+1]
+		_through_ids_ok = true
+		_through_clock_ok = true
+		_through_clock = 0.0
+		_through_captures = {}
+		_through_motor_start = game.player.tape_step_count
+		_through_active = true
+		await _tap(KEY_R)
+		while _through_active:await through_step
+		_through_driver.release()
+		var launch: Dictionary = game.player.last_launch
+		var apex: Dictionary = game.player.apex
+		var landing: Dictionary = game.player.last_landing
+		check(label+": clean packed transfer and continued second-segment run", game.finished and game.finish_kind == "clean" and game.respawn_count == 0 and game.player.continued and not launch.is_empty() and not apex.is_empty() and not landing.is_empty())
+		check(label+": transfer retains scene, level, runner, session, attempt and continuous clock", _through_ids_ok and _through_clock_ok)
+		if not launch.is_empty() and not landing.is_empty() and not apex.is_empty():
+			var before: Vector3 = launch.before_mps
+			var after: Vector3 = launch.after_mps
+			var at_land: Vector3 = landing.v
+			check(label+": launch and actual ballistic landing retain exact horizontal components", before.x == after.x and before.z == after.z and after.x == at_land.x and after.z == at_land.z and after.y > before.y, [before,after,at_land])
+			check(label+": grounded second start support and activated self-made audio", str(landing.support.body).begins_with("second_start_") and bool(launch.cue.playing) and str(launch.cue.pcm_sha256).length() == 64)
+			routes.append({"label":label,"speed_u":launch.speed_u,"rise_m":float(apex.reference_p.y)-float(launch.reference_p.y),
+				"distance_m":Vector2(landing.reference_p.x-launch.reference_p.x,landing.reference_p.z-launch.reference_p.z).length(),
+				"elapsed":game.elapsed,"ticks":_through_trace.size(),"launch":RUN_READER.json_safe(launch),"landing":RUN_READER.json_safe(landing)})
+		await captured("through-"+label+"-finished", {"finished":true,"clean":true})
+		report["through_trace_"+label] = _through_trace.duplicate(true)
+	if routes.size() == 2:
+		check("faster packed entry earns more height and distance", routes[1].speed_u > routes[0].speed_u and routes[1].rise_m > routes[0].rise_m and routes[1].distance_m > routes[0].distance_m, routes)
+	late.queue_free()
+	await _tap(KEY_R)
+	await _restore_preset(preset)
+	if home != "through-line":await _pause_menu_click("Map_"+home, "restore after Through Line")
+	report["through_controls"] = {"ok":routes.size() == 2 and checks.slice(begin).all(func(c: Dictionary) -> bool:return c.ok),"routes":routes}
