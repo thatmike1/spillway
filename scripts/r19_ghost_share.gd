@@ -3,7 +3,7 @@ extends Node
 
 const READER := preload("res://scripts/r16_run_reader.gd")
 const GHOST := preload("res://scripts/r16_ghost.gd")
-const BUILD := "spillway-2026.11.09-r19"
+const BUILD := "spillway-2026.11.10-r20"
 const MAGIC := "SWGHOST1"
 const SCHEMA := 1
 const SUFFIX := ".spillghost"
