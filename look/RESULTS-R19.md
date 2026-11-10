@@ -1,6 +1,6 @@
 # Spillway R19
 
-**Release status: the previous candidate is withdrawn.** Final input audit found that typing a ghost player name invoked global game shortcuts. The focused-field fix passes 121 headless sharing checks; native checks, runtime refreeze, full parity and a fresh portable rebuild are required. Prior accepted receipts remain historical evidence, not acceptance of the new runtime.
+**Portable candidate verified; final full parity and promotion pending.** The focused ghost-name/path repair passes 121 headless and 121 native Linux checks. The rebuilt Linux portable passes 1,980 exact-release checks, including actual name typing. Both ZIPs pass static verification; exact Windows PE/PCK startup passes under Wine. The earlier candidate is withdrawn and retained.
 
 ## Try first
 
@@ -15,7 +15,7 @@ Then choose **Tether Yard**, **Line Drive** and **Fall Line** under Esc → Expe
 - Mouse sliders are inside the pause menu's initially collapsed Advanced section. Their existing settings and bindings persist.
 - The Look C label follows F9 telemetry. L still switches looks.
 
-Earlier component checks: 25 new scoring checks, 60 inherited style checks and 2,008 exact forward-scoring observations. Final release coverage is pending below.
+Earlier component checks: 25 new scoring checks, 60 inherited style checks and 2,008 exact forward-scoring observations. Exact release coverage is listed below.
 
 ## Changes supported by the playtest
 
@@ -44,16 +44,16 @@ The actual official Windows executable ran under Wine, reporting Windows. Two re
 
 All four are playable source-course prototypes with earned clean finishes and fixed-input replays. No human enjoyment verdict is claimed. Saltglass uses the unchanged F2 body; Tether and Line Drive have explicit map-specific runner identities. Fall Line changes its world on a deterministic paused-aware clock while retaining the F2 body. Returning to the main maps restores their runner and laws.
 
-Production/native evidence: Saltglass 21 checks / 7,868 samples; Tether 25 checks / 1,695 samples; Fall Line 35 checks / 3,042 samples; Line Drive 36 checks plus 96 geometry checks / 1,705 samples. Old/new native captures match their headless replay fields exactly. Captures are **1296×736**. All 12 maps passed 2,203 inherited visual invariants. These are scripted verification facts, not performance, latency or player-feel claims.
+Production/native evidence: Saltglass 21 checks / 7,868 samples; Tether 25 checks / 1,695 samples; Fall Line 35 checks / 3,042 samples; Line Drive 36 checks plus 96 geometry checks / 1,705 samples. Old/new native captures match their headless replay fields exactly. Captures are **1296×736**. All 12 maps passed 2,203 inherited visual invariants. Staged directional-HUD frames passed 12 layout checks at each of 720p and 1080p; they prove presentation, while the separate earned-hop fixtures prove the awards. These are scripted verification facts, not performance, latency or player-feel claims.
 
 ## Final acceptance
 
 | Gate | Current status |
 | --- | --- |
 | Protected F2 sources | Six source hashes equal R18; all 1,203 pre-existing project files checked against the six exact allowed presentation/scoring edits |
-| Existing-map parity | Repaired strict revision guard and fresh matched baseline/candidate in progress |
-| Independent review | Bounded GPT runtime and delivery reviews complete; selectable folder path and strict three-to-five experiment gate fixed; exact acceptance still pending |
-| Exact Linux package | Passed 1,976 native checks: startup 80, controls 1,598, play 199, reload 99. All 5,777 trace/input ticks match exactly; 164 recordings / 9,343 ticks audited. Four broken-pack/sky cases exit nonzero |
+| Existing-map parity | Exact R18 baseline passes 523 audits; corrected separate-source contact proof passes 45 checks; fresh full candidate matrix pending |
+| Independent review | Bounded GPT runtime and delivery reviews complete; selectable folder path, actual-name input and strict three-to-five experiment gate fixed; exact portable acceptance passed, full source matrix pending |
+| Exact Linux package | Passed 1,980 native checks: startup 80, controls 1,598, play 203, reload 99. All 5,777 trace/input ticks match exactly; 164 recordings / 9,343 ticks audited. Four broken-pack/sky cases exit nonzero |
 | Windows ZIP | Hashes, CRC, official runtime, licenses and shared PCK verified. Exact PE/PCK startup under Wine passed, including direct extracted basename; native Windows unverified |
 | ZIP checksums / branch promotion | Both SHA256 checks pass; final parity and gameplay branch fast-forward pending |
 
@@ -69,4 +69,4 @@ All five spec items were reached. Three experiments were chosen, within the requ
 
 Decision trail: `decisions.tsv`. Independent review: [REVIEW-R19.md](/home/thatmike1/foldrunner-build-2026-11-05/look/REVIEW-R19.md), by gpt-6.1-terra, explicitly a same-family GPT review under the GPT-only instruction.
 
-Portable source: `da29f543c77b3d441e71c213aba370bf38c54974`. Both ZIPs use PCK `09d2e04991b59faad312aea6e70d0690ca1240f27b0d2932f0697cc425897d41`. [Linux ZIP](/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r19/spillway-2026.11.09-r19-linux-x86_64-da29f543.zip), [Windows ZIP](/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r19/spillway-2026.11.09-r19-windows-x86_64-da29f543.zip), [checksums](/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r19/SHA256SUMS), [portable verification](/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r19/VERIFICATION.json), [Windows Wine scope](/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r19/WINDOWS-WINE.json).
+Portable source: `5dcc94967c19cf1333797ce8fc26f36a8f860ce5`. Both ZIPs use PCK `0e64ec5ec069d28007f5e9b62332220f6a51d04e6105c2e358a3c48726ff4eb7`. [Linux ZIP](/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r19/spillway-2026.11.09-r19-linux-x86_64-5dcc9496.zip), [Windows ZIP](/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r19/spillway-2026.11.09-r19-windows-x86_64-5dcc9496.zip), [checksums](/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r19/SHA256SUMS), [portable verification](/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r19/VERIFICATION.json), [Windows Wine scope](/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r19/WINDOWS-WINE.json).
