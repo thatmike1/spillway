@@ -282,14 +282,31 @@ class ReleaseGates(unittest.TestCase):
                 engine.assert_not_called()
 
     def test_pending_features_prevent_assembly_even_with_complete_parent_freeze(self):
-        with tempfile.TemporaryDirectory(dir=pkg.SCRATCH) as td:
-            path = Path(td)/'freeze.json'; path.write_text(json.dumps(freeze()))
-            args = SimpleNamespace(freeze=path)
-            with patch.object(pkg.r16,'git',side_effect=['a'*40,'']), patch.object(pkg.r16,'checked') as engine, patch.object(pkg,'frozen_source') as archive:
-                self.refused(pkg.package,args)
-                archive.assert_not_called(); engine.assert_not_called()
-        self.refused(pkg.integration_ready,freeze())
-        self.assertEqual(pkg.PENDING_FEATURES, ('saltglass-route','directional-stack','tether-controls','through-line','export-my-runs'))
+        with patch.object(pkg,'PENDING_FEATURES',('unfinished-feature',)):
+            with tempfile.TemporaryDirectory(dir=pkg.SCRATCH) as td:
+                path = Path(td)/'freeze.json'; path.write_text(json.dumps(freeze()))
+                args = SimpleNamespace(freeze=path)
+                with patch.object(pkg.r16,'git',side_effect=['a'*40,'']), patch.object(pkg.r16,'checked') as engine, patch.object(pkg,'frozen_source') as archive:
+                    self.refused(pkg.package,args)
+                    archive.assert_not_called(); engine.assert_not_called()
+            self.refused(pkg.integration_ready,freeze())
+        self.assertEqual(pkg.PENDING_FEATURES, ())
+        pkg.integration_ready(freeze())
+
+    def test_completed_feature_gate_still_requires_every_real_controls_receipt(self):
+        names = ['directional_stack','tether_controls','through_controls','run_export','control_profile']
+        result = {name:{'ok':True} for name in names}
+        result['r20_maps'] = [{'map':name} for name in pkg.REQUIRED_MAPS]
+        audit = {'run_export':{'ok':True}}
+        self.assertTrue(pkg.controls_features_ok(result,audit,pkg.REQUIRED_MAPS))
+        for name in names:
+            for value in [{}, {'ok':False}, {'ok':1}]:
+                bad = copy.deepcopy(result);bad[name] = value
+                self.assertFalse(pkg.controls_features_ok(bad,audit,pkg.REQUIRED_MAPS))
+        self.assertFalse(pkg.controls_features_ok(result,{},pkg.REQUIRED_MAPS))
+        for maps in [result['r20_maps'][:-1],result['r20_maps']+[{'map':'line-drive'}],list(reversed(result['r20_maps'])),result['r20_maps']+[result['r20_maps'][0]]]:
+            bad = copy.deepcopy(result);bad['r20_maps'] = maps
+            self.assertFalse(pkg.controls_features_ok(bad,audit,pkg.REQUIRED_MAPS))
 
     def test_imports_do_not_mutate_old_release_modules(self):
         old = module('r20_test_original_r19', PROJECT/'tools/package-r19.py')

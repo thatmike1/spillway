@@ -3,7 +3,7 @@
 
 The R16 audit/input/ghost and R18 assembly implementations retain their provenance.
 Each load constructs private r18/r16 module instances; no old gate module is mutated.
-New feature acceptance is deliberately pending until the parent supplies real controls.
+Every new feature has behavioral controls; full frozen-candidate acceptance remains required.
 
  `prepare` is read-only; `package` requires an explicit frozen commit.
 
@@ -66,13 +66,14 @@ NEW_MAPS = ('saltglass', 'tether-yard', 'through-line')
 REQUIRED_MAPS = (*ORIGINAL_MAPS, *NEW_MAPS)
 EXPERIMENTAL_MAPS = ('experiment', 'tether-yard', 'through-line')
 SHELVED = ('line-drive', 'fall-line')
-# these are integration work, not claims about unfinished runtime APIs.
-PENDING_FEATURES = ('saltglass-route', 'directional-stack', 'tether-controls', 'through-line', 'export-my-runs')
+# every feature now has executable gates; assembling a candidate still runs all of them.
+PENDING_FEATURES = ()
 HELPERS = tuple(dict.fromkeys((*r18.HELPERS, 'tools/package-r19.py', 'tools/r19-pack-probe.gd',
     'tools/r19_native_guard.py', 'tools/package-r20.py', 'tools/r20-pack-probe.gd',
     'tests/test_package_r20.py', 'tools/check-r20-preservation.py',
     'tests/r20_release_style_observer.gd', 'tools/check-r20-style-events.py',
-    'tools/r20-direction-driver.gd', 'tests/r20_pack_direction_route.gd', 'tools/r20-raw-input-driver.gd', 'tests/r20_tether_route.gd', 'tests/r20_tether_native.gd', 'tests/r20_through_route.gd', 'tests/r20_through_native.gd')))
+    'tools/r20-direction-driver.gd', 'tests/r20_pack_direction_route.gd', 'tools/r20-raw-input-driver.gd', 'tests/r20_tether_route.gd', 'tests/r20_tether_native.gd', 'tests/r20_through_route.gd', 'tests/r20_through_native.gd',
+    'tools/ingest-r20-runs.py', 'tools/r20_run_bundle.py')))
 for module in (r18, r16):
     module.NAME = NAME
     module.HELPERS = HELPERS
@@ -334,6 +335,13 @@ def readme(platform, facts, identity, launch, user_dir, newline):
         'Only this exact R20 version and matching map revision/preset can race. G toggles the chosen ghost.',
         'Tether Yard: hold left mouse to attach; hold right mouse to reel. Both reproduce the inherited reel mode.',
         'Esc offers automatic reel and alternative grapple models. Ground reel pulls under an anchor; jump to lift.',
+        'Classic times out after 3 s; Pendulum/Elastic after 5 s. Range/blocked-line releases show and sound a cue.',
+        'Release LMB to let go. After an automatic release or menu change, release and press LMB again.',
+        'Saltglass: enter both fins high; the crescent climbs; flat exit decks; failed surfs fall to checkpoints.',
+        'Backwards/sideways: eligible hop chains build pending style. Fast chain ends bank it; stalls lose it.',
+        'Through Line (Experiments): bhop forward into the raised fork at 230+ u/s, fly onto Second Run and keep moving.',
+        'More entry speed gives more height/range; horizontal velocity carries. Dotted arcs show two example speeds.',
+        'Line Drive and Fall Line are shelved from selection; their source remains for later experiments.',
         'Export all attempts: Esc > Export my runs. Send the real ZIP manually; ghosts are separate .spillghost files.',
         'Windows recordings: %APPDATA%\\Godot\\app_userdata\\Spillway\\r16_runs\\',
         'Windows settings: spillway_r16.cfg beside the r16_runs folder.',
@@ -984,6 +992,13 @@ def profile_config_allowed(mode):
     return mode in ('play', 'controls')
 
 
+def controls_features_ok(result, audit, required_maps):
+    return ([row.get('map') for row in result.get('r20_maps', [])] == list(required_maps)
+        and all(result.get(name, {}).get('ok') is True for name in
+            ('directional_stack','tether_controls','through_controls','run_export','control_profile'))
+        and audit.get('run_export', {}).get('ok') is True)
+
+
 def native_checks(folder, build, files, args, evidence, work, routes):
     host = harness(folder, work / 'harness')
     args.pack_required = r16.resources(files)
@@ -1036,10 +1051,7 @@ def native_checks(folder, build, files, args, evidence, work, routes):
                 result['ok'] = (code == 0 and report.get('failures') == 0 and audit['ok'] and not r16.ERRORS.search(text)
                     and 'ObjectDB instances leaked' not in text and result['cwd_empty']
                     and any(t.startswith(r16.TITLE_PREFIX) for t in titles)
-                    and (mode != 'controls' or (set(r['map'] for r in result['r20_maps']) == set(build['freeze']['required_maps'])
-                        and result['directional_stack'].get('ok') is True and result['tether_controls'].get('ok') is True
-                        and result['through_controls'].get('ok') is True and result['run_export'].get('ok') is True
-                        and audit.get('run_export',{}).get('ok') is True and result['control_profile'].get('ok') is True
+                    and (mode != 'controls' or (controls_features_ok(result,audit,build['freeze']['required_maps'])
                         and result['control_profile'].get('sha256') == r16.profile_files(profile).get('Spillway/spillway_r16.cfg')))
                     and (mode != 'play' or (result['friend'].get('ok') is True and result['r20_route_identity'].get('ok') is True))
                     and result.get('exact_source_trace', {'ok': True})['ok'] and result.get('input_order', {'ok': True})['ok']
