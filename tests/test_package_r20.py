@@ -61,7 +61,7 @@ def stack_stream_fixture(terminal='bank'):
         'elapsed': at / 128, 'points': 480, 'base': 480, 'mult': 1, 'direction_mult': 1,
         'combo_mult': 1, 'combo': 0, 'label': 'Backwards banked', 'm': {'direction': 'backward_bhop',
             'hops': 3, 'unit': 160, 'formula': 'unit*n*(n-1)/2', 'reason': 'facing',
-            'start_tick': 1, 'last_hop_tick': 7, 'end_ups': 350.}, 'geo': {}, 'p': [0., 2., 30.], 'clean': True}
+            'start_tick': 1, 'last_hop_tick': 7, 'end_ups': 350.0000135166439}, 'geo': {}, 'p': [0., 2., 30.], 'clean': True}
     events, rows = [], []
     active = {'kind': '', 'hops': 0, 'pending': 0, 'unit': 0}
     last, verdict, score = {}, {}, 0
@@ -465,7 +465,7 @@ class ReleaseGates(unittest.TestCase):
         pkg.strict_style(value, 1300)
         for key, wrong in [('points', 30401), ('base', 30401), ('mult', 2), ('combo_mult', 2),
                 ('direction_mult', 2), ('combo', 1), ('tick', 1301), ('v', True),
-                ('clean', 1), ('p', [0., float('nan'), 30.]), ('record_kind', 'direction')]:
+                ('clean', 1), ('p', [0., float('nan'), 30.]), ('record_kind', 'direction'), ('label', 'Speed')]:
             bad = copy.deepcopy(value); bad[key] = wrong
             self.refused(pkg.strict_stack_style, bad, 1300)
         for key, wrong in [('hops', 19), ('hops', True), ('unit', 50), ('formula', 'unit*n'),
@@ -516,6 +516,7 @@ class ReleaseGates(unittest.TestCase):
             lambda r,s: r.events[2]['d'].update(time_s=100),
             lambda r,s: r.events[4]['d'].update(points=481),
             lambda r,s: r.events[4]['d']['m'].update(start_tick=2),
+            lambda r,s: r.events[4]['d']['m'].update(end_ups=351),
             lambda r,s: r.events[5]['d'].update(kind='direction_lost', reason='stall'),
             lambda r,s: r.events[4].update(s='event'),
             lambda r,s: r.events[1].update(k='unknown'),
@@ -539,6 +540,11 @@ class ReleaseGates(unittest.TestCase):
             else:
                 rec.events[-1]['k'] = 'pause'
             self.refused(pkg.audit_style_stream, rec, rows)
+
+    def test_bank_speed_uses_the_pinned_float32_vector_magnitude(self):
+        self.assertEqual(pkg.source_horizontal_ups(5., 12.), 13. / 0.0254)
+        self.assertEqual(pkg.source_horizontal_ups(0., 8.89), 350.0000135166439)
+        self.assertNotEqual(pkg.source_horizontal_ups(0., 8.89), 350.)
 
     def test_native_default_preserves_unavailable_desktop_refusal(self):
             # the real guard is used unchanged; no display server is launched.

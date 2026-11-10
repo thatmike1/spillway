@@ -70,7 +70,8 @@ SHELVED = ('line-drive', 'fall-line')
 PENDING_FEATURES = ('saltglass-route', 'directional-stack', 'tether-controls', 'through-line', 'export-my-runs')
 HELPERS = tuple(dict.fromkeys((*r18.HELPERS, 'tools/package-r19.py', 'tools/r19-pack-probe.gd',
     'tools/r19_native_guard.py', 'tools/package-r20.py', 'tools/r20-pack-probe.gd',
-    'tests/test_package_r20.py', 'tools/check-r20-preservation.py')))
+    'tests/test_package_r20.py', 'tools/check-r20-preservation.py',
+    'tests/r20_release_style_observer.gd', 'tools/check-r20-style-events.py')))
 for module in (r18, r16):
     module.NAME = NAME
     module.HELPERS = HELPERS
@@ -497,6 +498,8 @@ def strict_stack_style(value, at):
     direction, hops = measures['direction'], measures['hops']
     require(isinstance(direction, str) and direction in DIRECTION_UNITS
         and value['kind'] == direction + '_bank', 'invalid direction bank kind')
+    require(value['label'] == ('Backwards banked' if direction == 'backward_bhop' else 'Half-sideways banked'),
+        'direction bank label differs from its category')
     require(type(hops) is int and 2 <= hops <= at + 1
         and type(measures['unit']) is int and measures['unit'] == DIRECTION_UNITS[direction]
         and measures['formula'] == DIRECTION_FORMULA, 'invalid direction bank formula')
@@ -565,6 +568,13 @@ def strict_style(value, at):
         'R20 ordinary style must not multiply or immediately score direction')
 
 
+def source_horizontal_ups(x, z):
+    """reproduce the pinned float32 Vector2.length before its double source-unit division."""
+    f32 = lambda value: struct.unpack('<f', struct.pack('<f', value))[0]
+    x, z = f32(x), f32(z)
+    return f32(math.sqrt(f32(f32(x * x) + f32(z * z)))) / 0.0254
+
+
 def audit_style_stream(rec, rows):
     """reconcile scored events and non-scored state transitions with post-step observations."""
     n = len(rows)
@@ -627,8 +637,9 @@ def audit_style_stream(rec, rows):
             require(bank is not None and bank['points'] == value['pending']
                 and bank['m']['reason'] == value['reason'] and bank['m']['start_tick'] == start_tick
                 and bank['m']['last_hop_tick'] == last_hop_tick, 'direction bank differs from its earned diagnostic chain')
-            speed = math.hypot(rec.columns['actual_v_x'][at], rec.columns['actual_v_z'][at]) / 0.0254
-            require(speed >= 300, 'direction bank paid below minimum actual speed')
+            speed = source_horizontal_ups(rec.columns['actual_v_x'][at], rec.columns['actual_v_z'][at])
+            require(speed >= 300 and json_numbers_match(bank['m']['end_ups'], speed),
+                'direction bank speed differs from its actual recorded sample')
         else:
             require(bank is None and key not in banks, 'lost or zero pending chain awarded a bank')
         last = value
