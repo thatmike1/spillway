@@ -4,6 +4,20 @@ extends "r16-pack-probe.gd"
 var _telemetry_pressed := false
 var _folder_opened := ""
 
+func _input(event: InputEvent) -> void:
+	super._input(event)
+	if not event is InputEventMouseButton:
+		return
+	var host := get_tree().current_scene
+	if host == null or not ("session" in host) or host.get("session") == null or bool(host.get("paused")):
+		return
+	var session: Node = host.get("session")
+	if not bool(session.get("attempt_live")) or not session.get("recorder").call("is_open"):
+		return
+	delivered_inputs.append({"run_id": session.get("recorder").get("run_id"), "tick": session.get("tick"),
+		"data": {"type": "mouse_button", "button_index": event.button_index, "pressed": event.pressed,
+			"double_click": event.double_click, "factor": event.factor}})
+
 func _check_identity() -> void:
 	super._check_identity()
 	check("R20 host inherits R17 and R16", _script_chain(game).slice(0,4) == ["res://scripts/r20_main.gd", "res://scripts/r19_main.gd", "res://scripts/r17_main.gd", "res://scripts/r16_main.gd"], _script_chain(game))

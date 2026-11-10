@@ -21,6 +21,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import struct
 import subprocess
 import sys
 import tarfile
@@ -473,6 +474,20 @@ def strict_style(value, at):
 digest, profile_root, json_numbers_match = r16.digest, r16.profile_root, r16.json_numbers_match
 PROJECT_NAME, SAVE_PATH = r16.PROJECT_NAME, r16.SAVE_PATH
 
+MOTION_KEYS = {87, 65, 83, 68, 32, 4194326, 4194325, 69}
+
+
+def raw_motion_input(data):
+    """canonicalize the independent pre-serialization receipt, including mouse edges."""
+    f32 = lambda value: struct.unpack('<f', struct.pack('<f', value))[0]
+    if data.get('type') == 'key' and (data.get('physical_keycode') or data.get('keycode')) in MOTION_KEYS:
+        return (1, data['keycode'], data['physical_keycode'], int(data['pressed']) | (int(data.get('echo', False)) << 1), 0., 0., 0., 0.)
+    if data.get('type') == 'mouse_button':
+        return (2, data['button_index'], 0, int(data['pressed']) | (int(data.get('double_click', False)) << 2), f32(data.get('factor', 1.)), 0., 0., 0.)
+    if data.get('type') == 'mouse_motion':
+        return (3, 0, 0, 0, *[f32(value) for value in data['screen_relative']], *[f32(value) for value in data['relative']])
+    return None
+
 def audit_profile(profile, before, after, report, helpers, allow_config=False):
     """admit only observed attempt paths, never a wildcard for arbitrary new profile files."""
     result = {'ok': False, 'runs': [], 'errors': []}
@@ -558,19 +573,12 @@ def audit_profile(profile, before, after, report, helpers, allow_config=False):
                 if b''.join(struct.pack('<' + fmt, value) for value in rec.inputs[field]).hex() != engine['input_hex'][field]:
                     raise Rejected('engine/Python input bytes disagree: ' + field)
             # the raw observer sees Input before serialization; reset tails live in boundary events.
-            codes_set = {87, 65, 83, 68, 32, 4194326, 4194325, 69}
-            def canonical(data):
-                if data.get('type') == 'key' and (data.get('physical_keycode') or data.get('keycode')) in codes_set:
-                    return (1, data['keycode'], data['physical_keycode'], int(data['pressed']) | (int(data.get('echo', False)) << 1), 0., 0., 0., 0.)
-                if data.get('type') == 'mouse_motion':
-                    return (3, 0, 0, 0, *[f32(v) for v in data['screen_relative']], *[f32(v) for v in data['relative']])
-                return None
             wanted_inputs = [[] for _ in range(n)]
             wanted_inputs[0].extend(carry)
             carry = []
             tail = []
             for delivery in (r for r in deliveries if r['run_id'] == attempt['run_id']):
-                value = canonical(delivery['data'])
+                value = raw_motion_input(delivery['data'])
                 if value is None or delivery['tick'] > n:
                     raise Rejected('invalid or unconsumed raw input observation')
                 (wanted_inputs[delivery['tick']] if delivery['tick'] < n else tail).append(value)
@@ -580,7 +588,7 @@ def audit_profile(profile, before, after, report, helpers, allow_config=False):
                     raise Rejected('raw input tail has no observed lifecycle boundary')
                 boundary = boundaries[-1]['d']
                 if outcome.get('kind') in ('spawn', 'restart', 'practice', 'map', 'quit'):
-                    saved_tail = [canonical(v) for v in boundary.get('inputs', [])]
+                    saved_tail = [raw_motion_input(v) for v in boundary.get('inputs', [])]
                     if tail != [v for v in saved_tail if v is not None]:
                         raise Rejected('raw input tail differs from the reset boundary')
                 elif type(boundary.get('inputs_carried')) is int and boundary['inputs_carried'] >= len(tail):
@@ -589,7 +597,7 @@ def audit_profile(profile, before, after, report, helpers, allow_config=False):
                     raise Rejected('raw input tail was not consumed or carried')
             recorded_inputs = [[] for _ in range(n)]
             for j, tick in enumerate(rec.inputs['tick']):
-                if rec.inputs['kind'][j] == 3 or (rec.inputs['kind'][j] == 1 and (rec.inputs['aux'][j] or rec.inputs['code'][j]) in codes_set):
+                if rec.inputs['kind'][j] in (2, 3) or (rec.inputs['kind'][j] == 1 and (rec.inputs['aux'][j] or rec.inputs['code'][j]) in MOTION_KEYS):
                     if type(tick) is not int or tick < 0 or tick >= n:
                         raise Rejected('recorded input lies outside its tick stream')
                     recorded_inputs[tick].append(tuple(rec.inputs[k][j] for k in ('kind', 'code', 'aux', 'flags', 'x', 'y', 'x2', 'y2')))

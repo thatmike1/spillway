@@ -70,6 +70,23 @@ class ReleaseGates(unittest.TestCase):
         with self.assertRaises(pkg.Rejected):
             fn(*args)
 
+    def test_raw_mouse_buttons_keep_press_release_double_click_and_factor(self):
+        left = {'type':'mouse_button', 'button_index':1, 'pressed':True, 'double_click':False, 'factor':1.}
+        right = dict(left, button_index=2)
+        self.assertEqual(pkg.raw_motion_input(left), (2,1,0,1,1.,0.,0.,0.))
+        self.assertEqual(pkg.raw_motion_input(dict(left, pressed=False)), (2,1,0,0,1.,0.,0.,0.))
+        self.assertEqual(pkg.raw_motion_input(dict(right, double_click=True)), (2,2,0,5,1.,0.,0.,0.))
+        wheel = dict(left, button_index=4, factor=.3)
+        self.assertEqual(pkg.raw_motion_input(wheel), (2,4,0,1,0.30000001192092896,0.,0.,0.))
+        held = [pkg.raw_motion_input(row) for row in [left,right,dict(left,pressed=False),dict(right,pressed=False)]]
+        for mutation in [held[:-1],list(reversed(held)),held[:1]+held[2:], [held[1],held[0],*held[2:]]]:
+            self.assertNotEqual(mutation, held)
+        key = {'type':'key','keycode':87,'physical_keycode':87,'pressed':True,'echo':False}
+        self.assertEqual(pkg.raw_motion_input(key),(1,87,87,1,0.,0.,0.,0.))
+        self.assertIsNone(pkg.raw_motion_input(dict(key,keycode=4194305,physical_keycode=4194305)))
+        self.assertEqual(pkg.raw_motion_input({'type':'mouse_motion','screen_relative':[.3,0.], 'relative':[.2,-.3]}),
+                         (3,0,0,0,0.30000001192092896,0.,0.20000000298023224,-0.30000001192092896))
+
     def test_freeze_is_explicit_and_malformed_values_refuse(self):
         good = freeze()
         self.assertEqual(pkg.validate_freeze(good, 'a'*40), good)
@@ -205,6 +222,15 @@ class ReleaseGates(unittest.TestCase):
             source = path.read_text()
             if name == 'audit_profile' and path.name == 'package-r19.py':
                 source = source.replace("if not engine['ok'] or not json_numbers_match(engine['seal'], rec.seal)", "if not engine['ok'] or not json_numbers_match(engine['header'], rec.header) or not json_numbers_match(engine['seal'], rec.seal)")
+                # the only input extension moves canonicalization into the tested helper and
+                # admits button rows to the existing exact order/tick/boundary comparison.
+                start = source.index('            codes_set = {87,')
+                stop = source.index('            wanted_inputs = ', start)
+                source = source[:start] + source[stop:]
+                source = source.replace("canonical(delivery['data'])", "raw_motion_input(delivery['data'])")
+                source = source.replace("canonical(v) for v in boundary.get('inputs', [])", "raw_motion_input(v) for v in boundary.get('inputs', [])")
+                source = source.replace("rec.inputs['kind'][j] == 3 or (rec.inputs['kind'][j] == 1 and (rec.inputs['aux'][j] or rec.inputs['code'][j]) in codes_set)",
+                                        "rec.inputs['kind'][j] in (2, 3) or (rec.inputs['kind'][j] == 1 and (rec.inputs['aux'][j] or rec.inputs['code'][j]) in MOTION_KEYS)")
             tree = ast.parse(source)
             node = next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name==name)
             for item in ast.walk(node):
