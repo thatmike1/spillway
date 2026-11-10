@@ -390,6 +390,51 @@ class ReleaseGates(unittest.TestCase):
                 bad=dict(value);bad[key]=bad_value
                 self.refused(pkg.strict_style,bad,1)
 
+    def test_stack_bank_can_exceed_legacy_ceiling_without_combo_amplification(self):
+        value = {'v': 2, 'kind': 'backward_bhop_bank', 'tick': 1300, 'time_s': 10.15625,
+            'elapsed': 10.15625, 'points': 30400, 'base': 30400, 'mult': 1.,
+            'direction_mult': 1., 'combo_mult': 1., 'combo': 0, 'label': 'Backwards banked',
+            'm': {'direction': 'backward_bhop', 'hops': 20, 'unit': 160,
+                'formula': 'unit*n*(n-1)/2', 'reason': 'facing', 'start_tick': 50,
+                'last_hop_tick': 1290, 'end_ups': 350.}, 'geo': {}, 'p': [0., 2., 30.], 'clean': True}
+        pkg.strict_stack_style(value, 1300)
+        self.refused(pkg.strict_style, value, 1300)
+        for key, wrong in [('points', 30401), ('base', 30401), ('mult', 2), ('combo_mult', 2),
+                ('direction_mult', 2), ('combo', 1), ('tick', 1301), ('v', True),
+                ('clean', 1), ('p', [0., float('nan'), 30.]), ('record_kind', 'direction')]:
+            bad = copy.deepcopy(value); bad[key] = wrong
+            self.refused(pkg.strict_stack_style, bad, 1300)
+        for key, wrong in [('hops', 19), ('hops', True), ('unit', 50), ('formula', 'unit*n'),
+                ('direction', 'sideways_bhop'), ('start_tick', 1291), ('last_hop_tick', 1301),
+                ('end_ups', 299.999), ('end_ups', float('inf')), ('reason', 'quit')]:
+            bad = copy.deepcopy(value); bad['m'][key] = wrong
+            self.refused(pkg.strict_stack_style, bad, 1300)
+        side = copy.deepcopy(value)
+        side.update(kind='sideways_bhop_bank', points=9500, base=9500, label='Half-sideways banked')
+        side['m'].update(direction='sideways_bhop', unit=50)
+        pkg.strict_stack_style(side, 1300)
+
+    def test_pending_and_lost_diagnostics_never_carry_scored_points(self):
+        value = {'record_kind': 'direction', 'v': 1, 'kind': 'direction_pending',
+            'reason': 'eligible', 'serial': 20, 'tick': 1290, 'time_s': 10.078125,
+            'direction': 'backward_bhop', 'hops': 20, 'pending': 30400, 'unit': 160,
+            'formula': 'unit*n*(n-1)/2', 'm': {'landing_ups': 350.}}
+        pkg.strict_direction(value, 1290)
+        for key, wrong in [('pending', 30401), ('hops', 19), ('unit', 50), ('tick', 1291),
+                ('v', True), ('serial', 0), ('serial', True), ('time_s', float('nan')),
+                ('reason', 'quit'), ('points', 30400), ('base', 30400), ('mult', 1)]:
+            bad = copy.deepcopy(value); bad[key] = wrong
+            self.refused(pkg.strict_direction, bad, 1290)
+        for kind, reason in [('direction_banked', 'facing'), ('direction_lost', 'stall'),
+                ('direction_lost', 'quit'), ('direction_lost', 'settings')]:
+            terminal = dict(value, kind=kind, reason=reason, serial=21, m={})
+            pkg.strict_direction(terminal, 1290)
+        for reason in ['pause', 'resume']:
+            self.refused(pkg.strict_direction, dict(value, kind='direction_lost', reason=reason, m={}), 1290)
+        self.refused(pkg.strict_direction, dict(value, kind='direction_banked', reason='quit', m={}), 1290)
+        armed = dict(value, serial=1, hops=1, pending=0)
+        pkg.strict_direction(armed, 1290)
+
     def test_native_default_preserves_unavailable_desktop_refusal(self):
             # the real guard is used unchanged; no display server is launched.
             module=sys.modules[pkg.DesktopGuard.__module__]

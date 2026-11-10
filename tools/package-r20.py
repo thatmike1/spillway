@@ -470,6 +470,79 @@ def strict_style(value, at):
     require(isinstance(value.get('m'), dict) and isinstance(value.get('geo'), dict) and isinstance(value.get('label'), str) and bool(value['label']), 'invalid R20 style detail')
 
 
+DIRECTION_UNITS = {'backward_bhop': 160, 'sideways_bhop': 50}
+DIRECTION_FORMULA = 'unit*n*(n-1)/2'
+DIRECTION_BANK_REASONS = frozenset(('finish', 'facing', 'ground_dwell', 'no_motor_jump',
+    'flight_timeout', 'flight_short', 'travel_short', 'rise_short', 'fall_short',
+    'efficiency', 'heading', 'novelty'))
+
+
+def finite_number(value):
+    return type(value) in (int, float) and math.isfinite(value)
+
+
+def strict_stack_style(value, at):
+    """validate a bank independently of the ordinary combo and its legacy point ceiling."""
+    fields = {'v', 'kind', 'tick', 'time_s', 'elapsed', 'points', 'base', 'mult',
+        'direction_mult', 'combo_mult', 'combo', 'label', 'm', 'geo', 'p', 'clean'}
+    require(isinstance(value, dict) and set(value) == fields, 'invalid direction bank fields')
+    require(type(at) is int and at >= 0 and type(value['tick']) is int
+        and value['tick'] == at and type(value['v']) is int and value['v'] == 2, 'invalid direction bank tick/schema')
+    measures = value['m']
+    require(isinstance(measures, dict) and set(measures) == {'direction', 'hops', 'unit',
+        'formula', 'reason', 'start_tick', 'last_hop_tick', 'end_ups'}, 'invalid direction bank measures')
+    direction, hops = measures['direction'], measures['hops']
+    require(isinstance(direction, str) and direction in DIRECTION_UNITS
+        and value['kind'] == direction + '_bank', 'invalid direction bank kind')
+    require(type(hops) is int and 2 <= hops <= at + 1
+        and type(measures['unit']) is int and measures['unit'] == DIRECTION_UNITS[direction]
+        and measures['formula'] == DIRECTION_FORMULA, 'invalid direction bank formula')
+    expected = DIRECTION_UNITS[direction] * hops * (hops - 1) // 2
+    require(type(value['base']) is int and type(value['points']) is int
+        and value['base'] == value['points'] == expected, 'invalid direction bank points')
+    require(all(finite_number(value[key]) and value[key] == 1
+        for key in ('mult', 'direction_mult', 'combo_mult'))
+        and type(value['combo']) is int and value['combo'] == 0, 'direction bank must be outside the ordinary combo')
+    require(type(measures['start_tick']) is int and type(measures['last_hop_tick']) is int
+        and 0 <= measures['start_tick'] < measures['last_hop_tick'] <= at
+        and hops <= measures['last_hop_tick'] - measures['start_tick'] + 1, 'invalid direction bank hop ticks')
+    require(isinstance(measures['reason'], str) and measures['reason'] in DIRECTION_BANK_REASONS
+        and finite_number(measures['end_ups']) and measures['end_ups'] >= 300, 'invalid direction bank end')
+    require(all(finite_number(value[key]) and value[key] >= 0 for key in ('time_s', 'elapsed'))
+        and type(value['clean']) is bool and value['geo'] == {}
+        and isinstance(value['label'], str) and bool(value['label'])
+        and isinstance(value['p'], list) and len(value['p']) == 3
+        and all(finite_number(component) for component in value['p']), 'invalid direction bank observation')
+
+
+def strict_direction(value, at):
+    """validate the payload tick; queued loss envelope attribution is a separate audit."""
+    fields = {'record_kind', 'v', 'kind', 'reason', 'serial', 'tick', 'time_s',
+        'direction', 'hops', 'pending', 'unit', 'formula', 'm'}
+    require(isinstance(value, dict) and set(value) == fields, 'invalid direction diagnostic fields')
+    require(type(at) is int and at >= 0 and type(value['tick']) is int and value['tick'] == at
+        and type(value['v']) is int and value['v'] == 1 and value['record_kind'] == 'direction', 'invalid direction diagnostic tick/schema')
+    direction, hops = value['direction'], value['hops']
+    require(isinstance(direction, str) and direction in DIRECTION_UNITS
+        and type(hops) is int and 1 <= hops <= at + 1
+        and type(value['unit']) is int and value['unit'] == DIRECTION_UNITS[direction]
+        and value['formula'] == DIRECTION_FORMULA, 'invalid direction diagnostic formula')
+    require(type(value['pending']) is int
+        and value['pending'] == DIRECTION_UNITS[direction] * hops * (hops - 1) // 2,
+        'invalid direction diagnostic amount')
+    require(type(value['serial']) is int and value['serial'] > 0
+        and finite_number(value['time_s']) and value['time_s'] >= 0
+        and isinstance(value['m'], dict), 'invalid direction diagnostic observation')
+    require(isinstance(value['reason'], str) and bool(value['reason']), 'missing direction diagnostic reason')
+    require(value['kind'] in ('direction_pending', 'direction_banked', 'direction_lost'), 'invalid direction diagnostic kind')
+    if value['kind'] == 'direction_pending':
+        require(value['reason'] == 'eligible', 'invalid pending reason')
+    elif value['kind'] == 'direction_banked':
+        require(value['reason'] in DIRECTION_BANK_REASONS and value['m'] == {}, 'invalid bank diagnostic reason')
+    else:
+        require(value['m'] == {} and value['reason'] not in ('pause', 'resume'), 'invalid loss diagnostic reason')
+
+
 # retain the strict R19 v1 style schema and full R16 audit; R20 additions require a versioned integration.
 digest, profile_root, json_numbers_match = r16.digest, r16.profile_root, r16.json_numbers_match
 PROJECT_NAME, SAVE_PATH = r16.PROJECT_NAME, r16.SAVE_PATH
