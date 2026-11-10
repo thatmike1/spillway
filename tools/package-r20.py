@@ -71,7 +71,8 @@ PENDING_FEATURES = ('saltglass-route', 'directional-stack', 'tether-controls', '
 HELPERS = tuple(dict.fromkeys((*r18.HELPERS, 'tools/package-r19.py', 'tools/r19-pack-probe.gd',
     'tools/r19_native_guard.py', 'tools/package-r20.py', 'tools/r20-pack-probe.gd',
     'tests/test_package_r20.py', 'tools/check-r20-preservation.py',
-    'tests/r20_release_style_observer.gd', 'tools/check-r20-style-events.py')))
+    'tests/r20_release_style_observer.gd', 'tools/check-r20-style-events.py',
+    'tools/r20-direction-driver.gd', 'tests/r20_pack_direction_route.gd')))
 for module in (r18, r16):
     module.NAME = NAME
     module.HELPERS = HELPERS
@@ -304,7 +305,7 @@ def preflight(freeze=None, strict=False, runtime=False):
     require('config/use_custom_user_dir=true' not in project, 'shared Spillway profile folder changed')
     scene = r16.committed('scenes/r20.tscn')
     require('path="' + MAIN_SCRIPT + '"' in scene and all(s in scene.splitlines() for s in ['persist = true', 'record_runs = true']), 'R20 scene must explicitly persist and record')
-    for path, parent in [('scripts/r20_main.gd','r19_main'), ('scripts/r19_main.gd','r17_main'), ('scripts/r17_main.gd','r16_main'), ('scripts/r19_hud.gd','r18_hud')]:
+    for path, parent in [('scripts/r20_main.gd','r19_main'), ('scripts/r19_main.gd','r17_main'), ('scripts/r17_main.gd','r16_main'), ('scripts/r20_hud.gd','r19_hud'), ('scripts/r19_hud.gd','r18_hud')]:
         require(r16.committed(path).startswith('extends "res://scripts/' + parent + '.gd"'), 'host/HUD inheritance changed: ' + path)
     preset = next((b for b in re.split(r'^(?=\[preset\.\d+\]$)', r16.committed('export_presets.cfg'), flags=re.M) if 'name="R17 Pack"' in b.splitlines()), '')
     require('platform="Linux"' in preset and all(x in preset for x in ['look/*', 'docs/*', 'tests/*', 'tools/*']), 'export must exclude private concepts and verification helpers')
@@ -346,7 +347,7 @@ r16.readme = readme
 
 
 def copy_probes(root, out):
-    for name in ['r16-pack-probe.gd', 'r20-pack-probe.gd']:
+    for name in ['r16-pack-probe.gd', 'r20-pack-probe.gd', 'r20-direction-driver.gd']:
         shutil.copy2(root / 'tools' / name, out / name)
 
 
@@ -367,7 +368,7 @@ def source_identity(source, evidence, files):
     report = json.loads((out / 'probe.json').read_text())
     require(report['failures'] == 0, 'source identity probe failed')
     identity = report['identity']
-    require(identity['main_script'] == MAIN_SCRIPT and identity['hud_script'] == 'res://scripts/r19_hud.gd', 'wrong R20 source host/HUD')
+    require(identity['main_script'] == MAIN_SCRIPT and identity['hud_script'] == 'res://scripts/r20_hud.gd', 'wrong R20 source host/HUD')
     return identity
 
 

@@ -1,6 +1,13 @@
 extends "r16-pack-probe.gd"
 ## adapted from r19-pack-probe.gd at 065f7b279; exact R20 delivery observer. inherited controls, input/recording and real local ghost
 ## checks stay behavioral. the new checks use the packed host and its actual buttons.
+const DIRECTION_DRIVER := preload("r20-direction-driver.gd")
+signal direction_step
+var _direction_active := false
+var _direction_driver: RefCounted
+var _direction_tick := 0
+var _direction_row: Dictionary = {}
+var _direction_moving_l := false
 var _telemetry_pressed := false
 var _folder_opened := ""
 var _salt_first: Dictionary = {}
@@ -20,7 +27,33 @@ func observe_actual(delta: float) -> void:
 	observed_samples[-1]["style_time_s"] = snapshot.time_s
 	observed_samples[-1]["style_direction_verdict"] = RUN_READER.json_safe(snapshot.diag.direction.last)
 
+func early_step(delta: float) -> void:
+	if not _direction_active:
+		super.early_step(delta)
+		return
+	_direction_tick += 1
+	for command: Array in _direction_driver.commands(_direction_tick, _direction_row):
+		_direction_input(command)
+	if _direction_tick == 200:
+		var before := _behavior()
+		var look: bool = game.look_enabled
+		_key(KEY_L, true)
+		_key(KEY_L, false)
+		check("direction route: moving L changes only presentation", game.look_enabled != look and _behavior() == before)
+		_key(KEY_L, true)
+		_key(KEY_L, false)
+		check("direction route: second moving L restores paint", game.look_enabled == look and _behavior() == before)
+		_direction_moving_l = true
+
 func late_step(delta: float) -> void:
+	if _direction_active:
+		var sample: Dictionary = game.session.last_sample
+		_direction_row = {"p": game.player.global_position, "v": game.player.velocity,
+			"speed": Vector2(sample.actual_v.x, sample.actual_v.z).length() / 0.0254,
+			"yaw": game.player.yaw, "g": game.player.is_grounded(), "direction": game.session.style.snapshot().direction}
+		_direction_driver.observe(_direction_row)
+		direction_step.emit()
+		return
 	if not _row.is_empty() and game.map_id == "saltglass":
 		_observe_saltglass(int(_row.tick))
 	super.late_step(delta)
@@ -86,7 +119,7 @@ func _input(event: InputEvent) -> void:
 func _check_identity() -> void:
 	super._check_identity()
 	check("R20 host inherits R17 and R16", _script_chain(game).slice(0,4) == ["res://scripts/r20_main.gd", "res://scripts/r19_main.gd", "res://scripts/r17_main.gd", "res://scripts/r16_main.gd"], _script_chain(game))
-	check("R20 HUD inherits R18 interface", _script_chain(game.hud).slice(0,2) == ["res://scripts/r19_hud.gd", "res://scripts/r18_hud.gd"], _script_chain(game.hud))
+	check("R20 HUD inherits R18 interface", _script_chain(game.hud).slice(0,3) == ["res://scripts/r20_hud.gd", "res://scripts/r19_hud.gd", "res://scripts/r18_hud.gd"], _script_chain(game.hud))
 	check("R20 project and title identity", str(ProjectSettings.get_setting("application/config/version")) == "2026.11.10-r20" and game.window_title().begins_with("Spillway R20 · "))
 	check("R20 recording build distinct from behavioral BUILD_ID", str(game.recording_metadata("probe").build) == "spillway-2026.11.10-r20" and str(game.BUILD_ID) == "spillway-2026.11.09-r16")
 	check("R20 recording enabled in normal scene", bool(game.record_runs) and bool(game.persist))
@@ -183,6 +216,7 @@ func _controls() -> void:
 		await _pause_menu_click("Map_"+home,"restore R20 start map")
 		await _physics(5)
 	report["r20_maps"] = results
+	await _directional_controls()
 
 func _friend_button(name: String) -> bool:
 	var button := game.hud.find_child(name,true,false) as Button
@@ -318,3 +352,79 @@ func _wrap_up() -> void:
 # this intentionally fails closed rather than accepting invented field assignments.
 func _r20_features() -> void:
 	check("R20 exact-pack feature integration pending", false, ["saltglass-route", "directional-stack", "tether-controls", "through-line", "export-my-runs"])
+
+func _direction_input(command: Array) -> void:
+	if command[0] == "mouse":
+		var event := InputEventMouseMotion.new()
+		event.relative = Vector2(float(command[1]), 0.0)
+		event.screen_relative = event.relative
+		Input.parse_input_event(event)
+		Input.flush_buffered_events()
+	else:
+		_key(int(KEYS[command[0]]), bool(command[1]))
+
+func _directional_controls() -> void:
+	var begin := checks.size()
+	var home: String = game.map_id
+	var preset: String = game.preset_id
+	if home != "practice":
+		await _pause_menu_click("Map_practice", "direction route Penstock")
+	await _restore_preset("server128")
+	var early := Early.new()
+	early.run = self
+	early.process_physics_priority = -1000
+	early.process_mode = Node.PROCESS_MODE_ALWAYS
+	var late := Late.new()
+	late.run = self
+	late.process_physics_priority = 1001
+	late.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(early)
+	add_child(late)
+	var results: Array = []
+	for item: Array in [["back", "bank"], ["side", "bank"], ["back", "stall"], ["side", "stall"]]:
+		var label: String = "direction-" + str(item[0]) + "-" + str(item[1])
+		await _stage_picker_controls("practice", 3, false)
+		if game.practice_stage != 3 or game.paused:
+			check(label+": refuse route from a wrong stage", false, game.practice_stage)
+			break
+		_direction_driver = DIRECTION_DRIVER.new()
+		_direction_driver.configure(game.player.global_position, game.player.yaw, game.player.tape_radians_per_count, item[0], item[1])
+		_direction_tick = 0
+		_direction_row = {}
+		_direction_moving_l = false
+		var paused_pending := false
+		_direction_active = true
+		while not _direction_driver.done and _direction_tick < 2400 and game.respawn_count == 0:
+			await direction_step
+			if not paused_pending and int(_direction_row.direction.hops) >= 6:
+				_direction_active = false
+				await _tap(KEY_ESCAPE)
+				var pending: Dictionary = game.session.style.snapshot().direction.duplicate(true)
+				check(label+": pending is separate from banked score", int(pending.pending) > 0 and int(game.session.style.summary().score) < int(pending.pending), pending)
+				await captured(label+"-pending", {"paused":true,"clean":false})
+				await _tap(KEY_L)
+				await _tap(KEY_L)
+				check(label+": pause and L preserve pending exactly", game.session.style.snapshot().direction == pending)
+				await _tap(KEY_ESCAPE)
+				paused_pending = true
+				_direction_active = true
+		_direction_active = false
+		for command: Array in _direction_driver.release():
+			_direction_input(command)
+		var snapshot: Dictionary = game.session.style.snapshot()
+		var transition: Dictionary = snapshot.direction.last
+		var kind := "backward_bhop" if item[0] == "back" else "sideways_bhop"
+		var unit := 160 if item[0] == "back" else 50
+		var expected_kind := "direction_banked" if item[1] == "bank" else "direction_lost"
+		check(label+": actual authored route earns six eligible hops", _direction_driver.done and paused_pending and _direction_moving_l and game.respawn_count == 0 and int(transition.get("hops",0)) >= 6, transition)
+		check(label+": triangular terminal and category", transition.get("kind","") == expected_kind and transition.get("direction","") == kind and int(transition.get("pending",-1)) == unit * int(transition.get("hops",0)) * (int(transition.get("hops",0))-1) / 2, transition)
+		check(label+": only a bank scores the pending amount", int(snapshot.by_kind.get(kind+"_bank",{}).get("points",0)) == (int(transition.get("pending",0)) if item[1] == "bank" else 0), snapshot)
+		await captured(label+"-terminal", {"paused":false,"clean":false})
+		results.append({"label":label,"ticks":_direction_tick,"transition":transition,"snapshot":snapshot,"position":_v3(game.player.global_position)})
+		await _tap(KEY_R)
+	early.queue_free()
+	late.queue_free()
+	await _restore_preset(preset)
+	if home != "practice":
+		await _pause_menu_click("Map_"+home, "restore after directional routes")
+	report["directional_stack"] = {"ok": checks.slice(begin).all(func(c: Dictionary) -> bool:return c.ok), "routes":results, "geometry":"authored Penstock straight, actual GUI stage practice, input-only"}
