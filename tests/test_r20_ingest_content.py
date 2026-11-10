@@ -16,9 +16,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import r20_run_bundle as bundle
 
 
-def recording(outcome, compressed=False, zero_declared=False):
+def recording(outcome, compressed=False, zero_declared=False, metadata=None):
+    meta = {'map': 'generated-review-fixture', 'preset': 'server128', 'build': 'generated'}
+    if metadata is not None:
+        meta.update(metadata)
     header = json.dumps({'format': 'foldrunner-r16-run', 'version': 1,
-        'metadata': {'map': 'generated-review-fixture', 'preset': 'server128', 'build': 'generated'},
+        'metadata': meta,
         'identity': {}}).encode()
     prefix = b'FRR16RUN' + struct.pack('<HHI', 1, 0, len(header))
     chain = hashlib.sha256(prefix + header).digest()
@@ -100,6 +103,25 @@ class ImportedContent(unittest.TestCase):
         rows = self.ingest({'custom.r16run': recording({'kind': 'custom-boundary'})})
         self.assertEqual(rows['custom.r16run']['classification'], 'complete')
         self.assertEqual(rows['custom.r16run']['outcome']['kind'], 'custom-boundary')
+
+    def test_invalid_unicode_values_and_keys_stay_with_the_bad_attempt(self):
+        variants = [{'map': '\ud800'}, {'preset': '\udfff'}, {'extra': {'\ud800': 'value'}},
+            {'extra': {'label': '\ud800'}}, {'build_label': '\udfff'}]
+        payloads = {'good.r16run': recording({'kind': 'quit'}, compressed=True)}
+        payloads.update({f'bad-{i}.r16run': recording({'kind': 'quit'}, compressed=True, metadata=meta)
+            for i, meta in enumerate(variants)})
+        payloads['bad-outcome.r16run'] = recording({'kind': '\ud800'}, compressed=True)
+        rows = self.ingest(payloads)
+        self.assertEqual(rows['good.r16run']['classification'], 'complete')
+        for name in payloads:
+            if name != 'good.r16run':
+                self.assertEqual(rows[name]['classification'], 'corrupt')
+                self.assertIn('Unicode', rows[name]['errors'][0])
+
+    def test_valid_unicode_metadata_remains_complete_and_readable(self):
+        rows = self.ingest({'unicode.r16run': recording({'kind': 'quit'}, compressed=True,
+            metadata={'map': 'Žluťoučký dvůr 東京', 'preset': 'přítel'})})
+        self.assertEqual(rows['unicode.r16run']['classification'], 'complete')
 
 
 if __name__ == '__main__':

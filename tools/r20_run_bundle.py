@@ -194,8 +194,14 @@ def finite_data(value, depth=0):
     limit(depth <= 48, "recording JSON nesting bound exceeded")
     if isinstance(value, float):
         require(math.isfinite(value), "nonfinite recording JSON")
+    elif isinstance(value, str):
+        try:
+            value.encode("utf-8", "strict")
+        except UnicodeError as exc:
+            raise BundleError("malformed recording Unicode scalar") from exc
     elif isinstance(value, dict):
-        for child in value.values():
+        for key, child in value.items():
+            finite_data(key, depth + 1)
             finite_data(child, depth + 1)
     elif isinstance(value, list):
         for child in value:

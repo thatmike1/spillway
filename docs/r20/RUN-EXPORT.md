@@ -47,7 +47,7 @@ Classifications are separate: `complete` (sealed, including valid zero-sample da
 
 Before invoking the old analyzer, an envelope scan bounds decoded recording data at **64 MiB per attempt / 512 MiB per bundle**, **131,072 sample ticks**, **524,288 input rows**, and **8,192 chunks**. Unsupported analysis expansion is reported while original bytes remain preserved. Invalid/nonmonotonic or excessively wide tick domains cannot drive the old analyzer's tick-range loops. Nonfinite/malformed recording data is reported, never evaluated.
 
-A compressed chunk declaring zero decoded bytes is rejected before the original reader can inflate it, because zlib treats a zero output bound as unlimited. Outcome kinds are checked inside each attempt's classification boundary; malformed kinds become corrupt attempts without aborting valid neighbors. `python3 -B tests/test_r20_ingest_content.py` exercises real chained recording bytes and mixed ZIPs, including a one-MiB expansion that must never reach the inflater. The original reader remains byte-identical.
+A compressed chunk declaring zero decoded bytes is rejected before the original reader can inflate it, because zlib treats a zero output bound as unlimited. Outcome kinds and Unicode scalar validity of JSON values and keys are checked inside each attempt's classification boundary; malformed content becomes a corrupt attempt without aborting valid neighbors. `python3 -B tests/test_r20_ingest_content.py` exercises real chained recording bytes and mixed ZIPs, including a one-MiB expansion that must never reach the inflater and escaped unpaired surrogates alongside valid Unicode names. The original reader remains byte-identical.
 
 ## Reproduce and parent integration
 
