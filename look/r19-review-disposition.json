@@ -1,5 +1,5 @@
 {
-  "time": "2026-11-10T00:47:38.850823+00:00",
+  "time": "2026-11-10T01:46:03.285525+00:00",
   "review_file": "look/REVIEW-R19.md",
   "review_scope_runtime": "7f4c91e3bd697e53321b525e8c9bc16ebfb92093",
   "dispositions": [
@@ -16,7 +16,7 @@
     },
     {
       "finding": "33 editor controls failures and final delivery gates",
-      "status": "all33 assertions pass in current exact release; full source parity and promotion pending"
+      "status": "all33 assertions pass in current exact release; full source parity passed; normal branch promotion recorded separately"
     },
     {
       "finding": "same-family review limitation",
@@ -46,5 +46,7 @@
       "status": "fixed;121headless+121native checks and4packedrealtyping assertions pass; previous da29candidate withdrawn"
     }
   ],
-  "delivery_review": "look/REVIEW-R19-DELIVERY.md"
+  "delivery_review": "look/REVIEW-R19-DELIVERY.md",
+  "final_source_parity": "look/evidence/r19-parent-final-source-audit.json",
+  "scope_limit": "bounded same-family GPT review; root later fixed actual typing and exact-R18 test provenance, then independently inspected final source/portable evidence; no native Windows or enjoyment claim"
 }

@@ -1,6 +1,6 @@
 # Spillway R19
 
-**Portable candidate verified; final full parity and promotion pending.** The focused ghost-name/path repair passes 121 headless and 121 native Linux checks. The rebuilt Linux portable passes 1,980 exact-release checks, including actual name typing. Both ZIPs pass static verification; exact Windows PE/PCK startup passes under Wine. The earlier candidate is withdrawn and retained.
+**R19 delivered: all five items reached, portable and full source checks passed.** The focused ghost-name/path repair passes 121 headless and 121 native Linux checks. The rebuilt Linux portable passes 1,980 exact-release checks, including actual name typing. Both ZIPs pass static verification; exact Windows PE/PCK startup passes under Wine. The earlier candidate is withdrawn and retained. The final 48-play matrix passes against exact R18; the feature and gameplay branches share the final documentation commit after normal fast-forward promotion.
 
 ## Try first
 
@@ -44,18 +44,18 @@ The actual official Windows executable ran under Wine, reporting Windows. Two re
 
 All four are playable source-course prototypes with earned clean finishes and fixed-input replays. No human enjoyment verdict is claimed. Saltglass uses the unchanged F2 body; Tether and Line Drive have explicit map-specific runner identities. Fall Line changes its world on a deterministic paused-aware clock while retaining the F2 body. Returning to the main maps restores their runner and laws.
 
-Production/native evidence: Saltglass 21 checks / 7,868 samples; Tether 25 checks / 1,695 samples; Fall Line 35 checks / 3,042 samples; Line Drive 36 checks plus 96 geometry checks / 1,705 samples. Old/new native captures match their headless replay fields exactly. Captures are **1296×736**. All 12 maps passed 2,203 inherited visual invariants. Staged directional-HUD frames passed 12 layout checks at each of 720p and 1080p; they prove presentation, while the separate earned-hop fixtures prove the awards. These are scripted verification facts, not performance, latency or player-feel claims.
+Production/native evidence: Saltglass 21 checks / 7,868 samples; Tether 25 checks / 1,695 samples; Fall Line 35 checks / 3,042 samples; Line Drive 36 checks plus 96 geometry checks / 1,705 samples. Old/new native captures match their headless replay fields exactly. Those course captures are **1296×736**. All 12 maps passed 2,203 inherited visual invariants. Staged directional-HUD frames passed 12 layout checks at each of 720p and 1080p; they prove presentation, while the separate earned-hop fixtures prove the awards. These are scripted verification facts, not performance, latency or player-feel claims.
 
 ## Final acceptance
 
 | Gate | Current status |
 | --- | --- |
 | Protected F2 sources | Six source hashes equal R18; all 1,203 pre-existing project files checked against the six exact allowed presentation/scoring edits |
-| Existing-map parity | Exact R18 baseline passes 523 audits; corrected separate-source contact proof passes 45 checks; fresh full candidate matrix pending |
-| Independent review | Bounded GPT runtime and delivery reviews complete; selectable folder path, actual-name input and strict three-to-five experiment gate fixed; exact portable acceptance passed, full source matrix pending |
+| Existing-map parity | All 48 fresh plays across 16 routes / eight original maps pass. Independent audits: 940 candidate, 523 baseline and 311 postflight checks. All 240 raw streams rehash; zero physical tolerances or exceptions |
+| Independent review | Bounded GPT runtime and delivery reviews complete; selectable folder path, actual-name input and strict three-to-five experiment gate fixed; exact portable acceptance and full source matrix passed |
 | Exact Linux package | Passed 1,980 native checks: startup 80, controls 1,598, play 203, reload 99. All 5,777 trace/input ticks match exactly; 164 recordings / 9,343 ticks audited. Four broken-pack/sky cases exit nonzero |
 | Windows ZIP | Hashes, CRC, official runtime, licenses and shared PCK verified. Exact PE/PCK startup under Wine passed, including direct extracted basename; native Windows unverified |
-| ZIP checksums / branch promotion | Both SHA256 checks pass; final parity and gameplay branch fast-forward pending |
+| ZIP checksums / branch promotion | Both SHA256 checks pass; feature and gameplay branches converge through normal fast-forward. The receipt records the exact promoted head |
 
 ## Five taste calls
 
@@ -65,7 +65,9 @@ Production/native evidence: Saltglass 21 checks / 7,868 samples; Tether 25 check
 4. Keep Line Drive? Judge the alignment windows and the automatic launch reward.
 5. Keep Fall Line? Judge the two-second warning and countdown position.
 
-All five spec items were reached. Three experiments were chosen, within the requested three-to-five range; no fourth or fifth experiment was started. Remaining work is the final parity matrix and branch promotion, then Mike's play feedback. Directional surf seam relief and the limited sampled recovery coverage are disclosed in the course documentation. No desktop GPU performance claim or native Windows execution claim is made for R19.
+All five spec items were reached. Three experiments were chosen, within the requested three-to-five range; no fourth or fifth experiment was started. No spec item was left unreached. Remaining feedback is Mike's play judgement. Directional surf seam relief and the limited sampled recovery coverage are disclosed in the course documentation. No desktop GPU performance claim or native Windows execution claim is made for R19.
+
+Full source parity additionally audits 426 lifecycle recordings, 295,719 observed ticks and 215,022 ordered input rows, including ghosts and moving/paused L dispatch. The two retained Breakwater tapes avoid the edited gate, so they need no geometry exception. Exact separate-source contact queries cover that intentional edit. Raw parity proof is durably archived with per-file verification; [the report](/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r19-final-parity/REPORT.md) and [archive receipt](/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r19-final-parity-archive/ARCHIVE.json) retain provenance and reproduction. [Promotion receipt](/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r19-promotion.json) identifies the final branch head. Later commits change verification or documentation only, preserving all 554 frozen runtime files.
 
 Decision trail: `decisions.tsv`. Independent review: [REVIEW-R19.md](/home/thatmike1/foldrunner-build-2026-11-05/look/REVIEW-R19.md), by gpt-6.1-terra, explicitly a same-family GPT review under the GPT-only instruction.
 
