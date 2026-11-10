@@ -36,6 +36,15 @@ class BundleError(ValueError):
     pass
 
 
+class AnalysisLimit(BundleError):
+    pass
+
+
+def limit(condition, reason):
+    if not condition:
+        raise AnalysisLimit(reason)
+
+
 def require(condition, reason):
     if not condition:
         raise BundleError(reason)
@@ -174,13 +183,13 @@ def decoded_budget(path):
             chunks += 1
             # raw length also bounds input/event expansion; no unbounded decompression here.
             inputs_bound += raw // 44
-            require(total <= MAX_DECODED_FILE and ticks <= MAX_TICKS and chunks <= MAX_CHUNKS and inputs_bound <= 2 * MAX_INPUTS, "recording decoded analysis bound exceeded")
+            limit(total <= MAX_DECODED_FILE and ticks <= MAX_TICKS and chunks <= MAX_CHUNKS and inputs_bound <= 2 * MAX_INPUTS, "recording decoded analysis bound exceeded")
             f.seek(32 + stored, 1)
     return total
 
 
 def finite_data(value, depth=0):
-    require(depth <= 48, "recording JSON nesting bound exceeded")
+    limit(depth <= 48, "recording JSON nesting bound exceeded")
     if isinstance(value, float):
         require(math.isfinite(value), "nonfinite recording JSON")
     elif isinstance(value, dict):
@@ -218,10 +227,10 @@ def analyse_folder(folder, manifest):
         limited = False
         try:
             budget = decoded_budget(path)
-            require(decoded + budget <= MAX_DECODED_TOTAL, "total decoded recording analysis exceeds 512 MiB")
+            limit(decoded + budget <= MAX_DECODED_TOTAL, "total decoded recording analysis exceeds 512 MiB")
             decoded += budget
             rec = reader.read(path)
-            require(len(rec.inputs["tick"]) <= MAX_INPUTS, "recording inputs exceed analysis bound")
+            limit(len(rec.inputs["tick"]) <= MAX_INPUTS, "recording inputs exceed analysis bound")
             finite_data(rec.header)
             finite_data(rec.seal)
             finite_data(rec.events)
@@ -231,7 +240,7 @@ def analyse_folder(folder, manifest):
             require(isinstance(rec.header.get("metadata", {}), dict) and isinstance(rec.header.get("identity", {}), dict), "malformed recording metadata")
             require(isinstance(rec.seal.get("outcome", {}), dict), "malformed recording outcome")
         except (BundleError, ValueError, TypeError, AttributeError, KeyError, IndexError, RecursionError, OverflowError) as exc:
-            limited = isinstance(exc, BundleError) and "bound" in str(exc)
+            limited = isinstance(exc, AnalysisLimit)
             rec = reader.Recording(path)
             rec.size = path.stat().st_size
             rec.errors = [f"analysis limited: {exc}" if limited else f"malformed recording data: {exc}"]

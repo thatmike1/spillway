@@ -174,6 +174,17 @@ def main():
         return data
     negative("total-expansion", raw_transform=total_expansion)
     negative("empty-archive", raw_transform=lambda data: b"")
+    previous_limit = m.MAX_DECODED_TOTAL
+    try:
+        m.MAX_DECODED_TOTAL = 1
+        limited = m.ingest(bundle, a.out / "analysis-limited", "Budget fixture")
+        limited_path = Path(limited["path"])
+        limited_report = json.loads((limited_path / "analysis.json").read_text())
+        older = next(r for r in limited_report["attempts"] if r["name"] == "older-copied.r16run")
+        check(older["classification"] == "unsupported" and "exceeds 512 MiB" in older["errors"][0], "total decoded analysis limit is unsupported, not corrupt")
+        check((limited_path / "recordings/older-copied.r16run").read_bytes() == originals["recordings/older-copied.r16run"], "analysis-limited original recording remains byte-exact")
+    finally:
+        m.MAX_DECODED_TOTAL = previous_limit
     reader, _ = m.load_reader()
     for ticks, label in (([0, 2147483647], "huge-tick-loop"), ([4, 1], "nonmonotonic-ticks")):
         rec = reader.Recording(Path("generated-boundary.r16run"))
