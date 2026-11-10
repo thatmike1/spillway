@@ -1,8 +1,11 @@
 extends SceneTree
 ## labelled collision queries at observed feet, not an input replay or a movement parity claim.
 
-const BEFORE := preload("res://scripts/r17_main.gd")
-const AFTER := preload("res://scripts/r19_main.gd")
+const BEFORE := "res://scripts/r17_main.gd"
+const AFTER := "res://scripts/r19_main.gd"
+var capture_before := false
+var baseline_path := ""
+var baseline_rows: Array = []
 var checks: Array = []
 var rows: Array = []
 var output := "/tmp/r19-playtest-analysis/contacts.json"
@@ -11,6 +14,17 @@ func _initialize() -> void:
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			output = arg.trim_prefix("--out=")
+		elif arg == "--capture-before":
+			capture_before = true
+		elif arg.begins_with("--baseline="):
+			baseline_path = arg.trim_prefix("--baseline=")
+	if not capture_before:
+		var baseline = FileAccess.open(baseline_path, FileAccess.READ).get_var(false) if FileAccess.file_exists(baseline_path) else null
+		if not baseline is Dictionary or baseline.get("capture_only") != true or not baseline.get("maps") is Array or baseline.maps.size() != 8:
+			push_error("contact comparison requires a separate eight-map baseline capture")
+			quit(2)
+			return
+		baseline_rows = baseline.maps
 	run.call_deferred()
 
 func check(ok: bool, label: String) -> void:
@@ -34,7 +48,15 @@ func run() -> void:
 	RenderingServer.render_loop_enabled = false
 	for map_id: String in ["breakwater", "whiteout-relay", "sunken-court", "rainline", "night-shift", "practice", "overflow", "experiment"]:
 		var pair: Array = []
-		for host: Script in [BEFORE, AFTER]:
+		if not capture_before:
+			var baseline: Dictionary = baseline_rows[rows.size()]
+			if baseline.get("map") != map_id or not baseline.get("before") is Dictionary:
+				push_error("baseline contact maps/order do not match")
+				quit(2)
+				return
+			pair.append(baseline.before)
+		var side := "before" if capture_before else "after"
+		for host: Script in [load(BEFORE if capture_before else AFTER)]:
 			var game: Node3D = host.new()
 			game.map_id = map_id
 			game.persist = false
@@ -52,7 +74,7 @@ func run() -> void:
 				row.presets[motor] = {"metadata": game.recording_metadata("revision_query"), "identity_text": game.record_identity_text()}
 			game.select_preset("server128")
 			if map_id == "breakwater":
-				if host == AFTER:
+				if side == "after":
 					var installation := game.level.get_node("R16Opportunities/RunwayThread") as Node3D
 					check(is_equal_approx(installation.get_node("Cue").position.x, installation.get_node("WestWall").position.x), "style cue stays on its moved wall")
 				for x: float in [-80.8, -81.7, -77.98]:
@@ -61,6 +83,9 @@ func run() -> void:
 			game.request_quit(0)
 			root.remove_child(game)
 			game.free()
+		if capture_before:
+			rows.append({"map": map_id, "before": pair[0]})
+			continue
 		if map_id == "breakwater":
 			check(pair[0].queries[0].hit and pair[0].queries[1].hit, "both observed low-speed positions meet original thread fronts")
 			check(str(pair[0].queries[0].colliders).contains("RunwayThread") and str(pair[0].queries[1].colliders).contains("RunwayThread"), "original contacts name optional thread walls")
@@ -74,6 +99,12 @@ func run() -> void:
 		rows.append({"map": map_id, "before": pair[0], "after": pair[1]})
 	var failed := checks.filter(func(c: Dictionary) -> bool: return not c.ok)
 	var file := FileAccess.open(output, FileAccess.WRITE)
-	file.store_string(JSON.stringify({"checks": checks, "failed": failed.size(), "maps": rows}, "\t"))
+	var report := {"checks": checks, "failed": failed.size(), "maps": rows, "capture_only": capture_before}
+	file.store_string(JSON.stringify(report, "\t"))
+	if capture_before:
+		# trusted fixture transport preserves integer types and every float bit across processes.
+		var binary := FileAccess.open(output + ".bin", FileAccess.WRITE)
+		binary.store_var(report, false)
+		binary.close()
 	file.close()
 	quit(0 if failed.is_empty() else 1)

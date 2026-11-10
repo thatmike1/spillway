@@ -145,3 +145,22 @@ readers, source observation, ordered tape, trace/controls/ghost probes and
 retained physical reference are audited again. Per-run metadata preserves the
 original executed helper hashes, and the report records the old/new wrapper
 hashes. Failed/incomplete routes are never reused.
+
+
+The contact baseline must execute in the exact R18 source tree. Loading the
+candidate tree's inherited R17 class is not that baseline. Capture it separately:
+
+```sh
+python3 -B tests/r19_contacts_exact.py --candidate 5dcc94967c19cf1333797ce8fc26f36a8f860ce5 --out /tmp/r19-parity-contracts-exact
+```
+
+The helper freezes and verifies two complete source archives, runs the before-only
+fixture in R18, cleans that source/import/profile, then runs the candidate against
+the saved capture. It also recaptures the strict 25-check style contract. The two
+manifests, injection hashes, raw before/after data and exact engine commands bind
+the resulting map-revision contract. No candidate source is used for the baseline
+host. A private fixture-only Variant file transports the baseline with objects disabled,
+preserving native integer types and every float bit. JSON reparse changes numeric
+types and can round a float, so it is retained for inspection, not transport.
+No identity field is removed or compared with a tolerance.
+The old single-tree captures remain historical query proof, not exact-R18 proof.
