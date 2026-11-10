@@ -763,8 +763,52 @@ def check(dist, args, evidence, work, routes):
     return result
 
 
+def include_cleanup_tick(plan):
+    """keep every generator edge, including its neutral releases at the closing boundary."""
+    result = copy.deepcopy(plan)
+    end = result['duration_ticks']
+    tail = [event for event in result['events'] if event['tick'] >= end]
+    if tail:
+        require(all(event['tick'] == end and 'key' in event and event.get('edge') == 'release' for event in tail),
+            'route generator has non-neutral or late input outside its duration')
+        result['duration_ticks'] = end + 1
+        result['duration_s'] = (end + 1) / result['physics_hz']
+    return result
+
+
+def saltglass_route_freeze(source, evidence, identity):
+    generated = evidence / 'generated-saltglass'
+    generated.mkdir(parents=True)
+    r16.checked([r16.EDITOR, '--headless', '--audio-driver', 'Dummy', '--fixed-fps', '128',
+        '--path', source, '--script', 'res://tests/r20_surf_route.gd', '--', '--out=' + str(generated)],
+        source, r16.engine_env(generated / 'engine-profile'), generated / 'engine.log', 180)
+    summary = json.loads((generated / 'summary.json').read_text())
+    require(summary.get('pass') is True and summary.get('finished') is True
+        and summary.get('finish_kind') == 'clean' and summary.get('respawns') == 0
+        and summary.get('configured_main') == MAIN_SCRIPT and summary.get('configured_scene') == MAIN
+        and summary.get('runner') == 'res://scripts/r15_source_player.gd'
+        and summary.get('physics_hz') == summary.get('engine_hz') == 128
+        and 40 <= summary.get('elapsed', -1) <= 70
+        and summary.get('geometry_hash') == identity['maps']['saltglass']['geometry'],
+        'Saltglass release tape generator did not earn the required production route')
+    raw_plan = json.loads((generated / 'events.tape.json').read_text())
+    plan = include_cleanup_tick(raw_plan)
+    tape = generated / 'release.tape.json'
+    tape.write_text(json.dumps(plan, indent=1) + '\n')
+    route = r16.parse_route('map=saltglass,preset=server128,tape=' + str(tape)
+        + ',warmup=33,sensitivity=2.5,name=r20-saltglass')
+    frozen = r16.source_route(route, source, evidence, identity)
+    frozen['generated_route'] = {'script': 'tests/r20_surf_route.gd',
+        'script_sha256': digest(source / 'tests/r20_surf_route.gd'),
+        'summary_sha256': digest(generated / 'summary.json'), 'elapsed': summary['elapsed'],
+        'normal_spawn_input_only': True, 'original_tape_sha256': digest(generated / 'events.tape.json'),
+        'cleanup_tick_added': plan['duration_ticks'] != raw_plan['duration_ticks'],
+        'all_original_edges_retained': plan['events'] == raw_plan['events']}
+    return frozen
+
+
 def route_freeze(source, evidence, identity):
-    return r18.route_freeze(source, evidence, identity)
+    return [*r18.route_freeze(source, evidence, identity), saltglass_route_freeze(source, evidence, identity)]
 
 
 def output_ok(output, top):

@@ -3,6 +3,60 @@ extends "r16-pack-probe.gd"
 ## checks stay behavioral. the new checks use the packed host and its actual buttons.
 var _telemetry_pressed := false
 var _folder_opened := ""
+var _salt_first: Dictionary = {}
+var _salt_landings: Dictionary = {}
+var _salt_pieces: Dictionary = {}
+var _salt_contacts := {"west": 0, "east": 0}
+var _salt_steep_grounded := 0
+
+func late_step(delta: float) -> void:
+	if not _row.is_empty() and game.map_id == "saltglass":
+		_observe_saltglass(int(_row.tick))
+	super.late_step(delta)
+
+func _observe_saltglass(tick: int) -> void:
+	var player: CharacterBody3D = game.player
+	var motion: Dictionary = player.call("get_motion_state")
+	for contact: Dictionary in motion.get("contacts", []):
+		var normal: Vector3 = contact.normal
+		var body := str(contact.body)
+		if not body.begins_with("Surf_") or normal.y <= 0.45 or normal.y >= 0.65:
+			continue
+		var fin := "west" if body.contains("west") else "east"
+		_salt_pieces[body] = true
+		_salt_contacts[fin] += 1
+		if bool(player.call("is_grounded")):
+			_salt_steep_grounded += 1
+		if not _salt_first.has(fin):
+			_salt_first[fin] = {"tick": tick, "feet": _v3(game.body_reference()),
+				"contact": _v3(contact.position), "normal": _v3(normal)}
+	if bool(player.call("is_grounded")):
+		for fin: String in _salt_first:
+			if _salt_landings.has(fin) or tick <= int(_salt_first[fin].tick):
+				continue
+			var feet: Vector3 = player.global_position
+			var hit := player.get_world_3d().direct_space_state.intersect_ray(
+				PhysicsRayQueryParameters3D.create(feet + Vector3.UP * 0.6, feet + Vector3.DOWN * 0.6))
+			_salt_landings[fin] = {"tick": tick, "body": str((hit.collider as Node).name) if not hit.is_empty() else "",
+				"normal": _v3(hit.get("normal", Vector3.ZERO))}
+
+func _judge_run() -> void:
+	super._judge_run()
+	if game.map_id != "saltglass":
+		return
+	check("Saltglass packed route takes 40 to 70 seconds", game.elapsed >= 40.0 and game.elapsed <= 70.0, game.elapsed)
+	check("Saltglass packed route contacts every fin piece without walkable surf faces", _salt_pieces.size() == 16
+		and int(_salt_contacts.west) >= 128 and int(_salt_contacts.east) >= 128 and _salt_steep_grounded == 0, [_salt_pieces.keys(), _salt_contacts, _salt_steep_grounded])
+	for fin: String in ["west", "east"]:
+		var first: Dictionary = _salt_first.get(fin, {})
+		check(fin+": packed first feet and contact exceed 80 percent of crest", not first.is_empty()
+			and float(first.feet[1]) >= 14.4 and float(first.contact[1]) >= 14.4, first)
+		var landing: Dictionary = _salt_landings.get(fin, {})
+		check(fin+": packed first landing is the flat exit deck", not landing.is_empty()
+			and str(landing.body).begins_with(fin+"_landing_") and float(landing.normal[1]) > 0.99999, landing)
+	report["saltglass"] = {"first_contacts": _salt_first, "first_landings": _salt_landings,
+		"pieces": _salt_pieces.keys(), "contacts": _salt_contacts, "steep_grounded_ticks": _salt_steep_grounded,
+		"elapsed": game.elapsed, "geometry": game.course_geometry}
 
 func _input(event: InputEvent) -> void:
 	super._input(event)

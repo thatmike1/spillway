@@ -70,6 +70,29 @@ class ReleaseGates(unittest.TestCase):
         with self.assertRaises(pkg.Rejected):
             fn(*args)
 
+    def test_release_routes_retain_breakwater_and_add_earned_saltglass(self):
+        with patch.object(pkg.r18,'route_freeze',return_value=[{'route':'original-breakwater'}]) as original, \
+             patch.object(pkg,'saltglass_route_freeze',return_value={'route':'earned-saltglass'}) as surf:
+            self.assertEqual(pkg.route_freeze('source','evidence','identity'),
+                             [{'route':'original-breakwater'},{'route':'earned-saltglass'}])
+            original.assert_called_once_with('source','evidence','identity')
+            surf.assert_called_once_with('source','evidence','identity')
+
+    def test_generator_closing_releases_are_executed_without_dropping_any_edge(self):
+        plan = {'duration_ticks':2,'physics_hz':128,'events':[
+            {'tick':0,'key':'w','edge':'press'}, {'tick':2,'key':'w','edge':'release'}]}
+        original = copy.deepcopy(plan)
+        result = pkg.include_cleanup_tick(plan)
+        self.assertEqual(result['duration_ticks'],3)
+        self.assertEqual(result['events'],plan['events'])
+        self.assertEqual(original,plan)
+        for tail in [{'tick':2,'key':'w','edge':'press'}, {'tick':2,'mouse':[1,0]},
+                     {'tick':3,'key':'w','edge':'release'}]:
+            bad=copy.deepcopy(plan); bad['events'][-1]=tail
+            self.refused(pkg.include_cleanup_tick,bad)
+        inside=copy.deepcopy(plan);inside['events'][-1]['tick']=1
+        self.assertEqual(pkg.include_cleanup_tick(inside),inside)
+
     def test_raw_mouse_buttons_keep_press_release_double_click_and_factor(self):
         left = {'type':'mouse_button', 'button_index':1, 'pressed':True, 'double_click':False, 'factor':1.}
         right = dict(left, button_index=2)
