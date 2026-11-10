@@ -34,6 +34,15 @@ func capture(label: String) -> void:
 	await RenderingServer.frame_post_draw
 	var path := out_dir.path_join(label + ".png")
 	root.get_texture().get_image().save_png(path)
-	frames[label] = {"observed_route_tick": captured[label], "readback_motor_tick": player.motion_tick, "readback_p": plain(player.position),
+	var clearance := {}
+	if label == "launch":
+		var rect: Rect2 = game.hud.through_cue.get_global_rect()
+		clearance["visible"] = game.hud.through_cue.is_visible_in_tree()
+		clearance["in_viewport"] = root.get_visible_rect().encloses(rect)
+		for field: String in ["map_title", "preset_line", "message", "lab_tag", "lab_panel"]:
+			var control := game.hud.get(field) as Control
+			clearance[field] = not control.is_visible_in_tree() or not rect.intersects(control.get_global_rect())
+		assert(clearance.values().all(func(v: Variant) -> bool:return bool(v)))
+	frames[label] = {"cue_clearance": clearance,"observed_route_tick": captured[label], "readback_motor_tick": player.motion_tick, "readback_p": plain(player.position),
 		"readback_camera_p": plain(player.camera.global_position), "image_sha256": FileAccess.get_sha256(path), "size": [root.size.x, root.size.y]}
 	_write("frames.json", frames)

@@ -31,13 +31,16 @@ func attach(main: Node) -> void:
 	through_cue.name = "ThroughCreamCue"
 	through_cue.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	through_cue.color = UI.CREAM
-	through_cue.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	through_cue.offset_bottom = 30
+	through_cue.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	through_cue.offset_left = -112
+	through_cue.offset_right = 112
+	through_cue.offset_top = 64
+	through_cue.offset_bottom = 92
 	through_cue.visible = false
 	add_child(through_cue)
 	var launch_text := _small(through_cue, "RISE  ·  SECOND RUN", Color("263d45"))
-	launch_text.position = Vector2(20, 4)
-	launch_text.size = Vector2(380, 22)
+	launch_text.position = Vector2(12, 4)
+	launch_text.size = Vector2(200, 22)
 	launch_text.add_theme_color_override("font_color", UI.INK)
 
 func _choose_model(id: String) -> void:
@@ -63,7 +66,6 @@ func _process(delta: float) -> void:
 		through_cue.visible = active
 		if active:
 			through_cue.modulate.a = minf(1.0, float(game.player.cue_left_s) / 0.15)
-			through_cue.offset_bottom = 30
 	if game != null and game.map_id == "through-line" and title_card != null:
 		(title_card.get_node("TitleKeys") as Label).text = "Bhop into the raised fork · 230+ u/s forward\nMore speed, more lift · air-strafe onto Second Run · keep moving"
 	if game != null and game.map_id == "tether-yard" and title_card != null:
