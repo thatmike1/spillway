@@ -47,7 +47,7 @@ func _behavior() -> String:
 
 func _controls() -> void:
 	for shelved: String in ["line-drive", "fall-line"]:
-		check(shelved+": absent from runtime selection and menu", shelved not in game.map_registry and game.hud.find_child("Map_"+shelved,true,false) == null)
+		check(shelved+": absent from runtime selection and menu", shelved not in game.map_ids() and not game.maps.catalog.has(shelved) and game.hud.find_child("Map_"+shelved,true,false) == null)
 	await _tap(KEY_ESCAPE)
 	check("Advanced settings collapsed by default",not game.hud.advanced_box.visible)
 	var advanced := game.hud.find_child("AdvancedToggle",true,false) as Button
