@@ -1,0 +1,40 @@
+{
+  "time": "2026-11-09T23:46:49.399335+00:00",
+  "review_file": "look/REVIEW-R19.md",
+  "review_scope_runtime": "7f4c91e3bd697e53321b525e8c9bc16ebfb92093",
+  "dispositions": [
+    {
+      "finding": "ghost folder fallback promises selectable path",
+      "action": "replace Label with read-only selectable LineEdit",
+      "commit": "6a013cf3777e3df8ab6c9c39b8822dc9fdfc4aae",
+      "evidence": "look/evidence/r19-folder-path-fix",
+      "checks": {
+        "headless": 110,
+        "native": 110
+      },
+      "status": "fixed; runtime refrozen and parity notified"
+    },
+    {
+      "finding": "33 editor controls failures and final delivery gates",
+      "status": "open; exact release required, no waiver"
+    },
+    {
+      "finding": "same-family review limitation",
+      "status": "disclosed; GPT-only user instruction applied"
+    },
+    {
+      "finding": "delivery freeze accepts zero new experiments",
+      "action": "require three to five distinct new experiments and a separate regular course; retain oldLab separately; native probe verifies card parents/section",
+      "commit": "dced06b5f",
+      "tests": "18helpertests including 0/2/6 and old-map/missing-course refusals; 3/5 accepted",
+      "status": "helper fix committed; third exact candidate running"
+    },
+    {
+      "finding": "33 historical source-editor assertions need release reconciliation",
+      "action": "match each failed check name to retained exact packed passing assertions",
+      "evidence": "look/evidence/r19-editor-release-reconciliation.json",
+      "status": "33of33 matched passing; cause of editor-only difference unproven; attempt2 separately rejected for unopened friend disclosure"
+    }
+  ],
+  "delivery_review": "look/REVIEW-R19-DELIVERY.md"
+}
