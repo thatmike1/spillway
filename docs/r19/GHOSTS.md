@@ -28,7 +28,7 @@ A friend-folder scan visits at most 1,024 directory entries, lists at most 64 gh
 
 ## Verification
 
-The parent refresh passed 107 headless checks and 107 native AMD/X11 checks, including the faster older local PB regression. The native renderer held `/dev/dri/renderD128` and accumulated hardware graphics time; the observed desktop socket/server baseline stayed identical. The multi-host fixture logs eight ObjectDB instances at shutdown; this is disclosed rather than called a clean normal-release Quit. Final release lifecycle checks remain separate.
+The final input refresh passed 121 headless checks and 121 native AMD/X11 checks, including actual Unicode name typing, selection, Backspace, focused-field shortcut isolation, and the faster older local PB regression. Esc and F1–F12 remain global; letters and editing keys in the two ghost text fields reach the GUI before game shortcuts. The native renderer held `/dev/dri/renderD128` and accumulated hardware graphics time; the observed desktop socket/server baseline stayed identical. The multi-host fixture logs eight ObjectDB instances at shutdown; this is disclosed rather than called a clean normal-release Quit. Final release lifecycle checks remain separate.
 
 From `projects/foldrunner`:
 

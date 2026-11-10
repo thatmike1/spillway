@@ -13,6 +13,16 @@ var ghosts_directory := ""
 var ghost_share_storage := ""
 var ghost_folder_opener: Callable
 
+func _input(event: InputEvent) -> void:
+	if paused and event is InputEventKey and is_instance_valid(hud):
+		var field := get_viewport().gui_get_focus_owner()
+		if field != null and field in [hud.get("share_name"), hud.get("share_path")]:
+			var code: int = event.physical_keycode if event.physical_keycode != 0 else event.keycode
+			# text and editing keys belong to the focused field, before global game shortcuts.
+			if code != KEY_ESCAPE and (code < KEY_F1 or code > KEY_F12):
+				return
+	super._input(event)
+
 func _ready() -> void:
 	if map_registry.is_empty():
 		map_registry = R19_MAPS.make()

@@ -1,6 +1,6 @@
 # Spillway R19
 
-**Release status: Linux and Windows ZIPs are verified; final source parity and branch promotion remain pending.** The portable gates passed. Native Windows play, physical latency and enjoyment remain unverified.
+**Release status: the previous candidate is withdrawn.** Final input audit found that typing a ghost player name invoked global game shortcuts. The focused-field fix passes 121 headless sharing checks; native checks, runtime refreeze, full parity and a fresh portable rebuild are required. Prior accepted receipts remain historical evidence, not acceptance of the new runtime.
 
 ## Try first
 

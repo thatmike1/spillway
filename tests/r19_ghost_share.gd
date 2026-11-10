@@ -80,6 +80,71 @@ func fixture(id: Dictionary, build: String, directory: String, n: int = 24) -> S
 	check("synthetic clean seal", bool(sealed.ok), sealed)
 	return str(sealed.path)
 
+func _text_event(code: int, down: bool, unicode: int = 0, control: bool = false) -> void:
+	var event := InputEventKey.new()
+	event.keycode = code
+	event.physical_keycode = code
+	event.unicode = unicode if down else 0
+	event.ctrl_pressed = control
+	event.pressed = down
+	Input.parse_input_event(event)
+	await process_frame
+
+func _type_text(value: String) -> void:
+	for i: int in value.length():
+		var letter := value.substr(i, 1)
+		var code := letter.to_upper().unicode_at(0)
+		await _text_event(code, true, letter.unicode_at(0))
+		await _text_event(code, false)
+
+func _select_text() -> void:
+	await _text_event(KEY_CTRL, true, 0, true)
+	await _text_event(KEY_A, true, 0, true)
+	await _text_event(KEY_A, false, 0, true)
+	await _text_event(KEY_CTRL, false)
+
+func _typing_state() -> String:
+	return var_to_str([game.player.global_transform, game.player.velocity, game.elapsed, game.attempts, game.finished, game.clean_eligible, game.checkpoint_index, game.motor, game.settings, game.session.style.snapshot(), game.session.ghost_state, game.record_identity(), game.motion_identity(), game.look_enabled, game.hud.telemetry])
+
+func _name_input() -> void:
+	var field: LineEdit = game.hud.share_name
+	field.text = ""
+	field.grab_focus()
+	await process_frame
+	var before := _typing_state()
+	await _type_text("lrfgec")
+	check("typing game-shortcut letters reaches the name field", field.text == "lrfgec", field.text)
+	check("typing never changes body, attempt, score, ghost, preset, look or pause", before == _typing_state() and game.paused)
+	await _select_text()
+	check("Ctrl+A selects the name without game actions", field.get_selected_text() == "lrfgec")
+	await _type_text("Jindra Žluťoučký")
+	check("actual Unicode name input replaces selection", field.text == "Jindra Žluťoučký", field.text)
+	await _text_event(KEY_BACKSPACE, true)
+	await _text_event(KEY_BACKSPACE, false)
+	check("Backspace edits only the name", field.text == "Jindra Žluťoučk" and before == _typing_state())
+	await _type_text("ý")
+	await _text_event(KEY_F9, true)
+	await _text_event(KEY_F9, false)
+	check("F9 still works with name focus", game.hud.telemetry)
+	await _text_event(KEY_F9, true)
+	await _text_event(KEY_F9, false)
+	var path: LineEdit = game.hud.share_path
+	path.grab_focus()
+	await process_frame
+	await _select_text()
+	check("folder path supports actual keyboard selection", path.get_selected_text() == str(game.ghost_share.folder))
+	await _type_text("lrfgec")
+	check("read-only path rejects edits without invoking game shortcuts", path.text == str(game.ghost_share.folder) and before == _typing_state() and game.paused)
+	path.deselect()
+	field.grab_focus()
+	await process_frame
+	await _text_event(KEY_ESCAPE, true)
+	await _text_event(KEY_ESCAPE, false)
+	check("Esc still closes pause from a text field", not game.paused)
+	await _text_event(KEY_ESCAPE, true)
+	await _text_event(KEY_ESCAPE, false)
+	check("Esc returns to pause normally", game.paused)
+
 func _main() -> void:
 	DirAccess.make_dir_recursive_absolute(out)
 	await make_game()
@@ -102,6 +167,7 @@ func _main() -> void:
 	check("folder path is read-only and selectable after opener failure", not folder_path.editable and folder_path.get_selected_text() == str(service.folder))
 	folder_path.deselect()
 	service.folder_opener = working_opener
+	await _name_input()
 	await press("ExportGhost")
 	check("no clean best refuses export", str(service.status).begins_with("No verified clean best"), service.status)
 	var local := fixture(identity, SHARE.BUILD, out.path_join("local"))
@@ -110,7 +176,7 @@ func _main() -> void:
 	check("synthetic clean fixture passes strict reader", bool(verified.ok), verified.get("note"))
 	game.session.offer_ghost(local, 23)
 	game.settings.ghost = true
-	(game.hud.find_child("GhostPlayerName", true, false) as LineEdit).text = "Jindra Žluťoučký"
+	check("export uses the actually typed player name", game.hud.share_name.text == "Jindra Žluťoučký")
 	await press("ExportGhost")
 	check("real export button exports", str(service.status).begins_with("Exported"), service.status)
 	if service.rows.is_empty():

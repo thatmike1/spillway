@@ -118,6 +118,38 @@ func _put(path: String, bytes: PackedByteArray) -> void:
 	file.store_buffer(bytes)
 	file.close()
 
+func _friend_text_event(code: int, down: bool, unicode: int = 0, control: bool = false) -> void:
+	var event := InputEventKey.new()
+	event.keycode = code
+	event.physical_keycode = code
+	event.unicode = unicode if down else 0
+	event.ctrl_pressed = control
+	event.pressed = down
+	Input.parse_input_event(event)
+	Input.flush_buffered_events()
+	await _frames(1)
+
+func _friend_type_name(value: String) -> void:
+	var field: LineEdit = game.hud.share_name
+	await _reveal(field)
+	check("click actual player-name field",await _click(field))
+	await _frames(2)
+	check("player-name field has actual GUI focus",field.has_focus())
+	var before := _behavior()
+	var look: bool = game.look_enabled
+	var telemetry: bool = game.hud.telemetry
+	await _friend_text_event(KEY_CTRL,true,0,true)
+	await _friend_text_event(KEY_A,true,0,true)
+	await _friend_text_event(KEY_A,false,0,true)
+	await _friend_text_event(KEY_CTRL,false)
+	for i: int in value.length():
+		var letter := value.substr(i,1)
+		var code := letter.to_upper().unicode_at(0)
+		await _friend_text_event(code,true,letter.unicode_at(0))
+		await _friend_text_event(code,false)
+	check("actual key input enters the export player name",field.text == value,field.text)
+	check("name typing cannot trigger game, look or telemetry shortcuts",game.paused and before == _behavior() and game.look_enabled == look and game.hud.telemetry == telemetry)
+
 func _friend_release() -> void:
 	var begin := checks.size()
 	var service: Node = game.ghost_share
@@ -137,7 +169,7 @@ func _friend_release() -> void:
 		return OK
 	await _friend_button("OpenGhostFolder")
 	check("Open ghosts folder targets actual portable directory",_folder_opened == folder and DirAccess.dir_exists_absolute(folder),_folder_opened)
-	game.hud.share_name.text = "Release probe"
+	await _friend_type_name("Release probe")
 	await _friend_button("ExportGhost")
 	var exported := ""
 	for row: Dictionary in service.rows:
