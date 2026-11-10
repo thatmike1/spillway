@@ -178,6 +178,8 @@ def decoded_budget(path):
             magic, kind, codec, reserved, seq, raw, stored, first, n = struct.unpack("<4sBBHIIIII", head)
             if magic != b"CHNK" or kind not in (1, 2, 3) or raw > 8 * 1024 * 1024 or stored > 8 * 1024 * 1024:
                 break
+            # zlib max_length=0 means unlimited, so never pass that declaration to the old reader.
+            require(codec != 1 or raw > 0, "compressed recording chunk declares zero decoded length")
             total += raw
             ticks += n
             chunks += 1
@@ -235,10 +237,15 @@ def analyse_folder(folder, manifest):
             finite_data(rec.seal)
             finite_data(rec.events)
             sample_safety(rec)
+            outcome = rec.seal.get("outcome", {})
+            require(isinstance(outcome, dict), "malformed recording outcome")
+            outcome_kind = outcome.get("kind", "unknown")
+            require(isinstance(outcome_kind, str) and 0 < len(outcome_kind) <= 128
+                and not any(ord(c) < 32 or 127 <= ord(c) <= 159 for c in outcome_kind),
+                "malformed recording outcome kind")
             report = reader.analyse(rec, 0.75)
             finite_data(report)
             require(isinstance(rec.header.get("metadata", {}), dict) and isinstance(rec.header.get("identity", {}), dict), "malformed recording metadata")
-            require(isinstance(rec.seal.get("outcome", {}), dict), "malformed recording outcome")
         except (BundleError, ValueError, TypeError, AttributeError, KeyError, IndexError, RecursionError, OverflowError) as exc:
             limited = isinstance(exc, AnalysisLimit)
             rec = reader.Recording(path)
