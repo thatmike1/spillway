@@ -63,6 +63,10 @@ func run() -> void:
 	await process_frame
 	check(game.settings.tether_auto_reel, "actual mouse click on real pause control selects automatic reel")
 	if native:
+		# the setting refresh rebuilds the pause sheet; restore the tested control into view.
+		game.hud._pause_scroll.ensure_control_visible(control)
+		await process_frame
+		await process_frame
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png(output.path_join("pause-preference.png"))
 	game.set_paused(false)
