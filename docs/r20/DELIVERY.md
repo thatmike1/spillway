@@ -120,3 +120,16 @@ The preparation rehearsal at `look/evidence/r20-through-release-prep/` passed 22
 `python3 -B tests/r20_visual_check.py --commit "$R20_FINAL_COMMIT" --out /tmp/r20-final-visual` runs the delivered R17 visual-invariant fixture against a committed R20 host on all eleven maps. It verifies the inherited fixture against its exact R19 Git blob, changes only the host preload in an isolated adapter, and retains every original assertion. The receipt binds the complete source, adapter, official editor and resource bounds. It checks ink/lips/functional markings, indoor bands, repeated real L dispatch, collision/identity/live-state invariance, material/environment/light restoration and practice labels. This is a future final-freeze gate, not a preparation pass or a native quality verdict.
 
 Packed play mode also checks the earned route's current R20 build/style identity, unchanged F2, frozen map key, clean finish and retained Saltglass contact observations after friend sharing. It does not switch maps or replace the earned ghost at wrap-up. Full feature routes run separately in controls mode.
+
+## Exact Windows startup under Wine
+
+After package verification, `tools/check-r20-windows-release.py` takes the actual Windows ZIP, outer BUILD.json, SHA256SUMS, the pinned portable Wine64 loader and a new `/tmp` evidence directory. It verifies the ZIP, embedded metadata, official EXE/console/PCK hashes and its own committed helper provenance. It boots all eleven explicit maps from that unchanged Windows executable/PCK, with records off and no source or script overrides. Each startup must report the requested map, F2/128 Hz, R20 build and inherited real runner. Private prefix/profile/extraction are removed; commands, logs, hashes and limits remain. Six engine-free tests cover every-map iteration, hashes, traversal, embedded source, wrong runtime/pack and wrong-map startup.
+
+Verified preparation commands:
+
+```bash
+python3 -B tests/test_r20_windows_release.py
+python3 -B tools/check-r20-windows-release.py --help
+```
+
+This gate has not executed a final artifact yet. Successful Wine execution will still not establish native Windows, rendering, menu operation or feel. The old R19 helper is protected and unchanged.
