@@ -22,7 +22,7 @@ func attach(main: Node, style_service: RefCounted) -> void:
 	box.content_margin_right = 2.0
 	callout.add_theme_stylebox_override("normal", box)
 	caption = Label.new()
-	caption.text = "style"
+	caption.text = "banked style"
 	caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(caption)
 	UI.world_label(caption, "small", 12, Color(UI.CREAM, 0.86), 3)
@@ -37,10 +37,10 @@ func attach(main: Node, style_service: RefCounted) -> void:
 func update_from(snap: Dictionary, delta: float) -> void:
 	var direction: Dictionary = snap.get("direction", {})
 	if direction_label != null:
-		var mult := float(direction.get("mult", 1.0))
-		direction_label.visible = mult > 1.0
-		direction_label.text = "%s · %d hops · ×%s" % ["Backwards" if str(direction.get("kind", "")) == "backward_bhop" else "Half-sideways",
-			int(direction.get("hops", 0)), _mult_text(mult)] if mult > 1.0 else ""
+		var hops := int(direction.get("hops", 0))
+		direction_label.visible = hops > 0
+		direction_label.text = "%s · %d hops · +%s pending" % ["Backwards" if str(direction.get("kind", "")) == "backward_bhop" else "Half-sideways",
+			hops, points_text(int(direction.get("pending", 0)))] if hops > 0 else ""
 	super(snap, delta)
 
 func _layout() -> void:

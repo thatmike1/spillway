@@ -1,9 +1,10 @@
 extends RefCounted
 ## p / r16 style service: reads one post-step sample per physics step (docs/r16/INTERFACES.md)
-## and the real collision world, and returns scored style events. it never writes the body, its
+## and the real collision world, and returns scored style plus explicit non-scored diagnostics. it never writes the body, its
 ## velocity, grounding, input or progress: every geometry question is a query (body.test_move
 ## with the runner's own hull, or a direct space query with a box of the runner's hull size).
-## docs/r16/STYLE.md is the player and integration contract; the short version:
+## docs/r20/STYLE.md defines directional pending/banking and the extended event stream.
+## docs/r16/STYLE.md retains the ordinary detector contract; the short version:
 ##
 ## - speed: horizontal actual travel at 400 u/s or more, counted only on new ground (a 2 m cell
 ##   none of whose neighbours this attempt has visited); every 32 m of such travel pays once. loops and idling pay nothing.
@@ -31,8 +32,10 @@ extends RefCounted
 ## piece and heading, a near miss and a crouch save once per obstacle, sync only 4 m or more
 ## from every earlier paid landing, all per attempt. scoring runs only between the timer start and the finish line.
 
-const STYLE_VERSION := "r19-style-1"
-const EVENT_FORMAT := 1
+const STYLE_VERSION := "r20-style-stack-1"
+const EVENT_FORMAT := 2
+const LEGACY_EVENT_FORMAT := 1
+const DIRECTION_FORMULA := "unit*n*(n-1)/2"
 const U := 0.0254
 
 ## p / every tuning value, in source units (u, u/s) unless the key says _m or _s. the table
@@ -54,8 +57,8 @@ const RULES := {
 	"direction": {"min_ups": 300.0, "back_dot": -0.75, "side_dot": 0.75,
 		"min_air_s": 0.18, "max_air_s": 1.2, "min_rise_m": 0.25, "min_fall_m": 0.20,
 		"min_track_m": 3.0, "min_efficiency": 0.85, "max_ground_s": 0.06,
-		"spacing_m": 4.0, "heading_dot": 0.5, "back_start": 2.0, "back_step": 0.5, "back_cap": 4.0,
-		"side_start": 1.2, "side_step": 0.15, "side_cap": 1.8, "back_base": 80.0, "side_base": 40.0},
+		"spacing_m": 4.0, "heading_dot": 0.5, "back_unit": 160, "side_unit": 50,
+		"formula": DIRECTION_FORMULA, "end": "bank_at_speed_else_lose", "pause": "suspend_validate_next_sample"},
 	"limits": {"teleport_m": 0.05},
 	"finish": {"sample": "first_finished_inclusive"},
 }
@@ -101,7 +104,15 @@ var _stale_fast_m: float = 0.0
 var _direction_flight: Dictionary = {}
 var _direction_chain: int = 0
 var _direction_kind: String = ""
-var _direction_mult: float = 1.0
+var _direction_pending: int = 0
+var _direction_start_tick: int = -1
+var _direction_last_hop_tick: int = -1
+var _direction_last: Dictionary = {}
+var _direction_verdict: Dictionary = {}
+var _direction_diagnostics: Array[Dictionary] = []
+var _direction_serial: int = 0
+var _suspended: bool = false
+var _last_sample: Dictionary = {}
 var _direction_heading := Vector3.ZERO
 var _direction_ground_s: float = 0.0
 var _direction_spots: Array[Vector3] = []
@@ -162,6 +173,12 @@ func reset(next_context: Dictionary = {}) -> void:
 	_stale_fast_m = 0.0
 	_break_direction()
 	_direction_spots = []
+	_direction_last = {}
+	_direction_verdict = {}
+	_direction_diagnostics = []
+	_direction_serial = 0
+	_suspended = false
+	_last_sample = {}
 	_stats_hops = -1
 	_sync_last = {}
 	_sync_spots = []
@@ -182,9 +199,15 @@ func _init() -> void:
 	reset()
 
 ## the body was placed, or the world/rules changed under it: no flight, passage, probe or speed
-## stretch continues across this. the total is kept (a respawn is inside one attempt); the combo
+## stretch continues across this, except pause/resume which suspend without altering evidence.
+## pending direction points are lost; the total is kept (a respawn is inside one attempt); the combo
 ## ends unless the reason is one of KEEP_COMBO. reset() is the call that clears the total.
 func discontinuity(reason: String) -> void:
+	if reason == "pause" or reason == "resume":
+		# no wall-clock time or synthesized sample; the next physical sample validates the flight.
+		_suspended = reason == "pause"
+		return
+	_lose_direction(reason, _last_sample)
 	_discontinuities.append(reason)
 	if _discontinuities.size() > 16:
 		_discontinuities.pop_front()
@@ -201,10 +224,11 @@ func discontinuity(reason: String) -> void:
 	if not reason in KEEP_COMBO:
 		_end_combo("discontinuity:" + reason)
 
-## one post-step sample; returns the events it scored (each also kept in `events`).
+## one post-step sample; scored events also enter `events`. non-scored diagnostics carry
+## record_kind="direction" and are returned only for recording, never added to totals.
 func step(sample: Dictionary, body: CharacterBody3D, level: Node3D = null) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
-	if _sealed:
+	if _sealed or _suspended:
 		return out
 	_body = body
 	_level = level
@@ -225,8 +249,10 @@ func step(sample: Dictionary, body: CharacterBody3D, level: Node3D = null) -> Ar
 		_flight_step(sample, out)
 		_near_step(sample, out)
 		_crouch_step(sample, out)
+		if _finished:
+			_end_direction(sample, "finish", out)
 	else:
-		_break_direction()
+		_lose_direction("inactive", sample)
 		_stats_hops = int((sample.get("stats", {}) as Dictionary).get("hops", -1))
 		_flight = {}
 		_near = {}
@@ -234,6 +260,8 @@ func step(sample: Dictionary, body: CharacterBody3D, level: Node3D = null) -> Ar
 			_cancel_save("inactive")
 	_prev = {"tick": int(sample.get("tick", 0)), "p": sample.get("p", Vector3.ZERO), "grounded": bool(sample.get("grounded", false)),
 		"ducked": bool(sample.get("ducked", false)), "reference_p": sample.get("reference_p", sample.get("p", Vector3.ZERO))}
+	_last_sample = {"tick": int(sample.get("tick", 0))}
+	out.append_array(drain_diagnostics())
 	_sealed = _finished
 	return out
 
@@ -254,7 +282,8 @@ func snapshot() -> Dictionary:
 	var left := maxf(0.0, window - (_time - _last_combo_time)) if combo > 0 else 0.0
 	return {
 		"version": STYLE_VERSION, "identity_key": identity_key(), "score": score, "combo": combo, "mult": multiplier,
-		"direction": {"kind": _direction_kind, "hops": _direction_chain, "mult": _direction_mult},
+		"direction": {"kind": _direction_kind, "hops": _direction_chain, "pending": _direction_pending,
+			"unit": _direction_unit(), "formula": DIRECTION_FORMULA, "suspended": _suspended, "last": _direction_last.duplicate(true)},
 		"combo_left_s": left, "combo_window_s": window, "last_combo": _last_combo.duplicate(),
 		"recent": recent, "last": events[-1].duplicate(true) if not events.is_empty() else {},
 		"by_kind": summary().by_kind, "clean": _clean, "finished": _finished, "sealed": _sealed,
@@ -262,6 +291,7 @@ func snapshot() -> Dictionary:
 		"diag": {
 			"speed": {"visited_cells": _visited.size(), "stretch_m": _stretch_m, "stale_fast_m": _stale_fast_m, "cell_novel": _cell_novel},
 			"sync": _sync_last.duplicate(true),
+			"direction": {"last": _direction_verdict.duplicate(true), "visited_landings": _direction_spots.size(), "flight": _direction_flight_view()},
 			"flight": _flight_diag(), "gap": _last_gap.duplicate(true), "edge": _last_edge.duplicate(true),
 			"near": {"open": _near_diag(), "last": _near_last.duplicate(true)},
 			"crouch": {"open": _save_diag(), "last": _crouch_last.duplicate(true), "counts": _crouch_counts.duplicate()},
@@ -278,13 +308,13 @@ func _award(kind: String, sample: Dictionary, base: float, label: String, measur
 		_last_combo_time = _time
 		multiplier = minf(float(RULES.combo.max_mult), 1.0 + float(RULES.combo.step) * float(combo - 1))
 	var combo_mult := multiplier if combo > 0 else 1.0
-	var mult := combo_mult * _direction_mult
+	var mult := combo_mult
 	var points := roundi(base * mult)
 	score += points
 	var event := {
-		"v": EVENT_FORMAT, "kind": kind, "tick": int(sample.get("tick", 0)), "time_s": snappedf(_time, 1e-6),
+		"v": LEGACY_EVENT_FORMAT, "kind": kind, "tick": int(sample.get("tick", 0)), "time_s": snappedf(_time, 1e-6),
 		"elapsed": snappedf(float(sample.get("elapsed", 0.0)), 1e-6), "points": points, "base": roundi(base),
-		"mult": mult, "direction_mult": _direction_mult, "combo_mult": combo_mult, "combo": combo if extends_chain else 0, "label": label, "m": measures, "geo": geo,
+		"mult": mult, "direction_mult": 1.0, "combo_mult": combo_mult, "combo": combo if extends_chain else 0, "label": label, "m": measures, "geo": geo,
 		"p": _arr(sample.get("p", Vector3.ZERO)), "clean": _clean,
 	}
 	events.append(event)
@@ -400,7 +430,9 @@ func _break_direction() -> void:
 	_direction_flight = {}
 	_direction_chain = 0
 	_direction_kind = ""
-	_direction_mult = 1.0
+	_direction_pending = 0
+	_direction_start_tick = -1
+	_direction_last_hop_tick = -1
 	_direction_heading = Vector3.ZERO
 	_direction_ground_s = 0.0
 
@@ -417,6 +449,73 @@ func _travel_kind(v: Vector3, yaw: float) -> String:
 		return "sideways_bhop"
 	return ""
 
+## p / units and the triangular progression are game choices; qualifying physics stays R19.
+func _direction_unit() -> int:
+	if _direction_kind.is_empty():
+		return 0
+	return int(RULES.direction.back_unit if _direction_kind == "backward_bhop" else RULES.direction.side_unit)
+
+static func pending_points(kind: String, hops: int) -> int:
+	var unit := int(RULES.direction.back_unit if kind == "backward_bhop" else RULES.direction.side_unit)
+	return unit * ((hops * (hops - 1)) >> 1) if hops > 0 and kind in ["backward_bhop", "sideways_bhop"] else 0
+
+## explicitly non-scored diagnostics; these never enter events, score or by_kind.
+func drain_diagnostics() -> Array[Dictionary]:
+	var result := _direction_diagnostics
+	_direction_diagnostics = []
+	return result
+
+## host calls before a lifecycle boundary seals its recorder. no menu cashout.
+func discard_pending(reason: String) -> Array[Dictionary]:
+	discontinuity(reason)
+	return drain_diagnostics()
+
+func _direction_diagnostic(kind: String, reason: String, sample: Dictionary, measures: Dictionary = {}) -> Dictionary:
+	_direction_serial += 1
+	return {"record_kind": "direction", "v": 1, "kind": kind, "reason": reason, "serial": _direction_serial,
+		"tick": int(sample.get("tick", -1)), "time_s": snappedf(_time, 1e-6),
+		"direction": _direction_kind, "hops": _direction_chain, "pending": _direction_pending,
+		"unit": _direction_unit(), "formula": DIRECTION_FORMULA, "m": measures}
+
+func _lose_direction(reason: String, sample: Dictionary) -> void:
+	if _direction_chain > 0:
+		_direction_last = _direction_diagnostic("direction_lost", reason, sample)
+		_direction_diagnostics.append(_direction_last.duplicate(true))
+	_break_direction()
+
+func _end_direction(sample: Dictionary, reason: String, out: Array[Dictionary]) -> void:
+	# low actual speed always wins over a same-sample finish or heading/flight end.
+	if _hspeed_u(sample.get("actual_v", Vector3.ZERO)) < float(RULES.direction.min_ups):
+		_lose_direction("stall", sample)
+		return
+	if _direction_chain > 0:
+		_direction_last = _direction_diagnostic("direction_banked", reason, sample)
+		_direction_diagnostics.append(_direction_last.duplicate(true))
+	if _direction_pending > 0:
+		var kind := _direction_kind + "_bank"
+		var points := _direction_pending
+		var event := {"v": EVENT_FORMAT, "kind": kind, "tick": int(sample.get("tick", 0)), "time_s": snappedf(_time, 1e-6),
+			"elapsed": snappedf(float(sample.get("elapsed", 0.0)), 1e-6), "points": points, "base": points,
+			"mult": 1.0, "direction_mult": 1.0, "combo_mult": 1.0, "combo": 0,
+			"label": ("Backwards" if _direction_kind == "backward_bhop" else "Half-sideways") + " banked",
+			"m": {"direction": _direction_kind, "hops": _direction_chain, "unit": _direction_unit(), "formula": DIRECTION_FORMULA,
+				"reason": reason, "start_tick": _direction_start_tick, "last_hop_tick": _direction_last_hop_tick,
+				"end_ups": _hspeed_u(sample.get("actual_v", Vector3.ZERO))},
+			"geo": {}, "p": _arr(sample.get("p", Vector3.ZERO)), "clean": _clean}
+		score += points
+		events.append(event)
+		var tally: Dictionary = _by_kind.get(kind, {"n": 0, "points": 0})
+		tally.n = int(tally.n) + 1
+		tally.points = int(tally.points) + points
+		_by_kind[kind] = tally
+		out.append(event)
+	_break_direction()
+
+func _direction_reject(sample: Dictionary, reason: String, out: Array[Dictionary], measures: Dictionary = {}) -> void:
+	_direction_verdict = {"verdict": reason, "tick": int(sample.get("tick", 0)), "m": measures}
+	_count("direction", reason)
+	_end_direction(sample, reason, out)
+
 func _direction_step(sample: Dictionary, dt: float, out: Array[Dictionary]) -> void:
 	var rules: Dictionary = RULES.direction
 	var v: Vector3 = sample.get("actual_v", Vector3.ZERO)
@@ -424,19 +523,25 @@ func _direction_step(sample: Dictionary, dt: float, out: Array[Dictionary]) -> v
 	var grounded := bool(sample.get("grounded", false))
 	var motion: Dictionary = sample.get("motion", {})
 	var at: Vector3 = sample.get("reference_p", sample.get("p", Vector3.ZERO))
-	if _prev.is_empty() or kind.is_empty() or (not _direction_kind.is_empty() and kind != _direction_kind):
+	if _hspeed_u(v) < float(rules.min_ups):
+		_direction_verdict = {"verdict": "stall", "tick": int(sample.get("tick", 0))}
+		_lose_direction("stall", sample)
+		return
+	if _prev.is_empty():
 		_break_direction()
+		return
+	if kind.is_empty() or (not _direction_kind.is_empty() and kind != _direction_kind):
+		_direction_reject(sample, "facing", out)
 		return
 	var was_grounded := bool(_prev.grounded)
 	if grounded and was_grounded:
 		_direction_ground_s += dt
 		if _direction_ground_s > float(rules.max_ground_s):
-			_break_direction()
+			_direction_reject(sample, "ground_dwell", out)
 		return
 	if was_grounded and not grounded:
-		# an actual motor jump, from known support, is required; hop counters are not evidence.
 		if not "jump" in (motion.get("events", []) as Array):
-			_break_direction()
+			_direction_reject(sample, "no_motor_jump", out)
 			return
 		var start: Vector3 = _prev.reference_p
 		_direction_kind = kind
@@ -449,40 +554,49 @@ func _direction_step(sample: Dictionary, dt: float, out: Array[Dictionary]) -> v
 	flight.track_m = float(flight.track_m) + Vector2(v.x, v.z).length() * dt
 	flight.peak_y = maxf(float(flight.peak_y), at.y)
 	if float(flight.air_s) > float(rules.max_air_s):
-		_break_direction()
+		_direction_reject(sample, "flight_timeout", out)
 		return
 	if not grounded:
 		return
 	var from: Vector3 = flight.from
 	var delta := Vector3(at.x - from.x, 0.0, at.z - from.z)
 	var heading := delta.normalized()
-	var valid := float(flight.air_s) >= float(rules.min_air_s) and float(flight.track_m) >= float(rules.min_track_m)
-	valid = valid and float(flight.peak_y) - from.y >= float(rules.min_rise_m) and float(flight.peak_y) - at.y >= float(rules.min_fall_m)
-	valid = valid and delta.length() >= float(flight.track_m) * float(rules.min_efficiency)
-	valid = valid and (_direction_heading == Vector3.ZERO or heading.dot(_direction_heading) >= float(rules.heading_dot))
+	var measures := {"air_s": flight.air_s, "track_m": flight.track_m, "progress_m": delta.length(),
+		"rise_m": float(flight.peak_y) - from.y, "fall_m": float(flight.peak_y) - at.y,
+		"heading_dot": heading.dot(_direction_heading) if _direction_heading != Vector3.ZERO else 1.0, "landing_ups": _hspeed_u(v)}
+	var reason := ""
+	if float(flight.air_s) < float(rules.min_air_s):
+		reason = "flight_short"
+	elif float(flight.track_m) < float(rules.min_track_m):
+		reason = "travel_short"
+	elif float(measures.rise_m) < float(rules.min_rise_m):
+		reason = "rise_short"
+	elif float(measures.fall_m) < float(rules.min_fall_m):
+		reason = "fall_short"
+	elif delta.length() < float(flight.track_m) * float(rules.min_efficiency):
+		reason = "efficiency"
+	elif float(measures.heading_dot) < float(rules.heading_dot):
+		reason = "heading"
 	for spot: Vector3 in _direction_spots:
 		if Vector2(at.x - spot.x, at.z - spot.z).length() < float(rules.spacing_m):
-			valid = false
+			reason = "novelty"
 			_blocked["direction"] = int(_blocked.get("direction", 0)) + 1
 			break
-	if not valid:
-		_break_direction()
+	if not reason.is_empty():
+		_direction_reject(sample, reason, out, measures)
 		return
 	_direction_spots.append(at)
 	_direction_heading = heading
 	_direction_chain += 1
 	_direction_ground_s = 0.0
 	_direction_flight = {}
-	if _direction_chain < 2:
-		return
-	var backwards := kind == "backward_bhop"
-	_direction_mult = minf(float(rules.back_cap if backwards else rules.side_cap),
-		float(rules.back_start if backwards else rules.side_start) + float(_direction_chain - 2) * float(rules.back_step if backwards else rules.side_step))
-	var label := "%s %d hops ×%.2f" % ["Backwards" if backwards else "Half-sideways", _direction_chain, _direction_mult]
-	_award(kind, sample, float(rules.back_base if backwards else rules.side_base), label,
-		{"hops": _direction_chain, "direction_mult": _direction_mult, "air_s": flight.air_s, "track_m": flight.track_m,
-		"progress_m": delta.length(), "rise_m": float(flight.peak_y) - from.y, "fall_m": float(flight.peak_y) - at.y,
-		"landing_ups": _hspeed_u(v)}, {}, out)
+	_direction_pending = pending_points(kind, _direction_chain)
+	_direction_last_hop_tick = int(sample.get("tick", 0))
+	if _direction_chain == 1:
+		_direction_start_tick = _direction_last_hop_tick
+	_direction_verdict = {"verdict": "eligible", "tick": _direction_last_hop_tick, "m": measures}
+	_count("direction", "eligible")
+	_direction_diagnostics.append(_direction_diagnostic("direction_pending", "eligible", sample, measures))
 
 # --- sync -------------------------------------------------------------------------------------
 
@@ -1141,3 +1255,9 @@ func _save_diag() -> Dictionary:
 	if _save.is_empty():
 		return {}
 	return {"slab": _save.slab, "geo": _save.geo, "entry_ups": _save.entry_ups, "airborne": _save.airborne, "room_u": _save.room_u if float(_save.room_u) < INF else null}
+
+func _direction_flight_view() -> Dictionary:
+	var result := _direction_flight.duplicate(true)
+	if result.has("from"):
+		result.from = _arr(result.from)
+	return result

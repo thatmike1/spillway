@@ -15,7 +15,7 @@ const ACCENT := Color("f3cd83")
 const DIM := Color(0.957, 0.945, 0.867, 0.72)
 const SHADE := Color(0.055, 0.10, 0.12)
 ## callout ranks: a fresh lower-ranked event never replaces a higher one still in its hold.
-const RANK := {"crouch_save": 5, "backward_bhop": 4, "sideways_bhop": 3, "gap": 4, "edge": 4, "near_miss": 3, "sync": 2, "speed": 1}
+const RANK := {"crouch_save": 5, "backward_bhop": 4, "sideways_bhop": 3, "backward_bhop_bank": 4, "sideways_bhop_bank": 3, "gap": 4, "edge": 4, "near_miss": 3, "sync": 2, "speed": 1}
 const HOLD_S := 0.9
 const FADE_S := 0.5
 const BAR_WIDTH := 132.0
@@ -36,6 +36,7 @@ var new_best_override: int = -1
 var _shown_key: String = ""
 var _shown_rank: int = 0
 var _shown_age: float = INF
+var _direction_toast_key: String = ""
 
 func attach(main: Node, style_service: RefCounted) -> void:
 	game = main
@@ -134,6 +135,19 @@ func update_from(snap: Dictionary, delta: float) -> void:
 			_shown_rank = rank
 			_shown_age = 0.0
 		_shown_key = key
+	var transition: Dictionary = (snap.get("direction", {}) as Dictionary).get("last", {})
+	var serial := int(transition.get("serial", -1))
+	var transition_key := "%s/%d" % [str(snap.get("context", {})), serial]
+	if not transition.is_empty() and transition_key != _direction_toast_key:
+		_direction_toast_key = transition_key
+		var pending := int(transition.get("pending", 0))
+		var rank := 4 if str(transition.get("direction", "")) == "backward_bhop" else 3
+		if pending > 0 and (rank >= _shown_rank or _shown_age > HOLD_S * 0.66):
+			var word := "Backwards" if str(transition.get("direction", "")) == "backward_bhop" else "Half-sideways"
+			callout.text = "%s %s  %s%s" % [word, "banked" if transition.kind == "direction_banked" else "lost",
+				"+" if transition.kind == "direction_banked" else "", points_text(pending)]
+			_shown_rank = rank
+			_shown_age = 0.0
 	if _shown_age <= HOLD_S:
 		callout.modulate.a = 1.0
 	else:
