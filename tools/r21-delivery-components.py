@@ -448,7 +448,8 @@ def parity_source(d, source, out, identity, freeze, args):
         d.require(d.committed_bytes(freeze['source_commit'], name) == (d.PROJECT / name).read_bytes(),
                   'loose helper differs from final committed helper: ' + name)
     command = [sys.executable, '-B', str(d.PROJECT / 'tools/check-r21-parity.py'), '--audit', *argv]
-    d.r16.checked(command, d.PROJECT, __import__('os').environ.copy(), out / 'reaudit.log', 600)
+    # this audits every captured route, rather than one bounded engine play.
+    d.r16.checked(command, d.PROJECT, __import__('os').environ.copy(), out / 'reaudit.log', 3600)
     receipt = parity_receipt(d, PARITY_ROOT, freeze, identity)
     inputs = d.read_json(PARITY_ROOT / 'REPORT.json')['inputs']
     d.require(inputs['freeze_sha256'] == d.r16.digest(args.freeze)

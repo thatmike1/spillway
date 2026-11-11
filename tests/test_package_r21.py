@@ -492,6 +492,30 @@ class Orchestration(unittest.TestCase):
                      patch.object(pkg.Path, 'read_text', return_value='MemAvailable: 1024 kB\n'):
                     self.refused(pkg.resource_guard, assembly=True, reserve=True)
 
+    def test_later_wine_reserves_remaining_budget_without_counting_existing_proof_twice(self):
+        from types import SimpleNamespace
+        owned = 600 * 2**20
+        remaining = pkg.ASSEMBLY_RESERVE + pkg.EXPORT_LIMIT - owned
+        sizes = {pkg.SCRATCH: owned, pkg.ASSEMBLY: owned // 2,
+                 pkg.SCRATCH / 'export': owned // 2}
+        for label, home, tmp, memory, accepted in [
+            ('existing proof fits total budget', pkg.FLOOR, remaining, remaining + 1024, True),
+            ('one byte short on disk', pkg.FLOOR, remaining - 1, remaining + 1024, False),
+            ('insufficient memory', pkg.FLOOR, remaining, remaining - 1024, False),
+            ('HOME floor remains independent', pkg.FLOOR - 1, remaining, remaining + 1024, False),
+        ]:
+            def usage(path):
+                return SimpleNamespace(free=home if Path(path) == Path.home() else tmp)
+            with self.subTest(label=label), patch.object(pkg.shutil,'disk_usage',side_effect=usage), \
+                 patch.object(pkg,'tree_bytes',side_effect=lambda root:sizes[Path(root)]), \
+                 patch.object(pkg.Path,'read_text',return_value='MemAvailable: '+str(memory//1024)+' kB\n'):
+                if accepted:
+                    result = pkg.resource_guard(assembly=True,reserve=True)
+                    self.assertEqual(result['remaining_reserve_bytes'],remaining)
+                    self.assertEqual(result['owned_bytes'],owned)
+                else:
+                    self.refused(pkg.resource_guard,assembly=True,reserve=True)
+
     def test_four_original_pack_negatives_require_nonzero_even_with_error_text(self):
         from types import SimpleNamespace
         def run(code):

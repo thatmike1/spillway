@@ -379,16 +379,18 @@ def resource_guard(assembly=False, reserve=False):
                          if row.startswith('MemAvailable:'))) * 1024
     size = tree_bytes(SCRATCH)
     required = ASSEMBLY_RESERVE + EXPORT_LIMIT if assembly else PREP_LIMIT
+    remaining = max(0, required - size)
     require(home >= FLOOR, 'HOME below 15,000,000,000-byte floor')
     require(size <= required, 'combined R21 scratch/output exceeded budget')
     if assembly:
         require(tree_bytes(ASSEMBLY) <= ASSEMBLY_RESERVE, 'assembly exceeded 2.2 GB')
         require(tree_bytes(SCRATCH / 'export') <= EXPORT_LIMIT, 'output/evidence exceeded 700 MB')
-        require(available >= (required if reserve else 512 * 2**20), 'insufficient available memory for tmpfs work')
+        require(available >= (max(remaining, 512 * 2**20) if reserve else 512 * 2**20), 'insufficient available memory for tmpfs work')
     if reserve:
-        require(tmp >= required, 'insufficient tmpfs space for combined assembly and output reserve')
+        require(tmp >= remaining, 'insufficient tmpfs space for remaining assembly and output reserve')
     return {'home_free': home, 'tmp_free': tmp, 'memory_available': available, 'owned_bytes': size,
-            'assembly_limit': ASSEMBLY_RESERVE, 'output_limit': EXPORT_LIMIT}
+            'assembly_limit': ASSEMBLY_RESERVE, 'output_limit': EXPORT_LIMIT,
+            'remaining_reserve_bytes': remaining}
 
 
 def owned_path(path, root, fresh=False):

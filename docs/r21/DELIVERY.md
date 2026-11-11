@@ -70,6 +70,11 @@ Every operation extracts an explicit Git archive to owned assembly scratch, reje
 
 `package` imports, observes identity/model rules, exports one PCK, earns source fixtures, assembles both official runtimes and deterministic ZIPs, removes its loose source before exact-package execution, and runs all static/native/component gates. It publishes ZIPs only after successful checks. BUILD, VERIFICATION and SHA256SUMS bind source/tree/archive/manifest/helpers/assets/runtime/PCK/ZIP bytes. Failure records `FAILURE.json`, preserves raw proof and returns nonzero. A pure synthetic assembly test exercises success/failure sequencing; it is not an exported game.
 
+The source parity adapter independently re-audits all 48 captured plays and their
+negative controls. Its timeout is 3,600 seconds for that complete matrix, separate
+from the shorter limits on individual engine plays. It reruns the full auditor;
+an earlier success receipt alone is insufficient.
+
 `check` independently rebuilds source fixtures from the same committed archive and checks the exact supplied pair again. `identity` uses the same archive/import/guard/observer path without exporting. Neither command can bypass readiness by accepting empty fixtures.
 
 `wine` is an explicit **later** command, never automatic during assembly. It requires the reviewed freeze, exact statically verified candidate and portable loader SHA256 `91dfdd714f2c9078f010341346196d426e81c633ca0865cf7cc678e2825562db`. It reuses the frozen runner's execution/budget/process helpers, boots all eleven maps from the official Windows PE, and validates stdout plus separate `--log-file` logs. Engine logs remain outside game user data, preserving the repaired R20 behavior. Extracted bytes and all Spillway profile writes remain audited. RESULT pins the actual ZIP/PCK/loader/source and each map's logs. This is Wine startup only, never native Windows play.
@@ -80,7 +85,12 @@ This adapter assignment owns at most 30 MiB under `/tmp/r21-delivery-bindings` a
 
 Future full execution reserves **2.2 GB assembly plus at most 700 MB output/evidence**, together 2.9 GB. Both available tmpfs space and `MemAvailable` are checked before execution. HOME must remain above **15,000,000,000 bytes**. Guards measure all owned scratch/output together and run before/after each inherited engine launch as well as assembly stages. Output stays `/tmp/r21-package-helpers/export/spillway-r21`; assembly stays `/tmp/r21-package-helpers/assembly`. Symlink traversal, overwriting existing evidence and output under source or HOME refuse. At this implementation phase's first sample, HOME had 15,297,294,336 bytes and tmpfs 2,769,264,640 bytes. **That tmpfs sample cannot support full assembly.** Parent must establish headroom first without deleting another worker's data.
 
-Raw work remains on failure and after successful checking. Parent must archive **all raw proof losslessly** to the existing trusted backup with a complete per-file size/SHA inventory, verified archive hash and restoration evidence. Only then remove owned intermediates. Keep the exact accepted ZIP pair plus compact BUILD/VERIFICATION/SHA256SUMS, licence/manifests and archive receipts locally, rechecking HOME headroom before the final copy. Final publication, gameplay promotion and desktop copies remain parent work.
+Raw work remains on failure and after successful checking. Parent must archive **all final accepted raw proof losslessly** to the existing trusted backup with a complete per-file size/SHA inventory, verified archive hash and restoration evidence. Only then remove accepted-proof intermediates. Superseded rejected capture streams may be pruned after the replacement passes, retaining their failure report, original hashes and an explicit deletion receipt; they must never support a later acceptance claim. Keep the exact accepted ZIP pair plus compact BUILD/VERIFICATION/SHA256SUMS, licence/manifests and archive receipts locally, rechecking HOME headroom before the final copy. Final publication, gameplay promotion and desktop copies remain parent work.
+
+Later operations, including Wine, reserve the unused portion of the same combined
+2.9 GB budget. Already measured owned assembly/output bytes count toward that
+budget, rather than requiring another 2.9 GB free on top. Separate assembly/output
+caps and the HOME floor remain mandatory, with at least 512 MiB available memory.
 
 Pure verification commands from this directory:
 
