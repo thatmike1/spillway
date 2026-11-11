@@ -153,7 +153,8 @@ def audit_route(folder, route, inputs, output):
         metrics['finish'] = K.bounded_output([K.finish_view(original_summary, originals, old_origin)],
                                                 [K.finish_view(run['summary'], records)], output/(variant+'-finish.jsonl.gz'))
         # all original controls/checks survive; presentation is checked separately above, never grounds for dropping tours.
-        K.exact(K.toggle_contract(run['summary'], variant, plan), original_summary['checks'], 'all original executor assertions')
+        K.exact(K.assertion_view(K.toggle_contract(run['summary'], variant, plan), records),
+                K.assertion_view(original_summary['checks'], originals), 'all original executor assertions')
         for field in ('identity_rejections','setup_writes','scope'):
             K.exact(run['summary'][field], original_summary[field], 'complete original summary '+field)
         K.need(all(m['ok'] for m in metrics.values()), 'R20 exact parity failed; all differences retained')

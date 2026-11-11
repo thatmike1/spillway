@@ -157,6 +157,13 @@ that route's actual retained golden recording and uses actual R21 production
 scene/script. Moving and paused L are required. Every variant compares to the
 same R20 old reference, and explicit cross-variant comparisons add redundancy.
 
+Reader assertion labels contain generated recording filenames. The auditor binds
+each such filename to the independently read lifecycle record's semantic order,
+requiring every actual file exactly once in the frozen executor's lexical order.
+Only that verified filename becomes its record ordinal. Assertion wording, order,
+success flags and all other checks remain exact; unknown, missing, duplicated or
+reordered file assertions refuse.
+
 The unchanged bounded raw-stream compressor retains every complete JSONL byte
 through gzip with raw and compressed SHA256/size receipts, reclaiming only
 already-compressed transport blocks. There are 144 stream receipts. Raw summaries,

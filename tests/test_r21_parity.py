@@ -331,6 +331,39 @@ class Preparation(unittest.TestCase):
         self.assertTrue(result['ok'])
         self.assertGreaterEqual(len(result['checks']),91)
 
+    def test_14b_reader_assertions_bind_every_actual_lifecycle_record(self):
+        checks = K.load(self.directory/'summary.json')['checks']
+        prefix = 'Godot reader validates lifecycle recording '
+        expected = K.assertion_view(checks, self.records)
+        renamed = copy.deepcopy(self.records)
+        mapping = {}
+        for index, record in enumerate(sorted(renamed, key=lambda r:r.path.name)):
+            mapping[record.path.name] = 'capture-' + str(index).zfill(3) + '.r16run'
+            record.path = record.path.with_name(mapping[record.path.name])
+        alternate = copy.deepcopy(checks)
+        for row in alternate:
+            if row['name'].startswith(prefix):
+                row['name'] = prefix + mapping[row['name'][len(prefix):]]
+        K.exact(K.assertion_view(alternate, renamed), expected, 'bound generated names only')
+        positions = [i for i,row in enumerate(checks) if row['name'].startswith(prefix)]
+        for name,edit in [
+            ('unknown file',lambda rows:rows[positions[0]].update(name=prefix+'unknown.r16run')),
+            ('false reader',lambda rows:rows[positions[0]].update(ok=False)),
+            ('duplicate file',lambda rows:rows[positions[0]].update(name=rows[positions[1]]['name'])),
+            ('missing file',lambda rows:rows.pop(positions[0])),
+            ('reordered files',lambda rows:rows.__setitem__(slice(positions[0],positions[0]+2),
+                                                           list(reversed(rows[positions[0]:positions[0]+2])))),
+            ('prefix drift',lambda rows:rows[positions[0]].update(name='Changed '+rows[positions[0]]['name'])),
+            ('path instead of file',lambda rows:rows[positions[0]].update(name=prefix+'../'+self.records[0].path.name)),
+        ]:
+            bad = copy.deepcopy(checks)
+            edit(bad)
+            self.refuses(lambda bad=bad:K.assertion_view(bad,self.records))
+            self.mutations.append('actual reader assertion '+name)
+        bad = copy.deepcopy(checks)
+        bad[0]['name'] += ' changed'
+        self.refuses(lambda:K.exact(K.assertion_view(bad,self.records),expected,'ordinary assertion text'))
+
     def test_15_actual_summary_unknown_fields_and_dropped_checks_refuse(self):
         summary = K.load(self.directory/'summary.json')
         summary.update(host_scene=K.SCENE, host_script=K.SCRIPT,

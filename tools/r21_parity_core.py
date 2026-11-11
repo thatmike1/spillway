@@ -424,6 +424,29 @@ def toggle_contract(summary, variant, plan):
     return [c for c in checks if c['name'] not in extra_checks]
 
 
+def assertion_view(checks, records):
+    # bind process-generated names to independently read lifecycle records, never erase assertion text.
+    prefix = 'Godot reader validates lifecycle recording '
+    names = [r.path.name for r in records]
+    need(len(set(names)) == len(names) and all(Path(n).name == n for n in names),
+         'ambiguous lifecycle assertion recording names')
+    found = []
+    result = []
+    for row in checks:
+        keys(row, {'name','ok'}, 'actual executor assertion')
+        need(type(row['name']) is str and row['ok'] is True, 'failed or malformed executor assertion')
+        name = row['name']
+        if name.startswith(prefix):
+            filename = name[len(prefix):]
+            need(filename in names, 'reader assertion names an unread recording')
+            found.append(filename)
+            name = prefix + str(names.index(filename))
+        result.append({'name':name, 'ok':True})
+    # the frozen executor walks every actual filename in lexical directory order exactly once.
+    exact(found, sorted(names), 'missing/duplicate/reordered lifecycle reader assertions')
+    return result
+
+
 def summary_guard(summary, route, variant, plan, contract):
     keys(summary, set(load(BASELINE/route['name']/'old/summary.json')) | {'r21_presentation'}, 'complete actual summary')
     B.host_guard(summary, SCENE, SCRIPT)
