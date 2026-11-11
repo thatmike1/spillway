@@ -258,6 +258,14 @@ def exact_replay(d, first, second, rec, replay):
     return count
 
 
+def tether_route_arguments(model, assist):
+    extra = ['--production=1', '--model=' + model] + ([] if assist else ['--assist-off=1'])
+    if model == 'pendulum':
+        # this input finder lands before the finish volume instead of crossing it airborne.
+        extra += ['--land-z=-80', '--final-release-before=3']
+    return extra
+
+
 def tether_source(d, source, out, identity, freeze):
     before = source_guard(d, source, freeze)
     write(out / 'SOURCE.json', before)
@@ -286,7 +294,7 @@ def tether_source(d, source, out, identity, freeze):
     for model in MODELS:
         for assist in ([True] if model in MODELS[:2] else [True, False]):
             label = model if assist else model + '-assist-off'
-            extra = ['--production=1', '--model=' + model] + ([] if assist else ['--assist-off=1'])
+            extra = tether_route_arguments(model, assist)
             generated = engine(d, source, out, label, 'r21_tether_route.gd', extra)
             summary = d.read_json(generated / 'summary.json')
             tether_summary(d, summary, model, assist, identity)

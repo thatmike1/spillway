@@ -23,6 +23,12 @@ SCRATCH.mkdir(exist_ok=True)
 
 
 class Bindings(unittest.TestCase):
+    def test_pendulum_preserves_the_earned_grounded_finish_driver_arguments(self):
+        self.assertEqual(c.tether_route_arguments('pendulum', True),
+                         ['--production=1', '--model=pendulum', '--land-z=-80', '--final-release-before=3'])
+        self.assertEqual(c.tether_route_arguments('elastic', False),
+                         ['--production=1', '--model=elastic', '--assist-off=1'])
+
     def refused(self, function, *args, **kwargs):
         with self.assertRaises((d.Rejected, AssertionError, KeyError, ValueError, OSError)):
             function(*args, **kwargs)
