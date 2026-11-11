@@ -1,82 +1,92 @@
-# R21 portable delivery preparation
+# R21 portable delivery orchestration
 
-Only engine-free preparation is implemented. There is no R21 export, native acceptance or final ZIP claim. `identity`, `package` and `check` parse the parent freeze, require clean committed project source, then refuse with the production integration still pending. Even a syntactically complete freeze cannot clear `PENDING_GATES`. The new GDScript probe extends the R20 observer and deliberately reports failure with nonzero exit; it has not been parsed or run by Godot during preparation.
+The reusable `identity`, `package`, `check` and separate `wine` paths are implemented around private frozen R20/R18/R16 helpers. This phase uses Python/Git only. No R21 probe parse, import, engine, export, native acceptance, Wine execution or final candidate is claimed.
 
-The four new delivery files are `tools/package-r21.py`, `tools/r21-pack-probe.gd`, `tests/test_package_r21.py` and this document. Existing helpers, tests, runtime and deliveries are unchanged by this work. Other R21 components have independent ownership.
+Release is closed on three **actual unbound contracts** in `COMPONENTS`: revised Saltglass, final Tether, and original-eight parity. `integration_ready` checks those bindings and their committed path/hash pins; it no longer unconditionally raises. `--execute-frozen-runtime` is a separate required switch for later execution. A freeze JSON alone cannot install an adapter or clear any feature gate.
 
-## Baseline and composition
+## Frozen inheritance and identity
 
-The preservation baseline is **`e6baa995da84d380abc8b8d6a3769b33e771945e`**. The frozen R20 ZIPs in outer `delivery/spillway-r20` were built from **`7f8fb41b741c01455682ae0c6ee612d5d6fd1fc4`**. The later baseline changes exactly the Windows verifier, its tests and R20 delivery notes. Those are distinct provenance facts. R21 must descend from e6baa; it must not relabel the old ZIP source as e6baa.
+Preservation/verifier baseline: `e6baa995da84d380abc8b8d6a3769b33e771945e`. Accepted R20 artifact source: `7f8fb41b741c01455682ae0c6ee612d5d6fd1fc4`. These are distinct. `baseline_delivery` pins the accepted BUILD/VERIFICATION/SHA256SUMS receipts and ZIP membership; it does not rehash or run the old ZIPs. Final R21 ZIPs are independently hashed by the static checker.
 
-The preparation helper pins the accepted R20 BUILD, VERIFICATION and SHA256SUMS receipts. It checks that both named ZIPs remain present and that receipt identities agree. This receipt check does not rehash or execute those old ZIPs. Final R21 ZIP hashing is a separate required gate.
+Every inherited helper must equal both its exact e6baa Git blob and working bytes. R20 constructs private R18/R16 module instances. `configure` changes only those private objects: release filenames, host/scene/title/probe, recording build/version, inventory and explicit orchestration callbacks. The behavioral R16 build, profile namespace, engine/runtime/licence pins and physical assertions remain unchanged. Independent R19/R20 loads retain their original state.
 
-R20 is loaded into a private module, which constructs its own R18/R16 instances. R19 helpers and the repaired Windows runner are retained in the helper inventory. Every inherited helper must equal its exact committed e6baa bytes and the working helper bytes. No shared R20/R19 module is modified. Tests load independent R19/R20 instances and check their constants, helper inventories, expectation dictionaries and probe references remain unchanged.
+The original R20 `native_checks`, `audit_profile`, `audit_style_stream`, `run_export_profile_audit`, `static_check`, `pack_negatives` and Through Line generator function implementations remain intact. The R21 checker composes these, including:
 
-The R20 implementations remain available for composition: committed source archive/export, source trace generation, actual ordered key/mouse input, binary physics comparison, both strict recording readers, complete lifecycle/seals, per-tick style/stack reconciliation, earned ghosts and reload, real control tours, profile-write audit, export/ingest, four broken-pack startup negatives, official runtime/template pins, assets/licences, ZIP membership/modes/CRC/SHA and shared PCK checks. R18 interface checks stay inherited. These functions still assert R20 identities. Final integration must adapt the R21 observer and orchestration around the frozen contracts, without replacing identity strings blindly or exempting their failures.
+- startup and actual GUI/keyboard/mouse control tours over all eleven maps, preset switching, L, stage practice, lab, crouch, focus and Quit;
+- backwards/sideways stack banks/losses and live style reconciliation, buffered export/ingest/duplicate/broken bundles, friend export/import/wrong version, nonphysical ghost interpolation;
+- sealed recordings through both strict readers, raw ordered inputs and binary columns, earned source-to-pack trace equality, best promotion and separate-process reload without config rewrite;
+- isolated profile-write inventories, official runtime hashes/headers, asset/licence provenance, safe complete ZIP membership, Unix modes, CRC, SHA256SUMS and a common PCK;
+- four nonzero broken-pack controls: missing PCK, malformed PCK, missing critical sky in each look. Logging an assertion and exiting zero fails.
 
-The separate committed `tools/check-r21-preservation.py` owns all old-file permissions. The delivery helper executes that committed API and calls its inventories/comparison/settings check. It carries **no second old-path allowlist**. Every old project file remains protected, including all six F2 pins, `r16_style.gd`, stack panels, Through Line, Classic/Pendulum/R20 Elastic and shelved files. Only the preservation owner's exact reviewed scene/version and ghost-share-label hashes can permit its narrowly allowed old changes. Deletions, modes, stale approvals and protected edits still refuse. If that API has not been committed yet, preparation explicitly reports it pending; release never becomes available.
+The typed `tether_model` loadout-boundary observer admits only the independently frozen additional model IDs, retaining the original event/tick/map/from/to requirements. Unknown assist preference keys still refuse until the actual interface exists. No old control failure is waived and no check-count target is lowered. The R21 probe extends R20 and overrides only identity-bearing observers. Its base identity checks are copied exactly from R16 before adding R21 host/HUD/service checks. Friend controls are copied exactly with only the expected build operand changed; scoring identity remains `r20-style-stack-1` with its frozen rules digest. The original surf judge, physical/input observer, stack, Tether reference controls, Through Line controls, rendering, lifecycle, record, ghost and reload methods remain inherited. Failed observer checks take a nonzero end path.
 
-## Parent freeze contract
+New `_r21_saltglass_controls` and `_r21_tether_controls` each deliberately fail with their missing production contract. Replace only those narrow methods after reading the final component interfaces. They do not prevent the inherited controls from running. They have **not been parsed by Godot** in this phase.
 
-Use strict JSON without duplicate keys. `validate_freeze` requires the following. Values described as reviewed are external parent decisions, not defaults this helper invents.
+`identity_boundary` protects the entire original registry/startup, each original eight map/preset identity and Through Line exactly. Revised Saltglass/Tether require new modules, greater versions, changed geometry and changed record/course keys. F2 source law, clock, hull, timing and style identity stay exact. Saltglass retains its exact motor chain. `model_boundary` compares actual original rule/control objects with an independent frozen R20 runner and hashes all observed variants against the reviewed freeze. The identity observer uses current production `configure_tether`, `model`, `auto_reel` and `tether_identity`; its rules projection contains `classic`, `alternative`, and `controls`, excluding selection/version labels. Final assist-specific observations still need the real component adapter.
 
-| field | contract |
+The preservation owner's **committed** `tools/check-r21-preservation.py` API owns all old-file permissions, including all six F2 pins. This helper has no second allowlist. Reviewed old-path changes must match exact hashes; deletions, modes, stale approvals and protected source changes refuse.
+
+## Parent freeze and adapter seam
+
+Strict JSON rejects duplicate keys. Required fields remain:
+
+| field | requirement |
 | --- | --- |
 | `schema`, `runtime_frozen` | integer `1`, boolean `true` |
-| `source_commit` | exact full 40-character final source commit |
-| `identity_sha256` | independently reviewed canonical whole runtime identity SHA256 |
-| `intentional_changes` | exact changed-old-path SHA256 dictionary, validated by the preservation owner |
-| `required_maps` | ordered `breakwater`, `whiteout-relay`, `sunken-court`, `rainline`, `night-shift`, `practice`, `overflow`, `experiment`, `saltglass`, `tether-yard`, `through-line` |
-| `experimental_maps` | exactly ordered `experiment`, `tether-yard`, `through-line` |
-| `reached_items` | nonempty contiguous prefix of spec items `[1,2,3,4]`; complete release needs all four |
-| `runtime` | explicit `build`, `version`, `main_scene`, `main_script`, `hud_script`; build/version end in `-r21` |
-| `map_versions` | exactly `saltglass` and `tether-yard`, each with reviewed `level_id`, integer `level_version`, geometry SHA256 and `level_script` |
-| `models.original` | ordered `classic`, `pendulum`, `elastic` mapped to reviewed canonical actual-rules SHA256 values |
-| `models.elastic_variants` | exact approved ordered list of two or three `{id, base:"elastic", rules_sha256}` objects |
+| `source_commit`, `identity_sha256` | full final commit and independently reviewed canonical runtime identity digest |
+| `intentional_changes` | exact old-path SHA256 approvals consumed by preservation owner |
+| `required_maps` | ordered original eight, `saltglass`, `tether-yard`, `through-line` |
+| `experimental_maps` | ordered `experiment`, `tether-yard`, `through-line` |
+| `reached_items` | contiguous spec prefix; execution requires `[1,2,3,4]` |
+| `runtime` | explicit `build`, `version`, `main_scene`, `main_script`, `hud_script`; build/version end `-r21` |
+| `map_versions` | Saltglass and Tether each declare `level_id`, greater integer `level_version`, geometry SHA256, new `level_script` |
+| `models` | original Classic/Pendulum/Elastic actual rule hashes and exact ordered two or three `{id, base:"elastic", rules_sha256}` variants |
+| `delivery_components` | exact `saltglass`, `tether`, `parity` dictionaries of each installed adapter's committed input paths to SHA256 |
 
-Variant IDs, rules, host paths, build identity and geometry hashes are intentionally not supplied as a fake final freeze. The fixture values in Python tests are synthetic gate tests only.
+No exemptions, default variant IDs, geometry, fixture hashes or expected feature outcomes are invented. Test identities and byte fixtures are explicitly synthetic.
 
-`identity_boundary` requires the complete original registry and startup identity to match R20. All original eight map identities and every preset key remain exactly equal, and Through Line receives the same complete equality checks. Revised maps need new geometry, a greater level version and a new module, with changed course/record identities that bind the frozen version/geometry. Source preset, clock, fingerprint, hull, timing and overlay/style identity remain exact. Saltglass additionally retains its exact runner chain and mechanics. Tether's new mechanics require the independent actual-model observations checked by `model_boundary`: original model rule objects remain equal, and every variant's actual rules must hash to its approved value. Labels alone cannot satisfy that gate.
+`ComponentGate(paths, source, packed)` is a **delivery-owned integration seam**, not a claim about an unfinished component API. Parent installs its adapters in this file once actual production contracts exist:
 
-No `pending`, `skip_gates`, `allow_failures` or Breakwater exemption can be added to the freeze. Dirty or untracked project files are reported during preparation and refused for later runtime operations. Preparation reads committed snapshots while sibling workers continue; it does not stage or clean their files.
+1. `paths` names all committed fixture/generator/validator inputs. `integration_ready` requires a nonempty exact path set, matching freeze hashes and committed manifest, plus both callable validators. Runtime/level resources must exist in that same commit.
+2. `source(source, evidence, identity, freeze)` earns and independently validates actual production fixtures. It returns nonempty named successful `checks`, a nonempty relative-path `proof` SHA256 inventory under its evidence directory, and `binding = evidence_binding(component, "source", freeze)`.
+3. `packed(folder, build, args, all_evidence, evidence, routes)` validates the exact delivered runtime using those fixtures. It returns the same evidence envelope with stage `"packed"`. Empty, boolean/no-op, wrong-stage/source/identity or missing/mutated proof responses refuse.
+4. Saltglass source supplies nonempty `routes` from the actual configured host. These run through the inherited strict source/packed/play/reload pipeline. Tether supplies nonempty recording-derived `feature_tapes.tether` for **every** frozen original and variant model. Its adapter must prove exact raw-input/source/packed replays and both readers; it may add ordinary compatible play routes. Through Line tapes always use its unchanged R20 generator/reader. Parity must bind the actual final original-eight proof, without tolerances or scoring exemptions.
 
-## Production work still required
+Each ordinary play route needs a nonempty tape/finite ordered trace, correct F2 rate, positive duration, complete clean source finish, ordered progress, delivery/order/rate/cleanup receipts and no integrity flags or game-difference exemption. The component validators own additional real model/assist fixtures; the generic envelope is not a substitute for those checks.
 
-These are release requirements, not preparation passes. The explicit pending list keeps every release command closed until implementation and review of these seams:
+Saltglass still needs lowered/spaced exit speed/height, 40–70 s input-earned F2, high entries/flat landings, outside/safe alternatives, failure recovery, no safety/free skip and geometry-backed scoring. Tether still needs all final models, independently selectable Elastic-family assist, actual preview/attachment agreement, range/view/occlusion negatives, reference E/LMB/RMB/reel/release laws, fresh-press boundaries, reproduced platform clearance and exact recordings/replays. Planned soft/firm/arc values are not a final fixture contract.
 
-1. Bind the new host/HUD/scene/build identities and preserve the complete R20 host behavior, R18 interface, eleven-map old/new L toggle, labels, telemetry/F9, settings, focus, ghost folder/sharing, export and actual Quit. Preserve Through Line's exact scene/player/session/attempt/clock behavior and all six R20 features.
-2. Generate fresh input-earned Saltglass routes on the final production geometry. Measure lowered and spaced exit heights/speeds, high fin entries, flat landings and optional hard outside lines. Prove no safety catch/free skip, failed-line checkpoint recovery and 40–70 seconds F2. Keep generic geometry-backed scoring; no hand-placed route bonus.
-3. Drive acquisition at speed, preview before pressing, and blocked/occluded anchor refusals. Exercise actual earned routes for every new Elastic variant, independently read their sealed recordings and replay exact inputs/physics against the source traces. Compare unchanged Classic/Pendulum/R20 Elastic, E versus LMB/RMB, manual/automatic reel, fresh-press/release rules and real platform clearance. A rules-hash receipt alone is insufficient.
-4. Use committed archive snapshots for every import/export. Validate committed bytes before/after import and retain the generated inventory before cleanup. Generated UID sidecars must pair with committed `.gd`/`.gdshader` files and contain one `uid://` identifier of 1–13 lowercase alphanumeric characters plus a newline. `.import` sidecars must pair with committed `.png`, `.jpg`, `.hdr`, `.gltf`, `.glb` or `.ttf` assets and start with `[remap]`. The 65,536-byte bound, UID pattern and asset suffix list match committed R20 `check-r20-candidate-parity.py:import_metadata_guard`. Unknown code, missing files, changed hashes, oversized/unpaired metadata and symlinks refuse. The prepared `generated_sidecars` validator must be wired into the future assembly; it has not checked an actual R21 import.
-5. Execute the exact packed release from an empty cwd with no loose source/probes available through resource fallback. Keep the actual OS-input control tour over all eleven maps, both readers, sealed-record/live-source actual trace parity, old/new look and clean ghost reload. Preserve full original-eight physical/input parity separately. Require four nonzero broken-pack refusals: missing PCK, malformed PCK, missing critical sky in new and old look. An assertion followed by exit zero fails.
-6. Verify both final ZIPs, CRC, modes, complete source/helper/resource/asset/licence manifests, official runtimes and identical PCK; emit BUILD, VERIFICATION and SHA256SUMS bound to the exact source and ZIP bytes. Run the pinned Wine checker separately against the exact final Windows ZIP on all eleven maps. Its repaired `--log-file` must stay outside user data, preserving the default-engine-log fix while rejecting real game-data writes. Do not claim native Windows play from PE/Wine startup, or enjoyment/listening/latency from automated checks.
+## Snapshot, execution and reports
 
-R20 production fixture paths cannot simply be reused for a changed geometry/model and declared valid. Parent components may supply new seams and fixtures after runtime review. Those integrations remain pending here, including actual parsing of `r21-pack-probe.gd`.
+`preflight` requires this exact R21 branch/HEAD, clean committed project source, all helper hashes, scene persistence/recording, inherited host chain, export exclusions, asset/runtime pins and preservation approvals. It writes no source or output. Parent dirty integration files remain untouched and block execution.
 
-## Storage and publication
+Every operation extracts an explicit Git archive to owned assembly scratch, rejects special entries, checks every committed hash and compares executed helpers. `import_snapshot` checks before and after import, inventories the engine cache separately and records `IMPORT.json` before cleanup. `generated_sidecars` retains R20's exact policy: bounded 65,536-byte paired `.gd`/`.gdshader` UID with `uid://[a-z0-9]{1,13}` plus newline, or paired `.png/.jpg/.hdr/.gltf/.glb/.ttf` `.import` beginning `[remap]`. Unknown code, symlinks, missing/changed committed files, unpaired or malformed metadata refuse. `snapshot_guard` repeats the exact inventory comparison after identity, export and fixture generation. The `.godot` cache is moved outside the source inventory during checks, never silently treated as committed source; injected `.gd`, `.gdshader` or `.py` cache source also refuses.
 
-Laptop HOME has only about 325 MB above the required **15,000,000,000-byte floor** at task entry. The full R20 output was about 632 MB; writing a comparable R21 output directly to HOME is unsupported. Never delete old deliveries, private inputs, worktrees or another worker's evidence.
+`package` imports, observes identity/model rules, exports one PCK, earns source fixtures, assembles both official runtimes and deterministic ZIPs, removes its loose source before exact-package execution, and runs all static/native/component gates. It publishes ZIPs only after successful checks. BUILD, VERIFICATION and SHA256SUMS bind source/tree/archive/manifest/helpers/assets/runtime/PCK/ZIP bytes. Failure records `FAILURE.json`, preserves raw proof and returns nonzero. A pure synthetic assembly test exercises success/failure sequencing; it is not an exported game.
 
-`storage_plan()` exposes the supported full-output route `/tmp/r21-package-helpers/export/spillway-r21`, separate from bounded assembly scratch `/tmp/r21-package-helpers/assembly`. Reserve the inherited 2.2 GB assembly budget plus at most 700 MB output/evidence on tmpfs before the future run. The current R20 size is an estimate for planning, not a guarantee of R21 peak size. The parent must measure all owned scratch and output together, refuse if they exceed the budget, keep HOME above its floor throughout, and arrange headroom rather than increasing the budget silently. No export directory is created by preparation.
+`check` independently rebuilds source fixtures from the same committed archive and checks the exact supplied pair again. `identity` uses the same archive/import/guard/observer path without exporting. Neither command can bypass readiness by accepting empty fixtures.
 
-After exact ZIP acceptance, the parent archives raw evidence **losslessly to the existing trusted backup**, with a complete per-file size/SHA256 manifest and verified remote archive SHA256/restoration evidence. Retain that compact archive receipt and restoration manifest locally. Only after checking the backup against every source file may the parent remove its owned TMP intermediates. No raw gate proof may be omitted to save space. This helper performs no archival, transfer or deletion.
+`wine` is an explicit **later** command, never automatic during assembly. It requires the reviewed freeze, exact statically verified candidate and portable loader SHA256 `91dfdd714f2c9078f010341346196d426e81c633ca0865cf7cc678e2825562db`. It reuses the frozen runner's execution/budget/process helpers, boots all eleven maps from the official Windows PE, and validates stdout plus separate `--log-file` logs. Engine logs remain outside game user data, preserving the repaired R20 behavior. Extracted bytes and all Spillway profile writes remain audited. RESULT pins the actual ZIP/PCK/loader/source and each map's logs. This is Wine startup only, never native Windows play.
 
-The parent then keeps the exact verified pair of ZIPs, about 245 MB at R20 size, plus compact BUILD/VERIFICATION/SHA256SUMS, licenses/manifests and archive pointers in outer `delivery/spillway-r21`. Recheck actual bytes against HOME headroom before copying; fail if they cross the floor. The final receipts must bind the same exact ZIPs and PCK that passed runtime acceptance, with the raw-proof archive location/hash. Parent owns final publication and any desktop copy.
+## Resources and handoff
 
-Preparation uses pure Python/Git and cache hashing only, with owned TMP limited to 30 MiB and durable preparation files limited to 5 MiB. No editor, native display, export, package or gameplay process is authorized in this phase.
+Pure-phase scratch limit is 30 MiB and durable changes 5 MiB. No engine, GUI/native display, export, Wine, installs, caches, render or packages are authorized in this phase.
 
-Preparation commands, from `projects/foldrunner`:
+Future full execution reserves **2.2 GB assembly plus at most 700 MB output/evidence**, together 2.9 GB. Both available tmpfs space and `MemAvailable` are checked before execution. HOME must remain above **15,000,000,000 bytes**. Guards measure all owned scratch/output together and run before/after each inherited engine launch as well as assembly stages. Output stays `/tmp/r21-package-helpers/export/spillway-r21`; assembly stays `/tmp/r21-package-helpers/assembly`. Symlink traversal, overwriting existing evidence and output under source or HOME refuse. At this implementation phase's first sample, HOME had 15,297,294,336 bytes and tmpfs 2,769,264,640 bytes. **That tmpfs sample cannot support full assembly.** Parent must establish headroom first without deleting another worker's data.
+
+Raw work remains on failure and after successful checking. Parent must archive **all raw proof losslessly** to the existing trusted backup with a complete per-file size/SHA inventory, verified archive hash and restoration evidence. Only then remove owned intermediates. Keep the exact accepted ZIP pair plus compact BUILD/VERIFICATION/SHA256SUMS, licence/manifests and archive receipts locally, rechecking HOME headroom before the final copy. Final publication, gameplay promotion and desktop copies remain parent work.
+
+Pure verification commands from this directory:
 
 ```sh
 python3 -B tests/test_package_r21.py
-python3 -B tests/test_package_r20.py
 python3 -B tests/test_package_r19.py
 python3 -B tests/test_r20_windows_release.py
 python3 -B tools/package-r21.py prepare
-python3 -B tools/package-r21.py --help
 python3 -B tools/package-r21.py package --help
+python3 -B tools/package-r21.py wine --help
 ```
 
-The unmodified R20 suite's preparation test requires the literal branch `feat/spillway-r20`. On the shared R21 branch that one test refuses as designed. For the complete baseline suite, preparation used a disposable sparse Git view at exact e6baa with that branch name, borrowing existing objects and materializing only tools/tests. All 36 tests passed without editing helpers/tests or switching the shared checkout; its peak file size was 8,324,675 bytes, then that owned view was removed. The direct R21-branch run's refusal is retained as a scoped result, not a passing R21 preflight.
+The R20 preparation test requires literal branch `feat/spillway-r20`. Running that unchanged suite directly on R21 refuses that one branch check. Use a disposable sparse Git view at exact e6baa and that literal branch for its complete pure suite; never switch/reset the shared checkout or edit the baseline test. The Windows unit suite uses mocked processes and is not Wine execution.
 
-Successful `prepare` prints `prepared:true`, `release_ready:false`, `runtime_checked:false`, `candidate_exported:false` and all remaining gates. It is never a final green claim. Runtime integration, freeze review, GDScript parse, production fixtures, import/export, exact packed/native checks, parity, Windows startup, archival and final publication remain parent work.
+Actual component fixtures never validated here remain pending. Final Godot parse, source/native parity, complete packed controls/recordings/reloads/ghosts, Wine, raw-proof backup and final ZIP acceptance must be recorded separately after freeze.
