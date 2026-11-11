@@ -3,8 +3,8 @@ config_version=5
 
 [application]
 config/name="Spillway"
-config/version="2026.11.10-r20"
-run/main_scene="res://scenes/r20.tscn"
+config/version="2026.11.11-r21"
+run/main_scene="res://scenes/r21.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [display]
