@@ -5,6 +5,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location('r21_preservation', ROOT / 'tools/check-r21-preservation.py')
@@ -87,6 +88,13 @@ class Preservation(unittest.TestCase):
                 inv = P.inventory(commit)
                 self.assertEqual(set(inv['files']), {'motor'})
                 self.assertEqual(inv['files']['motor']['sha256'], __import__('hashlib').sha256(b'committed').hexdigest())
+                popen = subprocess.Popen
+                with mock.patch.object(P.subprocess, 'Popen', wraps=popen) as calls:
+                    repeated = P.inventory(commit)
+                self.assertEqual(inv, repeated)
+                archives = [call.args[0] for call in calls.call_args_list if 'archive' in call.args[0]]
+                self.assertEqual(len(archives), 1)
+                self.assertIn('--mtime=@' + git('show', '-s', '--format=%ct', commit), archives[0])
                 with self.assertRaises(ValueError):
                     P.inventory(commit[:12])
                 (project / '.gitattributes').write_text('motor export-ignore\n')

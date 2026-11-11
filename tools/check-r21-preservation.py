@@ -52,7 +52,12 @@ def inventory(commit):
     if not entries:
         raise ValueError('empty project tree')
     root = git('rev-parse', '--show-toplevel').decode().strip()
-    process = subprocess.Popen(['git', '-C', root, 'archive', '--format=tar', commit + ':' + SUBTREE], stdout=subprocess.PIPE)
+    # subtree archives use wall time unless the commit timestamp is supplied explicitly.
+    stamp = git('show', '-s', '--format=%ct', commit).decode().strip()
+    if not re.fullmatch(r'[0-9]+', stamp):
+        raise ValueError('invalid committed archive timestamp')
+    process = subprocess.Popen(['git', '-C', root, 'archive', '--format=tar', '--mtime=@' + stamp,
+                                commit + ':' + SUBTREE], stdout=subprocess.PIPE)
     reader = HashReader(process.stdout)
     files = {}
     try:
