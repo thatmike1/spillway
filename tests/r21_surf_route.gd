@@ -269,8 +269,8 @@ func _end(reason: String, tick: int) -> void:
 	_write("events.tape.json", {"format": "spillway-momentum-tape", "version": 2, "name": "r21-saltglass", "description": "input-only normal spawn on configured R21; 128 Hz, warmup 33, sensitivity 2.5", "physics_hz": hz, "input_profile": "physics_tick", "duration_ticks": tick, "duration_s": float(tick) / hz, "events": events})
 	trace_file.close()
 	print("saltglass: pass=", passed, " finish=", game.finished, " kind=", game.finish_kind, " time=", game.elapsed, " contacts=", contact_ticks, " node=", node_index, " final=", player.position, " reason=", reason)
-	game.request_quit(0)
-	quit(0 if passed else 1)
+	# the host seals the attempt and drains eight frames before shutting down.
+	game.request_quit(0 if passed else 1)
 
 func _accept(summary: Dictionary) -> bool:
 	return bool(summary.finished) and str(summary.finish_kind) == "clean" and int(summary.respawns) == 0 \

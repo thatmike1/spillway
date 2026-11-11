@@ -7,6 +7,8 @@ const NEW_MAPS := preload("res://scripts/r21_map_catalog.gd")
 const BASE_MAPS := preload("res://scripts/r15_maps.gd")
 const READER := preload("res://scripts/r16_run_reader.gd")
 const GEOMETRY := preload("res://tests/r21_surf_geometry.gd")
+const SURF := preload("res://scripts/r21_surf_level.gd")
+const TETHER := preload("res://scripts/r21_tether_level.gd")
 var output := ""
 var checks: Array = []
 
@@ -44,10 +46,16 @@ func run() -> void:
 	var old_maps := OLD_MAPS.make()
 	var new_maps := NEW_MAPS.make()
 	check(old_maps.order == new_maps.order and old_maps.default_chain == new_maps.default_chain, "catalog order and defaults retained")
+	check(old_maps.catalog.keys() == new_maps.catalog.keys(), "catalog contains exactly the delivered playable maps")
 	for id: String in old_maps.order:
-		check(new_maps.catalog[id] == old_maps.catalog[id] if id != "saltglass" else new_maps.catalog[id].script == "res://scripts/r21_surf_level.gd", "catalog: " + id)
+		var expected: Dictionary = old_maps.catalog[id]
+		if id == "saltglass":
+			expected = SURF.MAP_ENTRY
+		elif id == "tether-yard":
+			expected = TETHER.MAP_ENTRY
+		check(new_maps.catalog[id] == expected, "complete catalog entry: " + id)
 	var identities := {}
-	for id: String in BASE_MAPS.ORDER + ["saltglass"]:
+	for id: String in BASE_MAPS.ORDER + ["saltglass", "tether-yard", "through-line"]:
 		var old := host(R19, id)
 		var before: Dictionary = old.motion_identity()
 		old.request_quit(0)
@@ -56,10 +64,15 @@ func run() -> void:
 		var after: Dictionary = game.motion_identity()
 		var matches := READER.identity_matches(before, after).is_empty()
 		identities[id] = {"before": before, "after": after, "compatible": matches}
-		check(matches if id != "saltglass" else not matches and before.geometry != after.geometry, "local ghost motion identity: " + id)
+		var revised := id in ["saltglass", "tether-yard"]
+		check(not matches and before.geometry != after.geometry if revised else matches, "local ghost motion identity: " + id)
 		check("Spillway R21" in game.window_title() and "R19" not in game.window_title(), "R21 window title: " + id)
 		if id == "breakwater":
 			check(game.map_revision.version == "r19-breakwater-flow-1" and before.overlay == after.overlay, "delivered R19 Breakwater gate revision retained")
+		if id == "tether-yard":
+			check(game.level.level_id == "r21-tether-yard" and game.level.level_version == 2
+				and game.runner_path() == "res://scripts/r21_tether_player.gd", "revised Tether identity and exact runner")
+			check("Earlier Tether Yard ghosts" in game.map_revision_description(), "clear older Tether map note")
 		if id == "saltglass":
 			check("Earlier Saltglass ghosts" in game.map_revision_description(), "clear older-map note")
 			check(game.recording_metadata("proof").build == "spillway-2026.11.11-r21" and game.recording_metadata("proof").build_label == "Spillway R21", "R21 recording and sharing build")
