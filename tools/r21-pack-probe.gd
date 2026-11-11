@@ -334,7 +334,7 @@ func _r21_tether_controls() -> void:
 				var path: String = str(clean[-1].path)
 				routes[label]["recording"] = path
 				check(label + ": matching packed recording ghost loads", game.session.ghost.load_run(path, game.motion_identity()).ok)
-				var before := game.motion_identity()
+				var before: Dictionary = game.motion_identity()
 				game.change_setting("tether_auto_reel", true)
 				await _physics(1)
 				check(label + ": wrong reel ghost refuses", not game.session.ghost.load_run(path, game.motion_identity()).ok and before != game.motion_identity())
