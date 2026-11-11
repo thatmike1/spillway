@@ -71,7 +71,7 @@ func capture(label: String, control: Control) -> void:
 	await process_frame
 	await RenderingServer.frame_post_draw
 	var bounds := control.get_global_rect()
-	var clip := game.hud._pause_scroll.get_global_rect()
+	var clip: Rect2 = game.hud._pause_scroll.get_global_rect()
 	check(bounds.intersection(clip).size.y >= bounds.size.y - 1.0, label + ": selected control visible in scroll viewport")
 	var image := root.get_texture().get_image()
 	check(image.save_png(output.path_join(label + ".png")) == OK, label + ": actual viewport image saved")
