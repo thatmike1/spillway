@@ -662,7 +662,8 @@ def route_freeze(source, evidence, identity, freeze):
     require(all(Path(path).is_file() and read_json(path).get('events') for path in tapes['tether'].values()),
             'missing or empty Tether recording-derived tapes')
     features = {**tapes, **r20.through_feature_freeze(source, evidence, identity)}
-    features['r21_source_components'] = {name: {'root': str(evidence / name), 'receipt': receipt}
+    # snapshot receipts before annotating their routes, keeping provenance acyclic.
+    features['r21_source_components'] = {name: {'root': str(evidence / name), 'receipt': copy.deepcopy(receipt)}
         for name, receipt in [('saltglass', salt), ('tether', tether), ('parity', parity)]}
     for route in routes:
         route['feature_tapes'] = features

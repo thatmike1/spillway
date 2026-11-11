@@ -66,6 +66,38 @@ class Preparation(unittest.TestCase):
         with self.assertRaises(pkg.Rejected):
             function(*args)
 
+    def test_route_annotations_keep_component_receipts_acyclic_and_unchanged(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            tape = root / 'tape.json'
+            tape.write_text(json.dumps({'events': [{'tick': 0}]}))
+            freeze = {'models': {'elastic_variants': [{'id': 'soft'}, {'id': 'firm'}, {'id': 'arc'}]}}
+            models = [*pkg.ORIGINAL_MODELS, 'soft', 'firm', 'arc']
+            salt = {'routes': [{'route': {'name': 'saltglass-clean'}}], 'checks': [{'ok': True}]}
+            tether = {'routes': [{'route': {'name': 'tether-clean'}}],
+                      'feature_tapes': {'tether': dict.fromkeys(models, str(tape))}}
+            parity = {'checks': [{'ok': True}], 'proof': {'AUDIT.json': 'a' * 64}}
+            receipts = dict(zip(('saltglass', 'tether', 'parity'), (salt, tether, parity)))
+            before = pkg.canonical(receipts)
+            with patch.object(pkg.r18, 'route_freeze', return_value=[{'route': {'name': 'breakwater-clean'}}]), \
+                 patch.object(pkg, 'component_source', side_effect=(salt, tether, parity)), \
+                 patch.object(pkg.r20, 'through_feature_freeze', return_value={'through': str(tape)}), \
+                 patch.object(pkg, 'validate_routes'):
+                routes, components = pkg.route_freeze(root, root / 'evidence', {}, freeze)
+            # the exact BUILD projection must serialize after every route is annotated.
+            build_routes = [{k: v for k, v in row.items() if k not in ('trace', 'tape')} for row in routes]
+            decoded = json.loads(pkg.canonical(build_routes))
+            self.assertEqual(len(decoded), 3)
+            for route in routes:
+                snapshots = route['feature_tapes']['r21_source_components']
+                self.assertEqual(pkg.canonical({name: row['receipt'] for name, row in snapshots.items()}), before)
+                for name, row in snapshots.items():
+                    self.assertIsNot(row['receipt'], components[name])
+            # changing an annotated route must never change its saved receipt snapshot.
+            routes[1]['route']['name'] = 'changed-after-snapshot'
+            self.assertEqual(decoded[1]['feature_tapes']['r21_source_components']['saltglass']['receipt']
+                             ['routes'][0]['route']['name'], 'saltglass-clean')
+
     def test_separate_r20_r19_modules_are_unchanged_by_r21(self):
         old20 = load('separate_r20', PROJECT / 'tools/package-r20.py')
         old19 = load('separate_r19', PROJECT / 'tools/package-r19.py')
@@ -279,13 +311,27 @@ class Preparation(unittest.TestCase):
             self.refused(pkg.generated_sidecars, root, {})
 
     def test_storage_plan_has_no_HOME_full_output_or_hidden_cleanup(self):
-        plan = pkg.storage_plan()
-        self.assertEqual(plan['output'], '/tmp/r21-package-helpers/export/spillway-r21')
+        # preparation tests must not depend on retained failed release output.
+        with tempfile.TemporaryDirectory() as tmp:
+            empty_output = Path(tmp) / 'export'
+            with patch.object(pkg, 'EXPORT_OUTPUT', empty_output):
+                plan = pkg.storage_plan(empty_output)
+            self.assertEqual(plan['output'], str(empty_output))
+        self.assertEqual(str(pkg.EXPORT_OUTPUT), '/tmp/r21-package-helpers/export/spillway-r21')
         self.assertEqual(plan['home_floor_bytes'], 15_000_000_000)
         self.assertFalse(plan['automatic_cleanup'])
         self.assertLessEqual(plan['prepare_limit_bytes'], 30*2**20)
         self.assertLessEqual(plan['durable_preparation_limit_bytes'], 5*2**20)
         self.refused(pkg.storage_plan, pkg.OUTER/'delivery/spillway-r21')
+
+    def test_storage_plan_refuses_nonempty_output_without_removing_it(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            retained = root / 'retained.json'
+            retained.write_bytes(b'failed attempt evidence')
+            with patch.object(pkg, 'EXPORT_OUTPUT', root):
+                self.refused(pkg.storage_plan, root)
+            self.assertEqual(retained.read_bytes(), b'failed attempt evidence')
 
     def test_prepare_has_no_engine_execution_or_source_mutation(self):
         # all subprocesses in preparation must be Git, never editor/native/export.
@@ -295,7 +341,12 @@ class Preparation(unittest.TestCase):
             self.assertEqual(str(args[0]), 'git')
             calls.append(args)
             return original(args, *a, **kw)
-        with patch.object(subprocess, 'Popen', side_effect=git_only):
+        original_plan = pkg.storage_plan
+        with tempfile.TemporaryDirectory() as tmp, \
+             patch.object(subprocess, 'Popen', side_effect=git_only), \
+             patch.object(pkg, 'tree_bytes', return_value=0), \
+             patch.object(pkg, 'EXPORT_OUTPUT', Path(tmp) / 'export'), \
+             patch.object(pkg, 'storage_plan', side_effect=lambda: original_plan(Path(tmp) / 'export')):
             result = pkg.prepare()
         self.assertTrue(calls)
         self.assertTrue(result['prepared'])
