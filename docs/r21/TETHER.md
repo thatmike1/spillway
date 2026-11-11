@@ -1,6 +1,8 @@
 # R21 Tether Yard
 
-The new runner preserves the complete R20 Classic, Pendulum and Elastic force paths. Three single-axis Elastic variants and an independently selectable acquisition assist sit beside them. The actual configured R21 source host/UI now passes six clean model routes and exact sealed-input replays, 253 lifecycle/control/identity checks and a separate-process preference reload. Portable execution, native appearance/listening and human feel remain separate acceptance gates.
+The new runner preserves the complete R20 Classic, Pendulum and Elastic force paths. Three single-axis Elastic variants and an independently selectable acquisition assist sit beside them.
+
+The historical component packet pins player `67953a7e`: six clean configured-host model routes and exact sealed-input replays, 253 lifecycle/control/identity checks, separate-process preference reload and 373 dual-reader files. A later release-preview repair changed the player to `39e189c6`; its fresh evidence covers 78 component checks, six native/headless route pairs totaling 8,937 rows and 54 pause presentation checks. The historical packet does not certify the later player's full lifecycle/reload coverage. Final source and packed gates must earn that binding separately. Listening, physical latency, native Windows play and human feel remain unverified.
 
 Research was published before implementation: outer `look/GRAPPLE-RESEARCH.md`, SHA256 `43c7ac2032ac9462b6aeab4e08a6d6b39754bcab4bbff018b23e9274d953b1bc`. The exact frozen replay baseline is `e6baa995da84d380abc8b8d6a3769b33e771945e`. Original R20 project files remain unchanged by this component.
 
