@@ -51,6 +51,50 @@ def edit_header(data, edit):
     return bytes(output)
 
 
+def duplicate_record_json(data, section):
+    # rebuild every digest/count so only the shadowed JSON key can cause refusal.
+    length = struct.unpack_from('<I', data, 12)[0]
+    header = data[16:16+length]
+    touched = False
+    if section == 'header':
+        header = b'{"metadata":{"unreviewed":true},'+header[1:]
+        touched = True
+    out = bytearray(data[:12]+struct.pack('<I',len(header))+header)
+    chain = hashlib.sha256(out).digest()
+    out.extend(chain)
+    at = 16+length+32
+    while at < len(data):
+        head = list(struct.unpack_from('<4sBBHIIIII',data,at))
+        stored = data[at+60:at+60+head[6]]
+        raw = zlib.decompress(stored) if head[2] == 1 else stored
+        if section == 'events' and head[1] == K.A.CHUNK_TICKS and not touched:
+            count = struct.unpack_from('<I',raw)[0]
+            offset = 4+count*sum(size for _,_,size in K.A.TICK_LAYOUT)
+            inputs = struct.unpack_from('<I',raw,offset)[0]
+            offset += 4+inputs*K.A.INPUT_ROW
+            events = raw[offset+4:]
+            first = events.find(b'{')
+            if first >= 0:
+                events = events[:first+1]+b'"k":"unreviewed",'+events[first+1:]
+                raw = raw[:offset]+struct.pack('<I',len(events))+events
+                touched = True
+        if head[1] == K.A.CHUNK_SEAL:
+            seal = json.loads(raw)
+            seal['counts']['bytes'] = len(out)
+            raw = json.dumps(seal,separators=(',',':')).encode()
+            if section == 'seal':
+                raw = b'{"outcome":{"unreviewed":true},'+raw[1:]
+                touched = True
+        stored = zlib.compress(raw)
+        head[2],head[5],head[6] = 1,len(raw),len(stored)
+        packed = struct.pack('<4sBBHIIIII',*head)
+        chain = hashlib.sha256(chain+packed+stored).digest()
+        out.extend(packed+chain+stored)
+        at += 60+struct.unpack_from('<I',data,at+16)[0]
+    assert touched
+    return bytes(out)
+
+
 class Preparation(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -333,6 +377,19 @@ class Preparation(unittest.TestCase):
         files = {name:K.sha(code)}
         inventory = {name:{'sha256':K.sha(code),'mode':'100644'}}
         self.assertEqual(DRIVER.imported_source(root,cache,files,inventory),{})
+        cache_data = cache/'imported/texture.ctex'
+        cache_data.parent.mkdir()
+        cache_data.write_bytes(b'explicit synthetic import data')
+        self.assertEqual(DRIVER.cache_state(cache)[str(cache_data.relative_to(cache))]['sha256'],K.sha(cache_data))
+        for suffix in ('.gd','.gdshader','.py','.GD'):
+            injected = cache/('unreviewed'+suffix)
+            injected.write_text('extends Node\n')
+            self.refuses(lambda:DRIVER.imported_source(root,cache,files,inventory))
+            injected.unlink()
+        cache_link = cache/'unreviewed-link'
+        cache_link.symlink_to(code)
+        self.refuses(lambda:DRIVER.imported_source(root,cache,files,inventory))
+        cache_link.unlink()
         uid = root/(name+'.uid')
         uid.write_text('uid://abcdef123\n')
         self.assertEqual(DRIVER.imported_source(root,cache,files,inventory),{name+'.uid':K.sha(uid)})
@@ -358,6 +415,45 @@ class Preparation(unittest.TestCase):
         self.assertGreaterEqual(len(result['checks']),60)
         self.assertTrue(all(c['refused'] for c in result['checks']))
         self.mutations.extend('future negative driver '+c['name'] for c in result['checks'])
+
+    def test_19_complete_shared_delivery_freeze_schema(self):
+        delivery_tests = K.module('r21_shared_freeze_fixture', K.PROJECT/'tests/test_package_r21.py')
+        _,_,freeze,_ = delivery_tests.fixture()
+        freeze['runtime'].update(main_scene=K.SCENE, main_script=K.SCRIPT)
+        freeze['delivery_components'] = {name:{'tests/fixture_'+name+'.py':'1'*64}
+                                         for name in ('saltglass','tether','parity')}
+        self.assertIs(K.freeze_schema(freeze,freeze['source_commit']),freeze)
+        self.assertIs(K.D.validate_freeze(freeze,freeze['source_commit']),freeze)
+        for edit in (lambda f:f.pop('delivery_components'),
+                     lambda f:f['delivery_components'].update(unknown={}),
+                     lambda f:f['delivery_components'].__setitem__('saltglass',{}),
+                     lambda f:f['delivery_components'].__setitem__('tether',{'../escape.py':'1'*64}),
+                     lambda f:f['delivery_components'].__setitem__('parity',{'tests/fixture.py':'bad'})):
+            bad = copy.deepcopy(freeze)
+            edit(bad)
+            self.refuses(lambda:K.freeze_schema(bad,bad['source_commit']))
+
+    def test_20_hash_valid_duplicate_recording_JSON_refused_everywhere(self):
+        # the frozen reader accepts each hash-valid witness; only R21 adds duplicate-key refusal.
+        path = self.scratch/'duplicate.r16run'
+        for section in ('header','events','seal'):
+            path.write_bytes(duplicate_record_json(self.finish.path.read_bytes(),section))
+            self.assertTrue(K.K.A.read(path).ok,section)
+            parsed = K.A.read(path)
+            self.assertFalse(parsed.ok,section)
+            self.assertTrue(any('duplicate recording JSON key' in error for error in parsed.errors),section)
+            self.refuses(lambda:K.record_view(K.K.A.read(path),self.contract,'old'))
+        path.unlink()
+
+    def test_21_retained_cache_receipts_refuse_code_paths_and_invalid_inventory(self):
+        valid = {'imported/texture.ctex':{'sha256':'1'*64,'bytes':10,'mode':0o644}}
+        self.assertIs(K.cache_inventory_guard(valid),valid)
+        for name in ('unreviewed.gd','nested/a.gdshader','unknown.py','nested/../a.ctex','/absolute.ctex','a\\b.ctex'):
+            self.refuses(lambda name=name:K.cache_inventory_guard({name:next(iter(valid.values()))}))
+        for field, value in (('sha256','bad'),('bytes',True),('bytes',-1),('mode',0o100644)):
+            bad = copy.deepcopy(valid)
+            bad['imported/texture.ctex'][field] = value
+            self.refuses(lambda:K.cache_inventory_guard(bad))
 
 
 def original_56():

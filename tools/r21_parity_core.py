@@ -24,13 +24,14 @@ PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT / 'tools'))
 import r20_candidate_core as R20
 K = R20
-B, C, A = K.B, K.C, K.A
+B, C = K.B, K.C
 module, need, keys, sha, load, canonical = K.module, K.need, K.keys, K.sha, K.load, K.canonical
 Refused = K.Refused
 META_KEYS, IDENTITY_KEYS = K.META_KEYS, K.IDENTITY_KEYS
 lab_guard = K.lab_guard
 O = module('r21_frozen_observations', PROJECT / 'tests/r20_candidate_observations.py')
 D = module('r21_delivery_contract', PROJECT / 'tools/package-r21.py')
+A = module('r21_strict_recording_reader', PROJECT / 'tools/analyze-r16-runs.py')
 G = module('r21_frozen_guard', PROJECT / 'tools/check-r20-candidate-parity.py')
 T = module('r21_frozen_tape', PROJECT / 'tools/momentum-tape.py')
 BASE = 'e6baa995da84d380abc8b8d6a3769b33e771945e'
@@ -52,6 +53,51 @@ PREP_CAP = 60 * 2**20
 OWN = ('tools/check-r21-parity.py', 'tools/r21_parity_core.py',
        'tests/r21_parity.gd', 'tests/r21_parity_audit.py',
        'tests/test_r21_parity.py', 'docs/r21/PARITY.md')
+
+
+def unique_recording_object(pairs):
+    result = {}
+    for name, value in pairs:
+        if name in result:
+            raise ValueError('duplicate recording JSON key: '+name)
+        result[name] = value
+    return result
+
+
+# extend a private reader instance only; the frozen reader file and other gates stay exact.
+A.json = types.SimpleNamespace(loads=lambda data, **kwargs: json.loads(
+    data, object_pairs_hook=unique_recording_object, **kwargs))
+
+
+def freeze_schema(freeze, commit):
+    keys(freeze, {'schema','runtime_frozen','source_commit','identity_sha256','intentional_changes',
+                 'required_maps','experimental_maps','reached_items','runtime','map_versions','models',
+                 'delivery_components'}, 'R21 freeze')
+    D.validate_freeze(freeze, commit)
+    declared = freeze['delivery_components']
+    keys(declared, {'saltglass','tether','parity'}, 'delivery component bindings')
+    for name, pins in declared.items():
+        need(type(pins) is dict and bool(pins), 'empty delivery component: '+name)
+        for path, digest in pins.items():
+            need(type(path) is str and path and not Path(path).is_absolute() and '\\' not in path
+                 and all(part not in ('', '.', '..') for part in path.split('/'))
+                 and D.hex_value(digest, 64), 'invalid delivery component pin: '+name)
+    return freeze
+
+
+def cache_inventory_guard(value):
+    need(type(value) is dict, 'private cache inventory missing')
+    for name, entry in value.items():
+        path = Path(name)
+        need(type(name) is str and name and not path.is_absolute()
+             and all(p not in ('', '.', '..') for p in name.split('/'))
+             and '\\' not in name and path.suffix.lower() not in ('.gd','.gdshader','.py'),
+             'unexpected source or unsafe path in private import cache')
+        keys(entry, {'sha256','bytes','mode'}, 'private cache file')
+        need(D.hex_value(entry['sha256'], 64) and type(entry['bytes']) is int and entry['bytes'] >= 0
+             and type(entry['mode']) is int and 0 <= entry['mode'] <= 0o777,
+             'invalid private cache file receipt')
+    return value
 
 
 def differences(a, b, path='$'):
@@ -235,9 +281,7 @@ def original_identity_guard(identity):
 
 
 def validate_contract(freeze, contract, commit, identity, files, freeze_sha):
-    keys(freeze, {'schema','runtime_frozen','source_commit','identity_sha256','intentional_changes',
-                 'required_maps','experimental_maps','reached_items','runtime','map_versions','models'}, 'R21 freeze')
-    D.validate_freeze(freeze, commit)
+    freeze_schema(freeze, commit)
     exact(freeze['reached_items'], [1,2,3,4], 'complete priority freeze required')
     exact(freeze['runtime']['main_scene'], SCENE, 'actual configured R21 scene')
     exact(freeze['runtime']['main_script'], SCRIPT, 'actual configured R21 script')
@@ -280,6 +324,7 @@ def validate_contract(freeze, contract, commit, identity, files, freeze_sha):
     for name in D.REQUIRED_MAPS:
         need(menu['catalog'][name]['script'] == identity['maps'][name]['level_script'], 'menu map source: '+name)
     # the existing preservation owner alone decides changed-old-path permissions and F2 pins.
+    D.component_bindings(freeze, files)
     preservation = D.preservation(commit, freeze['intentional_changes'])
     need(len(preservation['F2_pins']) == 6, 'all six F2 source pins')
     settings = D.committed_bytes(commit, 'project.godot').decode()

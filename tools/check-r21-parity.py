@@ -80,8 +80,20 @@ def preflight(args):
             'preservation':preservation, 'contract':contract}
 
 
+def cache_state(cache):
+    K.need(cache.is_dir() and not cache.is_symlink(), 'private cache root is not a real directory')
+    result = {}
+    for path in cache.rglob('*'):
+        K.need(not path.is_symlink() and (path.is_file() or path.is_dir()), 'private cache special entry')
+        if path.is_file():
+            result[path.relative_to(cache).as_posix()] = {
+                'sha256': K.sha(path), 'bytes': path.stat().st_size, 'mode': path.stat().st_mode & 0o777}
+    return K.cache_inventory_guard(result)
+
+
 def source_state(root, cache):
     K.need((root/'.godot').is_symlink() and (root/'.godot').resolve() == cache.resolve(), 'private import cache binding')
+    cache_state(cache)
     result = {}
     for path in root.rglob('*'):
         if path == root/'.godot':
@@ -183,6 +195,7 @@ def execute(args, inputs):
             (source/'.godot').symlink_to(cache)
             files = {n:v['sha256'] for n,v in inputs['source']['files'].items()}
             report['source_before_import'] = source_state(source, cache)
+            report['cache_before_import'] = cache_state(cache)
             K.exact(report['source_before_import'], files, 'before import source inventory')
             env = K.B.OLD.environment(profile)
             env['MALLOC_ARENA_MAX'] = '1'
@@ -193,6 +206,7 @@ def execute(args, inputs):
             generated = imported_source(source, cache, files, inputs['source']['files'])
             report['generated_import_metadata'] = generated
             report['source_after_import'] = source_state(source, cache)
+            report['cache_after_import'] = cache_state(cache)
             for name in generated:
                 target = out/'generated-import-metadata'/name
                 target.parent.mkdir(parents=True, exist_ok=True)
@@ -205,8 +219,11 @@ def execute(args, inputs):
                 result = {'route':route, 'runs':{}}
                 for variant in K.VARIANTS:
                     K.exact(imported_source(source, cache, files, inputs['source']['files']), generated, 'before play frozen source/import inventory')
+                    cache_before = cache_state(cache)
                     K.exact(K.fixture_binding(route), inputs['contract']['fixtures'][route['name']], 'actual original fixture before play')
                     run = run_route(route, variant, source, directory/variant, profile, out, directory/'expanded.json')
+                    run['cache_before'] = cache_before
+                    run['cache_after'] = cache_state(cache)
                     run['helpers'] = K.helpers()
                     K.exact(run['helpers'], inputs['helpers'], 'actual capture helper inventory')
                     K.summary_guard(run['summary'], route, variant, plan, inputs['contract'])
@@ -221,7 +238,8 @@ def execute(args, inputs):
             K.exact({r['name']:K.fixture_binding(r) for r in K.routes()}, inputs['contract']['fixtures'], 'post-matrix fixture bindings')
             K.exact(K.baseline_guard(), inputs['baseline'], 'post-matrix baseline')
             report['source_postflight'] = {'ok':True, 'files':len(files),
-                                           'inventory':source_state(source, cache), 'helpers':K.helpers()}
+                                           'inventory':source_state(source, cache), 'cache':cache_state(cache),
+                                           'helpers':K.helpers()}
             report['capture_complete'] = True
         except BaseException as exc:
             report['error'] = repr(exc)

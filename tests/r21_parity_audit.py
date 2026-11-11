@@ -35,6 +35,9 @@ def raw_guard(folder, inputs):
                                'variants':list(K.VARIANTS)} for r in K.routes()], '48 fresh ordered plays')
     files = {n:v['sha256'] for n,v in inputs['source']['files'].items()}
     K.exact(report['source_before_import'], files, 'complete pre-import inventory')
+    K.exact(K.cache_inventory_guard(report['cache_before_import']), {}, 'empty pristine import cache')
+    K.cache_inventory_guard(report['cache_after_import'])
+    K.cache_inventory_guard(report['source_postflight']['cache'])
     post_import = {**files, **report['generated_import_metadata']}
     K.exact(report['source_after_import'], post_import, 'complete post-import inventory')
     K.exact(report['source_postflight']['inventory'], post_import, 'complete post-matrix inventory')
@@ -49,15 +52,21 @@ def raw_guard(folder, inputs):
     transport = K.load(folder/'TRANSPORT.json')
     K.need(transport['report_sha256'] == K.sha(folder/'REPORT.json'), 'raw report binding')
     expected = []
+    previous_cache = report['cache_after_import']
     for route in K.routes():
         result = K.load(folder/route['name']/'result.json')
         K.exact(list(result['runs']), list(K.VARIANTS), 'ordered complete play variants')
         for variant in K.VARIANTS:
+            K.cache_inventory_guard(result['runs'][variant]['cache_before'])
+            K.cache_inventory_guard(result['runs'][variant]['cache_after'])
+            K.exact(result['runs'][variant]['cache_before'], previous_cache, 'cache changed between engine stages')
+            previous_cache = result['runs'][variant]['cache_after']
             receipts = result['runs'][variant]['trace_compression']['receipts']
             K.keys(receipts, {'trace.jsonl','ghost.jsonl','observations.jsonl'}, 'all raw trace streams')
             for name in ('trace.jsonl','ghost.jsonl','observations.jsonl'):
                 expected.append({'path':route['name']+'/'+variant+'/evaluator/'+name+'.gz', **receipts[name]})
     K.exact(transport['receipts'], expected, 'complete ordered raw transport receipts')
+    K.exact(report['source_postflight']['cache'], previous_cache, 'complete final import cache inventory')
     K.need(len(expected) == 144, 'full 48 plays/144 streams required')
     for receipt in expected:
         K.need(receipt['lossless_verified'] is True, 'unverified stream compression')
@@ -210,6 +219,9 @@ def negative_seed(directory, output, contract, side):
                           header_editor(data,lambda h,g=group,n=name:h[g].__setitem__(n,{'unreviewed':n})))
         for group in ('metadata','identity'):
             challenge('unknown '+group, header_editor(data,lambda h,g=group:h[g].update(unreviewed=True)))
+        duplicate_editor = K.module('r21_shadowed_JSON_support', K.PROJECT/'tests/test_r21_parity.py').duplicate_record_json
+        for section in ('header','events','seal'):
+            challenge('hash-valid duplicate JSON '+section, duplicate_editor(data,section))
         source = directory/'evaluator/observations.jsonl.gz'
         def without_row(position):
             previous = None

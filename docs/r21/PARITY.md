@@ -83,6 +83,10 @@ feature branch with clean committed project source. The same runtime freeze as
 items. Runtime scene/script must be the actual R21 paths above. The freeze itself
 needs an external `--freeze-sha256`; its full identity canonical hash binds the
 separately supplied `--identity` JSON.
+`delivery_components` is required in that same freeze. Each nonempty component
+path/hash dictionary is checked, and the delivery owner's installed callbacks and
+exact committed fixture inputs are bound before capture. Unknown freeze fields
+still refuse.
 
 `--contract` plus external `--contract-sha256` supplies a strict JSON object with
 exactly these fields:
@@ -139,6 +143,11 @@ committed archive, uses private import/profile paths, checks every source/helper
 before/after import and each play, retains generated metadata, and applies the
 unchanged R20 UID/.import policy. Unknown generated code, oversized/unpaired
 sidecars and source fallback refuse. No source is injected from a dirty checkout.
+The private import cache is checked separately before/after import and every
+play. Source files (`.gd`, `.gdshader`, `.py`), symlinks and special entries refuse.
+Cache path, size, SHA256 and mode inventories are retained for every stage; the
+independent audit checks their schema and continuity. Runtime cache data may
+change during a play, so it is inventoried rather than assumed immutable.
 
 Exactly sixteen original tapes run in old/new/toggle order, totaling **48 fresh
 plays**. Expanded bytes are regenerated with the frozen expander and must match
@@ -158,6 +167,10 @@ rehashes all raw evidence, invokes both-reader/coverage/style/input/ghost/contro
 comparisons and unchanged original 56 negatives, and writes its separate result
 under `audit/AUDIT.json`. Interrupted/failing re-audit revokes prior success first.
 No fresh play is replaced by a retained observation or a report-only pass.
+An R21-private instance of the unchanged recording reader adds duplicate-key
+refusal to header, event and seal JSON before canonicalization. Rebuilt-hash
+duplicates in all three sections are mandatory actual-data negative controls.
+Other gates keep their original reader instances and bytes.
 
 Preparation owns at most 60MiB temporary and 5MiB durable files and keeps HOME
 above 15,000,000,000 bytes. The read-only 115MB R20 baseline is separate.
