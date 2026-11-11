@@ -323,8 +323,13 @@ func _r21_tether_controls() -> void:
 			if assist and model not in ["classic", "pendulum"]:
 				check(label + ": three native ready-preview exact-id attachment agreements", _r21_readiness_agreements >= 3)
 			var ref: Dictionary = references[label]
+			# the JSON trace is the pinned diagnostic; parsed JSON numbers are not the recorded bits.
 			var reference: Variant = JSON.parse_string(FileAccess.get_file_as_string(str(ref.trace)))
-			check(label + ": every packed physical sample equals earned source", reference is Array and reference == _tether_trace)
+			check(label + ": pinned diagnostic JSON trace is bound and complete", FileAccess.get_sha256(str(ref.trace)) == str(ref.get("trace_sha256", ""))
+				and reference is Array and (reference as Array).size() == _tether_trace.size())
+			var source: Dictionary = r21_source_trace(ref)
+			var differs: String = r21_trace_mismatch(_tether_trace, source.rows) if source.ok else str(source.error)
+			check(label + ": every packed physical sample equals earned source", differs.is_empty(), differs)
 			check(label + ": raw tape SHA remains bound", FileAccess.get_sha256(tape) == str(ref.tape_sha256))
 			routes[label] = {"model": model, "assist": assist, "trace": _tether_trace.duplicate(true),
 				"tape_sha256": FileAccess.get_sha256(tape), "identity": game.motion_identity()}
@@ -334,18 +339,7 @@ func _r21_tether_controls() -> void:
 				var path: String = str(clean[-1].path)
 				routes[label]["recording"] = path
 				check(label + ": matching packed recording ghost loads", game.session.ghost.load_run(path, game.motion_identity()).ok)
-				var before: Dictionary = game.motion_identity()
-				game.change_setting("tether_auto_reel", true)
-				await _physics(1)
-				check(label + ": wrong reel ghost refuses", not game.session.ghost.load_run(path, game.motion_identity()).ok and before != game.motion_identity())
-				game.change_setting("tether_auto_reel", false)
-				await _physics(1)
-				if model not in ["classic", "pendulum"]:
-					game.change_setting("tether_anchor_assist", not assist)
-					await _physics(1)
-					check(label + ": wrong assist ghost refuses", not game.session.ghost.load_run(path, game.motion_identity()).ok)
-					game.change_setting("tether_anchor_assist", assist)
-					await _physics(1)
+				await _r21_wrong_loadout_ghosts(label, path, model, assist)
 	late.queue_free()
 	observer.queue_free()
 	await _tap(KEY_R)
@@ -375,6 +369,146 @@ func _r21_tether_controls() -> void:
 	_r21_settings_profile()
 	report["r21_tether_controls"] = {"ok": checks.slice(begin).all(func(c: Dictionary) -> bool: return c.ok),
 		"checks": checks.slice(begin), "routes": routes, "scope": "native packed production routes/UI plus labelled acquisition fixtures"}
+
+## each loadout change opens an attempt; the next boundary waits until that attempt holds a sample.
+func _r21_wrong_loadout_ghosts(label: String, path: String, model: String, assist: bool) -> void:
+	var before: Dictionary = game.motion_identity()
+	game.change_setting("tether_auto_reel", true)
+	await game.get_tree().physics_frame
+	check(label + ": wrong reel ghost refuses", not game.session.ghost.load_run(path, game.motion_identity()).ok and before != game.motion_identity())
+	await _r21_recorded(label + " wrong reel")
+	game.change_setting("tether_auto_reel", false)
+	await game.get_tree().physics_frame
+	await _r21_recorded(label + " restored reel")
+	if model not in ["classic", "pendulum"]:
+		game.change_setting("tether_anchor_assist", not assist)
+		await game.get_tree().physics_frame
+		check(label + ": wrong assist ghost refuses", not game.session.ghost.load_run(path, game.motion_identity()).ok)
+		await _r21_recorded(label + " wrong assist")
+		game.change_setting("tether_anchor_assist", assist)
+		await game.get_tree().physics_frame
+		await _r21_recorded(label + " restored assist")
+
+## physics_frame is emitted before node callbacks, so one awaited frame can end before the session
+## (priority 999) samples a just-opened attempt. wait, bounded, for this attempt's own recorder sample.
+func _r21_recorded(label: String, limit: int = 8) -> bool:
+	var session: Node = game.session
+	var recorder: RefCounted = session.recorder
+	var run_id := str(recorder.run_id)
+	for frame: int in limit + 1:
+		if not session.attempt_live or not recorder.is_open() or str(recorder.run_id) != run_id or run_id.is_empty():
+			break
+		if int(recorder.counts().get("ticks", 0)) >= 1 and int(session.tick) >= 1:
+			return check(label + ": open attempt recorded a sample before the next boundary", true, {"run_id": run_id, "frames": frame})
+		if frame < limit:
+			await game.get_tree().physics_frame
+	return check(label + ": open attempt recorded a sample before the next boundary", false,
+		{"run_id": run_id, "now": str(recorder.run_id), "open": recorder.is_open(), "live": session.attempt_live, "ticks": recorder.counts().get("ticks", 0)})
+
+const R21_WARMUP_TICKS := 33
+const R21_TRACE_FIELDS := ["tick", "p", "v", "yaw", "pitch", "grounded", "checkpoint", "elapsed", "respawns"]
+
+## the bound source recording's observed rows, rebuilt from its strictly read binary columns in the
+## shape _tether_late() records. returns {ok, error, rows}.
+static func r21_source_trace(ref: Dictionary) -> Dictionary:
+	var out := {"ok": false, "error": "", "rows": []}
+	for key: String in ["recording", "recording_sha256", "tape", "tape_sha256", "trace", "trace_sha256", "identity"]:
+		if not ref.has(key):
+			out.error = "source reference has no " + key
+			return out
+	var ticks: Variant = ref.get("ticks")
+	if typeof(ticks) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(ticks)) or float(ticks) != floorf(float(ticks)) or float(ticks) < 1 or float(ticks) > 80000:
+		out.error = "source reference tick count is not a positive whole number"
+		return out
+	for key: String in ["recording", "tape", "trace"]:
+		if FileAccess.get_sha256(str(ref[key])) != str(ref[key + "_sha256"]) or str(ref[key + "_sha256"]).length() != 64:
+			out.error = "source %s SHA-256 differs from its binding" % key
+			return out
+	var run: Dictionary = RUN_READER.read(str(ref.recording))
+	if not bool(run.ok) or str(run.status) != "complete" or not (run.errors as Array).is_empty():
+		out.error = "source recording is not a strict complete read: %s" % str(run.errors).left(200)
+		return out
+	var why := RUN_READER.identity_matches((run.header as Dictionary).get("identity"), ref.identity)
+	if not why.is_empty():
+		out.error = "source recording " + why
+		return out
+	var c: Dictionary = run.columns
+	var n := (c.tick as PackedInt32Array).size()
+	if n != R21_WARMUP_TICKS + int(ticks):
+		out.error = "source recording holds %d ticks, not %d warmup plus %d observed" % [n, R21_WARMUP_TICKS, int(ticks)]
+		return out
+	for name: String in ["flags", "elapsed", "checkpoint", "respawns", "p", "v", "yaw", "pitch"]:
+		if c[name].size() != n:
+			out.error = "source column %s holds %d rows, not %d" % [name, c[name].size(), n]
+			return out
+	var rows: Array = []
+	for j: int in n:
+		if c.tick[j] != j:
+			out.error = "source tick %d is not contiguous at row %d" % [c.tick[j], j]
+			return out
+		if j < R21_WARMUP_TICKS:
+			continue
+		var p: Vector3 = c.p[j]
+		var v: Vector3 = c.v[j]
+		rows.append({"tick": int(c.tick[j]) - R21_WARMUP_TICKS, "p": [p.x, p.y, p.z], "v": [v.x, v.y, v.z],
+			"yaw": float(c.yaw[j]), "pitch": float(c.pitch[j]), "grounded": (int(c.flags[j]) & 8) != 0,
+			"checkpoint": int(c.checkpoint[j]), "elapsed": float(c.elapsed[j]), "respawns": int(c.respawns[j])})
+	out.rows = rows
+	out.ok = true
+	return out
+
+## "" when both traces hold the same rows, field set, types and float64 bytes (signed zero included).
+static func r21_trace_mismatch(native: Array, source: Array) -> String:
+	if native.size() != source.size():
+		return "packed trace holds %d rows, source %d" % [native.size(), source.size()]
+	for i: int in native.size():
+		if not native[i] is Dictionary or not source[i] is Dictionary:
+			return "row %d is not an object" % i
+		var why := _r21_row_mismatch(native[i], source[i])
+		if not why.is_empty():
+			return "row %d: %s" % [i, why]
+	return ""
+
+static func _r21_row_mismatch(a: Dictionary, b: Dictionary) -> String:
+	var wanted: Array = R21_TRACE_FIELDS.duplicate()
+	wanted.sort()
+	for row: Dictionary in [a, b]:
+		var keys: Array = row.keys()
+		if keys.any(func(k: Variant) -> bool: return typeof(k) != TYPE_STRING):
+			return "field names are not strings"
+		keys.sort()
+		if keys != wanted:
+			return "fields %s" % str(keys)
+	for key: String in ["tick", "checkpoint", "respawns"]:
+		if typeof(a[key]) != TYPE_INT or typeof(b[key]) != TYPE_INT or a[key] != b[key]:
+			return "%s %s (%s) != %s (%s)" % [key, str(a[key]), type_string(typeof(a[key])), str(b[key]), type_string(typeof(b[key]))]
+	if typeof(a.grounded) != TYPE_BOOL or typeof(b.grounded) != TYPE_BOOL or a.grounded != b.grounded:
+		return "grounded %s != %s" % [str(a.grounded), str(b.grounded)]
+	var bits := [_r21_float_bytes(a), _r21_float_bytes(b)]
+	if bits[0].is_empty() or bits[1].is_empty():
+		return "a float field is missing, not a float or not finite"
+	if bits[0] != bits[1]:
+		var x: PackedFloat64Array = bits[0].to_float64_array()
+		var y: PackedFloat64Array = bits[1].to_float64_array()
+		for k: int in x.size():
+			if PackedFloat64Array([x[k]]).to_byte_array() != PackedFloat64Array([y[k]]).to_byte_array():
+				return "float %d of p,v,yaw,pitch,elapsed: %s != %s (bytes %s != %s)" % [k, String.num(x[k], 17), String.num(y[k], 17),
+					PackedFloat64Array([x[k]]).to_byte_array().hex_encode(), PackedFloat64Array([y[k]]).to_byte_array().hex_encode()]
+	return ""
+
+static func _r21_float_bytes(row: Dictionary) -> PackedByteArray:
+	var values: Array = []
+	for key: String in ["p", "v"]:
+		if not row[key] is Array or (row[key] as Array).size() != 3:
+			return PackedByteArray()
+		values.append_array(row[key])
+	values.append_array([row.yaw, row.pitch, row.elapsed])
+	var out := PackedFloat64Array()
+	for value: Variant in values:
+		if typeof(value) != TYPE_FLOAT or not is_finite(value):
+			return PackedByteArray()
+		out.append(value)
+	return out.to_byte_array()
 
 func _r21_settings_profile() -> void:
 	var config := ConfigFile.new()
