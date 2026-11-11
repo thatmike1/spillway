@@ -188,6 +188,26 @@ func acquisition_checks() -> void:
 	button(true)
 	step()
 	check(player.r21_acquisition_snapshot().attached and player.r21_acquisition_snapshot().id == before.id, "fresh press attaches exact published preview id")
+	for node: Node3D in anchors:
+		if str(node.get_meta("r21_anchor_id", "")) == "offset":
+			node.position = player._eye() + Vector3(sin(deg_to_rad(26)), 0, -cos(deg_to_rad(26))) * 20
+	button(false)
+	step()
+	check(not player.r21_acquisition_snapshot().ready, "release immediately invalidates cached target outside retention")
+	clear()
+	var released := anchor("release-old", 0)
+	step()
+	button(true)
+	step()
+	released.position = player._eye() + Vector3(sin(deg_to_rad(26)), 0, -cos(deg_to_rad(26))) * 20
+	anchor("release-next", 5)
+	button(false)
+	step()
+	check(not player.r21_acquisition_snapshot().attached and player.r21_acquisition_snapshot().ready
+		and player.r21_acquisition_snapshot().id == "release-next", "release publishes a different eligible candidate immediately")
+	button(true)
+	step()
+	check(player.r21_acquisition_snapshot().attached and player.r21_acquisition_snapshot().id == "release-next", "fresh press after release attaches the newly published candidate")
 	clear()
 	var a := anchor("a", 5, 20)
 	anchor("b", 5.08, 19)

@@ -34,3 +34,36 @@ with tempfile.TemporaryDirectory(prefix='r21-tether-audit-control-',dir='/tmp') 
         else:
             raise AssertionError('invalid route accepted: '+key)
 print(json.dumps({'ok':True,'checks':passed}))
+# every model must have its own finder and a distinct, recording-derived open-loop replay.
+production=json.loads((run/'production-routes.json').read_text())
+audit.route_audit(run,production,production=True)
+for label,mapping in [('same execution',dict(production,classic_replay=production['classic'])),
+                      ('wrong model',dict(production,classic=production['elastic'],classic_replay=production['elastic_replay'],elastic=production['classic'],elastic_replay=production['classic_replay']))]:
+    try:
+        audit.route_audit(run,mapping,production=True)
+    except AssertionError:
+        passed.append('refused '+label)
+    else:
+        raise AssertionError('substituted model/replay accepted: '+label)
+original_read=audit.read
+for label in ['non-replay execution','wrong raw tape','wrong replay argument']:
+    def hostile_read(path):
+        value=original_read(path)
+        path=Path(path)
+        if label=='non-replay execution' and path==Path(production['classic_replay'])/'summary.json':
+            value['mode']='coordinate-aware input only'
+        elif label=='wrong raw tape' and path==run/'classic-production-recorded.tape.json':
+            value['events']=value['events'][:-1]
+        elif label=='wrong replay argument' and path==run/(Path(production['classic_replay']).name+'.receipt.json'):
+            value['argv']=[arg if not arg.startswith('--tape=') else '--tape='+str(run/'elastic-production-recorded.tape.json') for arg in value['argv']]
+        return value
+    audit.read=hostile_read
+    try:
+        audit.route_audit(run,production,production=True)
+    except AssertionError:
+        passed.append('refused '+label)
+    else:
+        raise AssertionError('bad replay accepted: '+label)
+    finally:
+        audit.read=original_read
+print(json.dumps({'ok':True,'all_checks':passed}))

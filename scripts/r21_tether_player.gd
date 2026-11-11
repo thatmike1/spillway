@@ -86,6 +86,9 @@ func _grapple_step(v: Vector3, grounded: bool, delta: float) -> Vector3:
 		_r21_attach_id = str(grapple_target.get("id", grapple_target.get("name", "")))
 	if r21_assist_active():
 		if grapple.is_empty():
+			if _r21_attached_before_step:
+				# release must not republish the candidate cached before attachment.
+				_update_r21_candidate()
 			# both the inherited world ring and passive HUD read this published candidate.
 			grapple_target = _r21_candidate.duplicate(true) if not _r21_candidate.is_empty() else {"state": "none"}
 	return change

@@ -73,9 +73,43 @@ def human_audit(run):
     return results
 
 
+def execution_receipt(run, folder, summary, model, replay):
+    receipt = read(run / (folder.name + '.receipt.json'))
+    assert receipt['ok'] is True and receipt['exit'] == 0 and not receipt['failure']
+    assert receipt['log_sha256'] == sha(run / (folder.name + '.log'))
+    assert receipt['engine_sha256'] == '8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e'
+    argv = receipt['argv']
+    assert argv.count('--script') == 1 and argv[argv.index('--script') + 1] == 'res://tests/r21_tether_route.gd'
+    assert '--model=' + model in argv and '--out=' + str(folder) in argv
+    if summary['scope'] == 'actual production host/UI':
+        assert receipt['scope'] == 'production snapshot' and '--production=1' in argv
+    assert summary['options']['model'] == model
+    assert summary['mode'] == ('open-loop saved input' if replay else 'coordinate-aware input only')
+    assert any(arg.startswith('--tape=') for arg in argv) == replay
+    return receipt
+
+
+def route_binding(record, summary, model):
+    assert record.header['identity'] == summary['identity']
+    identity = record.header['identity']
+    assert identity['runner'] == 'res://scripts/r21_tether_player.gd' and identity['map'] == 'tether-yard'
+    assert identity['preset'] == 'server128' and identity['physics_hz'] == summary['physics_hz'] == 128
+    assert identity['geometry'] == summary['geometry_hash'] == '93f8593e156dd29a1f907e7af219e74d3ff666fee82423bc722270274b43dba6'
+    mechanics = record.header['metadata']['physics']['mechanics']
+    law = [entry for entry in mechanics if entry.get('version') == 'r21-tether-elastic-1']
+    assert len(law) == 1 and law[0]['model'] == model and law[0]['automatic_reel'] is False
+    assert not summary['options'].get('auto', False) and not summary['options'].get('assist-off', False)
+    assert law[0]['acquisition']['law'] == ('r20-original-aim' if model in ('classic', 'pendulum') else 'r21-anchor-assist-1')
+    return identity
+
+
 def route_audit(run, routes, production=False):
     reader=load_reader()
     results=[]
+    selected = [Path(routes[model + suffix]).resolve() for model in MODELS for suffix in ('', '_replay')]
+    assert len(set(selected)) == 12, 'each model and replay requires a distinct execution'
+    sources = None
+    keys = set()
     for model in MODELS:
         folder=Path(routes[model]); replay=Path(routes[model+'_replay'])
         a=read(folder/'summary.json');b=read(replay/'summary.json')
@@ -91,8 +125,36 @@ def route_audit(run, routes, production=False):
             assert rec.ok,rec.errors
             return rec,wire
         ra,wa=recording(a);rb,wb=recording(b)
-        assert ra.columns==rb.columns,(model,'binary physics differs')
-        assert ra.inputs==rb.inputs,(model,'full ordered raw/action inputs differ')
+        assert Path(wa['path']).resolve().parent == (folder / 'recordings').resolve()
+        assert Path(wb['path']).resolve().parent == (replay / 'recordings').resolve()
+        assert Path(wa['path']).resolve() != Path(wb['path']).resolve()
+        identity = route_binding(ra, a, model)
+        assert route_binding(rb, b, model) == identity
+        assert identity['course_key'] not in keys, 'model identities must differ'
+        keys.add(identity['course_key'])
+        ea = execution_receipt(run, folder, a, model, False)
+        eb = execution_receipt(run, replay, b, model, True)
+        def executed_sources(receipt):
+            return {name: value for name, value in receipt['source_sha256'].items()
+                    if name.startswith(('scripts/', 'scenes/', 'assets/', 'data/')) or name in
+                    ('project.godot', 'tests/r21_tether_route.gd', 'tests/r21_tether_adapter.gd',
+                     'tests/r14_practice_driver.gd', 'tests/r19_tether_geometry.gd')}
+        pins = executed_sources(ea)
+        assert all(name in pins for name in ('scripts/r21_tether_player.gd', 'scripts/r21_tether_level.gd', 'tests/r21_tether_route.gd'))
+        assert pins == executed_sources(eb), 'finder and replay executed different runtime/driver sources'
+        assert sources is None or sources == pins, 'models executed different runtime/driver sources'
+        sources = pins
+        tape_args = [arg.split('=', 1)[1] for arg in eb['argv'] if arg.startswith('--tape=')]
+        assert len(tape_args) == 1 and b['options']['tape'] == tape_args[0]
+        tape = read(tape_args[0])
+        assert tape['version'] == 2 and tape['physics_hz'] == 128 and tape['duration_ticks'] == a['ticks'] == b['ticks']
+        warmup = int(a['options'].get('warmup', 33))
+        raw = [{key: column[i] for key, column in ra.inputs.items()} for i, kind in enumerate(ra.inputs['kind']) if kind in (1, 2, 3)]
+        assert tape['events'] == [{'tick': int(row['tick']) - warmup, 'raw': row} for row in raw]
+        for first, second, label in [(ra.columns, rb.columns, 'physics'), (ra.inputs, rb.inputs, 'ordered raw/action inputs')]:
+            assert first.keys() == second.keys(), (model, label, 'column membership')
+            for name in first:
+                assert first[name].typecode == second[name].typecode and first[name].tobytes() == second[name].tobytes(), (model, label, name)
         at,bt=trace(folder),trace(replay)
         assert len(at)==len(bt)
         for i,(x,y) in enumerate(zip(at,bt)):
