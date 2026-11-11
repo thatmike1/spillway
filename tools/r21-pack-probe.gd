@@ -1,6 +1,6 @@
 extends "r20-pack-probe.gd"
 ## r21 overrides only identity-bearing observers; all inherited physical/input audits run.
-## source and packed component fixtures remain explicit, individually closed seams.
+## final component observers compose the original controls without changing their assertions.
 
 func _check_identity() -> void:
 	var player: Node = game.get("player")
@@ -189,14 +189,338 @@ func _controls() -> void:
 	await _r21_tether_controls()
 
 func _r21_saltglass_controls() -> void:
-	# replace this seam only after reading the final actual surf contract and fixtures.
-	check("R21 revised Saltglass final packed exit/outside/no-skip contract is not bound", false,
-		{"scene": game.scene_file_path, "host": _script_path(game), "map": game.map_id})
+	var begin := checks.size()
+	var home: String = game.map_id
+	if home != "saltglass":
+		await _pause_menu_click("Map_saltglass", "R21 Saltglass geometry")
+	await _physics(2)
+	check("R21 Saltglass packed production module and geometry", _script_path(game.level) == "res://scripts/r21_surf_level.gd"
+		and game.level.geometry_hash() == spec.r21.map_versions.saltglass.geometry
+		and game.runner_path() == "res://scripts/r15_source_player.gd")
+	var fins := 0
+	var shapes := 0
+	for piece: Dictionary in game.level.manifest:
+		if str(piece.name).begins_with("Surf_"):
+			fins += 1
+	for node: Node in game.level.find_children("*", "CollisionShape3D", true, false):
+		if not node.disabled and node.shape != null:
+			shapes += 1
+	check("R21 Saltglass actual sixteen fin colliders and authored geometry", fins == 16 and shapes >= game.level.manifest.size(), [fins, shapes])
+	if home != "saltglass":
+		await _pause_menu_click("Map_" + home, "restore after R21 Saltglass geometry")
+	report["r21_saltglass_controls"] = {"ok": checks.slice(begin).all(func(c: Dictionary) -> bool: return c.ok),
+		"checks": checks.slice(begin), "scope": "packed geometry; semantic exit/outside/bail acceptance is bound through exact source replay"}
+
+class R21PreviewObserver:
+	extends Node
+	var probe: Variant
+	func _physics_process(_delta: float) -> void:
+		probe._r21_observe_preview()
+
+var _r21_observing := false
+var _r21_preview: Dictionary = {}
+var _r21_preview_count := 0
+var _r21_readiness_agreements := 0
+var _r21_preview_pure := true
+var _r21_hud_agrees := true
+var _r21_ids_agree := true
+
+func _r21_observe_preview() -> void:
+	if not _r21_observing or not _tether_active or not _tether_armed:
+		return
+	var next: Dictionary = game.player.r21_acquisition_snapshot()
+	if not _r21_preview.is_empty() and next.attached and not _r21_preview.attached and next.assist:
+		_r21_ids_agree = _r21_ids_agree and _r21_preview.ready and next.id == _r21_preview.id
+		_r21_readiness_agreements += 1
+	var before := var_to_str([game.player.get_motion_state(), game.player.r21_acquisition_snapshot()])
+	game.hud._refresh_anchor_readout()
+	_r21_preview_pure = _r21_preview_pure and before == var_to_str([game.player.get_motion_state(), game.player.r21_acquisition_snapshot()])
+	var shown: bool = not game.finished and str(next.state) == "ok" and (next.attached or next.ready)
+	_r21_hud_agrees = _r21_hud_agrees and (game.hud.displayed_anchor == next if shown else game.hud.displayed_anchor.is_empty())
+	_r21_preview = next.duplicate(true)
+	_r21_preview_count += 1
+
+func _r21_preference(button: Button, label: String) -> void:
+	if not button.disabled:
+		await _reveal(button)
+		check(label + ": actual native preference click", await _click(button))
+		await _tap(KEY_ESCAPE)
+		await _physics(1)
+		check(label + ": no held attachment after preference boundary", game.player.grapple.is_empty())
+		await _tap(KEY_ESCAPE)
 
 func _r21_tether_controls() -> void:
-	# new variant/assist APIs do not exist in the currently frozen integration host.
-	check("R21 final six-model/assist/preview/occlusion/clearance contract is not bound", false,
-		{"model": game.settings.get("tether_model"), "host": _script_path(game)})
+	var begin := checks.size()
+	var fixtures: Dictionary = spec.get("feature_tapes", {})
+	var on: Dictionary = fixtures.get("tether", {})
+	var off: Dictionary = fixtures.get("r21_tether_off", {})
+	var references: Dictionary = fixtures.get("r21_tether_reference", {})
+	var models: Array = ["classic", "pendulum", "elastic", "elastic-soft", "elastic-firm", "elastic-arc"]
+	if not check("R21 exact six-model and four assist-off reader-derived tapes", on.keys() == models
+		and off.keys() == models.slice(2) and references.size() == 10, [on.keys(), off.keys()]):
+		return
+	var home: String = game.map_id
+	var preset: String = game.preset_id
+	var previous_model: String = game.settings.tether_model
+	var previous_auto: bool = game.settings.tether_auto_reel
+	var previous_assist: bool = game.settings.tether_anchor_assist
+	if home != "tether-yard":
+		await _pause_menu_click("Map_tether-yard", "R21 Tether production routes")
+	await _restore_preset("server128")
+	check("R21 packed actual host/HUD/runner interfaces", _script_path(game) == "res://scripts/r21_main.gd"
+		and _script_path(game.hud) == "res://scripts/r21_hud.gd" and game.runner_path() == "res://scripts/r21_tether_player.gd")
+	check("R21 six selectable packed models in exact order", game.hud.tether_models.keys() == models)
+	var late := Late.new()
+	late.run = self
+	late.process_physics_priority = 1001
+	late.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(late)
+	var observer := R21PreviewObserver.new()
+	observer.probe = self
+	observer.process_physics_priority = 1000
+	observer.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(observer)
+	var routes: Dictionary = {}
+	for model: String in models:
+		for assist: bool in ([true] if model in ["classic", "pendulum"] else [true, false]):
+			var label := model if assist else model + "-assist-off"
+			await _tap(KEY_ESCAPE)
+			await _r21_preference(game.hud.tether_models[model], label + " model")
+			await _r21_preference(game.hud.reel_manual, label + " manual reel")
+			if bool(game.settings.tether_anchor_assist) != assist and model not in ["classic", "pendulum"]:
+				await _r21_preference(game.hud.anchor_assist_switch, label + " independent assist")
+			check(label + ": exact model/assist/reel selected in production", game.player.model == model
+				and not game.player.auto_reel and game.player.r21_assist_active() == (assist and model not in ["classic", "pendulum"]))
+			check(label + ": Classic/Pendulum disable assist preference", game.hud.anchor_assist_switch.disabled == (model in ["classic", "pendulum"]))
+			await captured("r21-" + label + "-preferences", {"paused": true})
+			await _tap(KEY_ESCAPE)
+			_tether_driver = RAW_DRIVER.new()
+			var tape: String = str(on[model] if assist else off[model])
+			if not check(label + ": load exact source reader-derived tape", _tether_driver.configure(tape, false)):
+				break
+			_tether_tick = 0
+			_tether_armed = false
+			_tether_trace = []
+			_tether_attaches = {}
+			_tether_cues = []
+			_r21_preview = {}
+			_r21_preview_count = 0
+			_r21_readiness_agreements = 0
+			_r21_preview_pure = true
+			_r21_hud_agrees = true
+			_r21_ids_agree = true
+			_tether_motor_start = game.player.tape_step_count
+			_tether_active = true
+			_r21_observing = true
+			await _tap(KEY_R)
+			while _tether_active:
+				await tether_step
+			_r21_observing = false
+			_tether_driver.release()
+			check(label + ": earned packed clean finish through three anchors", game.finished and game.finish_kind == "clean"
+				and game.respawn_count == 0 and _tether_attaches.size() == 3 and _r21_preview_count > 0)
+			check(label + ": every physics preview is pure and HUD agrees", _r21_preview_pure and _r21_hud_agrees and _r21_ids_agree)
+			if assist and model not in ["classic", "pendulum"]:
+				check(label + ": three native ready-preview exact-id attachment agreements", _r21_readiness_agreements >= 3)
+			var ref: Dictionary = references[label]
+			var reference: Variant = JSON.parse_string(FileAccess.get_file_as_string(str(ref.trace)))
+			check(label + ": every packed physical sample equals earned source", reference is Array and reference == _tether_trace)
+			check(label + ": raw tape SHA remains bound", FileAccess.get_sha256(tape) == str(ref.tape_sha256))
+			routes[label] = {"model": model, "assist": assist, "trace": _tether_trace.duplicate(true),
+				"tape_sha256": FileAccess.get_sha256(tape), "identity": game.motion_identity()}
+			var clean: Array = game.session.sealed.filter(func(r: Dictionary) -> bool: return str(r.get("kind", "")) == "finish")
+			check(label + ": earned packed recording is available for ghost boundary", not clean.is_empty())
+			if not clean.is_empty():
+				var path: String = str(clean[-1].path)
+				routes[label]["recording"] = path
+				check(label + ": matching packed recording ghost loads", game.session.ghost.load_run(path, game.motion_identity()).ok)
+				var before := game.motion_identity()
+				game.change_setting("tether_auto_reel", true)
+				await _physics(1)
+				check(label + ": wrong reel ghost refuses", not game.session.ghost.load_run(path, game.motion_identity()).ok and before != game.motion_identity())
+				game.change_setting("tether_auto_reel", false)
+				await _physics(1)
+				if model not in ["classic", "pendulum"]:
+					game.change_setting("tether_anchor_assist", not assist)
+					await _physics(1)
+					check(label + ": wrong assist ghost refuses", not game.session.ghost.load_run(path, game.motion_identity()).ok)
+					game.change_setting("tether_anchor_assist", assist)
+					await _physics(1)
+	late.queue_free()
+	observer.queue_free()
+	await _tap(KEY_R)
+	await _r21_acquisition_controls()
+	await _r21_lifecycle_controls()
+	# restore preferences through the actual UI, leaving each sampled boundary intact.
+	await _tap(KEY_ESCAPE)
+	await _r21_preference(game.hud.tether_models["elastic"], "restore assist-capable model")
+	if bool(game.settings.tether_anchor_assist) != previous_assist:
+		await _r21_preference(game.hud.anchor_assist_switch, "restore assist")
+	await _r21_preference(game.hud.tether_models[previous_model], "restore model")
+	await _r21_preference(game.hud.reel_automatic if previous_auto else game.hud.reel_manual, "restore reel")
+	await _tap(KEY_ESCAPE)
+	await _restore_preset(preset)
+	if home != "tether-yard":
+		await _pause_menu_click("Map_" + home, "restore after R21 Tether")
+	for map: String in expect.required_maps:
+		if map in ["tether-yard", "saltglass"]:
+			continue
+		if game.map_id != map:
+			await _pause_menu_click("Map_" + map, "R21 original-map isolation")
+		check(map + ": no revised Tether runner on original maps", not game.player.has_method("r21_acquisition_snapshot"))
+		_check_map("R21 unchanged map " + map)
+	if game.map_id != home:
+		await _pause_menu_click("Map_" + home, "restore R21 control home")
+	_controls_profile()
+	_r21_settings_profile()
+	report["r21_tether_controls"] = {"ok": checks.slice(begin).all(func(c: Dictionary) -> bool: return c.ok),
+		"checks": checks.slice(begin), "routes": routes, "scope": "native packed production routes/UI plus labelled acquisition fixtures"}
+
+func _r21_settings_profile() -> void:
+	var config := ConfigFile.new()
+	check("R21 actual shared profile can be reopened", config.load(game.profile_path) == OK)
+	var actual: Array = Array(config.get_section_keys("settings"))
+	var expected: Array = game.settings.keys()
+	actual.sort()
+	expected.sort()
+	check("R21 persisted settings contain exactly the known keys", actual == expected)
+	check("R21 separate persisted anchor assist is a boolean", typeof(config.get_value("settings", "tether_anchor_assist", null)) == TYPE_BOOL)
+
+func _r21_mouse(pressed: bool, receiver: Node = null) -> void:
+	var event := InputEventMouseButton.new()
+	event.button_index = MOUSE_BUTTON_LEFT
+	event.pressed = pressed
+	Input.parse_input_event(event)
+	Input.flush_buffered_events()
+	if receiver != null:
+		# the isolated SubViewport receives the same real event and global button state.
+		receiver.call("_unhandled_input", event)
+
+func _r21_lifecycle_controls() -> void:
+	# boundaries use a normal production spawn and mouse input, never a body pose.
+	game.change_setting("tether_model", "elastic")
+	await _physics(1)
+	for boundary: String in ["pause", "restart", "practice", "respawn", "preset", "model", "automatic_reel", "anchor_assist", "map"]:
+		_r21_mouse(false)
+		game.change_setting("tether_model", "elastic")
+		await _physics(1)
+		game.change_setting("tether_anchor_assist", true)
+		await _physics(1)
+		game.change_setting("tether_auto_reel", false)
+		await _physics(1)
+		game.restart_run("restart")
+		await _physics(34)
+		# use the first anchor's actual authored position through raw mouse counts.
+		var target: Vector3 = game.level.ANCHORS[0]
+		var delta: Vector3 = target - game.player._eye()
+		var desired_yaw := atan2(-delta.x, -delta.z)
+		var desired_pitch := atan2(delta.y, Vector2(delta.x, delta.z).length())
+		var motion := InputEventMouseMotion.new()
+		motion.relative = Vector2(wrapf(game.player.yaw - desired_yaw, -PI, PI), game.player.pitch - desired_pitch) / game.player.tape_radians_per_count
+		motion.screen_relative = motion.relative
+		Input.parse_input_event(motion)
+		Input.flush_buffered_events()
+		await _physics(2)
+		var preview: Dictionary = game.player.r21_acquisition_snapshot()
+		check(boundary + ": normal-spawn preview is ready before fresh press", preview.ready)
+		_r21_mouse(true)
+		await _physics(2)
+		check(boundary + ": earned real attachment before boundary", not game.player.grapple.is_empty()
+			and game.player.r21_acquisition_snapshot().id == preview.id)
+		match boundary:
+			"pause": game.set_paused(true); game.set_paused(false)
+			"restart": game.restart_run("restart")
+			"practice": game.practise_stage(0)
+			"respawn": game.respawn()
+			"preset":
+				game.select_preset("server128_aa1000")
+				await _physics(1)
+				game.select_preset("server128")
+			"model": game.change_setting("tether_model", "elastic-soft")
+			"automatic_reel": game.change_setting("tether_auto_reel", true)
+			"anchor_assist": game.change_setting("tether_anchor_assist", false)
+			"map":
+				game.select_map("breakwater")
+				await _physics(1)
+				game.select_map("tether-yard")
+		await _physics(4)
+		check(boundary + ": held press cannot cross actual production boundary", game.player.grapple.is_empty()
+			and not game.player.r21_acquisition_snapshot().ready)
+	_r21_mouse(false)
+	await _physics(2)
+
+func _r21_acquisition_controls() -> void:
+	# labelled isolated packed-runner fixture, never a normal-spawn earned route.
+	game.set_paused(true)
+	var viewport := SubViewport.new()
+	viewport.size = Vector2i(1280, 720)
+	viewport.own_world_3d = true
+	viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	viewport.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(viewport)
+	var world := Node3D.new()
+	viewport.add_child(world)
+	var player: CharacterBody3D = load("res://scripts/r21_tether_player.gd").new()
+	world.add_child(player)
+	player.position = Vector3(10000, 10000, 10000)
+	player.set_physics_process(false)
+	player.set_process(false)
+	player.input_enabled = true
+	player.configure_tether("elastic", false)
+	player.configure_anchor_assist(true)
+	_r21_mouse(false, player)
+	player.block_tether("restart")
+	var anchor := Node3D.new()
+	anchor.name = "R21PackedAnchor"
+	anchor.set_meta("r21_anchor_id", "r21-packed-anchor")
+	anchor.set_meta("anchor_name", "packed fixture")
+	world.add_child(anchor)
+	anchor.add_to_group(player.ANCHOR_GROUP)
+	anchor.global_position = player._eye() + Vector3(0, 0, -20)
+	var invalid := [Vector3(0, 0, -31), Vector3(0, 0, 20), Vector3(8, 0, -20)]
+	for offset: Vector3 in invalid:
+		anchor.global_position = player._eye() + offset
+		player._grapple_step(Vector3.ZERO, false, 1.0 / 128)
+		check("R21 packed invalid range/view/cone refuses preview", not player.r21_acquisition_snapshot().ready, offset)
+	anchor.global_position = player._eye() + Vector3(sin(deg_to_rad(17.0)), 0, -cos(deg_to_rad(17.0))) * 20
+	player.settings.fov = 10.0
+	player._grapple_step(Vector3.ZERO, false, 1.0 / 128)
+	check("R21 packed narrow viewport rejects an otherwise in-cone target", not player.r21_acquisition_snapshot().ready)
+	player.settings.fov = 92.0
+	anchor.global_position = player._eye() + Vector3(0, 0, -20)
+	player._grapple_step(Vector3.ZERO, false, 1.0 / 128)
+	var ready: Dictionary = player.r21_acquisition_snapshot()
+	check("R21 packed fixture publishes ready id after physics", ready.ready and ready.id == "r21-packed-anchor")
+	var frozen := var_to_str([player.get_motion_state(), player.r21_acquisition_snapshot()])
+	for cadence: int in [0, 1, 3]:
+		for frame: int in cadence:
+			player._process(1.0 / 60)
+		check("R21 packed rendering cadence cannot change candidate or mechanics", frozen == var_to_str([player.get_motion_state(), player.r21_acquisition_snapshot()]), cadence)
+	_r21_mouse(true, player)
+	player._grapple_step(Vector3.ZERO, false, 1.0 / 128)
+	player._grapple_press = false
+	check("R21 packed fresh press latches ready published id", player.r21_acquisition_snapshot().attached and player.r21_acquisition_snapshot().id == ready.id)
+	_r21_mouse(false, player)
+	player._grapple_step(Vector3.ZERO, false, 1.0 / 128)
+	var blocker := StaticBody3D.new()
+	var collision := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(1, 2, 0.05)
+	collision.shape = box
+	blocker.add_child(collision)
+	world.add_child(blocker)
+	blocker.global_position = anchor.global_position + Vector3(0, 0, 0.1)
+	await _physics(2)
+	player._grapple_step(Vector3.ZERO, false, 1.0 / 128)
+	check("R21 packed endpoint occlusion refuses prospective anchor", not player.r21_acquisition_snapshot().ready)
+	blocker.free()
+	await _physics(2)
+	player._grapple_step(Vector3.ZERO, false, 1.0 / 128)
+	check("R21 packed preview recovers after actual blocker removal", player.r21_acquisition_snapshot().ready)
+	_r21_mouse(false, player)
+	viewport.queue_free()
+	await _frames(2)
+	game.set_paused(false)
 
 func _end(reason: String) -> void:
 	# a failed observer must never exit zero by clicking the production Quit button.

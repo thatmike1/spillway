@@ -106,7 +106,11 @@ class Preparation(unittest.TestCase):
 
     def test_preservation_uses_committed_owner_api_and_six_pins(self):
         commit = pkg.r16.git('rev-parse', 'HEAD').strip()
-        result = pkg.preservation(commit, {})
+        # final Saltglass commit includes the parent's two exact approved integration edits.
+        approvals = {p: hashlib.sha256(pkg.committed_bytes(commit, p)).hexdigest()
+                     for p in ('project.godot', 'scripts/r19_ghost_share.gd')}
+        self.refused(pkg.preservation, commit, {})
+        result = pkg.preservation(commit, approvals)
         self.assertTrue(result['ok'])
         self.assertEqual(result['baseline_commit'], pkg.BASE)
         self.assertEqual(set(result['F2_pins']), set(pkg.F2_PATHS))

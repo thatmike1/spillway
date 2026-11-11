@@ -30,7 +30,7 @@ OUTER = Path('/home/thatmike1/foldrunner-build-2026-11-05')
 BASE_DELIVERY = OUTER / 'delivery/spillway-r20'
 FLOOR = 15_000_000_000
 PREP_LIMIT = 30 * 2**20
-DURABLE_LIMIT = 5 * 2**20
+DURABLE_LIMIT = 2 * 2**20
 SCRATCH = Path('/tmp/r21-package-helpers')
 EXPORT_OUTPUT = SCRATCH / 'export/spillway-r21'
 EXPORT_LIMIT = 700_000_000
@@ -60,16 +60,16 @@ EXPERIMENTAL_MAPS = ('experiment', 'tether-yard', 'through-line')
 ORIGINAL_MODELS = ('classic', 'pendulum', 'elastic')
 F2_PATHS = tuple(r20.F2_PATHS)
 OWNED = ('tools/package-r21.py', 'tools/r21-pack-probe.gd',
-         'tests/test_package_r21.py', 'docs/r21/DELIVERY.md')
+         'tests/test_package_r21.py', 'docs/r21/DELIVERY.md',
+         'tools/r21-delivery-components.py', 'tests/test_r21_delivery_components.py')
 PRESERVATION_HELPER = 'tools/check-r21-preservation.py'
 HELPERS = tuple(dict.fromkeys((*r20.HELPERS, *OWNED, PRESERVATION_HELPER,
     'tools/check-r20-windows-release.py', 'tools/r19-windows-wine.py')))
 
 # preparation describes outstanding work; runtime readiness comes from actual bindings below.
 PENDING_GATES = (
-    'final Saltglass source/packed contract adapter and earned fixtures',
-    'final Tether source/packed contract adapter, six modes and independent assist controls',
-    'final original-eight parity contract adapter',
+    'final frozen-source Saltglass and Tether production fixture execution',
+    'parent-reviewed complete final parity contract and raw 48-play audit',
     'Godot parse/import/export and exact packed lifecycle/control/play/reload audits',
     'exact Windows ZIP all-map Wine startup, raw-proof archival and final publication',
 )
@@ -89,8 +89,9 @@ class ComponentGate:
         self.paths, self.source, self.packed = tuple(paths), source, packed
 
 
-# deliberately unbound: the final actual interfaces have not been supplied or tested.
-COMPONENTS = {name: ComponentGate() for name in ('saltglass', 'tether', 'parity')}
+# installed adapters still require the parent's complete final freeze and raw artifacts.
+delivery = load('r21_delivery_components', PROJECT / 'tools/r21-delivery-components.py')
+COMPONENTS = {}  # installed after this module's functions exist
 
 
 def unique_object(pairs):
@@ -473,14 +474,16 @@ def configure(freeze):
         if _DIRECTION_BOUNDARY(rec, event, value):
             return True
         # the current production host records actual model selection as this typed loadout.
-        # assist-specific boundaries need the final adapter; no guessed preference key.
         data = event.get('d', {})
+        typed = (data.get('key') == 'tether_model'
+                 and all(type(data.get(key)) is str and data[key] in model_ids for key in ('from', 'to')))
+        if data.get('key') == 'tether_anchor_assist':
+            typed = all(type(data.get(key)) is bool for key in ('from', 'to'))
         return (value.get('reason') == 'tether_settings' and event.get('s') == 'event'
-            and event.get('t') == value.get('tick') and event.get('k') == 'loadout'
+            and type(event.get('t')) is int and type(value.get('tick')) is int
+            and event['t'] == value['tick'] and event.get('k') == 'loadout'
             and getattr(rec, 'header', {}).get('metadata', {}).get('map') == 'tether-yard'
-            and data.get('key') == 'tether_model'
-            and all(type(data.get(key)) is str and data[key] in model_ids for key in ('from', 'to'))
-            and data['from'] != data['to'])
+            and typed and data['from'] != data['to'])
     r20.direction_boundary_matches = model_boundary_event
 
 
@@ -657,6 +660,8 @@ def route_freeze(source, evidence, identity, freeze):
     require(all(Path(path).is_file() and read_json(path).get('events') for path in tapes['tether'].values()),
             'missing or empty Tether recording-derived tapes')
     features = {**tapes, **r20.through_feature_freeze(source, evidence, identity)}
+    features['r21_source_components'] = {name: {'root': str(evidence / name), 'receipt': receipt}
+        for name, receipt in [('saltglass', salt), ('tether', tether), ('parity', parity)]}
     for route in routes:
         route['feature_tapes'] = features
     validate_routes(routes, freeze)
@@ -946,13 +951,17 @@ def prepare():
     require(subprocess.run(['git', 'merge-base', '--is-ancestor', BASE, commit], cwd=PROJECT).returncode == 0,
             'R21 must descend from exact e6baa R20 baseline')
     build = baseline_delivery()
+    try:
+        preserved = preservation(commit, {})
+    except Rejected as error:
+        preserved = {'ok': False, 'approval_required': True, 'reason': str(error)}
     return {'prepared': True, 'release_ready': False, 'candidate_exported': False, 'runtime_checked': False,
         'source_commit': commit, 'preservation_baseline': BASE, 'artifact_source': ARTIFACT_SOURCE,
         'r20_receipts_sha256': dict(RECEIPTS), 'inherited_helpers_sha256': inherited_sources(commit),
         'engine_pins': r20.engine_pins(), 'baseline_identity_sha256': hashlib.sha256(canonical(build['identity'])).hexdigest(),
         'pending': list(PENDING_GATES), 'unbound_components': [name for name, gate in COMPONENTS.items()
             if not gate.paths or not callable(gate.source) or not callable(gate.packed)],
-        'storage': storage_plan(), 'resources': resources, 'preservation': preservation(commit, {}),
+        'storage': storage_plan(), 'resources': resources, 'preservation': preserved,
         'working_tree_clean': not bool(r16.git('status', '--porcelain', '--untracked-files=all', '--', '.').strip())}
 
 
@@ -963,6 +972,9 @@ def main(argv=None):
     for name in ('identity', 'package', 'check', 'wine'):
         command = commands.add_parser(name)
         command.add_argument('--freeze', type=Path, required=True)
+        command.add_argument('--parity-contract', type=Path)
+        command.add_argument('--parity-contract-sha256')
+        command.add_argument('--parity-identity', type=Path)
         command.add_argument('--execute-frozen-runtime', action='store_true', help='explicit post-freeze engine authorization; not for preparation')
         command.add_argument('--display', type=int, choices=range(190, 200), default=198)
         command.add_argument('--deadline', type=float, default=600)
@@ -982,7 +994,10 @@ def main(argv=None):
         else:
             require(args.execute_frozen_runtime, 'runtime execution is not authorized by preparation; explicit post-freeze invocation required')
             freeze = validate_freeze(read_json(args.freeze), r16.git('rev-parse', 'HEAD').strip())
+            global _delivery_args
+            _delivery_args = args
             facts = preflight(freeze)
+            delivery.review_inputs(_DeliveryContext(), args, freeze)
             configure(freeze)
             with r16.cancellation_signals():
                 if args.command == 'package':
@@ -1002,6 +1017,17 @@ def main(argv=None):
         print('package-r21: cancelled; owned process scopes released; raw proof retained', file=sys.stderr)
         return 130
     return 0
+
+
+class _DeliveryContext:
+    def __getattr__(self, name):
+        if name not in globals():
+            raise AttributeError(name)
+        return globals()[name]
+
+
+COMPONENTS = delivery.install(_DeliveryContext())
+HELPERS = tuple(dict.fromkeys((*HELPERS, *(p for gate in COMPONENTS.values() for p in gate.paths))))
 
 
 if __name__ == '__main__':
