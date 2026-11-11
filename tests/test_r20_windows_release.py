@@ -54,18 +54,28 @@ class WindowsRelease(unittest.TestCase):
         map_id = command[-1].removeprefix('--r16-map=')
         self.calls.append(map_id)
         log.write_text('r16: build=spillway-2026.11.09-r16; map=' + map_id + '; preset=server128; physics_hz=128; records=off; recordings=off; runner=res://runner.gd; standin=false; renderer=gl_compatibility\nr20: spillway-2026.11.10-r20;\n')
+        index = command.index('--log-file')
+        self.assertLess(index, command.index('--'))
+        self.assertEqual(command[index + 1], M.W.win(root / (map_id + '.engine.log')))
+        (root / (map_id + '.engine.log')).write_text(log.read_text())
         return {'exit': 0}
 
-    def invoke(self, execute=None):
+    def invoke(self, execute=None, verification_commit=None, changed_paths=None):
         arguments = ['check', '--zip', str(self.zip), '--build', str(self.root / 'BUILD.json'),
                      '--checksums', str(self.root / 'SHA256SUMS'), '--wine', str(self.wine), '--out', str(self.out)]
+        if verification_commit is not None:
+            arguments += ['--verification-commit', verification_commit]
+        def git_output(args, **kwargs):
+            if args[1] == 'diff':
+                return '\n'.join(changed_paths or [])
+            return (M.PROJECT / args[2].split(':projects/foldrunner/', 1)[1]).read_bytes()
         def digest(path):
             return '91dfdd714f2c9078f010341346196d426e81c633ca0865cf7cc678e2825562db' if Path(path) == self.wine else self.original_digest(path)
         with patch.object(sys, 'argv', arguments), patch.object(M.W, 'digest', side_effect=digest), \
                 patch.object(M.W, 'TEMPLATE_SHA', self.digest(b'pe')), patch.object(M.W, 'CONSOLE_SHA', self.digest(b'console')), \
                 patch.object(M.W, 'budget', return_value={'synthetic': True}), \
                 patch.object(M.W, 'execute', side_effect=execute or self.execute), \
-                patch.object(M.subprocess, 'check_output', side_effect=lambda args, **kwargs: (M.PROJECT / args[2].split(':projects/foldrunner/', 1)[1]).read_bytes()), \
+                patch.object(M.subprocess, 'check_output', side_effect=git_output), \
                 patch.object(M.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0)):
             M.main()
 
@@ -78,6 +88,67 @@ class WindowsRelease(unittest.TestCase):
         self.assertFalse(result['native_windows'])
         self.assertFalse((self.out / 'release').exists())
         self.assertFalse((self.out / 'prefix').exists())
+        self.assertTrue(all(row['engine_log_sha256'] == self.original_digest(self.out / (row['map'] + '.engine.log'))
+                            for row in result['maps']))
+
+    def test_explicit_verifier_only_descendant_preserves_artifact_source(self):
+        self.fixture()
+        self.invoke(verification_commit='b' * 40, changed_paths=sorted(M.VERIFIER_ONLY))
+        result = json.loads((self.out / 'RESULT.json').read_text())
+        self.assertTrue(result['ok'])
+        self.assertEqual(result['source_commit'], 'a' * 40)
+        self.assertEqual(result['verification_commit'], 'b' * 40)
+        self.assertEqual(result['verification_only_changes'], sorted(M.VERIFIER_ONLY))
+
+    def test_verifier_commit_cannot_admit_runtime_or_other_changes(self):
+        checker = 'projects/foldrunner/tools/check-r20-windows-release.py'
+        for changed in [[checker, 'projects/foldrunner/scripts/r20_main.gd'],
+                        [checker, 'projects/foldrunner/project.godot'],
+                        [checker, 'other-project/file.py'], [checker, checker], [],
+                        ['projects/foldrunner/docs/r20/DELIVERY.md']]:
+            with self.subTest(changed=changed):
+                self.fixture()
+                with self.assertRaises(AssertionError):
+                    self.invoke(verification_commit='b' * 40, changed_paths=changed)
+                self.assertEqual(self.calls, [])
+                self.assertFalse(self.out.exists())
+
+    def test_verifier_commit_requires_full_hash_and_ancestry(self):
+        with self.assertRaises(AssertionError):
+            M.verification_binding('a' * 40, 'main')
+        with patch.object(M.subprocess, 'run', side_effect=subprocess.CalledProcessError(1, ['git'])):
+            with self.assertRaises(subprocess.CalledProcessError):
+                M.verification_binding('a' * 40, 'b' * 40)
+
+    def test_engine_log_is_required_and_errors_are_refused(self):
+        for mutation in ['missing', 'error', 'wrong-map']:
+            with self.subTest(mutation=mutation):
+                self.fixture()
+                def bad(*args, **kwargs):
+                    result = self.execute(*args, **kwargs)
+                    engine = args[4] / (self.calls[-1] + '.engine.log')
+                    if mutation == 'missing':
+                        engine.unlink()
+                    elif mutation == 'error':
+                        engine.write_text(engine.read_text() + 'ERROR: synthetic failure\n')
+                    else:
+                        engine.write_text(engine.read_text().replace('map=breakwater;', 'map=overflow;'))
+                    return result
+                with self.assertRaises(AssertionError):
+                    self.invoke(bad)
+                self.out.rename(self.root / mutation)
+                self.calls.clear()
+
+    def test_no_game_data_writes_remain_strict_including_default_engine_logs(self):
+        self.fixture()
+        def writes(*args, **kwargs):
+            result = self.execute(*args, **kwargs)
+            path = args[4] / 'prefix/drive_c/users/test/AppData/Roaming/Godot/app_userdata/Spillway/logs/godot.log'
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text('unexpected default log')
+            return result
+        with self.assertRaisesRegex(AssertionError, 'no-records startup wrote game user data'):
+            self.invoke(writes)
 
     def test_wrong_checksum_refuses_before_execution(self):
         self.fixture()

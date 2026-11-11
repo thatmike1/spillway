@@ -18,6 +18,23 @@ spec = importlib.util.spec_from_file_location('r20_windows_inherited_runner', PR
 W = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(W)
 MAPS = ['breakwater', 'whiteout-relay', 'sunken-court', 'rainline', 'night-shift', 'practice', 'overflow', 'experiment', 'saltglass', 'tether-yard', 'through-line']
+VERIFIER_ONLY = {'projects/foldrunner/tools/check-r20-windows-release.py',
+                 'projects/foldrunner/tests/test_r20_windows_release.py',
+                 'projects/foldrunner/docs/r20/DELIVERY.md'}
+
+
+def verification_binding(source_commit, verification_commit):
+    """allow an explicit committed verifier repair while keeping the game ZIP frozen."""
+    assert re.fullmatch('[0-9a-f]{40}', verification_commit), 'full verification commit required'
+    if source_commit == verification_commit:
+        return []
+    subprocess.run(['git', 'merge-base', '--is-ancestor', source_commit, verification_commit],
+                   cwd=PROJECT, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    changed = subprocess.check_output(['git', 'diff', '--name-only', source_commit, verification_commit],
+                                      cwd=PROJECT, text=True).splitlines()
+    assert changed and len(changed) == len(set(changed)) and set(changed) <= VERIFIER_ONLY, 'unreviewed post-build source change'
+    assert 'projects/foldrunner/tools/check-r20-windows-release.py' in changed, 'no verifier repair in the explicit commit'
+    return changed
 
 
 def main():
@@ -27,6 +44,7 @@ def main():
     parser.add_argument('--checksums', type=Path, required=True)
     parser.add_argument('--wine', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--verification-commit', help='explicit committed verifier-only descendant; game source must be unchanged')
     args = parser.parse_args()
     out = args.out.resolve()
     assert out.is_relative_to(Path('/tmp')) and not out.exists(), 'new RAM evidence directory required'
@@ -42,9 +60,11 @@ def main():
         assert name not in sums and re.fullmatch('[0-9a-f]{64}', digest)
         sums[name] = digest
     assert args.zip.name in build['platforms'] and sums[args.zip.name] == W.digest(args.zip)
+    verification_commit = args.verification_commit or build['source_commit']
+    verification_changes = verification_binding(build['source_commit'], verification_commit)
     helpers = {}
     for name in ['tools/check-r20-windows-release.py', 'tools/r19-windows-wine.py']:
-        blob = subprocess.check_output(['git', 'show', build['source_commit'] + ':projects/foldrunner/' + name], cwd=PROJECT)
+        blob = subprocess.check_output(['git', 'show', verification_commit + ':projects/foldrunner/' + name], cwd=PROJECT)
         assert blob == (PROJECT / name).read_bytes(), 'verification helper differs from release commit: ' + name
         helpers[name] = W.digest(PROJECT / name)
     out.mkdir()
@@ -60,6 +80,7 @@ def main():
                WINEDLLOVERRIDES='winemenubuilder.exe=d;mscoree,mshtml,winegstreamer=')
     receipt = {'ok': False, 'native_windows': False, 'zip_sha256': sums[args.zip.name],
                'build_sha256': W.digest(args.build), 'source_commit': build['source_commit'],
+               'verification_commit': verification_commit, 'verification_only_changes': verification_changes,
                'wine_sha256': W.digest(args.wine), 'commands': [], 'maps': [],
                'helpers_sha256': helpers,
                'limits': ['official Windows PE under Wine, not native Windows',
@@ -101,15 +122,22 @@ def main():
         before = {str(p.relative_to(folder)): W.digest(p) for p in folder.rglob('*') if p.is_file()}
         for map_id in MAPS:
             log = out / (map_id + '.log')
-            command = [args.wine.resolve(), exes[0], '--headless', '--audio-driver', 'Dummy', '--quit-after', '12', '--',
+            engine_log = out / (map_id + '.engine.log')
+            command = [args.wine.resolve(), exes[0], '--headless', '--audio-driver', 'Dummy',
+                       '--log-file', W.win(engine_log), '--quit-after', '12', '--',
                        '--no-records', '--no-run-recordings', '--verify-startup', '--r16-map=' + map_id]
             result = W.execute(command, env, folder, log, out, seconds=60)
             text = log.read_text(errors='replace')
             startup = re.search(r'^r16: build=spillway-2026\.11\.09-r16; map=([^;]+); preset=server128; physics_hz=128;.*records=off; recordings=off; runner=.*; standin=false; renderer=\S+', text, re.M)
             assert startup and startup[1] == map_id and 'r20: spillway-2026.11.10-r20;' in text, map_id + ': wrong startup'
             assert 'startup_error=' not in text and 'ObjectDB instances leaked' not in text
+            assert engine_log.is_file() and not engine_log.is_symlink() and 0 < engine_log.stat().st_size <= 8 * 1024**2
+            engine_text = engine_log.read_text(errors='replace')
+            assert startup[0] in engine_text and 'r20: spillway-2026.11.10-r20;' in engine_text
+            assert not re.search(r'SCRIPT ERROR:|Parse Error:|Failed to load script|^ERROR:|startup_error=|ObjectDB instances leaked', engine_text, re.M)
             receipt['commands'].append(result)
-            receipt['maps'].append({'map': map_id, 'ok': True, 'log_sha256': W.digest(log), 'startup': startup[0]})
+            receipt['maps'].append({'map': map_id, 'ok': True, 'log_sha256': W.digest(log),
+                                    'engine_log_sha256': W.digest(engine_log), 'startup': startup[0]})
             print(map_id + ': pass', flush=True)
         assert before == {str(p.relative_to(folder)): W.digest(p) for p in folder.rglob('*') if p.is_file()}
         game_writes = [str(p.relative_to(out)) for p in (out / 'prefix/drive_c/users').rglob('*')

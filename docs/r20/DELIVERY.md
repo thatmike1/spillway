@@ -123,7 +123,11 @@ Packed play mode also checks the earned route's current R20 build/style identity
 
 ## Exact Windows startup under Wine
 
-After package verification, `tools/check-r20-windows-release.py` takes the actual Windows ZIP, outer BUILD.json, SHA256SUMS, the pinned portable Wine64 loader and a new `/tmp` evidence directory. It verifies the ZIP, embedded metadata, official EXE/console/PCK hashes and its own committed helper provenance. It boots all eleven explicit maps from that unchanged Windows executable/PCK, with records off and no source or script overrides. Each startup must report the requested map, F2/128 Hz, R20 build and inherited real runner. Private prefix/profile/extraction are removed; commands, logs, hashes and limits remain. Six engine-free tests cover every-map iteration, hashes, traversal, embedded source, wrong runtime/pack and wrong-map startup.
+After package verification, `tools/check-r20-windows-release.py` takes the actual Windows ZIP, outer BUILD.json, SHA256SUMS, the pinned portable Wine64 loader and a new `/tmp` evidence directory. It verifies the ZIP, embedded metadata, official EXE/console/PCK hashes and its own committed helper provenance. It boots all eleven explicit maps from that unchanged Windows executable/PCK, with records off and no source or script overrides. Each startup must report the requested map, F2/128 Hz, R20 build and inherited real runner. Private prefix/profile/extraction are removed; commands, logs, hashes and limits remain. Eleven engine-free tests cover coverage, provenance, malformed artifacts, log routing and strict game-data write refusal.
+
+Godot writes engine logs independently of run recording. Each startup uses the release-supported `--log-file` option to send its engine log to a distinct evidence path outside user data. Both stdout and that nonempty bounded log must report the matching startup without errors. The original zero-game-data-write assertion remains strict, including unexpected default engine logs. This behavior is documented in the [official logging guide](https://docs.godotengine.org/en/stable/tutorials/scripting/logging.html) and the installed Godot 4.7.2 `--help` marks the option available in release templates.
+
+By default the verifier must match the artifact's source commit. An explicit `--verification-commit` can name a full committed descendant containing only changes to this checker, its test file and this document. Git ancestry and the complete changed-path set are checked; runtime or other changes refuse before execution. Both executing helper files must match that committed verifier revision. The receipt preserves the artifact's original source separately from the verifier commit and its complete delta. This permits repairing the fixture while keeping already verified ZIPs frozen.
 
 Verified preparation commands:
 
@@ -132,7 +136,7 @@ python3 -B tests/test_r20_windows_release.py
 python3 -B tools/check-r20-windows-release.py --help
 ```
 
-This gate has not executed a final artifact yet. Successful Wine execution will still not establish native Windows, rendering, menu operation or feel. The old R19 helper is protected and unchanged.
+Successful Wine execution does not establish native Windows, rendering, menu operation or feel. The old R19 helper is protected and unchanged.
 
 ## Export-controller preparation and review repairs
 
