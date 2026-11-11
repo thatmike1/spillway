@@ -82,7 +82,11 @@ func _identity() -> void:
 
 func _tether_rules(identity: Dictionary) -> Dictionary:
 	# separate actual rules/control objects from the revised runner's version/selection labels.
-	return RUN_READER.json_safe({"classic": identity.classic, "alternative": identity.alternative, "controls": identity.controls})
+	var alternative: Dictionary = identity.alternative
+	var classic: Dictionary = identity.classic
+	var reel: Variant = identity.get("reel_ups", alternative.get("reel_ups", classic.get("reel_ups", -1.0)))
+	return RUN_READER.json_safe({"classic": classic, "alternative": alternative, "controls": identity.controls,
+		"effective_reel_ups": reel})
 
 func _friend_release() -> void:
 	var begin := checks.size()

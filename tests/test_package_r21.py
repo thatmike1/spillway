@@ -163,6 +163,27 @@ class Preparation(unittest.TestCase):
         bad = copy.deepcopy(observed); bad['extra'] = {}
         self.refused(pkg.model_boundary, bad, freeze, original)
 
+    def test_slow_reel_observation_cannot_alias_the_reference_rate(self):
+        _, _, freeze, _ = fixture()
+        # synthetic observations isolate the reel axis from identical spring coefficients.
+        original = {name: {'classic': {'reel_ups': 260.0}, 'alternative': {},
+                          'controls': 'fixture mouse controls', 'effective_reel_ups': 260.0}
+                    for name in pkg.ORIGINAL_MODELS}
+        freeze['models']['original'] = {name: hashlib.sha256(pkg.canonical(value)).hexdigest()
+                                        for name, value in original.items()}
+        observed = copy.deepcopy(original)
+        for index, variant in enumerate(freeze['models']['elastic_variants']):
+            value = copy.deepcopy(original['elastic'])
+            value['effective_reel_ups'] = 180.0 if index == 0 else 220.0
+            observed[variant['id']] = value
+            variant['rules_sha256'] = hashlib.sha256(pkg.canonical(value)).hexdigest()
+        pkg.model_boundary(observed, freeze, original)
+        name = freeze['models']['elastic_variants'][0]['id']
+        bad = copy.deepcopy(observed); bad[name]['effective_reel_ups'] = 260.0
+        self.refused(pkg.model_boundary, bad, freeze, original)
+        bad = copy.deepcopy(observed); del bad[name]['effective_reel_ups']
+        self.refused(pkg.model_boundary, bad, freeze, original)
+
     def test_all_original_map_and_through_line_identities_are_exact(self):
         baseline, identity, freeze, _ = fixture()
         pkg.identity_boundary(identity, freeze, baseline)
