@@ -67,7 +67,10 @@ func run() -> void:
 	game.request_quit(0 if result["pass"] else 1)
 
 func capture(label: String, control: Control) -> void:
+	# preference handlers restore pause focus; let its deferred scroll settle first.
 	await process_frame
+	await process_frame
+	game.hud._pause_scroll.ensure_control_visible(control)
 	await process_frame
 	await RenderingServer.frame_post_draw
 	var bounds := control.get_global_rect()
