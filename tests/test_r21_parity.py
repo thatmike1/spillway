@@ -338,6 +338,12 @@ class Preparation(unittest.TestCase):
         contract = dict(self.contract, window_titles={self.route['name']:'Spillway R21 · comparator fixture'}, menu_registry={})
         plan,_ = K.route_plan(self.route)
         self.assertTrue(K.summary_guard(summary,self.route,'old',plan,contract))
+        for invalid in [True, float(summary['finish']['last_tick']), str(summary['finish']['last_tick']), None, float('nan'), float('inf'),
+                        summary['finish']['last_tick'] + 0.5, summary['finish']['last_tick'] - 1]:
+            bad = copy.deepcopy(summary)
+            bad['finish']['last_tick'] = invalid
+            self.refuses(lambda bad=bad:K.summary_guard(bad,self.route,'old',plan,contract))
+            self.mutations.append('summary numeric finish tick refused ' + repr(invalid))
         for name,edit in [('unknown root',lambda s:s.update(unknown=True)),
                           ('unknown presentation',lambda s:s['r21_presentation'].update(unknown=True)),
                           ('drop original checks',lambda s:s.update(checks=[])),

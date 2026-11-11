@@ -46,6 +46,17 @@ for label,mapping in [('same execution',dict(production,classic_replay=productio
     else:
         raise AssertionError('substituted model/replay accepted: '+label)
 original_read=audit.read
+reader=audit.load_reader()
+columns={name:[0] for name in reader.COLUMN_NAMES}
+for name in ['p_x','yaw']:
+    positive=dict(columns);positive[name]=[0.0]
+    negative=dict(columns);negative[name]=[-0.0]
+    assert audit.binary_columns(reader,positive)!=audit.binary_columns(reader,negative)
+    passed.append('binary sign preserved '+name)
+inputs={name:[0] for name,_,_ in reader.INPUT_LAYOUT}
+opposite=dict(inputs);opposite['x']=[-0.0]
+assert audit.binary_columns(reader,inputs,True)!=audit.binary_columns(reader,opposite,True)
+passed.append('binary raw input sign preserved')
 for label in ['non-replay execution','wrong raw tape','wrong replay argument']:
     def hostile_read(path):
         value=original_read(path)

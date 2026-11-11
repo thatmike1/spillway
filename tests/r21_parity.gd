@@ -60,10 +60,10 @@ func late_step(delta: float) -> void:
 	# the parent sees the same key and does not duplicate observations; all tape and tour code still runs.
 	super.late_step(delta)
 
-func _write_summary() -> void:
-	super._write_summary()
-	var path := out_dir.path_join("summary.json")
-	var summary: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))
-	summary["r21_presentation"] = {"window_title": game.window_title(),
-		"menu_registry": READER.json_safe(game.map_registry)}
-	_write_json("summary.json", summary)
+func _write_json(relative: String, value: Variant) -> void:
+	if relative == "summary.json":
+		# append observations before serialization, preserving every inherited numeric type and bit.
+		value = value.duplicate(true)
+		value["r21_presentation"] = {"window_title": game.window_title(),
+			"menu_registry": READER.json_safe(game.map_registry)}
+	super._write_json(relative, value)

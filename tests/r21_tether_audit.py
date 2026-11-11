@@ -6,6 +6,7 @@ import gzip
 import hashlib
 import importlib.util
 import json
+import struct
 from pathlib import Path
 import sys
 
@@ -35,6 +36,14 @@ def load_reader():
 def trace(root):
     with gzip.open(Path(root)/'trace.jsonl.gz','rt') as stream:
         return [json.loads(line) for line in stream]
+
+
+def binary_columns(reader, columns, inputs=False):
+    layout = {name: code for name, code, _ in reader.INPUT_LAYOUT} if inputs else {
+        **{name: code for name, code, _ in reader.TICK_LAYOUT if name not in reader.VECTORS},
+        **{group + '_' + axis: 'f' for group in reader.VECTORS for axis in 'xyz'}}
+    assert columns.keys() == layout.keys(), 'complete binary column layout required'
+    return {name: struct.pack('<' + str(len(values)) + layout[name], *values) for name, values in columns.items()}
 
 
 def human_audit(run):
@@ -151,10 +160,8 @@ def route_audit(run, routes, production=False):
         warmup = int(a['options'].get('warmup', 33))
         raw = [{key: column[i] for key, column in ra.inputs.items()} for i, kind in enumerate(ra.inputs['kind']) if kind in (1, 2, 3)]
         assert tape['events'] == [{'tick': int(row['tick']) - warmup, 'raw': row} for row in raw]
-        for first, second, label in [(ra.columns, rb.columns, 'physics'), (ra.inputs, rb.inputs, 'ordered raw/action inputs')]:
-            assert first.keys() == second.keys(), (model, label, 'column membership')
-            for name in first:
-                assert first[name].typecode == second[name].typecode and first[name].tobytes() == second[name].tobytes(), (model, label, name)
+        assert binary_columns(reader, ra.columns) == binary_columns(reader, rb.columns), (model, 'binary physics differs')
+        assert binary_columns(reader, ra.inputs, True) == binary_columns(reader, rb.inputs, True), (model, 'binary raw/action input differs')
         at,bt=trace(folder),trace(replay)
         assert len(at)==len(bt)
         for i,(x,y) in enumerate(zip(at,bt)):
