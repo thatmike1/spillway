@@ -10,7 +10,9 @@ import gzip
 import hashlib
 import importlib.util
 import json
+import math
 from pathlib import Path
+import struct
 import subprocess
 import sys
 
@@ -243,8 +245,30 @@ def rows(path):
             yield json.loads(line)
 
 
+def binary_columns(d, columns, inputs=False):
+    reader = module('r21_delivery_binary_layout', d.PROJECT / 'tools/analyze-r16-runs.py')
+    layout = {name: code for name, code, _ in reader.INPUT_LAYOUT} if inputs else {
+        **{name: code for name, code, _ in reader.TICK_LAYOUT if name not in reader.VECTORS},
+        **{group + '_' + axis: 'f' for group in reader.VECTORS for axis in 'xyz'}}
+    d.require(columns.keys() == layout.keys(), 'complete original binary column layout required')
+    return {name: struct.pack('<' + str(len(values)) + layout[name], *values) for name, values in columns.items()}
+
+
+def exact_value(first, second):
+    if type(first) is not type(second):
+        return False
+    if type(first) is float:
+        return math.isfinite(first) and math.isfinite(second) and struct.pack('<d', first) == struct.pack('<d', second)
+    if type(first) is dict:
+        return first.keys() == second.keys() and all(exact_value(first[key], second[key]) for key in first)
+    if type(first) is list:
+        return len(first) == len(second) and all(exact_value(a, b) for a, b in zip(first, second))
+    return type(first) in (str, int, bool, type(None)) and first == second
+
+
 def exact_replay(d, first, second, rec, replay):
-    d.require(rec.columns == replay.columns and rec.inputs == replay.inputs,
+    d.require(binary_columns(d, rec.columns) == binary_columns(d, replay.columns)
+              and binary_columns(d, rec.inputs, True) == binary_columns(d, replay.inputs, True),
               'Tether binary physics/raw/action replay columns differ')
     import itertools
     count = 0
@@ -252,7 +276,7 @@ def exact_replay(d, first, second, rec, replay):
         d.require(a is not None and b is not None and a.get('tick') == b.get('tick') == count,
                   'missing/unordered replay trace row')
         for key in (*TRACE_FIELDS, 'reference_p', 'style', 'motion', 'rope_length_u'):
-            d.require(a[key] == b[key], 'Tether full source replay differs: ' + key)
+            d.require(exact_value(a[key], b[key]), 'Tether full source replay differs: ' + key)
         count += 1
     d.require(count > 0, 'empty replay trace')
     return count
@@ -523,12 +547,12 @@ def packed_tether_routes(d, feature, references):
                   and d.r16.digest(ref['recording']) == ref['recording_sha256'], 'source Tether proof changed: ' + label)
         observed = feature['routes'][label]
         d.require(observed['model'] == ref['model'] and observed['assist'] == ref['assist']
-                  and observed['trace'] == d.read_json(ref['trace'])
-                  and observed['identity'] == ref['identity']
+                  and exact_value(observed['trace'], d.read_json(ref['trace']))
+                  and exact_value(observed['identity'], ref['identity'])
                   and observed['tape_sha256'] == ref['tape_sha256'], 'packed/source Tether route differs: ' + label)
         original, current = reader.read(Path(ref['recording'])), reader.read(Path(observed['recording']))
-        d.require(original.ok and current.ok and original.columns == current.columns
-                  and current.header['identity'] == ref['identity'],
+        d.require(original.ok and current.ok and binary_columns(d, original.columns) == binary_columns(d, current.columns)
+                  and exact_value(current.header['identity'], ref['identity']),
                   'packed/source Tether complete binary physical columns differ: ' + label)
 
 def packed(d, name, folder, build, args, evidence, out, routes):

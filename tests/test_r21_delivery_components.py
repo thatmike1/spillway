@@ -172,7 +172,10 @@ class Bindings(unittest.TestCase):
 
     def test_exact_source_replay_rejects_every_field_missing_rows_and_binary_input_drift(self):
         row = {k: 0 for k in (*c.TRACE_FIELDS, 'reference_p', 'style', 'motion', 'rope_length_u')}
-        rec = SimpleNamespace(columns={'tick': [0]}, inputs={'kind': [1]})
+        reader = c.module('r21_test_original_binary_layout', PROJECT/'tools/analyze-r16-runs.py')
+        rec = SimpleNamespace(columns={name:[0] for name in reader.COLUMN_NAMES},
+                              inputs={name:[0] for name,_,_ in reader.INPUT_LAYOUT})
+        rec.inputs['kind'] = [1]
         with tempfile.TemporaryDirectory(dir=SCRATCH) as directory:
             root = Path(directory); a = root/'a'; b = root/'b'; a.mkdir(); b.mkdir()
             def trace(folder, items):
@@ -188,6 +191,25 @@ class Bindings(unittest.TestCase):
             self.refused(c.exact_replay, d, a, b, rec, other)
             other = copy.deepcopy(rec); other.columns['tick'][0] = 1
             self.refused(c.exact_replay, d, a, b, rec, other)
+            for group, name in [('columns', 'actual_v_x'), ('columns', 'yaw'), ('inputs', 'x')]:
+                other = copy.deepcopy(rec)
+                getattr(other, group)[name] = [-0.0]
+                self.refused(c.exact_replay, d, a, b, rec, other)
+            for name in ['style', 'motion', 'rope_length_u']:
+                original = dict(row);original[name] = [0.0]
+                opposite = dict(original);opposite[name] = [-0.0]
+                trace(a,[original]);trace(b,[opposite])
+                self.refused(c.exact_replay, d, a, b, rec, rec)
+
+    def test_trace_comparison_preserves_types_float_bits_and_complete_structure(self):
+        value = {'tick': 1, 'position': [0.0, 1.25], 'ready': True}
+        self.assertTrue(c.exact_value(value, copy.deepcopy(value)))
+        for change in [{'tick':1.0,'position':[0.0,1.25],'ready':True},
+                       {'tick':1,'position':[-0.0,1.25],'ready':True},
+                       {'tick':1,'position':[0.0,1.25],'ready':1},
+                       {'tick':1,'position':[0.0,1.25],'ready':True,'unknown':0}]:
+            self.assertFalse(c.exact_value(value,change))
+        self.assertFalse(c.exact_value(float('nan'),float('nan')))
 
     def test_only_exact_settings_key_boolean_type_and_real_loadout_boundary_are_admitted(self):
         settings = {k: (False if types == (bool,) else 'elastic' if types == (str,) else 1.0)
@@ -286,11 +308,14 @@ class Bindings(unittest.TestCase):
                         'recording': str(root/(label+'.r16run'))}
             # strict decoding is independently covered by the existing format/reader suites.
             # this fake decoder challenges adapter dispatch and comparisons, not file validity.
+            layout = c.module('r21_packed_test_original_layout', PROJECT/'tools/analyze-r16-runs.py')
             def decoded(path):
                 label=path.name.removesuffix('.r16run')
-                return SimpleNamespace(ok=True, columns={'tick':[0], 'actual_v_x':[1.0]},
+                columns = {name:[0] for name in layout.COLUMN_NAMES}
+                columns['actual_v_x'] = [1.0]
+                return SimpleNamespace(ok=True, columns=columns,
                     header={'identity':{'fixture':label}})
-            decoder=SimpleNamespace(read=decoded)
+            decoder=SimpleNamespace(read=decoded, TICK_LAYOUT=layout.TICK_LAYOUT, VECTORS=layout.VECTORS)
             for label, ref in references.items():
                 path=root/(label+'-source.r16run');path.write_bytes(b'fixture '+label.encode())
                 ref.update(recording=str(path),recording_sha256=d.r16.digest(path))
@@ -312,6 +337,13 @@ class Bindings(unittest.TestCase):
                         rec.columns['actual_v_x'][0]=1.0000001
                     return rec
                 decoder.read=drift
+                self.refused(c.packed_tether_routes,d,{'routes':observations},references)
+                def sign_drift(path):
+                    rec=read(path)
+                    if '-source.r16run' not in path.name:
+                        rec.columns['actual_v_y'][0]=-0.0
+                    return rec
+                decoder.read=sign_drift
                 self.refused(c.packed_tether_routes,d,{'routes':observations},references)
                 decoder.read=read
                 (root/'tape.json').write_text('changed')
