@@ -356,7 +356,7 @@ class Bindings(unittest.TestCase):
         for method in ('late_step','early_step','observe_actual','_tether_controls','_through_controls','_judge_run'):
             self.assertNotIn('func '+method+'(',text)
         for evidence in ('r21_acquisition_snapshot()', '_r21_readiness_agreements >= 3',
-                         'reference == _tether_trace', 'game.hud.anchor_assist_switch',
+                         'r21_trace_mismatch(_tether_trace, source.rows)', 'game.hud.anchor_assist_switch',
                          'game.session.ghost.load_run', 'SubViewport.UPDATE_DISABLED',
                          'for cadence: int in [0, 1, 3]', '_r21_lifecycle_controls()',
                          'not game.player.has_method("r21_acquisition_snapshot")'):
