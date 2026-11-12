@@ -2,3 +2,4 @@
 *.py text eol=lf
 *.md text eol=lf
 tests/fixtures/** -text -diff
+docs/releases/*.SHA256SUMS -text
