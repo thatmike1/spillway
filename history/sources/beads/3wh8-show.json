@@ -1,0 +1,68 @@
+[
+  {
+    "id": "ccChat-general-3wh8",
+    "title": "spillway r17: blend c across every playable map",
+    "description": "Roll the approved Look C proof of concept into delivered R16 without movement/scoring/recording/ghost/lab changes. Work only in look/wt on feat/spillway-look-c; merge origin gameplay first, read-only R16 checkout, never main. Every playable map including practice/lab/legacy gets L old/new toggle, cream landing tops/darker sides, orange jump edges, structural ink, static painted map sky and toon lighting while preserving map identities. Prove per-map input/physics and R16 recordings/ghost parity; desktop GPU paired views; per-map before/after, native movie and comparison page. RESULTS-R17.md plus verified Linux/Windows ZIPs and SHA256SUMS in delivery/spillway-r17. Keep15GB free, prune only own scratch, no private concepts shipped. Push rowb-suffix commits then fast-forward origin/feat/foldrunner-me-build. User likes slice but has not played R16; R17 is visual only.",
+    "acceptance_criteria": "all playable maps styled/toggleable, R16 behavior unchanged and per-map parity/GPU evidence, paired images/movies/results, verified packages, branches unified by fast-forward with no main push",
+    "status": "open",
+    "priority": 2,
+    "issue_type": "task",
+    "assignee": "agent:codex",
+    "owner": "[redacted]",
+    "created_at": "2026-11-09T14:03:02Z",
+    "created_by": "agent:codex",
+    "updated_at": "2026-11-09T16:49:53Z",
+    "metadata": {
+      "try": {
+        "app": "Spillway",
+        "kit": [
+          {
+            "href": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r17/playable/SpillwayR17-linux-x86_64/SpillwayR17.x86_64",
+            "path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r17/playable/SpillwayR17-linux-x86_64/SpillwayR17.x86_64",
+            "type": "path",
+            "label": "Linux playable"
+          },
+          {
+            "href": "/home/thatmike1/foldrunner-build-2026-11-05/look/comparison-r17.html",
+            "path": "/home/thatmike1/foldrunner-build-2026-11-05/look/comparison-r17.html",
+            "type": "path",
+            "label": "Map comparisons and native clips"
+          },
+          {
+            "href": "/home/thatmike1/foldrunner-build-2026-11-05/look/RESULTS-R17.md",
+            "path": "/home/thatmike1/foldrunner-build-2026-11-05/look/RESULTS-R17.md",
+            "type": "path",
+            "label": "Player notes and limits"
+          }
+        ],
+        "why": "Only Mike can judge the new appearance and whether landing edges read instantly during his own bhop play.",
+        "steps": [
+          {
+            "id": "play",
+            "note": "Look C starts enabled; current movement/scoring/recordings/ghosts are inherited R16.",
+            "title": "Launch the desktop Linux playable and visit the maps from Esc."
+          },
+          {
+            "id": "compare",
+            "note": "This is your look/readability verdict; your R16 feature feedback remains separate.",
+            "title": "Press L while moving or paused and judge the next landing and take-off edge."
+          }
+        ],
+        "title": "Play Spillway R17 and compare the look with L",
+        "where": "desk",
+        "expect": "Cream landings and orange jump lips read clearly at speed; L compares the same map with the inherited look without changing the run.",
+        "shipped": "2026-11-09 R17",
+        "verified": "All eight maps, final old/new/live-toggle physics and recording/ghost parity, exact Linux release controls/play/reload, native300+u/s films, paired desktop GPU test and both ZIP static checks. Windows native play remains unverified."
+      }
+    },
+    "labels": [
+      "fun",
+      "try-it"
+    ],
+    "dependent_count": 0,
+    "dependency_count": 0,
+    "comment_count": 14,
+    "comments_omitted": true,
+    "revision": "4689158249130133724"
+  }
+]

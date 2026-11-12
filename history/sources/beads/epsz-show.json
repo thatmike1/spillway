@@ -1,0 +1,26 @@
+[
+  {
+    "id": "ccChat-general-epsz",
+    "title": "spillway r21: surf exit flow, earned outside lines and tuned elastic grapple",
+    "description": "R21 follows Mike’s 33-run R20 playtest. Authoritative spec: /home/thatmike1/foldrunner-build-2026-11-05/R21-SPEC.md. Work on feat/spillway-r21 from e6baa995d in look/wt; preserve original eight maps/F2, Through Line and backwards stacks. No desktop copying in this round. Earlier R20 delivery and verdicts remain in comments.",
+    "status": "closed",
+    "priority": 2,
+    "issue_type": "task",
+    "assignee": "agent:codex",
+    "owner": "[redacted]",
+    "created_at": "2026-11-10T08:12:14Z",
+    "created_by": "agent:claude",
+    "updated_at": "2026-11-12T03:30:55Z",
+    "started_at": "2026-11-10T08:13:03Z",
+    "closed_at": "2026-11-12T03:30:55Z",
+    "close_reason": "all 27 completion-audit requirements verified; exact ZIPs published, trusted proof fully read back, both branches pushed at dee210165, verified scratch cleaned",
+    "labels": [
+      "fun"
+    ],
+    "dependent_count": 0,
+    "dependency_count": 0,
+    "comment_count": 176,
+    "comments_omitted": true,
+    "revision": "-50526503744150418"
+  }
+]

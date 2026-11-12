@@ -1,0 +1,116 @@
+{
+  "passed": true,
+  "round_counts": {
+    "r01": 5,
+    "r02": 4,
+    "r03": 5,
+    "r04": 5,
+    "r05": 5,
+    "r06": 6,
+    "r07": 5,
+    "r08": 5,
+    "r09": 6,
+    "r10": 8,
+    "r11": 7,
+    "r12": 2,
+    "r13": 2,
+    "r14": 2,
+    "r15": 8,
+    "r16": 6,
+    "r17": 10,
+    "r18": 2,
+    "r19": 7,
+    "r20": 6,
+    "r21": 14
+  },
+  "frame_count": 120,
+  "history_bytes_at_check": 7768866,
+  "budget_bytes": 150000000,
+  "checks": [
+    "21 rounds with frames and notes",
+    "one ordered timeline section per numbered round",
+    "manifest membership and relative image paths",
+    "all output hashes and WebP decodes at 1600 px width",
+    "available original source hashes",
+    "copied desktop source snapshot hashes",
+    "curated Markdown links",
+    "private-display cleanup and HOME reserve receipts",
+    "total history budget"
+  ],
+  "source_checks": {
+    "available_and_matched": 40,
+    "unavailable_external_original": 61,
+    "commit_or_archive_reference": 19
+  },
+  "external_source_limit": "The desktop archive drive is unavailable here. Its source-machine verification is retained in VERIFICATION-r01-r11-desktop.json, not reissued as a laptop source check. Stream-restored archive frames were individually hashed before conversion; rebuilt source references are not historical ZIP identities.",
+  "known_gaps": [
+    {
+      "round": "r12",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r13",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r14",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r15",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r16",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r17",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r18",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r19",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r20",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r02",
+      "missing": "More than one literal exact-R2 view",
+      "reason": "Only one distinct R2 startup survives; three R3 unchanged-course illustrations are explicitly qualified in the desktop archive notes and manifest."
+    },
+    {
+      "round": "r19",
+      "missing": "Retained final-R19 Breakwater-start frame",
+      "reason": "Local preserved R19 frames cover the menu, Saltglass and experiments. No later round image is relabeled as R19."
+    },
+    {
+      "round": "r20",
+      "missing": "Confirmed final-ZIP R20 menu and Breakwater start",
+      "reason": "The recovered packaged menu/start pair belongs to a rejected packaging candidate and is labeled accordingly; native source new-mechanic frames remain available."
+    },
+    {
+      "round": "r17",
+      "missing": "Retained R17 pause menu",
+      "reason": "Retained fixed-camera map comparisons cover all maps, but no round-specific menu screenshot was found."
+    }
+  ],
+  "errors": [],
+  "visual_review": "All 120 converted images inspected in five labeled contact sheets on 12 November; game scenes and game UI only. Rebuilt starts/menus and R21 exact-release views are visibly populated. R21 Tether-menu caption corrected to avoid claiming off-screen tuning controls are visible.",
+  "cleanup": "All owned temporary clones, imported caches, rebuilt PCKs, extracted release executables and isolated runtime profiles were deleted by each capture finally block. Temporary restored original frames/contact sheets/helpers are removed after this report is staged. Original sources and desktop staging are preserved."
+}

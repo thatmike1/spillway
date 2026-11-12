@@ -1,0 +1,23 @@
+[
+  {
+    "id": "ccChat-general-0zb1",
+    "title": "spillway r18: redesign the game ui in the look c style",
+    "description": "Mike finds the game UI super annoying (menus, HUD, end screen read like debug overlays). One Opus design agent redesigns all player-facing UI in the look C language on top of R17 (7698806ef), gameplay untouched, delivered as a launchable build on the desktop.",
+    "status": "open",
+    "priority": 2,
+    "issue_type": "task",
+    "owner": "[redacted]",
+    "created_at": "2026-11-09T19:18:53Z",
+    "created_by": "agent:claude",
+    "updated_at": "2026-11-09T20:22:35Z",
+    "started_at": "2026-11-09T19:19:31Z",
+    "labels": [
+      "fun"
+    ],
+    "dependent_count": 0,
+    "dependency_count": 0,
+    "comment_count": 6,
+    "comments_omitted": true,
+    "revision": "-3329561563137671345"
+  }
+]

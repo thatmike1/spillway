@@ -1,0 +1,3211 @@
+{
+  "schema_version": 2,
+  "path_base": "history/; every frames[].file is relative to this directory",
+  "scope": "R1–R21 plus Foldrunner prehistory in TIMELINE.md",
+  "archive_root": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05",
+  "frames": [
+    {
+      "round": "r01",
+      "file": "rounds/r01/frames/01.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/full-r1-render/corrected-start00000007.png",
+      "source_sha256": "87a5a6a4edd80ac869ded001e393e527c1e5bb2f204ddb4ad8b5878c9a2a47fa",
+      "what_it_shows": "The new sunlit dam complex and distant pump tower at startup.",
+      "provenance": "R1-labelled development-source capture, not sealed delivered-pack proof; see notes.md",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "1bf4d9430bcdae1d257291c19b138634c28f4457c37285f3e5ed07c0e2b87eb5",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r01",
+      "file": "rounds/r01/frames/02.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/final-render/fast/fast00000030.png",
+      "source_sha256": "a2b1ee5c3af4b252cb9848db314721dca09651ac6ade3dea33f17ffc8fe67330",
+      "what_it_shows": "Approach to the half-open ochre gate.",
+      "provenance": "R1-labelled development-source capture, not sealed delivered-pack proof; see notes.md",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "8477478ff5319db582f79df20e3df96e68ccaa02644e7e348201020daf6fdc69",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r01",
+      "file": "rounds/r01/frames/03.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/final-render/fast/fast00000300.png",
+      "source_sha256": "f96922df005e116abc6ea8ea28912e49e1f7912b1a6653042035d45196779c5a",
+      "what_it_shows": "Brick valve housing and forested hillside along the yard.",
+      "provenance": "R1-labelled development-source capture, not sealed delivered-pack proof; see notes.md",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "925b0852fd39da7e7374ef7cf0f0d106cee39d1b0f855ece1e5cd35a6354788d",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r01",
+      "file": "rounds/r01/frames/04.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/final-render/fast/fast00000660.png",
+      "source_sha256": "f5c0dfca4993f5668a99ca08a73e9a9abe6107494bb845c63168da5d47bbe91e",
+      "what_it_shows": "Diagonal Outflow supports and the basin below.",
+      "provenance": "R1-labelled development-source capture, not sealed delivered-pack proof; see notes.md",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "2e70a30f77c8ba0402cc5f71804aed6661df8f03815c6926a62a5293af003505",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r01",
+      "file": "rounds/r01/frames/05.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/final-render/safe/safe00000600.png",
+      "source_sha256": "88a0cdbd12bc10e94ce2e039b74d15a4227ea2c63daafb7769d7609a635704b3",
+      "what_it_shows": "Safe railed gantry above the water.",
+      "provenance": "R1-labelled development-source capture, not sealed delivered-pack proof; see notes.md",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "6caaa8f012f21d4aa756a8fa5f21ea129637095e8cce17ee16818a155d48b73c",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r02",
+      "file": "rounds/r02/frames/01.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r2/fast/fast00000007.png",
+      "source_sha256": "6653efd4290f128e799d6af09eb588c89505509b25c0669ef36a1bd6c52d9272",
+      "what_it_shows": "R2 delivered startup, with the forest rooted by visible trunks.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "9c3e848d44e12007091fc1a4805867fe285af61cd87530949418798f6ecc3b46",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r02",
+      "file": "rounds/r02/frames/02.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r3/recovery/recovery00000600.png",
+      "source_sha256": "d9508bfb0296e3e4c96eb00db319b8b24662c505ae00d71dcba9d21064991f28",
+      "what_it_shows": "Covered final approach beneath the gantry.",
+      "provenance": "R3 capture illustrating unchanged R2 game geometry/movement; capture guard and build labels differ; see sources/r2-to-r3.diff",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "222e8f7f389aa2b53af40cbb6c7bd48468fe6f74da725ce372b7236b9551e7de",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r02",
+      "file": "rounds/r02/frames/03.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r3/safe/safe00000600.png",
+      "source_sha256": "15c75478b6fa009cb87f3310972e0f137f52e9e09b07997ccee08645f8b40953",
+      "what_it_shows": "Safe railed Outflow line.",
+      "provenance": "R3 capture illustrating unchanged R2 game geometry/movement; capture guard and build labels differ; see sources/r2-to-r3.diff",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "6d471b3f11a92fb224d098d83c66afa12917399bf5f5a68da82a03a94dfd4c36",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r02",
+      "file": "rounds/r02/frames/04.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r3/fast/fast00000813.png",
+      "source_sha256": "1d76a51b77040919e8619c358bb0b1ba19522cd67ada67e4b46724848938e833",
+      "what_it_shows": "Wheel finish with full-run split results.",
+      "provenance": "R3 capture illustrating unchanged R2 game geometry/movement; capture guard and build labels differ; see sources/r2-to-r3.diff",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "24571a2aec26e13640d277d3b9e7db1e5b166e592dab7d03c96c1e1de8737fe6",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r03",
+      "file": "rounds/r03/frames/01.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r3/fast/fast00000001.png",
+      "source_sha256": "409ebe9b0639bb521b5e9d301956c8cf5418ca79a4c9cabc2895f38ba1666a96",
+      "what_it_shows": "Delivered startup with pale concrete, brick tower and ochre gate.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "2e690b8b4608b7bd25a6fba42ba6cc0bc5cd7121e20b0df49863b327e49af6fc",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r03",
+      "file": "rounds/r03/frames/02.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r3/fast/fast00000300.png",
+      "source_sha256": "fbc733671adb6092221137b24cf0f8ff478d79f6a548b9ac623f11b8b614c363",
+      "what_it_shows": "Terrace beside brick machinery housings.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "79eb11c6a7e89418060dc9500ed76fa93b20815b4fadc20986c74149eb16ba9e",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r03",
+      "file": "rounds/r03/frames/03.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r3/fast/fast00000600.png",
+      "source_sha256": "f7937bc3f422533d0deed1141482558f415d115a0df3ec3b59be6ca59111734d",
+      "what_it_shows": "Filter-house roof, pump tower and Outflow supports.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "b16ce03e627e1a8a197fc0beaf36acbb2fba0e1f59c38612b0a912c482204e21",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r03",
+      "file": "rounds/r03/frames/04.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r3/recovery/recovery00000060.png",
+      "source_sha256": "e76a81a09d02457b390083656f1f5c1555f84be3a995f1662c3aa236898ceae6",
+      "what_it_shows": "Recovery route approaching the gate from the chute.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "ebcbd461147a7243fdbcbb487c0194efa77b2dc8a10cb3e58d5532a58d428ba2",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r03",
+      "file": "rounds/r03/frames/05.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r3/safe/safe00000733.png",
+      "source_sha256": "92716604eaf137555161daa90c3fee1077022efc0ec2a85a67d19a965473043e",
+      "what_it_shows": "Wheel at the end of the safe route.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "6b4e4e2f362beb1784c7b3b03c0dd68b7b82ac08fe18e19d74954ba88b8cc01f",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r04",
+      "file": "rounds/r04/frames/01.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r4/fast/fast00000000.png",
+      "source_sha256": "6c819cb89c3c289ea38d3061ea5f6c3201de20bfa6426f34f186ead3350e4740",
+      "what_it_shows": "Whole-course view from the Crest start.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "ce4ce4b9501f070c5af08f8fc688487cd0c97c341a14ed0c9cda9fc90fcd8bf4",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r04",
+      "file": "rounds/r04/frames/02.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r4/fast/fast00000045.png",
+      "source_sha256": "c09b9974c76e3f1b2be59e228647fa858b5eec3d87011d5d8860e930692dc586",
+      "what_it_shows": "Player view underneath the raised gate.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "2805e265f6a96583a73da22267dd808e6dd52dd9c14ee72a7ac32dc5f71fa135",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r04",
+      "file": "rounds/r04/frames/03.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r4/safe/safe00000045.png",
+      "source_sha256": "760a467c775432346fd4a9d6539ae02d113cf238525fc5d09f414b3cd292178a",
+      "what_it_shows": "Safe switchback stairs overlooking the yard.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "2505429023e53d6b00d41fd192d5ddc625fc1e7aaa60516c60516edfef3b571a",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r04",
+      "file": "rounds/r04/frames/04.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r4/recovery/recovery00000180.png",
+      "source_sha256": "9b6ec0c4c0eef18ec3b55e6bc1c376e57c0a669a215e7fc55f8cb89c68bbb8ec",
+      "what_it_shows": "Railed yard approach above water.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "c8aec4284dbdb085b4d105232627a31bdea3408bec3e175efc39cd14bba5b6cd",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r04",
+      "file": "rounds/r04/frames/05.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r4/safe/safe00000738.png",
+      "source_sha256": "115a9aba52fd22e5d016c9e303e6e42dfe95c30bed89729f51c1dbcccb69002a",
+      "what_it_shows": "Safe-route finish and three displayed splits.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "9bc72be865d670a370882d48bf548c0bfdaf9f44e5e0fcc24bd6a3c413214bd7",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r05",
+      "file": "rounds/r05/frames/01.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r5/fast/fast00000000.png",
+      "source_sha256": "6c819cb89c3c289ea38d3061ea5f6c3201de20bfa6426f34f186ead3350e4740",
+      "what_it_shows": "Course overview from the Crest.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "ce4ce4b9501f070c5af08f8fc688487cd0c97c341a14ed0c9cda9fc90fcd8bf4",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r05",
+      "file": "rounds/r05/frames/02.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r5/fast/fast00000240.png",
+      "source_sha256": "02d5a83c4fb032a2b155cbaf4962bc29e2f7e808b679df2322d54db47a35f044",
+      "what_it_shows": "Long concrete terrace leading past the valve housings.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "b4c94039caa8f7a48ca26d148191d57d6f465355f2c62d8345f00029eae8d598",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r05",
+      "file": "rounds/r05/frames/03.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r5/safe/safe00000510.png",
+      "source_sha256": "231b27168f37f7c7877d69260eec5922994139664c2c41d688ce3b0f9d6f854f",
+      "what_it_shows": "High approach to the pump tower and Outflow.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "083a84eb3e877802ee7d27d6e29e967d191730ed31fb367bf5a1ec353d04a4ac",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r05",
+      "file": "rounds/r05/frames/04.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r5/recovery/recovery00000660.png",
+      "source_sha256": "186b4bdd472076df26f4a7f1e6ec252e42dbf00282c8f0378c1340d6af94a683",
+      "what_it_shows": "Wheel seen from the covered lower approach.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "ae97a3124cadee071263f163d4b3bb12b657c686180c7cfbf45016bb8c3ada3a",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r05",
+      "file": "rounds/r05/frames/05.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r5/recovery/recovery00000699.png",
+      "source_sha256": "c8599bc925ae94c97bdfed36ae4e71b225129cea5cbb2b1c0f32dba3b2897b4c",
+      "what_it_shows": "Completed recovery route and split results.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "65f9921f12e1787dc6981822dc6c65cb1a935201fa2b533c50ed940e179c968b",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r06",
+      "file": "rounds/r06/frames/01.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r6/fast/fast00000029.png",
+      "source_sha256": "3f9cd1bba762ad94bdacf8f42f32f4f0ca3c166a7cfa7d9b2d5168c95b40ad3a",
+      "what_it_shows": "Crest approach to the gate.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "19bdb607dabda3b19309ac0ca69014e3d9ef977882aee8feeed8addd5897f545",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r06",
+      "file": "rounds/r06/frames/02.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r6/fast/fast00000290.png",
+      "source_sha256": "619e5da2aeb30dcad3e83458ee657ae8a8c9be2852462d973c07684dca8996b6",
+      "what_it_shows": "Housing-to-roof line beside the hillside.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "7b4d05f0199dc2884be62c4cb2579ee1f2a278bd1d42a732cde96ea217297b1b",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r06",
+      "file": "rounds/r06/frames/03.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r6/fast/fast00000580.png",
+      "source_sha256": "c528351339f2a1f63ea856f40ec6c38a5ecc9ddda49fbbf762e62a926e1e84f4",
+      "what_it_shows": "Landing and covered approach among the Outflow supports.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "9f193a0f19c6a7a8dd1fc381156f32d51a8dfc7459b0213f7d7faa7f144b7287",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r06",
+      "file": "rounds/r06/frames/04.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r6/recovery/recovery00000489.png",
+      "source_sha256": "12b36be6413408790cec02b4c4ae3844297fc11c2d227516878dec0a50ade3e5",
+      "what_it_shows": "Water-level view of the basin ramp and supporting piers.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "46b9df9d6a445b83022e10331d7fd390cd51e745b420be37a4a4d9f50831c375",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r06",
+      "file": "rounds/r06/frames/05.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r6/recovery/recovery00000539.png",
+      "source_sha256": "b757f40ad686286bd7a898e253368f54f1537b3b0670b4e58fc38f2783b5bb7f",
+      "what_it_shows": "Lower recovery passage underneath the gantries.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "2b95919a7709a596337a3a39a293182ba43bde3f654c33e6480a72afcb417dee",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r06",
+      "file": "rounds/r06/frames/06.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r6/safe/safe00000740.png",
+      "source_sha256": "7685cab56a39ebf5de6b566a07350f814c8202b1ad7a181bc7538c16b1a9ebb1",
+      "what_it_shows": "Wheel finish framed farther back with split results.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "a8466ad145b7924f661febafe8ff3e1fc9c24a4f7ae34cb2e02c572968d15af2",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r07",
+      "file": "rounds/r07/frames/01.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r7/fast/fast00000000.png",
+      "source_sha256": "c0629c5a217eaced92d1b5ef5d4a6ebaf2442fcc3a0ca1453504b92a92e08915",
+      "what_it_shows": "Delivered course overview.",
+      "provenance": "R7 delivered-pack partial capture; not full-route completion proof",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "39c700c2e4f9fea9a8fdee418d70c2217591d8f8fe4d04b40838298b9009682e",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r07",
+      "file": "rounds/r07/frames/02.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r7/fast/fast00000044.png",
+      "source_sha256": "dfd49417b94bb07a1bdaed2f7da839b9c18f34bde6e8707325d4172a4dce4d27",
+      "what_it_shows": "Carried-speed approach over the chute and toward the tower.",
+      "provenance": "R7 delivered-pack partial capture; not full-route completion proof",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "7af661ade74968ca6561a5d4b58e115af261b9502a46909e698441cb6149dca8",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r07",
+      "file": "rounds/r07/frames/03.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r7/fast/fast00000176.png",
+      "source_sha256": "cfc78cebc39b644574683660ba65ac3fcd042bb332131925c00191e3f5688472",
+      "what_it_shows": "Housing and connecting roof edge.",
+      "provenance": "R7 delivered-pack partial capture; not full-route completion proof",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "5a5a5c8a09c0af8517811d866e0ffc465a743afa21b19ff3a9d559ea5ec7090a",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r07",
+      "file": "rounds/r07/frames/04.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r7/fast/fast00000264.png",
+      "source_sha256": "6fa024f78f97344ee9638805439c5a8c4c99b17486e4783ca9ff7f1613547295",
+      "what_it_shows": "Outflow diagonal line from above.",
+      "provenance": "R7 delivered-pack partial capture; not full-route completion proof",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "c7836e10f5aea4d6d2557f75528c30f103f6d0ee4c148bdc83da35fa958df3b8",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r07",
+      "file": "rounds/r07/frames/05.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r7/fast/fast00000352.png",
+      "source_sha256": "3f98a1eb6931b12187a6ba875bc069546addcb78a4afa37a15b8f095d75db746",
+      "what_it_shows": "Direct wheel arrival registering a clean finish.",
+      "provenance": "R7 delivered-pack partial capture; not full-route completion proof",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "300ac47ffb0b5f0de68f66c2b53c0a3358d966a225175fce8c9e337d9c23d470",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r08",
+      "file": "rounds/r08/frames/01.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/r8-late-miss-views/late-miss-toward-exit.png",
+      "source_sha256": "2ef5110b52f1820436976761c81fc2caca26c9bd2c1f9230e5f9019ce6193724",
+      "what_it_shows": "Basin view toward the existing exit ramp before R9 painted rails.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "8d59ecbca2d13d41efb29741037895d7f3d31615656a85bf461177fa7fd41629",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r08",
+      "file": "rounds/r08/frames/02.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivery-checks/r8-access-frames/access00000001.png",
+      "source_sha256": "08b66063a37708b773da8dd36a32a974ea823c527f6814c2f3cd0de8fdc4cc95",
+      "what_it_shows": "Yard access deck and pump tower beyond.",
+      "provenance": "R8 delivered-pack access fixture, not uninterrupted play; see r8-native-access.log",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "1af6815e125efca9108c86a78138cfea5f02d9d1f10f6f61c3ee34af5debf847",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r08",
+      "file": "rounds/r08/frames/03.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivery-checks/r8-access-frames/access00000030.png",
+      "source_sha256": "4f8182f40a40ee54bb2a68928ef0156ac5d3fba8d3bfdadf3e39dda83161b13d",
+      "what_it_shows": "Guarded apron junction by the yard machinery.",
+      "provenance": "R8 delivered-pack access fixture, not uninterrupted play; see r8-native-access.log",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "025948a14226375dbcdc76b28b5cac0a7938c2e41f9873be9db82fa86a3048c2",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r08",
+      "file": "rounds/r08/frames/04.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivery-checks/r8-access-frames/access00000270.png",
+      "source_sha256": "30f78bd8403f06dfbf151ecd177d1ee14f04fed50f479ec7cb1971f043e42e01",
+      "what_it_shows": "Housing and continuous roof approach.",
+      "provenance": "R8 delivered-pack access fixture, not uninterrupted play; see r8-native-access.log",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "d638af797b1bb335887b5b011d26a573f0aaa996c0e9d516ebd283d997ab7738",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r08",
+      "file": "rounds/r08/frames/05.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivery-checks/r8-access-frames/access00000360.png",
+      "source_sha256": "198bccaa99934b7f482628b14ccdedfa4e22b6bda8f2ba20cdad28150709a047",
+      "what_it_shows": "Outflow jump supports above the basin.",
+      "provenance": "R8 delivered-pack access fixture, not uninterrupted play; see r8-native-access.log",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "234e61bc6606ee8c9ec5fb7d4051b1096dc291cc1d9a91152c344ce69e912215",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r09",
+      "file": "rounds/r09/frames/01.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r9/fast/fast00000000.png",
+      "source_sha256": "fb2eafcd5ceee990c0b215059c6e160bfb4f361b10feda517b190c2596b83bf6",
+      "what_it_shows": "Crest, gate and distant tower.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "5ce2e9455de9cb93baec51320c701cf10a5e2b1c0f2e27a8cf5f9c159cb48cc1",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r09",
+      "file": "rounds/r09/frames/02.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r9/fast/fast00000372.png",
+      "source_sha256": "4fe33b714597dd1beb90ac700826bc72fd046f5c35d50f664268cf6020e7349f",
+      "what_it_shows": "Low slide view beneath the half-open gate.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "15d3d5226f04e5d60e716fab168ee2381ab3ee964f447991fbde60fb1101c344",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r09",
+      "file": "rounds/r09/frames/03.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r9/safe/safe00000345.png",
+      "source_sha256": "38ea27be698a0300858977f7069e1ac8d43a3657fa272ec9a627a7e4c3fc7833",
+      "what_it_shows": "Safe maintenance gantry beside the water.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "50a5fb49eea628587c1af8e8556aa8644cd05fec0c26809fb2f0dcaefc72c161",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r09",
+      "file": "rounds/r09/frames/04.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r9/recovery/recovery00000930.png",
+      "source_sha256": "7edebad7996f85f4cfcc8592063b9f1b460513079d915cc8a9900aec15fb994c",
+      "what_it_shows": "Fast Outflow supports viewed from the roof.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "9549ed3d6ee0689c452d38cafbb29019ba7c475214a112f6b3a02b33feace741",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r09",
+      "file": "rounds/r09/frames/05.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r9/recovery/recovery00001140.png",
+      "source_sha256": "e99bfcd1ea274a14e22928de30fe84fdc56559505e4b8f13e00d524d555cf9df",
+      "what_it_shows": "Existing basin recovery ramp now outlined by ochre rails.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "25c5977cfcc37dbf2a2b6f20f86f6e40ed1fa6901296da253864850df89014c2",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r09",
+      "file": "rounds/r09/frames/06.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r9/recovery/recovery00001350.png",
+      "source_sha256": "946ef1050b6c8fb686a13c4567a45e0c8056a1c8317649750bc29598ccc4a01a",
+      "what_it_shows": "Wheel finish after the recovery line.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "3320be3441ed933824cc5bcd8957889ed15e078a65cba5cc12ceeb1180dda1e5",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r10",
+      "file": "rounds/r10/frames/01.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r10/fast/view-001.png",
+      "source_sha256": "04ce0d25ea71d7eea4100b31509984c5cafa50f6ae174cc6ed5249cbfda7791c",
+      "what_it_shows": "Start view of the finished three-stage dam course.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "394f61b481a622cfc12a9d63f05d7e31c2efbc88d94931fb35e37c5297e4bd20",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r10",
+      "file": "rounds/r10/frames/02.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r10/fast/view-005.png",
+      "source_sha256": "4a75fbfcfcadefe233f73c60d0f41c8ddca14db09880595aa827ab03cc1a30c3",
+      "what_it_shows": "Yard entrance crossing toward the tower.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "86b9f40a11d51dee8fd6f7dfd1a6a6dac08a65ec4baf9e149fb341136a59314b",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r10",
+      "file": "rounds/r10/frames/03.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r10/recovery/view-006.png",
+      "source_sha256": "74b4ef0895a16e2d414c816110ae8db74379b69e834bae34f424a9e69e82c6d4",
+      "what_it_shows": "Shallow-water recovery at the Crest.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "a37d7337d92b15089e37d1f3ce59d1570d867fe57f82dae9432ee19f2cc54ca4",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r10",
+      "file": "rounds/r10/frames/04.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r10/recovery/view-012.png",
+      "source_sha256": "b802d80af5e9bc43244df3158eb1406cd7e657c7e34e89a8046332017f322eeb",
+      "what_it_shows": "Filter-house roof and gap toward Outflow.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "f7d917b2e01fdfb2d200eb6acdc8091817702abface4200acc1c5d33658c41b7",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r10",
+      "file": "rounds/r10/frames/05.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r10/rail_hop_recovery/view-015.png",
+      "source_sha256": "f37dc5fe805d324702b4f8de33ccb714405fa572ffd204f143e0db6dcfb4baff",
+      "what_it_shows": "Rail-hop route overlooking the guarded apron and yard.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "dd9023e5b656f092be3d217bab40ef7210e99d92d69b86f569031bba01deefad",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r10",
+      "file": "rounds/r10/frames/06.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r10/rail_hop_recovery/view-018.png",
+      "source_sha256": "a5c8cb2f0ff6872e32d7b5ddd73cd27867bb647f41cb4045fd92b42b20f40ae3",
+      "what_it_shows": "Actual missed jump into the Outflow basin.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "fcd86f674f8613ba40f431417089d12db69e0ebb4499d5252761b8323ef8292e",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r10",
+      "file": "rounds/r10/frames/07.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r10/rail_hop_recovery/view-022.png",
+      "source_sha256": "25a1f8ed03c9a43d2a7b1a0ac396a1ba658906e43fd054439495cad97f3cc816",
+      "what_it_shows": "Recovery ascent between ochre handrails.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "b10cb5d0498e079c667532e076da3b6f71b88bc7f3ec32243cdfd6af9fefe467",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r10",
+      "file": "rounds/r10/frames/08.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r10/rail_hop_recovery/view-030.png",
+      "source_sha256": "b238e8d47f91d0af6e65cfea7545f6273977970006f39fb25ab5d127c5d24f6d",
+      "what_it_shows": "Rail-hop recovery registering an ordered clean finish.",
+      "provenance": "round-labelled archived capture",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "16bc90c0503944dc902a59447afbd0a0e31197c56f99653ff27a1ddd69199554",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r11",
+      "file": "rounds/r11/frames/01.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r11/fast/fast.mp4",
+      "source_sha256": "c51f06cba1f8a71026e84d25399245467ea26cc9ece9aaef70965946761e9b7f",
+      "what_it_shows": "Crest startup and the gate.",
+      "provenance": "R11 delivered-pack movie still",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null,
+        "extraction": {
+          "tool": "ffmpeg",
+          "seek_seconds": 1,
+          "frames": 1
+        }
+      },
+      "output_sha256": "e2ccfba3826082783d2f2b34a3050189cf8a39afcd8587d43cbbb040e62510cb",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r11",
+      "file": "rounds/r11/frames/02.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r11/fast/fast.mp4",
+      "source_sha256": "c51f06cba1f8a71026e84d25399245467ea26cc9ece9aaef70965946761e9b7f",
+      "what_it_shows": "Reworked crossing toward the pump tower.",
+      "provenance": "R11 delivered-pack movie still",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null,
+        "extraction": {
+          "tool": "ffmpeg",
+          "seek_seconds": 4,
+          "frames": 1
+        }
+      },
+      "output_sha256": "fbe760113e8adc58098af424a76bf50c208571ef00901d7d8d049a1b0203447d",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r11",
+      "file": "rounds/r11/frames/03.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r11/fast/fast.mp4",
+      "source_sha256": "c51f06cba1f8a71026e84d25399245467ea26cc9ece9aaef70965946761e9b7f",
+      "what_it_shows": "Working bucketed wheel and guarded pump-hall finish.",
+      "provenance": "R11 delivered-pack movie still",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null,
+        "extraction": {
+          "tool": "ffmpeg",
+          "seek_seconds": 24,
+          "frames": 1
+        }
+      },
+      "output_sha256": "0141d204d65d7943bad7337a265f3680a506907ada343879fd3217c8ce775fb3",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r11",
+      "file": "rounds/r11/frames/04.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r11/recovery/recovery.mp4",
+      "source_sha256": "cd68672f11ed753af34e291b3c44d37bea2eb47cc9e6347edbaf5c7026cd5f95",
+      "what_it_shows": "Maintenance screen discouraging the terrace-to-wheel bypass.",
+      "provenance": "R11 delivered-pack movie still",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null,
+        "extraction": {
+          "tool": "ffmpeg",
+          "seek_seconds": 19,
+          "frames": 1
+        }
+      },
+      "output_sha256": "63af0785828f143c0e055701fc98f6fddd521d091594f900702a5de4ce51f702",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r11",
+      "file": "rounds/r11/frames/05.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/delivered-r11/recovery/recovery.mp4",
+      "source_sha256": "cd68672f11ed753af34e291b3c44d37bea2eb47cc9e6347edbaf5c7026cd5f95",
+      "what_it_shows": "Widened basin exit and ochre recovery rails.",
+      "provenance": "R11 delivered-pack movie still",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null,
+        "extraction": {
+          "tool": "ffmpeg",
+          "seek_seconds": 39,
+          "frames": 1
+        }
+      },
+      "output_sha256": "18333f0b89f616ce4ab2550a734b0861f4d20caf566182eccf6ae0109e0118dc",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r11",
+      "file": "rounds/r11/frames/06.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/playtest-r11/1.png",
+      "source_sha256": "ea0df4d5d72c59deb54f2e5487b9c9495f147e750137142f15f2e19ad459940f",
+      "what_it_shows": "Mike playtest: horizontal valve wheel where he reported snagging.",
+      "provenance": "Mike R11 playtest screenshot; defect description from accompanying README",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "6a6c0977b65220d8de5fb203419b40657011aafd0e93eb99932ef9c6e42d10ec",
+      "dimensions": [
+        1600,
+        924
+      ]
+    },
+    {
+      "round": "r11",
+      "file": "rounds/r11/frames/07.webp",
+      "source_path": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/playtest-r11/6.png",
+      "source_sha256": "6b6cb66b97053fd398cfbee2048fd3d7cc2be25a510526e09af38641bb875617",
+      "what_it_shows": "Mike playtest: reservoir sheet visibly ends above the terrain.",
+      "provenance": "Mike R11 playtest screenshot; defect description from accompanying README",
+      "how_made": {
+        "tool": "cwebp",
+        "quality": 82,
+        "resize": [
+          1600,
+          0
+        ],
+        "crop": null,
+        "retouch": null
+      },
+      "output_sha256": "efcd7c3692db021ad6c0ead2e883c8c0081f927c9a36a7a1ce5b193661fc5587",
+      "dimensions": [
+        1600,
+        964
+      ]
+    },
+    {
+      "file": "rounds/r12/frames/01-rebuilt-start.webp",
+      "what_it_shows": "R12 Spillway crest start; Breakwater did not exist",
+      "how_made": {
+        "capture": "rebuilt from commit f84e175d53a4a259330969c83edaa929d8d02f5c, not the delivered ZIP; temporary sparse shared clone; Godot 4.7.2 Spillway Pack pack export; official release runtime from R21 ZIP; isolated XDG profile, AMD/X11 :190 under shared engine lock; ffmpeg x11grab; WebP quality 82, 1600 px",
+        "conversion": "WebP quality 82 at 1600 px"
+      },
+      "output_sha256": "7260359eff1ac125ae3efd1fd44a6987a59597d1ce255513bb28c55996e2e007",
+      "provenance": "rebuilt from commit f84e175d53a4a259330969c83edaa929d8d02f5c, not the delivered ZIP",
+      "capture_receipt": {
+        "round": "r12",
+        "commit": "f84e175d53a4a259330969c83edaa929d8d02f5c",
+        "home_free_before": 16742047744,
+        "origin": "rebuilt from commit f84e175d53a4a259330969c83edaa929d8d02f5c, not the delivered ZIP",
+        "export_command": [
+          "/home/thatmike1/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64",
+          "--headless",
+          "--path",
+          "/tmp/spillway-history-rebuild-r12/clone/projects/foldrunner",
+          "--export-pack",
+          "Spillway Pack",
+          "/tmp/spillway-history-rebuild-r12/Rebuilt.pck"
+        ],
+        "rebuilt_pack_sha256": "eb0d1b33254b4dae41aeb7cfa3d9fc3e949d91f58c9f7b9d4eecb443de1a9573",
+        "official_release_runtime_sha256": "d9f79ab89b5ae369aeed11c6052d402e8218cd503bf85b4a235f9c30c46a7c63",
+        "display_released": true,
+        "home_free_after": 16741384192
+      },
+      "round": "r12",
+      "source_path": "ccChat-general@f84e175d53a4a259330969c83edaa929d8d02f5c:projects/foldrunner",
+      "commit": "f84e175d53a4a259330969c83edaa929d8d02f5c",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "file": "rounds/r12/frames/02-rebuilt-menu.webp",
+      "what_it_shows": "R12 pause menu rebuilt from committed source",
+      "how_made": {
+        "capture": "rebuilt from commit f84e175d53a4a259330969c83edaa929d8d02f5c, not the delivered ZIP; temporary sparse shared clone; Godot 4.7.2 Spillway Pack pack export; official release runtime from R21 ZIP; isolated XDG profile, AMD/X11 :190 under shared engine lock; ffmpeg x11grab; WebP quality 82, 1600 px",
+        "conversion": "WebP quality 82 at 1600 px"
+      },
+      "output_sha256": "4a8d07651c6fe0313f9efb40123691c0707f7bbb1acd74e90e0d6ac0a5475600",
+      "provenance": "rebuilt from commit f84e175d53a4a259330969c83edaa929d8d02f5c, not the delivered ZIP",
+      "capture_receipt": {
+        "round": "r12",
+        "commit": "f84e175d53a4a259330969c83edaa929d8d02f5c",
+        "home_free_before": 16742047744,
+        "origin": "rebuilt from commit f84e175d53a4a259330969c83edaa929d8d02f5c, not the delivered ZIP",
+        "export_command": [
+          "/home/thatmike1/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64",
+          "--headless",
+          "--path",
+          "/tmp/spillway-history-rebuild-r12/clone/projects/foldrunner",
+          "--export-pack",
+          "Spillway Pack",
+          "/tmp/spillway-history-rebuild-r12/Rebuilt.pck"
+        ],
+        "rebuilt_pack_sha256": "eb0d1b33254b4dae41aeb7cfa3d9fc3e949d91f58c9f7b9d4eecb443de1a9573",
+        "official_release_runtime_sha256": "d9f79ab89b5ae369aeed11c6052d402e8218cd503bf85b4a235f9c30c46a7c63",
+        "display_released": true,
+        "home_free_after": 16741384192
+      },
+      "round": "r12",
+      "source_path": "ccChat-general@f84e175d53a4a259330969c83edaa929d8d02f5c:projects/foldrunner",
+      "commit": "f84e175d53a4a259330969c83edaa929d8d02f5c",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "file": "rounds/r13/frames/01-rebuilt-start.webp",
+      "what_it_shows": "R13 Overflow start; Breakwater did not exist",
+      "how_made": {
+        "capture": "rebuilt from commit d8fe109fbf8965c73ecc2965ae32b0a67d165165, not the delivered ZIP; temporary sparse shared clone; Godot 4.7.2 Overflow Pack pack export; official release runtime from R21 ZIP; isolated XDG profile, AMD/X11 :190 under shared engine lock; ffmpeg x11grab; WebP quality 82, 1600 px",
+        "conversion": "WebP quality 82 at 1600 px"
+      },
+      "output_sha256": "4bd3b3ea750eb3b476cdf0c7a8c3261086eaf4417546a4d150d2611bd124dae2",
+      "provenance": "rebuilt from commit d8fe109fbf8965c73ecc2965ae32b0a67d165165, not the delivered ZIP",
+      "capture_receipt": {
+        "round": "r13",
+        "commit": "d8fe109fbf8965c73ecc2965ae32b0a67d165165",
+        "home_free_before": 16740925440,
+        "origin": "rebuilt from commit d8fe109fbf8965c73ecc2965ae32b0a67d165165, not the delivered ZIP",
+        "export_command": [
+          "/home/thatmike1/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64",
+          "--headless",
+          "--path",
+          "/tmp/spillway-history-rebuild-r13/clone/projects/foldrunner",
+          "--export-pack",
+          "Overflow Pack",
+          "/tmp/spillway-history-rebuild-r13/Rebuilt.pck"
+        ],
+        "rebuilt_pack_sha256": "eaed23c3069991f6e2091408c6341f87343e7dcc173df712f93d44841393b306",
+        "official_release_runtime_sha256": "d9f79ab89b5ae369aeed11c6052d402e8218cd503bf85b4a235f9c30c46a7c63",
+        "display_released": true,
+        "home_free_after": 16740917248
+      },
+      "round": "r13",
+      "source_path": "ccChat-general@d8fe109fbf8965c73ecc2965ae32b0a67d165165:projects/foldrunner",
+      "commit": "d8fe109fbf8965c73ecc2965ae32b0a67d165165",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "file": "rounds/r13/frames/02-rebuilt-menu.webp",
+      "what_it_shows": "R13 pause menu rebuilt from committed source",
+      "how_made": {
+        "capture": "rebuilt from commit d8fe109fbf8965c73ecc2965ae32b0a67d165165, not the delivered ZIP; temporary sparse shared clone; Godot 4.7.2 Overflow Pack pack export; official release runtime from R21 ZIP; isolated XDG profile, AMD/X11 :190 under shared engine lock; ffmpeg x11grab; WebP quality 82, 1600 px",
+        "conversion": "WebP quality 82 at 1600 px"
+      },
+      "output_sha256": "7c7e61dae512f065916d2f7b60e6cfd223c6717cb3cebe049a7245572abe3ef6",
+      "provenance": "rebuilt from commit d8fe109fbf8965c73ecc2965ae32b0a67d165165, not the delivered ZIP",
+      "capture_receipt": {
+        "round": "r13",
+        "commit": "d8fe109fbf8965c73ecc2965ae32b0a67d165165",
+        "home_free_before": 16740925440,
+        "origin": "rebuilt from commit d8fe109fbf8965c73ecc2965ae32b0a67d165165, not the delivered ZIP",
+        "export_command": [
+          "/home/thatmike1/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64",
+          "--headless",
+          "--path",
+          "/tmp/spillway-history-rebuild-r13/clone/projects/foldrunner",
+          "--export-pack",
+          "Overflow Pack",
+          "/tmp/spillway-history-rebuild-r13/Rebuilt.pck"
+        ],
+        "rebuilt_pack_sha256": "eaed23c3069991f6e2091408c6341f87343e7dcc173df712f93d44841393b306",
+        "official_release_runtime_sha256": "d9f79ab89b5ae369aeed11c6052d402e8218cd503bf85b4a235f9c30c46a7c63",
+        "display_released": true,
+        "home_free_after": 16740917248
+      },
+      "round": "r13",
+      "source_path": "ccChat-general@d8fe109fbf8965c73ecc2965ae32b0a67d165165:projects/foldrunner",
+      "commit": "d8fe109fbf8965c73ecc2965ae32b0a67d165165",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "file": "rounds/r14/frames/01-rebuilt-start.webp",
+      "what_it_shows": "R14 Penstock Yard practice start; Breakwater did not exist",
+      "how_made": {
+        "capture": "rebuilt from commit 65d205be85c884dc13295725a3eb26c3f46d9ca7, not the delivered ZIP; temporary sparse shared clone; Godot 4.7.2 R14 Pack pack export; official release runtime from R21 ZIP; isolated XDG profile, AMD/X11 :190 under shared engine lock; ffmpeg x11grab; WebP quality 82, 1600 px",
+        "conversion": "WebP quality 82 at 1600 px"
+      },
+      "output_sha256": "a29a8ac261384c862aed4252618bf4c37f59ebb7ef870d5ea38a824aeaaedcd1",
+      "provenance": "rebuilt from commit 65d205be85c884dc13295725a3eb26c3f46d9ca7, not the delivered ZIP",
+      "capture_receipt": {
+        "round": "r14",
+        "commit": "65d205be85c884dc13295725a3eb26c3f46d9ca7",
+        "home_free_before": 16740696064,
+        "origin": "rebuilt from commit 65d205be85c884dc13295725a3eb26c3f46d9ca7, not the delivered ZIP",
+        "export_command": [
+          "/home/thatmike1/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64",
+          "--headless",
+          "--path",
+          "/tmp/spillway-history-rebuild-r14/clone/projects/foldrunner",
+          "--export-pack",
+          "R14 Pack",
+          "/tmp/spillway-history-rebuild-r14/Rebuilt.pck"
+        ],
+        "rebuilt_pack_sha256": "099eb8e315a83829810ada1b6e21dadde706cce841137406e3c0216fdd6102db",
+        "official_release_runtime_sha256": "d9f79ab89b5ae369aeed11c6052d402e8218cd503bf85b4a235f9c30c46a7c63",
+        "display_released": true,
+        "home_free_after": 16739983360
+      },
+      "round": "r14",
+      "source_path": "ccChat-general@65d205be85c884dc13295725a3eb26c3f46d9ca7:projects/foldrunner",
+      "commit": "65d205be85c884dc13295725a3eb26c3f46d9ca7",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "file": "rounds/r14/frames/02-rebuilt-menu.webp",
+      "what_it_shows": "R14 pause menu rebuilt from committed source",
+      "how_made": {
+        "capture": "rebuilt from commit 65d205be85c884dc13295725a3eb26c3f46d9ca7, not the delivered ZIP; temporary sparse shared clone; Godot 4.7.2 R14 Pack pack export; official release runtime from R21 ZIP; isolated XDG profile, AMD/X11 :190 under shared engine lock; ffmpeg x11grab; WebP quality 82, 1600 px",
+        "conversion": "WebP quality 82 at 1600 px"
+      },
+      "output_sha256": "fdd2cade73f351e32378bb2715fd93ed555f5a690b8b68e544e1d7256141cde6",
+      "provenance": "rebuilt from commit 65d205be85c884dc13295725a3eb26c3f46d9ca7, not the delivered ZIP",
+      "capture_receipt": {
+        "round": "r14",
+        "commit": "65d205be85c884dc13295725a3eb26c3f46d9ca7",
+        "home_free_before": 16740696064,
+        "origin": "rebuilt from commit 65d205be85c884dc13295725a3eb26c3f46d9ca7, not the delivered ZIP",
+        "export_command": [
+          "/home/thatmike1/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64",
+          "--headless",
+          "--path",
+          "/tmp/spillway-history-rebuild-r14/clone/projects/foldrunner",
+          "--export-pack",
+          "R14 Pack",
+          "/tmp/spillway-history-rebuild-r14/Rebuilt.pck"
+        ],
+        "rebuilt_pack_sha256": "099eb8e315a83829810ada1b6e21dadde706cce841137406e3c0216fdd6102db",
+        "official_release_runtime_sha256": "d9f79ab89b5ae369aeed11c6052d402e8218cd503bf85b4a235f9c30c46a7c63",
+        "display_released": true,
+        "home_free_after": 16739983360
+      },
+      "round": "r14",
+      "source_path": "ccChat-general@65d205be85c884dc13295725a3eb26c3f46d9ca7:projects/foldrunner",
+      "commit": "65d205be85c884dc13295725a3eb26c3f46d9ca7",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r15",
+      "file": "rounds/r15/frames/01-breakwater-start.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r15/final-package-8a254d16/check/runs/controls/frames/000_startup.png",
+      "source_sha256": "76c8f94896ee910d524d680c70b28b318d696c75a395ca0fabc0ed8c426771e3",
+      "what_it_shows": "Breakwater start in retained final R15 packed controls",
+      "provenance": "retained R15 exact-pack/OS-input evidence, not a new launch",
+      "how_made": {
+        "capture": "Original source and method described in docs/r15/RESULTS.md and exact-release controls; compressed during handover",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "2aaf8fb7d13f6307461316bd19c1a699e77dd01024d4ff180a311b334d32894a",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r15",
+      "file": "rounds/r15/frames/02-menu.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r15/final-os-8a254d16/map-menu.jpg",
+      "source_sha256": "4759e1c397913afde681c3c519faf1296dbd224217813be752af624badab099d",
+      "what_it_shows": "R15 map and preset menu",
+      "provenance": "retained R15 exact-pack/OS-input evidence, not a new launch",
+      "how_made": {
+        "capture": "Original source and method described in docs/r15/RESULTS.md and exact-release controls; compressed during handover",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "311f2fd400a6f65f3a92ce60bea54389562cb56fdb200f3ea75e4cdf3173c28c",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r15",
+      "file": "rounds/r15/frames/03-air-crouch.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r15/final-os-8a254d16/air-crouch.jpg",
+      "source_sha256": "e692230511c819d6ce607ba5490bfc27a6801da151b9b3db9b1ffd283218c40c",
+      "what_it_shows": "R15 airborne crouch from the exact-release OS-input check",
+      "provenance": "retained R15 exact-pack/OS-input evidence, not a new launch",
+      "how_made": {
+        "capture": "Original source and method described in docs/r15/RESULTS.md and exact-release controls; compressed during handover",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "c3dabf1b804ecf58755487a3eb52f6bee43c76e381722ba149bd09dc93dbafeb",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r15",
+      "file": "rounds/r15/frames/04-whiteout.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r15/final-package-8a254d16/check/runs/controls/frames/008_map-whiteout-relay.png",
+      "source_sha256": "8459ede433175a2c6e0f77a193f13e1a8d60bb80af1add81f6cd4b07b11b8a58",
+      "what_it_shows": "Whiteout Relay introduced in R15",
+      "provenance": "retained R15 exact-pack/OS-input evidence, not a new launch",
+      "how_made": {
+        "capture": "Original source and method described in docs/r15/RESULTS.md and exact-release controls; compressed during handover",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "bc664b7889c6065477b6c7dbc3399e9a5e7c879e1c002c9decfa95d33dee1791",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r15",
+      "file": "rounds/r15/frames/05-sunken-court.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r15/final-package-8a254d16/check/runs/controls/frames/016_map-sunken-court.png",
+      "source_sha256": "8eec642efce3c24ba931814545ca33e8fb2db472720285de99a0f05dc255a029",
+      "what_it_shows": "Sunken Court introduced in R15",
+      "provenance": "retained R15 exact-pack/OS-input evidence, not a new launch",
+      "how_made": {
+        "capture": "Original source and method described in docs/r15/RESULTS.md and exact-release controls; compressed during handover",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "4ca91389fbe35a90d2185f505094fe8a3428dea2e9c2c21bb127a1905c53b8f9",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r15",
+      "file": "rounds/r15/frames/06-rainline.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r15/final-package-8a254d16/check/runs/controls/frames/024_map-rainline.png",
+      "source_sha256": "a5597d59c3ba5da586805c97e9ff4cf9d1425f1db37c9ba370f8ed127a0f024a",
+      "what_it_shows": "Rainline introduced in R15",
+      "provenance": "retained R15 exact-pack/OS-input evidence, not a new launch",
+      "how_made": {
+        "capture": "Original source and method described in docs/r15/RESULTS.md and exact-release controls; compressed during handover",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "437484f45c034172cd127f1f6fc31b5ec24a6c112fe005f9e67a9c14b53b3fef",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r15",
+      "file": "rounds/r15/frames/07-night-shift.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r15/final-package-8a254d16/check/runs/controls/frames/032_map-night-shift.png",
+      "source_sha256": "bb7d31d04184f9408e4a24fbeee410670b2134eb82aa7e04b537e8c46312f61c",
+      "what_it_shows": "Night Shift introduced in R15",
+      "provenance": "retained R15 exact-pack/OS-input evidence, not a new launch",
+      "how_made": {
+        "capture": "Original source and method described in docs/r15/RESULTS.md and exact-release controls; compressed during handover",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "fbb232de7d1f7b4bab3fccab391ba87c443df057835d1bbdc6381cd3285d0a46",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r15",
+      "file": "rounds/r15/frames/08-movement-lab.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r15/final-package-8a254d16/check/runs/controls/frames/056_map-experiment.png",
+      "source_sha256": "db8a5c9544db5ea55e295a2e79a1c5846db72776ce6ea5e517bc3887cda7bc6e",
+      "what_it_shows": "The isolated R15 Movement Lab",
+      "provenance": "retained R15 exact-pack/OS-input evidence, not a new launch",
+      "how_made": {
+        "capture": "Original source and method described in docs/r15/RESULTS.md and exact-release controls; compressed during handover",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "3779fa3c18a40f951ebc44f9bcdfd56939a5244e03be19224307f513661fb1fb",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r16",
+      "file": "rounds/r16/frames/01-breakwater-start.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r16/final-package-67e608a0/check/runs/controls/frames/000_startup.png",
+      "source_sha256": "a977e1d209eb21c3726f2ad4429f4a8fa65d368138d47c7dc9cb1513026821d0",
+      "what_it_shows": "Breakwater start with R16 HUD",
+      "provenance": "retained R16 native/packed evidence, not a new launch",
+      "how_made": {
+        "capture": "Exact-pack controls or native observer and focused OS keys; see docs/r16/NATIVE-ACCEPTANCE.md, LAB-OS-INPUT.md and RELEASE-OS-INPUT.md",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "5742a4deaa26bfa6e7d26e2ba842a10f056a4e33819d41a32b4c2118c93f91b7",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r16",
+      "file": "rounds/r16/frames/02-menu.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r16/release-os-smoke4/pause.jpg",
+      "source_sha256": "2e2e94cf634bb7a5fbe01cc71c6f21024efeb6d4f0498056bbe042d31d50b804",
+      "what_it_shows": "R16 pause menu with recording controls/path",
+      "provenance": "retained R16 native/packed evidence, not a new launch",
+      "how_made": {
+        "capture": "Exact-pack controls or native observer and focused OS keys; see docs/r16/NATIVE-ACCEPTANCE.md, LAB-OS-INPUT.md and RELEASE-OS-INPUT.md",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "aa96c9da9c86aecd09da900ab6aa9a32e862636870c6fb0d43d8f90118d20d6b",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r16",
+      "file": "rounds/r16/frames/03-style.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r16/native-acceptance/final-native-course/run/first-combo.jpg",
+      "source_sha256": "a03b59735e67132f18b5035e42327e214c6b38caaa6afebc3cd560339fed550f",
+      "what_it_shows": "R16 geometry-backed gap award and combo callout",
+      "provenance": "retained R16 native/packed evidence, not a new launch",
+      "how_made": {
+        "capture": "Exact-pack controls or native observer and focused OS keys; see docs/r16/NATIVE-ACCEPTANCE.md, LAB-OS-INPUT.md and RELEASE-OS-INPUT.md",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "a809b7c5f5d4e04b6fdc9222ce619b90442030b067fa5ae6edc683cb208cf623",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r16",
+      "file": "rounds/r16/frames/04-ghost.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r16/native-acceptance/final-native-course/run/ghost-ahead-clear.jpg",
+      "source_sha256": "cd5ab2b7cf051f882360093942cdf02f0bb76f503b92a13de9b5e27e52025d11",
+      "what_it_shows": "Nonphysical fastest-clean-run ghost ahead of the player",
+      "provenance": "retained R16 native/packed evidence, not a new launch",
+      "how_made": {
+        "capture": "Exact-pack controls or native observer and focused OS keys; see docs/r16/NATIVE-ACCEPTANCE.md, LAB-OS-INPUT.md and RELEASE-OS-INPUT.md",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "94925d33d1d01b263b68f7a2393f7d200836419916a574d12cec7473e70e3daa",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r16",
+      "file": "rounds/r16/frames/05-landing-slide.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r16/lab-os-final/attempt3/landing-slide.jpg",
+      "source_sha256": "6f643fa61434bac6395b0959b3f78a316fa6309c46aa443a45ddc9abbd3af77d",
+      "what_it_shows": "R16 lab landing slide, from focused OS-input proof",
+      "provenance": "retained R16 native/packed evidence, not a new launch",
+      "how_made": {
+        "capture": "Exact-pack controls or native observer and focused OS keys; see docs/r16/NATIVE-ACCEPTANCE.md, LAB-OS-INPUT.md and RELEASE-OS-INPUT.md",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "44e1270277e1b65dc996fb8296b644fbd353c3ea7c996361d3c140c40c2199ac",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r16",
+      "file": "rounds/r16/frames/06-wall-kick.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r16/lab-os-final/attempt3/wall-kick-a.jpg",
+      "source_sha256": "2aeeffa7299026a54e0b239e9cef6ddb56a553aaa5103e01a60209120ff30464",
+      "what_it_shows": "R16 lab A-held wall kick with bounded budget",
+      "provenance": "retained R16 native/packed evidence, not a new launch",
+      "how_made": {
+        "capture": "Exact-pack controls or native observer and focused OS keys; see docs/r16/NATIVE-ACCEPTANCE.md, LAB-OS-INPUT.md and RELEASE-OS-INPUT.md",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "05dbb11e3cc8957132bba26b98cf74302ece3db7cf5a91ba32879829bcf343fe",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r17",
+      "file": "rounds/r17/frames/breakwater-before.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r17-views-final/breakwater/spawn-old.png",
+      "source_sha256": "a40c1166a07760de548e6f0b36d6474c7572b0e87e0fa6a387e09c3ceaa3d439",
+      "what_it_shows": "The same R17 Breakwater spawn with the inherited old look",
+      "provenance": "retained R17 native source comparison, not a fresh ZIP launch",
+      "how_made": {
+        "capture": "Godot native fixed-view capture; adjacent views.json records camera/FOV",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "0a50c82e955a5cfcd9636e49de10ae0b99e967af162cdd54f7d5597daab26626",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r17",
+      "file": "rounds/r17/frames/breakwater-route.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r17-views-final/breakwater/route-new.png",
+      "source_sha256": "d9830787ea482ffca088287e29bb721f89a7c8473a9812bc93e587be9538e859",
+      "what_it_shows": "R17 Breakwater route view with cream tops, darker sides and orange edges",
+      "provenance": "retained R17 native source comparison, not a fresh ZIP launch",
+      "how_made": {
+        "capture": "Godot native fixed-view capture; adjacent views.json records camera/FOV",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "758cce16b3df8abd61781293c15ef2cb01192fe2cd881e88ac030b59a206e7f9",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r17",
+      "file": "rounds/r17/frames/look-breakwater.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r17-views-final/breakwater/spawn-new.png",
+      "source_sha256": "9fc4a958cf0910a27e6241c9fade901bba833915508a0a1a4be389e0e0fe296c",
+      "what_it_shows": "R17 breakwater fixed-camera spawn, painted Look C",
+      "provenance": "retained R17 native source comparison, not a fresh ZIP launch",
+      "how_made": {
+        "capture": "Godot native fixed-view capture; camera/FOV and old/new role recorded in adjacent views.json and source-manifest.json",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "5d74965393212bc48a3e643d96e1468e6acd1b836a7905081298042497d17661",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r17",
+      "file": "rounds/r17/frames/look-experiment.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r17-views-final/experiment/spawn-new.png",
+      "source_sha256": "ac99031ed40f354cf26e216457d8d40a735de0da37edf05adeb07eee0ac78cdb",
+      "what_it_shows": "R17 experiment fixed-camera spawn, painted Look C",
+      "provenance": "retained R17 native source comparison, not a fresh ZIP launch",
+      "how_made": {
+        "capture": "Godot native fixed-view capture; camera/FOV and old/new role recorded in adjacent views.json and source-manifest.json",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "cc0eb337a30c2d3e3ede2b83487e12df13f3d9f467ca3aa7ffc58059f58c39fc",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r17",
+      "file": "rounds/r17/frames/look-night-shift.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r17-views-final/night-shift/spawn-new.png",
+      "source_sha256": "27cee8986a6c9811a8e915fa2e893a1914b6bf7dcc420f7cc0a313f072a7d2fa",
+      "what_it_shows": "R17 night-shift fixed-camera spawn, painted Look C",
+      "provenance": "retained R17 native source comparison, not a fresh ZIP launch",
+      "how_made": {
+        "capture": "Godot native fixed-view capture; camera/FOV and old/new role recorded in adjacent views.json and source-manifest.json",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "5c026d20bbd2181ddb2a31a6a18460f6fd57a73eae32450b012f1fdfe70191c7",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r17",
+      "file": "rounds/r17/frames/look-overflow.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r17-views-final/overflow/spawn-new.png",
+      "source_sha256": "3162bb937218bb0ca6ae5b185bc04100f6990a3cea33290dedf2329272368c6a",
+      "what_it_shows": "R17 overflow fixed-camera spawn, painted Look C",
+      "provenance": "retained R17 native source comparison, not a fresh ZIP launch",
+      "how_made": {
+        "capture": "Godot native fixed-view capture; camera/FOV and old/new role recorded in adjacent views.json and source-manifest.json",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "679b4367f4a9f2001a1e1e7bba276185c4c4b6bfde04676b68a68ea9b3fa89e5",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r17",
+      "file": "rounds/r17/frames/look-practice.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r17-views-final/practice/spawn-new.png",
+      "source_sha256": "a16ab30945f2b1fa964e2571b1412ebda1407ac00ecd18d040f40a9cbfcb70ac",
+      "what_it_shows": "R17 practice fixed-camera spawn, painted Look C",
+      "provenance": "retained R17 native source comparison, not a fresh ZIP launch",
+      "how_made": {
+        "capture": "Godot native fixed-view capture; camera/FOV and old/new role recorded in adjacent views.json and source-manifest.json",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "7b006f15885ac28bca74cb31497de6cdae4df328afcd243d089aa41b306b2815",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r17",
+      "file": "rounds/r17/frames/look-rainline.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r17-views-final/rainline/spawn-new.png",
+      "source_sha256": "25099eb2d9019be425b02318b573a4abc58fea4f8b732150a170d316e0933159",
+      "what_it_shows": "R17 rainline fixed-camera spawn, painted Look C",
+      "provenance": "retained R17 native source comparison, not a fresh ZIP launch",
+      "how_made": {
+        "capture": "Godot native fixed-view capture; camera/FOV and old/new role recorded in adjacent views.json and source-manifest.json",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "d06bd912a5aed6f1adba52824d9e89a18c9aa7817b0bc13b4bdf00bc85895f51",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r17",
+      "file": "rounds/r17/frames/look-sunken-court.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r17-views-final/sunken-court/spawn-new.png",
+      "source_sha256": "5fb02cb4b33c99b0282cbde4a87a29a9fd3366fbc0fa48de86a29c990deae8ef",
+      "what_it_shows": "R17 sunken-court fixed-camera spawn, painted Look C",
+      "provenance": "retained R17 native source comparison, not a fresh ZIP launch",
+      "how_made": {
+        "capture": "Godot native fixed-view capture; camera/FOV and old/new role recorded in adjacent views.json and source-manifest.json",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "231bea85d7c55929e2a12858d443b77e30b833993c76828ae66c0ecd7c342386",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r17",
+      "file": "rounds/r17/frames/look-whiteout-relay.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r17-views-final/whiteout-relay/spawn-new.png",
+      "source_sha256": "02020e82dabe0cdd96fb30f3bd5aa11fae5a32cc1f8543254895cd3cf68ee2f9",
+      "what_it_shows": "R17 whiteout-relay fixed-camera spawn, painted Look C",
+      "provenance": "retained R17 native source comparison, not a fresh ZIP launch",
+      "how_made": {
+        "capture": "Godot native fixed-view capture; camera/FOV and old/new role recorded in adjacent views.json and source-manifest.json",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "e5b450c3248e47000363847cd15e70be2f7996bd0096d20bd7e8e049f9e7333c",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "file": "rounds/r18/frames/01-rebuilt-start.webp",
+      "what_it_shows": "R18 Breakwater start and redesigned title/HUD",
+      "how_made": {
+        "capture": "rebuilt from commit 640d06e6539b53da752f03bfddb64fb46310abb7, not the delivered ZIP; temporary sparse shared clone; Godot 4.7.2 R17 Pack pack export; official release runtime from R21 ZIP; isolated XDG profile, AMD/X11 :190 under shared engine lock; ffmpeg x11grab; WebP quality 82, 1600 px",
+        "conversion": "WebP quality 82 at 1600 px"
+      },
+      "output_sha256": "219fca69716527c24b6d751153c2007742eae394dec7f4f2a1c68ac350d571e0",
+      "provenance": "rebuilt from commit 640d06e6539b53da752f03bfddb64fb46310abb7, not the delivered ZIP",
+      "capture_receipt": {
+        "round": "r18",
+        "commit": "640d06e6539b53da752f03bfddb64fb46310abb7",
+        "home_free_before": 16736702464,
+        "origin": "rebuilt from commit 640d06e6539b53da752f03bfddb64fb46310abb7, not the delivered ZIP",
+        "export_command": [
+          "/home/thatmike1/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64",
+          "--headless",
+          "--path",
+          "/tmp/spillway-history-rebuild-r18/clone/projects/foldrunner",
+          "--export-pack",
+          "R17 Pack",
+          "/tmp/spillway-history-rebuild-r18/Rebuilt.pck"
+        ],
+        "rebuilt_pack_sha256": "d327e9dfcbc94b6dc903e38294cc77690ddded46783f6000ee171bd8840d621c",
+        "official_release_runtime_sha256": "d9f79ab89b5ae369aeed11c6052d402e8218cd503bf85b4a235f9c30c46a7c63",
+        "display_released": true,
+        "home_free_after": 16734826496
+      },
+      "round": "r18",
+      "source_path": "ccChat-general@640d06e6539b53da752f03bfddb64fb46310abb7:projects/foldrunner",
+      "commit": "640d06e6539b53da752f03bfddb64fb46310abb7",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "file": "rounds/r18/frames/02-rebuilt-menu.webp",
+      "what_it_shows": "R18 pause menu rebuilt from committed source",
+      "how_made": {
+        "capture": "rebuilt from commit 640d06e6539b53da752f03bfddb64fb46310abb7, not the delivered ZIP; temporary sparse shared clone; Godot 4.7.2 R17 Pack pack export; official release runtime from R21 ZIP; isolated XDG profile, AMD/X11 :190 under shared engine lock; ffmpeg x11grab; WebP quality 82, 1600 px",
+        "conversion": "WebP quality 82 at 1600 px"
+      },
+      "output_sha256": "158ffe0bd1b10efd1939ed9de046857d9d4dce6f88e76e01022d7e24b4f352e7",
+      "provenance": "rebuilt from commit 640d06e6539b53da752f03bfddb64fb46310abb7, not the delivered ZIP",
+      "capture_receipt": {
+        "round": "r18",
+        "commit": "640d06e6539b53da752f03bfddb64fb46310abb7",
+        "home_free_before": 16736702464,
+        "origin": "rebuilt from commit 640d06e6539b53da752f03bfddb64fb46310abb7, not the delivered ZIP",
+        "export_command": [
+          "/home/thatmike1/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64",
+          "--headless",
+          "--path",
+          "/tmp/spillway-history-rebuild-r18/clone/projects/foldrunner",
+          "--export-pack",
+          "R17 Pack",
+          "/tmp/spillway-history-rebuild-r18/Rebuilt.pck"
+        ],
+        "rebuilt_pack_sha256": "d327e9dfcbc94b6dc903e38294cc77690ddded46783f6000ee171bd8840d621c",
+        "official_release_runtime_sha256": "d9f79ab89b5ae369aeed11c6052d402e8218cd503bf85b4a235f9c30c46a7c63",
+        "display_released": true,
+        "home_free_after": 16734826496
+      },
+      "round": "r18",
+      "source_path": "ccChat-general@640d06e6539b53da752f03bfddb64fb46310abb7:projects/foldrunner",
+      "commit": "640d06e6539b53da752f03bfddb64fb46310abb7",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r19",
+      "file": "rounds/r19/frames/fall-line-frame-01500.webp",
+      "source_path": "hetzner:/root/spillway-r20-proof/r20-retired-r19-components.tar.zst::r19-fall-line-integration/native/new/frame-01500.png",
+      "source_sha256": "245b57d8d9f5764936cfe4298252ca2e1c4cb1dd69bd82f0f3a409f76f3e7393",
+      "what_it_shows": "R19 Fall Line collapsing-deck experiment in a scripted route",
+      "provenance": "retained R19 native source input replay, not final ZIP proof",
+      "how_made": {
+        "capture": "Retained original native frame restored as a streamed archive member, payload SHA256 matched FILES.json; original capture method in round results/reviews",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "fa913238896f97498486958d311925caa38659036c3ac48f782c6fb15f93ca82",
+      "archive_sha256": "54e80d55cd56542c6d809c0b433b70ae26df28ca15c2159e4cd74040f969b1c5",
+      "source_manifest": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r20-retired-r19-components-archive/FILES.json",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r19",
+      "file": "rounds/r19/frames/menu-1280x720.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r19-ghost-share/native/menu-1280x720.png",
+      "source_sha256": "d4f5b7752965167b40c350f52b0f7ab3fba03add3fb0b2e3d347894a927cbc1a",
+      "what_it_shows": "R19 ghost-sharing menu expanded",
+      "provenance": "R19 staged native ghost-service/menu fixture, not final ZIP proof",
+      "how_made": {
+        "capture": "Retained native screenshot; scope documented in look/REVIEW-R19.md and ghost-sharing evidence",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "59180fba114fa0af60c92c0e133c07ef74cbbf1aae2d31acb02fa291ee85d3c8",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r19",
+      "file": "rounds/r19/frames/menu-collapsed-1280x720.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r19-ghost-share/native/menu-collapsed-1280x720.png",
+      "source_sha256": "e99d50620ec2aac1f931a13e1937d5bd64fd03d98589170dce06690f7a21d311",
+      "what_it_shows": "R19 ghost-sharing menu collapsed",
+      "provenance": "R19 staged native ghost-service/menu fixture, not final ZIP proof",
+      "how_made": {
+        "capture": "Retained native screenshot; scope documented in look/REVIEW-R19.md and ghost-sharing evidence",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "dba756433dcc1d0f814a7af8e8b044ceed5302e7e181bbae04564a5cfefdf5aa",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r19",
+      "file": "rounds/r19/frames/saltglass-frame-00040.webp",
+      "source_path": "hetzner:/root/spillway-r20-proof/r20-retired-r19-components.tar.zst::r19-surf-integration/native/new/frame-00040.png",
+      "source_sha256": "c76422e2584920dbf14815dcb972668c219caf2ae65999cd503772c90ca2ccc7",
+      "what_it_shows": "R19 Saltglass start",
+      "provenance": "retained R19 native source input replay, not final ZIP proof",
+      "how_made": {
+        "capture": "Retained original native frame restored as a streamed archive member, payload SHA256 matched FILES.json; original capture method in round results/reviews",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "911da881d5bb90019202b4eace490404d4477aba2cce15250dc57edd6d9d50d0",
+      "archive_sha256": "54e80d55cd56542c6d809c0b433b70ae26df28ca15c2159e4cd74040f969b1c5",
+      "source_manifest": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r20-retired-r19-components-archive/FILES.json",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r19",
+      "file": "rounds/r19/frames/saltglass-frame-02300.webp",
+      "source_path": "hetzner:/root/spillway-r20-proof/r20-retired-r19-components.tar.zst::r19-surf-integration/native/new/frame-02300.png",
+      "source_sha256": "dd2cd4803b24627a9ed846b94da099d3183b632b8d2806341229bb7cc5aa0fe0",
+      "what_it_shows": "R19 Saltglass surf-fin route view",
+      "provenance": "retained R19 native source input replay, not final ZIP proof",
+      "how_made": {
+        "capture": "Retained original native frame restored as a streamed archive member, payload SHA256 matched FILES.json; original capture method in round results/reviews",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "7d6fefb528cbb58d2708adaf609c8b7b34d1fe77a9ad729c6555a16f060f4c4e",
+      "archive_sha256": "54e80d55cd56542c6d809c0b433b70ae26df28ca15c2159e4cd74040f969b1c5",
+      "source_manifest": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r20-retired-r19-components-archive/FILES.json",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r19",
+      "file": "rounds/r19/frames/style-backwards.webp",
+      "source_path": "hetzner:/root/spillway-r21-proof/r21-retired-final-headroom.tar.zst::r19-direction-ui/1920x1080/backwards.png",
+      "source_sha256": "2b2dbc9f83311f7a30608e73048ce7ed67726f6b648fa03daf451027093a1148",
+      "what_it_shows": "R19 backwards style award presentation fixture",
+      "provenance": "R19 staged native directional-HUD fixture, not proof of earned gameplay",
+      "how_made": {
+        "capture": "Retained original native frame restored as a streamed archive member, payload SHA256 matched FILES.json; original capture method in round results/reviews",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "b27304a1e2ed44a358550a677e54fe8c2a7f2289c6423f594dc47ea355339ac6",
+      "archive_sha256": "c2034a9bfe891c10c822dc572083210f02343d94a8bed956345961a58ea17af1",
+      "source_manifest": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r21-retired-final-headroom-archive/FILES.json",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r19",
+      "file": "rounds/r19/frames/style-sideways.webp",
+      "source_path": "hetzner:/root/spillway-r21-proof/r21-retired-final-headroom.tar.zst::r19-direction-ui/1920x1080/sideways.png",
+      "source_sha256": "358473ac9d0d4bdf6b67d3ccb9777a2dcf1193456032895bc5456f0730fd64c1",
+      "what_it_shows": "R19 sideways style award presentation fixture",
+      "provenance": "R19 staged native directional-HUD fixture, not proof of earned gameplay",
+      "how_made": {
+        "capture": "Retained original native frame restored as a streamed archive member, payload SHA256 matched FILES.json; original capture method in round results/reviews",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "8bba265ebd453a47aed7ea1aa2eb85732ed4d675f2b450ba286315e4475cb039",
+      "archive_sha256": "c2034a9bfe891c10c822dc572083210f02343d94a8bed956345961a58ea17af1",
+      "source_manifest": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r21-retired-final-headroom-archive/FILES.json",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r20",
+      "file": "rounds/r20/frames/archive-check-000_tick_00000.webp",
+      "source_path": "hetzner:/root/spillway-r20-proof/r20-release-headroom.tar.zst::delivery/spillway-r20/evidence/check/breakwater-basic-play/frames/000_tick_00000.png",
+      "source_sha256": "282c16c0c98bfb88bd4d31bcf5c9399f367ca165f53bad1ba627169fdd1c5969",
+      "what_it_shows": "R20 packaging-candidate Breakwater start",
+      "provenance": "retained rejected R20 packaging candidate; final R20 ZIP identity is not claimed",
+      "how_made": {
+        "capture": "Retained original native frame restored as a streamed archive member, payload SHA256 matched FILES.json; original capture method in round results/reviews",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "b15179a817c89ea8ef62943ae8ca639948be6793b14ff8fcb9cc1d4e94858ea1",
+      "archive_sha256": "b137ea7845df3a9c7c039b7aae011f9462b5d99f9ee769707951d71c0019cb82",
+      "source_manifest": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r20-release-headroom-archive/FILES.json",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r20",
+      "file": "rounds/r20/frames/archive-check-083_pause-for-map_saltglass.webp",
+      "source_path": "hetzner:/root/spillway-r20-proof/r20-release-headroom.tar.zst::delivery/spillway-r20/evidence/check/controls/frames/083_pause-for-map_saltglass.png",
+      "source_sha256": "915f83fb8188973e83e8e67937ef32231582df11f334c2b0c58b7517361f76ab",
+      "what_it_shows": "R20 packaging-candidate pause menu before Saltglass selection",
+      "provenance": "retained rejected R20 packaging candidate; final R20 ZIP identity is not claimed",
+      "how_made": {
+        "capture": "Retained original native frame restored as a streamed archive member, payload SHA256 matched FILES.json; original capture method in round results/reviews",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "7d39fabcd179f60f439f1206653963c6079fdd6ca03aa070255f764e51d56cc7",
+      "archive_sha256": "b137ea7845df3a9c7c039b7aae011f9462b5d99f9ee769707951d71c0019cb82",
+      "source_manifest": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r20-release-headroom-archive/FILES.json",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r20",
+      "file": "rounds/r20/frames/saltglass-frame-03900.webp",
+      "source_path": "hetzner:/root/spillway-r21-proof/r21-retired-native-source-evidence.tar.zst::r20-saltglass-native-corrected/new/frame-03900.png",
+      "source_sha256": "3f4aa4b07db975b08ea086671b8890435ce1b39a4632f74934efecd0831223b4",
+      "what_it_shows": "R20 Saltglass high-entry surf route",
+      "provenance": "retained R20 native source capture, not final ZIP proof",
+      "how_made": {
+        "capture": "Retained original native frame restored as a streamed archive member, payload SHA256 matched FILES.json; original capture method in round results/reviews",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "cb909eea10ee909d3087b9fb360d66803de22e945f6f12179358b5668b0e8aa8",
+      "archive_sha256": "d90b0d8d2c1b80c7723e2f6cdefafb4d34aaec1e24c2160aba2960e821dd59ab",
+      "source_manifest": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r21-retired-native-source-evidence-archive/FILES.json",
+      "dimensions": [
+        1600,
+        909
+      ]
+    },
+    {
+      "round": "r20",
+      "file": "rounds/r20/frames/tether-route-00900.webp",
+      "source_path": "hetzner:/root/spillway-r21-proof/r21-retired-native-source-evidence.tar.zst::r20-tether-native/r20-tether-native/classic-1080/route-00900.png",
+      "source_sha256": "2be2fc91fa40fb7e3a3b1d0a1dd3e2872f8410d56ea2ce221087de65fdebddb0",
+      "what_it_shows": "R20 Classic mouse-grapple Tether Yard route",
+      "provenance": "retained R20 native source capture, not final ZIP proof",
+      "how_made": {
+        "capture": "Retained original native frame restored as a streamed archive member, payload SHA256 matched FILES.json; original capture method in round results/reviews",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "7ba9f6fdfa9b08b049c79285886dd8c9405a5754ed198b43cca5ce53cc5b03c4",
+      "archive_sha256": "d90b0d8d2c1b80c7723e2f6cdefafb4d34aaec1e24c2160aba2960e821dd59ab",
+      "source_manifest": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r21-retired-native-source-evidence-archive/FILES.json",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r20",
+      "file": "rounds/r20/frames/through-line-landing.webp",
+      "source_path": "hetzner:/root/spillway-r21-proof/r21-retired-native-source-evidence.tar.zst::r20-through-native/r20-through-native-02/fast-1080/landing.png",
+      "source_sha256": "554500826abd5b58eeb3c917172ecfa8259d99a983c0366bfd0d0edf1a91263d",
+      "what_it_shows": "R20 Through Line receiving landing",
+      "provenance": "retained R20 native source capture, not final ZIP proof",
+      "how_made": {
+        "capture": "Retained original native frame restored as a streamed archive member, payload SHA256 matched FILES.json; original capture method in round results/reviews",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "ea27966eadc7ee9f6658d477f26af131863c4f0f98b03a6c27eba2e8addc48ac",
+      "archive_sha256": "d90b0d8d2c1b80c7723e2f6cdefafb4d34aaec1e24c2160aba2960e821dd59ab",
+      "source_manifest": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r21-retired-native-source-evidence-archive/FILES.json",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r20",
+      "file": "rounds/r20/frames/through-line-launch.webp",
+      "source_path": "hetzner:/root/spillway-r21-proof/r21-retired-native-source-evidence.tar.zst::r20-through-native/r20-through-native-02/fast-1080/launch.png",
+      "source_sha256": "a3e2709caad503255d62385eeb14a21d5c389b5532cce01c47a0753af937eea8",
+      "what_it_shows": "R20 Through Line launch",
+      "provenance": "retained R20 native source capture, not final ZIP proof",
+      "how_made": {
+        "capture": "Retained original native frame restored as a streamed archive member, payload SHA256 matched FILES.json; original capture method in round results/reviews",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "05797b4b3a5443b18359a2e57f55c59ab82e77e0981576779439024ec29a2792",
+      "archive_sha256": "d90b0d8d2c1b80c7723e2f6cdefafb4d34aaec1e24c2160aba2960e821dd59ab",
+      "source_manifest": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r21-retired-native-source-evidence-archive/FILES.json",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "file": "rounds/r21/frames/01-breakwater-start.webp",
+      "what_it_shows": "breakwater start in the published R21 build",
+      "how_made": {
+        "capture": "exact Linux ZIP extracted in temporary RAM folder; adjacent packed release launched from empty cwd, isolated XDG profile, AMD/X11 private display :190 under shared engine lock; ffmpeg x11grab; WebP quality 82 at 1600 px wide",
+        "conversion": "WebP quality 82 at 1600 px"
+      },
+      "output_sha256": "3cd7fb7a17f1ec83dfceffbbeeac893de21f84d84a77a6c1f18f975030502898",
+      "provenance": "published delivered ZIP",
+      "capture_receipt": {
+        "round": "r21",
+        "home_free_before": 16743227392,
+        "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+        "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+        "origin": "published delivered ZIP",
+        "display_released": true,
+        "home_free_after": 16743059456
+      },
+      "round": "r21",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+      "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+      "capture_command": [
+        "stdbuf",
+        "-oL",
+        "/tmp/spillway-history-capture-r21/build/SpillwayR21-linux-x86_64/SpillwayR21.x86_64",
+        "--verbose",
+        "--display-driver",
+        "x11",
+        "--rendering-driver",
+        "opengl3",
+        "--audio-driver",
+        "Dummy",
+        "--windowed",
+        "--resolution",
+        "1600x900",
+        "--position",
+        "0,0",
+        "--",
+        "--no-records",
+        "--no-run-recordings",
+        "--r16-map=breakwater"
+      ],
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "file": "rounds/r21/frames/01-saltglass-start.webp",
+      "what_it_shows": "saltglass start in the published R21 build",
+      "how_made": {
+        "capture": "exact Linux ZIP extracted in temporary RAM folder; adjacent packed release launched from empty cwd, isolated XDG profile, AMD/X11 private display :190 under shared engine lock; ffmpeg x11grab; WebP quality 82 at 1600 px wide",
+        "conversion": "WebP quality 82 at 1600 px"
+      },
+      "output_sha256": "6f3133731ceeddf9f7c8c226f16555ab63d1f94b7b22597d99bdc2fb30904525",
+      "provenance": "published delivered ZIP",
+      "capture_receipt": {
+        "round": "r21",
+        "home_free_before": 16743227392,
+        "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+        "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+        "origin": "published delivered ZIP",
+        "display_released": true,
+        "home_free_after": 16743059456
+      },
+      "round": "r21",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+      "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+      "capture_command": [
+        "stdbuf",
+        "-oL",
+        "/tmp/spillway-history-capture-r21/build/SpillwayR21-linux-x86_64/SpillwayR21.x86_64",
+        "--verbose",
+        "--display-driver",
+        "x11",
+        "--rendering-driver",
+        "opengl3",
+        "--audio-driver",
+        "Dummy",
+        "--windowed",
+        "--resolution",
+        "1600x900",
+        "--position",
+        "0,0",
+        "--",
+        "--no-records",
+        "--no-run-recordings",
+        "--r16-map=saltglass"
+      ],
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "file": "rounds/r21/frames/01-tether-yard-start.webp",
+      "what_it_shows": "tether-yard start in the published R21 build",
+      "how_made": {
+        "capture": "exact Linux ZIP extracted in temporary RAM folder; adjacent packed release launched from empty cwd, isolated XDG profile, AMD/X11 private display :190 under shared engine lock; ffmpeg x11grab; WebP quality 82 at 1600 px wide",
+        "conversion": "WebP quality 82 at 1600 px"
+      },
+      "output_sha256": "41c688e68d5d65d02733e28d49b4a106e9c9fefba872ce48b1cc2904e07a21a8",
+      "provenance": "published delivered ZIP",
+      "capture_receipt": {
+        "round": "r21",
+        "home_free_before": 16743227392,
+        "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+        "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+        "origin": "published delivered ZIP",
+        "display_released": true,
+        "home_free_after": 16743059456
+      },
+      "round": "r21",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+      "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+      "capture_command": [
+        "stdbuf",
+        "-oL",
+        "/tmp/spillway-history-capture-r21/build/SpillwayR21-linux-x86_64/SpillwayR21.x86_64",
+        "--verbose",
+        "--display-driver",
+        "x11",
+        "--rendering-driver",
+        "opengl3",
+        "--audio-driver",
+        "Dummy",
+        "--windowed",
+        "--resolution",
+        "1600x900",
+        "--position",
+        "0,0",
+        "--",
+        "--no-records",
+        "--no-run-recordings",
+        "--r16-map=tether-yard"
+      ],
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "file": "rounds/r21/frames/02-breakwater-menu.webp",
+      "what_it_shows": "R21 pause menu on breakwater",
+      "how_made": {
+        "capture": "exact Linux ZIP extracted in temporary RAM folder; adjacent packed release launched from empty cwd, isolated XDG profile, AMD/X11 private display :190 under shared engine lock; ffmpeg x11grab; WebP quality 82 at 1600 px wide",
+        "conversion": "WebP quality 82 at 1600 px"
+      },
+      "output_sha256": "a78dbde1d03d0d9d77182033e77f3927fd320ab79d96477347579a0061be2a7e",
+      "provenance": "published delivered ZIP",
+      "capture_receipt": {
+        "round": "r21",
+        "home_free_before": 16743227392,
+        "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+        "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+        "origin": "published delivered ZIP",
+        "display_released": true,
+        "home_free_after": 16743059456
+      },
+      "round": "r21",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+      "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+      "capture_command": [
+        "stdbuf",
+        "-oL",
+        "/tmp/spillway-history-capture-r21/build/SpillwayR21-linux-x86_64/SpillwayR21.x86_64",
+        "--verbose",
+        "--display-driver",
+        "x11",
+        "--rendering-driver",
+        "opengl3",
+        "--audio-driver",
+        "Dummy",
+        "--windowed",
+        "--resolution",
+        "1600x900",
+        "--position",
+        "0,0",
+        "--",
+        "--no-records",
+        "--no-run-recordings",
+        "--r16-map=breakwater"
+      ],
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "file": "rounds/r21/frames/02-saltglass-menu.webp",
+      "what_it_shows": "R21 pause menu on saltglass",
+      "how_made": {
+        "capture": "exact Linux ZIP extracted in temporary RAM folder; adjacent packed release launched from empty cwd, isolated XDG profile, AMD/X11 private display :190 under shared engine lock; ffmpeg x11grab; WebP quality 82 at 1600 px wide",
+        "conversion": "WebP quality 82 at 1600 px"
+      },
+      "output_sha256": "cdf64054a1ab19fa5f25d232a9b26e268ddc2857c9185c5f769ec0c79e49acdc",
+      "provenance": "published delivered ZIP",
+      "capture_receipt": {
+        "round": "r21",
+        "home_free_before": 16743227392,
+        "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+        "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+        "origin": "published delivered ZIP",
+        "display_released": true,
+        "home_free_after": 16743059456
+      },
+      "round": "r21",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+      "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+      "capture_command": [
+        "stdbuf",
+        "-oL",
+        "/tmp/spillway-history-capture-r21/build/SpillwayR21-linux-x86_64/SpillwayR21.x86_64",
+        "--verbose",
+        "--display-driver",
+        "x11",
+        "--rendering-driver",
+        "opengl3",
+        "--audio-driver",
+        "Dummy",
+        "--windowed",
+        "--resolution",
+        "1600x900",
+        "--position",
+        "0,0",
+        "--",
+        "--no-records",
+        "--no-run-recordings",
+        "--r16-map=saltglass"
+      ],
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "file": "rounds/r21/frames/02-tether-yard-menu.webp",
+      "what_it_shows": "R21 pause menu on Tether Yard; tuning controls are farther down the sheet",
+      "how_made": {
+        "capture": "exact Linux ZIP extracted in temporary RAM folder; adjacent packed release launched from empty cwd, isolated XDG profile, AMD/X11 private display :190 under shared engine lock; ffmpeg x11grab; WebP quality 82 at 1600 px wide",
+        "conversion": "WebP quality 82 at 1600 px"
+      },
+      "output_sha256": "4058aee382062a341c4670e15a0d5758a6730570594a241b4641ec9769dca7ba",
+      "provenance": "published delivered ZIP",
+      "capture_receipt": {
+        "round": "r21",
+        "home_free_before": 16743227392,
+        "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+        "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+        "origin": "published delivered ZIP",
+        "display_released": true,
+        "home_free_after": 16743059456
+      },
+      "round": "r21",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+      "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+      "capture_command": [
+        "stdbuf",
+        "-oL",
+        "/tmp/spillway-history-capture-r21/build/SpillwayR21-linux-x86_64/SpillwayR21.x86_64",
+        "--verbose",
+        "--display-driver",
+        "x11",
+        "--rendering-driver",
+        "opengl3",
+        "--audio-driver",
+        "Dummy",
+        "--windowed",
+        "--resolution",
+        "1600x900",
+        "--position",
+        "0,0",
+        "--",
+        "--no-records",
+        "--no-run-recordings",
+        "--r16-map=tether-yard"
+      ],
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r21",
+      "file": "rounds/r21/frames/mike-floating-boxes.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/playtest-r21/screenshots/floating-boxes.png",
+      "source_sha256": "91edbf69d4cb7755bb9bb0aa31ca6ad01743199214e7b9d98b745a78ac0a442c",
+      "what_it_shows": "Mike R21 playtest: floating boxes",
+      "provenance": "Mike actual R21 playtest screenshot; caption from FEEDBACK.md",
+      "how_made": {
+        "capture": "Original player screenshot, resized and WebP compressed during handover",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "7799de1a6cfe6278d0b74ddd3afdac1fae92ab17ba6e715de4805c147e26edb0",
+      "dimensions": [
+        1600,
+        957
+      ]
+    },
+    {
+      "round": "r21",
+      "file": "rounds/r21/frames/mike-ramp-blends-with-platform-underside.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/playtest-r21/screenshots/ramp-blends-with-platform-underside.png",
+      "source_sha256": "499a665ae9eb741a880aab227ff5553f98f300c3a04f271cccd2bbc0c7f58681",
+      "what_it_shows": "Mike R21 playtest: ramp blends with platform underside",
+      "provenance": "Mike actual R21 playtest screenshot; caption from FEEDBACK.md",
+      "how_made": {
+        "capture": "Original player screenshot, resized and WebP compressed during handover",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "a0f57e52d49fbd88b2b60f0fcc012fb05ffc7200ab437ef0269845ebe99f12e3",
+      "dimensions": [
+        1600,
+        957
+      ]
+    },
+    {
+      "round": "r21",
+      "file": "rounds/r21/frames/native-saltglass-low-exit.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r21-native-final/saltglass-low-exit.png",
+      "source_sha256": "da1ad0e2763333a61fac869079852b2bebe052e9c413b54b12e4568c08d9d724",
+      "what_it_shows": "R21 saltglass low exit",
+      "provenance": "retained R21 native component/source capture before final publication, not exact final ZIP proof",
+      "how_made": {
+        "capture": "Native scripted component capture; SUMMARY.json pins Saltglass source 7fc298051 and Tether source 5168fc05f. The retained Saltglass capture receipt has ok=false; selected frames document appearance, not a passing complete audit.",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "acb0161cda581a3935c780bf3f72b995fe2253854e47b4f3f143fe8425af44f0",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r21",
+      "file": "rounds/r21/frames/native-saltglass-outside.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r21-native-final/saltglass-outside.png",
+      "source_sha256": "6d5ac55f41033cdb7ce0a07455f0a8d459b13da52465eddf226d69b684b1157c",
+      "what_it_shows": "R21 saltglass outside",
+      "provenance": "retained R21 native component/source capture before final publication, not exact final ZIP proof",
+      "how_made": {
+        "capture": "Native scripted component capture; SUMMARY.json pins Saltglass source 7fc298051 and Tether source 5168fc05f. The retained Saltglass capture receipt has ok=false; selected frames document appearance, not a passing complete audit.",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "0f4737120bfad79c607bdce52e638b3ad744ea806329c68f3987bb89e36a5b5f",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r21",
+      "file": "rounds/r21/frames/native-tether-assist-1080.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r21-native-final/tether-assist-1080.png",
+      "source_sha256": "283d3a39dadd08aeb59d96e888b8aae9225a2c6e2a28a98db3feafeeaedc0bc4",
+      "what_it_shows": "R21 tether assist 1080",
+      "provenance": "retained R21 native component/source capture before final publication, not exact final ZIP proof",
+      "how_made": {
+        "capture": "Native scripted component capture; SUMMARY.json pins Saltglass source 7fc298051 and Tether source 5168fc05f. The retained Saltglass capture receipt has ok=false; selected frames document appearance, not a passing complete audit.",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "70ae3f47d36b9bef6d1b5da41ec3feb1aaba54c99a8a22648ebdc4f45e9da597",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r21",
+      "file": "rounds/r21/frames/native-tether-attached.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r21-native-final/tether-attached.png",
+      "source_sha256": "2a5fec4417fadb7a8e8a3e9a0df42aa78727d5fe19291a5356c9535221759fd6",
+      "what_it_shows": "R21 tether attached",
+      "provenance": "retained R21 native component/source capture before final publication, not exact final ZIP proof",
+      "how_made": {
+        "capture": "Native scripted component capture; SUMMARY.json pins Saltglass source 7fc298051 and Tether source 5168fc05f. The retained Saltglass capture receipt has ok=false; selected frames document appearance, not a passing complete audit.",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "96f6223b2a53dad6f2c5c4b41aba763839b2434399f78f51190d8f8288fb7395",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r21",
+      "file": "rounds/r21/frames/native-tether-models-720.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r21-native-final/tether-models-720.png",
+      "source_sha256": "0dd0a589b17e8c6e92c991d5eaf881e69e5f338ab787be0bb040b3e43c750900",
+      "what_it_shows": "R21 tether models 720",
+      "provenance": "retained R21 native component/source capture before final publication, not exact final ZIP proof",
+      "how_made": {
+        "capture": "Native scripted component capture; SUMMARY.json pins Saltglass source 7fc298051 and Tether source 5168fc05f. The retained Saltglass capture receipt has ok=false; selected frames document appearance, not a passing complete audit.",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "01df7af21cbd25fb52aea39309186d0bd263c829d46bdca3e83ab32a55a13a8e",
+      "dimensions": [
+        1600,
+        900
+      ]
+    },
+    {
+      "round": "r21",
+      "file": "rounds/r21/frames/native-tether-release.webp",
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/look/evidence/r21-native-final/tether-release.png",
+      "source_sha256": "693f34b625733424a62cea206b464f41416a3342f1aa2d3abf2e29a6cc8bcf37",
+      "what_it_shows": "R21 tether release",
+      "provenance": "retained R21 native component/source capture before final publication, not exact final ZIP proof",
+      "how_made": {
+        "capture": "Native scripted component capture; SUMMARY.json pins Saltglass source 7fc298051 and Tether source 5168fc05f. The retained Saltglass capture receipt has ok=false; selected frames document appearance, not a passing complete audit.",
+        "conversion": "ImageMagick WebP quality 82, 1600 px wide, aspect preserved; no crop or retouch"
+      },
+      "output_sha256": "fd24b87577bca37ac2e1265501e014486065cd0bf711c9a593236e131e1fc396",
+      "dimensions": [
+        1600,
+        900
+      ]
+    }
+  ],
+  "gaps": [
+    {
+      "round": "r12",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r13",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r14",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r15",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r16",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r17",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r18",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r19",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r20",
+      "missing": "Fresh capture from the historical delivered ZIP",
+      "reason": "Mike deliberately deleted R12–R20 deliveries during disk cleanup on 12 November. No deleted delivery folder was recreated. Retained evidence and explicitly labeled source rebuilds are used instead."
+    },
+    {
+      "round": "r02",
+      "missing": "More than one literal exact-R2 view",
+      "reason": "Only one distinct R2 startup survives; three R3 unchanged-course illustrations are explicitly qualified in the desktop archive notes and manifest."
+    },
+    {
+      "round": "r19",
+      "missing": "Retained final-R19 Breakwater-start frame",
+      "reason": "Local preserved R19 frames cover the menu, Saltglass and experiments. No later round image is relabeled as R19."
+    },
+    {
+      "round": "r20",
+      "missing": "Confirmed final-ZIP R20 menu and Breakwater start",
+      "reason": "The recovered packaged menu/start pair belongs to a rejected packaging candidate and is labeled accordingly; native source new-mechanic frames remain available."
+    },
+    {
+      "round": "r17",
+      "missing": "Retained R17 pause menu",
+      "reason": "Retained fixed-camera map comparisons cover all maps, but no round-specific menu screenshot was found."
+    }
+  ],
+  "fresh_capture_receipts": {
+    "capture-r21": {
+      "round": "r21",
+      "home_free_before": 16743227392,
+      "frames": [
+        {
+          "round": "r21",
+          "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+          "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+          "shows": "breakwater start in the published R21 build",
+          "how_captured": "exact Linux ZIP extracted in temporary RAM folder; adjacent packed release launched from empty cwd, isolated XDG profile, AMD/X11 private display :190 under shared engine lock; ffmpeg x11grab; WebP quality 82 at 1600 px wide",
+          "capture_command": [
+            "stdbuf",
+            "-oL",
+            "/tmp/spillway-history-capture-r21/build/SpillwayR21-linux-x86_64/SpillwayR21.x86_64",
+            "--verbose",
+            "--display-driver",
+            "x11",
+            "--rendering-driver",
+            "opengl3",
+            "--audio-driver",
+            "Dummy",
+            "--windowed",
+            "--resolution",
+            "1600x900",
+            "--position",
+            "0,0",
+            "--",
+            "--no-records",
+            "--no-run-recordings",
+            "--r16-map=breakwater"
+          ],
+          "image_sha256": "3cd7fb7a17f1ec83dfceffbbeeac893de21f84d84a77a6c1f18f975030502898",
+          "file": "rounds/r21/frames/01-breakwater-start.webp"
+        },
+        {
+          "round": "r21",
+          "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+          "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+          "shows": "R21 pause menu on breakwater",
+          "how_captured": "exact Linux ZIP extracted in temporary RAM folder; adjacent packed release launched from empty cwd, isolated XDG profile, AMD/X11 private display :190 under shared engine lock; ffmpeg x11grab; WebP quality 82 at 1600 px wide",
+          "capture_command": [
+            "stdbuf",
+            "-oL",
+            "/tmp/spillway-history-capture-r21/build/SpillwayR21-linux-x86_64/SpillwayR21.x86_64",
+            "--verbose",
+            "--display-driver",
+            "x11",
+            "--rendering-driver",
+            "opengl3",
+            "--audio-driver",
+            "Dummy",
+            "--windowed",
+            "--resolution",
+            "1600x900",
+            "--position",
+            "0,0",
+            "--",
+            "--no-records",
+            "--no-run-recordings",
+            "--r16-map=breakwater"
+          ],
+          "image_sha256": "a78dbde1d03d0d9d77182033e77f3927fd320ab79d96477347579a0061be2a7e",
+          "file": "rounds/r21/frames/02-breakwater-menu.webp"
+        },
+        {
+          "round": "r21",
+          "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+          "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+          "shows": "saltglass start in the published R21 build",
+          "how_captured": "exact Linux ZIP extracted in temporary RAM folder; adjacent packed release launched from empty cwd, isolated XDG profile, AMD/X11 private display :190 under shared engine lock; ffmpeg x11grab; WebP quality 82 at 1600 px wide",
+          "capture_command": [
+            "stdbuf",
+            "-oL",
+            "/tmp/spillway-history-capture-r21/build/SpillwayR21-linux-x86_64/SpillwayR21.x86_64",
+            "--verbose",
+            "--display-driver",
+            "x11",
+            "--rendering-driver",
+            "opengl3",
+            "--audio-driver",
+            "Dummy",
+            "--windowed",
+            "--resolution",
+            "1600x900",
+            "--position",
+            "0,0",
+            "--",
+            "--no-records",
+            "--no-run-recordings",
+            "--r16-map=saltglass"
+          ],
+          "image_sha256": "6f3133731ceeddf9f7c8c226f16555ab63d1f94b7b22597d99bdc2fb30904525",
+          "file": "rounds/r21/frames/01-saltglass-start.webp"
+        },
+        {
+          "round": "r21",
+          "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+          "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+          "shows": "R21 pause menu on saltglass",
+          "how_captured": "exact Linux ZIP extracted in temporary RAM folder; adjacent packed release launched from empty cwd, isolated XDG profile, AMD/X11 private display :190 under shared engine lock; ffmpeg x11grab; WebP quality 82 at 1600 px wide",
+          "capture_command": [
+            "stdbuf",
+            "-oL",
+            "/tmp/spillway-history-capture-r21/build/SpillwayR21-linux-x86_64/SpillwayR21.x86_64",
+            "--verbose",
+            "--display-driver",
+            "x11",
+            "--rendering-driver",
+            "opengl3",
+            "--audio-driver",
+            "Dummy",
+            "--windowed",
+            "--resolution",
+            "1600x900",
+            "--position",
+            "0,0",
+            "--",
+            "--no-records",
+            "--no-run-recordings",
+            "--r16-map=saltglass"
+          ],
+          "image_sha256": "cdf64054a1ab19fa5f25d232a9b26e268ddc2857c9185c5f769ec0c79e49acdc",
+          "file": "rounds/r21/frames/02-saltglass-menu.webp"
+        },
+        {
+          "round": "r21",
+          "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+          "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+          "shows": "tether-yard start in the published R21 build",
+          "how_captured": "exact Linux ZIP extracted in temporary RAM folder; adjacent packed release launched from empty cwd, isolated XDG profile, AMD/X11 private display :190 under shared engine lock; ffmpeg x11grab; WebP quality 82 at 1600 px wide",
+          "capture_command": [
+            "stdbuf",
+            "-oL",
+            "/tmp/spillway-history-capture-r21/build/SpillwayR21-linux-x86_64/SpillwayR21.x86_64",
+            "--verbose",
+            "--display-driver",
+            "x11",
+            "--rendering-driver",
+            "opengl3",
+            "--audio-driver",
+            "Dummy",
+            "--windowed",
+            "--resolution",
+            "1600x900",
+            "--position",
+            "0,0",
+            "--",
+            "--no-records",
+            "--no-run-recordings",
+            "--r16-map=tether-yard"
+          ],
+          "image_sha256": "41c688e68d5d65d02733e28d49b4a106e9c9fefba872ce48b1cc2904e07a21a8",
+          "file": "rounds/r21/frames/01-tether-yard-start.webp"
+        },
+        {
+          "round": "r21",
+          "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+          "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+          "shows": "R21 pause menu on tether-yard with Elastic variants and anchor assist controls",
+          "how_captured": "exact Linux ZIP extracted in temporary RAM folder; adjacent packed release launched from empty cwd, isolated XDG profile, AMD/X11 private display :190 under shared engine lock; ffmpeg x11grab; WebP quality 82 at 1600 px wide",
+          "capture_command": [
+            "stdbuf",
+            "-oL",
+            "/tmp/spillway-history-capture-r21/build/SpillwayR21-linux-x86_64/SpillwayR21.x86_64",
+            "--verbose",
+            "--display-driver",
+            "x11",
+            "--rendering-driver",
+            "opengl3",
+            "--audio-driver",
+            "Dummy",
+            "--windowed",
+            "--resolution",
+            "1600x900",
+            "--position",
+            "0,0",
+            "--",
+            "--no-records",
+            "--no-run-recordings",
+            "--r16-map=tether-yard"
+          ],
+          "image_sha256": "4058aee382062a341c4670e15a0d5758a6730570594a241b4641ec9769dca7ba",
+          "file": "rounds/r21/frames/02-tether-yard-menu.webp"
+        }
+      ],
+      "source_path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r21/spillway-2026.11.11-r21-linux-x86_64-dee21016.zip",
+      "source_sha256": "749c2030233610068b3f465a87a644cd594665f1be7d367dba6370b211066ec5",
+      "origin": "published delivered ZIP",
+      "display_released": true,
+      "home_free_after": 16743059456
+    },
+    "rebuild-r12": {
+      "round": "r12",
+      "commit": "f84e175d53a4a259330969c83edaa929d8d02f5c",
+      "home_free_before": 16742047744,
+      "origin": "rebuilt from commit f84e175d53a4a259330969c83edaa929d8d02f5c, not the delivered ZIP",
+      "frames": [
+        {
+          "round": "r12",
+          "source_path": "ccChat-general@f84e175d53a4a259330969c83edaa929d8d02f5c:projects/foldrunner",
+          "shows": "R12 Spillway crest start; Breakwater did not exist",
+          "how_captured": "rebuilt from commit f84e175d53a4a259330969c83edaa929d8d02f5c, not the delivered ZIP; temporary sparse shared clone; Godot 4.7.2 Spillway Pack pack export; official release runtime from R21 ZIP; isolated XDG profile, AMD/X11 :190 under shared engine lock; ffmpeg x11grab; WebP quality 82, 1600 px",
+          "commit": "f84e175d53a4a259330969c83edaa929d8d02f5c",
+          "image_sha256": "7260359eff1ac125ae3efd1fd44a6987a59597d1ce255513bb28c55996e2e007",
+          "file": "rounds/r12/frames/01-rebuilt-start.webp"
+        },
+        {
+          "round": "r12",
+          "source_path": "ccChat-general@f84e175d53a4a259330969c83edaa929d8d02f5c:projects/foldrunner",
+          "shows": "R12 pause menu rebuilt from committed source",
+          "how_captured": "rebuilt from commit f84e175d53a4a259330969c83edaa929d8d02f5c, not the delivered ZIP; temporary sparse shared clone; Godot 4.7.2 Spillway Pack pack export; official release runtime from R21 ZIP; isolated XDG profile, AMD/X11 :190 under shared engine lock; ffmpeg x11grab; WebP quality 82, 1600 px",
+          "commit": "f84e175d53a4a259330969c83edaa929d8d02f5c",
+          "image_sha256": "4a8d07651c6fe0313f9efb40123691c0707f7bbb1acd74e90e0d6ac0a5475600",
+          "file": "rounds/r12/frames/02-rebuilt-menu.webp"
+        }
+      ],
+      "export_command": [
+        "/home/thatmike1/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/tmp/spillway-history-rebuild-r12/clone/projects/foldrunner",
+        "--export-pack",
+        "Spillway Pack",
+        "/tmp/spillway-history-rebuild-r12/Rebuilt.pck"
+      ],
+      "rebuilt_pack_sha256": "eb0d1b33254b4dae41aeb7cfa3d9fc3e949d91f58c9f7b9d4eecb443de1a9573",
+      "official_release_runtime_sha256": "d9f79ab89b5ae369aeed11c6052d402e8218cd503bf85b4a235f9c30c46a7c63",
+      "display_released": true,
+      "home_free_after": 16741384192
+    },
+    "rebuild-r13": {
+      "round": "r13",
+      "commit": "d8fe109fbf8965c73ecc2965ae32b0a67d165165",
+      "home_free_before": 16740925440,
+      "origin": "rebuilt from commit d8fe109fbf8965c73ecc2965ae32b0a67d165165, not the delivered ZIP",
+      "frames": [
+        {
+          "round": "r13",
+          "source_path": "ccChat-general@d8fe109fbf8965c73ecc2965ae32b0a67d165165:projects/foldrunner",
+          "shows": "R13 Overflow start; Breakwater did not exist",
+          "how_captured": "rebuilt from commit d8fe109fbf8965c73ecc2965ae32b0a67d165165, not the delivered ZIP; temporary sparse shared clone; Godot 4.7.2 Overflow Pack pack export; official release runtime from R21 ZIP; isolated XDG profile, AMD/X11 :190 under shared engine lock; ffmpeg x11grab; WebP quality 82, 1600 px",
+          "commit": "d8fe109fbf8965c73ecc2965ae32b0a67d165165",
+          "image_sha256": "4bd3b3ea750eb3b476cdf0c7a8c3261086eaf4417546a4d150d2611bd124dae2",
+          "file": "rounds/r13/frames/01-rebuilt-start.webp"
+        },
+        {
+          "round": "r13",
+          "source_path": "ccChat-general@d8fe109fbf8965c73ecc2965ae32b0a67d165165:projects/foldrunner",
+          "shows": "R13 pause menu rebuilt from committed source",
+          "how_captured": "rebuilt from commit d8fe109fbf8965c73ecc2965ae32b0a67d165165, not the delivered ZIP; temporary sparse shared clone; Godot 4.7.2 Overflow Pack pack export; official release runtime from R21 ZIP; isolated XDG profile, AMD/X11 :190 under shared engine lock; ffmpeg x11grab; WebP quality 82, 1600 px",
+          "commit": "d8fe109fbf8965c73ecc2965ae32b0a67d165165",
+          "image_sha256": "7c7e61dae512f065916d2f7b60e6cfd223c6717cb3cebe049a7245572abe3ef6",
+          "file": "rounds/r13/frames/02-rebuilt-menu.webp"
+        }
+      ],
+      "export_command": [
+        "/home/thatmike1/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/tmp/spillway-history-rebuild-r13/clone/projects/foldrunner",
+        "--export-pack",
+        "Overflow Pack",
+        "/tmp/spillway-history-rebuild-r13/Rebuilt.pck"
+      ],
+      "rebuilt_pack_sha256": "eaed23c3069991f6e2091408c6341f87343e7dcc173df712f93d44841393b306",
+      "official_release_runtime_sha256": "d9f79ab89b5ae369aeed11c6052d402e8218cd503bf85b4a235f9c30c46a7c63",
+      "display_released": true,
+      "home_free_after": 16740917248
+    },
+    "rebuild-r14": {
+      "round": "r14",
+      "commit": "65d205be85c884dc13295725a3eb26c3f46d9ca7",
+      "home_free_before": 16740696064,
+      "origin": "rebuilt from commit 65d205be85c884dc13295725a3eb26c3f46d9ca7, not the delivered ZIP",
+      "frames": [
+        {
+          "round": "r14",
+          "source_path": "ccChat-general@65d205be85c884dc13295725a3eb26c3f46d9ca7:projects/foldrunner",
+          "shows": "R14 Penstock Yard practice start; Breakwater did not exist",
+          "how_captured": "rebuilt from commit 65d205be85c884dc13295725a3eb26c3f46d9ca7, not the delivered ZIP; temporary sparse shared clone; Godot 4.7.2 R14 Pack pack export; official release runtime from R21 ZIP; isolated XDG profile, AMD/X11 :190 under shared engine lock; ffmpeg x11grab; WebP quality 82, 1600 px",
+          "commit": "65d205be85c884dc13295725a3eb26c3f46d9ca7",
+          "image_sha256": "a29a8ac261384c862aed4252618bf4c37f59ebb7ef870d5ea38a824aeaaedcd1",
+          "file": "rounds/r14/frames/01-rebuilt-start.webp"
+        },
+        {
+          "round": "r14",
+          "source_path": "ccChat-general@65d205be85c884dc13295725a3eb26c3f46d9ca7:projects/foldrunner",
+          "shows": "R14 pause menu rebuilt from committed source",
+          "how_captured": "rebuilt from commit 65d205be85c884dc13295725a3eb26c3f46d9ca7, not the delivered ZIP; temporary sparse shared clone; Godot 4.7.2 R14 Pack pack export; official release runtime from R21 ZIP; isolated XDG profile, AMD/X11 :190 under shared engine lock; ffmpeg x11grab; WebP quality 82, 1600 px",
+          "commit": "65d205be85c884dc13295725a3eb26c3f46d9ca7",
+          "image_sha256": "fdd2cade73f351e32378bb2715fd93ed555f5a690b8b68e544e1d7256141cde6",
+          "file": "rounds/r14/frames/02-rebuilt-menu.webp"
+        }
+      ],
+      "export_command": [
+        "/home/thatmike1/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/tmp/spillway-history-rebuild-r14/clone/projects/foldrunner",
+        "--export-pack",
+        "R14 Pack",
+        "/tmp/spillway-history-rebuild-r14/Rebuilt.pck"
+      ],
+      "rebuilt_pack_sha256": "099eb8e315a83829810ada1b6e21dadde706cce841137406e3c0216fdd6102db",
+      "official_release_runtime_sha256": "d9f79ab89b5ae369aeed11c6052d402e8218cd503bf85b4a235f9c30c46a7c63",
+      "display_released": true,
+      "home_free_after": 16739983360
+    },
+    "rebuild-r18": {
+      "round": "r18",
+      "commit": "640d06e6539b53da752f03bfddb64fb46310abb7",
+      "home_free_before": 16736702464,
+      "origin": "rebuilt from commit 640d06e6539b53da752f03bfddb64fb46310abb7, not the delivered ZIP",
+      "frames": [
+        {
+          "round": "r18",
+          "source_path": "ccChat-general@640d06e6539b53da752f03bfddb64fb46310abb7:projects/foldrunner",
+          "shows": "R18 Breakwater start and redesigned title/HUD",
+          "how_captured": "rebuilt from commit 640d06e6539b53da752f03bfddb64fb46310abb7, not the delivered ZIP; temporary sparse shared clone; Godot 4.7.2 R17 Pack pack export; official release runtime from R21 ZIP; isolated XDG profile, AMD/X11 :190 under shared engine lock; ffmpeg x11grab; WebP quality 82, 1600 px",
+          "commit": "640d06e6539b53da752f03bfddb64fb46310abb7",
+          "image_sha256": "219fca69716527c24b6d751153c2007742eae394dec7f4f2a1c68ac350d571e0",
+          "file": "rounds/r18/frames/01-rebuilt-start.webp"
+        },
+        {
+          "round": "r18",
+          "source_path": "ccChat-general@640d06e6539b53da752f03bfddb64fb46310abb7:projects/foldrunner",
+          "shows": "R18 pause menu rebuilt from committed source",
+          "how_captured": "rebuilt from commit 640d06e6539b53da752f03bfddb64fb46310abb7, not the delivered ZIP; temporary sparse shared clone; Godot 4.7.2 R17 Pack pack export; official release runtime from R21 ZIP; isolated XDG profile, AMD/X11 :190 under shared engine lock; ffmpeg x11grab; WebP quality 82, 1600 px",
+          "commit": "640d06e6539b53da752f03bfddb64fb46310abb7",
+          "image_sha256": "158ffe0bd1b10efd1939ed9de046857d9d4dce6f88e76e01022d7e24b4f352e7",
+          "file": "rounds/r18/frames/02-rebuilt-menu.webp"
+        }
+      ],
+      "export_command": [
+        "/home/thatmike1/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/tmp/spillway-history-rebuild-r18/clone/projects/foldrunner",
+        "--export-pack",
+        "R17 Pack",
+        "/tmp/spillway-history-rebuild-r18/Rebuilt.pck"
+      ],
+      "rebuilt_pack_sha256": "d327e9dfcbc94b6dc903e38294cc77690ddded46783f6000ee171bd8840d621c",
+      "official_release_runtime_sha256": "d9f79ab89b5ae369aeed11c6052d402e8218cd503bf85b4a235f9c30c46a7c63",
+      "display_released": true,
+      "home_free_after": 16734826496
+    }
+  },
+  "source_status": "R12–R20 delivery ZIPs were deliberately deleted by Mike; recreated source exports are temporary and never claimed to be those ZIPs. Original archive evidence remains untouched.",
+  "desktop_verification": "VERIFICATION-r01-r11-desktop.json is the source-machine receipt. Original /mnt/ssdswag source frame hashes are not reverified on this laptop because the drive is unavailable."
+}

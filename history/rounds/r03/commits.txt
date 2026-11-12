@@ -1,0 +1,1 @@
+9957eea2254739e40020092f2860c2113ccf6bd3 2026-11-05T19:22:02+01:00 fix: allow route evidence from portable builds (ccChat-general-rowb)

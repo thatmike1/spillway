@@ -1,0 +1,293 @@
+[
+  {
+    "file": "sources/SURF-BRIEF.md",
+    "origin": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/SURF-BRIEF.md",
+    "sha256": "4a43a67fb45b1444c5dd63b7aaec5be03d3cc87268b61e2ab018da9bbc983fb7"
+  },
+  {
+    "file": "sources/checkpoints-reboot-r10.md",
+    "origin": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/reboot-r10.md",
+    "sha256": "97bd0d7e2802087f9db24fe163e9637baff52d8e5a6b9af055aff7398d9e6019"
+  },
+  {
+    "file": "sources/checkpoints-reboot.md",
+    "origin": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/reboot.md",
+    "sha256": "6e762dac904558021e81db2d7cc609f0b33bac14f8199e3e8a01c91aa64d2ac5"
+  },
+  {
+    "file": "sources/mike-reboot-message.txt",
+    "origin": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/checkpoints/spillway/reviews/public-runtime-transcript.txt [2026-11-05T15:23:31.128Z message excerpt]",
+    "sha256": "3bca8bd3b566644f7e8a9d59456c58b0a78a87e5586f46361c17d8f225c790d7"
+  },
+  {
+    "file": "sources/playtest-r11-README.md",
+    "origin": "/mnt/ssdswag/foldrunner-archive/foldrunner-build-2026-11-05/playtest-r11/README.md",
+    "sha256": "3dec2d5cf448a606fe4156880b6d3fdf838f7d9d6016cf0f75cd7ae83da6e390"
+  },
+  {
+    "file": "sources/r2-to-r3.diff",
+    "origin": "git diff 36aaaad44 9957eea22 -- projects/foldrunner",
+    "sha256": "b520251b4eeb676c4e034d21354e7832a98153659eaf06a3254c53c79a9503c1"
+  },
+  {
+    "file": "sources/reboot-BRIEF.md",
+    "origin": "git:02a4a3149:projects/foldrunner/docs/reboot/BRIEF.md",
+    "sha256": "00465a2973873da0a387c954649c128011542e76083870afe2c6e187e434aea6"
+  },
+  {
+    "file": "sources/reboot-RESULTS.md",
+    "origin": "git:02a4a3149:projects/foldrunner/docs/reboot/RESULTS.md",
+    "sha256": "dacb0d00e498252aecd6670fbe897e6ace8dfe236c98d0cf7853fcd56ef5e9f2"
+  },
+  {
+    "file": "sources/reboot-STATUS.md",
+    "origin": "git:02a4a3149:projects/foldrunner/docs/reboot/STATUS.md",
+    "sha256": "fb490606ff34aadc886a2e91acd37901b46ef0e08bcbe4b606b5d52e46ceb938"
+  },
+  {
+    "file": "sources/reboot-decisions.tsv",
+    "origin": "git:02a4a3149:projects/foldrunner/docs/reboot/decisions.tsv",
+    "sha256": "e1928e38ad3fcf5774c942e07553d47f8b2cc6e9419385b5321148aabd8d9039"
+  },
+  {
+    "file": "sources/prehistory/BRIEF.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/BRIEF.md",
+    "sha256": "89637d7058bcb7bd868fdb4003d2859f85da7122990c05aafb0dbb9b4d46b66b"
+  },
+  {
+    "file": "sources/prehistory/FIXES-round1.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/FIXES-round1.md",
+    "sha256": "0d86181096fd2f29f2d6b93315f28d353199a6639f7853f3dc644b8c9ea30c70"
+  },
+  {
+    "file": "sources/r12/SURF-BRIEF.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/SURF-BRIEF.md",
+    "sha256": "4a43a67fb45b1444c5dd63b7aaec5be03d3cc87268b61e2ab018da9bbc983fb7"
+  },
+  {
+    "file": "sources/r17/goal-r17.txt",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/goal-r17.txt",
+    "sha256": "a571d795e5c387b10e18313927c62f2453f2aa7bb575b10b75aefe9b0c54da38"
+  },
+  {
+    "file": "sources/r17/look-RESULTS.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/look/RESULTS.md",
+    "sha256": "3d6b7c0c5d3dcdc3d8571fd60a06c0d4e20414a39af908694f5a908bc24185b9"
+  },
+  {
+    "file": "sources/r17/look-RESULTS-R17.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/look/RESULTS-R17.md",
+    "sha256": "c486697541fa3e0c23c4fa598e0fa5c6873fb5ddec2b6a077aab920ff5018a07"
+  },
+  {
+    "file": "sources/r17/look-REVIEW-R17.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/look/REVIEW-R17.md",
+    "sha256": "af87b715424f9cfdd520291e363b3de368f4b624fbac9d66193ffb5001f7196c"
+  },
+  {
+    "file": "sources/r18/playtest-r18-ANALYSIS.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/playtest-r18/ANALYSIS.md",
+    "sha256": "39863a8074d1f6a5654729b7c4a5661e2790a45d75f2242a0f2405d01415d4cb"
+  },
+  {
+    "file": "sources/r19/R19-SPEC.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/R19-SPEC.md",
+    "sha256": "bedaf44fae76573af8bc9cbb364e52b9fe1cfd6d619bf5c44fe52091e27b5fe6"
+  },
+  {
+    "file": "sources/r19/look-RESULTS-R19.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/look/RESULTS-R19.md",
+    "sha256": "09854dd4a75f5dff39920abfe0b25a55ae742d1e14648cf11af8a84a0ec12c8a"
+  },
+  {
+    "file": "sources/r19/look-REVIEW-R19.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/look/REVIEW-R19.md",
+    "sha256": "1692112a166012506489f58f5b0fc85fc842b4dac10d6a7fe9b2aac18733333d"
+  },
+  {
+    "file": "sources/r19/playtest-r19-ANALYSIS.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/playtest-r19/ANALYSIS.md",
+    "sha256": "6d277183540ba5f7f0a5adadd0f694e521c851dbaf2d4a0db19bd20d48605e48"
+  },
+  {
+    "file": "sources/r20/R20-SPEC.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/R20-SPEC.md",
+    "sha256": "988deec117e80c909c2dc8f8df6ce5381aa7f003175dda956f72bd6ee981237c"
+  },
+  {
+    "file": "sources/r20/look-RESULTS-R20.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/look/RESULTS-R20.md",
+    "sha256": "d607fd76b7a5c253086872a3e8fc04d2dab75641c0aaf91bcd492cd2b1184cbc"
+  },
+  {
+    "file": "sources/r20/playtest-r20-ANALYSIS.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/playtest-r20/ANALYSIS.md",
+    "sha256": "c27272acdfe5ca37ddc2babe2fcc02f5c583f9d1d4bbe95cb50815ff9838825a"
+  },
+  {
+    "file": "sources/r21/R21-SPEC.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/R21-SPEC.md",
+    "sha256": "ad1b80d11c36a4a801d583cc65295796eeb2e9faefbe24f24d26adb021ebe244"
+  },
+  {
+    "file": "sources/r21/look-RESULTS-R21.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/look/RESULTS-R21.md",
+    "sha256": "ba6c9df955e8ca0b0c3fad4b0f0c0efaa2c5aa925cc7980a7b84f36cbc818ecf"
+  },
+  {
+    "file": "sources/r21/playtest-r21-FEEDBACK.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/playtest-r21/FEEDBACK.md",
+    "sha256": "1b1fb997d9505f8e87f182f9ed5ba8715eeba406d72e8e96e764f158e2f183c2"
+  },
+  {
+    "file": "sources/prehistory/docs-FEEL-RESULTS.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/look/wt/projects/foldrunner/docs/FEEL-RESULTS.md",
+    "sha256": "8646dd3ff2413d7f2dc6e4e3a7143394616dd7bc50f459ea57201f8a79f5c536"
+  },
+  {
+    "file": "sources/r12/docs-surf-RESULTS.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/look/wt/projects/foldrunner/docs/surf/RESULTS.md",
+    "sha256": "17fad7f51733a65cd2396e3db1f59873f01494ff08ca14a85a7aed45967b9f32"
+  },
+  {
+    "file": "sources/r13/docs-momentum-BRIEF.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/look/wt/projects/foldrunner/docs/momentum/BRIEF.md",
+    "sha256": "3e86defab0a0f7bf944b78a5f1326858191b28778c3e06a1357735d8716b1987"
+  },
+  {
+    "file": "sources/r13/docs-momentum-RESULTS.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/look/wt/projects/foldrunner/docs/momentum/RESULTS.md",
+    "sha256": "0e28959833d48c59f7d74604a3c6c5923069c0bc3d710ad2452172752295c734"
+  },
+  {
+    "file": "sources/r14/docs-r14-BRIEF.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/look/wt/projects/foldrunner/docs/r14/BRIEF.md",
+    "sha256": "0f86114032b0edd0bcd40ee4a430372044c786827e462f59dea9a9c475491955"
+  },
+  {
+    "file": "sources/r14/docs-r14-RESULTS.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/look/wt/projects/foldrunner/docs/r14/RESULTS.md",
+    "sha256": "f4cf989a90999585447db6c6a78b75bd49ec03fad0b9969cc92e3faa0ae80727"
+  },
+  {
+    "file": "sources/r15/docs-r15-BRIEF.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/look/wt/projects/foldrunner/docs/r15/BRIEF.md",
+    "sha256": "74cf26e135d9c3a50620ec574ff2951e0b3fed4b327818b77c880b7b0860099f"
+  },
+  {
+    "file": "sources/r15/docs-r15-RESULTS.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/look/wt/projects/foldrunner/docs/r15/RESULTS.md",
+    "sha256": "0f74c3921d8c946865707da72bcdaf3cd48b5bc674ca3a7ab57a78bd635eeeef"
+  },
+  {
+    "file": "sources/r16/docs-r16-BRIEF.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/look/wt/projects/foldrunner/docs/r16/BRIEF.md",
+    "sha256": "41a2a735e41946830605a504ce8c46ef31edba4de7a6563ef504ca0863d00ccf"
+  },
+  {
+    "file": "sources/r16/docs-r16-RESULTS.md",
+    "origin": "/home/thatmike1/foldrunner-build-2026-11-05/look/wt/projects/foldrunner/docs/r16/RESULTS.md",
+    "sha256": "7d5a74f688c822bde97105a337cf6e396cc076a89f7ef089b75f698028733974"
+  },
+  {
+    "file": "sources/beads/9mga-show.json",
+    "origin": "bd show ccChat-general-9mga --json, read 2026-11-12 in /home/thatmike1/git/ccChat-general; snapshot, not live state",
+    "sha256": "b3589295e8a210612f05d2d0a29d799923f8c5a0a20b2e4e72f0e804414dd78d",
+    "origin_sha256": "24ae0b883bfb916ffe8a7ddb7373398b71a77f381469995e77f7a4e9dccc1781",
+    "note": "owner email redacted before commit"
+  },
+  {
+    "file": "sources/beads/9mga-comments.json",
+    "origin": "bd comments ccChat-general-9mga --json, read 2026-11-12 in /home/thatmike1/git/ccChat-general; snapshot, not live state",
+    "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+  },
+  {
+    "file": "sources/beads/rowb-show.json",
+    "origin": "bd show ccChat-general-rowb --json, read 2026-11-12 in /home/thatmike1/git/ccChat-general; snapshot, not live state",
+    "sha256": "f30aab0dabcc888839a14747487eeff1a10f4c740e1d6659947c563e72b17a71",
+    "origin_sha256": "07d7802ea0883f2033f6a1c9035ba3685caaedc71a4237e95b47838c96a25258",
+    "note": "owner email redacted before commit"
+  },
+  {
+    "file": "sources/beads/rowb-comments.json",
+    "origin": "bd comments ccChat-general-rowb --json, read 2026-11-12 in /home/thatmike1/git/ccChat-general; snapshot, not live state",
+    "sha256": "7cffb7c6a9001d3e055f419a75210cf29e46dfea6adb54e143977ec7b2aa4264"
+  },
+  {
+    "file": "sources/beads/pb3f-show.json",
+    "origin": "bd show ccChat-general-pb3f --json, read 2026-11-12 in /home/thatmike1/git/ccChat-general; snapshot, not live state",
+    "sha256": "3e89bb5d0a1fd82fadd4c0fe16d91e430a1f5c92f0e81c1e9a29b3545b4ebe6a",
+    "origin_sha256": "da2219f518bc893194b3aa76ffc091338b67e010b7eeab663539ba4358585c77",
+    "note": "owner email redacted before commit"
+  },
+  {
+    "file": "sources/beads/pb3f-comments.json",
+    "origin": "bd comments ccChat-general-pb3f --json, read 2026-11-12 in /home/thatmike1/git/ccChat-general; snapshot, not live state",
+    "sha256": "099bcd34917f6afe32b05fbf89f27fd00d9397441108efe1245201aa8f3ffb6a"
+  },
+  {
+    "file": "sources/beads/41fq-show.json",
+    "origin": "bd show ccChat-general-41fq --json, read 2026-11-12 in /home/thatmike1/git/ccChat-general; snapshot, not live state",
+    "sha256": "ab80f6b3d901d4fcea227993e096e0f9f0e7a79c71f4ae277117d8fa9cfc78e2",
+    "origin_sha256": "76c2b838b1410b6d326935cc4a00f07fabf9ca6e33c03c4f170167b6d2242cbd",
+    "note": "owner email redacted before commit"
+  },
+  {
+    "file": "sources/beads/41fq-comments.json",
+    "origin": "bd comments ccChat-general-41fq --json, read 2026-11-12 in /home/thatmike1/git/ccChat-general; snapshot, not live state",
+    "sha256": "6e3efa5741415d105bad7406b3905b5e0742da3ed412a0ae771c6dba74dfefe3"
+  },
+  {
+    "file": "sources/beads/epsz-show.json",
+    "origin": "bd show ccChat-general-epsz --json, read 2026-11-12 in /home/thatmike1/git/ccChat-general; snapshot, not live state",
+    "sha256": "de43204229fcd8b0500ab75aa07ea8f5da3c5c2ce2cd3fda1a2f9225028b3746",
+    "origin_sha256": "d9ec7bc4d6bd56823e251233abdfa8bca30ddf7874301a4c04b8960988e930a0",
+    "note": "owner email redacted before commit"
+  },
+  {
+    "file": "sources/beads/epsz-comments.json",
+    "origin": "bd comments ccChat-general-epsz --json, read 2026-11-12 in /home/thatmike1/git/ccChat-general; snapshot, not live state",
+    "sha256": "3d3e34e2b51b9b8d554c06fafd14bfa60a9e22b61e325df4bbe7ae78a165cba2"
+  },
+  {
+    "file": "sources/beads/nrbo-show.json",
+    "origin": "bd show ccChat-general-nrbo --json, read 2026-11-12 in /home/thatmike1/git/ccChat-general; snapshot, not live state",
+    "sha256": "cbfe8cf14620f540c4b57f9acffc053e54d1bc87b84d1fd0e59e05adbc35aea9",
+    "origin_sha256": "f79d4ed9240f825232f7859d777a82aefb3b166b909588a97ab12b1fcf9196d1",
+    "note": "owner email redacted before commit"
+  },
+  {
+    "file": "sources/beads/nrbo-comments.json",
+    "origin": "bd comments ccChat-general-nrbo --json, read 2026-11-12 in /home/thatmike1/git/ccChat-general; snapshot, not live state",
+    "sha256": "7a9f713ff0ac2b0d1691184a65978f7e0ae8e318d5c8215526f6743e85be6621"
+  },
+  {
+    "file": "sources/beads/3wh8-show.json",
+    "origin": "bd show ccChat-general-3wh8 --json, read 2026-11-12 in /home/thatmike1/git/ccChat-general; snapshot, not live state",
+    "sha256": "91db93a5af80adc5ee47305716fe15e08f6679fe103505b009c4b376425bafd9",
+    "origin_sha256": "bb653c7a46af91eea99cf4118d7e8728a9c14386f281da46d1a57328f2aad1ae",
+    "note": "owner email redacted before commit"
+  },
+  {
+    "file": "sources/beads/3wh8-comments.json",
+    "origin": "bd comments ccChat-general-3wh8 --json, read 2026-11-12 in /home/thatmike1/git/ccChat-general; snapshot, not live state",
+    "sha256": "0d02e3ce2bec96df0e3711f5cc0114bb754d751e641bf8141fca751e7ee035df"
+  },
+  {
+    "file": "sources/beads/0zb1-show.json",
+    "origin": "bd show ccChat-general-0zb1 --json, read 2026-11-12 in /home/thatmike1/git/ccChat-general; snapshot, not live state",
+    "sha256": "c196c71c0d3809d55df6974bf059a20364af5d9e75187276e977a6617b92b1dd",
+    "origin_sha256": "4f2d5d6662a74d4de7a799f6e82ae4c5d8fe223833a4be621029e84f495de3a3",
+    "note": "owner email redacted before commit"
+  },
+  {
+    "file": "sources/beads/0zb1-comments.json",
+    "origin": "bd comments ccChat-general-0zb1 --json, read 2026-11-12 in /home/thatmike1/git/ccChat-general; snapshot, not live state",
+    "sha256": "3901df8b4e79195c3d8c18ab55e862486a69a4986ede0b93702fc82eef5c8a24"
+  },
+  {
+    "file": "sources/git-log.txt",
+    "origin": "git log --all --format=%H|%ad|%s --date=iso-strict -- projects/foldrunner, read 2026-11-12 in /home/thatmike1/git/ccChat-general",
+    "sha256": "d0a3608844a9dd5907614580e1db52c1b86e96fc5eb38879b54d451032a674c2"
+  }
+]

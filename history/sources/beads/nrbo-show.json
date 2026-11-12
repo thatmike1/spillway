@@ -1,0 +1,79 @@
+[
+  {
+    "id": "ccChat-general-nrbo",
+    "title": "spillway r19: overnight gpt round (backwards bhop style, ui fixes, playtest-driven map tuning, ghost sharing, surf map)",
+    "description": "Overnight Codex goal on the laptop after Mike enjoyed R18. Spec: laptop ~/foldrunner-build-2026-11-05/goal-r19.txt. Delivers verified ZIPs to delivery/spillway-r19 and a morning report.",
+    "status": "closed",
+    "priority": 2,
+    "issue_type": "task",
+    "assignee": "agent:codex",
+    "owner": "[redacted]",
+    "created_at": "2026-11-09T21:01:47Z",
+    "created_by": "agent:claude",
+    "updated_at": "2026-11-10T08:13:03Z",
+    "started_at": "2026-11-09T21:09:43Z",
+    "closed_at": "2026-11-10T08:13:03Z",
+    "close_reason": "R19 delivered and played; feedback moved to ccChat-general-epsz",
+    "metadata": {
+      "try": {
+        "app": "Spillway",
+        "kit": [
+          {
+            "href": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r19/spillway-2026.11.09-r19-linux-x86_64-5dcc9496.zip",
+            "path": "/home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r19/spillway-2026.11.09-r19-linux-x86_64-5dcc9496.zip",
+            "type": "path",
+            "label": "Linux build"
+          },
+          {
+            "href": "/home/thatmike1/foldrunner-build-2026-11-05/look/RESULTS-R19.md",
+            "path": "/home/thatmike1/foldrunner-build-2026-11-05/look/RESULTS-R19.md",
+            "type": "path",
+            "label": "Player notes"
+          },
+          {
+            "type": "spec",
+            "label": "Scope",
+            "value": "All agent gates passed. Native Windows gameplay and human enjoyment are unverified."
+          }
+        ],
+        "why": "Automated tests establish behavior and parity; only Mike can judge the movement mix, scoring and experiment feel.",
+        "steps": [
+          {
+            "id": "saltglass",
+            "title": "Choose Saltglass on F2 and judge the surf/bhop flow"
+          },
+          {
+            "id": "direction",
+            "title": "Try sustained backwards and sideways bhops and judge the bonus sizes"
+          },
+          {
+            "id": "tether",
+            "title": "Esc → Experiments → Tether Yard: judge reach, releases and anchor visibility"
+          },
+          {
+            "id": "line",
+            "title": "Esc → Experiments → Line Drive: judge alignment and automatic launches"
+          },
+          {
+            "id": "fall",
+            "title": "Esc → Experiments → Fall Line: judge the two-second warning"
+          }
+        ],
+        "title": "Play Saltglass and the three R19 experiments",
+        "where": "desk",
+        "expect": "Original F2 feels preserved; Saltglass, direction awards and the three experiments are playable enough for a keep/change verdict.",
+        "shipped": "2026-11-10 spillway-r19",
+        "verified": "1980 exact Linux release checks;48 source parity plays;2203 visual invariants;Windows PE startup and158sharing checks under Wine."
+      }
+    },
+    "labels": [
+      "fun",
+      "try-it"
+    ],
+    "dependent_count": 0,
+    "dependency_count": 0,
+    "comment_count": 45,
+    "comments_omitted": true,
+    "revision": "-1382313081533669050"
+  }
+]

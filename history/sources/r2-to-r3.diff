@@ -1,0 +1,71 @@
+diff --git a/projects/foldrunner/docs/reboot/decisions.tsv b/projects/foldrunner/docs/reboot/decisions.tsv
+index bf637fe99..052fb6831 100644
+--- a/projects/foldrunner/docs/reboot/decisions.tsv
++++ b/projects/foldrunner/docs/reboot/decisions.tsv
+@@ -24,3 +24,4 @@ ts	phase	decision	why	evidence	result
+ 2026-11-05T18:11:48Z	delivery	verify extracted Windows executables against the official archive before shipping	the packager checked the archive but previously copied any extracted EXEs beside it	tools/package-spillway.py; outer checkpoints/spillway/reviews/spillway-package-recheck.txt	installed binaries match; deliberately damaged extracted binaries now rejected before export; native Windows play remains unverified
+ 2026-11-05T18:11:48Z	composition	bring the main wheel into the finish view and connect its shaft	the complete fast capture ended facing a blank base wall beneath the oversized wheel	scripts/spillway_level.gd:_make_architecture; outer checkpoints/spillway/final-render/fast/fast00000800.png	P / one 4.9m drive wheel with a lower hub; final packaged rendering pending
+ 2026-11-05T18:17:20Z	art	root the tree crowns with terrain-sampled trunks	native frames and code showed crowns raised above ground without visible support; one extra instanced draw anchors them	scripts/spillway_art.gd:_forest; outer checkpoints/spillway/opus-art/after-sheet.jpg	P / original low-poly trunks; final delivery advances to r2 before canonical captures
++2026-11-05T18:21:57Z	delivery	fix the route evidence guard for a packed game	packed res:// globalizes to an empty string; the old empty-root prefix check rejected every absolute output path	scripts/spillway_driver.gd:evidence_path_allowed; outer checkpoints/spillway/delivered-r2/fast/engine.log; /tmp/spillway-path-probe.gd	reject virtual paths and Git destination ancestors; r3 will verify actual packed route playback before final capture
+diff --git a/projects/foldrunner/project.godot b/projects/foldrunner/project.godot
+index 6b7693ccf..7c0e87cfc 100644
+--- a/projects/foldrunner/project.godot
++++ b/projects/foldrunner/project.godot
+@@ -3,7 +3,7 @@ config_version=5
+ 
+ [application]
+ config/name="Spillway"
+-config/version="2026.11.05-r2"
++config/version="2026.11.05-r3"
+ run/main_scene="res://scenes/main.tscn"
+ config/features=PackedStringArray("4.7", "GL Compatibility")
+ 
+diff --git a/projects/foldrunner/scripts/spillway_driver.gd b/projects/foldrunner/scripts/spillway_driver.gd
+index 1e1789f79..c424bc161 100644
+--- a/projects/foldrunner/scripts/spillway_driver.gd
++++ b/projects/foldrunner/scripts/spillway_driver.gd
+@@ -381,21 +381,22 @@ func _exit_tree() -> void:
+ 		_trace.close()
+ 
+ static func evidence_path_allowed(path: String) -> bool:
+-	if not path.is_absolute_path():
++	if not path.is_absolute_path() or path.begins_with("res://") or path.begins_with("user://"):
+ 		return false
+-	var project: String = ProjectSettings.globalize_path("res://").trim_suffix("/")
+-	var repo: String = project
+-	var candidate: String = project
++	var clean := path.simplify_path().trim_suffix("/")
++	var project := ProjectSettings.globalize_path("res://").trim_suffix("/")
++	if project.is_absolute_path() and (clean == project or clean.begins_with(project + "/")):
++		return false
++	# packed games have no filesystem res:// root; inspect destination ancestors instead.
++	var candidate := clean
+ 	while not candidate.is_empty():
+ 		if FileAccess.file_exists(candidate.path_join(".git")) or DirAccess.dir_exists_absolute(candidate.path_join(".git")):
+-			repo = candidate
+-			break
+-		var parent: String = candidate.get_base_dir()
++			return false
++		var parent := candidate.get_base_dir()
+ 		if parent == candidate:
+ 			break
+ 		candidate = parent
+-	var clean: String = path.simplify_path().trim_suffix("/")
+-	return clean != repo and not clean.begins_with(repo + "/")
++	return true
+ 
+ func _quit(code: int) -> void:
+ 	if is_instance_valid(main) and main.has_method("request_quit"):
+diff --git a/projects/foldrunner/scripts/spillway_main.gd b/projects/foldrunner/scripts/spillway_main.gd
+index 9ee97494c..dc3aa1354 100644
+--- a/projects/foldrunner/scripts/spillway_main.gd
++++ b/projects/foldrunner/scripts/spillway_main.gd
+@@ -1,7 +1,7 @@
+ extends Node3D
+ ## p / run provenance is separate from movement and presentation.
+ 
+-const BUILD_ID := "spillway-2026.11.05-r2"
++const BUILD_ID := "spillway-2026.11.05-r3"
+ const SAVE_PATH := "user://spillway_v1.cfg"
+ var player: CharacterBody3D
+ var level: Node3D

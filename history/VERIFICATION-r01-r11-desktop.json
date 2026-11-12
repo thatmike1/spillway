@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "round_counts": {
+    "r01": 5,
+    "r02": 4,
+    "r03": 5,
+    "r04": 5,
+    "r05": 5,
+    "r06": 6,
+    "r07": 5,
+    "r08": 5,
+    "r09": 6,
+    "r10": 8,
+    "r11": 7
+  },
+  "frame_count": 61,
+  "output_bytes": 3242864,
+  "budget_bytes": 80000000,
+  "checks": [
+    "11 rounds, 4\u201310 frames each",
+    "all manifest entries match on-disk frames",
+    "WebP decode and 1600px width",
+    "all source and output SHA256 values",
+    "own-game source directory allowlist",
+    "curated Markdown links (verbatim source snapshots retain original relative links)",
+    "notes, build identities and commit lists",
+    "total output below 80 MB"
+  ],
+  "visual_review": "all selected frames inspected in contact sheets; selected full-size WebPs rechecked; own-game scenes only, no photos, references, moodboards or developer overlays",
+  "known_gap": "R2 has one literal R2 frame and three explicitly qualified unchanged-game R3 illustrations",
+  "errors": []
+}

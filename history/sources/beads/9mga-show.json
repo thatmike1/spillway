@@ -1,0 +1,27 @@
+[
+  {
+    "id": "ccChat-general-9mga",
+    "title": "Foldrunner: build GPU-free folding-city parkour prototype",
+    "description": "Mike approved a first-person parkour prototype inspired by Control Resonant and Doctor Strange folding architecture. Defaults: Godot, city-controlled anomalies, short rooftop route, early browser feasibility. Work in projects/foldrunner. Parallel agents for movement/world/environment under docs/CONTRACT.md. Do not use GPU, launch editor/game, or render previews while Mike is gaming. Deliver source, meaningful headless tests, launch instructions, tracked visual playtest follow-up, commit and push.",
+    "acceptance_criteria": "Project imports and headless tests pass; route and anomaly systems integrated; web feasibility tested or concrete obstacle documented; visual QA explicitly deferred; source pushed.",
+    "notes": "Completed first GPU-free pass in projects/foldrunner. Godot4.7.2 installed outside repo. All5headless suites pass: player31, world34, cityPASS, integration23, actual input/collision traversalPASS ~7.47sec. Single-threaded Web export and HTTP artifact/MIME/WASM checks pass. Official engine/template SHA256 verified. No GPU/editor/browser graphics launched. Visual playtest38bz pending until Mike says gaming ended; route expansion4631 depends on that playtest.",
+    "status": "closed",
+    "priority": 2,
+    "issue_type": "task",
+    "assignee": "agent:codex",
+    "owner": "[redacted]",
+    "created_at": "2026-10-10T18:52:32Z",
+    "created_by": "agent:codex",
+    "updated_at": "2026-10-10T19:05:57Z",
+    "started_at": "2026-10-10T18:53:06Z",
+    "closed_at": "2026-10-10T19:05:57Z",
+    "close_reason": "GPU-free first prototype delivered and pushed in 8247c380. Five headless suites pass, including full input-driven route traversal. Single-threaded browser export and HTTP/MIME smoke checks pass. Desktop and browser visual playtests remain in ccChat-general-38bz; longer route in ccChat-general-4631.",
+    "labels": [
+      "fun"
+    ],
+    "dependent_count": 2,
+    "dependency_count": 0,
+    "comment_count": 0,
+    "revision": "2750806657107127324"
+  }
+]

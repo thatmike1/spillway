@@ -1,0 +1,35 @@
+/goal Spillway R17: take the look C slice into the real game and roll it out to every map.
+
+Mike played your look C slice and likes it: "pretty nice, a good proof of concept". R16 (style points, recordings and ghosts, limited wall jump, slide out of a bhop) is delivered and pushed on feat/foldrunner-me-build at 7261ba59. Mike hasn't played R16 yet and will give its feedback later, so R17 changes nothing about movement, scoring, recordings or the R16 features. R17 is the look only.
+
+Where:
+- Repo: ccChat-general, project projects/foldrunner. Keep working in your worktree /home/thatmike1/foldrunner-build-2026-11-05/look/wt on feat/spillway-look-c.
+- The R16 checkout /home/thatmike1/foldrunner-build-2026-11-05/wt is finished; read from it, don't edit it.
+- Never push or merge main.
+
+What to do:
+1. Merge origin/feat/foldrunner-me-build (R16) into feat/spillway-look-c. Resolve conflicts so every R16 feature works exactly as delivered. The R16 delivery guide and acceptance files are in /home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r16/ and REPORT.md.
+2. Bring the look to every playable map, one map at a time: Breakwater first (already done), then the others, the practice map included. Keep each map's identity (dusk port, sunlit ruins, night depot, snowy ridge, rainy rooftops) inside the blend C language:
+   - cream landable tops against darker sides;
+   - orange only on jump edges;
+   - ink outlines only on structural edges;
+   - a painted static sky per map;
+   - flat toon light bands.
+   References are in look/concepts/ (blend-c-breakwater.png is the target language; sunbleached-sunken.png and the round-2 notes cover the other maps). Concept art is private reference, never committed or shipped.
+3. Keep the L old/new toggle on every map.
+4. Readability at speed is the bar: at 300+ u/s, the surface you land on and the edge you jump from read instantly, and the sky stays calm enough that the route pops. If a map's look hurts that, readability wins.
+5. Physics parity per map: the old-look and new-look traces must stay identical, with the same checks you used for Breakwater, including the R16 recordings and ghosts replaying the same under both looks.
+6. Desktop GPU cost per map with the same method as the slice (the linked desktop environment). Report any map where the new look costs more.
+
+Done when every playable map has the look, R16 behaviour is unchanged, the parity and GPU checks pass, and the following exist:
+- per-map before/after renders and a comparison page in look/;
+- a short native movie per map;
+- look/RESULTS-R17.md, the player-facing notes and what's left;
+- verified Linux and Windows ZIPs in /home/thatmike1/foldrunner-build-2026-11-05/delivery/spillway-r17/ with SHA256SUMS.
+Finally push feat/spillway-look-c and fast-forward feat/foldrunner-me-build to it, so the next round starts from one line. Commit subjects end with (ccChat-general-rowb).
+
+Rules:
+- GPT first: at most one Opus delegate per hour, ideally one visual review near the end.
+- Keep at least 15 GB free on /home (about 16 GB now). Prune your own intermediate evidence, not other rounds' deliveries.
+- Ground claims in files read or commands run, label guesses, and log decisions in look/decisions.tsv.
+- Final report in four parts: what changed, does it work, what Mike decides, where.

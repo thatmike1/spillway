@@ -1,0 +1,13 @@
+{
+  "game": "Spillway",
+  "build": "spillway-2026.11.05-r10",
+  "source_commit": "5a8cf81e5b1cea3b7d09a6a1ba6fdf759fb72d7e",
+  "engine": "4.7.2.stable.official.ed1daf0bf",
+  "pack_sha256": "eef2fb0810ccb1ed7ca4e6f683f5fe714452530dfa1f6a71c5630a4f97f86986",
+  "windows_release": {
+    "url": "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_win64.exe.zip",
+    "sha256": "731980f9608d61333e5baf54a2ef17210acc7a538446c0cb9969f002aca1e953",
+    "official_digest": "sha256:731980f9608d61333e5baf54a2ef17210acc7a538446c0cb9969f002aca1e953"
+  },
+  "native_windows_execution": "not verified on this Linux host"
+}

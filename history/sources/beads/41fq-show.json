@@ -1,0 +1,27 @@
+[
+  {
+    "id": "ccChat-general-41fq",
+    "title": "spillway r16: style, recorded runs and lab flow",
+    "description": "runs on: laptop, where the frozen R15 source, pinned runtime and private AMD/X11 delivery checks live.\n\nMike played R15 Breakwater, Whiteout Relay, Sunken Court and Movement Lab and says it is fun and he wants to keep playing. Preserve approved F2 bhop, F5 comparison, five themed maps and legacy maps; R15 delivery stays immutable. New records use spillway_r16.cfg.\n\nIn priority order: geometry/physics-derived style score for course speed, edge landings, large gaps, high-sync strafes with actual gain, fast near misses and a large reward when crouching truly avoided a standing-hull collision. Design combos, readable brief callouts and a style best beside time best; add a few optional opportunities without breaking existing lines. Record every player attempt compactly with per-tick inputs/view/motion/context and lifecycle/checkpoint/fall/restart/style/outcome data. Document format, supply folder-capable agent analysis and an in-game best clean run ghost. Desktop recordings arrive by copying files; do not block on them. Polish limited wall jumps to work from A/D strafing bhops and a distinct-input bhop-landing-to-slide-to-bhop chain. Keep grapple unchanged.\n\nDecide all tuning autonomously and label game choices. Honest scripted/source/native evidence; \u003e=15GiB HOME before large renders/exports; portable Linux/Windows ZIPs in outer delivery/spillway-r16/; outer REPORT.md explains score/controls/recordings. Push scoped commits on feat/foldrunner-me-build with this round's bead ids. Human feel remains Mike's verdict. No time floor or new map redesign scope.\n",
+    "acceptance_criteria": "approved bhop/grapple/base courses preserved; real style detections, compact every-attempt recordings plus folder analysis and best-run ghost; bounded A/D wall jumps and bhop-slide-hop; isolated packed Linux checks, portable ZIPs/report and pushed source; R15 immutable",
+    "status": "closed",
+    "priority": 2,
+    "issue_type": "epic",
+    "assignee": "agent:codex",
+    "owner": "[redacted]",
+    "created_at": "2026-11-09T08:36:51Z",
+    "created_by": "agent:codex",
+    "updated_at": "2026-11-09T12:28:28Z",
+    "started_at": "2026-11-09T08:36:54Z",
+    "closed_at": "2026-11-09T12:28:28Z",
+    "close_reason": "all four children delivered and verified; portable R16 artifacts/player guide promoted, independent audit no blocker, source/docs pushed",
+    "labels": [
+      "fun"
+    ],
+    "dependent_count": 4,
+    "dependency_count": 0,
+    "comment_count": 2,
+    "comments_omitted": true,
+    "revision": "-2531144072339660622"
+  }
+]

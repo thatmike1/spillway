@@ -1,0 +1,3 @@
+97374c1c233bb91d0823907ccc8f09335777d0e3 2026-11-05T20:27:35+01:00 fix: admit ordinary routes and smooth roof access (ccChat-general-rowb)
+5efcbc838762c314347ada35972a5f0c7e0a37d7 2026-11-05T20:28:43+01:00 feat: give spillway recovery a measured cost (ccChat-general-rowb)
+6068c61b93d484f62877eefb227722073ed42ca8 2026-11-05T20:36:12+01:00 fix: guard the diagonal apron junction (ccChat-general-rowb)
