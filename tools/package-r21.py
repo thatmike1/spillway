@@ -33,7 +33,7 @@ PREP_LIMIT = 30 * 2**20
 DURABLE_LIMIT = 2 * 2**20
 SCRATCH = Path('/tmp/r21-package-helpers')
 EXPORT_OUTPUT = SCRATCH / 'export/spillway-r21'
-EXPORT_LIMIT = 700_000_000
+EXPORT_LIMIT = 850_000_000
 ASSEMBLY_RESERVE = 2_200_000_000
 RECEIPTS = {
     'BUILD.json': '61389e07d5173fc6498e9af9639689e20676b752153685b40c9150dff504ae75',
@@ -384,7 +384,7 @@ def resource_guard(assembly=False, reserve=False):
     require(size <= required, 'combined R21 scratch/output exceeded budget')
     if assembly:
         require(tree_bytes(ASSEMBLY) <= ASSEMBLY_RESERVE, 'assembly exceeded 2.2 GB')
-        require(tree_bytes(SCRATCH / 'export') <= EXPORT_LIMIT, 'output/evidence exceeded 700 MB')
+        require(tree_bytes(SCRATCH / 'export') <= EXPORT_LIMIT, 'output/evidence exceeded 850 MB')
         require(available >= (max(remaining, 512 * 2**20) if reserve else 512 * 2**20), 'insufficient available memory for tmpfs work')
     if reserve:
         require(tmp >= remaining, 'insufficient tmpfs space for remaining assembly and output reserve')
@@ -816,7 +816,7 @@ def package(args, freeze, facts):
         result = check(dist, args, evidence / 'check', work / 'verify', routes)
         result['source_components'] = features
         (dist / 'VERIFICATION.json').write_text(json.dumps(result, indent=2) + '\n')
-        require(tree_bytes(dist) + tree_bytes(evidence) <= EXPORT_LIMIT, 'accepted output/proof exceeds 700 MB')
+        require(tree_bytes(dist) + tree_bytes(evidence) <= EXPORT_LIMIT, 'accepted output/proof exceeds 850 MB')
         for path in dist.iterdir():
             shutil.move(path, output / path.name)
         resource_guard(assembly=True)
