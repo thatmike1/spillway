@@ -1,5 +1,6 @@
 """Replay all original routes with the retained R21 executor and exact audit."""
 import json
+import subprocess
 from pathlib import Path
 import shutil
 import sys
@@ -37,6 +38,12 @@ def snapshot(target):
             shutil.copytree(path, target / name, ignore=shutil.ignore_patterns("*.import", "__pycache__"))
         elif path.is_file():
             shutil.copy2(path, target / name)
+    # authored importer settings are source; regenerated sidecars stay outside the snapshot.
+    imports = subprocess.check_output(["git", "ls-files", "-z", "--", "*.import"], cwd=PROJECT).decode().split("\0")
+    for name in filter(None, imports):
+        dest = target / name
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(PROJECT / name, dest)
     for folder in ("tests", "tools", "verification/frozen"):
         for path in (PROJECT / folder).rglob("*"):
             if path.is_file() and (path.suffix == ".gd" or path.name.endswith(".gd.uid")):

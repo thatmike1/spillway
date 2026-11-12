@@ -9,3 +9,5 @@
 Evidence, logs, imported source snapshots and profiles go into a new external temporary directory. They are never release inputs and are never committed. The original delivery-specific verifiers remain in Git history. Release r21 preserves its original verified binary bytes; new exports are source verification builds.
 
 `lib/PROVENANCE.json` records the original and current AST hashes for 85 retained definitions: 78 are unchanged. The seven portability changes cover stream/module loading, the standalone exception class, source/fixture paths and executor metadata expectations. Arithmetic and sample/binary comparisons remain the original bodies. Fixture data is hidden from normal editor import and ripgrep searches; read a named file or use ripgrep's explicit override when auditing it. Git attributes preserve fixture bytes across platform line-ending settings.
+
+The snapshot retains Git-tracked `.import` files: these 14 authored files carry texture compression, normal-map and mipmap settings. It excludes untracked generated sidecars and import caches. Tests and exports share this snapshot path.
