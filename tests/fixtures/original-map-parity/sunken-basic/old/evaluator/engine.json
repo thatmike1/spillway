@@ -1,0 +1,101 @@
+{
+	"accumulated_input": true,
+	"adapter": "",
+	"adapter_vendor": "",
+	"body_yaw_policy": "axis_aligned",
+	"cadence_ticks": 1,
+	"cmdline": [
+		"--script",
+		"res://tests/r20_candidate_parity.gd"
+	],
+	"display_server": "headless",
+	"engine": {
+		"build": "official",
+		"hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+		"hex": 263938,
+		"major": 4,
+		"minor": 7,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.7.2-stable (official)",
+		"timestamp": 0
+	},
+	"executable": "/home/thatmike1/.local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64",
+	"executor_script": "res://tests/r20_candidate_parity.gd",
+	"fixture": "",
+	"frames": "none",
+	"game": {
+		"class": "",
+		"node_script": "res://scripts/r20_main.gd",
+		"script": "res://scripts/momentum_flow_lab.gd"
+	},
+	"inject": "tick",
+	"input_profile": "physics_tick",
+	"max_physics_steps_per_frame": 12,
+	"motion_state": "motor get_motion_state(), recorded only",
+	"motor": "flow",
+	"motor_requested": "flow",
+	"motor_script": "res://scripts/r15_source_player.gd",
+	"physics_dt": 0.0078125,
+	"physics_engine": "DEFAULT",
+	"physics_hz": 128,
+	"physics_hz_project": 120,
+	"physics_hz_requested": 128,
+	"priorities": {
+		"early": -1000,
+		"game": 0,
+		"late": 1000,
+		"motor": 0
+	},
+	"rate_declared": {
+		"hz": 128,
+		"source": "game.physics_hz"
+	},
+	"rate_policy": "declared",
+	"readback_every": 4,
+	"renderer": "gl_compatibility",
+	"rendering_driver": "opengl3",
+	"requested_velocity": "motor tape_requested_velocity()",
+	"settings": {
+		"autohop": true,
+		"comfort": false,
+		"fov_horizontal": 90.0,
+		"mouse_sensitivity": 0.0009599310885968812,
+		"pitch_limit": 1.553343,
+		"sensitivity": 2.5
+	},
+	"setup_writes": [
+		"normal authored spawn via configured PackedScene; map/preset/sensitivity and isolated recording output configured before ready; no body/progress writes"
+	],
+	"start": "normal_spawn",
+	"tape_version": 2,
+	"time_scale": 1.0,
+	"user_args": [
+		"--out=/tmp/r20-candidate-parity/sunken-basic/old",
+		"--tape=/tmp/r20-candidate-parity/sunken-basic/expanded.json",
+		"--physics-hz=128",
+		"--warmup=33",
+		"--map=sunken-court",
+		"--preset=server128",
+		"--sensitivity=2.5",
+		"--variant=old",
+		"--frames=none",
+		"--wall-budget-s=150",
+		"--host-scene=res://scenes/r20.tscn",
+		"--host-script=res://scripts/r20_main.gd",
+		"--ghost=/tmp/r20-parity-baseline/sunken-basic/r19/runs/sunken-court_server128_20261110-082518_230_3e738578.r16run",
+		"--look=old"
+	],
+	"user_data_dir": "/tmp/r20-candidate-parity/profile/xdg_data_home/godot/app_userdata/Spillway",
+	"viewport_size": [
+		1280.0,
+		1280.0
+	],
+	"wall_budget_s": 150.0,
+	"warmup_steps": 33,
+	"window_size": [
+		0.0,
+		0.0
+	],
+	"world": "lab"
+}

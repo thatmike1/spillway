@@ -1,0 +1,6024 @@
+[
+	{
+		"columns_sha256": {
+			"actual_v": "3f68eb6424dd4e49b6cc554f936dbab732327f3abb9fb77386814c35f0da9e40",
+			"checkpoint": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"dt": "bda8dac224b09366fa9ccbc5c7887a0be3c60c0184e0fb468acf0f4ba0135fcb",
+			"elapsed": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"flags": "839018c5d8d9b743f6ea9914c04117ca00c6c92a2cfe7ff0c3e4b1ae7dbe6552",
+			"held": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"p": "1a79e779dca1b083e4378f96590e03b714aeac4de97834ffd58dc04c615fbf79",
+			"physics_hz": "81b0006182e2f4180d23d14f625a836f013f13c50bb9e085fcca8949834c8a1e",
+			"pitch": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"reference_p": "1a79e779dca1b083e4378f96590e03b714aeac4de97834ffd58dc04c615fbf79",
+			"respawns": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"tick": "baed642339816affb3fe8719792d0e4ce82f12db72b7373d244eaa65445800fe",
+			"v": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+			"yaw": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925"
+		},
+		"events": [
+			{
+				"d": {
+					"names": [
+						"crouch",
+						"jump",
+						"look_down",
+						"look_left",
+						"look_right",
+						"look_up",
+						"move_back",
+						"move_forward",
+						"move_left",
+						"move_right",
+						"r15_grapple",
+						"r15_slide"
+					]
+				},
+				"k": "held_names",
+				"q": 0.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"index": 0.0,
+					"name": "r16_preset_5"
+				},
+				"k": "action_name",
+				"q": 1.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"checkpoint": 0.0,
+					"dt": 0.0078125,
+					"mode": "run",
+					"motor_version": "r15-source-crouch-2",
+					"physics_hz": 128.0,
+					"practice_reason": "",
+					"respawns": 0.0
+				},
+				"k": "context",
+				"q": 2.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"edge": [
+						{
+							"echo": false,
+							"keycode": 82.0,
+							"physical_keycode": 82.0,
+							"pressed": true,
+							"type": "key"
+						},
+						{
+							"action": "restart",
+							"pressed": true,
+							"type": "action"
+						}
+					],
+					"inputs": [],
+					"paused": false
+				},
+				"k": "restart",
+				"q": 3.0,
+				"s": "event",
+				"t": 3.0
+			}
+		],
+		"file": "breakwater_server128-aa1000_20261110-160646_565_3acc5282.r16run",
+		"header": {
+			"created_unix": 1794326806.56521,
+			"created_utc": "2026-11-10T16:06:46Z",
+			"engine": "4.7.2-stable (official)",
+			"format": "foldrunner-r16-run",
+			"identity": {
+				"course_key": "331253cc76905979",
+				"format": "r16-motion-1",
+				"geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+				"map": "breakwater",
+				"motor": "r15-source-crouch-2",
+				"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+				"physics_hz": 128.0,
+				"preset": "server128_aa1000",
+				"runner": "res://scripts/r15_source_player.gd",
+				"timing": "r16-timing-1"
+			},
+			"metadata": {
+				"attempt": 4.0,
+				"build": "spillway-2026.11.10-r20",
+				"build_label": "Spillway R20",
+				"clean_at_start": true,
+				"course_key": "331253cc76905979",
+				"elapsed_at_start": 0.0,
+				"family": "source",
+				"held_actions": [
+					"move_forward",
+					"move_back",
+					"move_left",
+					"move_right",
+					"jump",
+					"crouch",
+					"r15_slide",
+					"r15_grapple",
+					"look_left",
+					"look_right",
+					"look_up",
+					"look_down"
+				],
+				"identity": {
+					"course_key": "331253cc76905979",
+					"format": "r16-motion-1",
+					"geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					"map": "breakwater",
+					"motor": "r15-source-crouch-2",
+					"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+					"physics_hz": 128.0,
+					"preset": "server128_aa1000",
+					"runner": "res://scripts/r15_source_player.gd",
+					"timing": "r16-timing-1"
+				},
+				"lab": {},
+				"laws": {
+					"approved": "r15 source runner res://scripts/r15_source_player.gd with the r15 F2/F5 server presets, unchanged",
+					"course_law": "approved r15",
+					"experimental": [],
+					"r16_additions": "style scoring, recording and ghost are r16 game choices that only read the game"
+				},
+				"look": {
+					"family": "source",
+					"fov": 90.0,
+					"input": "screen_relative counts",
+					"m_pitch": 0.022,
+					"m_yaw": 0.022,
+					"pitch_rad_per_count": 0.00095993108859688,
+					"replay_override": true,
+					"sensitivity": 2.5,
+					"yaw_rad_per_count": 0.00095993108859688
+				},
+				"map": "breakwater",
+				"map_kind": "course",
+				"map_name": "Breakwater",
+				"opportunities": {
+					"applied": true,
+					"base_geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					"hash": "b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+					"passages": [
+						"RunwayCrouch",
+						"RunwayThread"
+					],
+					"reason": "widen_optional_thread_after_repeated_front_contacts",
+					"version": "r19-breakwater-flow-1"
+				},
+				"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+				"paused_at_start": false,
+				"physics": {
+					"family": "source",
+					"fingerprint": {
+						"air_budget": "legacy",
+						"air_surface": "deadstrafe",
+						"cl_forwardspeed": 450.0,
+						"cl_sidespeed": 450.0,
+						"duck_air_anchor": "center",
+						"duck_air_crop": false,
+						"duck_eye_clearance": 2.0,
+						"duck_eye_height": 46.0,
+						"duck_eye_time": 0.1,
+						"duck_hull_height": 54.0,
+						"duck_multiplier": 0.34,
+						"eye_height": 64.0,
+						"ground_probe": 2.0,
+						"ground_speed_clamp": false,
+						"hull_height": 72.0,
+						"hull_width": 32.0,
+						"jump_clamp_factor": 1.1,
+						"jump_order": "source2013",
+						"non_jump_velocity": 140.0,
+						"player_maxspeed": 250.0,
+						"preset": "csgo_server",
+						"stamina_model": "gokz_fit",
+						"sv_accelerate": 5.5,
+						"sv_air_max_wishspeed": 30.0,
+						"sv_airaccelerate": 1000.0,
+						"sv_autobunnyhopping": true,
+						"sv_enablebunnyhopping": true,
+						"sv_friction": 5.2,
+						"sv_gravity": 800.0,
+						"sv_jump_impulse": 301.993377,
+						"sv_maxspeed": 320.0,
+						"sv_maxvelocity": 3500.0,
+						"sv_staminajumpcost": 0.0,
+						"sv_staminalandcost": 0.0,
+						"sv_staminamax": 0.0,
+						"sv_staminarecoveryrate": 0.0,
+						"sv_stepsize": 18.0,
+						"sv_stopspeed": 80.0,
+						"sv_walkable_normal": 0.7,
+						"tickrate": 128.0,
+						"water_multiplier": 0.8
+					},
+					"hull": {
+						"duck_air_anchor": "center",
+						"duck_height_u": 54.0,
+						"height_u": 72.0,
+						"shape": "box",
+						"width_u": 32.0
+					},
+					"hz": 128.0,
+					"mechanics": [],
+					"motor_version": "r15-source-crouch-2",
+					"runner": "res://scripts/r15_source_player.gd",
+					"standin": false
+				},
+				"practice_reason": "",
+				"practice_stage": -1.0,
+				"preset": "server128_aa1000",
+				"preset_label": "Bhop server AA 1000",
+				"record_identity": [
+					"r16-timing-1",
+					[
+						"breakwater",
+						"course",
+						"r15-breakwater",
+						1.0,
+						"breakwater"
+					],
+					"bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					[
+						"Box rows",
+						"Crane line",
+						"Breakwater",
+						"The breach",
+						"Lighthouse"
+					],
+					"server128_aa1000",
+					"source",
+					"r15-source-crouch-2",
+					"res://scripts/r15_source_player.gd",
+					128.0,
+					"{\"air_budget\":\"legacy\",\"air_surface\":\"deadstrafe\",\"cl_forwardspeed\":450.0,\"cl_sidespeed\":450.0,\"duck_air_anchor\":\"center\",\"duck_air_crop\":false,\"duck_eye_clearance\":2.0,\"duck_eye_height\":46.0,\"duck_eye_time\":0.1,\"duck_hull_height\":54.0,\"duck_multiplier\":0.34,\"eye_height\":64.0,\"ground_probe\":2.0,\"ground_speed_clamp\":false,\"hull_height\":72.0,\"hull_width\":32.0,\"jump_clamp_factor\":1.1,\"jump_order\":\"source2013\",\"non_jump_velocity\":140.0,\"player_maxspeed\":250.0,\"preset\":\"csgo_server\",\"stamina_model\":\"gokz_fit\",\"sv_accelerate\":5.5,\"sv_air_max_wishspeed\":30.0,\"sv_airaccelerate\":1000.0,\"sv_autobunnyhopping\":true,\"sv_enablebunnyhopping\":true,\"sv_friction\":5.2,\"sv_gravity\":800.0,\"sv_jump_impulse\":301.993377,\"sv_maxspeed\":320.0,\"sv_maxvelocity\":3500.0,\"sv_staminajumpcost\":0.0,\"sv_staminalandcost\":0.0,\"sv_staminamax\":0.0,\"sv_staminarecoveryrate\":0.0,\"sv_stepsize\":18.0,\"sv_stopspeed\":80.0,\"sv_walkable_normal\":0.7,\"tickrate\":128,\"water_multiplier\":0.8}",
+					"{\"duck_air_anchor\":\"center\",\"duck_height_u\":54.0,\"height_u\":72.0,\"shape\":\"box\",\"width_u\":32.0}",
+					"[]",
+					"r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389"
+				],
+				"sample": {
+					"actual_v": "the runner's own travel over its step, excluding duck-origin compensation; checked against (p - previous p - duck shift) / dt",
+					"version": "r16-sample-1",
+					"when": "end of each unpaused physics frame (priority 999, after the strafe stats): the body after this frame's motor step, the host state as this frame left it"
+				},
+				"scoring": {
+					"style": {
+						"event_format": 2.0,
+						"rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
+						"version": "r20-style-stack-1"
+					},
+					"style_key": "r20-style-stack-1/2/b133b80f118247cf",
+					"timing": "r16-timing-1"
+				},
+				"start_reason": "preset",
+				"timer_running_at_start": false
+			},
+			"os": "Linux",
+			"run_id": "breakwater_server128-aa1000_20261110-160646_565_3acc5282",
+			"units": {
+				"angle": "rad",
+				"length": "m",
+				"time": "s",
+				"velocity": "m/s"
+			},
+			"vector_precision": "single",
+			"version": 1.0
+		},
+		"identity_text": "[\"r16-timing-1\",[\"breakwater\",\"course\",\"r15-breakwater\",1,\"breakwater\"],\"bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162\",[\"Box rows\",\"Crane line\",\"Breakwater\",\"The breach\",\"Lighthouse\"],\"server128_aa1000\",\"source\",\"r15-source-crouch-2\",\"res://scripts/r15_source_player.gd\",128,\"{\\\"air_budget\\\":\\\"legacy\\\",\\\"air_surface\\\":\\\"deadstrafe\\\",\\\"cl_forwardspeed\\\":450.0,\\\"cl_sidespeed\\\":450.0,\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_air_crop\\\":false,\\\"duck_eye_clearance\\\":2.0,\\\"duck_eye_height\\\":46.0,\\\"duck_eye_time\\\":0.1,\\\"duck_hull_height\\\":54.0,\\\"duck_multiplier\\\":0.34,\\\"eye_height\\\":64.0,\\\"ground_probe\\\":2.0,\\\"ground_speed_clamp\\\":false,\\\"hull_height\\\":72.0,\\\"hull_width\\\":32.0,\\\"jump_clamp_factor\\\":1.1,\\\"jump_order\\\":\\\"source2013\\\",\\\"non_jump_velocity\\\":140.0,\\\"player_maxspeed\\\":250.0,\\\"preset\\\":\\\"csgo_server\\\",\\\"stamina_model\\\":\\\"gokz_fit\\\",\\\"sv_accelerate\\\":5.5,\\\"sv_air_max_wishspeed\\\":30.0,\\\"sv_airaccelerate\\\":1000.0,\\\"sv_autobunnyhopping\\\":true,\\\"sv_enablebunnyhopping\\\":true,\\\"sv_friction\\\":5.2,\\\"sv_gravity\\\":800.0,\\\"sv_jump_impulse\\\":301.993377,\\\"sv_maxspeed\\\":320.0,\\\"sv_maxvelocity\\\":3500.0,\\\"sv_staminajumpcost\\\":0.0,\\\"sv_staminalandcost\\\":0.0,\\\"sv_staminamax\\\":0.0,\\\"sv_staminarecoveryrate\\\":0.0,\\\"sv_stepsize\\\":18.0,\\\"sv_stopspeed\\\":80.0,\\\"sv_walkable_normal\\\":0.7,\\\"tickrate\\\":128,\\\"water_multiplier\\\":0.8}\",\"{\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_height_u\\\":54.0,\\\"height_u\\\":72.0,\\\"shape\\\":\\\"box\\\",\\\"width_u\\\":32.0}\",\"[]\",\"r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389\"]",
+		"inputs_sha256": {
+			"aux": "81b55becd8296d02eeab4add075c1b53a96f6bba83b8d7e10c6804fd9268c5e9",
+			"code": "81b55becd8296d02eeab4add075c1b53a96f6bba83b8d7e10c6804fd9268c5e9",
+			"flags": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"kind": "77ee7ce65c84d38465b8162c58afd76001b97d06f7e68e7abc06ad7eee78756c",
+			"tick": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+		},
+		"seal": {
+			"counts": {
+				"bytes": 6581.0,
+				"chunks": 1.0,
+				"events": 4.0,
+				"gaps": 0.0,
+				"inputs": 2.0,
+				"ticks": 4.0
+			},
+			"ended_unix": 1794326806.582762,
+			"final": {
+				"checkpoint": 0.0,
+				"clean": true,
+				"elapsed": 0.0,
+				"finished": false,
+				"p": [
+					0.0,
+					0.00116091629024595,
+					4.0
+				],
+				"respawns": 0.0,
+				"started": false,
+				"tick": 3.0
+			},
+			"finish_tick": -1.0,
+			"first_tick": 0.0,
+			"last_tick": 3.0,
+			"outcome": {
+				"checkpoint": 0.0,
+				"clean": false,
+				"elapsed": 0.0,
+				"finished": false,
+				"kind": "restart",
+				"practice_reason": "",
+				"respawns": 0.0,
+				"style": {
+					"by_kind": {},
+					"score": 0.0
+				}
+			},
+			"timer_start_tick": -1.0
+		},
+		"sha256": "60ee6a10115e28b060ba54acd496d57a2e9cca9536e9e3fe131eced0132f0b3c"
+	},
+	{
+		"columns_sha256": {
+			"actual_v": "c9b4547a7f1f1956b96dc10367918d1804bee0e104a672395fd6c7921dc33af3",
+			"checkpoint": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"dt": "bda8dac224b09366fa9ccbc5c7887a0be3c60c0184e0fb468acf0f4ba0135fcb",
+			"elapsed": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"flags": "839018c5d8d9b743f6ea9914c04117ca00c6c92a2cfe7ff0c3e4b1ae7dbe6552",
+			"held": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"p": "84ef679e328df1005778a5f9c7b80092402d51becf9626fb3d4a969158b9cdec",
+			"physics_hz": "81b0006182e2f4180d23d14f625a836f013f13c50bb9e085fcca8949834c8a1e",
+			"pitch": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"reference_p": "84ef679e328df1005778a5f9c7b80092402d51becf9626fb3d4a969158b9cdec",
+			"respawns": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"tick": "baed642339816affb3fe8719792d0e4ce82f12db72b7373d244eaa65445800fe",
+			"v": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+			"yaw": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925"
+		},
+		"events": [
+			{
+				"d": {
+					"names": [
+						"crouch",
+						"jump",
+						"look_down",
+						"look_left",
+						"look_right",
+						"look_up",
+						"move_back",
+						"move_forward",
+						"move_left",
+						"move_right",
+						"r15_grapple",
+						"r15_slide"
+					]
+				},
+				"k": "held_names",
+				"q": 0.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"index": 0.0,
+					"name": "restart"
+				},
+				"k": "action_name",
+				"q": 1.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"checkpoint": 0.0,
+					"dt": 0.0078125,
+					"mode": "run",
+					"motor_version": "r15-source-crouch-2",
+					"physics_hz": 128.0,
+					"practice_reason": "",
+					"respawns": 0.0
+				},
+				"k": "context",
+				"q": 2.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 3.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"edge": [
+						{
+							"echo": false,
+							"keycode": 4194333.0,
+							"physical_keycode": 4194333.0,
+							"pressed": true,
+							"type": "key"
+						},
+						{
+							"action": "r16_preset_2",
+							"pressed": true,
+							"type": "action"
+						}
+					],
+					"from": "server128_aa1000",
+					"inputs_carried": 0.0,
+					"paused": false,
+					"same_body": true,
+					"to": "server128",
+					"untouched": true
+				},
+				"k": "preset",
+				"q": 4.0,
+				"s": "event",
+				"t": 3.0
+			}
+		],
+		"file": "breakwater_server128-aa1000_20261110-160646_583_6e88a765.r16run",
+		"header": {
+			"created_unix": 1794326806.583388,
+			"created_utc": "2026-11-10T16:06:46Z",
+			"engine": "4.7.2-stable (official)",
+			"format": "foldrunner-r16-run",
+			"identity": {
+				"course_key": "331253cc76905979",
+				"format": "r16-motion-1",
+				"geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+				"map": "breakwater",
+				"motor": "r15-source-crouch-2",
+				"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+				"physics_hz": 128.0,
+				"preset": "server128_aa1000",
+				"runner": "res://scripts/r15_source_player.gd",
+				"timing": "r16-timing-1"
+			},
+			"metadata": {
+				"attempt": 5.0,
+				"build": "spillway-2026.11.10-r20",
+				"build_label": "Spillway R20",
+				"clean_at_start": true,
+				"course_key": "331253cc76905979",
+				"elapsed_at_start": 0.0,
+				"family": "source",
+				"held_actions": [
+					"move_forward",
+					"move_back",
+					"move_left",
+					"move_right",
+					"jump",
+					"crouch",
+					"r15_slide",
+					"r15_grapple",
+					"look_left",
+					"look_right",
+					"look_up",
+					"look_down"
+				],
+				"identity": {
+					"course_key": "331253cc76905979",
+					"format": "r16-motion-1",
+					"geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					"map": "breakwater",
+					"motor": "r15-source-crouch-2",
+					"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+					"physics_hz": 128.0,
+					"preset": "server128_aa1000",
+					"runner": "res://scripts/r15_source_player.gd",
+					"timing": "r16-timing-1"
+				},
+				"lab": {},
+				"laws": {
+					"approved": "r15 source runner res://scripts/r15_source_player.gd with the r15 F2/F5 server presets, unchanged",
+					"course_law": "approved r15",
+					"experimental": [],
+					"r16_additions": "style scoring, recording and ghost are r16 game choices that only read the game"
+				},
+				"look": {
+					"family": "source",
+					"fov": 90.0,
+					"input": "screen_relative counts",
+					"m_pitch": 0.022,
+					"m_yaw": 0.022,
+					"pitch_rad_per_count": 0.00095993108859688,
+					"replay_override": true,
+					"sensitivity": 2.5,
+					"yaw_rad_per_count": 0.00095993108859688
+				},
+				"map": "breakwater",
+				"map_kind": "course",
+				"map_name": "Breakwater",
+				"opportunities": {
+					"applied": true,
+					"base_geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					"hash": "b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+					"passages": [
+						"RunwayCrouch",
+						"RunwayThread"
+					],
+					"reason": "widen_optional_thread_after_repeated_front_contacts",
+					"version": "r19-breakwater-flow-1"
+				},
+				"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+				"paused_at_start": false,
+				"physics": {
+					"family": "source",
+					"fingerprint": {
+						"air_budget": "legacy",
+						"air_surface": "deadstrafe",
+						"cl_forwardspeed": 450.0,
+						"cl_sidespeed": 450.0,
+						"duck_air_anchor": "center",
+						"duck_air_crop": false,
+						"duck_eye_clearance": 2.0,
+						"duck_eye_height": 46.0,
+						"duck_eye_time": 0.1,
+						"duck_hull_height": 54.0,
+						"duck_multiplier": 0.34,
+						"eye_height": 64.0,
+						"ground_probe": 2.0,
+						"ground_speed_clamp": false,
+						"hull_height": 72.0,
+						"hull_width": 32.0,
+						"jump_clamp_factor": 1.1,
+						"jump_order": "source2013",
+						"non_jump_velocity": 140.0,
+						"player_maxspeed": 250.0,
+						"preset": "csgo_server",
+						"stamina_model": "gokz_fit",
+						"sv_accelerate": 5.5,
+						"sv_air_max_wishspeed": 30.0,
+						"sv_airaccelerate": 1000.0,
+						"sv_autobunnyhopping": true,
+						"sv_enablebunnyhopping": true,
+						"sv_friction": 5.2,
+						"sv_gravity": 800.0,
+						"sv_jump_impulse": 301.993377,
+						"sv_maxspeed": 320.0,
+						"sv_maxvelocity": 3500.0,
+						"sv_staminajumpcost": 0.0,
+						"sv_staminalandcost": 0.0,
+						"sv_staminamax": 0.0,
+						"sv_staminarecoveryrate": 0.0,
+						"sv_stepsize": 18.0,
+						"sv_stopspeed": 80.0,
+						"sv_walkable_normal": 0.7,
+						"tickrate": 128.0,
+						"water_multiplier": 0.8
+					},
+					"hull": {
+						"duck_air_anchor": "center",
+						"duck_height_u": 54.0,
+						"height_u": 72.0,
+						"shape": "box",
+						"width_u": 32.0
+					},
+					"hz": 128.0,
+					"mechanics": [],
+					"motor_version": "r15-source-crouch-2",
+					"runner": "res://scripts/r15_source_player.gd",
+					"standin": false
+				},
+				"practice_reason": "",
+				"practice_stage": -1.0,
+				"preset": "server128_aa1000",
+				"preset_label": "Bhop server AA 1000",
+				"record_identity": [
+					"r16-timing-1",
+					[
+						"breakwater",
+						"course",
+						"r15-breakwater",
+						1.0,
+						"breakwater"
+					],
+					"bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					[
+						"Box rows",
+						"Crane line",
+						"Breakwater",
+						"The breach",
+						"Lighthouse"
+					],
+					"server128_aa1000",
+					"source",
+					"r15-source-crouch-2",
+					"res://scripts/r15_source_player.gd",
+					128.0,
+					"{\"air_budget\":\"legacy\",\"air_surface\":\"deadstrafe\",\"cl_forwardspeed\":450.0,\"cl_sidespeed\":450.0,\"duck_air_anchor\":\"center\",\"duck_air_crop\":false,\"duck_eye_clearance\":2.0,\"duck_eye_height\":46.0,\"duck_eye_time\":0.1,\"duck_hull_height\":54.0,\"duck_multiplier\":0.34,\"eye_height\":64.0,\"ground_probe\":2.0,\"ground_speed_clamp\":false,\"hull_height\":72.0,\"hull_width\":32.0,\"jump_clamp_factor\":1.1,\"jump_order\":\"source2013\",\"non_jump_velocity\":140.0,\"player_maxspeed\":250.0,\"preset\":\"csgo_server\",\"stamina_model\":\"gokz_fit\",\"sv_accelerate\":5.5,\"sv_air_max_wishspeed\":30.0,\"sv_airaccelerate\":1000.0,\"sv_autobunnyhopping\":true,\"sv_enablebunnyhopping\":true,\"sv_friction\":5.2,\"sv_gravity\":800.0,\"sv_jump_impulse\":301.993377,\"sv_maxspeed\":320.0,\"sv_maxvelocity\":3500.0,\"sv_staminajumpcost\":0.0,\"sv_staminalandcost\":0.0,\"sv_staminamax\":0.0,\"sv_staminarecoveryrate\":0.0,\"sv_stepsize\":18.0,\"sv_stopspeed\":80.0,\"sv_walkable_normal\":0.7,\"tickrate\":128,\"water_multiplier\":0.8}",
+					"{\"duck_air_anchor\":\"center\",\"duck_height_u\":54.0,\"height_u\":72.0,\"shape\":\"box\",\"width_u\":32.0}",
+					"[]",
+					"r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389"
+				],
+				"sample": {
+					"actual_v": "the runner's own travel over its step, excluding duck-origin compensation; checked against (p - previous p - duck shift) / dt",
+					"version": "r16-sample-1",
+					"when": "end of each unpaused physics frame (priority 999, after the strafe stats): the body after this frame's motor step, the host state as this frame left it"
+				},
+				"scoring": {
+					"style": {
+						"event_format": 2.0,
+						"rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
+						"version": "r20-style-stack-1"
+					},
+					"style_key": "r20-style-stack-1/2/b133b80f118247cf",
+					"timing": "r16-timing-1"
+				},
+				"start_reason": "restart",
+				"timer_running_at_start": false
+			},
+			"os": "Linux",
+			"run_id": "breakwater_server128-aa1000_20261110-160646_583_6e88a765",
+			"units": {
+				"angle": "rad",
+				"length": "m",
+				"time": "s",
+				"velocity": "m/s"
+			},
+			"vector_precision": "single",
+			"version": 1.0
+		},
+		"identity_text": "[\"r16-timing-1\",[\"breakwater\",\"course\",\"r15-breakwater\",1,\"breakwater\"],\"bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162\",[\"Box rows\",\"Crane line\",\"Breakwater\",\"The breach\",\"Lighthouse\"],\"server128_aa1000\",\"source\",\"r15-source-crouch-2\",\"res://scripts/r15_source_player.gd\",128,\"{\\\"air_budget\\\":\\\"legacy\\\",\\\"air_surface\\\":\\\"deadstrafe\\\",\\\"cl_forwardspeed\\\":450.0,\\\"cl_sidespeed\\\":450.0,\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_air_crop\\\":false,\\\"duck_eye_clearance\\\":2.0,\\\"duck_eye_height\\\":46.0,\\\"duck_eye_time\\\":0.1,\\\"duck_hull_height\\\":54.0,\\\"duck_multiplier\\\":0.34,\\\"eye_height\\\":64.0,\\\"ground_probe\\\":2.0,\\\"ground_speed_clamp\\\":false,\\\"hull_height\\\":72.0,\\\"hull_width\\\":32.0,\\\"jump_clamp_factor\\\":1.1,\\\"jump_order\\\":\\\"source2013\\\",\\\"non_jump_velocity\\\":140.0,\\\"player_maxspeed\\\":250.0,\\\"preset\\\":\\\"csgo_server\\\",\\\"stamina_model\\\":\\\"gokz_fit\\\",\\\"sv_accelerate\\\":5.5,\\\"sv_air_max_wishspeed\\\":30.0,\\\"sv_airaccelerate\\\":1000.0,\\\"sv_autobunnyhopping\\\":true,\\\"sv_enablebunnyhopping\\\":true,\\\"sv_friction\\\":5.2,\\\"sv_gravity\\\":800.0,\\\"sv_jump_impulse\\\":301.993377,\\\"sv_maxspeed\\\":320.0,\\\"sv_maxvelocity\\\":3500.0,\\\"sv_staminajumpcost\\\":0.0,\\\"sv_staminalandcost\\\":0.0,\\\"sv_staminamax\\\":0.0,\\\"sv_staminarecoveryrate\\\":0.0,\\\"sv_stepsize\\\":18.0,\\\"sv_stopspeed\\\":80.0,\\\"sv_walkable_normal\\\":0.7,\\\"tickrate\\\":128,\\\"water_multiplier\\\":0.8}\",\"{\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_height_u\\\":54.0,\\\"height_u\\\":72.0,\\\"shape\\\":\\\"box\\\",\\\"width_u\\\":32.0}\",\"[]\",\"r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389\"]",
+		"inputs_sha256": {
+			"aux": "59f897c1aca4a814dad339f4185fdf0a38a52c816ad14e94162466af79521357",
+			"code": "59f897c1aca4a814dad339f4185fdf0a38a52c816ad14e94162466af79521357",
+			"flags": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"kind": "77ee7ce65c84d38465b8162c58afd76001b97d06f7e68e7abc06ad7eee78756c",
+			"tick": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+		},
+		"seal": {
+			"counts": {
+				"bytes": 6659.0,
+				"chunks": 1.0,
+				"events": 5.0,
+				"gaps": 0.0,
+				"inputs": 2.0,
+				"ticks": 4.0
+			},
+			"ended_unix": 1794326806.600055,
+			"final": {
+				"checkpoint": 0.0,
+				"clean": true,
+				"elapsed": 0.0,
+				"finished": false,
+				"p": [
+					0.0,
+					0.00115448131691664,
+					4.0
+				],
+				"respawns": 0.0,
+				"started": false,
+				"tick": 3.0
+			},
+			"finish_tick": -1.0,
+			"first_tick": 0.0,
+			"last_tick": 3.0,
+			"outcome": {
+				"checkpoint": 0.0,
+				"clean": false,
+				"elapsed": 0.0,
+				"finished": false,
+				"kind": "preset",
+				"practice_reason": "",
+				"respawns": 0.0,
+				"style": {
+					"by_kind": {},
+					"score": 0.0
+				}
+			},
+			"timer_start_tick": -1.0
+		},
+		"sha256": "55809726577854cf3772f41f46a89c90c9666edf87304d8c63bb5d0ec42c370c"
+	},
+	{
+		"columns_sha256": {
+			"actual_v": "68a912bd5047704d02ee021ace62216c93947def9c8312d52e24408ab8fd2959",
+			"checkpoint": "83dd0c62bd0e548020ff2383f674da58c6c655ffab80e12aaabc2fdf31fc1586",
+			"dt": "901f25d266c592c29816b984a0901dcf65c7d0901c41c259a9465647e0bd5eb8",
+			"elapsed": "871b38c26ee72d322edec4510fe9897c5d6b7a14ad632f95a7b6091675363bae",
+			"flags": "bc31f1617d2b969eb90174b71748f96624a1f45491624e7bdd2088445f7ef7ca",
+			"held": "93674b1c2323d5455af4b6926e67179890d322203c9468f471bdb1d73e6700d2",
+			"p": "db513e0e5aa73402fc9afb2777e8f69acd3a89259b033d5311d0cfe778259bb9",
+			"physics_hz": "2c485e238d784e1f76124fba22ce1110a777fd8bbda83634fc1b5498a5edef03",
+			"pitch": "3439dac65feaf774606c4a5815005a123f7156bcf0bedf1b33a87afae1aeb65d",
+			"reference_p": "db513e0e5aa73402fc9afb2777e8f69acd3a89259b033d5311d0cfe778259bb9",
+			"respawns": "18deeabd97785369db5907ae6398b2c1d765d35d7125a324ecffe154b588aac1",
+			"tick": "0961dec8bde58d7023f81666fcdad6451d570d328e030cd140fd7a96d9963119",
+			"v": "bfa3d4f97a13a5cc9e513e100968fd0a6bcd151be2f881341801b4a19e7adda6",
+			"yaw": "cc59a3e3c43b97e845b6bf568add9f908b248528e6541019116484f29c9d4b9e"
+		},
+		"events": [
+			{
+				"d": {
+					"names": [
+						"crouch",
+						"jump",
+						"look_down",
+						"look_left",
+						"look_right",
+						"look_up",
+						"move_back",
+						"move_forward",
+						"move_left",
+						"move_right",
+						"r15_grapple",
+						"r15_slide"
+					]
+				},
+				"k": "held_names",
+				"q": 0.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"checkpoint": 0.0,
+					"dt": 0.0078125,
+					"mode": "run",
+					"motor_version": "r15-source-crouch-2",
+					"physics_hz": 128.0,
+					"practice_reason": "",
+					"respawns": 0.0
+				},
+				"k": "context",
+				"q": 1.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 2.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"index": 0.0,
+					"name": "move_forward"
+				},
+				"k": "action_name",
+				"q": 3.0,
+				"s": "recorder",
+				"t": 33.0
+			},
+			{
+				"d": {
+					"elapsed": 0.0078125
+				},
+				"k": "timer_start",
+				"q": 4.0,
+				"s": "recorder",
+				"t": 59.0
+			},
+			{
+				"d": {
+					"index": 1.0,
+					"name": "jump"
+				},
+				"k": "action_name",
+				"q": 5.0,
+				"s": "recorder",
+				"t": 698.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 6.0,
+				"s": "recorder",
+				"t": 698.0
+			},
+			{
+				"d": {
+					"events": [
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 7.0,
+				"s": "recorder",
+				"t": 698.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 8.0,
+				"s": "recorder",
+				"t": 792.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 9.0,
+				"s": "recorder",
+				"t": 792.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 1.0,
+					"landing": 249.99998474121097,
+					"peak": 249.9999962453767,
+					"sync": null,
+					"takeoff": 249.99998474121097,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 10.0,
+				"s": "recorder",
+				"t": 792.0
+			},
+			{
+				"d": {
+					"base": 71.0,
+					"clean": true,
+					"combo": 1.0,
+					"combo_mult": 1.0,
+					"direction_mult": 1.0,
+					"elapsed": 5.734375,
+					"geo": {
+						"from": {
+							"face": [
+								0.0,
+								1.0,
+								0.0
+							],
+							"path": "s0_gate_b",
+							"surface": "route"
+						},
+						"to": {
+							"face": [
+								0.0,
+								1.0,
+								0.0
+							],
+							"path": "s1_block_1_3",
+							"surface": "route"
+						}
+					},
+					"kind": "gap",
+					"label": "Gap 2.0 m",
+					"m": {
+						"air_ticks": 95.0,
+						"cleared_m": 1.9998,
+						"ducked_in_flight": false,
+						"hull_width_m": 0.8128000000000001,
+						"rise_u": 1.48,
+						"takeoff": [
+							-3.0102,
+							0.0011,
+							-27.7587
+						],
+						"void_from": [
+							-3.0090000000000003,
+							0.6698000000000001,
+							-28.4065
+						],
+						"void_m": 1.187,
+						"void_to": [
+							-3.0067,
+							1.3463,
+							-29.5935
+						]
+					},
+					"mult": 1.0,
+					"p": [
+						-3.0013,
+						0.0387,
+						-32.4717
+					],
+					"points": 71.0,
+					"tick": 792.0,
+					"time_s": 6.195313,
+					"v": 1.0
+				},
+				"k": "style",
+				"q": 11.0,
+				"s": "capture",
+				"t": 792.0
+			},
+			{
+				"d": {
+					"elapsed": 5.7421875,
+					"from": 0.0,
+					"to": 1.0
+				},
+				"k": "checkpoint",
+				"q": 12.0,
+				"s": "recorder",
+				"t": 793.0
+			},
+			{
+				"d": {
+					"checkpoint": 1.0
+				},
+				"k": "context",
+				"q": 13.0,
+				"s": "recorder",
+				"t": 793.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 14.0,
+				"s": "recorder",
+				"t": 862.0
+			},
+			{
+				"d": {
+					"events": [
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 15.0,
+				"s": "recorder",
+				"t": 862.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 16.0,
+				"s": "recorder",
+				"t": 956.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 17.0,
+				"s": "recorder",
+				"t": 956.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 2.0,
+					"landing": 250.0,
+					"peak": 250.0,
+					"sync": null,
+					"takeoff": 250.0,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 18.0,
+				"s": "recorder",
+				"t": 956.0
+			},
+			{
+				"d": {
+					"base": 99.0,
+					"clean": true,
+					"combo": 2.0,
+					"combo_mult": 1.25,
+					"direction_mult": 1.0,
+					"elapsed": 7.015625,
+					"geo": {
+						"from": {
+							"face": [
+								0.0,
+								1.0,
+								0.0
+							],
+							"path": "s1_block_1_3",
+							"surface": "route"
+						},
+						"to": {
+							"face": [
+								0.0,
+								1.0,
+								0.0
+							],
+							"path": "s1_block_2_3",
+							"surface": "route"
+						}
+					},
+					"kind": "gap",
+					"label": "Gap 2.5 m",
+					"m": {
+						"air_ticks": 95.0,
+						"cleared_m": 2.4998,
+						"ducked_in_flight": false,
+						"hull_width_m": 0.8128000000000001,
+						"rise_u": 1.48,
+						"takeoff": [
+							-2.9991000000000003,
+							0.0011,
+							-35.8819
+						],
+						"void_from": [
+							-2.9991000000000003,
+							0.6119,
+							-36.4645
+						],
+						"void_m": 1.687,
+						"void_to": [
+							-2.999,
+							1.4163,
+							-38.1515
+						]
+					},
+					"mult": 1.25,
+					"p": [
+						-2.999,
+						0.0387,
+						-40.5949
+					],
+					"points": 124.0,
+					"tick": 956.0,
+					"time_s": 7.476563,
+					"v": 1.0
+				},
+				"k": "style",
+				"q": 19.0,
+				"s": "capture",
+				"t": 956.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 20.0,
+				"s": "recorder",
+				"t": 1035.0
+			},
+			{
+				"d": {
+					"events": [
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 21.0,
+				"s": "recorder",
+				"t": 1035.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 22.0,
+				"s": "recorder",
+				"t": 1129.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 23.0,
+				"s": "recorder",
+				"t": 1129.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 3.0,
+					"landing": 250.0,
+					"peak": 250.0,
+					"sync": null,
+					"takeoff": 250.0,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 24.0,
+				"s": "recorder",
+				"t": 1129.0
+			},
+			{
+				"d": {
+					"base": 130.0,
+					"clean": true,
+					"combo": 3.0,
+					"combo_mult": 1.5,
+					"direction_mult": 1.0,
+					"elapsed": 8.367187999999999,
+					"geo": {
+						"from": {
+							"face": [
+								0.0,
+								1.0,
+								0.0
+							],
+							"path": "s1_block_2_3",
+							"surface": "route"
+						},
+						"to": {
+							"face": [
+								0.0,
+								1.0,
+								0.0
+							],
+							"path": "s1_block_3_3",
+							"surface": "route"
+						}
+					},
+					"kind": "gap",
+					"label": "Gap 3.0 m",
+					"m": {
+						"air_ticks": 95.0,
+						"cleared_m": 3.0010000000000003,
+						"ducked_in_flight": false,
+						"hull_width_m": 0.8128000000000001,
+						"rise_u": 1.48,
+						"takeoff": [
+							-2.9993000000000003,
+							0.0011,
+							-44.4517
+						],
+						"void_from": [
+							-2.9994,
+							0.6013000000000001,
+							-45.0225
+						],
+						"void_m": 2.1882,
+						"void_to": [
+							-2.9996,
+							1.3813,
+							-47.2107
+						]
+					},
+					"mult": 1.5,
+					"p": [
+						-2.9998,
+						0.0387,
+						-49.1646
+					],
+					"points": 195.0,
+					"tick": 1129.0,
+					"time_s": 8.828125,
+					"v": 1.0
+				},
+				"k": "style",
+				"q": 25.0,
+				"s": "capture",
+				"t": 1129.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 26.0,
+				"s": "recorder",
+				"t": 1342.0
+			},
+			{
+				"d": {
+					"events": [
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 27.0,
+				"s": "recorder",
+				"t": 1342.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 28.0,
+				"s": "recorder",
+				"t": 1436.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 29.0,
+				"s": "recorder",
+				"t": 1436.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 4.0,
+					"landing": 250.00001525878903,
+					"peak": 250.00001525878903,
+					"sync": null,
+					"takeoff": 250.00001525878903,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 30.0,
+				"s": "recorder",
+				"t": 1436.0
+			},
+			{
+				"d": {
+					"base": 164.0,
+					"clean": true,
+					"combo": 4.0,
+					"combo_mult": 1.75,
+					"direction_mult": 1.0,
+					"elapsed": 10.765625,
+					"geo": {
+						"from": {
+							"face": [
+								0.0,
+								1.0,
+								0.0
+							],
+							"path": "s1_block_3_2",
+							"surface": "route"
+						},
+						"to": {
+							"face": [
+								0.0,
+								1.0,
+								0.0
+							],
+							"path": "s1_block_4_2",
+							"surface": "route"
+						}
+					},
+					"kind": "gap",
+					"label": "Gap 3.5 m",
+					"m": {
+						"air_ticks": 95.0,
+						"cleared_m": 3.5052000000000003,
+						"ducked_in_flight": false,
+						"hull_width_m": 0.8128000000000001,
+						"rise_u": 1.48,
+						"takeoff": [
+							-3.5784,
+							0.0011,
+							-59.6523
+						],
+						"void_from": [
+							-3.614,
+							0.5945,
+							-60.2145
+						],
+						"void_m": 2.6924,
+						"void_to": [
+							-3.7844,
+							1.2223000000000002,
+							-62.901500000000006
+						]
+					},
+					"mult": 1.75,
+					"p": [
+						-3.8766,
+						0.0387,
+						-64.3558
+					],
+					"points": 287.0,
+					"tick": 1436.0,
+					"time_s": 11.226563,
+					"v": 1.0
+				},
+				"k": "style",
+				"q": 31.0,
+				"s": "capture",
+				"t": 1436.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 32.0,
+				"s": "recorder",
+				"t": 1534.0
+			},
+			{
+				"d": {
+					"events": [
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 33.0,
+				"s": "recorder",
+				"t": 1534.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 34.0,
+				"s": "recorder",
+				"t": 1628.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 35.0,
+				"s": "recorder",
+				"t": 1628.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 5.0,
+					"landing": 250.00038146972656,
+					"peak": 250.00038146972656,
+					"sync": null,
+					"takeoff": 250.00038146972656,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 36.0,
+				"s": "recorder",
+				"t": 1628.0
+			},
+			{
+				"d": {
+					"base": 130.0,
+					"clean": true,
+					"combo": 5.0,
+					"combo_mult": 2.0,
+					"direction_mult": 1.0,
+					"elapsed": 12.265625,
+					"geo": {
+						"from": {
+							"face": [
+								0.0,
+								1.0,
+								0.0
+							],
+							"path": "s1_block_4_2",
+							"surface": "route"
+						},
+						"to": {
+							"face": [
+								0.0,
+								1.0,
+								0.0
+							],
+							"path": "s2_bend1_00",
+							"surface": "route"
+						}
+					},
+					"kind": "gap",
+					"label": "Gap 3.0 m",
+					"m": {
+						"air_ticks": 95.0,
+						"cleared_m": 2.9998,
+						"ducked_in_flight": false,
+						"hull_width_m": 0.8128000000000001,
+						"rise_u": 1.48,
+						"takeoff": [
+							-3.9758,
+							0.0011,
+							-69.1537
+						],
+						"void_from": [
+							-3.9791,
+							0.6443,
+							-69.77250000000001
+						],
+						"void_m": 2.1870000000000003,
+						"void_to": [
+							-3.9907,
+							1.3715000000000002,
+							-71.9595
+						]
+					},
+					"mult": 2.0,
+					"p": [
+						-4.0008,
+						0.0387,
+						-73.86630000000001
+					],
+					"points": 260.0,
+					"tick": 1628.0,
+					"time_s": 12.726563,
+					"v": 1.0
+				},
+				"k": "style",
+				"q": 37.0,
+				"s": "capture",
+				"t": 1628.0
+			},
+			{
+				"d": {
+					"elapsed": 12.2734375,
+					"from": 1.0,
+					"to": 2.0
+				},
+				"k": "checkpoint",
+				"q": 38.0,
+				"s": "recorder",
+				"t": 1629.0
+			},
+			{
+				"d": {
+					"checkpoint": 2.0
+				},
+				"k": "context",
+				"q": 39.0,
+				"s": "recorder",
+				"t": 1629.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 40.0,
+				"s": "recorder",
+				"t": 1631.0
+			},
+			{
+				"d": {
+					"events": [
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 41.0,
+				"s": "recorder",
+				"t": 1631.0
+			},
+			{
+				"d": {
+					"index": 2.0,
+					"name": "move_right"
+				},
+				"k": "action_name",
+				"q": 42.0,
+				"s": "recorder",
+				"t": 1633.0
+			},
+			{
+				"d": {
+					"index": 3.0,
+					"name": "move_left"
+				},
+				"k": "action_name",
+				"q": 43.0,
+				"s": "recorder",
+				"t": 1701.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 44.0,
+				"s": "recorder",
+				"t": 1725.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 45.0,
+				"s": "recorder",
+				"t": 1725.0
+			},
+			{
+				"d": {
+					"air": 32.289031982421875,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 20.0,
+					"gain": 32.289031982421875,
+					"good": 17.0,
+					"index": 6.0,
+					"landing": 273.09246826171875,
+					"peak": 273.092450119379,
+					"sync": 0.85,
+					"takeoff": 240.80343627929688,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 46.0,
+				"s": "recorder",
+				"t": 1725.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 47.0,
+				"s": "recorder",
+				"t": 1726.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 48.0,
+				"s": "recorder",
+				"t": 1726.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 49.0,
+				"s": "recorder",
+				"t": 1821.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 50.0,
+				"s": "recorder",
+				"t": 1821.0
+			},
+			{
+				"d": {
+					"air": 7.931182861328125,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 5.0,
+					"gain": 7.931182861328125,
+					"good": 3.0,
+					"index": 7.0,
+					"landing": 281.0236511230469,
+					"peak": 281.02366004403183,
+					"sync": 0.6,
+					"takeoff": 273.09246826171875,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 51.0,
+				"s": "recorder",
+				"t": 1821.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 52.0,
+				"s": "recorder",
+				"t": 1822.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 53.0,
+				"s": "recorder",
+				"t": 1822.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 54.0,
+				"s": "recorder",
+				"t": 1917.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 55.0,
+				"s": "recorder",
+				"t": 1917.0
+			},
+			{
+				"d": {
+					"air": 3.18450927734375,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 2.0,
+					"gain": 3.18450927734375,
+					"good": 1.0,
+					"index": 8.0,
+					"landing": 284.20819091796875,
+					"peak": 284.2081813361701,
+					"sync": 0.5,
+					"takeoff": 281.023681640625,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 56.0,
+				"s": "recorder",
+				"t": 1917.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 57.0,
+				"s": "recorder",
+				"t": 1918.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 58.0,
+				"s": "recorder",
+				"t": 1918.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 59.0,
+				"s": "recorder",
+				"t": 2012.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 60.0,
+				"s": "recorder",
+				"t": 2012.0
+			},
+			{
+				"d": {
+					"air": 3.149261474609375,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 2.0,
+					"gain": 3.149261474609375,
+					"good": 0.0,
+					"index": 9.0,
+					"landing": 287.3574523925781,
+					"peak": 287.35742794247125,
+					"sync": 0.0,
+					"takeoff": 284.20819091796875,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 61.0,
+				"s": "recorder",
+				"t": 2012.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 62.0,
+				"s": "recorder",
+				"t": 2013.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 63.0,
+				"s": "recorder",
+				"t": 2013.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 64.0,
+				"s": "recorder",
+				"t": 2108.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 65.0,
+				"s": "recorder",
+				"t": 2108.0
+			},
+			{
+				"d": {
+					"air": 10.520263671875,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 7.0,
+					"gain": 10.520263671875,
+					"good": 5.0,
+					"index": 10.0,
+					"landing": 297.8777160644531,
+					"peak": 297.8777322243518,
+					"sync": 0.7142857142857143,
+					"takeoff": 287.3574523925781,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 66.0,
+				"s": "recorder",
+				"t": 2108.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 67.0,
+				"s": "recorder",
+				"t": 2109.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 68.0,
+				"s": "recorder",
+				"t": 2109.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 69.0,
+				"s": "recorder",
+				"t": 2204.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 70.0,
+				"s": "recorder",
+				"t": 2204.0
+			},
+			{
+				"d": {
+					"air": 1.50689697265625,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 1.0,
+					"gain": 1.50689697265625,
+					"good": 0.0,
+					"index": 11.0,
+					"landing": 299.3846130371094,
+					"peak": 299.38461273673954,
+					"sync": 0.0,
+					"takeoff": 297.8777160644531,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 71.0,
+				"s": "recorder",
+				"t": 2204.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 72.0,
+				"s": "recorder",
+				"t": 2205.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 73.0,
+				"s": "recorder",
+				"t": 2205.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 74.0,
+				"s": "recorder",
+				"t": 2299.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 75.0,
+				"s": "recorder",
+				"t": 2299.0
+			},
+			{
+				"d": {
+					"air": 13.004730224609377,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 9.0,
+					"gain": 13.004730224609377,
+					"good": 7.0,
+					"index": 12.0,
+					"landing": 312.38934326171875,
+					"peak": 312.3893324784407,
+					"sync": 0.7777777777777778,
+					"takeoff": 299.3846130371094,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 76.0,
+				"s": "recorder",
+				"t": 2299.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 77.0,
+				"s": "recorder",
+				"t": 2300.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 78.0,
+				"s": "recorder",
+				"t": 2300.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 79.0,
+				"s": "recorder",
+				"t": 2395.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 80.0,
+				"s": "recorder",
+				"t": 2395.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 13.0,
+					"landing": 312.38934326171875,
+					"peak": 312.38934326171875,
+					"sync": null,
+					"takeoff": 312.38934326171875,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 81.0,
+				"s": "recorder",
+				"t": 2395.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 82.0,
+				"s": "recorder",
+				"t": 2396.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 83.0,
+				"s": "recorder",
+				"t": 2396.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 84.0,
+				"s": "recorder",
+				"t": 2491.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 85.0,
+				"s": "recorder",
+				"t": 2491.0
+			},
+			{
+				"d": {
+					"air": 2.867828369140625,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 2.0,
+					"gain": 2.867828369140625,
+					"good": 0.0,
+					"index": 14.0,
+					"landing": 315.2571716308594,
+					"peak": 315.2571700689361,
+					"sync": 0.0,
+					"takeoff": 312.38934326171875,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 86.0,
+				"s": "recorder",
+				"t": 2491.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 87.0,
+				"s": "recorder",
+				"t": 2492.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 88.0,
+				"s": "recorder",
+				"t": 2492.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 89.0,
+				"s": "recorder",
+				"t": 2586.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 90.0,
+				"s": "recorder",
+				"t": 2586.0
+			},
+			{
+				"d": {
+					"air": 6.9603271484375,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 5.0,
+					"gain": 6.9603271484375,
+					"good": 5.0,
+					"index": 15.0,
+					"landing": 322.2174987792969,
+					"peak": 322.21749072938456,
+					"sync": 1.0,
+					"takeoff": 315.2571716308594,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 91.0,
+				"s": "recorder",
+				"t": 2586.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 92.0,
+				"s": "recorder",
+				"t": 2587.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 93.0,
+				"s": "recorder",
+				"t": 2587.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 94.0,
+				"s": "recorder",
+				"t": 2682.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 95.0,
+				"s": "recorder",
+				"t": 2682.0
+			},
+			{
+				"d": {
+					"air": 9.533935546875,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 7.0,
+					"gain": 9.533935546875,
+					"good": 7.0,
+					"index": 16.0,
+					"landing": 331.7514343261719,
+					"peak": 331.7514554722103,
+					"sync": 1.0,
+					"takeoff": 322.2174987792969,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 96.0,
+				"s": "recorder",
+				"t": 2682.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 97.0,
+				"s": "recorder",
+				"t": 2683.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 98.0,
+				"s": "recorder",
+				"t": 2683.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 99.0,
+				"s": "recorder",
+				"t": 2778.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 100.0,
+				"s": "recorder",
+				"t": 2778.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 17.0,
+					"landing": 331.7514343261719,
+					"peak": 331.7514554722103,
+					"sync": null,
+					"takeoff": 331.7514343261719,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 101.0,
+				"s": "recorder",
+				"t": 2778.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 102.0,
+				"s": "recorder",
+				"t": 2779.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 103.0,
+				"s": "recorder",
+				"t": 2779.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 104.0,
+				"s": "recorder",
+				"t": 2873.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 105.0,
+				"s": "recorder",
+				"t": 2873.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 18.0,
+					"landing": 331.7514343261719,
+					"peak": 331.7514554722103,
+					"sync": null,
+					"takeoff": 331.7514343261719,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 106.0,
+				"s": "recorder",
+				"t": 2873.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 107.0,
+				"s": "recorder",
+				"t": 2874.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 108.0,
+				"s": "recorder",
+				"t": 2874.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 109.0,
+				"s": "recorder",
+				"t": 2969.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 110.0,
+				"s": "recorder",
+				"t": 2969.0
+			},
+			{
+				"d": {
+					"air": 6.684967041015625,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 5.0,
+					"gain": 6.684967041015625,
+					"good": 3.0,
+					"index": 19.0,
+					"landing": 338.4364013671875,
+					"peak": 338.4363745141217,
+					"sync": 0.6,
+					"takeoff": 331.7514343261719,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 111.0,
+				"s": "recorder",
+				"t": 2969.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 112.0,
+				"s": "recorder",
+				"t": 2970.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 113.0,
+				"s": "recorder",
+				"t": 2970.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 114.0,
+				"s": "recorder",
+				"t": 3065.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 115.0,
+				"s": "recorder",
+				"t": 3065.0
+			},
+			{
+				"d": {
+					"air": 10.45135498046875,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 8.0,
+					"gain": 10.45135498046875,
+					"good": 5.0,
+					"index": 20.0,
+					"landing": 348.88775634765625,
+					"peak": 348.8877439123439,
+					"sync": 0.625,
+					"takeoff": 338.4364013671875,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 116.0,
+				"s": "recorder",
+				"t": 3065.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 117.0,
+				"s": "recorder",
+				"t": 3066.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 118.0,
+				"s": "recorder",
+				"t": 3066.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 119.0,
+				"s": "recorder",
+				"t": 3160.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 120.0,
+				"s": "recorder",
+				"t": 3160.0
+			},
+			{
+				"d": {
+					"air": 5.114654541015625,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 4.0,
+					"gain": 5.114654541015625,
+					"good": 4.0,
+					"index": 21.0,
+					"landing": 354.0024108886719,
+					"peak": 354.00240440068285,
+					"sync": 1.0,
+					"takeoff": 348.88775634765625,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 121.0,
+				"s": "recorder",
+				"t": 3160.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 122.0,
+				"s": "recorder",
+				"t": 3161.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 123.0,
+				"s": "recorder",
+				"t": 3161.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 124.0,
+				"s": "recorder",
+				"t": 3256.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 125.0,
+				"s": "recorder",
+				"t": 3256.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 22.0,
+					"landing": 354.00238037109375,
+					"peak": 354.00240440068285,
+					"sync": null,
+					"takeoff": 354.00238037109375,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 126.0,
+				"s": "recorder",
+				"t": 3256.0
+			},
+			{
+				"d": {
+					"elapsed": 24.9921875,
+					"from": 2.0,
+					"to": 3.0
+				},
+				"k": "checkpoint",
+				"q": 127.0,
+				"s": "recorder",
+				"t": 3257.0
+			},
+			{
+				"d": {
+					"checkpoint": 3.0,
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 128.0,
+				"s": "recorder",
+				"t": 3257.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 129.0,
+				"s": "recorder",
+				"t": 3257.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 130.0,
+				"s": "recorder",
+				"t": 3352.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 131.0,
+				"s": "recorder",
+				"t": 3352.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 23.0,
+					"landing": 354.00238037109375,
+					"peak": 354.00240440068285,
+					"sync": null,
+					"takeoff": 354.00238037109375,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 132.0,
+				"s": "recorder",
+				"t": 3352.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 133.0,
+				"s": "recorder",
+				"t": 3353.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 134.0,
+				"s": "recorder",
+				"t": 3353.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 135.0,
+				"s": "recorder",
+				"t": 3447.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 136.0,
+				"s": "recorder",
+				"t": 3447.0
+			},
+			{
+				"d": {
+					"air": 1.268890380859375,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 1.0,
+					"gain": 1.268890380859375,
+					"good": 0.0,
+					"index": 24.0,
+					"landing": 355.2712707519531,
+					"peak": 355.2712793425312,
+					"sync": 0.0,
+					"takeoff": 354.00238037109375,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 137.0,
+				"s": "recorder",
+				"t": 3447.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 138.0,
+				"s": "recorder",
+				"t": 3448.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 139.0,
+				"s": "recorder",
+				"t": 3448.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 140.0,
+				"s": "recorder",
+				"t": 3543.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 141.0,
+				"s": "recorder",
+				"t": 3543.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 25.0,
+					"landing": 355.2712707519531,
+					"peak": 355.2712793425312,
+					"sync": null,
+					"takeoff": 355.2712707519531,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 142.0,
+				"s": "recorder",
+				"t": 3543.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 143.0,
+				"s": "recorder",
+				"t": 3544.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 144.0,
+				"s": "recorder",
+				"t": 3544.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 145.0,
+				"s": "recorder",
+				"t": 3639.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 146.0,
+				"s": "recorder",
+				"t": 3639.0
+			},
+			{
+				"d": {
+					"air": 2.52435302734375,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 2.0,
+					"gain": 2.52435302734375,
+					"good": 0.0,
+					"index": 26.0,
+					"landing": 357.7956237792969,
+					"peak": 357.7956252210722,
+					"sync": 0.0,
+					"takeoff": 355.2712707519531,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 147.0,
+				"s": "recorder",
+				"t": 3639.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 148.0,
+				"s": "recorder",
+				"t": 3640.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 149.0,
+				"s": "recorder",
+				"t": 3640.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 150.0,
+				"s": "recorder",
+				"t": 3734.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 151.0,
+				"s": "recorder",
+				"t": 3734.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 27.0,
+					"landing": 357.7956237792969,
+					"peak": 357.7956252210722,
+					"sync": null,
+					"takeoff": 357.7956237792969,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 152.0,
+				"s": "recorder",
+				"t": 3734.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 153.0,
+				"s": "recorder",
+				"t": 3735.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 154.0,
+				"s": "recorder",
+				"t": 3735.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 155.0,
+				"s": "recorder",
+				"t": 3830.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 156.0,
+				"s": "recorder",
+				"t": 3830.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 28.0,
+					"landing": 357.7956237792969,
+					"peak": 357.7956252210722,
+					"sync": null,
+					"takeoff": 357.7956237792969,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 157.0,
+				"s": "recorder",
+				"t": 3830.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 158.0,
+				"s": "recorder",
+				"t": 3831.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 159.0,
+				"s": "recorder",
+				"t": 3831.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 160.0,
+				"s": "recorder",
+				"t": 3926.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 161.0,
+				"s": "recorder",
+				"t": 3926.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 29.0,
+					"landing": 357.7956237792969,
+					"peak": 357.7956252210722,
+					"sync": null,
+					"takeoff": 357.7956237792969,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 162.0,
+				"s": "recorder",
+				"t": 3926.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 163.0,
+				"s": "recorder",
+				"t": 3927.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 164.0,
+				"s": "recorder",
+				"t": 3927.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 165.0,
+				"s": "recorder",
+				"t": 4021.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 166.0,
+				"s": "recorder",
+				"t": 4021.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 30.0,
+					"landing": 357.7956237792969,
+					"peak": 357.7956252210722,
+					"sync": null,
+					"takeoff": 357.7956237792969,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 167.0,
+				"s": "recorder",
+				"t": 4021.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 168.0,
+				"s": "recorder",
+				"t": 4022.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 169.0,
+				"s": "recorder",
+				"t": 4022.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 170.0,
+				"s": "recorder",
+				"t": 4117.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 171.0,
+				"s": "recorder",
+				"t": 4117.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 31.0,
+					"landing": 357.7956237792969,
+					"peak": 357.7956252210722,
+					"sync": null,
+					"takeoff": 357.7956237792969,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 172.0,
+				"s": "recorder",
+				"t": 4117.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 173.0,
+				"s": "recorder",
+				"t": 4118.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 174.0,
+				"s": "recorder",
+				"t": 4118.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 175.0,
+				"s": "recorder",
+				"t": 4213.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 176.0,
+				"s": "recorder",
+				"t": 4213.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 32.0,
+					"landing": 357.7956237792969,
+					"peak": 357.7956252210722,
+					"sync": null,
+					"takeoff": 357.7956237792969,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 177.0,
+				"s": "recorder",
+				"t": 4213.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 178.0,
+				"s": "recorder",
+				"t": 4214.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 179.0,
+				"s": "recorder",
+				"t": 4214.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 180.0,
+				"s": "recorder",
+				"t": 4308.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 181.0,
+				"s": "recorder",
+				"t": 4308.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 33.0,
+					"landing": 357.7956237792969,
+					"peak": 357.7956252210722,
+					"sync": null,
+					"takeoff": 357.7956237792969,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 182.0,
+				"s": "recorder",
+				"t": 4308.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 183.0,
+				"s": "recorder",
+				"t": 4309.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 184.0,
+				"s": "recorder",
+				"t": 4309.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 185.0,
+				"s": "recorder",
+				"t": 4404.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 186.0,
+				"s": "recorder",
+				"t": 4404.0
+			},
+			{
+				"d": {
+					"air": 1.255523681640625,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 1.0,
+					"gain": 1.255523681640625,
+					"good": 0.0,
+					"index": 34.0,
+					"landing": 359.0511474609375,
+					"peak": 359.0511337039978,
+					"sync": 0.0,
+					"takeoff": 357.7956237792969,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 187.0,
+				"s": "recorder",
+				"t": 4404.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 188.0,
+				"s": "recorder",
+				"t": 4405.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 189.0,
+				"s": "recorder",
+				"t": 4405.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 190.0,
+				"s": "recorder",
+				"t": 4500.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 191.0,
+				"s": "recorder",
+				"t": 4500.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 35.0,
+					"landing": 359.0511474609375,
+					"peak": 359.0511474609375,
+					"sync": null,
+					"takeoff": 359.0511474609375,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 192.0,
+				"s": "recorder",
+				"t": 4500.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 193.0,
+				"s": "recorder",
+				"t": 4501.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 194.0,
+				"s": "recorder",
+				"t": 4501.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 195.0,
+				"s": "recorder",
+				"t": 4595.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 196.0,
+				"s": "recorder",
+				"t": 4595.0
+			},
+			{
+				"d": {
+					"air": 1.2510986328125,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 1.0,
+					"gain": 1.2510986328125,
+					"good": 0.0,
+					"index": 36.0,
+					"landing": 360.30224609375,
+					"peak": 360.30224927767057,
+					"sync": 0.0,
+					"takeoff": 359.0511474609375,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 197.0,
+				"s": "recorder",
+				"t": 4595.0
+			},
+			{
+				"d": {
+					"elapsed": 35.453125,
+					"from": 3.0,
+					"to": 4.0
+				},
+				"k": "checkpoint",
+				"q": 198.0,
+				"s": "recorder",
+				"t": 4596.0
+			},
+			{
+				"d": {
+					"checkpoint": 4.0
+				},
+				"k": "context",
+				"q": 199.0,
+				"s": "recorder",
+				"t": 4596.0
+			},
+			{
+				"d": {
+					"clean": true,
+					"elapsed": 44.6015625
+				},
+				"k": "finish_line",
+				"q": 200.0,
+				"s": "recorder",
+				"t": 5767.0
+			},
+			{
+				"d": {
+					"elapsed": 44.6015625,
+					"finish_kind": "clean",
+					"time_ticks": 5709.0
+				},
+				"k": "finish",
+				"q": 201.0,
+				"s": "event",
+				"t": 5767.0
+			}
+		],
+		"file": "breakwater_server128_20261110-160612_917_9d52838a.r16run",
+		"header": {
+			"created_unix": 1794326772.917864,
+			"created_utc": "2026-11-10T16:06:12Z",
+			"engine": "4.7.2-stable (official)",
+			"format": "foldrunner-r16-run",
+			"identity": {
+				"course_key": "4753897420048f6b",
+				"format": "r16-motion-1",
+				"geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+				"map": "breakwater",
+				"motor": "r15-source-crouch-2",
+				"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+				"physics_hz": 128.0,
+				"preset": "server128",
+				"runner": "res://scripts/r15_source_player.gd",
+				"timing": "r16-timing-1"
+			},
+			"metadata": {
+				"attempt": 1.0,
+				"build": "spillway-2026.11.10-r20",
+				"build_label": "Spillway R20",
+				"clean_at_start": true,
+				"course_key": "4753897420048f6b",
+				"elapsed_at_start": 0.0,
+				"family": "source",
+				"held_actions": [
+					"move_forward",
+					"move_back",
+					"move_left",
+					"move_right",
+					"jump",
+					"crouch",
+					"r15_slide",
+					"r15_grapple",
+					"look_left",
+					"look_right",
+					"look_up",
+					"look_down"
+				],
+				"identity": {
+					"course_key": "4753897420048f6b",
+					"format": "r16-motion-1",
+					"geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					"map": "breakwater",
+					"motor": "r15-source-crouch-2",
+					"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+					"physics_hz": 128.0,
+					"preset": "server128",
+					"runner": "res://scripts/r15_source_player.gd",
+					"timing": "r16-timing-1"
+				},
+				"lab": {},
+				"laws": {
+					"approved": "r15 source runner res://scripts/r15_source_player.gd with the r15 F2/F5 server presets, unchanged",
+					"course_law": "approved r15",
+					"experimental": [],
+					"r16_additions": "style scoring, recording and ghost are r16 game choices that only read the game"
+				},
+				"look": {
+					"family": "source",
+					"fov": 90.0,
+					"input": "screen_relative counts",
+					"m_pitch": 0.022,
+					"m_yaw": 0.022,
+					"pitch_rad_per_count": 0.00095993108859688,
+					"replay_override": true,
+					"sensitivity": 2.5,
+					"yaw_rad_per_count": 0.00095993108859688
+				},
+				"map": "breakwater",
+				"map_kind": "course",
+				"map_name": "Breakwater",
+				"opportunities": {
+					"applied": true,
+					"base_geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					"hash": "b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+					"passages": [
+						"RunwayCrouch",
+						"RunwayThread"
+					],
+					"reason": "widen_optional_thread_after_repeated_front_contacts",
+					"version": "r19-breakwater-flow-1"
+				},
+				"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+				"paused_at_start": false,
+				"physics": {
+					"family": "source",
+					"fingerprint": {
+						"air_budget": "legacy",
+						"air_surface": "deadstrafe",
+						"cl_forwardspeed": 450.0,
+						"cl_sidespeed": 450.0,
+						"duck_air_anchor": "center",
+						"duck_air_crop": false,
+						"duck_eye_clearance": 2.0,
+						"duck_eye_height": 46.0,
+						"duck_eye_time": 0.1,
+						"duck_hull_height": 54.0,
+						"duck_multiplier": 0.34,
+						"eye_height": 64.0,
+						"ground_probe": 2.0,
+						"ground_speed_clamp": false,
+						"hull_height": 72.0,
+						"hull_width": 32.0,
+						"jump_clamp_factor": 1.1,
+						"jump_order": "source2013",
+						"non_jump_velocity": 140.0,
+						"player_maxspeed": 250.0,
+						"preset": "csgo_server",
+						"stamina_model": "gokz_fit",
+						"sv_accelerate": 5.5,
+						"sv_air_max_wishspeed": 30.0,
+						"sv_airaccelerate": 100.0,
+						"sv_autobunnyhopping": true,
+						"sv_enablebunnyhopping": true,
+						"sv_friction": 5.2,
+						"sv_gravity": 800.0,
+						"sv_jump_impulse": 301.993377,
+						"sv_maxspeed": 320.0,
+						"sv_maxvelocity": 3500.0,
+						"sv_staminajumpcost": 0.0,
+						"sv_staminalandcost": 0.0,
+						"sv_staminamax": 0.0,
+						"sv_staminarecoveryrate": 0.0,
+						"sv_stepsize": 18.0,
+						"sv_stopspeed": 80.0,
+						"sv_walkable_normal": 0.7,
+						"tickrate": 128.0,
+						"water_multiplier": 0.8
+					},
+					"hull": {
+						"duck_air_anchor": "center",
+						"duck_height_u": 54.0,
+						"height_u": 72.0,
+						"shape": "box",
+						"width_u": 32.0
+					},
+					"hz": 128.0,
+					"mechanics": [],
+					"motor_version": "r15-source-crouch-2",
+					"runner": "res://scripts/r15_source_player.gd",
+					"standin": false
+				},
+				"practice_reason": "",
+				"practice_stage": -1.0,
+				"preset": "server128",
+				"preset_label": "CS:GO bhop server",
+				"record_identity": [
+					"r16-timing-1",
+					[
+						"breakwater",
+						"course",
+						"r15-breakwater",
+						1.0,
+						"breakwater"
+					],
+					"bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					[
+						"Box rows",
+						"Crane line",
+						"Breakwater",
+						"The breach",
+						"Lighthouse"
+					],
+					"server128",
+					"source",
+					"r15-source-crouch-2",
+					"res://scripts/r15_source_player.gd",
+					128.0,
+					"{\"air_budget\":\"legacy\",\"air_surface\":\"deadstrafe\",\"cl_forwardspeed\":450.0,\"cl_sidespeed\":450.0,\"duck_air_anchor\":\"center\",\"duck_air_crop\":false,\"duck_eye_clearance\":2.0,\"duck_eye_height\":46.0,\"duck_eye_time\":0.1,\"duck_hull_height\":54.0,\"duck_multiplier\":0.34,\"eye_height\":64.0,\"ground_probe\":2.0,\"ground_speed_clamp\":false,\"hull_height\":72.0,\"hull_width\":32.0,\"jump_clamp_factor\":1.1,\"jump_order\":\"source2013\",\"non_jump_velocity\":140.0,\"player_maxspeed\":250.0,\"preset\":\"csgo_server\",\"stamina_model\":\"gokz_fit\",\"sv_accelerate\":5.5,\"sv_air_max_wishspeed\":30.0,\"sv_airaccelerate\":100.0,\"sv_autobunnyhopping\":true,\"sv_enablebunnyhopping\":true,\"sv_friction\":5.2,\"sv_gravity\":800.0,\"sv_jump_impulse\":301.993377,\"sv_maxspeed\":320.0,\"sv_maxvelocity\":3500.0,\"sv_staminajumpcost\":0.0,\"sv_staminalandcost\":0.0,\"sv_staminamax\":0.0,\"sv_staminarecoveryrate\":0.0,\"sv_stepsize\":18.0,\"sv_stopspeed\":80.0,\"sv_walkable_normal\":0.7,\"tickrate\":128,\"water_multiplier\":0.8}",
+					"{\"duck_air_anchor\":\"center\",\"duck_height_u\":54.0,\"height_u\":72.0,\"shape\":\"box\",\"width_u\":32.0}",
+					"[]",
+					"r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389"
+				],
+				"sample": {
+					"actual_v": "the runner's own travel over its step, excluding duck-origin compensation; checked against (p - previous p - duck shift) / dt",
+					"version": "r16-sample-1",
+					"when": "end of each unpaused physics frame (priority 999, after the strafe stats): the body after this frame's motor step, the host state as this frame left it"
+				},
+				"scoring": {
+					"style": {
+						"event_format": 2.0,
+						"rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
+						"version": "r20-style-stack-1"
+					},
+					"style_key": "r20-style-stack-1/2/b133b80f118247cf",
+					"timing": "r16-timing-1"
+				},
+				"start_reason": "spawn",
+				"timer_running_at_start": false
+			},
+			"os": "Linux",
+			"run_id": "breakwater_server128_20261110-160612_917_9d52838a",
+			"units": {
+				"angle": "rad",
+				"length": "m",
+				"time": "s",
+				"velocity": "m/s"
+			},
+			"vector_precision": "single",
+			"version": 1.0
+		},
+		"identity_text": "[\"r16-timing-1\",[\"breakwater\",\"course\",\"r15-breakwater\",1,\"breakwater\"],\"bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162\",[\"Box rows\",\"Crane line\",\"Breakwater\",\"The breach\",\"Lighthouse\"],\"server128\",\"source\",\"r15-source-crouch-2\",\"res://scripts/r15_source_player.gd\",128,\"{\\\"air_budget\\\":\\\"legacy\\\",\\\"air_surface\\\":\\\"deadstrafe\\\",\\\"cl_forwardspeed\\\":450.0,\\\"cl_sidespeed\\\":450.0,\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_air_crop\\\":false,\\\"duck_eye_clearance\\\":2.0,\\\"duck_eye_height\\\":46.0,\\\"duck_eye_time\\\":0.1,\\\"duck_hull_height\\\":54.0,\\\"duck_multiplier\\\":0.34,\\\"eye_height\\\":64.0,\\\"ground_probe\\\":2.0,\\\"ground_speed_clamp\\\":false,\\\"hull_height\\\":72.0,\\\"hull_width\\\":32.0,\\\"jump_clamp_factor\\\":1.1,\\\"jump_order\\\":\\\"source2013\\\",\\\"non_jump_velocity\\\":140.0,\\\"player_maxspeed\\\":250.0,\\\"preset\\\":\\\"csgo_server\\\",\\\"stamina_model\\\":\\\"gokz_fit\\\",\\\"sv_accelerate\\\":5.5,\\\"sv_air_max_wishspeed\\\":30.0,\\\"sv_airaccelerate\\\":100.0,\\\"sv_autobunnyhopping\\\":true,\\\"sv_enablebunnyhopping\\\":true,\\\"sv_friction\\\":5.2,\\\"sv_gravity\\\":800.0,\\\"sv_jump_impulse\\\":301.993377,\\\"sv_maxspeed\\\":320.0,\\\"sv_maxvelocity\\\":3500.0,\\\"sv_staminajumpcost\\\":0.0,\\\"sv_staminalandcost\\\":0.0,\\\"sv_staminamax\\\":0.0,\\\"sv_staminarecoveryrate\\\":0.0,\\\"sv_stepsize\\\":18.0,\\\"sv_stopspeed\\\":80.0,\\\"sv_walkable_normal\\\":0.7,\\\"tickrate\\\":128,\\\"water_multiplier\\\":0.8}\",\"{\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_height_u\\\":54.0,\\\"height_u\\\":72.0,\\\"shape\\\":\\\"box\\\",\\\"width_u\\\":32.0}\",\"[]\",\"r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389\"]",
+		"inputs_sha256": {
+			"aux": "197ff9b9564976e3023dc974c250ffe96da052b8629746665a655f8c5ef87a7a",
+			"code": "c7b554d3110519e874b089190c9bd5263e054a55ed7bdad617e0bbd1387b6d0d",
+			"flags": "a81a0ae4754b35d6b4e59d72f7111b1e162241a57e12418f02d9f36ec3d666aa",
+			"kind": "113094507ead826eeebacafc1b8cc6f172c487dea3038553f9f45c1a9fbef1d8",
+			"tick": "436555c38c5439d89be415490dbc10ba0ccede3f53db3d6e70280b355d9142df",
+			"x": "4ffc9d8fd9f1c7e3a256aa7d41ffc25a2a1173004c1f9b0ea5d8aca639bb8bc0",
+			"x2": "77fa32b406c302b7f077198426e176e216244e90ce79bd344606511356a2b02e",
+			"y": "d04897fa0dea39567e1a76e461f101448ac543cc2ba5d75b78d845c47637c42c",
+			"y2": "d04897fa0dea39567e1a76e461f101448ac543cc2ba5d75b78d845c47637c42c"
+		},
+		"seal": {
+			"counts": {
+				"bytes": 228106.0,
+				"chunks": 23.0,
+				"events": 202.0,
+				"gaps": 0.0,
+				"inputs": 5118.0,
+				"ticks": 5768.0
+			},
+			"ended_unix": 1794326806.210953,
+			"final": {
+				"checkpoint": 4.0,
+				"clean": true,
+				"elapsed": 44.6015625,
+				"finished": true,
+				"p": [
+					-68.37802124023438,
+					-0.9988566637039183,
+					-264.092529296875
+				],
+				"respawns": 0.0,
+				"started": true,
+				"tick": 5767.0
+			},
+			"finish_tick": 5767.0,
+			"first_tick": 0.0,
+			"last_tick": 5767.0,
+			"outcome": {
+				"checkpoint": 4.0,
+				"clean": true,
+				"finish_kind": "clean",
+				"kind": "finish",
+				"practice_reason": "",
+				"respawns": 0.0,
+				"style": {
+					"best_eligible": true,
+					"by_kind": {
+						"gap": {
+							"n": 5.0,
+							"points": 937.0
+						}
+					},
+					"score": 937.0
+				},
+				"time": 44.6015625,
+				"time_ticks": 5709.0
+			},
+			"timer_start_tick": 59.0
+		},
+		"sha256": "eb373a69e075cce1cb59d91ac9ba33872a3177a4d148b070c4e28bdbb8b3b24b"
+	},
+	{
+		"columns_sha256": {
+			"actual_v": "043667ab6dabe93153102f3e9cca3150a66694392d29096ff3ac42c2836343c9",
+			"checkpoint": "10eef285deef7a4b7c82b22aa53589b7833df29de3814649c772bbd5c832f365",
+			"dt": "54e8ccc227a1b50d926a08de015bae0ffbd4df62d3713f6a2a673402a68235a3",
+			"elapsed": "86d2cf5b090f43ee54d8f7c1dcf746a853951191457ff6dac96269a9d24860b9",
+			"flags": "d4c965a22b6dd32cff14f59570f4a9a56d2c68fec4c0752d9a3e7751a0a793af",
+			"held": "86d2cf5b090f43ee54d8f7c1dcf746a853951191457ff6dac96269a9d24860b9",
+			"p": "ef7a1d7725c415001786b21cce9dd816975b7bc4bd2a76498546a19eabe848f9",
+			"physics_hz": "416a96130908d9c9d8690a212ed0a1adc5b2141551cae93ca20a03f5e43c4e07",
+			"pitch": "86d2cf5b090f43ee54d8f7c1dcf746a853951191457ff6dac96269a9d24860b9",
+			"reference_p": "ef7a1d7725c415001786b21cce9dd816975b7bc4bd2a76498546a19eabe848f9",
+			"respawns": "10eef285deef7a4b7c82b22aa53589b7833df29de3814649c772bbd5c832f365",
+			"tick": "dc7d338117ab6755881b1fd3e550eb5a4c4467fac9a382368a2269ab5a6a61e7",
+			"v": "44b8aa4d28701168922acf61435ea4bb442f97b0b14ad7a2510ed68874ee2a72",
+			"yaw": "86d2cf5b090f43ee54d8f7c1dcf746a853951191457ff6dac96269a9d24860b9"
+		},
+		"events": [
+			{
+				"d": {
+					"names": [
+						"crouch",
+						"jump",
+						"look_down",
+						"look_left",
+						"look_right",
+						"look_up",
+						"move_back",
+						"move_forward",
+						"move_left",
+						"move_right",
+						"r15_grapple",
+						"r15_slide"
+					]
+				},
+				"k": "held_names",
+				"q": 0.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"index": 0.0,
+					"name": "restart"
+				},
+				"k": "action_name",
+				"q": 1.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"checkpoint": 0.0,
+					"dt": 0.0078125,
+					"mode": "run",
+					"motor_version": "r15-source-crouch-2",
+					"physics_hz": 128.0,
+					"practice_reason": "",
+					"respawns": 0.0
+				},
+				"k": "context",
+				"q": 2.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 3.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"shown": false
+				},
+				"k": "ghost",
+				"q": 4.0,
+				"s": "event",
+				"t": 7.0
+			},
+			{
+				"d": {
+					"index": 1.0,
+					"name": "r16_ghost"
+				},
+				"k": "action_name",
+				"q": 5.0,
+				"s": "recorder",
+				"t": 8.0
+			},
+			{
+				"d": {
+					"shown": true
+				},
+				"k": "ghost",
+				"q": 6.0,
+				"s": "event",
+				"t": 11.0
+			},
+			{
+				"d": {
+					"edge": [
+						{
+							"echo": false,
+							"keycode": 4194305.0,
+							"physical_keycode": 4194305.0,
+							"pressed": true,
+							"type": "key"
+						},
+						{
+							"action": "pause",
+							"pressed": true,
+							"type": "action"
+						}
+					],
+					"pending_inputs": 0.0
+				},
+				"k": "pause",
+				"q": 7.0,
+				"s": "event",
+				"t": 15.0
+			},
+			{
+				"d": {
+					"edge": [
+						{
+							"echo": false,
+							"keycode": 4194305.0,
+							"physical_keycode": 4194305.0,
+							"pressed": true,
+							"type": "key"
+						}
+					],
+					"inputs_while_paused": 2.0
+				},
+				"k": "resume",
+				"q": 8.0,
+				"s": "event",
+				"t": 15.0
+			},
+			{
+				"d": {
+					"index": 2.0,
+					"name": "pause"
+				},
+				"k": "action_name",
+				"q": 9.0,
+				"s": "recorder",
+				"t": 16.0
+			},
+			{
+				"d": {
+					"edge": [
+						{
+							"echo": false,
+							"keycode": 70.0,
+							"physical_keycode": 70.0,
+							"pressed": true,
+							"type": "key"
+						},
+						{
+							"action": "practice",
+							"pressed": true,
+							"type": "action"
+						}
+					],
+					"inputs": [],
+					"paused": false,
+					"stage": 0.0
+				},
+				"k": "practice",
+				"q": 10.0,
+				"s": "event",
+				"t": 21.0
+			}
+		],
+		"file": "breakwater_server128_20261110-160646_400_91b2aca6.r16run",
+		"header": {
+			"created_unix": 1794326806.400646,
+			"created_utc": "2026-11-10T16:06:46Z",
+			"engine": "4.7.2-stable (official)",
+			"format": "foldrunner-r16-run",
+			"identity": {
+				"course_key": "4753897420048f6b",
+				"format": "r16-motion-1",
+				"geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+				"map": "breakwater",
+				"motor": "r15-source-crouch-2",
+				"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+				"physics_hz": 128.0,
+				"preset": "server128",
+				"runner": "res://scripts/r15_source_player.gd",
+				"timing": "r16-timing-1"
+			},
+			"metadata": {
+				"attempt": 2.0,
+				"build": "spillway-2026.11.10-r20",
+				"build_label": "Spillway R20",
+				"clean_at_start": true,
+				"course_key": "4753897420048f6b",
+				"elapsed_at_start": 0.0,
+				"family": "source",
+				"held_actions": [
+					"move_forward",
+					"move_back",
+					"move_left",
+					"move_right",
+					"jump",
+					"crouch",
+					"r15_slide",
+					"r15_grapple",
+					"look_left",
+					"look_right",
+					"look_up",
+					"look_down"
+				],
+				"identity": {
+					"course_key": "4753897420048f6b",
+					"format": "r16-motion-1",
+					"geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					"map": "breakwater",
+					"motor": "r15-source-crouch-2",
+					"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+					"physics_hz": 128.0,
+					"preset": "server128",
+					"runner": "res://scripts/r15_source_player.gd",
+					"timing": "r16-timing-1"
+				},
+				"lab": {},
+				"laws": {
+					"approved": "r15 source runner res://scripts/r15_source_player.gd with the r15 F2/F5 server presets, unchanged",
+					"course_law": "approved r15",
+					"experimental": [],
+					"r16_additions": "style scoring, recording and ghost are r16 game choices that only read the game"
+				},
+				"look": {
+					"family": "source",
+					"fov": 90.0,
+					"input": "screen_relative counts",
+					"m_pitch": 0.022,
+					"m_yaw": 0.022,
+					"pitch_rad_per_count": 0.00095993108859688,
+					"replay_override": true,
+					"sensitivity": 2.5,
+					"yaw_rad_per_count": 0.00095993108859688
+				},
+				"map": "breakwater",
+				"map_kind": "course",
+				"map_name": "Breakwater",
+				"opportunities": {
+					"applied": true,
+					"base_geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					"hash": "b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+					"passages": [
+						"RunwayCrouch",
+						"RunwayThread"
+					],
+					"reason": "widen_optional_thread_after_repeated_front_contacts",
+					"version": "r19-breakwater-flow-1"
+				},
+				"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+				"paused_at_start": false,
+				"physics": {
+					"family": "source",
+					"fingerprint": {
+						"air_budget": "legacy",
+						"air_surface": "deadstrafe",
+						"cl_forwardspeed": 450.0,
+						"cl_sidespeed": 450.0,
+						"duck_air_anchor": "center",
+						"duck_air_crop": false,
+						"duck_eye_clearance": 2.0,
+						"duck_eye_height": 46.0,
+						"duck_eye_time": 0.1,
+						"duck_hull_height": 54.0,
+						"duck_multiplier": 0.34,
+						"eye_height": 64.0,
+						"ground_probe": 2.0,
+						"ground_speed_clamp": false,
+						"hull_height": 72.0,
+						"hull_width": 32.0,
+						"jump_clamp_factor": 1.1,
+						"jump_order": "source2013",
+						"non_jump_velocity": 140.0,
+						"player_maxspeed": 250.0,
+						"preset": "csgo_server",
+						"stamina_model": "gokz_fit",
+						"sv_accelerate": 5.5,
+						"sv_air_max_wishspeed": 30.0,
+						"sv_airaccelerate": 100.0,
+						"sv_autobunnyhopping": true,
+						"sv_enablebunnyhopping": true,
+						"sv_friction": 5.2,
+						"sv_gravity": 800.0,
+						"sv_jump_impulse": 301.993377,
+						"sv_maxspeed": 320.0,
+						"sv_maxvelocity": 3500.0,
+						"sv_staminajumpcost": 0.0,
+						"sv_staminalandcost": 0.0,
+						"sv_staminamax": 0.0,
+						"sv_staminarecoveryrate": 0.0,
+						"sv_stepsize": 18.0,
+						"sv_stopspeed": 80.0,
+						"sv_walkable_normal": 0.7,
+						"tickrate": 128.0,
+						"water_multiplier": 0.8
+					},
+					"hull": {
+						"duck_air_anchor": "center",
+						"duck_height_u": 54.0,
+						"height_u": 72.0,
+						"shape": "box",
+						"width_u": 32.0
+					},
+					"hz": 128.0,
+					"mechanics": [],
+					"motor_version": "r15-source-crouch-2",
+					"runner": "res://scripts/r15_source_player.gd",
+					"standin": false
+				},
+				"practice_reason": "",
+				"practice_stage": -1.0,
+				"preset": "server128",
+				"preset_label": "CS:GO bhop server",
+				"record_identity": [
+					"r16-timing-1",
+					[
+						"breakwater",
+						"course",
+						"r15-breakwater",
+						1.0,
+						"breakwater"
+					],
+					"bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					[
+						"Box rows",
+						"Crane line",
+						"Breakwater",
+						"The breach",
+						"Lighthouse"
+					],
+					"server128",
+					"source",
+					"r15-source-crouch-2",
+					"res://scripts/r15_source_player.gd",
+					128.0,
+					"{\"air_budget\":\"legacy\",\"air_surface\":\"deadstrafe\",\"cl_forwardspeed\":450.0,\"cl_sidespeed\":450.0,\"duck_air_anchor\":\"center\",\"duck_air_crop\":false,\"duck_eye_clearance\":2.0,\"duck_eye_height\":46.0,\"duck_eye_time\":0.1,\"duck_hull_height\":54.0,\"duck_multiplier\":0.34,\"eye_height\":64.0,\"ground_probe\":2.0,\"ground_speed_clamp\":false,\"hull_height\":72.0,\"hull_width\":32.0,\"jump_clamp_factor\":1.1,\"jump_order\":\"source2013\",\"non_jump_velocity\":140.0,\"player_maxspeed\":250.0,\"preset\":\"csgo_server\",\"stamina_model\":\"gokz_fit\",\"sv_accelerate\":5.5,\"sv_air_max_wishspeed\":30.0,\"sv_airaccelerate\":100.0,\"sv_autobunnyhopping\":true,\"sv_enablebunnyhopping\":true,\"sv_friction\":5.2,\"sv_gravity\":800.0,\"sv_jump_impulse\":301.993377,\"sv_maxspeed\":320.0,\"sv_maxvelocity\":3500.0,\"sv_staminajumpcost\":0.0,\"sv_staminalandcost\":0.0,\"sv_staminamax\":0.0,\"sv_staminarecoveryrate\":0.0,\"sv_stepsize\":18.0,\"sv_stopspeed\":80.0,\"sv_walkable_normal\":0.7,\"tickrate\":128,\"water_multiplier\":0.8}",
+					"{\"duck_air_anchor\":\"center\",\"duck_height_u\":54.0,\"height_u\":72.0,\"shape\":\"box\",\"width_u\":32.0}",
+					"[]",
+					"r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389"
+				],
+				"sample": {
+					"actual_v": "the runner's own travel over its step, excluding duck-origin compensation; checked against (p - previous p - duck shift) / dt",
+					"version": "r16-sample-1",
+					"when": "end of each unpaused physics frame (priority 999, after the strafe stats): the body after this frame's motor step, the host state as this frame left it"
+				},
+				"scoring": {
+					"style": {
+						"event_format": 2.0,
+						"rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
+						"version": "r20-style-stack-1"
+					},
+					"style_key": "r20-style-stack-1/2/b133b80f118247cf",
+					"timing": "r16-timing-1"
+				},
+				"start_reason": "restart",
+				"timer_running_at_start": false
+			},
+			"os": "Linux",
+			"run_id": "breakwater_server128_20261110-160646_400_91b2aca6",
+			"units": {
+				"angle": "rad",
+				"length": "m",
+				"time": "s",
+				"velocity": "m/s"
+			},
+			"vector_precision": "single",
+			"version": 1.0
+		},
+		"identity_text": "[\"r16-timing-1\",[\"breakwater\",\"course\",\"r15-breakwater\",1,\"breakwater\"],\"bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162\",[\"Box rows\",\"Crane line\",\"Breakwater\",\"The breach\",\"Lighthouse\"],\"server128\",\"source\",\"r15-source-crouch-2\",\"res://scripts/r15_source_player.gd\",128,\"{\\\"air_budget\\\":\\\"legacy\\\",\\\"air_surface\\\":\\\"deadstrafe\\\",\\\"cl_forwardspeed\\\":450.0,\\\"cl_sidespeed\\\":450.0,\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_air_crop\\\":false,\\\"duck_eye_clearance\\\":2.0,\\\"duck_eye_height\\\":46.0,\\\"duck_eye_time\\\":0.1,\\\"duck_hull_height\\\":54.0,\\\"duck_multiplier\\\":0.34,\\\"eye_height\\\":64.0,\\\"ground_probe\\\":2.0,\\\"ground_speed_clamp\\\":false,\\\"hull_height\\\":72.0,\\\"hull_width\\\":32.0,\\\"jump_clamp_factor\\\":1.1,\\\"jump_order\\\":\\\"source2013\\\",\\\"non_jump_velocity\\\":140.0,\\\"player_maxspeed\\\":250.0,\\\"preset\\\":\\\"csgo_server\\\",\\\"stamina_model\\\":\\\"gokz_fit\\\",\\\"sv_accelerate\\\":5.5,\\\"sv_air_max_wishspeed\\\":30.0,\\\"sv_airaccelerate\\\":100.0,\\\"sv_autobunnyhopping\\\":true,\\\"sv_enablebunnyhopping\\\":true,\\\"sv_friction\\\":5.2,\\\"sv_gravity\\\":800.0,\\\"sv_jump_impulse\\\":301.993377,\\\"sv_maxspeed\\\":320.0,\\\"sv_maxvelocity\\\":3500.0,\\\"sv_staminajumpcost\\\":0.0,\\\"sv_staminalandcost\\\":0.0,\\\"sv_staminamax\\\":0.0,\\\"sv_staminarecoveryrate\\\":0.0,\\\"sv_stepsize\\\":18.0,\\\"sv_stopspeed\\\":80.0,\\\"sv_walkable_normal\\\":0.7,\\\"tickrate\\\":128,\\\"water_multiplier\\\":0.8}\",\"{\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_height_u\\\":54.0,\\\"height_u\\\":72.0,\\\"shape\\\":\\\"box\\\",\\\"width_u\\\":32.0}\",\"[]\",\"r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389\"]",
+		"inputs_sha256": {
+			"aux": "d29a4a123daa74a4ecde1414e1c2186bdfaa54e5cdf9f2691c3631796e5bca93",
+			"code": "293b204eda6f496cb8c03f3d1f065918bae4e24d910c668509f642d6b84d4301",
+			"flags": "897086af8b731bf6d2c49643a6aabb07dc813023ffe91043fced9d4226c6245c",
+			"kind": "4f25cb409a13a1575f0d8b3c33dc2b3c32647ca83eda9d15915a0efa76f4be12",
+			"tick": "ad8cd35e3b26cceffa1a647f153355d650b4bdfaa703709349a820f10eea93ae",
+			"x": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+			"x2": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+			"y": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+			"y2": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1"
+		},
+		"seal": {
+			"counts": {
+				"bytes": 6886.0,
+				"chunks": 1.0,
+				"events": 11.0,
+				"gaps": 0.0,
+				"inputs": 12.0,
+				"ticks": 22.0
+			},
+			"ended_unix": 1794326806.509193,
+			"final": {
+				"checkpoint": 0.0,
+				"clean": true,
+				"elapsed": 0.0,
+				"finished": false,
+				"p": [
+					0.0,
+					0.00114622607361525,
+					4.0
+				],
+				"respawns": 0.0,
+				"started": false,
+				"tick": 21.0
+			},
+			"finish_tick": -1.0,
+			"first_tick": 0.0,
+			"last_tick": 21.0,
+			"outcome": {
+				"checkpoint": 0.0,
+				"clean": false,
+				"elapsed": 0.0,
+				"finished": false,
+				"kind": "practice",
+				"practice_reason": "",
+				"respawns": 0.0,
+				"style": {
+					"by_kind": {},
+					"score": 0.0
+				}
+			},
+			"timer_start_tick": -1.0
+		},
+		"sha256": "737b4c10cb277ba6c82e98dea73755d2fb45cc80627ecea09bbc286e3852b020"
+	},
+	{
+		"columns_sha256": {
+			"actual_v": "c9b4547a7f1f1956b96dc10367918d1804bee0e104a672395fd6c7921dc33af3",
+			"checkpoint": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"dt": "bda8dac224b09366fa9ccbc5c7887a0be3c60c0184e0fb468acf0f4ba0135fcb",
+			"elapsed": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"flags": "6dc1c586572d6873ac1ba4f7a07985f5485d70168c412df7c421ecc1442ca561",
+			"held": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"p": "84ef679e328df1005778a5f9c7b80092402d51becf9626fb3d4a969158b9cdec",
+			"physics_hz": "81b0006182e2f4180d23d14f625a836f013f13c50bb9e085fcca8949834c8a1e",
+			"pitch": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"reference_p": "84ef679e328df1005778a5f9c7b80092402d51becf9626fb3d4a969158b9cdec",
+			"respawns": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"tick": "baed642339816affb3fe8719792d0e4ce82f12db72b7373d244eaa65445800fe",
+			"v": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+			"yaw": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925"
+		},
+		"events": [
+			{
+				"d": {
+					"names": [
+						"crouch",
+						"jump",
+						"look_down",
+						"look_left",
+						"look_right",
+						"look_up",
+						"move_back",
+						"move_forward",
+						"move_left",
+						"move_right",
+						"r15_grapple",
+						"r15_slide"
+					]
+				},
+				"k": "held_names",
+				"q": 0.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"index": 0.0,
+					"name": "practice"
+				},
+				"k": "action_name",
+				"q": 1.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"checkpoint": 0.0,
+					"dt": 0.0078125,
+					"mode": "run",
+					"motor_version": "r15-source-crouch-2",
+					"physics_hz": 128.0,
+					"practice_reason": "practice",
+					"respawns": 0.0
+				},
+				"k": "context",
+				"q": 2.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 3.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"edge": [
+						{
+							"echo": false,
+							"keycode": 82.0,
+							"physical_keycode": 82.0,
+							"pressed": true,
+							"type": "key"
+						},
+						{
+							"action": "restart",
+							"pressed": true,
+							"type": "action"
+						}
+					],
+					"inputs": [],
+					"paused": false
+				},
+				"k": "restart",
+				"q": 4.0,
+				"s": "event",
+				"t": 3.0
+			}
+		],
+		"file": "breakwater_server128_20261110-160646_509_085f9258.r16run",
+		"header": {
+			"created_unix": 1794326806.509854,
+			"created_utc": "2026-11-10T16:06:46Z",
+			"engine": "4.7.2-stable (official)",
+			"format": "foldrunner-r16-run",
+			"identity": {
+				"course_key": "4753897420048f6b",
+				"format": "r16-motion-1",
+				"geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+				"map": "breakwater",
+				"motor": "r15-source-crouch-2",
+				"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+				"physics_hz": 128.0,
+				"preset": "server128",
+				"runner": "res://scripts/r15_source_player.gd",
+				"timing": "r16-timing-1"
+			},
+			"metadata": {
+				"attempt": 3.0,
+				"build": "spillway-2026.11.10-r20",
+				"build_label": "Spillway R20",
+				"clean_at_start": false,
+				"course_key": "4753897420048f6b",
+				"elapsed_at_start": 0.0,
+				"family": "source",
+				"held_actions": [
+					"move_forward",
+					"move_back",
+					"move_left",
+					"move_right",
+					"jump",
+					"crouch",
+					"r15_slide",
+					"r15_grapple",
+					"look_left",
+					"look_right",
+					"look_up",
+					"look_down"
+				],
+				"identity": {
+					"course_key": "4753897420048f6b",
+					"format": "r16-motion-1",
+					"geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					"map": "breakwater",
+					"motor": "r15-source-crouch-2",
+					"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+					"physics_hz": 128.0,
+					"preset": "server128",
+					"runner": "res://scripts/r15_source_player.gd",
+					"timing": "r16-timing-1"
+				},
+				"lab": {},
+				"laws": {
+					"approved": "r15 source runner res://scripts/r15_source_player.gd with the r15 F2/F5 server presets, unchanged",
+					"course_law": "approved r15",
+					"experimental": [],
+					"r16_additions": "style scoring, recording and ghost are r16 game choices that only read the game"
+				},
+				"look": {
+					"family": "source",
+					"fov": 90.0,
+					"input": "screen_relative counts",
+					"m_pitch": 0.022,
+					"m_yaw": 0.022,
+					"pitch_rad_per_count": 0.00095993108859688,
+					"replay_override": true,
+					"sensitivity": 2.5,
+					"yaw_rad_per_count": 0.00095993108859688
+				},
+				"map": "breakwater",
+				"map_kind": "course",
+				"map_name": "Breakwater",
+				"opportunities": {
+					"applied": true,
+					"base_geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					"hash": "b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+					"passages": [
+						"RunwayCrouch",
+						"RunwayThread"
+					],
+					"reason": "widen_optional_thread_after_repeated_front_contacts",
+					"version": "r19-breakwater-flow-1"
+				},
+				"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+				"paused_at_start": false,
+				"physics": {
+					"family": "source",
+					"fingerprint": {
+						"air_budget": "legacy",
+						"air_surface": "deadstrafe",
+						"cl_forwardspeed": 450.0,
+						"cl_sidespeed": 450.0,
+						"duck_air_anchor": "center",
+						"duck_air_crop": false,
+						"duck_eye_clearance": 2.0,
+						"duck_eye_height": 46.0,
+						"duck_eye_time": 0.1,
+						"duck_hull_height": 54.0,
+						"duck_multiplier": 0.34,
+						"eye_height": 64.0,
+						"ground_probe": 2.0,
+						"ground_speed_clamp": false,
+						"hull_height": 72.0,
+						"hull_width": 32.0,
+						"jump_clamp_factor": 1.1,
+						"jump_order": "source2013",
+						"non_jump_velocity": 140.0,
+						"player_maxspeed": 250.0,
+						"preset": "csgo_server",
+						"stamina_model": "gokz_fit",
+						"sv_accelerate": 5.5,
+						"sv_air_max_wishspeed": 30.0,
+						"sv_airaccelerate": 100.0,
+						"sv_autobunnyhopping": true,
+						"sv_enablebunnyhopping": true,
+						"sv_friction": 5.2,
+						"sv_gravity": 800.0,
+						"sv_jump_impulse": 301.993377,
+						"sv_maxspeed": 320.0,
+						"sv_maxvelocity": 3500.0,
+						"sv_staminajumpcost": 0.0,
+						"sv_staminalandcost": 0.0,
+						"sv_staminamax": 0.0,
+						"sv_staminarecoveryrate": 0.0,
+						"sv_stepsize": 18.0,
+						"sv_stopspeed": 80.0,
+						"sv_walkable_normal": 0.7,
+						"tickrate": 128.0,
+						"water_multiplier": 0.8
+					},
+					"hull": {
+						"duck_air_anchor": "center",
+						"duck_height_u": 54.0,
+						"height_u": 72.0,
+						"shape": "box",
+						"width_u": 32.0
+					},
+					"hz": 128.0,
+					"mechanics": [],
+					"motor_version": "r15-source-crouch-2",
+					"runner": "res://scripts/r15_source_player.gd",
+					"standin": false
+				},
+				"practice_reason": "practice",
+				"practice_stage": 0.0,
+				"preset": "server128",
+				"preset_label": "CS:GO bhop server",
+				"record_identity": [
+					"r16-timing-1",
+					[
+						"breakwater",
+						"course",
+						"r15-breakwater",
+						1.0,
+						"breakwater"
+					],
+					"bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					[
+						"Box rows",
+						"Crane line",
+						"Breakwater",
+						"The breach",
+						"Lighthouse"
+					],
+					"server128",
+					"source",
+					"r15-source-crouch-2",
+					"res://scripts/r15_source_player.gd",
+					128.0,
+					"{\"air_budget\":\"legacy\",\"air_surface\":\"deadstrafe\",\"cl_forwardspeed\":450.0,\"cl_sidespeed\":450.0,\"duck_air_anchor\":\"center\",\"duck_air_crop\":false,\"duck_eye_clearance\":2.0,\"duck_eye_height\":46.0,\"duck_eye_time\":0.1,\"duck_hull_height\":54.0,\"duck_multiplier\":0.34,\"eye_height\":64.0,\"ground_probe\":2.0,\"ground_speed_clamp\":false,\"hull_height\":72.0,\"hull_width\":32.0,\"jump_clamp_factor\":1.1,\"jump_order\":\"source2013\",\"non_jump_velocity\":140.0,\"player_maxspeed\":250.0,\"preset\":\"csgo_server\",\"stamina_model\":\"gokz_fit\",\"sv_accelerate\":5.5,\"sv_air_max_wishspeed\":30.0,\"sv_airaccelerate\":100.0,\"sv_autobunnyhopping\":true,\"sv_enablebunnyhopping\":true,\"sv_friction\":5.2,\"sv_gravity\":800.0,\"sv_jump_impulse\":301.993377,\"sv_maxspeed\":320.0,\"sv_maxvelocity\":3500.0,\"sv_staminajumpcost\":0.0,\"sv_staminalandcost\":0.0,\"sv_staminamax\":0.0,\"sv_staminarecoveryrate\":0.0,\"sv_stepsize\":18.0,\"sv_stopspeed\":80.0,\"sv_walkable_normal\":0.7,\"tickrate\":128,\"water_multiplier\":0.8}",
+					"{\"duck_air_anchor\":\"center\",\"duck_height_u\":54.0,\"height_u\":72.0,\"shape\":\"box\",\"width_u\":32.0}",
+					"[]",
+					"r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389"
+				],
+				"sample": {
+					"actual_v": "the runner's own travel over its step, excluding duck-origin compensation; checked against (p - previous p - duck shift) / dt",
+					"version": "r16-sample-1",
+					"when": "end of each unpaused physics frame (priority 999, after the strafe stats): the body after this frame's motor step, the host state as this frame left it"
+				},
+				"scoring": {
+					"style": {
+						"event_format": 2.0,
+						"rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
+						"version": "r20-style-stack-1"
+					},
+					"style_key": "r20-style-stack-1/2/b133b80f118247cf",
+					"timing": "r16-timing-1"
+				},
+				"start_reason": "practice",
+				"timer_running_at_start": false
+			},
+			"os": "Linux",
+			"run_id": "breakwater_server128_20261110-160646_509_085f9258",
+			"units": {
+				"angle": "rad",
+				"length": "m",
+				"time": "s",
+				"velocity": "m/s"
+			},
+			"vector_precision": "single",
+			"version": 1.0
+		},
+		"identity_text": "[\"r16-timing-1\",[\"breakwater\",\"course\",\"r15-breakwater\",1,\"breakwater\"],\"bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162\",[\"Box rows\",\"Crane line\",\"Breakwater\",\"The breach\",\"Lighthouse\"],\"server128\",\"source\",\"r15-source-crouch-2\",\"res://scripts/r15_source_player.gd\",128,\"{\\\"air_budget\\\":\\\"legacy\\\",\\\"air_surface\\\":\\\"deadstrafe\\\",\\\"cl_forwardspeed\\\":450.0,\\\"cl_sidespeed\\\":450.0,\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_air_crop\\\":false,\\\"duck_eye_clearance\\\":2.0,\\\"duck_eye_height\\\":46.0,\\\"duck_eye_time\\\":0.1,\\\"duck_hull_height\\\":54.0,\\\"duck_multiplier\\\":0.34,\\\"eye_height\\\":64.0,\\\"ground_probe\\\":2.0,\\\"ground_speed_clamp\\\":false,\\\"hull_height\\\":72.0,\\\"hull_width\\\":32.0,\\\"jump_clamp_factor\\\":1.1,\\\"jump_order\\\":\\\"source2013\\\",\\\"non_jump_velocity\\\":140.0,\\\"player_maxspeed\\\":250.0,\\\"preset\\\":\\\"csgo_server\\\",\\\"stamina_model\\\":\\\"gokz_fit\\\",\\\"sv_accelerate\\\":5.5,\\\"sv_air_max_wishspeed\\\":30.0,\\\"sv_airaccelerate\\\":100.0,\\\"sv_autobunnyhopping\\\":true,\\\"sv_enablebunnyhopping\\\":true,\\\"sv_friction\\\":5.2,\\\"sv_gravity\\\":800.0,\\\"sv_jump_impulse\\\":301.993377,\\\"sv_maxspeed\\\":320.0,\\\"sv_maxvelocity\\\":3500.0,\\\"sv_staminajumpcost\\\":0.0,\\\"sv_staminalandcost\\\":0.0,\\\"sv_staminamax\\\":0.0,\\\"sv_staminarecoveryrate\\\":0.0,\\\"sv_stepsize\\\":18.0,\\\"sv_stopspeed\\\":80.0,\\\"sv_walkable_normal\\\":0.7,\\\"tickrate\\\":128,\\\"water_multiplier\\\":0.8}\",\"{\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_height_u\\\":54.0,\\\"height_u\\\":72.0,\\\"shape\\\":\\\"box\\\",\\\"width_u\\\":32.0}\",\"[]\",\"r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389\"]",
+		"inputs_sha256": {
+			"aux": "914e32aebfef22cb2aaec589ba06a77793a487f906275b5085aa78e2ef440b89",
+			"code": "914e32aebfef22cb2aaec589ba06a77793a487f906275b5085aa78e2ef440b89",
+			"flags": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"kind": "77ee7ce65c84d38465b8162c58afd76001b97d06f7e68e7abc06ad7eee78756c",
+			"tick": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+		},
+		"seal": {
+			"counts": {
+				"bytes": 6579.0,
+				"chunks": 1.0,
+				"events": 5.0,
+				"gaps": 0.0,
+				"inputs": 2.0,
+				"ticks": 4.0
+			},
+			"ended_unix": 1794326806.527979,
+			"final": {
+				"checkpoint": 0.0,
+				"clean": false,
+				"elapsed": 0.0,
+				"finished": false,
+				"p": [
+					0.0,
+					0.00115448131691664,
+					4.0
+				],
+				"respawns": 0.0,
+				"started": false,
+				"tick": 3.0
+			},
+			"finish_tick": -1.0,
+			"first_tick": 0.0,
+			"last_tick": 3.0,
+			"outcome": {
+				"checkpoint": 0.0,
+				"clean": false,
+				"elapsed": 0.0,
+				"finished": false,
+				"kind": "restart",
+				"practice_reason": "practice",
+				"respawns": 0.0,
+				"style": {
+					"by_kind": {},
+					"score": 0.0
+				}
+			},
+			"timer_start_tick": -1.0
+		},
+		"sha256": "892dceeee649d38a6e19105df2b49dbd869b7199d22d2d32cc8917a48fa2a5d8"
+	},
+	{
+		"columns_sha256": {
+			"actual_v": "c9b4547a7f1f1956b96dc10367918d1804bee0e104a672395fd6c7921dc33af3",
+			"checkpoint": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"dt": "bda8dac224b09366fa9ccbc5c7887a0be3c60c0184e0fb468acf0f4ba0135fcb",
+			"elapsed": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"flags": "839018c5d8d9b743f6ea9914c04117ca00c6c92a2cfe7ff0c3e4b1ae7dbe6552",
+			"held": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"p": "84ef679e328df1005778a5f9c7b80092402d51becf9626fb3d4a969158b9cdec",
+			"physics_hz": "81b0006182e2f4180d23d14f625a836f013f13c50bb9e085fcca8949834c8a1e",
+			"pitch": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"reference_p": "84ef679e328df1005778a5f9c7b80092402d51becf9626fb3d4a969158b9cdec",
+			"respawns": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"tick": "baed642339816affb3fe8719792d0e4ce82f12db72b7373d244eaa65445800fe",
+			"v": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+			"yaw": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925"
+		},
+		"events": [
+			{
+				"d": {
+					"names": [
+						"crouch",
+						"jump",
+						"look_down",
+						"look_left",
+						"look_right",
+						"look_up",
+						"move_back",
+						"move_forward",
+						"move_left",
+						"move_right",
+						"r15_grapple",
+						"r15_slide"
+					]
+				},
+				"k": "held_names",
+				"q": 0.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"index": 0.0,
+					"name": "restart"
+				},
+				"k": "action_name",
+				"q": 1.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"checkpoint": 0.0,
+					"dt": 0.0078125,
+					"mode": "run",
+					"motor_version": "r15-source-crouch-2",
+					"physics_hz": 128.0,
+					"practice_reason": "",
+					"respawns": 0.0
+				},
+				"k": "context",
+				"q": 2.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 3.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"edge": [
+						{
+							"echo": false,
+							"keycode": 4194336.0,
+							"physical_keycode": 4194336.0,
+							"pressed": true,
+							"type": "key"
+						},
+						{
+							"action": "r16_preset_5",
+							"pressed": true,
+							"type": "action"
+						}
+					],
+					"from": "server128",
+					"inputs_carried": 0.0,
+					"paused": false,
+					"same_body": true,
+					"to": "server128_aa1000",
+					"untouched": true
+				},
+				"k": "preset",
+				"q": 4.0,
+				"s": "event",
+				"t": 3.0
+			}
+		],
+		"file": "breakwater_server128_20261110-160646_528_1b5ea842.r16run",
+		"header": {
+			"created_unix": 1794326806.528629,
+			"created_utc": "2026-11-10T16:06:46Z",
+			"engine": "4.7.2-stable (official)",
+			"format": "foldrunner-r16-run",
+			"identity": {
+				"course_key": "4753897420048f6b",
+				"format": "r16-motion-1",
+				"geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+				"map": "breakwater",
+				"motor": "r15-source-crouch-2",
+				"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+				"physics_hz": 128.0,
+				"preset": "server128",
+				"runner": "res://scripts/r15_source_player.gd",
+				"timing": "r16-timing-1"
+			},
+			"metadata": {
+				"attempt": 4.0,
+				"build": "spillway-2026.11.10-r20",
+				"build_label": "Spillway R20",
+				"clean_at_start": true,
+				"course_key": "4753897420048f6b",
+				"elapsed_at_start": 0.0,
+				"family": "source",
+				"held_actions": [
+					"move_forward",
+					"move_back",
+					"move_left",
+					"move_right",
+					"jump",
+					"crouch",
+					"r15_slide",
+					"r15_grapple",
+					"look_left",
+					"look_right",
+					"look_up",
+					"look_down"
+				],
+				"identity": {
+					"course_key": "4753897420048f6b",
+					"format": "r16-motion-1",
+					"geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					"map": "breakwater",
+					"motor": "r15-source-crouch-2",
+					"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+					"physics_hz": 128.0,
+					"preset": "server128",
+					"runner": "res://scripts/r15_source_player.gd",
+					"timing": "r16-timing-1"
+				},
+				"lab": {},
+				"laws": {
+					"approved": "r15 source runner res://scripts/r15_source_player.gd with the r15 F2/F5 server presets, unchanged",
+					"course_law": "approved r15",
+					"experimental": [],
+					"r16_additions": "style scoring, recording and ghost are r16 game choices that only read the game"
+				},
+				"look": {
+					"family": "source",
+					"fov": 90.0,
+					"input": "screen_relative counts",
+					"m_pitch": 0.022,
+					"m_yaw": 0.022,
+					"pitch_rad_per_count": 0.00095993108859688,
+					"replay_override": true,
+					"sensitivity": 2.5,
+					"yaw_rad_per_count": 0.00095993108859688
+				},
+				"map": "breakwater",
+				"map_kind": "course",
+				"map_name": "Breakwater",
+				"opportunities": {
+					"applied": true,
+					"base_geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					"hash": "b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+					"passages": [
+						"RunwayCrouch",
+						"RunwayThread"
+					],
+					"reason": "widen_optional_thread_after_repeated_front_contacts",
+					"version": "r19-breakwater-flow-1"
+				},
+				"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+				"paused_at_start": false,
+				"physics": {
+					"family": "source",
+					"fingerprint": {
+						"air_budget": "legacy",
+						"air_surface": "deadstrafe",
+						"cl_forwardspeed": 450.0,
+						"cl_sidespeed": 450.0,
+						"duck_air_anchor": "center",
+						"duck_air_crop": false,
+						"duck_eye_clearance": 2.0,
+						"duck_eye_height": 46.0,
+						"duck_eye_time": 0.1,
+						"duck_hull_height": 54.0,
+						"duck_multiplier": 0.34,
+						"eye_height": 64.0,
+						"ground_probe": 2.0,
+						"ground_speed_clamp": false,
+						"hull_height": 72.0,
+						"hull_width": 32.0,
+						"jump_clamp_factor": 1.1,
+						"jump_order": "source2013",
+						"non_jump_velocity": 140.0,
+						"player_maxspeed": 250.0,
+						"preset": "csgo_server",
+						"stamina_model": "gokz_fit",
+						"sv_accelerate": 5.5,
+						"sv_air_max_wishspeed": 30.0,
+						"sv_airaccelerate": 100.0,
+						"sv_autobunnyhopping": true,
+						"sv_enablebunnyhopping": true,
+						"sv_friction": 5.2,
+						"sv_gravity": 800.0,
+						"sv_jump_impulse": 301.993377,
+						"sv_maxspeed": 320.0,
+						"sv_maxvelocity": 3500.0,
+						"sv_staminajumpcost": 0.0,
+						"sv_staminalandcost": 0.0,
+						"sv_staminamax": 0.0,
+						"sv_staminarecoveryrate": 0.0,
+						"sv_stepsize": 18.0,
+						"sv_stopspeed": 80.0,
+						"sv_walkable_normal": 0.7,
+						"tickrate": 128.0,
+						"water_multiplier": 0.8
+					},
+					"hull": {
+						"duck_air_anchor": "center",
+						"duck_height_u": 54.0,
+						"height_u": 72.0,
+						"shape": "box",
+						"width_u": 32.0
+					},
+					"hz": 128.0,
+					"mechanics": [],
+					"motor_version": "r15-source-crouch-2",
+					"runner": "res://scripts/r15_source_player.gd",
+					"standin": false
+				},
+				"practice_reason": "",
+				"practice_stage": -1.0,
+				"preset": "server128",
+				"preset_label": "CS:GO bhop server",
+				"record_identity": [
+					"r16-timing-1",
+					[
+						"breakwater",
+						"course",
+						"r15-breakwater",
+						1.0,
+						"breakwater"
+					],
+					"bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					[
+						"Box rows",
+						"Crane line",
+						"Breakwater",
+						"The breach",
+						"Lighthouse"
+					],
+					"server128",
+					"source",
+					"r15-source-crouch-2",
+					"res://scripts/r15_source_player.gd",
+					128.0,
+					"{\"air_budget\":\"legacy\",\"air_surface\":\"deadstrafe\",\"cl_forwardspeed\":450.0,\"cl_sidespeed\":450.0,\"duck_air_anchor\":\"center\",\"duck_air_crop\":false,\"duck_eye_clearance\":2.0,\"duck_eye_height\":46.0,\"duck_eye_time\":0.1,\"duck_hull_height\":54.0,\"duck_multiplier\":0.34,\"eye_height\":64.0,\"ground_probe\":2.0,\"ground_speed_clamp\":false,\"hull_height\":72.0,\"hull_width\":32.0,\"jump_clamp_factor\":1.1,\"jump_order\":\"source2013\",\"non_jump_velocity\":140.0,\"player_maxspeed\":250.0,\"preset\":\"csgo_server\",\"stamina_model\":\"gokz_fit\",\"sv_accelerate\":5.5,\"sv_air_max_wishspeed\":30.0,\"sv_airaccelerate\":100.0,\"sv_autobunnyhopping\":true,\"sv_enablebunnyhopping\":true,\"sv_friction\":5.2,\"sv_gravity\":800.0,\"sv_jump_impulse\":301.993377,\"sv_maxspeed\":320.0,\"sv_maxvelocity\":3500.0,\"sv_staminajumpcost\":0.0,\"sv_staminalandcost\":0.0,\"sv_staminamax\":0.0,\"sv_staminarecoveryrate\":0.0,\"sv_stepsize\":18.0,\"sv_stopspeed\":80.0,\"sv_walkable_normal\":0.7,\"tickrate\":128,\"water_multiplier\":0.8}",
+					"{\"duck_air_anchor\":\"center\",\"duck_height_u\":54.0,\"height_u\":72.0,\"shape\":\"box\",\"width_u\":32.0}",
+					"[]",
+					"r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389"
+				],
+				"sample": {
+					"actual_v": "the runner's own travel over its step, excluding duck-origin compensation; checked against (p - previous p - duck shift) / dt",
+					"version": "r16-sample-1",
+					"when": "end of each unpaused physics frame (priority 999, after the strafe stats): the body after this frame's motor step, the host state as this frame left it"
+				},
+				"scoring": {
+					"style": {
+						"event_format": 2.0,
+						"rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
+						"version": "r20-style-stack-1"
+					},
+					"style_key": "r20-style-stack-1/2/b133b80f118247cf",
+					"timing": "r16-timing-1"
+				},
+				"start_reason": "restart",
+				"timer_running_at_start": false
+			},
+			"os": "Linux",
+			"run_id": "breakwater_server128_20261110-160646_528_1b5ea842",
+			"units": {
+				"angle": "rad",
+				"length": "m",
+				"time": "s",
+				"velocity": "m/s"
+			},
+			"vector_precision": "single",
+			"version": 1.0
+		},
+		"identity_text": "[\"r16-timing-1\",[\"breakwater\",\"course\",\"r15-breakwater\",1,\"breakwater\"],\"bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162\",[\"Box rows\",\"Crane line\",\"Breakwater\",\"The breach\",\"Lighthouse\"],\"server128\",\"source\",\"r15-source-crouch-2\",\"res://scripts/r15_source_player.gd\",128,\"{\\\"air_budget\\\":\\\"legacy\\\",\\\"air_surface\\\":\\\"deadstrafe\\\",\\\"cl_forwardspeed\\\":450.0,\\\"cl_sidespeed\\\":450.0,\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_air_crop\\\":false,\\\"duck_eye_clearance\\\":2.0,\\\"duck_eye_height\\\":46.0,\\\"duck_eye_time\\\":0.1,\\\"duck_hull_height\\\":54.0,\\\"duck_multiplier\\\":0.34,\\\"eye_height\\\":64.0,\\\"ground_probe\\\":2.0,\\\"ground_speed_clamp\\\":false,\\\"hull_height\\\":72.0,\\\"hull_width\\\":32.0,\\\"jump_clamp_factor\\\":1.1,\\\"jump_order\\\":\\\"source2013\\\",\\\"non_jump_velocity\\\":140.0,\\\"player_maxspeed\\\":250.0,\\\"preset\\\":\\\"csgo_server\\\",\\\"stamina_model\\\":\\\"gokz_fit\\\",\\\"sv_accelerate\\\":5.5,\\\"sv_air_max_wishspeed\\\":30.0,\\\"sv_airaccelerate\\\":100.0,\\\"sv_autobunnyhopping\\\":true,\\\"sv_enablebunnyhopping\\\":true,\\\"sv_friction\\\":5.2,\\\"sv_gravity\\\":800.0,\\\"sv_jump_impulse\\\":301.993377,\\\"sv_maxspeed\\\":320.0,\\\"sv_maxvelocity\\\":3500.0,\\\"sv_staminajumpcost\\\":0.0,\\\"sv_staminalandcost\\\":0.0,\\\"sv_staminamax\\\":0.0,\\\"sv_staminarecoveryrate\\\":0.0,\\\"sv_stepsize\\\":18.0,\\\"sv_stopspeed\\\":80.0,\\\"sv_walkable_normal\\\":0.7,\\\"tickrate\\\":128,\\\"water_multiplier\\\":0.8}\",\"{\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_height_u\\\":54.0,\\\"height_u\\\":72.0,\\\"shape\\\":\\\"box\\\",\\\"width_u\\\":32.0}\",\"[]\",\"r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389\"]",
+		"inputs_sha256": {
+			"aux": "59f897c1aca4a814dad339f4185fdf0a38a52c816ad14e94162466af79521357",
+			"code": "59f897c1aca4a814dad339f4185fdf0a38a52c816ad14e94162466af79521357",
+			"flags": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"kind": "77ee7ce65c84d38465b8162c58afd76001b97d06f7e68e7abc06ad7eee78756c",
+			"tick": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+		},
+		"seal": {
+			"counts": {
+				"bytes": 6621.0,
+				"chunks": 1.0,
+				"events": 5.0,
+				"gaps": 0.0,
+				"inputs": 2.0,
+				"ticks": 4.0
+			},
+			"ended_unix": 1794326806.545489,
+			"final": {
+				"checkpoint": 0.0,
+				"clean": true,
+				"elapsed": 0.0,
+				"finished": false,
+				"p": [
+					0.0,
+					0.00115448131691664,
+					4.0
+				],
+				"respawns": 0.0,
+				"started": false,
+				"tick": 3.0
+			},
+			"finish_tick": -1.0,
+			"first_tick": 0.0,
+			"last_tick": 3.0,
+			"outcome": {
+				"checkpoint": 0.0,
+				"clean": false,
+				"elapsed": 0.0,
+				"finished": false,
+				"kind": "preset",
+				"practice_reason": "",
+				"respawns": 0.0,
+				"style": {
+					"by_kind": {},
+					"score": 0.0
+				}
+			},
+			"timer_start_tick": -1.0
+		},
+		"sha256": "62a383e664cf6bf71cb8952e6c218cd11cf17c5e0ef1bb51e48ae22d3f435cfe"
+	},
+	{
+		"columns_sha256": {
+			"actual_v": "3f68eb6424dd4e49b6cc554f936dbab732327f3abb9fb77386814c35f0da9e40",
+			"checkpoint": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"dt": "bda8dac224b09366fa9ccbc5c7887a0be3c60c0184e0fb468acf0f4ba0135fcb",
+			"elapsed": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"flags": "839018c5d8d9b743f6ea9914c04117ca00c6c92a2cfe7ff0c3e4b1ae7dbe6552",
+			"held": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"p": "1a79e779dca1b083e4378f96590e03b714aeac4de97834ffd58dc04c615fbf79",
+			"physics_hz": "81b0006182e2f4180d23d14f625a836f013f13c50bb9e085fcca8949834c8a1e",
+			"pitch": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"reference_p": "1a79e779dca1b083e4378f96590e03b714aeac4de97834ffd58dc04c615fbf79",
+			"respawns": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"tick": "baed642339816affb3fe8719792d0e4ce82f12db72b7373d244eaa65445800fe",
+			"v": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+			"yaw": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925"
+		},
+		"events": [
+			{
+				"d": {
+					"names": [
+						"crouch",
+						"jump",
+						"look_down",
+						"look_left",
+						"look_right",
+						"look_up",
+						"move_back",
+						"move_forward",
+						"move_left",
+						"move_right",
+						"r15_grapple",
+						"r15_slide"
+					]
+				},
+				"k": "held_names",
+				"q": 0.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"index": 0.0,
+					"name": "r16_preset_2"
+				},
+				"k": "action_name",
+				"q": 1.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"checkpoint": 0.0,
+					"dt": 0.0078125,
+					"mode": "run",
+					"motor_version": "r15-source-crouch-2",
+					"physics_hz": 128.0,
+					"practice_reason": "",
+					"respawns": 0.0
+				},
+				"k": "context",
+				"q": 2.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"edge": [
+						{
+							"echo": false,
+							"keycode": 82.0,
+							"physical_keycode": 82.0,
+							"pressed": true,
+							"type": "key"
+						},
+						{
+							"action": "restart",
+							"pressed": true,
+							"type": "action"
+						}
+					],
+					"inputs": [],
+					"paused": false
+				},
+				"k": "restart",
+				"q": 3.0,
+				"s": "event",
+				"t": 3.0
+			}
+		],
+		"file": "breakwater_server128_20261110-160646_634_6f40d04b.r16run",
+		"header": {
+			"created_unix": 1794326806.634277,
+			"created_utc": "2026-11-10T16:06:46Z",
+			"engine": "4.7.2-stable (official)",
+			"format": "foldrunner-r16-run",
+			"identity": {
+				"course_key": "4753897420048f6b",
+				"format": "r16-motion-1",
+				"geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+				"map": "breakwater",
+				"motor": "r15-source-crouch-2",
+				"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+				"physics_hz": 128.0,
+				"preset": "server128",
+				"runner": "res://scripts/r15_source_player.gd",
+				"timing": "r16-timing-1"
+			},
+			"metadata": {
+				"attempt": 5.0,
+				"build": "spillway-2026.11.10-r20",
+				"build_label": "Spillway R20",
+				"clean_at_start": true,
+				"course_key": "4753897420048f6b",
+				"elapsed_at_start": 0.0,
+				"family": "source",
+				"held_actions": [
+					"move_forward",
+					"move_back",
+					"move_left",
+					"move_right",
+					"jump",
+					"crouch",
+					"r15_slide",
+					"r15_grapple",
+					"look_left",
+					"look_right",
+					"look_up",
+					"look_down"
+				],
+				"identity": {
+					"course_key": "4753897420048f6b",
+					"format": "r16-motion-1",
+					"geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					"map": "breakwater",
+					"motor": "r15-source-crouch-2",
+					"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+					"physics_hz": 128.0,
+					"preset": "server128",
+					"runner": "res://scripts/r15_source_player.gd",
+					"timing": "r16-timing-1"
+				},
+				"lab": {},
+				"laws": {
+					"approved": "r15 source runner res://scripts/r15_source_player.gd with the r15 F2/F5 server presets, unchanged",
+					"course_law": "approved r15",
+					"experimental": [],
+					"r16_additions": "style scoring, recording and ghost are r16 game choices that only read the game"
+				},
+				"look": {
+					"family": "source",
+					"fov": 90.0,
+					"input": "screen_relative counts",
+					"m_pitch": 0.022,
+					"m_yaw": 0.022,
+					"pitch_rad_per_count": 0.00095993108859688,
+					"replay_override": true,
+					"sensitivity": 2.5,
+					"yaw_rad_per_count": 0.00095993108859688
+				},
+				"map": "breakwater",
+				"map_kind": "course",
+				"map_name": "Breakwater",
+				"opportunities": {
+					"applied": true,
+					"base_geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					"hash": "b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+					"passages": [
+						"RunwayCrouch",
+						"RunwayThread"
+					],
+					"reason": "widen_optional_thread_after_repeated_front_contacts",
+					"version": "r19-breakwater-flow-1"
+				},
+				"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+				"paused_at_start": false,
+				"physics": {
+					"family": "source",
+					"fingerprint": {
+						"air_budget": "legacy",
+						"air_surface": "deadstrafe",
+						"cl_forwardspeed": 450.0,
+						"cl_sidespeed": 450.0,
+						"duck_air_anchor": "center",
+						"duck_air_crop": false,
+						"duck_eye_clearance": 2.0,
+						"duck_eye_height": 46.0,
+						"duck_eye_time": 0.1,
+						"duck_hull_height": 54.0,
+						"duck_multiplier": 0.34,
+						"eye_height": 64.0,
+						"ground_probe": 2.0,
+						"ground_speed_clamp": false,
+						"hull_height": 72.0,
+						"hull_width": 32.0,
+						"jump_clamp_factor": 1.1,
+						"jump_order": "source2013",
+						"non_jump_velocity": 140.0,
+						"player_maxspeed": 250.0,
+						"preset": "csgo_server",
+						"stamina_model": "gokz_fit",
+						"sv_accelerate": 5.5,
+						"sv_air_max_wishspeed": 30.0,
+						"sv_airaccelerate": 100.0,
+						"sv_autobunnyhopping": true,
+						"sv_enablebunnyhopping": true,
+						"sv_friction": 5.2,
+						"sv_gravity": 800.0,
+						"sv_jump_impulse": 301.993377,
+						"sv_maxspeed": 320.0,
+						"sv_maxvelocity": 3500.0,
+						"sv_staminajumpcost": 0.0,
+						"sv_staminalandcost": 0.0,
+						"sv_staminamax": 0.0,
+						"sv_staminarecoveryrate": 0.0,
+						"sv_stepsize": 18.0,
+						"sv_stopspeed": 80.0,
+						"sv_walkable_normal": 0.7,
+						"tickrate": 128.0,
+						"water_multiplier": 0.8
+					},
+					"hull": {
+						"duck_air_anchor": "center",
+						"duck_height_u": 54.0,
+						"height_u": 72.0,
+						"shape": "box",
+						"width_u": 32.0
+					},
+					"hz": 128.0,
+					"mechanics": [],
+					"motor_version": "r15-source-crouch-2",
+					"runner": "res://scripts/r15_source_player.gd",
+					"standin": false
+				},
+				"practice_reason": "",
+				"practice_stage": -1.0,
+				"preset": "server128",
+				"preset_label": "CS:GO bhop server",
+				"record_identity": [
+					"r16-timing-1",
+					[
+						"breakwater",
+						"course",
+						"r15-breakwater",
+						1.0,
+						"breakwater"
+					],
+					"bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					[
+						"Box rows",
+						"Crane line",
+						"Breakwater",
+						"The breach",
+						"Lighthouse"
+					],
+					"server128",
+					"source",
+					"r15-source-crouch-2",
+					"res://scripts/r15_source_player.gd",
+					128.0,
+					"{\"air_budget\":\"legacy\",\"air_surface\":\"deadstrafe\",\"cl_forwardspeed\":450.0,\"cl_sidespeed\":450.0,\"duck_air_anchor\":\"center\",\"duck_air_crop\":false,\"duck_eye_clearance\":2.0,\"duck_eye_height\":46.0,\"duck_eye_time\":0.1,\"duck_hull_height\":54.0,\"duck_multiplier\":0.34,\"eye_height\":64.0,\"ground_probe\":2.0,\"ground_speed_clamp\":false,\"hull_height\":72.0,\"hull_width\":32.0,\"jump_clamp_factor\":1.1,\"jump_order\":\"source2013\",\"non_jump_velocity\":140.0,\"player_maxspeed\":250.0,\"preset\":\"csgo_server\",\"stamina_model\":\"gokz_fit\",\"sv_accelerate\":5.5,\"sv_air_max_wishspeed\":30.0,\"sv_airaccelerate\":100.0,\"sv_autobunnyhopping\":true,\"sv_enablebunnyhopping\":true,\"sv_friction\":5.2,\"sv_gravity\":800.0,\"sv_jump_impulse\":301.993377,\"sv_maxspeed\":320.0,\"sv_maxvelocity\":3500.0,\"sv_staminajumpcost\":0.0,\"sv_staminalandcost\":0.0,\"sv_staminamax\":0.0,\"sv_staminarecoveryrate\":0.0,\"sv_stepsize\":18.0,\"sv_stopspeed\":80.0,\"sv_walkable_normal\":0.7,\"tickrate\":128,\"water_multiplier\":0.8}",
+					"{\"duck_air_anchor\":\"center\",\"duck_height_u\":54.0,\"height_u\":72.0,\"shape\":\"box\",\"width_u\":32.0}",
+					"[]",
+					"r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389"
+				],
+				"sample": {
+					"actual_v": "the runner's own travel over its step, excluding duck-origin compensation; checked against (p - previous p - duck shift) / dt",
+					"version": "r16-sample-1",
+					"when": "end of each unpaused physics frame (priority 999, after the strafe stats): the body after this frame's motor step, the host state as this frame left it"
+				},
+				"scoring": {
+					"style": {
+						"event_format": 2.0,
+						"rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
+						"version": "r20-style-stack-1"
+					},
+					"style_key": "r20-style-stack-1/2/b133b80f118247cf",
+					"timing": "r16-timing-1"
+				},
+				"start_reason": "preset",
+				"timer_running_at_start": false
+			},
+			"os": "Linux",
+			"run_id": "breakwater_server128_20261110-160646_634_6f40d04b",
+			"units": {
+				"angle": "rad",
+				"length": "m",
+				"time": "s",
+				"velocity": "m/s"
+			},
+			"vector_precision": "single",
+			"version": 1.0
+		},
+		"identity_text": "[\"r16-timing-1\",[\"breakwater\",\"course\",\"r15-breakwater\",1,\"breakwater\"],\"bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162\",[\"Box rows\",\"Crane line\",\"Breakwater\",\"The breach\",\"Lighthouse\"],\"server128\",\"source\",\"r15-source-crouch-2\",\"res://scripts/r15_source_player.gd\",128,\"{\\\"air_budget\\\":\\\"legacy\\\",\\\"air_surface\\\":\\\"deadstrafe\\\",\\\"cl_forwardspeed\\\":450.0,\\\"cl_sidespeed\\\":450.0,\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_air_crop\\\":false,\\\"duck_eye_clearance\\\":2.0,\\\"duck_eye_height\\\":46.0,\\\"duck_eye_time\\\":0.1,\\\"duck_hull_height\\\":54.0,\\\"duck_multiplier\\\":0.34,\\\"eye_height\\\":64.0,\\\"ground_probe\\\":2.0,\\\"ground_speed_clamp\\\":false,\\\"hull_height\\\":72.0,\\\"hull_width\\\":32.0,\\\"jump_clamp_factor\\\":1.1,\\\"jump_order\\\":\\\"source2013\\\",\\\"non_jump_velocity\\\":140.0,\\\"player_maxspeed\\\":250.0,\\\"preset\\\":\\\"csgo_server\\\",\\\"stamina_model\\\":\\\"gokz_fit\\\",\\\"sv_accelerate\\\":5.5,\\\"sv_air_max_wishspeed\\\":30.0,\\\"sv_airaccelerate\\\":100.0,\\\"sv_autobunnyhopping\\\":true,\\\"sv_enablebunnyhopping\\\":true,\\\"sv_friction\\\":5.2,\\\"sv_gravity\\\":800.0,\\\"sv_jump_impulse\\\":301.993377,\\\"sv_maxspeed\\\":320.0,\\\"sv_maxvelocity\\\":3500.0,\\\"sv_staminajumpcost\\\":0.0,\\\"sv_staminalandcost\\\":0.0,\\\"sv_staminamax\\\":0.0,\\\"sv_staminarecoveryrate\\\":0.0,\\\"sv_stepsize\\\":18.0,\\\"sv_stopspeed\\\":80.0,\\\"sv_walkable_normal\\\":0.7,\\\"tickrate\\\":128,\\\"water_multiplier\\\":0.8}\",\"{\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_height_u\\\":54.0,\\\"height_u\\\":72.0,\\\"shape\\\":\\\"box\\\",\\\"width_u\\\":32.0}\",\"[]\",\"r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389\"]",
+		"inputs_sha256": {
+			"aux": "b71e03575ecd61b8975529ad2d067fea4ce146aa20a5b8b9e66dfc0dd9008870",
+			"code": "b71e03575ecd61b8975529ad2d067fea4ce146aa20a5b8b9e66dfc0dd9008870",
+			"flags": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"kind": "77ee7ce65c84d38465b8162c58afd76001b97d06f7e68e7abc06ad7eee78756c",
+			"tick": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+		},
+		"seal": {
+			"counts": {
+				"bytes": 6543.0,
+				"chunks": 1.0,
+				"events": 4.0,
+				"gaps": 0.0,
+				"inputs": 2.0,
+				"ticks": 4.0
+			},
+			"ended_unix": 1794326806.651803,
+			"final": {
+				"checkpoint": 0.0,
+				"clean": true,
+				"elapsed": 0.0,
+				"finished": false,
+				"p": [
+					0.0,
+					0.00116091629024595,
+					4.0
+				],
+				"respawns": 0.0,
+				"started": false,
+				"tick": 3.0
+			},
+			"finish_tick": -1.0,
+			"first_tick": 0.0,
+			"last_tick": 3.0,
+			"outcome": {
+				"checkpoint": 0.0,
+				"clean": false,
+				"elapsed": 0.0,
+				"finished": false,
+				"kind": "restart",
+				"practice_reason": "",
+				"respawns": 0.0,
+				"style": {
+					"by_kind": {},
+					"score": 0.0
+				}
+			},
+			"timer_start_tick": -1.0
+		},
+		"sha256": "0717f5e545571f81c033b43c3e2b8f63257b829f98edd4162ca8ed37e1e8ddcb"
+	},
+	{
+		"columns_sha256": {
+			"actual_v": "c9b4547a7f1f1956b96dc10367918d1804bee0e104a672395fd6c7921dc33af3",
+			"checkpoint": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"dt": "bda8dac224b09366fa9ccbc5c7887a0be3c60c0184e0fb468acf0f4ba0135fcb",
+			"elapsed": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"flags": "839018c5d8d9b743f6ea9914c04117ca00c6c92a2cfe7ff0c3e4b1ae7dbe6552",
+			"held": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"p": "84ef679e328df1005778a5f9c7b80092402d51becf9626fb3d4a969158b9cdec",
+			"physics_hz": "81b0006182e2f4180d23d14f625a836f013f13c50bb9e085fcca8949834c8a1e",
+			"pitch": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"reference_p": "84ef679e328df1005778a5f9c7b80092402d51becf9626fb3d4a969158b9cdec",
+			"respawns": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"tick": "baed642339816affb3fe8719792d0e4ce82f12db72b7373d244eaa65445800fe",
+			"v": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+			"yaw": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925"
+		},
+		"events": [
+			{
+				"d": {
+					"names": [
+						"crouch",
+						"jump",
+						"look_down",
+						"look_left",
+						"look_right",
+						"look_up",
+						"move_back",
+						"move_forward",
+						"move_left",
+						"move_right",
+						"r15_grapple",
+						"r15_slide"
+					]
+				},
+				"k": "held_names",
+				"q": 0.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"index": 0.0,
+					"name": "restart"
+				},
+				"k": "action_name",
+				"q": 1.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"checkpoint": 0.0,
+					"dt": 0.0078125,
+					"mode": "run",
+					"motor_version": "r15-source-crouch-2",
+					"physics_hz": 128.0,
+					"practice_reason": "",
+					"respawns": 0.0
+				},
+				"k": "context",
+				"q": 2.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 3.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"edge": [
+						{
+							"echo": false,
+							"keycode": 4194305.0,
+							"physical_keycode": 4194305.0,
+							"pressed": true,
+							"type": "key"
+						},
+						{
+							"action": "pause",
+							"pressed": true,
+							"type": "action"
+						}
+					],
+					"pending_inputs": 0.0
+				},
+				"k": "pause",
+				"q": 4.0,
+				"s": "event",
+				"t": 3.0
+			},
+			{
+				"d": {
+					"edge": [],
+					"from": "breakwater",
+					"inputs": [],
+					"paused": true,
+					"to": "experiment"
+				},
+				"k": "map",
+				"q": 5.0,
+				"s": "event",
+				"t": 3.0
+			}
+		],
+		"file": "breakwater_server128_20261110-160646_652_3160e3db.r16run",
+		"header": {
+			"created_unix": 1794326806.652427,
+			"created_utc": "2026-11-10T16:06:46Z",
+			"engine": "4.7.2-stable (official)",
+			"format": "foldrunner-r16-run",
+			"identity": {
+				"course_key": "4753897420048f6b",
+				"format": "r16-motion-1",
+				"geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+				"map": "breakwater",
+				"motor": "r15-source-crouch-2",
+				"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+				"physics_hz": 128.0,
+				"preset": "server128",
+				"runner": "res://scripts/r15_source_player.gd",
+				"timing": "r16-timing-1"
+			},
+			"metadata": {
+				"attempt": 6.0,
+				"build": "spillway-2026.11.10-r20",
+				"build_label": "Spillway R20",
+				"clean_at_start": true,
+				"course_key": "4753897420048f6b",
+				"elapsed_at_start": 0.0,
+				"family": "source",
+				"held_actions": [
+					"move_forward",
+					"move_back",
+					"move_left",
+					"move_right",
+					"jump",
+					"crouch",
+					"r15_slide",
+					"r15_grapple",
+					"look_left",
+					"look_right",
+					"look_up",
+					"look_down"
+				],
+				"identity": {
+					"course_key": "4753897420048f6b",
+					"format": "r16-motion-1",
+					"geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					"map": "breakwater",
+					"motor": "r15-source-crouch-2",
+					"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+					"physics_hz": 128.0,
+					"preset": "server128",
+					"runner": "res://scripts/r15_source_player.gd",
+					"timing": "r16-timing-1"
+				},
+				"lab": {},
+				"laws": {
+					"approved": "r15 source runner res://scripts/r15_source_player.gd with the r15 F2/F5 server presets, unchanged",
+					"course_law": "approved r15",
+					"experimental": [],
+					"r16_additions": "style scoring, recording and ghost are r16 game choices that only read the game"
+				},
+				"look": {
+					"family": "source",
+					"fov": 90.0,
+					"input": "screen_relative counts",
+					"m_pitch": 0.022,
+					"m_yaw": 0.022,
+					"pitch_rad_per_count": 0.00095993108859688,
+					"replay_override": true,
+					"sensitivity": 2.5,
+					"yaw_rad_per_count": 0.00095993108859688
+				},
+				"map": "breakwater",
+				"map_kind": "course",
+				"map_name": "Breakwater",
+				"opportunities": {
+					"applied": true,
+					"base_geometry": "bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					"hash": "b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+					"passages": [
+						"RunwayCrouch",
+						"RunwayThread"
+					],
+					"reason": "widen_optional_thread_after_repeated_front_contacts",
+					"version": "r19-breakwater-flow-1"
+				},
+				"overlay": "r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389",
+				"paused_at_start": false,
+				"physics": {
+					"family": "source",
+					"fingerprint": {
+						"air_budget": "legacy",
+						"air_surface": "deadstrafe",
+						"cl_forwardspeed": 450.0,
+						"cl_sidespeed": 450.0,
+						"duck_air_anchor": "center",
+						"duck_air_crop": false,
+						"duck_eye_clearance": 2.0,
+						"duck_eye_height": 46.0,
+						"duck_eye_time": 0.1,
+						"duck_hull_height": 54.0,
+						"duck_multiplier": 0.34,
+						"eye_height": 64.0,
+						"ground_probe": 2.0,
+						"ground_speed_clamp": false,
+						"hull_height": 72.0,
+						"hull_width": 32.0,
+						"jump_clamp_factor": 1.1,
+						"jump_order": "source2013",
+						"non_jump_velocity": 140.0,
+						"player_maxspeed": 250.0,
+						"preset": "csgo_server",
+						"stamina_model": "gokz_fit",
+						"sv_accelerate": 5.5,
+						"sv_air_max_wishspeed": 30.0,
+						"sv_airaccelerate": 100.0,
+						"sv_autobunnyhopping": true,
+						"sv_enablebunnyhopping": true,
+						"sv_friction": 5.2,
+						"sv_gravity": 800.0,
+						"sv_jump_impulse": 301.993377,
+						"sv_maxspeed": 320.0,
+						"sv_maxvelocity": 3500.0,
+						"sv_staminajumpcost": 0.0,
+						"sv_staminalandcost": 0.0,
+						"sv_staminamax": 0.0,
+						"sv_staminarecoveryrate": 0.0,
+						"sv_stepsize": 18.0,
+						"sv_stopspeed": 80.0,
+						"sv_walkable_normal": 0.7,
+						"tickrate": 128.0,
+						"water_multiplier": 0.8
+					},
+					"hull": {
+						"duck_air_anchor": "center",
+						"duck_height_u": 54.0,
+						"height_u": 72.0,
+						"shape": "box",
+						"width_u": 32.0
+					},
+					"hz": 128.0,
+					"mechanics": [],
+					"motor_version": "r15-source-crouch-2",
+					"runner": "res://scripts/r15_source_player.gd",
+					"standin": false
+				},
+				"practice_reason": "",
+				"practice_stage": -1.0,
+				"preset": "server128",
+				"preset_label": "CS:GO bhop server",
+				"record_identity": [
+					"r16-timing-1",
+					[
+						"breakwater",
+						"course",
+						"r15-breakwater",
+						1.0,
+						"breakwater"
+					],
+					"bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162",
+					[
+						"Box rows",
+						"Crane line",
+						"Breakwater",
+						"The breach",
+						"Lighthouse"
+					],
+					"server128",
+					"source",
+					"r15-source-crouch-2",
+					"res://scripts/r15_source_player.gd",
+					128.0,
+					"{\"air_budget\":\"legacy\",\"air_surface\":\"deadstrafe\",\"cl_forwardspeed\":450.0,\"cl_sidespeed\":450.0,\"duck_air_anchor\":\"center\",\"duck_air_crop\":false,\"duck_eye_clearance\":2.0,\"duck_eye_height\":46.0,\"duck_eye_time\":0.1,\"duck_hull_height\":54.0,\"duck_multiplier\":0.34,\"eye_height\":64.0,\"ground_probe\":2.0,\"ground_speed_clamp\":false,\"hull_height\":72.0,\"hull_width\":32.0,\"jump_clamp_factor\":1.1,\"jump_order\":\"source2013\",\"non_jump_velocity\":140.0,\"player_maxspeed\":250.0,\"preset\":\"csgo_server\",\"stamina_model\":\"gokz_fit\",\"sv_accelerate\":5.5,\"sv_air_max_wishspeed\":30.0,\"sv_airaccelerate\":100.0,\"sv_autobunnyhopping\":true,\"sv_enablebunnyhopping\":true,\"sv_friction\":5.2,\"sv_gravity\":800.0,\"sv_jump_impulse\":301.993377,\"sv_maxspeed\":320.0,\"sv_maxvelocity\":3500.0,\"sv_staminajumpcost\":0.0,\"sv_staminalandcost\":0.0,\"sv_staminamax\":0.0,\"sv_staminarecoveryrate\":0.0,\"sv_stepsize\":18.0,\"sv_stopspeed\":80.0,\"sv_walkable_normal\":0.7,\"tickrate\":128,\"water_multiplier\":0.8}",
+					"{\"duck_air_anchor\":\"center\",\"duck_height_u\":54.0,\"height_u\":72.0,\"shape\":\"box\",\"width_u\":32.0}",
+					"[]",
+					"r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389"
+				],
+				"sample": {
+					"actual_v": "the runner's own travel over its step, excluding duck-origin compensation; checked against (p - previous p - duck shift) / dt",
+					"version": "r16-sample-1",
+					"when": "end of each unpaused physics frame (priority 999, after the strafe stats): the body after this frame's motor step, the host state as this frame left it"
+				},
+				"scoring": {
+					"style": {
+						"event_format": 2.0,
+						"rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
+						"version": "r20-style-stack-1"
+					},
+					"style_key": "r20-style-stack-1/2/b133b80f118247cf",
+					"timing": "r16-timing-1"
+				},
+				"start_reason": "restart",
+				"timer_running_at_start": false
+			},
+			"os": "Linux",
+			"run_id": "breakwater_server128_20261110-160646_652_3160e3db",
+			"units": {
+				"angle": "rad",
+				"length": "m",
+				"time": "s",
+				"velocity": "m/s"
+			},
+			"vector_precision": "single",
+			"version": 1.0
+		},
+		"identity_text": "[\"r16-timing-1\",[\"breakwater\",\"course\",\"r15-breakwater\",1,\"breakwater\"],\"bc7d35582a7f18228692a625441a4d630f515f7b45dae366cf91f00b2b7b6162\",[\"Box rows\",\"Crane line\",\"Breakwater\",\"The breach\",\"Lighthouse\"],\"server128\",\"source\",\"r15-source-crouch-2\",\"res://scripts/r15_source_player.gd\",128,\"{\\\"air_budget\\\":\\\"legacy\\\",\\\"air_surface\\\":\\\"deadstrafe\\\",\\\"cl_forwardspeed\\\":450.0,\\\"cl_sidespeed\\\":450.0,\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_air_crop\\\":false,\\\"duck_eye_clearance\\\":2.0,\\\"duck_eye_height\\\":46.0,\\\"duck_eye_time\\\":0.1,\\\"duck_hull_height\\\":54.0,\\\"duck_multiplier\\\":0.34,\\\"eye_height\\\":64.0,\\\"ground_probe\\\":2.0,\\\"ground_speed_clamp\\\":false,\\\"hull_height\\\":72.0,\\\"hull_width\\\":32.0,\\\"jump_clamp_factor\\\":1.1,\\\"jump_order\\\":\\\"source2013\\\",\\\"non_jump_velocity\\\":140.0,\\\"player_maxspeed\\\":250.0,\\\"preset\\\":\\\"csgo_server\\\",\\\"stamina_model\\\":\\\"gokz_fit\\\",\\\"sv_accelerate\\\":5.5,\\\"sv_air_max_wishspeed\\\":30.0,\\\"sv_airaccelerate\\\":100.0,\\\"sv_autobunnyhopping\\\":true,\\\"sv_enablebunnyhopping\\\":true,\\\"sv_friction\\\":5.2,\\\"sv_gravity\\\":800.0,\\\"sv_jump_impulse\\\":301.993377,\\\"sv_maxspeed\\\":320.0,\\\"sv_maxvelocity\\\":3500.0,\\\"sv_staminajumpcost\\\":0.0,\\\"sv_staminalandcost\\\":0.0,\\\"sv_staminamax\\\":0.0,\\\"sv_staminarecoveryrate\\\":0.0,\\\"sv_stepsize\\\":18.0,\\\"sv_stopspeed\\\":80.0,\\\"sv_walkable_normal\\\":0.7,\\\"tickrate\\\":128,\\\"water_multiplier\\\":0.8}\",\"{\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_height_u\\\":54.0,\\\"height_u\\\":72.0,\\\"shape\\\":\\\"box\\\",\\\"width_u\\\":32.0}\",\"[]\",\"r19-breakwater-flow-1:b4aa38be4af8fef1eaad7f8ca7789cc900a4347accb08230d46674b567ef2389\"]",
+		"inputs_sha256": {
+			"aux": "59f897c1aca4a814dad339f4185fdf0a38a52c816ad14e94162466af79521357",
+			"code": "59f897c1aca4a814dad339f4185fdf0a38a52c816ad14e94162466af79521357",
+			"flags": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"kind": "77ee7ce65c84d38465b8162c58afd76001b97d06f7e68e7abc06ad7eee78756c",
+			"tick": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+		},
+		"seal": {
+			"counts": {
+				"bytes": 6615.0,
+				"chunks": 1.0,
+				"events": 6.0,
+				"gaps": 0.0,
+				"inputs": 2.0,
+				"ticks": 4.0
+			},
+			"ended_unix": 1794326806.673756,
+			"final": {
+				"checkpoint": 0.0,
+				"clean": true,
+				"elapsed": 0.0,
+				"finished": false,
+				"p": [
+					0.0,
+					0.00115448131691664,
+					4.0
+				],
+				"respawns": 0.0,
+				"started": false,
+				"tick": 3.0
+			},
+			"finish_tick": -1.0,
+			"first_tick": 0.0,
+			"last_tick": 3.0,
+			"outcome": {
+				"checkpoint": 0.0,
+				"clean": false,
+				"elapsed": 0.0,
+				"finished": false,
+				"kind": "map",
+				"practice_reason": "",
+				"respawns": 0.0,
+				"style": {
+					"by_kind": {},
+					"score": 0.0
+				}
+			},
+			"timer_start_tick": -1.0
+		},
+		"sha256": "6fc2391ef3580a25f0c78be0c48c84dd44248e4f728d3701338eb8939bc424f3"
+	},
+	{
+		"columns_sha256": {
+			"actual_v": "c207e67861fac43a72c64d061e91ef1577c9365c892d97803217a219faa7cd75",
+			"checkpoint": "2c34ce1df23b838c5abf2a7f6437cca3d3067ed509ff25f11df6b11b582b51eb",
+			"dt": "06622fde15a9ad59dea6493bb9cfb209d3966315fec44d4003e99f5c9b14afba",
+			"elapsed": "5b6fb58e61fa475939767d68a446f97f1bff02c0e5935a3ea8bb51e6515783d8",
+			"flags": "d1acbc1e7f83b0ecab817846f40b3b42a0d2608362af8a4539d47008ab8d977d",
+			"held": "5b6fb58e61fa475939767d68a446f97f1bff02c0e5935a3ea8bb51e6515783d8",
+			"p": "8d2b1691db172581091018fffc870511ffd0881fb181fedcd6ed2f0f2c588481",
+			"physics_hz": "193867d3cbe41469ec358abcedee94123fb74ab76741298cd75fb6d2bf78aaa1",
+			"pitch": "5b6fb58e61fa475939767d68a446f97f1bff02c0e5935a3ea8bb51e6515783d8",
+			"reference_p": "8d2b1691db172581091018fffc870511ffd0881fb181fedcd6ed2f0f2c588481",
+			"respawns": "2c34ce1df23b838c5abf2a7f6437cca3d3067ed509ff25f11df6b11b582b51eb",
+			"tick": "10b4796eac59c7d81c33711f219ba227247a4e338adad078159ba01e87590841",
+			"v": "6edd9f6f9cc92cded36e6c4a580933f9c9f1b90562b46903b806f21902a1a54f",
+			"yaw": "5b6fb58e61fa475939767d68a446f97f1bff02c0e5935a3ea8bb51e6515783d8"
+		},
+		"events": [
+			{
+				"d": {
+					"names": [
+						"crouch",
+						"jump",
+						"look_down",
+						"look_left",
+						"look_right",
+						"look_up",
+						"move_back",
+						"move_forward",
+						"move_left",
+						"move_right",
+						"r15_grapple",
+						"r15_slide"
+					]
+				},
+				"k": "held_names",
+				"q": 0.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"checkpoint": 0.0,
+					"dt": 0.0078125,
+					"lab_enabled": {
+						"grapple": true,
+						"slide": true,
+						"wall_jump": true
+					},
+					"mode": "run",
+					"motor_version": "r15-source-crouch-2",
+					"physics_hz": 128.0,
+					"practice_reason": "",
+					"respawns": 0.0
+				},
+				"k": "context",
+				"q": 1.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 2.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"edge": [],
+					"inputs": [],
+					"paused": false
+				},
+				"k": "quit",
+				"q": 3.0,
+				"s": "event",
+				"t": 9.0
+			}
+		],
+		"file": "experiment_server128_20261110-160646_758_1e934c52.r16run",
+		"header": {
+			"created_unix": 1794326806.758314,
+			"created_utc": "2026-11-10T16:06:46Z",
+			"engine": "4.7.2-stable (official)",
+			"format": "foldrunner-r16-run",
+			"identity": {
+				"course_key": "4007f235009ca97f",
+				"format": "r16-motion-1",
+				"geometry": "e37414fe7f40a4c08c2d68b392c971096a61dbd12511407bc3f1ebc7efe10528",
+				"map": "experiment",
+				"motor": "r15-source-crouch-2+r16-lab-moves-1",
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"physics_hz": 128.0,
+				"preset": "server128",
+				"runner": "res://scripts/r16_experiment_player.gd",
+				"timing": "r16-timing-1"
+			},
+			"metadata": {
+				"attempt": 7.0,
+				"build": "spillway-2026.11.10-r20",
+				"build_label": "Spillway R20",
+				"clean_at_start": true,
+				"course_key": "4007f235009ca97f",
+				"elapsed_at_start": 0.0,
+				"family": "source",
+				"held_actions": [
+					"move_forward",
+					"move_back",
+					"move_left",
+					"move_right",
+					"jump",
+					"crouch",
+					"r15_slide",
+					"r15_grapple",
+					"look_left",
+					"look_right",
+					"look_up",
+					"look_down"
+				],
+				"identity": {
+					"course_key": "4007f235009ca97f",
+					"format": "r16-motion-1",
+					"geometry": "e37414fe7f40a4c08c2d68b392c971096a61dbd12511407bc3f1ebc7efe10528",
+					"map": "experiment",
+					"motor": "r15-source-crouch-2+r16-lab-moves-1",
+					"overlay": "r16-opportunities-1:none (non_target_map)",
+					"physics_hz": 128.0,
+					"preset": "server128",
+					"runner": "res://scripts/r16_experiment_player.gd",
+					"timing": "r16-timing-1"
+				},
+				"lab": {
+					"grapple": true,
+					"slide": true,
+					"wall_jump": true
+				},
+				"laws": {
+					"approved": "r15 source runner res://scripts/r15_source_player.gd with the r15 F2/F5 server presets, unchanged",
+					"course_law": "experimental",
+					"experimental": [
+						"lab slide r16-lab-slide-2",
+						"lab wall_jump r16-lab-wall-jump-2",
+						"lab grapple r15-lab-grapple-1",
+						"movement lab runner r15-source-crouch-2+r16-lab-moves-1"
+					],
+					"r16_additions": "style scoring, recording and ghost are r16 game choices that only read the game"
+				},
+				"look": {
+					"family": "source",
+					"fov": 90.0,
+					"input": "screen_relative counts",
+					"m_pitch": 0.022,
+					"m_yaw": 0.022,
+					"pitch_rad_per_count": 0.00095993108859688,
+					"replay_override": true,
+					"sensitivity": 2.5,
+					"yaw_rad_per_count": 0.00095993108859688
+				},
+				"map": "experiment",
+				"map_kind": "lab",
+				"map_name": "Movement Lab",
+				"opportunities": {
+					"applied": false,
+					"base_geometry": "e37414fe7f40a4c08c2d68b392c971096a61dbd12511407bc3f1ebc7efe10528",
+					"hash": "",
+					"passages": [],
+					"reason": "non_target_map",
+					"version": "r16-opportunities-1"
+				},
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"paused_at_start": false,
+				"physics": {
+					"family": "source",
+					"fingerprint": {
+						"air_budget": "legacy",
+						"air_surface": "deadstrafe",
+						"cl_forwardspeed": 450.0,
+						"cl_sidespeed": 450.0,
+						"duck_air_anchor": "center",
+						"duck_air_crop": false,
+						"duck_eye_clearance": 2.0,
+						"duck_eye_height": 46.0,
+						"duck_eye_time": 0.1,
+						"duck_hull_height": 54.0,
+						"duck_multiplier": 0.34,
+						"eye_height": 64.0,
+						"ground_probe": 2.0,
+						"ground_speed_clamp": false,
+						"hull_height": 72.0,
+						"hull_width": 32.0,
+						"jump_clamp_factor": 1.1,
+						"jump_order": "source2013",
+						"non_jump_velocity": 140.0,
+						"player_maxspeed": 250.0,
+						"preset": "csgo_server",
+						"stamina_model": "gokz_fit",
+						"sv_accelerate": 5.5,
+						"sv_air_max_wishspeed": 30.0,
+						"sv_airaccelerate": 100.0,
+						"sv_autobunnyhopping": true,
+						"sv_enablebunnyhopping": true,
+						"sv_friction": 5.2,
+						"sv_gravity": 800.0,
+						"sv_jump_impulse": 301.993377,
+						"sv_maxspeed": 320.0,
+						"sv_maxvelocity": 3500.0,
+						"sv_staminajumpcost": 0.0,
+						"sv_staminalandcost": 0.0,
+						"sv_staminamax": 0.0,
+						"sv_staminarecoveryrate": 0.0,
+						"sv_stepsize": 18.0,
+						"sv_stopspeed": 80.0,
+						"sv_walkable_normal": 0.7,
+						"tickrate": 128.0,
+						"water_multiplier": 0.8
+					},
+					"hull": {
+						"duck_air_anchor": "center",
+						"duck_height_u": 54.0,
+						"height_u": 72.0,
+						"shape": "box",
+						"width_u": 32.0
+					},
+					"hz": 128.0,
+					"mechanics": [
+						"slide",
+						"wall_jump",
+						"grapple",
+						{
+							"id": "slide",
+							"on": true,
+							"tuning": {
+								"arm": "fresh Shift press in the air, Shift held",
+								"buffer_from": "later of press and apex",
+								"buffer_s": 0.4,
+								"cooldown_s": 0.5,
+								"end_ups": 100.0,
+								"entry_tick_jump": "none; a fresh press on it hops next tick",
+								"friction": 0.25,
+								"held_space": "held into the landing never hops; release and press",
+								"lab_version": "r16-lab-moves-1",
+								"late_press_ticks": 1.0,
+								"law": "r16-lab-slide-2",
+								"max_s": 1.5,
+								"min_entry_ups": 180.0,
+								"wall_jump": "disarms"
+							},
+							"version": "r15-lab-moves-1"
+						},
+						{
+							"id": "wall_jump",
+							"on": true,
+							"tuning": {
+								"budget": 2.0,
+								"cooldown_s": 0.25,
+								"gain_cap_ups": 80.0,
+								"guard": "no air acceleration for a wish into the wall",
+								"guard_s": 0.25,
+								"lab_version": "r16-lab-moves-1",
+								"law": "r16-lab-wall-jump-2",
+								"max_normal_y": 0.2,
+								"out_ups": 230.0,
+								"per_wall": "each wall plane once per flight",
+								"press_buffer_s": 0.1,
+								"reach_u": 6.0,
+								"refill": "landing on walkable support",
+								"same_wall_deg": 20.0,
+								"same_wall_u": 8.0,
+								"speed_cap_ups": 340.0,
+								"up_ups": 290.0
+							},
+							"version": "r15-lab-moves-1"
+						},
+						{
+							"id": "grapple",
+							"on": true,
+							"tuning": {
+								"aim_cone_deg": 9.0,
+								"anchor_clear_m": 0.3,
+								"law": "r15-lab-grapple-1",
+								"max_pull_ups2": 1300.0,
+								"max_s": 3.0,
+								"min_length_u": 96.0,
+								"range_u": 1181.0,
+								"reel_ups": 260.0,
+								"speed_cap_ups": 650.0,
+								"stiffness": 30.0,
+								"stretch_u": 80.0
+							},
+							"version": "r15-lab-moves-1"
+						}
+					],
+					"motor_version": "r15-source-crouch-2+r16-lab-moves-1",
+					"runner": "res://scripts/r16_experiment_player.gd",
+					"standin": false
+				},
+				"practice_reason": "",
+				"practice_stage": -1.0,
+				"preset": "server128",
+				"preset_label": "CS:GO bhop server",
+				"record_identity": [
+					"r16-timing-1",
+					[
+						"experiment",
+						"lab",
+						"r15-movement-lab",
+						1.0,
+						"workshop"
+					],
+					"e37414fe7f40a4c08c2d68b392c971096a61dbd12511407bc3f1ebc7efe10528",
+					[
+						"Slide lane",
+						"Wall chamber",
+						"Grapple gap",
+						"Dispatch bay"
+					],
+					"server128",
+					"source",
+					"r15-source-crouch-2+r16-lab-moves-1",
+					"res://scripts/r16_experiment_player.gd",
+					128.0,
+					"{\"air_budget\":\"legacy\",\"air_surface\":\"deadstrafe\",\"cl_forwardspeed\":450.0,\"cl_sidespeed\":450.0,\"duck_air_anchor\":\"center\",\"duck_air_crop\":false,\"duck_eye_clearance\":2.0,\"duck_eye_height\":46.0,\"duck_eye_time\":0.1,\"duck_hull_height\":54.0,\"duck_multiplier\":0.34,\"eye_height\":64.0,\"ground_probe\":2.0,\"ground_speed_clamp\":false,\"hull_height\":72.0,\"hull_width\":32.0,\"jump_clamp_factor\":1.1,\"jump_order\":\"source2013\",\"non_jump_velocity\":140.0,\"player_maxspeed\":250.0,\"preset\":\"csgo_server\",\"stamina_model\":\"gokz_fit\",\"sv_accelerate\":5.5,\"sv_air_max_wishspeed\":30.0,\"sv_airaccelerate\":100.0,\"sv_autobunnyhopping\":true,\"sv_enablebunnyhopping\":true,\"sv_friction\":5.2,\"sv_gravity\":800.0,\"sv_jump_impulse\":301.993377,\"sv_maxspeed\":320.0,\"sv_maxvelocity\":3500.0,\"sv_staminajumpcost\":0.0,\"sv_staminalandcost\":0.0,\"sv_staminamax\":0.0,\"sv_staminarecoveryrate\":0.0,\"sv_stepsize\":18.0,\"sv_stopspeed\":80.0,\"sv_walkable_normal\":0.7,\"tickrate\":128,\"water_multiplier\":0.8}",
+					"{\"duck_air_anchor\":\"center\",\"duck_height_u\":54.0,\"height_u\":72.0,\"shape\":\"box\",\"width_u\":32.0}",
+					"[\"slide\",\"wall_jump\",\"grapple\",{\"id\":\"slide\",\"on\":true,\"tuning\":{\"arm\":\"fresh Shift press in the air, Shift held\",\"buffer_from\":\"later of press and apex\",\"buffer_s\":0.4,\"cooldown_s\":0.5,\"end_ups\":100.0,\"entry_tick_jump\":\"none; a fresh press on it hops next tick\",\"friction\":0.25,\"held_space\":\"held into the landing never hops; release and press\",\"lab_version\":\"r16-lab-moves-1\",\"late_press_ticks\":1,\"law\":\"r16-lab-slide-2\",\"max_s\":1.5,\"min_entry_ups\":180.0,\"wall_jump\":\"disarms\"},\"version\":\"r15-lab-moves-1\"},{\"id\":\"wall_jump\",\"on\":true,\"tuning\":{\"budget\":2,\"cooldown_s\":0.25,\"gain_cap_ups\":80.0,\"guard\":\"no air acceleration for a wish into the wall\",\"guard_s\":0.25,\"lab_version\":\"r16-lab-moves-1\",\"law\":\"r16-lab-wall-jump-2\",\"max_normal_y\":0.2,\"out_ups\":230.0,\"per_wall\":\"each wall plane once per flight\",\"press_buffer_s\":0.1,\"reach_u\":6.0,\"refill\":\"landing on walkable support\",\"same_wall_deg\":20.0,\"same_wall_u\":8.0,\"speed_cap_ups\":340.0,\"up_ups\":290.0},\"version\":\"r15-lab-moves-1\"},{\"id\":\"grapple\",\"on\":true,\"tuning\":{\"aim_cone_deg\":9.0,\"anchor_clear_m\":0.3,\"law\":\"r15-lab-grapple-1\",\"max_pull_ups2\":1300.0,\"max_s\":3.0,\"min_length_u\":96.0,\"range_u\":1181.0,\"reel_ups\":260.0,\"speed_cap_ups\":650.0,\"stiffness\":30.0,\"stretch_u\":80.0},\"version\":\"r15-lab-moves-1\"}]",
+					"r16-opportunities-1:none (non_target_map)"
+				],
+				"sample": {
+					"actual_v": "the runner's own travel over its step, excluding duck-origin compensation; checked against (p - previous p - duck shift) / dt",
+					"version": "r16-sample-1",
+					"when": "end of each unpaused physics frame (priority 999, after the strafe stats): the body after this frame's motor step, the host state as this frame left it"
+				},
+				"scoring": {
+					"style": {
+						"event_format": 2.0,
+						"rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
+						"version": "r20-style-stack-1"
+					},
+					"style_key": "r20-style-stack-1/2/b133b80f118247cf",
+					"timing": "r16-timing-1"
+				},
+				"start_reason": "map",
+				"timer_running_at_start": false
+			},
+			"os": "Linux",
+			"run_id": "experiment_server128_20261110-160646_758_1e934c52",
+			"units": {
+				"angle": "rad",
+				"length": "m",
+				"time": "s",
+				"velocity": "m/s"
+			},
+			"vector_precision": "single",
+			"version": 1.0
+		},
+		"identity_text": "[\"r16-timing-1\",[\"experiment\",\"lab\",\"r15-movement-lab\",1,\"workshop\"],\"e37414fe7f40a4c08c2d68b392c971096a61dbd12511407bc3f1ebc7efe10528\",[\"Slide lane\",\"Wall chamber\",\"Grapple gap\",\"Dispatch bay\"],\"server128\",\"source\",\"r15-source-crouch-2+r16-lab-moves-1\",\"res://scripts/r16_experiment_player.gd\",128,\"{\\\"air_budget\\\":\\\"legacy\\\",\\\"air_surface\\\":\\\"deadstrafe\\\",\\\"cl_forwardspeed\\\":450.0,\\\"cl_sidespeed\\\":450.0,\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_air_crop\\\":false,\\\"duck_eye_clearance\\\":2.0,\\\"duck_eye_height\\\":46.0,\\\"duck_eye_time\\\":0.1,\\\"duck_hull_height\\\":54.0,\\\"duck_multiplier\\\":0.34,\\\"eye_height\\\":64.0,\\\"ground_probe\\\":2.0,\\\"ground_speed_clamp\\\":false,\\\"hull_height\\\":72.0,\\\"hull_width\\\":32.0,\\\"jump_clamp_factor\\\":1.1,\\\"jump_order\\\":\\\"source2013\\\",\\\"non_jump_velocity\\\":140.0,\\\"player_maxspeed\\\":250.0,\\\"preset\\\":\\\"csgo_server\\\",\\\"stamina_model\\\":\\\"gokz_fit\\\",\\\"sv_accelerate\\\":5.5,\\\"sv_air_max_wishspeed\\\":30.0,\\\"sv_airaccelerate\\\":100.0,\\\"sv_autobunnyhopping\\\":true,\\\"sv_enablebunnyhopping\\\":true,\\\"sv_friction\\\":5.2,\\\"sv_gravity\\\":800.0,\\\"sv_jump_impulse\\\":301.993377,\\\"sv_maxspeed\\\":320.0,\\\"sv_maxvelocity\\\":3500.0,\\\"sv_staminajumpcost\\\":0.0,\\\"sv_staminalandcost\\\":0.0,\\\"sv_staminamax\\\":0.0,\\\"sv_staminarecoveryrate\\\":0.0,\\\"sv_stepsize\\\":18.0,\\\"sv_stopspeed\\\":80.0,\\\"sv_walkable_normal\\\":0.7,\\\"tickrate\\\":128,\\\"water_multiplier\\\":0.8}\",\"{\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_height_u\\\":54.0,\\\"height_u\\\":72.0,\\\"shape\\\":\\\"box\\\",\\\"width_u\\\":32.0}\",\"[\\\"slide\\\",\\\"wall_jump\\\",\\\"grapple\\\",{\\\"id\\\":\\\"slide\\\",\\\"on\\\":true,\\\"tuning\\\":{\\\"arm\\\":\\\"fresh Shift press in the air, Shift held\\\",\\\"buffer_from\\\":\\\"later of press and apex\\\",\\\"buffer_s\\\":0.4,\\\"cooldown_s\\\":0.5,\\\"end_ups\\\":100.0,\\\"entry_tick_jump\\\":\\\"none; a fresh press on it hops next tick\\\",\\\"friction\\\":0.25,\\\"held_space\\\":\\\"held into the landing never hops; release and press\\\",\\\"lab_version\\\":\\\"r16-lab-moves-1\\\",\\\"late_press_ticks\\\":1,\\\"law\\\":\\\"r16-lab-slide-2\\\",\\\"max_s\\\":1.5,\\\"min_entry_ups\\\":180.0,\\\"wall_jump\\\":\\\"disarms\\\"},\\\"version\\\":\\\"r15-lab-moves-1\\\"},{\\\"id\\\":\\\"wall_jump\\\",\\\"on\\\":true,\\\"tuning\\\":{\\\"budget\\\":2,\\\"cooldown_s\\\":0.25,\\\"gain_cap_ups\\\":80.0,\\\"guard\\\":\\\"no air acceleration for a wish into the wall\\\",\\\"guard_s\\\":0.25,\\\"lab_version\\\":\\\"r16-lab-moves-1\\\",\\\"law\\\":\\\"r16-lab-wall-jump-2\\\",\\\"max_normal_y\\\":0.2,\\\"out_ups\\\":230.0,\\\"per_wall\\\":\\\"each wall plane once per flight\\\",\\\"press_buffer_s\\\":0.1,\\\"reach_u\\\":6.0,\\\"refill\\\":\\\"landing on walkable support\\\",\\\"same_wall_deg\\\":20.0,\\\"same_wall_u\\\":8.0,\\\"speed_cap_ups\\\":340.0,\\\"up_ups\\\":290.0},\\\"version\\\":\\\"r15-lab-moves-1\\\"},{\\\"id\\\":\\\"grapple\\\",\\\"on\\\":true,\\\"tuning\\\":{\\\"aim_cone_deg\\\":9.0,\\\"anchor_clear_m\\\":0.3,\\\"law\\\":\\\"r15-lab-grapple-1\\\",\\\"max_pull_ups2\\\":1300.0,\\\"max_s\\\":3.0,\\\"min_length_u\\\":96.0,\\\"range_u\\\":1181.0,\\\"reel_ups\\\":260.0,\\\"speed_cap_ups\\\":650.0,\\\"stiffness\\\":30.0,\\\"stretch_u\\\":80.0},\\\"version\\\":\\\"r15-lab-moves-1\\\"}]\",\"r16-opportunities-1:none (non_target_map)\"]",
+		"inputs_sha256": {
+			"aux": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"code": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"flags": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"kind": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"tick": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"x": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"x2": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"y": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"y2": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+		},
+		"seal": {
+			"counts": {
+				"bytes": 9200.0,
+				"chunks": 1.0,
+				"events": 4.0,
+				"gaps": 0.0,
+				"inputs": 0.0,
+				"ticks": 10.0
+			},
+			"ended_unix": 1794326806.824104,
+			"final": {
+				"checkpoint": 0.0,
+				"clean": true,
+				"elapsed": 0.0,
+				"finished": false,
+				"p": [
+					0.0,
+					0.00112692534457892,
+					4.0
+				],
+				"respawns": 0.0,
+				"started": false,
+				"tick": 9.0
+			},
+			"finish_tick": -1.0,
+			"first_tick": 0.0,
+			"last_tick": 9.0,
+			"outcome": {
+				"checkpoint": 0.0,
+				"clean": false,
+				"elapsed": 0.0,
+				"finished": false,
+				"kind": "quit",
+				"practice_reason": "",
+				"respawns": 0.0,
+				"style": {
+					"by_kind": {},
+					"score": 0.0
+				}
+			},
+			"timer_start_tick": -1.0
+		},
+		"sha256": "22c175017af2101ee7754880790c0903daebe9d763c7b9b2d0939f0afe709095"
+	}
+]

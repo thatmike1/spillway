@@ -1,0 +1,9 @@
+# Verification ownership
+
+`python3 tools/test.py` checks immutable fixtures, 77 actual-data mutations, a fresh Godot import, Saltglass production registration/revision separation and Tether Yard geometry and movement coefficients. `python3 tools/test.py --slow` also checks the direction stack, original-map Through Line preservation and the complete 48-play original-map matrix.
+
+`lib/` contains the retained comparison functions extracted from the R17-R21 verifier chain. Their function bodies retain the original arithmetic, strict schemas, binary column hashes, reader cross-checks, independent ghost sampling and full lifecycle accounting. `fast_exact.py` skips recursion only when pickle bytes are identical, including numeric types and signed zero; every other pair goes through the original comparator. It never unpickles input.
+
+`tests/fixtures/original-map-parity/` holds frozen test inputs from the accepted R20 capture that R21 used. This is the eight-map, sixteen-route reference, not a capture of Mike's play. Each route has its submitted and expanded input tape, earned golden ghost, complete recording lifecycle, three observation streams, engine settings and controls. `SHA256.json` pins every fixture. Build metadata is normalized only through the retained explicit identity policy; the six exact comparison groups retain motion, recordings, ghost, observations, controls and finish. Three presentation variants give 288 comparisons; cross-variant checks are additional.
+
+Evidence, logs, imported source snapshots and profiles go into a new external temporary directory. They are never release inputs and are never committed. The original delivery-specific verifiers remain in Git history. Release r21 preserves its original verified binary bytes; new exports are source verification builds.

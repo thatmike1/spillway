@@ -1,0 +1,6371 @@
+[
+	{
+		"columns_sha256": {
+			"actual_v": "c207e67861fac43a72c64d061e91ef1577c9365c892d97803217a219faa7cd75",
+			"checkpoint": "2c34ce1df23b838c5abf2a7f6437cca3d3067ed509ff25f11df6b11b582b51eb",
+			"dt": "06622fde15a9ad59dea6493bb9cfb209d3966315fec44d4003e99f5c9b14afba",
+			"elapsed": "5b6fb58e61fa475939767d68a446f97f1bff02c0e5935a3ea8bb51e6515783d8",
+			"flags": "d1acbc1e7f83b0ecab817846f40b3b42a0d2608362af8a4539d47008ab8d977d",
+			"held": "5b6fb58e61fa475939767d68a446f97f1bff02c0e5935a3ea8bb51e6515783d8",
+			"p": "8d2b1691db172581091018fffc870511ffd0881fb181fedcd6ed2f0f2c588481",
+			"physics_hz": "193867d3cbe41469ec358abcedee94123fb74ab76741298cd75fb6d2bf78aaa1",
+			"pitch": "5b6fb58e61fa475939767d68a446f97f1bff02c0e5935a3ea8bb51e6515783d8",
+			"reference_p": "8d2b1691db172581091018fffc870511ffd0881fb181fedcd6ed2f0f2c588481",
+			"respawns": "2c34ce1df23b838c5abf2a7f6437cca3d3067ed509ff25f11df6b11b582b51eb",
+			"tick": "10b4796eac59c7d81c33711f219ba227247a4e338adad078159ba01e87590841",
+			"v": "6edd9f6f9cc92cded36e6c4a580933f9c9f1b90562b46903b806f21902a1a54f",
+			"yaw": "5b6fb58e61fa475939767d68a446f97f1bff02c0e5935a3ea8bb51e6515783d8"
+		},
+		"events": [
+			{
+				"d": {
+					"names": [
+						"crouch",
+						"jump",
+						"look_down",
+						"look_left",
+						"look_right",
+						"look_up",
+						"move_back",
+						"move_forward",
+						"move_left",
+						"move_right",
+						"r15_grapple",
+						"r15_slide"
+					]
+				},
+				"k": "held_names",
+				"q": 0.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"checkpoint": 0.0,
+					"dt": 0.0078125,
+					"lab_enabled": {
+						"grapple": true,
+						"slide": true,
+						"wall_jump": true
+					},
+					"mode": "run",
+					"motor_version": "r15-source-crouch-2",
+					"physics_hz": 128.0,
+					"practice_reason": "",
+					"respawns": 0.0
+				},
+				"k": "context",
+				"q": 1.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 2.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"edge": [],
+					"inputs": [],
+					"paused": false
+				},
+				"k": "quit",
+				"q": 3.0,
+				"s": "event",
+				"t": 9.0
+			}
+		],
+		"file": "experiment_server128_20261110-162939_540_eb9e770b.r16run",
+		"header": {
+			"created_unix": 1794328179.540534,
+			"created_utc": "2026-11-10T16:29:39Z",
+			"engine": "4.7.2-stable (official)",
+			"format": "foldrunner-r16-run",
+			"identity": {
+				"course_key": "4007f235009ca97f",
+				"format": "r16-motion-1",
+				"geometry": "e37414fe7f40a4c08c2d68b392c971096a61dbd12511407bc3f1ebc7efe10528",
+				"map": "experiment",
+				"motor": "r15-source-crouch-2+r16-lab-moves-1",
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"physics_hz": 128.0,
+				"preset": "server128",
+				"runner": "res://scripts/r16_experiment_player.gd",
+				"timing": "r16-timing-1"
+			},
+			"metadata": {
+				"attempt": 7.0,
+				"build": "spillway-2026.11.10-r20",
+				"build_label": "Spillway R20",
+				"clean_at_start": true,
+				"course_key": "4007f235009ca97f",
+				"elapsed_at_start": 0.0,
+				"family": "source",
+				"held_actions": [
+					"move_forward",
+					"move_back",
+					"move_left",
+					"move_right",
+					"jump",
+					"crouch",
+					"r15_slide",
+					"r15_grapple",
+					"look_left",
+					"look_right",
+					"look_up",
+					"look_down"
+				],
+				"identity": {
+					"course_key": "4007f235009ca97f",
+					"format": "r16-motion-1",
+					"geometry": "e37414fe7f40a4c08c2d68b392c971096a61dbd12511407bc3f1ebc7efe10528",
+					"map": "experiment",
+					"motor": "r15-source-crouch-2+r16-lab-moves-1",
+					"overlay": "r16-opportunities-1:none (non_target_map)",
+					"physics_hz": 128.0,
+					"preset": "server128",
+					"runner": "res://scripts/r16_experiment_player.gd",
+					"timing": "r16-timing-1"
+				},
+				"lab": {
+					"grapple": true,
+					"slide": true,
+					"wall_jump": true
+				},
+				"laws": {
+					"approved": "r15 source runner res://scripts/r15_source_player.gd with the r15 F2/F5 server presets, unchanged",
+					"course_law": "experimental",
+					"experimental": [
+						"lab slide r16-lab-slide-2",
+						"lab wall_jump r16-lab-wall-jump-2",
+						"lab grapple r15-lab-grapple-1",
+						"movement lab runner r15-source-crouch-2+r16-lab-moves-1"
+					],
+					"r16_additions": "style scoring, recording and ghost are r16 game choices that only read the game"
+				},
+				"look": {
+					"family": "source",
+					"fov": 90.0,
+					"input": "screen_relative counts",
+					"m_pitch": 0.022,
+					"m_yaw": 0.022,
+					"pitch_rad_per_count": 0.00095993108859688,
+					"replay_override": true,
+					"sensitivity": 2.5,
+					"yaw_rad_per_count": 0.00095993108859688
+				},
+				"map": "experiment",
+				"map_kind": "lab",
+				"map_name": "Movement Lab",
+				"opportunities": {
+					"applied": false,
+					"base_geometry": "e37414fe7f40a4c08c2d68b392c971096a61dbd12511407bc3f1ebc7efe10528",
+					"hash": "",
+					"passages": [],
+					"reason": "non_target_map",
+					"version": "r16-opportunities-1"
+				},
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"paused_at_start": false,
+				"physics": {
+					"family": "source",
+					"fingerprint": {
+						"air_budget": "legacy",
+						"air_surface": "deadstrafe",
+						"cl_forwardspeed": 450.0,
+						"cl_sidespeed": 450.0,
+						"duck_air_anchor": "center",
+						"duck_air_crop": false,
+						"duck_eye_clearance": 2.0,
+						"duck_eye_height": 46.0,
+						"duck_eye_time": 0.1,
+						"duck_hull_height": 54.0,
+						"duck_multiplier": 0.34,
+						"eye_height": 64.0,
+						"ground_probe": 2.0,
+						"ground_speed_clamp": false,
+						"hull_height": 72.0,
+						"hull_width": 32.0,
+						"jump_clamp_factor": 1.1,
+						"jump_order": "source2013",
+						"non_jump_velocity": 140.0,
+						"player_maxspeed": 250.0,
+						"preset": "csgo_server",
+						"stamina_model": "gokz_fit",
+						"sv_accelerate": 5.5,
+						"sv_air_max_wishspeed": 30.0,
+						"sv_airaccelerate": 100.0,
+						"sv_autobunnyhopping": true,
+						"sv_enablebunnyhopping": true,
+						"sv_friction": 5.2,
+						"sv_gravity": 800.0,
+						"sv_jump_impulse": 301.993377,
+						"sv_maxspeed": 320.0,
+						"sv_maxvelocity": 3500.0,
+						"sv_staminajumpcost": 0.0,
+						"sv_staminalandcost": 0.0,
+						"sv_staminamax": 0.0,
+						"sv_staminarecoveryrate": 0.0,
+						"sv_stepsize": 18.0,
+						"sv_stopspeed": 80.0,
+						"sv_walkable_normal": 0.7,
+						"tickrate": 128.0,
+						"water_multiplier": 0.8
+					},
+					"hull": {
+						"duck_air_anchor": "center",
+						"duck_height_u": 54.0,
+						"height_u": 72.0,
+						"shape": "box",
+						"width_u": 32.0
+					},
+					"hz": 128.0,
+					"mechanics": [
+						"slide",
+						"wall_jump",
+						"grapple",
+						{
+							"id": "slide",
+							"on": true,
+							"tuning": {
+								"arm": "fresh Shift press in the air, Shift held",
+								"buffer_from": "later of press and apex",
+								"buffer_s": 0.4,
+								"cooldown_s": 0.5,
+								"end_ups": 100.0,
+								"entry_tick_jump": "none; a fresh press on it hops next tick",
+								"friction": 0.25,
+								"held_space": "held into the landing never hops; release and press",
+								"lab_version": "r16-lab-moves-1",
+								"late_press_ticks": 1.0,
+								"law": "r16-lab-slide-2",
+								"max_s": 1.5,
+								"min_entry_ups": 180.0,
+								"wall_jump": "disarms"
+							},
+							"version": "r15-lab-moves-1"
+						},
+						{
+							"id": "wall_jump",
+							"on": true,
+							"tuning": {
+								"budget": 2.0,
+								"cooldown_s": 0.25,
+								"gain_cap_ups": 80.0,
+								"guard": "no air acceleration for a wish into the wall",
+								"guard_s": 0.25,
+								"lab_version": "r16-lab-moves-1",
+								"law": "r16-lab-wall-jump-2",
+								"max_normal_y": 0.2,
+								"out_ups": 230.0,
+								"per_wall": "each wall plane once per flight",
+								"press_buffer_s": 0.1,
+								"reach_u": 6.0,
+								"refill": "landing on walkable support",
+								"same_wall_deg": 20.0,
+								"same_wall_u": 8.0,
+								"speed_cap_ups": 340.0,
+								"up_ups": 290.0
+							},
+							"version": "r15-lab-moves-1"
+						},
+						{
+							"id": "grapple",
+							"on": true,
+							"tuning": {
+								"aim_cone_deg": 9.0,
+								"anchor_clear_m": 0.3,
+								"law": "r15-lab-grapple-1",
+								"max_pull_ups2": 1300.0,
+								"max_s": 3.0,
+								"min_length_u": 96.0,
+								"range_u": 1181.0,
+								"reel_ups": 260.0,
+								"speed_cap_ups": 650.0,
+								"stiffness": 30.0,
+								"stretch_u": 80.0
+							},
+							"version": "r15-lab-moves-1"
+						}
+					],
+					"motor_version": "r15-source-crouch-2+r16-lab-moves-1",
+					"runner": "res://scripts/r16_experiment_player.gd",
+					"standin": false
+				},
+				"practice_reason": "",
+				"practice_stage": -1.0,
+				"preset": "server128",
+				"preset_label": "CS:GO bhop server",
+				"record_identity": [
+					"r16-timing-1",
+					[
+						"experiment",
+						"lab",
+						"r15-movement-lab",
+						1.0,
+						"workshop"
+					],
+					"e37414fe7f40a4c08c2d68b392c971096a61dbd12511407bc3f1ebc7efe10528",
+					[
+						"Slide lane",
+						"Wall chamber",
+						"Grapple gap",
+						"Dispatch bay"
+					],
+					"server128",
+					"source",
+					"r15-source-crouch-2+r16-lab-moves-1",
+					"res://scripts/r16_experiment_player.gd",
+					128.0,
+					"{\"air_budget\":\"legacy\",\"air_surface\":\"deadstrafe\",\"cl_forwardspeed\":450.0,\"cl_sidespeed\":450.0,\"duck_air_anchor\":\"center\",\"duck_air_crop\":false,\"duck_eye_clearance\":2.0,\"duck_eye_height\":46.0,\"duck_eye_time\":0.1,\"duck_hull_height\":54.0,\"duck_multiplier\":0.34,\"eye_height\":64.0,\"ground_probe\":2.0,\"ground_speed_clamp\":false,\"hull_height\":72.0,\"hull_width\":32.0,\"jump_clamp_factor\":1.1,\"jump_order\":\"source2013\",\"non_jump_velocity\":140.0,\"player_maxspeed\":250.0,\"preset\":\"csgo_server\",\"stamina_model\":\"gokz_fit\",\"sv_accelerate\":5.5,\"sv_air_max_wishspeed\":30.0,\"sv_airaccelerate\":100.0,\"sv_autobunnyhopping\":true,\"sv_enablebunnyhopping\":true,\"sv_friction\":5.2,\"sv_gravity\":800.0,\"sv_jump_impulse\":301.993377,\"sv_maxspeed\":320.0,\"sv_maxvelocity\":3500.0,\"sv_staminajumpcost\":0.0,\"sv_staminalandcost\":0.0,\"sv_staminamax\":0.0,\"sv_staminarecoveryrate\":0.0,\"sv_stepsize\":18.0,\"sv_stopspeed\":80.0,\"sv_walkable_normal\":0.7,\"tickrate\":128,\"water_multiplier\":0.8}",
+					"{\"duck_air_anchor\":\"center\",\"duck_height_u\":54.0,\"height_u\":72.0,\"shape\":\"box\",\"width_u\":32.0}",
+					"[\"slide\",\"wall_jump\",\"grapple\",{\"id\":\"slide\",\"on\":true,\"tuning\":{\"arm\":\"fresh Shift press in the air, Shift held\",\"buffer_from\":\"later of press and apex\",\"buffer_s\":0.4,\"cooldown_s\":0.5,\"end_ups\":100.0,\"entry_tick_jump\":\"none; a fresh press on it hops next tick\",\"friction\":0.25,\"held_space\":\"held into the landing never hops; release and press\",\"lab_version\":\"r16-lab-moves-1\",\"late_press_ticks\":1,\"law\":\"r16-lab-slide-2\",\"max_s\":1.5,\"min_entry_ups\":180.0,\"wall_jump\":\"disarms\"},\"version\":\"r15-lab-moves-1\"},{\"id\":\"wall_jump\",\"on\":true,\"tuning\":{\"budget\":2,\"cooldown_s\":0.25,\"gain_cap_ups\":80.0,\"guard\":\"no air acceleration for a wish into the wall\",\"guard_s\":0.25,\"lab_version\":\"r16-lab-moves-1\",\"law\":\"r16-lab-wall-jump-2\",\"max_normal_y\":0.2,\"out_ups\":230.0,\"per_wall\":\"each wall plane once per flight\",\"press_buffer_s\":0.1,\"reach_u\":6.0,\"refill\":\"landing on walkable support\",\"same_wall_deg\":20.0,\"same_wall_u\":8.0,\"speed_cap_ups\":340.0,\"up_ups\":290.0},\"version\":\"r15-lab-moves-1\"},{\"id\":\"grapple\",\"on\":true,\"tuning\":{\"aim_cone_deg\":9.0,\"anchor_clear_m\":0.3,\"law\":\"r15-lab-grapple-1\",\"max_pull_ups2\":1300.0,\"max_s\":3.0,\"min_length_u\":96.0,\"range_u\":1181.0,\"reel_ups\":260.0,\"speed_cap_ups\":650.0,\"stiffness\":30.0,\"stretch_u\":80.0},\"version\":\"r15-lab-moves-1\"}]",
+					"r16-opportunities-1:none (non_target_map)"
+				],
+				"sample": {
+					"actual_v": "the runner's own travel over its step, excluding duck-origin compensation; checked against (p - previous p - duck shift) / dt",
+					"version": "r16-sample-1",
+					"when": "end of each unpaused physics frame (priority 999, after the strafe stats): the body after this frame's motor step, the host state as this frame left it"
+				},
+				"scoring": {
+					"style": {
+						"event_format": 2.0,
+						"rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
+						"version": "r20-style-stack-1"
+					},
+					"style_key": "r20-style-stack-1/2/b133b80f118247cf",
+					"timing": "r16-timing-1"
+				},
+				"start_reason": "map",
+				"timer_running_at_start": false
+			},
+			"os": "Linux",
+			"run_id": "experiment_server128_20261110-162939_540_eb9e770b",
+			"units": {
+				"angle": "rad",
+				"length": "m",
+				"time": "s",
+				"velocity": "m/s"
+			},
+			"vector_precision": "single",
+			"version": 1.0
+		},
+		"identity_text": "[\"r16-timing-1\",[\"experiment\",\"lab\",\"r15-movement-lab\",1,\"workshop\"],\"e37414fe7f40a4c08c2d68b392c971096a61dbd12511407bc3f1ebc7efe10528\",[\"Slide lane\",\"Wall chamber\",\"Grapple gap\",\"Dispatch bay\"],\"server128\",\"source\",\"r15-source-crouch-2+r16-lab-moves-1\",\"res://scripts/r16_experiment_player.gd\",128,\"{\\\"air_budget\\\":\\\"legacy\\\",\\\"air_surface\\\":\\\"deadstrafe\\\",\\\"cl_forwardspeed\\\":450.0,\\\"cl_sidespeed\\\":450.0,\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_air_crop\\\":false,\\\"duck_eye_clearance\\\":2.0,\\\"duck_eye_height\\\":46.0,\\\"duck_eye_time\\\":0.1,\\\"duck_hull_height\\\":54.0,\\\"duck_multiplier\\\":0.34,\\\"eye_height\\\":64.0,\\\"ground_probe\\\":2.0,\\\"ground_speed_clamp\\\":false,\\\"hull_height\\\":72.0,\\\"hull_width\\\":32.0,\\\"jump_clamp_factor\\\":1.1,\\\"jump_order\\\":\\\"source2013\\\",\\\"non_jump_velocity\\\":140.0,\\\"player_maxspeed\\\":250.0,\\\"preset\\\":\\\"csgo_server\\\",\\\"stamina_model\\\":\\\"gokz_fit\\\",\\\"sv_accelerate\\\":5.5,\\\"sv_air_max_wishspeed\\\":30.0,\\\"sv_airaccelerate\\\":100.0,\\\"sv_autobunnyhopping\\\":true,\\\"sv_enablebunnyhopping\\\":true,\\\"sv_friction\\\":5.2,\\\"sv_gravity\\\":800.0,\\\"sv_jump_impulse\\\":301.993377,\\\"sv_maxspeed\\\":320.0,\\\"sv_maxvelocity\\\":3500.0,\\\"sv_staminajumpcost\\\":0.0,\\\"sv_staminalandcost\\\":0.0,\\\"sv_staminamax\\\":0.0,\\\"sv_staminarecoveryrate\\\":0.0,\\\"sv_stepsize\\\":18.0,\\\"sv_stopspeed\\\":80.0,\\\"sv_walkable_normal\\\":0.7,\\\"tickrate\\\":128,\\\"water_multiplier\\\":0.8}\",\"{\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_height_u\\\":54.0,\\\"height_u\\\":72.0,\\\"shape\\\":\\\"box\\\",\\\"width_u\\\":32.0}\",\"[\\\"slide\\\",\\\"wall_jump\\\",\\\"grapple\\\",{\\\"id\\\":\\\"slide\\\",\\\"on\\\":true,\\\"tuning\\\":{\\\"arm\\\":\\\"fresh Shift press in the air, Shift held\\\",\\\"buffer_from\\\":\\\"later of press and apex\\\",\\\"buffer_s\\\":0.4,\\\"cooldown_s\\\":0.5,\\\"end_ups\\\":100.0,\\\"entry_tick_jump\\\":\\\"none; a fresh press on it hops next tick\\\",\\\"friction\\\":0.25,\\\"held_space\\\":\\\"held into the landing never hops; release and press\\\",\\\"lab_version\\\":\\\"r16-lab-moves-1\\\",\\\"late_press_ticks\\\":1,\\\"law\\\":\\\"r16-lab-slide-2\\\",\\\"max_s\\\":1.5,\\\"min_entry_ups\\\":180.0,\\\"wall_jump\\\":\\\"disarms\\\"},\\\"version\\\":\\\"r15-lab-moves-1\\\"},{\\\"id\\\":\\\"wall_jump\\\",\\\"on\\\":true,\\\"tuning\\\":{\\\"budget\\\":2,\\\"cooldown_s\\\":0.25,\\\"gain_cap_ups\\\":80.0,\\\"guard\\\":\\\"no air acceleration for a wish into the wall\\\",\\\"guard_s\\\":0.25,\\\"lab_version\\\":\\\"r16-lab-moves-1\\\",\\\"law\\\":\\\"r16-lab-wall-jump-2\\\",\\\"max_normal_y\\\":0.2,\\\"out_ups\\\":230.0,\\\"per_wall\\\":\\\"each wall plane once per flight\\\",\\\"press_buffer_s\\\":0.1,\\\"reach_u\\\":6.0,\\\"refill\\\":\\\"landing on walkable support\\\",\\\"same_wall_deg\\\":20.0,\\\"same_wall_u\\\":8.0,\\\"speed_cap_ups\\\":340.0,\\\"up_ups\\\":290.0},\\\"version\\\":\\\"r15-lab-moves-1\\\"},{\\\"id\\\":\\\"grapple\\\",\\\"on\\\":true,\\\"tuning\\\":{\\\"aim_cone_deg\\\":9.0,\\\"anchor_clear_m\\\":0.3,\\\"law\\\":\\\"r15-lab-grapple-1\\\",\\\"max_pull_ups2\\\":1300.0,\\\"max_s\\\":3.0,\\\"min_length_u\\\":96.0,\\\"range_u\\\":1181.0,\\\"reel_ups\\\":260.0,\\\"speed_cap_ups\\\":650.0,\\\"stiffness\\\":30.0,\\\"stretch_u\\\":80.0},\\\"version\\\":\\\"r15-lab-moves-1\\\"}]\",\"r16-opportunities-1:none (non_target_map)\"]",
+		"inputs_sha256": {
+			"aux": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"code": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"flags": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"kind": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"tick": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"x": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"x2": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"y": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"y2": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+		},
+		"seal": {
+			"counts": {
+				"bytes": 9200.0,
+				"chunks": 1.0,
+				"events": 4.0,
+				"gaps": 0.0,
+				"inputs": 0.0,
+				"ticks": 10.0
+			},
+			"ended_unix": 1794328179.607713,
+			"final": {
+				"checkpoint": 0.0,
+				"clean": true,
+				"elapsed": 0.0,
+				"finished": false,
+				"p": [
+					0.0,
+					0.00112692534457892,
+					4.0
+				],
+				"respawns": 0.0,
+				"started": false,
+				"tick": 9.0
+			},
+			"finish_tick": -1.0,
+			"first_tick": 0.0,
+			"last_tick": 9.0,
+			"outcome": {
+				"checkpoint": 0.0,
+				"clean": false,
+				"elapsed": 0.0,
+				"finished": false,
+				"kind": "quit",
+				"practice_reason": "",
+				"respawns": 0.0,
+				"style": {
+					"by_kind": {},
+					"score": 0.0
+				}
+			},
+			"timer_start_tick": -1.0
+		},
+		"sha256": "ebbf67f4a1d9200fc95a6e0ebdaba52c300f4e64921a9c59f53cfc0992ed8bad"
+	},
+	{
+		"columns_sha256": {
+			"actual_v": "1bc18cfc385e5804ee20cd48285f6319c3b4dab5761be68975ee21dbbafe03c0",
+			"checkpoint": "2604ad83d3ed2fc4795e2b6bfc4d84a8da388a286e380d6b428addf8155bb882",
+			"dt": "fd72c3e5139b499189d006cd29f00fae4b62acf0a30bc3178dac16442be6a2fd",
+			"elapsed": "c45cd344d8fa73039e63d81473a2460b760e6d973ead26403239564370c76151",
+			"flags": "d419e15ce02179dc1f67e536c38b2b3144aef1fb829ede60cad10478e42bc4a8",
+			"held": "cc1bc6c040e5d2e202ead9f66523ff915925ae2559bde789469a4cb351e3daca",
+			"p": "c5ede90cac7d000c10c33d61d35804a6adf418867f20ebd68f0d9f600946a898",
+			"physics_hz": "8505eb9fa4c9ad01233ed0bc9d90004c5bd84403ea19d30b8cf7413bc397cd18",
+			"pitch": "8af17c9c557b980cd6be0b3c3dc1c9db2b2c53034c8d48ca12b5c4df2b13965e",
+			"reference_p": "c5ede90cac7d000c10c33d61d35804a6adf418867f20ebd68f0d9f600946a898",
+			"respawns": "3d4ef4035650115a881dd3e5df63c6b8076119eb83497eb366bcf668af31a552",
+			"tick": "40dd1641cdec1e874f2905dfd8743dac1f9e635082dc0e01aa7538a17d8d0654",
+			"v": "079e61f00337104f99dbddf3c9160a05ccd77d18c4c320c7fc4e507c2666adcf",
+			"yaw": "e726266a131f9bb550f6bda8ca927e58f366922b82d58d31e88d6f30d0354ffc"
+		},
+		"events": [
+			{
+				"d": {
+					"names": [
+						"crouch",
+						"jump",
+						"look_down",
+						"look_left",
+						"look_right",
+						"look_up",
+						"move_back",
+						"move_forward",
+						"move_left",
+						"move_right",
+						"r15_grapple",
+						"r15_slide"
+					]
+				},
+				"k": "held_names",
+				"q": 0.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"checkpoint": 0.0,
+					"dt": 0.0078125,
+					"mode": "run",
+					"motor_version": "r15-source-crouch-2",
+					"physics_hz": 128.0,
+					"practice_reason": "",
+					"respawns": 0.0
+				},
+				"k": "context",
+				"q": 1.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 2.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"index": 0.0,
+					"name": "move_forward"
+				},
+				"k": "action_name",
+				"q": 3.0,
+				"s": "recorder",
+				"t": 33.0
+			},
+			{
+				"d": {
+					"elapsed": 0.0078125
+				},
+				"k": "timer_start",
+				"q": 4.0,
+				"s": "recorder",
+				"t": 59.0
+			},
+			{
+				"d": {
+					"index": 1.0,
+					"name": "jump"
+				},
+				"k": "action_name",
+				"q": 5.0,
+				"s": "recorder",
+				"t": 92.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 6.0,
+				"s": "recorder",
+				"t": 92.0
+			},
+			{
+				"d": {
+					"events": [
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 7.0,
+				"s": "recorder",
+				"t": 92.0
+			},
+			{
+				"d": {
+					"index": 2.0,
+					"name": "move_right"
+				},
+				"k": "action_name",
+				"q": 8.0,
+				"s": "recorder",
+				"t": 93.0
+			},
+			{
+				"d": {
+					"index": 3.0,
+					"name": "move_left"
+				},
+				"k": "action_name",
+				"q": 9.0,
+				"s": "recorder",
+				"t": 100.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 10.0,
+				"s": "recorder",
+				"t": 186.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 11.0,
+				"s": "recorder",
+				"t": 186.0
+			},
+			{
+				"d": {
+					"air": 132.11402893066406,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 92.0,
+					"gain": 132.11402893066406,
+					"good": 85.0,
+					"index": 1.0,
+					"landing": 372.119140625,
+					"peak": 372.1191000750685,
+					"sync": 0.9239130434782608,
+					"takeoff": 240.0051116943359,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 12.0,
+				"s": "recorder",
+				"t": 186.0
+			},
+			{
+				"d": {
+					"base": 150.0,
+					"clean": true,
+					"combo": 1.0,
+					"combo_mult": 1.0,
+					"direction_mult": 1.0,
+					"elapsed": 1.0,
+					"geo": {
+						"cell": "0,0,13"
+					},
+					"kind": "sync",
+					"label": "Sync 92%  +132",
+					"m": {
+						"air_gain_ups": 132.11,
+						"air_ticks": 95.0,
+						"contact_ups": 0.0,
+						"eligible": 92.0,
+						"gain_ups": 132.11,
+						"landing_ups": 372.12,
+						"sync": 0.9239,
+						"takeoff_ups": 240.01
+					},
+					"mult": 1.0,
+					"p": [
+						0.1774,
+						0.0387,
+						12.5464
+					],
+					"points": 150.0,
+					"tick": 186.0,
+					"time_s": 1.4609379999999998,
+					"v": 1.0
+				},
+				"k": "style",
+				"q": 13.0,
+				"s": "capture",
+				"t": 186.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 14.0,
+				"s": "recorder",
+				"t": 187.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 15.0,
+				"s": "recorder",
+				"t": 187.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 16.0,
+				"s": "recorder",
+				"t": 282.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 17.0,
+				"s": "recorder",
+				"t": 282.0
+			},
+			{
+				"d": {
+					"air": 100.18658447265624,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 94.0,
+					"gain": 100.18658447265624,
+					"good": 87.0,
+					"index": 2.0,
+					"landing": 472.30572509765625,
+					"peak": 472.30570335087816,
+					"sync": 0.925531914893617,
+					"takeoff": 372.119140625,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 18.0,
+				"s": "recorder",
+				"t": 282.0
+			},
+			{
+				"d": {
+					"base": 150.0,
+					"clean": true,
+					"combo": 2.0,
+					"combo_mult": 1.25,
+					"direction_mult": 1.0,
+					"elapsed": 1.75,
+					"geo": {
+						"cell": "0,0,5"
+					},
+					"kind": "sync",
+					"label": "Sync 93%  +100",
+					"m": {
+						"air_gain_ups": 100.19,
+						"air_ticks": 96.0,
+						"contact_ups": 0.0,
+						"eligible": 94.0,
+						"gain_ups": 100.19,
+						"landing_ups": 472.31,
+						"sync": 0.9255,
+						"takeoff_ups": 372.12
+					},
+					"mult": 1.25,
+					"p": [
+						0.113,
+						0.0172,
+						4.9029
+					],
+					"points": 188.0,
+					"tick": 282.0,
+					"time_s": 2.210938,
+					"v": 1.0
+				},
+				"k": "style",
+				"q": 19.0,
+				"s": "capture",
+				"t": 282.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 20.0,
+				"s": "recorder",
+				"t": 283.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 21.0,
+				"s": "recorder",
+				"t": 283.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 22.0,
+				"s": "recorder",
+				"t": 378.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 23.0,
+				"s": "recorder",
+				"t": 378.0
+			},
+			{
+				"d": {
+					"air": 3.795806884765625,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 4.0,
+					"gain": 3.795806884765625,
+					"good": 3.0,
+					"index": 3.0,
+					"landing": 476.1015319824219,
+					"peak": 476.1015524075726,
+					"sync": 0.75,
+					"takeoff": 472.30572509765625,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 24.0,
+				"s": "recorder",
+				"t": 378.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 25.0,
+				"s": "recorder",
+				"t": 379.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 26.0,
+				"s": "recorder",
+				"t": 379.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 27.0,
+				"s": "recorder",
+				"t": 473.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 28.0,
+				"s": "recorder",
+				"t": 473.0
+			},
+			{
+				"d": {
+					"air": 0.94427490234375,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 1.0,
+					"gain": 0.94427490234375,
+					"good": 0.0,
+					"index": 4.0,
+					"landing": 477.0458068847656,
+					"peak": 477.0457650732807,
+					"sync": 0.0,
+					"takeoff": 476.1015319824219,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 29.0,
+				"s": "recorder",
+				"t": 473.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 30.0,
+				"s": "recorder",
+				"t": 474.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 31.0,
+				"s": "recorder",
+				"t": 474.0
+			},
+			{
+				"d": {
+					"base": 28.0,
+					"clean": true,
+					"combo": 0.0,
+					"combo_mult": 1.25,
+					"direction_mult": 1.0,
+					"elapsed": 3.890625,
+					"geo": {},
+					"kind": "speed",
+					"label": "Speed 469",
+					"m": {
+						"mean_ups": 469.15,
+						"stretch_m": 32.068,
+						"visited_cells": 25.0
+					},
+					"mult": 1.25,
+					"p": [
+						-0.0499,
+						0.6894,
+						-20.9854
+					],
+					"points": 34.0,
+					"tick": 556.0,
+					"time_s": 4.351563,
+					"v": 1.0
+				},
+				"k": "style",
+				"q": 32.0,
+				"s": "capture",
+				"t": 556.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 33.0,
+				"s": "recorder",
+				"t": 569.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 34.0,
+				"s": "recorder",
+				"t": 569.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 5.0,
+					"landing": 477.0458068847656,
+					"peak": 477.0458068847656,
+					"sync": null,
+					"takeoff": 477.0458068847656,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 35.0,
+				"s": "recorder",
+				"t": 569.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 36.0,
+				"s": "recorder",
+				"t": 570.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 37.0,
+				"s": "recorder",
+				"t": 570.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 38.0,
+				"s": "recorder",
+				"t": 665.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 39.0,
+				"s": "recorder",
+				"t": 665.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 6.0,
+					"landing": 477.0458068847656,
+					"peak": 477.0458068847656,
+					"sync": null,
+					"takeoff": 477.0458068847656,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 40.0,
+				"s": "recorder",
+				"t": 665.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 41.0,
+				"s": "recorder",
+				"t": 666.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 42.0,
+				"s": "recorder",
+				"t": 666.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 43.0,
+				"s": "recorder",
+				"t": 760.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 44.0,
+				"s": "recorder",
+				"t": 760.0
+			},
+			{
+				"d": {
+					"air": 1.88287353515625,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 2.0,
+					"gain": 1.88287353515625,
+					"good": 0.0,
+					"index": 7.0,
+					"landing": 478.9286804199219,
+					"peak": 478.92870865468905,
+					"sync": 0.0,
+					"takeoff": 477.0458068847656,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 45.0,
+				"s": "recorder",
+				"t": 760.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 46.0,
+				"s": "recorder",
+				"t": 761.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 47.0,
+				"s": "recorder",
+				"t": 761.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 48.0,
+				"s": "recorder",
+				"t": 856.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 49.0,
+				"s": "recorder",
+				"t": 856.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 8.0,
+					"landing": 478.9286804199219,
+					"peak": 478.92870865468905,
+					"sync": null,
+					"takeoff": 478.9286804199219,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 50.0,
+				"s": "recorder",
+				"t": 856.0
+			},
+			{
+				"d": {
+					"elapsed": 6.2421875,
+					"from": 0.0,
+					"to": 1.0
+				},
+				"k": "checkpoint",
+				"q": 51.0,
+				"s": "recorder",
+				"t": 857.0
+			},
+			{
+				"d": {
+					"checkpoint": 1.0,
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 52.0,
+				"s": "recorder",
+				"t": 857.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 53.0,
+				"s": "recorder",
+				"t": 857.0
+			},
+			{
+				"d": {
+					"base": 29.0,
+					"clean": true,
+					"combo": 0.0,
+					"combo_mult": 1.0,
+					"direction_mult": 1.0,
+					"elapsed": 6.53125,
+					"geo": {},
+					"kind": "speed",
+					"label": "Speed 479",
+					"m": {
+						"mean_ups": 478.51,
+						"stretch_m": 32.094,
+						"visited_cells": 42.0
+					},
+					"mult": 1.0,
+					"p": [
+						-0.2781,
+						1.3754,
+						-52.9516
+					],
+					"points": 29.0,
+					"tick": 894.0,
+					"time_s": 6.992188,
+					"v": 1.0
+				},
+				"k": "style",
+				"q": 54.0,
+				"s": "capture",
+				"t": 894.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 55.0,
+				"s": "recorder",
+				"t": 952.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 56.0,
+				"s": "recorder",
+				"t": 952.0
+			},
+			{
+				"d": {
+					"air": 5.6048583984375,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 8.0,
+					"gain": 5.6048583984375,
+					"good": 7.0,
+					"index": 9.0,
+					"landing": 484.5335388183594,
+					"peak": 484.5334976676881,
+					"sync": 0.875,
+					"takeoff": 478.9286804199219,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 57.0,
+				"s": "recorder",
+				"t": 952.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 58.0,
+				"s": "recorder",
+				"t": 953.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 59.0,
+				"s": "recorder",
+				"t": 953.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 60.0,
+				"s": "recorder",
+				"t": 1047.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 61.0,
+				"s": "recorder",
+				"t": 1047.0
+			},
+			{
+				"d": {
+					"air": 9.19989013671875,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 13.0,
+					"gain": 9.19989013671875,
+					"good": 11.0,
+					"index": 10.0,
+					"landing": 493.7334289550781,
+					"peak": 493.7334135761411,
+					"sync": 0.8461538461538461,
+					"takeoff": 484.5335388183594,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 62.0,
+				"s": "recorder",
+				"t": 1047.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 63.0,
+				"s": "recorder",
+				"t": 1048.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 64.0,
+				"s": "recorder",
+				"t": 1048.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 65.0,
+				"s": "recorder",
+				"t": 1143.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 66.0,
+				"s": "recorder",
+				"t": 1143.0
+			},
+			{
+				"d": {
+					"air": 8.948883056640625,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 11.0,
+					"gain": 8.948883056640625,
+					"good": 10.0,
+					"index": 11.0,
+					"landing": 502.6823120117187,
+					"peak": 502.6822953712283,
+					"sync": 0.9090909090909092,
+					"takeoff": 493.7334289550781,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 67.0,
+				"s": "recorder",
+				"t": 1143.0
+			},
+			{
+				"d": {
+					"elapsed": 8.484375,
+					"from": 1.0,
+					"to": 2.0
+				},
+				"k": "checkpoint",
+				"q": 68.0,
+				"s": "recorder",
+				"t": 1144.0
+			},
+			{
+				"d": {
+					"checkpoint": 2.0,
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 69.0,
+				"s": "recorder",
+				"t": 1144.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 70.0,
+				"s": "recorder",
+				"t": 1144.0
+			},
+			{
+				"d": {
+					"base": 31.0,
+					"clean": true,
+					"combo": 0.0,
+					"combo_mult": 1.0,
+					"direction_mult": 1.0,
+					"elapsed": 9.078125,
+					"geo": {},
+					"kind": "speed",
+					"label": "Speed 496",
+					"m": {
+						"mean_ups": 496.23,
+						"stretch_m": 32.095,
+						"visited_cells": 62.0
+					},
+					"mult": 1.0,
+					"p": [
+						2.6936,
+						0.9074,
+						-84.0254
+					],
+					"points": 31.0,
+					"tick": 1220.0,
+					"time_s": 9.539063,
+					"v": 1.0
+				},
+				"k": "style",
+				"q": 71.0,
+				"s": "capture",
+				"t": 1220.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 72.0,
+				"s": "recorder",
+				"t": 1239.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 73.0,
+				"s": "recorder",
+				"t": 1239.0
+			},
+			{
+				"d": {
+					"air": 0.8944091796875,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 1.0,
+					"gain": 0.8944091796875,
+					"good": 0.0,
+					"index": 12.0,
+					"landing": 503.57672119140625,
+					"peak": 503.576721732072,
+					"sync": 0.0,
+					"takeoff": 502.6823120117187,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 74.0,
+				"s": "recorder",
+				"t": 1239.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 75.0,
+				"s": "recorder",
+				"t": 1240.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 76.0,
+				"s": "recorder",
+				"t": 1240.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 77.0,
+				"s": "recorder",
+				"t": 1334.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 78.0,
+				"s": "recorder",
+				"t": 1334.0
+			},
+			{
+				"d": {
+					"air": 12.1026611328125,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 14.0,
+					"gain": 12.1026611328125,
+					"good": 13.0,
+					"index": 13.0,
+					"landing": 515.6793823242188,
+					"peak": 515.6794120007613,
+					"sync": 0.9285714285714286,
+					"takeoff": 503.57672119140625,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 79.0,
+				"s": "recorder",
+				"t": 1334.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 80.0,
+				"s": "recorder",
+				"t": 1335.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 81.0,
+				"s": "recorder",
+				"t": 1335.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 82.0,
+				"s": "recorder",
+				"t": 1430.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 83.0,
+				"s": "recorder",
+				"t": 1430.0
+			},
+			{
+				"d": {
+					"air": 5.20947265625,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 6.0,
+					"gain": 5.20947265625,
+					"good": 4.0,
+					"index": 14.0,
+					"landing": 520.8888549804688,
+					"peak": 520.888801634781,
+					"sync": 0.6666666666666666,
+					"takeoff": 515.6793823242188,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 84.0,
+				"s": "recorder",
+				"t": 1430.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 85.0,
+				"s": "recorder",
+				"t": 1431.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 86.0,
+				"s": "recorder",
+				"t": 1431.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 87.0,
+				"s": "recorder",
+				"t": 1526.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 88.0,
+				"s": "recorder",
+				"t": 1526.0
+			},
+			{
+				"d": {
+					"air": 0.8631591796875,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 1.0,
+					"gain": 0.8631591796875,
+					"good": 0.0,
+					"index": 15.0,
+					"landing": 521.7520141601563,
+					"peak": 521.7519519835945,
+					"sync": 0.0,
+					"takeoff": 520.8888549804688,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 89.0,
+				"s": "recorder",
+				"t": 1526.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 90.0,
+				"s": "recorder",
+				"t": 1527.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 91.0,
+				"s": "recorder",
+				"t": 1527.0
+			},
+			{
+				"d": {
+					"base": 34.0,
+					"clean": true,
+					"combo": 0.0,
+					"combo_mult": 1.0,
+					"direction_mult": 1.0,
+					"elapsed": 11.515625,
+					"geo": {},
+					"kind": "speed",
+					"label": "Speed 518",
+					"m": {
+						"mean_ups": 517.92,
+						"stretch_m": 32.063,
+						"visited_cells": 80.0
+					},
+					"mult": 1.0,
+					"p": [
+						32.1719,
+						0.335,
+						-91.5409
+					],
+					"points": 34.0,
+					"tick": 1532.0,
+					"time_s": 11.976563,
+					"v": 1.0
+				},
+				"k": "style",
+				"q": 92.0,
+				"s": "capture",
+				"t": 1532.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 93.0,
+				"s": "recorder",
+				"t": 1621.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 94.0,
+				"s": "recorder",
+				"t": 1621.0
+			},
+			{
+				"d": {
+					"air": 6.0028076171875,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 7.0,
+					"gain": 6.0028076171875,
+					"good": 5.0,
+					"index": 16.0,
+					"landing": 527.7548217773438,
+					"peak": 527.7548437043438,
+					"sync": 0.7142857142857143,
+					"takeoff": 521.7520141601563,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 95.0,
+				"s": "recorder",
+				"t": 1621.0
+			},
+			{
+				"d": {
+					"elapsed": 12.2578125,
+					"from": 2.0,
+					"to": 3.0
+				},
+				"k": "checkpoint",
+				"q": 96.0,
+				"s": "recorder",
+				"t": 1627.0
+			},
+			{
+				"d": {
+					"checkpoint": 3.0
+				},
+				"k": "context",
+				"q": 97.0,
+				"s": "recorder",
+				"t": 1627.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 98.0,
+				"s": "recorder",
+				"t": 1836.0
+			},
+			{
+				"d": {
+					"events": [
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 99.0,
+				"s": "recorder",
+				"t": 1836.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 100.0,
+				"s": "recorder",
+				"t": 1930.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 101.0,
+				"s": "recorder",
+				"t": 1930.0
+			},
+			{
+				"d": {
+					"air": 15.962661743164064,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 10.0,
+					"gain": 15.962661743164064,
+					"good": 9.0,
+					"index": 17.0,
+					"landing": 266.0428771972656,
+					"peak": 266.042863290141,
+					"sync": 0.9,
+					"takeoff": 250.08021545410156,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 102.0,
+				"s": "recorder",
+				"t": 1930.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 103.0,
+				"s": "recorder",
+				"t": 1931.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 104.0,
+				"s": "recorder",
+				"t": 1931.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 105.0,
+				"s": "recorder",
+				"t": 2026.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 106.0,
+				"s": "recorder",
+				"t": 2026.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 18.0,
+					"landing": 266.0428771972656,
+					"peak": 266.0428771972656,
+					"sync": null,
+					"takeoff": 266.0428771972656,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 107.0,
+				"s": "recorder",
+				"t": 2026.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 108.0,
+				"s": "recorder",
+				"t": 2027.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 109.0,
+				"s": "recorder",
+				"t": 2027.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 110.0,
+				"s": "recorder",
+				"t": 2122.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 111.0,
+				"s": "recorder",
+				"t": 2122.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 19.0,
+					"landing": 266.0428771972656,
+					"peak": 266.0428771972656,
+					"sync": null,
+					"takeoff": 266.0428771972656,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 112.0,
+				"s": "recorder",
+				"t": 2122.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 113.0,
+				"s": "recorder",
+				"t": 2123.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 114.0,
+				"s": "recorder",
+				"t": 2123.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 115.0,
+				"s": "recorder",
+				"t": 2217.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 116.0,
+				"s": "recorder",
+				"t": 2217.0
+			},
+			{
+				"d": {
+					"air": 1.68609619140625,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 1.0,
+					"gain": 1.68609619140625,
+					"good": 0.0,
+					"index": 20.0,
+					"landing": 267.7289733886719,
+					"peak": 267.7289707454171,
+					"sync": 0.0,
+					"takeoff": 266.0428771972656,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 117.0,
+				"s": "recorder",
+				"t": 2217.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 118.0,
+				"s": "recorder",
+				"t": 2218.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 119.0,
+				"s": "recorder",
+				"t": 2218.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 120.0,
+				"s": "recorder",
+				"t": 2313.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 121.0,
+				"s": "recorder",
+				"t": 2313.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 21.0,
+					"landing": 267.7289733886719,
+					"peak": 267.7289733886719,
+					"sync": null,
+					"takeoff": 267.7289733886719,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 122.0,
+				"s": "recorder",
+				"t": 2313.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 123.0,
+				"s": "recorder",
+				"t": 2314.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 124.0,
+				"s": "recorder",
+				"t": 2314.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 125.0,
+				"s": "recorder",
+				"t": 2409.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 126.0,
+				"s": "recorder",
+				"t": 2409.0
+			},
+			{
+				"d": {
+					"air": 1.675537109375,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 1.0,
+					"gain": 1.675537109375,
+					"good": 0.0,
+					"index": 22.0,
+					"landing": 269.4045104980469,
+					"peak": 269.4045089361236,
+					"sync": 0.0,
+					"takeoff": 267.7289733886719,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 127.0,
+				"s": "recorder",
+				"t": 2409.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 128.0,
+				"s": "recorder",
+				"t": 2410.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 129.0,
+				"s": "recorder",
+				"t": 2410.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 130.0,
+				"s": "recorder",
+				"t": 2504.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 131.0,
+				"s": "recorder",
+				"t": 2504.0
+			},
+			{
+				"d": {
+					"air": 3.320220947265625,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 2.0,
+					"gain": 3.320220947265625,
+					"good": 0.0,
+					"index": 23.0,
+					"landing": 272.7247314453125,
+					"peak": 272.7247410871851,
+					"sync": 0.0,
+					"takeoff": 269.4045104980469,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 132.0,
+				"s": "recorder",
+				"t": 2504.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 133.0,
+				"s": "recorder",
+				"t": 2505.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 134.0,
+				"s": "recorder",
+				"t": 2505.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 135.0,
+				"s": "recorder",
+				"t": 2600.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 136.0,
+				"s": "recorder",
+				"t": 2600.0
+			},
+			{
+				"d": {
+					"air": 4.90594482421875,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 3.0,
+					"gain": 4.90594482421875,
+					"good": 0.0,
+					"index": 24.0,
+					"landing": 277.63067626953125,
+					"peak": 277.63066329355314,
+					"sync": 0.0,
+					"takeoff": 272.7247314453125,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 137.0,
+				"s": "recorder",
+				"t": 2600.0
+			},
+			{
+				"d": {
+					"elapsed": 20.2421875,
+					"from": 3.0,
+					"to": 4.0
+				},
+				"k": "checkpoint",
+				"q": 138.0,
+				"s": "recorder",
+				"t": 2649.0
+			},
+			{
+				"d": {
+					"checkpoint": 4.0
+				},
+				"k": "context",
+				"q": 139.0,
+				"s": "recorder",
+				"t": 2649.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 140.0,
+				"s": "recorder",
+				"t": 2945.0
+			},
+			{
+				"d": {
+					"events": [
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 141.0,
+				"s": "recorder",
+				"t": 2945.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 142.0,
+				"s": "recorder",
+				"t": 3026.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 143.0,
+				"s": "recorder",
+				"t": 3026.0
+			},
+			{
+				"d": {
+					"air": 12.896560668945313,
+					"air_ticks": 82.0,
+					"contact": 0.0,
+					"eligible": 8.0,
+					"gain": 12.896560668945313,
+					"good": 7.0,
+					"index": 25.0,
+					"landing": 263.43634033203125,
+					"peak": 263.436347480834,
+					"sync": 0.875,
+					"takeoff": 250.5397796630859,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 144.0,
+				"s": "recorder",
+				"t": 3026.0
+			},
+			{
+				"d": {
+					"base": 60.0,
+					"clean": true,
+					"combo": 1.0,
+					"combo_mult": 1.0,
+					"direction_mult": 1.0,
+					"elapsed": 23.1875,
+					"geo": {
+						"landing": {
+							"face": [
+								0.0,
+								0.988,
+								-0.157
+							],
+							"path": "s4_ramp_a",
+							"surface": "route"
+						}
+					},
+					"kind": "edge",
+					"label": "Edge 16 cm",
+					"m": {
+						"hull_width_u": 32.0,
+						"line": [
+							0.0805,
+							0.0,
+							0.9968
+						],
+						"rise_u": 27.3,
+						"slack_m": 0.16158,
+						"slack_u": 6.361,
+						"why": "climb"
+					},
+					"mult": 1.0,
+					"p": [
+						48.6304,
+						0.77,
+						-29.7104
+					],
+					"points": 60.0,
+					"tick": 3026.0,
+					"time_s": 23.648438,
+					"v": 1.0
+				},
+				"k": "style",
+				"q": 145.0,
+				"s": "capture",
+				"t": 3026.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 146.0,
+				"s": "recorder",
+				"t": 3027.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 147.0,
+				"s": "recorder",
+				"t": 3027.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 148.0,
+				"s": "recorder",
+				"t": 3108.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 149.0,
+				"s": "recorder",
+				"t": 3108.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 82.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 26.0,
+					"landing": 263.43634033203125,
+					"peak": 263.436347480834,
+					"sync": null,
+					"takeoff": 263.43634033203125,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 150.0,
+				"s": "recorder",
+				"t": 3108.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 151.0,
+				"s": "recorder",
+				"t": 3109.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 152.0,
+				"s": "recorder",
+				"t": 3109.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 153.0,
+				"s": "recorder",
+				"t": 3191.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 154.0,
+				"s": "recorder",
+				"t": 3191.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 83.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 27.0,
+					"landing": 263.43634033203125,
+					"peak": 263.436347480834,
+					"sync": null,
+					"takeoff": 263.43634033203125,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 155.0,
+				"s": "recorder",
+				"t": 3191.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 156.0,
+				"s": "recorder",
+				"t": 3192.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 157.0,
+				"s": "recorder",
+				"t": 3192.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 158.0,
+				"s": "recorder",
+				"t": 3273.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 159.0,
+				"s": "recorder",
+				"t": 3273.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 82.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 28.0,
+					"landing": 263.43634033203125,
+					"peak": 263.436347480834,
+					"sync": null,
+					"takeoff": 263.43634033203125,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 160.0,
+				"s": "recorder",
+				"t": 3273.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 161.0,
+				"s": "recorder",
+				"t": 3274.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 162.0,
+				"s": "recorder",
+				"t": 3274.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 163.0,
+				"s": "recorder",
+				"t": 3355.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 164.0,
+				"s": "recorder",
+				"t": 3355.0
+			},
+			{
+				"d": {
+					"air": 1.70269775390625,
+					"air_ticks": 82.0,
+					"contact": 0.0,
+					"eligible": 1.0,
+					"gain": 1.70269775390625,
+					"good": 0.0,
+					"index": 29.0,
+					"landing": 265.1390380859375,
+					"peak": 265.1390503710649,
+					"sync": 0.0,
+					"takeoff": 263.43634033203125,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 165.0,
+				"s": "recorder",
+				"t": 3355.0
+			},
+			{
+				"d": {
+					"base": 64.0,
+					"clean": true,
+					"combo": 1.0,
+					"combo_mult": 1.0,
+					"direction_mult": 1.0,
+					"elapsed": 25.757813,
+					"geo": {
+						"landing": {
+							"face": [
+								0.0,
+								0.988,
+								-0.157
+							],
+							"path": "s4_ramp_b",
+							"surface": "route"
+						}
+					},
+					"kind": "edge",
+					"label": "Edge 15 cm",
+					"m": {
+						"hull_width_u": 32.0,
+						"line": [
+							-0.0232,
+							0.0,
+							0.9997
+						],
+						"rise_u": 27.3,
+						"slack_m": 0.15493,
+						"slack_u": 6.1000000000000005,
+						"why": "climb"
+					},
+					"mult": 1.0,
+					"p": [
+						49.0378,
+						3.5009,
+						-12.5146
+					],
+					"points": 64.0,
+					"tick": 3355.0,
+					"time_s": 26.21875,
+					"v": 1.0
+				},
+				"k": "style",
+				"q": 166.0,
+				"s": "capture",
+				"t": 3355.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 167.0,
+				"s": "recorder",
+				"t": 3356.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 168.0,
+				"s": "recorder",
+				"t": 3356.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 169.0,
+				"s": "recorder",
+				"t": 3437.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 170.0,
+				"s": "recorder",
+				"t": 3437.0
+			},
+			{
+				"d": {
+					"air": 6.70416259765625,
+					"air_ticks": 82.0,
+					"contact": 0.0,
+					"eligible": 4.0,
+					"gain": 6.70416259765625,
+					"good": 0.0,
+					"index": 30.0,
+					"landing": 271.84320068359375,
+					"peak": 271.8431930842362,
+					"sync": 0.0,
+					"takeoff": 265.1390380859375,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 171.0,
+				"s": "recorder",
+				"t": 3437.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 172.0,
+				"s": "recorder",
+				"t": 3438.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 173.0,
+				"s": "recorder",
+				"t": 3438.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 174.0,
+				"s": "recorder",
+				"t": 3519.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 175.0,
+				"s": "recorder",
+				"t": 3519.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 82.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 31.0,
+					"landing": 271.84320068359375,
+					"peak": 271.84320068359375,
+					"sync": null,
+					"takeoff": 271.84320068359375,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 176.0,
+				"s": "recorder",
+				"t": 3519.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 177.0,
+				"s": "recorder",
+				"t": 3520.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 178.0,
+				"s": "recorder",
+				"t": 3520.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 179.0,
+				"s": "recorder",
+				"t": 3612.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 180.0,
+				"s": "recorder",
+				"t": 3612.0
+			},
+			{
+				"d": {
+					"air": 9.4632568359375,
+					"air_ticks": 93.0,
+					"contact": 0.0,
+					"eligible": 6.0,
+					"gain": 9.4632568359375,
+					"good": 4.0,
+					"index": 32.0,
+					"landing": 281.30645751953125,
+					"peak": 281.3064770435724,
+					"sync": 0.6666666666666666,
+					"takeoff": 271.84320068359375,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 181.0,
+				"s": "recorder",
+				"t": 3612.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 182.0,
+				"s": "recorder",
+				"t": 3613.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 183.0,
+				"s": "recorder",
+				"t": 3613.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 184.0,
+				"s": "recorder",
+				"t": 3708.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 185.0,
+				"s": "recorder",
+				"t": 3708.0
+			},
+			{
+				"d": {
+					"air": 10.617523193359377,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 7.0,
+					"gain": 10.617523193359377,
+					"good": 5.0,
+					"index": 33.0,
+					"landing": 291.9239807128906,
+					"peak": 291.9239885225071,
+					"sync": 0.7142857142857143,
+					"takeoff": 281.30645751953125,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 186.0,
+				"s": "recorder",
+				"t": 3708.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 187.0,
+				"s": "recorder",
+				"t": 3709.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 188.0,
+				"s": "recorder",
+				"t": 3709.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 189.0,
+				"s": "recorder",
+				"t": 3804.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 190.0,
+				"s": "recorder",
+				"t": 3804.0
+			},
+			{
+				"d": {
+					"air": 8.87835693359375,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 6.0,
+					"gain": 8.87835693359375,
+					"good": 4.0,
+					"index": 34.0,
+					"landing": 300.8023376464844,
+					"peak": 300.80232094592,
+					"sync": 0.6666666666666666,
+					"takeoff": 291.9239807128906,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 191.0,
+				"s": "recorder",
+				"t": 3804.0
+			},
+			{
+				"d": {
+					"elapsed": 29.2734375,
+					"from": 4.0,
+					"to": 5.0
+				},
+				"k": "checkpoint",
+				"q": 192.0,
+				"s": "recorder",
+				"t": 3805.0
+			},
+			{
+				"d": {
+					"checkpoint": 5.0,
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 193.0,
+				"s": "recorder",
+				"t": 3805.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 194.0,
+				"s": "recorder",
+				"t": 3805.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 195.0,
+				"s": "recorder",
+				"t": 3899.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 196.0,
+				"s": "recorder",
+				"t": 3899.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 35.0,
+					"landing": 300.8023376464844,
+					"peak": 300.8023376464844,
+					"sync": null,
+					"takeoff": 300.8023376464844,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 197.0,
+				"s": "recorder",
+				"t": 3899.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 198.0,
+				"s": "recorder",
+				"t": 3900.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 199.0,
+				"s": "recorder",
+				"t": 3900.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 200.0,
+				"s": "recorder",
+				"t": 3995.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 201.0,
+				"s": "recorder",
+				"t": 3995.0
+			},
+			{
+				"d": {
+					"air": 1.492279052734375,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 1.0,
+					"gain": 1.492279052734375,
+					"good": 0.0,
+					"index": 36.0,
+					"landing": 302.29461669921875,
+					"peak": 302.29461474681466,
+					"sync": 0.0,
+					"takeoff": 300.8023376464844,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 202.0,
+				"s": "recorder",
+				"t": 3995.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 203.0,
+				"s": "recorder",
+				"t": 3996.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 204.0,
+				"s": "recorder",
+				"t": 3996.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 205.0,
+				"s": "recorder",
+				"t": 4091.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 206.0,
+				"s": "recorder",
+				"t": 4091.0
+			},
+			{
+				"d": {
+					"air": 2.96270751953125,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 2.0,
+					"gain": 2.96270751953125,
+					"good": 0.0,
+					"index": 37.0,
+					"landing": 305.25732421875,
+					"peak": 305.25731289480615,
+					"sync": 0.0,
+					"takeoff": 302.29461669921875,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 207.0,
+				"s": "recorder",
+				"t": 4091.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 208.0,
+				"s": "recorder",
+				"t": 4092.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 209.0,
+				"s": "recorder",
+				"t": 4092.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 210.0,
+				"s": "recorder",
+				"t": 4186.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 211.0,
+				"s": "recorder",
+				"t": 4186.0
+			},
+			{
+				"d": {
+					"air": 1.470611572265625,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 1.0,
+					"gain": 1.470611572265625,
+					"good": 0.0,
+					"index": 38.0,
+					"landing": 306.7279357910156,
+					"peak": 306.7279425193006,
+					"sync": 0.0,
+					"takeoff": 305.25732421875,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 212.0,
+				"s": "recorder",
+				"t": 4186.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 213.0,
+				"s": "recorder",
+				"t": 4187.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 214.0,
+				"s": "recorder",
+				"t": 4187.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 215.0,
+				"s": "recorder",
+				"t": 4282.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 216.0,
+				"s": "recorder",
+				"t": 4282.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 39.0,
+					"landing": 306.7279357910156,
+					"peak": 306.7279425193006,
+					"sync": null,
+					"takeoff": 306.7279357910156,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 217.0,
+				"s": "recorder",
+				"t": 4282.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 218.0,
+				"s": "recorder",
+				"t": 4283.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 219.0,
+				"s": "recorder",
+				"t": 4283.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 220.0,
+				"s": "recorder",
+				"t": 4378.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 221.0,
+				"s": "recorder",
+				"t": 4378.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 40.0,
+					"landing": 306.7279357910156,
+					"peak": 306.7279425193006,
+					"sync": null,
+					"takeoff": 306.7279357910156,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 222.0,
+				"s": "recorder",
+				"t": 4378.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 223.0,
+				"s": "recorder",
+				"t": 4379.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 224.0,
+				"s": "recorder",
+				"t": 4379.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 225.0,
+				"s": "recorder",
+				"t": 4473.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 226.0,
+				"s": "recorder",
+				"t": 4473.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 41.0,
+					"landing": 306.7279357910156,
+					"peak": 306.7279425193006,
+					"sync": null,
+					"takeoff": 306.7279357910156,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 227.0,
+				"s": "recorder",
+				"t": 4473.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 228.0,
+				"s": "recorder",
+				"t": 4474.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 229.0,
+				"s": "recorder",
+				"t": 4474.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 230.0,
+				"s": "recorder",
+				"t": 4569.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 231.0,
+				"s": "recorder",
+				"t": 4569.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 42.0,
+					"landing": 306.7279357910156,
+					"peak": 306.7279425193006,
+					"sync": null,
+					"takeoff": 306.7279357910156,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 232.0,
+				"s": "recorder",
+				"t": 4569.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 233.0,
+				"s": "recorder",
+				"t": 4570.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 234.0,
+				"s": "recorder",
+				"t": 4570.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 235.0,
+				"s": "recorder",
+				"t": 4665.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 236.0,
+				"s": "recorder",
+				"t": 4665.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 43.0,
+					"landing": 306.7279357910156,
+					"peak": 306.7279425193006,
+					"sync": null,
+					"takeoff": 306.7279357910156,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 237.0,
+				"s": "recorder",
+				"t": 4665.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 238.0,
+				"s": "recorder",
+				"t": 4666.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 239.0,
+				"s": "recorder",
+				"t": 4666.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 240.0,
+				"s": "recorder",
+				"t": 4760.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 241.0,
+				"s": "recorder",
+				"t": 4760.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 95.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 44.0,
+					"landing": 306.7279357910156,
+					"peak": 306.7279425193006,
+					"sync": null,
+					"takeoff": 306.7279357910156,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 242.0,
+				"s": "recorder",
+				"t": 4760.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 243.0,
+				"s": "recorder",
+				"t": 4761.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 244.0,
+				"s": "recorder",
+				"t": 4761.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 245.0,
+				"s": "recorder",
+				"t": 4856.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 246.0,
+				"s": "recorder",
+				"t": 4856.0
+			},
+			{
+				"d": {
+					"air": 2.9202880859375,
+					"air_ticks": 96.0,
+					"contact": 0.0,
+					"eligible": 2.0,
+					"gain": 2.9202880859375,
+					"good": 0.0,
+					"index": 45.0,
+					"landing": 309.6482238769531,
+					"peak": 309.64823219719835,
+					"sync": 0.0,
+					"takeoff": 306.7279357910156,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 247.0,
+				"s": "recorder",
+				"t": 4856.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 248.0,
+				"s": "recorder",
+				"t": 4949.0
+			},
+			{
+				"d": {
+					"events": [
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 249.0,
+				"s": "recorder",
+				"t": 4949.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 250.0,
+				"s": "recorder",
+				"t": 5066.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 251.0,
+				"s": "recorder",
+				"t": 5066.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 118.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 46.0,
+					"landing": 250.00001525878903,
+					"peak": 250.00001525878903,
+					"sync": null,
+					"takeoff": 250.00001525878903,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 252.0,
+				"s": "recorder",
+				"t": 5066.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 253.0,
+				"s": "recorder",
+				"t": 5080.0
+			},
+			{
+				"d": {
+					"events": [
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 254.0,
+				"s": "recorder",
+				"t": 5080.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 255.0,
+				"s": "recorder",
+				"t": 5197.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 256.0,
+				"s": "recorder",
+				"t": 5197.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 118.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 47.0,
+					"landing": 249.47866821289065,
+					"peak": 249.47866821289065,
+					"sync": null,
+					"takeoff": 249.47866821289065,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 257.0,
+				"s": "recorder",
+				"t": 5197.0
+			},
+			{
+				"d": {
+					"mode": "air"
+				},
+				"k": "context",
+				"q": 258.0,
+				"s": "recorder",
+				"t": 5198.0
+			},
+			{
+				"d": {
+					"events": [
+						"perfect",
+						"jump"
+					]
+				},
+				"k": "motion",
+				"q": 259.0,
+				"s": "recorder",
+				"t": 5198.0
+			},
+			{
+				"d": {
+					"mode": "run"
+				},
+				"k": "context",
+				"q": 260.0,
+				"s": "recorder",
+				"t": 5317.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 261.0,
+				"s": "recorder",
+				"t": 5317.0
+			},
+			{
+				"d": {
+					"air": 0.0,
+					"air_ticks": 120.0,
+					"contact": 0.0,
+					"eligible": 0.0,
+					"gain": 0.0,
+					"good": 0.0,
+					"index": 48.0,
+					"landing": 249.47866821289065,
+					"peak": 249.47866821289065,
+					"sync": null,
+					"takeoff": 249.47866821289065,
+					"wall_ticks": 0.0
+				},
+				"k": "hop",
+				"q": 262.0,
+				"s": "recorder",
+				"t": 5317.0
+			},
+			{
+				"d": {
+					"clean": true,
+					"elapsed": 42.6796875
+				},
+				"k": "finish_line",
+				"q": 263.0,
+				"s": "recorder",
+				"t": 5521.0
+			},
+			{
+				"d": {
+					"elapsed": 42.6796875,
+					"finish_kind": "clean",
+					"time_ticks": 5463.0
+				},
+				"k": "finish",
+				"q": 264.0,
+				"s": "event",
+				"t": 5521.0
+			}
+		],
+		"file": "night-shift_server128-aa1000_20261110-162908_741_78c53074.r16run",
+		"header": {
+			"created_unix": 1794328148.741233,
+			"created_utc": "2026-11-10T16:29:08Z",
+			"engine": "4.7.2-stable (official)",
+			"format": "foldrunner-r16-run",
+			"identity": {
+				"course_key": "052f1b00d51dab56",
+				"format": "r16-motion-1",
+				"geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+				"map": "night-shift",
+				"motor": "r15-source-crouch-2",
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"physics_hz": 128.0,
+				"preset": "server128_aa1000",
+				"runner": "res://scripts/r15_source_player.gd",
+				"timing": "r16-timing-1"
+			},
+			"metadata": {
+				"attempt": 1.0,
+				"build": "spillway-2026.11.10-r20",
+				"build_label": "Spillway R20",
+				"clean_at_start": true,
+				"course_key": "052f1b00d51dab56",
+				"elapsed_at_start": 0.0,
+				"family": "source",
+				"held_actions": [
+					"move_forward",
+					"move_back",
+					"move_left",
+					"move_right",
+					"jump",
+					"crouch",
+					"r15_slide",
+					"r15_grapple",
+					"look_left",
+					"look_right",
+					"look_up",
+					"look_down"
+				],
+				"identity": {
+					"course_key": "052f1b00d51dab56",
+					"format": "r16-motion-1",
+					"geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					"map": "night-shift",
+					"motor": "r15-source-crouch-2",
+					"overlay": "r16-opportunities-1:none (non_target_map)",
+					"physics_hz": 128.0,
+					"preset": "server128_aa1000",
+					"runner": "res://scripts/r15_source_player.gd",
+					"timing": "r16-timing-1"
+				},
+				"lab": {},
+				"laws": {
+					"approved": "r15 source runner res://scripts/r15_source_player.gd with the r15 F2/F5 server presets, unchanged",
+					"course_law": "approved r15",
+					"experimental": [],
+					"r16_additions": "style scoring, recording and ghost are r16 game choices that only read the game"
+				},
+				"look": {
+					"family": "source",
+					"fov": 90.0,
+					"input": "screen_relative counts",
+					"m_pitch": 0.022,
+					"m_yaw": 0.022,
+					"pitch_rad_per_count": 0.00095993108859688,
+					"replay_override": true,
+					"sensitivity": 2.5,
+					"yaw_rad_per_count": 0.00095993108859688
+				},
+				"map": "night-shift",
+				"map_kind": "course",
+				"map_name": "Night Shift",
+				"opportunities": {
+					"applied": false,
+					"base_geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					"hash": "",
+					"passages": [],
+					"reason": "non_target_map",
+					"version": "r16-opportunities-1"
+				},
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"paused_at_start": false,
+				"physics": {
+					"family": "source",
+					"fingerprint": {
+						"air_budget": "legacy",
+						"air_surface": "deadstrafe",
+						"cl_forwardspeed": 450.0,
+						"cl_sidespeed": 450.0,
+						"duck_air_anchor": "center",
+						"duck_air_crop": false,
+						"duck_eye_clearance": 2.0,
+						"duck_eye_height": 46.0,
+						"duck_eye_time": 0.1,
+						"duck_hull_height": 54.0,
+						"duck_multiplier": 0.34,
+						"eye_height": 64.0,
+						"ground_probe": 2.0,
+						"ground_speed_clamp": false,
+						"hull_height": 72.0,
+						"hull_width": 32.0,
+						"jump_clamp_factor": 1.1,
+						"jump_order": "source2013",
+						"non_jump_velocity": 140.0,
+						"player_maxspeed": 250.0,
+						"preset": "csgo_server",
+						"stamina_model": "gokz_fit",
+						"sv_accelerate": 5.5,
+						"sv_air_max_wishspeed": 30.0,
+						"sv_airaccelerate": 1000.0,
+						"sv_autobunnyhopping": true,
+						"sv_enablebunnyhopping": true,
+						"sv_friction": 5.2,
+						"sv_gravity": 800.0,
+						"sv_jump_impulse": 301.993377,
+						"sv_maxspeed": 320.0,
+						"sv_maxvelocity": 3500.0,
+						"sv_staminajumpcost": 0.0,
+						"sv_staminalandcost": 0.0,
+						"sv_staminamax": 0.0,
+						"sv_staminarecoveryrate": 0.0,
+						"sv_stepsize": 18.0,
+						"sv_stopspeed": 80.0,
+						"sv_walkable_normal": 0.7,
+						"tickrate": 128.0,
+						"water_multiplier": 0.8
+					},
+					"hull": {
+						"duck_air_anchor": "center",
+						"duck_height_u": 54.0,
+						"height_u": 72.0,
+						"shape": "box",
+						"width_u": 32.0
+					},
+					"hz": 128.0,
+					"mechanics": [],
+					"motor_version": "r15-source-crouch-2",
+					"runner": "res://scripts/r15_source_player.gd",
+					"standin": false
+				},
+				"practice_reason": "",
+				"practice_stage": -1.0,
+				"preset": "server128_aa1000",
+				"preset_label": "Bhop server AA 1000",
+				"record_identity": [
+					"r16-timing-1",
+					[
+						"night-shift",
+						"course",
+						"r15-night-shift",
+						1.0,
+						"nightshift"
+					],
+					"cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					[
+						"Throat",
+						"Turning loop",
+						"Wash bays",
+						"Flyover ramp",
+						"Flyover",
+						"Terminus"
+					],
+					"server128_aa1000",
+					"source",
+					"r15-source-crouch-2",
+					"res://scripts/r15_source_player.gd",
+					128.0,
+					"{\"air_budget\":\"legacy\",\"air_surface\":\"deadstrafe\",\"cl_forwardspeed\":450.0,\"cl_sidespeed\":450.0,\"duck_air_anchor\":\"center\",\"duck_air_crop\":false,\"duck_eye_clearance\":2.0,\"duck_eye_height\":46.0,\"duck_eye_time\":0.1,\"duck_hull_height\":54.0,\"duck_multiplier\":0.34,\"eye_height\":64.0,\"ground_probe\":2.0,\"ground_speed_clamp\":false,\"hull_height\":72.0,\"hull_width\":32.0,\"jump_clamp_factor\":1.1,\"jump_order\":\"source2013\",\"non_jump_velocity\":140.0,\"player_maxspeed\":250.0,\"preset\":\"csgo_server\",\"stamina_model\":\"gokz_fit\",\"sv_accelerate\":5.5,\"sv_air_max_wishspeed\":30.0,\"sv_airaccelerate\":1000.0,\"sv_autobunnyhopping\":true,\"sv_enablebunnyhopping\":true,\"sv_friction\":5.2,\"sv_gravity\":800.0,\"sv_jump_impulse\":301.993377,\"sv_maxspeed\":320.0,\"sv_maxvelocity\":3500.0,\"sv_staminajumpcost\":0.0,\"sv_staminalandcost\":0.0,\"sv_staminamax\":0.0,\"sv_staminarecoveryrate\":0.0,\"sv_stepsize\":18.0,\"sv_stopspeed\":80.0,\"sv_walkable_normal\":0.7,\"tickrate\":128,\"water_multiplier\":0.8}",
+					"{\"duck_air_anchor\":\"center\",\"duck_height_u\":54.0,\"height_u\":72.0,\"shape\":\"box\",\"width_u\":32.0}",
+					"[]",
+					"r16-opportunities-1:none (non_target_map)"
+				],
+				"sample": {
+					"actual_v": "the runner's own travel over its step, excluding duck-origin compensation; checked against (p - previous p - duck shift) / dt",
+					"version": "r16-sample-1",
+					"when": "end of each unpaused physics frame (priority 999, after the strafe stats): the body after this frame's motor step, the host state as this frame left it"
+				},
+				"scoring": {
+					"style": {
+						"event_format": 2.0,
+						"rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
+						"version": "r20-style-stack-1"
+					},
+					"style_key": "r20-style-stack-1/2/b133b80f118247cf",
+					"timing": "r16-timing-1"
+				},
+				"start_reason": "spawn",
+				"timer_running_at_start": false
+			},
+			"os": "Linux",
+			"run_id": "night-shift_server128-aa1000_20261110-162908_741_78c53074",
+			"units": {
+				"angle": "rad",
+				"length": "m",
+				"time": "s",
+				"velocity": "m/s"
+			},
+			"vector_precision": "single",
+			"version": 1.0
+		},
+		"identity_text": "[\"r16-timing-1\",[\"night-shift\",\"course\",\"r15-night-shift\",1,\"nightshift\"],\"cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad\",[\"Throat\",\"Turning loop\",\"Wash bays\",\"Flyover ramp\",\"Flyover\",\"Terminus\"],\"server128_aa1000\",\"source\",\"r15-source-crouch-2\",\"res://scripts/r15_source_player.gd\",128,\"{\\\"air_budget\\\":\\\"legacy\\\",\\\"air_surface\\\":\\\"deadstrafe\\\",\\\"cl_forwardspeed\\\":450.0,\\\"cl_sidespeed\\\":450.0,\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_air_crop\\\":false,\\\"duck_eye_clearance\\\":2.0,\\\"duck_eye_height\\\":46.0,\\\"duck_eye_time\\\":0.1,\\\"duck_hull_height\\\":54.0,\\\"duck_multiplier\\\":0.34,\\\"eye_height\\\":64.0,\\\"ground_probe\\\":2.0,\\\"ground_speed_clamp\\\":false,\\\"hull_height\\\":72.0,\\\"hull_width\\\":32.0,\\\"jump_clamp_factor\\\":1.1,\\\"jump_order\\\":\\\"source2013\\\",\\\"non_jump_velocity\\\":140.0,\\\"player_maxspeed\\\":250.0,\\\"preset\\\":\\\"csgo_server\\\",\\\"stamina_model\\\":\\\"gokz_fit\\\",\\\"sv_accelerate\\\":5.5,\\\"sv_air_max_wishspeed\\\":30.0,\\\"sv_airaccelerate\\\":1000.0,\\\"sv_autobunnyhopping\\\":true,\\\"sv_enablebunnyhopping\\\":true,\\\"sv_friction\\\":5.2,\\\"sv_gravity\\\":800.0,\\\"sv_jump_impulse\\\":301.993377,\\\"sv_maxspeed\\\":320.0,\\\"sv_maxvelocity\\\":3500.0,\\\"sv_staminajumpcost\\\":0.0,\\\"sv_staminalandcost\\\":0.0,\\\"sv_staminamax\\\":0.0,\\\"sv_staminarecoveryrate\\\":0.0,\\\"sv_stepsize\\\":18.0,\\\"sv_stopspeed\\\":80.0,\\\"sv_walkable_normal\\\":0.7,\\\"tickrate\\\":128,\\\"water_multiplier\\\":0.8}\",\"{\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_height_u\\\":54.0,\\\"height_u\\\":72.0,\\\"shape\\\":\\\"box\\\",\\\"width_u\\\":32.0}\",\"[]\",\"r16-opportunities-1:none (non_target_map)\"]",
+		"inputs_sha256": {
+			"aux": "b4ba239f788b54904c8178e7718ae189eed7e58c743763a6d0e21ddef538ab2b",
+			"code": "58fdea1aca74c981b0445facbeb364bfc92dea0d6661174489d5055a400fc4f6",
+			"flags": "62453a6e01de244fc28b7b3a34e2da09dbd396e429efc4e96e8457a5e37235a1",
+			"kind": "facddb10c062460c34e6ff84223c97471a2ce41102fb6cbb4261f5eaf6843515",
+			"tick": "5e2a5e2c4f3725b861826b51c81361fae87e47d6fc86d006d0a52b14cb3b253a",
+			"x": "801b1f7a0f176cc7249c61300f523736f64bb28577e944ea8073f50eda4ef2b9",
+			"x2": "cf137b123b9d929e5d5649731e495ed0e2f5d72f5aad6ee73c8fa6bd13e1eff8",
+			"y": "ffffd7512241b7243dd8cd2162d128899acdc4165ef6e6fc74ebb1174f40267e",
+			"y2": "ffffd7512241b7243dd8cd2162d128899acdc4165ef6e6fc74ebb1174f40267e"
+		},
+		"seal": {
+			"counts": {
+				"bytes": 234661.0,
+				"chunks": 22.0,
+				"events": 265.0,
+				"gaps": 0.0,
+				"inputs": 5842.0,
+				"ticks": 5522.0
+			},
+			"ended_unix": 1794328179.050316,
+			"final": {
+				"checkpoint": 5.0,
+				"clean": true,
+				"elapsed": 42.6796875,
+				"finished": true,
+				"p": [
+					-58.062625885009766,
+					0.00112784921657294,
+					6.5136518478393555
+				],
+				"respawns": 0.0,
+				"started": true,
+				"tick": 5521.0
+			},
+			"finish_tick": 5521.0,
+			"first_tick": 0.0,
+			"last_tick": 5521.0,
+			"outcome": {
+				"checkpoint": 5.0,
+				"clean": true,
+				"finish_kind": "clean",
+				"kind": "finish",
+				"practice_reason": "",
+				"respawns": 0.0,
+				"style": {
+					"best_eligible": true,
+					"by_kind": {
+						"edge": {
+							"n": 2.0,
+							"points": 124.0
+						},
+						"speed": {
+							"n": 4.0,
+							"points": 128.0
+						},
+						"sync": {
+							"n": 2.0,
+							"points": 338.0
+						}
+					},
+					"score": 590.0
+				},
+				"time": 42.6796875,
+				"time_ticks": 5463.0
+			},
+			"timer_start_tick": 59.0
+		},
+		"sha256": "aba19fb50a2a2ce7a545451d22308a422a82638506785a0eeab56cb79d77828d"
+	},
+	{
+		"columns_sha256": {
+			"actual_v": "043667ab6dabe93153102f3e9cca3150a66694392d29096ff3ac42c2836343c9",
+			"checkpoint": "10eef285deef7a4b7c82b22aa53589b7833df29de3814649c772bbd5c832f365",
+			"dt": "54e8ccc227a1b50d926a08de015bae0ffbd4df62d3713f6a2a673402a68235a3",
+			"elapsed": "86d2cf5b090f43ee54d8f7c1dcf746a853951191457ff6dac96269a9d24860b9",
+			"flags": "d4c965a22b6dd32cff14f59570f4a9a56d2c68fec4c0752d9a3e7751a0a793af",
+			"held": "86d2cf5b090f43ee54d8f7c1dcf746a853951191457ff6dac96269a9d24860b9",
+			"p": "bb208c1248375c60f567374b7d7e98d76932111fdbc5740157dfe132a7f298e2",
+			"physics_hz": "416a96130908d9c9d8690a212ed0a1adc5b2141551cae93ca20a03f5e43c4e07",
+			"pitch": "86d2cf5b090f43ee54d8f7c1dcf746a853951191457ff6dac96269a9d24860b9",
+			"reference_p": "bb208c1248375c60f567374b7d7e98d76932111fdbc5740157dfe132a7f298e2",
+			"respawns": "10eef285deef7a4b7c82b22aa53589b7833df29de3814649c772bbd5c832f365",
+			"tick": "dc7d338117ab6755881b1fd3e550eb5a4c4467fac9a382368a2269ab5a6a61e7",
+			"v": "44b8aa4d28701168922acf61435ea4bb442f97b0b14ad7a2510ed68874ee2a72",
+			"yaw": "86d2cf5b090f43ee54d8f7c1dcf746a853951191457ff6dac96269a9d24860b9"
+		},
+		"events": [
+			{
+				"d": {
+					"names": [
+						"crouch",
+						"jump",
+						"look_down",
+						"look_left",
+						"look_right",
+						"look_up",
+						"move_back",
+						"move_forward",
+						"move_left",
+						"move_right",
+						"r15_grapple",
+						"r15_slide"
+					]
+				},
+				"k": "held_names",
+				"q": 0.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"index": 0.0,
+					"name": "restart"
+				},
+				"k": "action_name",
+				"q": 1.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"checkpoint": 0.0,
+					"dt": 0.0078125,
+					"mode": "run",
+					"motor_version": "r15-source-crouch-2",
+					"physics_hz": 128.0,
+					"practice_reason": "",
+					"respawns": 0.0
+				},
+				"k": "context",
+				"q": 2.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 3.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"shown": false
+				},
+				"k": "ghost",
+				"q": 4.0,
+				"s": "event",
+				"t": 7.0
+			},
+			{
+				"d": {
+					"index": 1.0,
+					"name": "r16_ghost"
+				},
+				"k": "action_name",
+				"q": 5.0,
+				"s": "recorder",
+				"t": 8.0
+			},
+			{
+				"d": {
+					"shown": true
+				},
+				"k": "ghost",
+				"q": 6.0,
+				"s": "event",
+				"t": 11.0
+			},
+			{
+				"d": {
+					"edge": [
+						{
+							"echo": false,
+							"keycode": 4194305.0,
+							"physical_keycode": 4194305.0,
+							"pressed": true,
+							"type": "key"
+						},
+						{
+							"action": "pause",
+							"pressed": true,
+							"type": "action"
+						}
+					],
+					"pending_inputs": 0.0
+				},
+				"k": "pause",
+				"q": 7.0,
+				"s": "event",
+				"t": 15.0
+			},
+			{
+				"d": {
+					"edge": [
+						{
+							"echo": false,
+							"keycode": 4194305.0,
+							"physical_keycode": 4194305.0,
+							"pressed": true,
+							"type": "key"
+						}
+					],
+					"inputs_while_paused": 2.0
+				},
+				"k": "resume",
+				"q": 8.0,
+				"s": "event",
+				"t": 15.0
+			},
+			{
+				"d": {
+					"index": 2.0,
+					"name": "pause"
+				},
+				"k": "action_name",
+				"q": 9.0,
+				"s": "recorder",
+				"t": 16.0
+			},
+			{
+				"d": {
+					"edge": [
+						{
+							"echo": false,
+							"keycode": 70.0,
+							"physical_keycode": 70.0,
+							"pressed": true,
+							"type": "key"
+						},
+						{
+							"action": "practice",
+							"pressed": true,
+							"type": "action"
+						}
+					],
+					"inputs": [],
+					"paused": false,
+					"stage": 0.0
+				},
+				"k": "practice",
+				"q": 10.0,
+				"s": "event",
+				"t": 21.0
+			}
+		],
+		"file": "night-shift_server128-aa1000_20261110-162939_219_8ab6bd4d.r16run",
+		"header": {
+			"created_unix": 1794328179.219793,
+			"created_utc": "2026-11-10T16:29:39Z",
+			"engine": "4.7.2-stable (official)",
+			"format": "foldrunner-r16-run",
+			"identity": {
+				"course_key": "052f1b00d51dab56",
+				"format": "r16-motion-1",
+				"geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+				"map": "night-shift",
+				"motor": "r15-source-crouch-2",
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"physics_hz": 128.0,
+				"preset": "server128_aa1000",
+				"runner": "res://scripts/r15_source_player.gd",
+				"timing": "r16-timing-1"
+			},
+			"metadata": {
+				"attempt": 2.0,
+				"build": "spillway-2026.11.10-r20",
+				"build_label": "Spillway R20",
+				"clean_at_start": true,
+				"course_key": "052f1b00d51dab56",
+				"elapsed_at_start": 0.0,
+				"family": "source",
+				"held_actions": [
+					"move_forward",
+					"move_back",
+					"move_left",
+					"move_right",
+					"jump",
+					"crouch",
+					"r15_slide",
+					"r15_grapple",
+					"look_left",
+					"look_right",
+					"look_up",
+					"look_down"
+				],
+				"identity": {
+					"course_key": "052f1b00d51dab56",
+					"format": "r16-motion-1",
+					"geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					"map": "night-shift",
+					"motor": "r15-source-crouch-2",
+					"overlay": "r16-opportunities-1:none (non_target_map)",
+					"physics_hz": 128.0,
+					"preset": "server128_aa1000",
+					"runner": "res://scripts/r15_source_player.gd",
+					"timing": "r16-timing-1"
+				},
+				"lab": {},
+				"laws": {
+					"approved": "r15 source runner res://scripts/r15_source_player.gd with the r15 F2/F5 server presets, unchanged",
+					"course_law": "approved r15",
+					"experimental": [],
+					"r16_additions": "style scoring, recording and ghost are r16 game choices that only read the game"
+				},
+				"look": {
+					"family": "source",
+					"fov": 90.0,
+					"input": "screen_relative counts",
+					"m_pitch": 0.022,
+					"m_yaw": 0.022,
+					"pitch_rad_per_count": 0.00095993108859688,
+					"replay_override": true,
+					"sensitivity": 2.5,
+					"yaw_rad_per_count": 0.00095993108859688
+				},
+				"map": "night-shift",
+				"map_kind": "course",
+				"map_name": "Night Shift",
+				"opportunities": {
+					"applied": false,
+					"base_geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					"hash": "",
+					"passages": [],
+					"reason": "non_target_map",
+					"version": "r16-opportunities-1"
+				},
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"paused_at_start": false,
+				"physics": {
+					"family": "source",
+					"fingerprint": {
+						"air_budget": "legacy",
+						"air_surface": "deadstrafe",
+						"cl_forwardspeed": 450.0,
+						"cl_sidespeed": 450.0,
+						"duck_air_anchor": "center",
+						"duck_air_crop": false,
+						"duck_eye_clearance": 2.0,
+						"duck_eye_height": 46.0,
+						"duck_eye_time": 0.1,
+						"duck_hull_height": 54.0,
+						"duck_multiplier": 0.34,
+						"eye_height": 64.0,
+						"ground_probe": 2.0,
+						"ground_speed_clamp": false,
+						"hull_height": 72.0,
+						"hull_width": 32.0,
+						"jump_clamp_factor": 1.1,
+						"jump_order": "source2013",
+						"non_jump_velocity": 140.0,
+						"player_maxspeed": 250.0,
+						"preset": "csgo_server",
+						"stamina_model": "gokz_fit",
+						"sv_accelerate": 5.5,
+						"sv_air_max_wishspeed": 30.0,
+						"sv_airaccelerate": 1000.0,
+						"sv_autobunnyhopping": true,
+						"sv_enablebunnyhopping": true,
+						"sv_friction": 5.2,
+						"sv_gravity": 800.0,
+						"sv_jump_impulse": 301.993377,
+						"sv_maxspeed": 320.0,
+						"sv_maxvelocity": 3500.0,
+						"sv_staminajumpcost": 0.0,
+						"sv_staminalandcost": 0.0,
+						"sv_staminamax": 0.0,
+						"sv_staminarecoveryrate": 0.0,
+						"sv_stepsize": 18.0,
+						"sv_stopspeed": 80.0,
+						"sv_walkable_normal": 0.7,
+						"tickrate": 128.0,
+						"water_multiplier": 0.8
+					},
+					"hull": {
+						"duck_air_anchor": "center",
+						"duck_height_u": 54.0,
+						"height_u": 72.0,
+						"shape": "box",
+						"width_u": 32.0
+					},
+					"hz": 128.0,
+					"mechanics": [],
+					"motor_version": "r15-source-crouch-2",
+					"runner": "res://scripts/r15_source_player.gd",
+					"standin": false
+				},
+				"practice_reason": "",
+				"practice_stage": -1.0,
+				"preset": "server128_aa1000",
+				"preset_label": "Bhop server AA 1000",
+				"record_identity": [
+					"r16-timing-1",
+					[
+						"night-shift",
+						"course",
+						"r15-night-shift",
+						1.0,
+						"nightshift"
+					],
+					"cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					[
+						"Throat",
+						"Turning loop",
+						"Wash bays",
+						"Flyover ramp",
+						"Flyover",
+						"Terminus"
+					],
+					"server128_aa1000",
+					"source",
+					"r15-source-crouch-2",
+					"res://scripts/r15_source_player.gd",
+					128.0,
+					"{\"air_budget\":\"legacy\",\"air_surface\":\"deadstrafe\",\"cl_forwardspeed\":450.0,\"cl_sidespeed\":450.0,\"duck_air_anchor\":\"center\",\"duck_air_crop\":false,\"duck_eye_clearance\":2.0,\"duck_eye_height\":46.0,\"duck_eye_time\":0.1,\"duck_hull_height\":54.0,\"duck_multiplier\":0.34,\"eye_height\":64.0,\"ground_probe\":2.0,\"ground_speed_clamp\":false,\"hull_height\":72.0,\"hull_width\":32.0,\"jump_clamp_factor\":1.1,\"jump_order\":\"source2013\",\"non_jump_velocity\":140.0,\"player_maxspeed\":250.0,\"preset\":\"csgo_server\",\"stamina_model\":\"gokz_fit\",\"sv_accelerate\":5.5,\"sv_air_max_wishspeed\":30.0,\"sv_airaccelerate\":1000.0,\"sv_autobunnyhopping\":true,\"sv_enablebunnyhopping\":true,\"sv_friction\":5.2,\"sv_gravity\":800.0,\"sv_jump_impulse\":301.993377,\"sv_maxspeed\":320.0,\"sv_maxvelocity\":3500.0,\"sv_staminajumpcost\":0.0,\"sv_staminalandcost\":0.0,\"sv_staminamax\":0.0,\"sv_staminarecoveryrate\":0.0,\"sv_stepsize\":18.0,\"sv_stopspeed\":80.0,\"sv_walkable_normal\":0.7,\"tickrate\":128,\"water_multiplier\":0.8}",
+					"{\"duck_air_anchor\":\"center\",\"duck_height_u\":54.0,\"height_u\":72.0,\"shape\":\"box\",\"width_u\":32.0}",
+					"[]",
+					"r16-opportunities-1:none (non_target_map)"
+				],
+				"sample": {
+					"actual_v": "the runner's own travel over its step, excluding duck-origin compensation; checked against (p - previous p - duck shift) / dt",
+					"version": "r16-sample-1",
+					"when": "end of each unpaused physics frame (priority 999, after the strafe stats): the body after this frame's motor step, the host state as this frame left it"
+				},
+				"scoring": {
+					"style": {
+						"event_format": 2.0,
+						"rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
+						"version": "r20-style-stack-1"
+					},
+					"style_key": "r20-style-stack-1/2/b133b80f118247cf",
+					"timing": "r16-timing-1"
+				},
+				"start_reason": "restart",
+				"timer_running_at_start": false
+			},
+			"os": "Linux",
+			"run_id": "night-shift_server128-aa1000_20261110-162939_219_8ab6bd4d",
+			"units": {
+				"angle": "rad",
+				"length": "m",
+				"time": "s",
+				"velocity": "m/s"
+			},
+			"vector_precision": "single",
+			"version": 1.0
+		},
+		"identity_text": "[\"r16-timing-1\",[\"night-shift\",\"course\",\"r15-night-shift\",1,\"nightshift\"],\"cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad\",[\"Throat\",\"Turning loop\",\"Wash bays\",\"Flyover ramp\",\"Flyover\",\"Terminus\"],\"server128_aa1000\",\"source\",\"r15-source-crouch-2\",\"res://scripts/r15_source_player.gd\",128,\"{\\\"air_budget\\\":\\\"legacy\\\",\\\"air_surface\\\":\\\"deadstrafe\\\",\\\"cl_forwardspeed\\\":450.0,\\\"cl_sidespeed\\\":450.0,\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_air_crop\\\":false,\\\"duck_eye_clearance\\\":2.0,\\\"duck_eye_height\\\":46.0,\\\"duck_eye_time\\\":0.1,\\\"duck_hull_height\\\":54.0,\\\"duck_multiplier\\\":0.34,\\\"eye_height\\\":64.0,\\\"ground_probe\\\":2.0,\\\"ground_speed_clamp\\\":false,\\\"hull_height\\\":72.0,\\\"hull_width\\\":32.0,\\\"jump_clamp_factor\\\":1.1,\\\"jump_order\\\":\\\"source2013\\\",\\\"non_jump_velocity\\\":140.0,\\\"player_maxspeed\\\":250.0,\\\"preset\\\":\\\"csgo_server\\\",\\\"stamina_model\\\":\\\"gokz_fit\\\",\\\"sv_accelerate\\\":5.5,\\\"sv_air_max_wishspeed\\\":30.0,\\\"sv_airaccelerate\\\":1000.0,\\\"sv_autobunnyhopping\\\":true,\\\"sv_enablebunnyhopping\\\":true,\\\"sv_friction\\\":5.2,\\\"sv_gravity\\\":800.0,\\\"sv_jump_impulse\\\":301.993377,\\\"sv_maxspeed\\\":320.0,\\\"sv_maxvelocity\\\":3500.0,\\\"sv_staminajumpcost\\\":0.0,\\\"sv_staminalandcost\\\":0.0,\\\"sv_staminamax\\\":0.0,\\\"sv_staminarecoveryrate\\\":0.0,\\\"sv_stepsize\\\":18.0,\\\"sv_stopspeed\\\":80.0,\\\"sv_walkable_normal\\\":0.7,\\\"tickrate\\\":128,\\\"water_multiplier\\\":0.8}\",\"{\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_height_u\\\":54.0,\\\"height_u\\\":72.0,\\\"shape\\\":\\\"box\\\",\\\"width_u\\\":32.0}\",\"[]\",\"r16-opportunities-1:none (non_target_map)\"]",
+		"inputs_sha256": {
+			"aux": "d29a4a123daa74a4ecde1414e1c2186bdfaa54e5cdf9f2691c3631796e5bca93",
+			"code": "293b204eda6f496cb8c03f3d1f065918bae4e24d910c668509f642d6b84d4301",
+			"flags": "897086af8b731bf6d2c49643a6aabb07dc813023ffe91043fced9d4226c6245c",
+			"kind": "4f25cb409a13a1575f0d8b3c33dc2b3c32647ca83eda9d15915a0efa76f4be12",
+			"tick": "ad8cd35e3b26cceffa1a647f153355d650b4bdfaa703709349a820f10eea93ae",
+			"x": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+			"x2": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+			"y": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+			"y2": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1"
+		},
+		"seal": {
+			"counts": {
+				"bytes": 6632.0,
+				"chunks": 1.0,
+				"events": 11.0,
+				"gaps": 0.0,
+				"inputs": 12.0,
+				"ticks": 22.0
+			},
+			"ended_unix": 1794328179.330536,
+			"final": {
+				"checkpoint": 0.0,
+				"clean": true,
+				"elapsed": 0.0,
+				"finished": false,
+				"p": [
+					0.0,
+					0.00114622607361525,
+					20.0
+				],
+				"respawns": 0.0,
+				"started": false,
+				"tick": 21.0
+			},
+			"finish_tick": -1.0,
+			"first_tick": 0.0,
+			"last_tick": 21.0,
+			"outcome": {
+				"checkpoint": 0.0,
+				"clean": false,
+				"elapsed": 0.0,
+				"finished": false,
+				"kind": "practice",
+				"practice_reason": "",
+				"respawns": 0.0,
+				"style": {
+					"by_kind": {},
+					"score": 0.0
+				}
+			},
+			"timer_start_tick": -1.0
+		},
+		"sha256": "506930ed3338d4337ae7a7ffeb11651dbdb4a412aea86f48650cf0267787924e"
+	},
+	{
+		"columns_sha256": {
+			"actual_v": "c9b4547a7f1f1956b96dc10367918d1804bee0e104a672395fd6c7921dc33af3",
+			"checkpoint": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"dt": "bda8dac224b09366fa9ccbc5c7887a0be3c60c0184e0fb468acf0f4ba0135fcb",
+			"elapsed": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"flags": "6dc1c586572d6873ac1ba4f7a07985f5485d70168c412df7c421ecc1442ca561",
+			"held": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"p": "666b20f41188c2404481316c7057e0add60eeb4e04790af2890d6d27d48fc0b8",
+			"physics_hz": "81b0006182e2f4180d23d14f625a836f013f13c50bb9e085fcca8949834c8a1e",
+			"pitch": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"reference_p": "666b20f41188c2404481316c7057e0add60eeb4e04790af2890d6d27d48fc0b8",
+			"respawns": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"tick": "baed642339816affb3fe8719792d0e4ce82f12db72b7373d244eaa65445800fe",
+			"v": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+			"yaw": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925"
+		},
+		"events": [
+			{
+				"d": {
+					"names": [
+						"crouch",
+						"jump",
+						"look_down",
+						"look_left",
+						"look_right",
+						"look_up",
+						"move_back",
+						"move_forward",
+						"move_left",
+						"move_right",
+						"r15_grapple",
+						"r15_slide"
+					]
+				},
+				"k": "held_names",
+				"q": 0.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"index": 0.0,
+					"name": "practice"
+				},
+				"k": "action_name",
+				"q": 1.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"checkpoint": 0.0,
+					"dt": 0.0078125,
+					"mode": "run",
+					"motor_version": "r15-source-crouch-2",
+					"physics_hz": 128.0,
+					"practice_reason": "practice",
+					"respawns": 0.0
+				},
+				"k": "context",
+				"q": 2.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 3.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"edge": [
+						{
+							"echo": false,
+							"keycode": 82.0,
+							"physical_keycode": 82.0,
+							"pressed": true,
+							"type": "key"
+						},
+						{
+							"action": "restart",
+							"pressed": true,
+							"type": "action"
+						}
+					],
+					"inputs": [],
+					"paused": false
+				},
+				"k": "restart",
+				"q": 4.0,
+				"s": "event",
+				"t": 3.0
+			}
+		],
+		"file": "night-shift_server128-aa1000_20261110-162939_331_f6e535e5.r16run",
+		"header": {
+			"created_unix": 1794328179.33118,
+			"created_utc": "2026-11-10T16:29:39Z",
+			"engine": "4.7.2-stable (official)",
+			"format": "foldrunner-r16-run",
+			"identity": {
+				"course_key": "052f1b00d51dab56",
+				"format": "r16-motion-1",
+				"geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+				"map": "night-shift",
+				"motor": "r15-source-crouch-2",
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"physics_hz": 128.0,
+				"preset": "server128_aa1000",
+				"runner": "res://scripts/r15_source_player.gd",
+				"timing": "r16-timing-1"
+			},
+			"metadata": {
+				"attempt": 3.0,
+				"build": "spillway-2026.11.10-r20",
+				"build_label": "Spillway R20",
+				"clean_at_start": false,
+				"course_key": "052f1b00d51dab56",
+				"elapsed_at_start": 0.0,
+				"family": "source",
+				"held_actions": [
+					"move_forward",
+					"move_back",
+					"move_left",
+					"move_right",
+					"jump",
+					"crouch",
+					"r15_slide",
+					"r15_grapple",
+					"look_left",
+					"look_right",
+					"look_up",
+					"look_down"
+				],
+				"identity": {
+					"course_key": "052f1b00d51dab56",
+					"format": "r16-motion-1",
+					"geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					"map": "night-shift",
+					"motor": "r15-source-crouch-2",
+					"overlay": "r16-opportunities-1:none (non_target_map)",
+					"physics_hz": 128.0,
+					"preset": "server128_aa1000",
+					"runner": "res://scripts/r15_source_player.gd",
+					"timing": "r16-timing-1"
+				},
+				"lab": {},
+				"laws": {
+					"approved": "r15 source runner res://scripts/r15_source_player.gd with the r15 F2/F5 server presets, unchanged",
+					"course_law": "approved r15",
+					"experimental": [],
+					"r16_additions": "style scoring, recording and ghost are r16 game choices that only read the game"
+				},
+				"look": {
+					"family": "source",
+					"fov": 90.0,
+					"input": "screen_relative counts",
+					"m_pitch": 0.022,
+					"m_yaw": 0.022,
+					"pitch_rad_per_count": 0.00095993108859688,
+					"replay_override": true,
+					"sensitivity": 2.5,
+					"yaw_rad_per_count": 0.00095993108859688
+				},
+				"map": "night-shift",
+				"map_kind": "course",
+				"map_name": "Night Shift",
+				"opportunities": {
+					"applied": false,
+					"base_geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					"hash": "",
+					"passages": [],
+					"reason": "non_target_map",
+					"version": "r16-opportunities-1"
+				},
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"paused_at_start": false,
+				"physics": {
+					"family": "source",
+					"fingerprint": {
+						"air_budget": "legacy",
+						"air_surface": "deadstrafe",
+						"cl_forwardspeed": 450.0,
+						"cl_sidespeed": 450.0,
+						"duck_air_anchor": "center",
+						"duck_air_crop": false,
+						"duck_eye_clearance": 2.0,
+						"duck_eye_height": 46.0,
+						"duck_eye_time": 0.1,
+						"duck_hull_height": 54.0,
+						"duck_multiplier": 0.34,
+						"eye_height": 64.0,
+						"ground_probe": 2.0,
+						"ground_speed_clamp": false,
+						"hull_height": 72.0,
+						"hull_width": 32.0,
+						"jump_clamp_factor": 1.1,
+						"jump_order": "source2013",
+						"non_jump_velocity": 140.0,
+						"player_maxspeed": 250.0,
+						"preset": "csgo_server",
+						"stamina_model": "gokz_fit",
+						"sv_accelerate": 5.5,
+						"sv_air_max_wishspeed": 30.0,
+						"sv_airaccelerate": 1000.0,
+						"sv_autobunnyhopping": true,
+						"sv_enablebunnyhopping": true,
+						"sv_friction": 5.2,
+						"sv_gravity": 800.0,
+						"sv_jump_impulse": 301.993377,
+						"sv_maxspeed": 320.0,
+						"sv_maxvelocity": 3500.0,
+						"sv_staminajumpcost": 0.0,
+						"sv_staminalandcost": 0.0,
+						"sv_staminamax": 0.0,
+						"sv_staminarecoveryrate": 0.0,
+						"sv_stepsize": 18.0,
+						"sv_stopspeed": 80.0,
+						"sv_walkable_normal": 0.7,
+						"tickrate": 128.0,
+						"water_multiplier": 0.8
+					},
+					"hull": {
+						"duck_air_anchor": "center",
+						"duck_height_u": 54.0,
+						"height_u": 72.0,
+						"shape": "box",
+						"width_u": 32.0
+					},
+					"hz": 128.0,
+					"mechanics": [],
+					"motor_version": "r15-source-crouch-2",
+					"runner": "res://scripts/r15_source_player.gd",
+					"standin": false
+				},
+				"practice_reason": "practice",
+				"practice_stage": 0.0,
+				"preset": "server128_aa1000",
+				"preset_label": "Bhop server AA 1000",
+				"record_identity": [
+					"r16-timing-1",
+					[
+						"night-shift",
+						"course",
+						"r15-night-shift",
+						1.0,
+						"nightshift"
+					],
+					"cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					[
+						"Throat",
+						"Turning loop",
+						"Wash bays",
+						"Flyover ramp",
+						"Flyover",
+						"Terminus"
+					],
+					"server128_aa1000",
+					"source",
+					"r15-source-crouch-2",
+					"res://scripts/r15_source_player.gd",
+					128.0,
+					"{\"air_budget\":\"legacy\",\"air_surface\":\"deadstrafe\",\"cl_forwardspeed\":450.0,\"cl_sidespeed\":450.0,\"duck_air_anchor\":\"center\",\"duck_air_crop\":false,\"duck_eye_clearance\":2.0,\"duck_eye_height\":46.0,\"duck_eye_time\":0.1,\"duck_hull_height\":54.0,\"duck_multiplier\":0.34,\"eye_height\":64.0,\"ground_probe\":2.0,\"ground_speed_clamp\":false,\"hull_height\":72.0,\"hull_width\":32.0,\"jump_clamp_factor\":1.1,\"jump_order\":\"source2013\",\"non_jump_velocity\":140.0,\"player_maxspeed\":250.0,\"preset\":\"csgo_server\",\"stamina_model\":\"gokz_fit\",\"sv_accelerate\":5.5,\"sv_air_max_wishspeed\":30.0,\"sv_airaccelerate\":1000.0,\"sv_autobunnyhopping\":true,\"sv_enablebunnyhopping\":true,\"sv_friction\":5.2,\"sv_gravity\":800.0,\"sv_jump_impulse\":301.993377,\"sv_maxspeed\":320.0,\"sv_maxvelocity\":3500.0,\"sv_staminajumpcost\":0.0,\"sv_staminalandcost\":0.0,\"sv_staminamax\":0.0,\"sv_staminarecoveryrate\":0.0,\"sv_stepsize\":18.0,\"sv_stopspeed\":80.0,\"sv_walkable_normal\":0.7,\"tickrate\":128,\"water_multiplier\":0.8}",
+					"{\"duck_air_anchor\":\"center\",\"duck_height_u\":54.0,\"height_u\":72.0,\"shape\":\"box\",\"width_u\":32.0}",
+					"[]",
+					"r16-opportunities-1:none (non_target_map)"
+				],
+				"sample": {
+					"actual_v": "the runner's own travel over its step, excluding duck-origin compensation; checked against (p - previous p - duck shift) / dt",
+					"version": "r16-sample-1",
+					"when": "end of each unpaused physics frame (priority 999, after the strafe stats): the body after this frame's motor step, the host state as this frame left it"
+				},
+				"scoring": {
+					"style": {
+						"event_format": 2.0,
+						"rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
+						"version": "r20-style-stack-1"
+					},
+					"style_key": "r20-style-stack-1/2/b133b80f118247cf",
+					"timing": "r16-timing-1"
+				},
+				"start_reason": "practice",
+				"timer_running_at_start": false
+			},
+			"os": "Linux",
+			"run_id": "night-shift_server128-aa1000_20261110-162939_331_f6e535e5",
+			"units": {
+				"angle": "rad",
+				"length": "m",
+				"time": "s",
+				"velocity": "m/s"
+			},
+			"vector_precision": "single",
+			"version": 1.0
+		},
+		"identity_text": "[\"r16-timing-1\",[\"night-shift\",\"course\",\"r15-night-shift\",1,\"nightshift\"],\"cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad\",[\"Throat\",\"Turning loop\",\"Wash bays\",\"Flyover ramp\",\"Flyover\",\"Terminus\"],\"server128_aa1000\",\"source\",\"r15-source-crouch-2\",\"res://scripts/r15_source_player.gd\",128,\"{\\\"air_budget\\\":\\\"legacy\\\",\\\"air_surface\\\":\\\"deadstrafe\\\",\\\"cl_forwardspeed\\\":450.0,\\\"cl_sidespeed\\\":450.0,\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_air_crop\\\":false,\\\"duck_eye_clearance\\\":2.0,\\\"duck_eye_height\\\":46.0,\\\"duck_eye_time\\\":0.1,\\\"duck_hull_height\\\":54.0,\\\"duck_multiplier\\\":0.34,\\\"eye_height\\\":64.0,\\\"ground_probe\\\":2.0,\\\"ground_speed_clamp\\\":false,\\\"hull_height\\\":72.0,\\\"hull_width\\\":32.0,\\\"jump_clamp_factor\\\":1.1,\\\"jump_order\\\":\\\"source2013\\\",\\\"non_jump_velocity\\\":140.0,\\\"player_maxspeed\\\":250.0,\\\"preset\\\":\\\"csgo_server\\\",\\\"stamina_model\\\":\\\"gokz_fit\\\",\\\"sv_accelerate\\\":5.5,\\\"sv_air_max_wishspeed\\\":30.0,\\\"sv_airaccelerate\\\":1000.0,\\\"sv_autobunnyhopping\\\":true,\\\"sv_enablebunnyhopping\\\":true,\\\"sv_friction\\\":5.2,\\\"sv_gravity\\\":800.0,\\\"sv_jump_impulse\\\":301.993377,\\\"sv_maxspeed\\\":320.0,\\\"sv_maxvelocity\\\":3500.0,\\\"sv_staminajumpcost\\\":0.0,\\\"sv_staminalandcost\\\":0.0,\\\"sv_staminamax\\\":0.0,\\\"sv_staminarecoveryrate\\\":0.0,\\\"sv_stepsize\\\":18.0,\\\"sv_stopspeed\\\":80.0,\\\"sv_walkable_normal\\\":0.7,\\\"tickrate\\\":128,\\\"water_multiplier\\\":0.8}\",\"{\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_height_u\\\":54.0,\\\"height_u\\\":72.0,\\\"shape\\\":\\\"box\\\",\\\"width_u\\\":32.0}\",\"[]\",\"r16-opportunities-1:none (non_target_map)\"]",
+		"inputs_sha256": {
+			"aux": "914e32aebfef22cb2aaec589ba06a77793a487f906275b5085aa78e2ef440b89",
+			"code": "914e32aebfef22cb2aaec589ba06a77793a487f906275b5085aa78e2ef440b89",
+			"flags": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"kind": "77ee7ce65c84d38465b8162c58afd76001b97d06f7e68e7abc06ad7eee78756c",
+			"tick": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+		},
+		"seal": {
+			"counts": {
+				"bytes": 6322.0,
+				"chunks": 1.0,
+				"events": 5.0,
+				"gaps": 0.0,
+				"inputs": 2.0,
+				"ticks": 4.0
+			},
+			"ended_unix": 1794328179.349455,
+			"final": {
+				"checkpoint": 0.0,
+				"clean": false,
+				"elapsed": 0.0,
+				"finished": false,
+				"p": [
+					0.0,
+					0.00115448131691664,
+					20.0
+				],
+				"respawns": 0.0,
+				"started": false,
+				"tick": 3.0
+			},
+			"finish_tick": -1.0,
+			"first_tick": 0.0,
+			"last_tick": 3.0,
+			"outcome": {
+				"checkpoint": 0.0,
+				"clean": false,
+				"elapsed": 0.0,
+				"finished": false,
+				"kind": "restart",
+				"practice_reason": "practice",
+				"respawns": 0.0,
+				"style": {
+					"by_kind": {},
+					"score": 0.0
+				}
+			},
+			"timer_start_tick": -1.0
+		},
+		"sha256": "3c16c72e066b353c69673a5cc79e234ad9aa88aa919ea8a7c9ca49ec793e8798"
+	},
+	{
+		"columns_sha256": {
+			"actual_v": "29683501351f803ce55587e12c1ef360098d42309bb99a76424e93a2f071d59d",
+			"checkpoint": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"dt": "137e966835bd39a9031a9b7469279ac57542964f92d0093f5adc3bbdc397763a",
+			"elapsed": "f5a5fd42d16a20302798ef6ed309979b43003d2320d9f0e8ea9831a92759fb4b",
+			"flags": "edba9c9d6ab5c6ee791b9f6281bc0532f9a5817088c03897e6241f312cd7c508",
+			"held": "f5a5fd42d16a20302798ef6ed309979b43003d2320d9f0e8ea9831a92759fb4b",
+			"p": "cf1e1159aa82dd250e6cbfd95c4541f0fc002e8de4dbf8bf46b14fc261807935",
+			"physics_hz": "0df94b82399ae10c4e2bd8bad364e2fa0216c9a6b132169b907914797add52d5",
+			"pitch": "f5a5fd42d16a20302798ef6ed309979b43003d2320d9f0e8ea9831a92759fb4b",
+			"reference_p": "cf1e1159aa82dd250e6cbfd95c4541f0fc002e8de4dbf8bf46b14fc261807935",
+			"respawns": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"tick": "ff1f6ee5d67458cfac950f62e93042e21fcb867e2234dcc8721801231064ad40",
+			"v": "2ea9ab9198d1638007400cd2c3bef1cc745b864b76011a0e1bc52180ac6452d4",
+			"yaw": "f5a5fd42d16a20302798ef6ed309979b43003d2320d9f0e8ea9831a92759fb4b"
+		},
+		"events": [
+			{
+				"d": {
+					"names": [
+						"crouch",
+						"jump",
+						"look_down",
+						"look_left",
+						"look_right",
+						"look_up",
+						"move_back",
+						"move_forward",
+						"move_left",
+						"move_right",
+						"r15_grapple",
+						"r15_slide"
+					]
+				},
+				"k": "held_names",
+				"q": 0.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"index": 0.0,
+					"name": "restart"
+				},
+				"k": "action_name",
+				"q": 1.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"checkpoint": 0.0,
+					"dt": 0.0078125,
+					"mode": "run",
+					"motor_version": "r15-source-crouch-2",
+					"physics_hz": 128.0,
+					"practice_reason": "",
+					"respawns": 0.0
+				},
+				"k": "context",
+				"q": 2.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 3.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"index": 1.0,
+					"name": "r16_preset_5"
+				},
+				"k": "action_name",
+				"q": 4.0,
+				"s": "recorder",
+				"t": 4.0
+			},
+			{
+				"d": {
+					"edge": [
+						{
+							"echo": false,
+							"keycode": 82.0,
+							"physical_keycode": 82.0,
+							"pressed": true,
+							"type": "key"
+						},
+						{
+							"action": "restart",
+							"pressed": true,
+							"type": "action"
+						}
+					],
+					"inputs": [],
+					"paused": false
+				},
+				"k": "restart",
+				"q": 5.0,
+				"s": "event",
+				"t": 7.0
+			}
+		],
+		"file": "night-shift_server128-aa1000_20261110-162939_350_8663a638.r16run",
+		"header": {
+			"created_unix": 1794328179.350098,
+			"created_utc": "2026-11-10T16:29:39Z",
+			"engine": "4.7.2-stable (official)",
+			"format": "foldrunner-r16-run",
+			"identity": {
+				"course_key": "052f1b00d51dab56",
+				"format": "r16-motion-1",
+				"geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+				"map": "night-shift",
+				"motor": "r15-source-crouch-2",
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"physics_hz": 128.0,
+				"preset": "server128_aa1000",
+				"runner": "res://scripts/r15_source_player.gd",
+				"timing": "r16-timing-1"
+			},
+			"metadata": {
+				"attempt": 4.0,
+				"build": "spillway-2026.11.10-r20",
+				"build_label": "Spillway R20",
+				"clean_at_start": true,
+				"course_key": "052f1b00d51dab56",
+				"elapsed_at_start": 0.0,
+				"family": "source",
+				"held_actions": [
+					"move_forward",
+					"move_back",
+					"move_left",
+					"move_right",
+					"jump",
+					"crouch",
+					"r15_slide",
+					"r15_grapple",
+					"look_left",
+					"look_right",
+					"look_up",
+					"look_down"
+				],
+				"identity": {
+					"course_key": "052f1b00d51dab56",
+					"format": "r16-motion-1",
+					"geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					"map": "night-shift",
+					"motor": "r15-source-crouch-2",
+					"overlay": "r16-opportunities-1:none (non_target_map)",
+					"physics_hz": 128.0,
+					"preset": "server128_aa1000",
+					"runner": "res://scripts/r15_source_player.gd",
+					"timing": "r16-timing-1"
+				},
+				"lab": {},
+				"laws": {
+					"approved": "r15 source runner res://scripts/r15_source_player.gd with the r15 F2/F5 server presets, unchanged",
+					"course_law": "approved r15",
+					"experimental": [],
+					"r16_additions": "style scoring, recording and ghost are r16 game choices that only read the game"
+				},
+				"look": {
+					"family": "source",
+					"fov": 90.0,
+					"input": "screen_relative counts",
+					"m_pitch": 0.022,
+					"m_yaw": 0.022,
+					"pitch_rad_per_count": 0.00095993108859688,
+					"replay_override": true,
+					"sensitivity": 2.5,
+					"yaw_rad_per_count": 0.00095993108859688
+				},
+				"map": "night-shift",
+				"map_kind": "course",
+				"map_name": "Night Shift",
+				"opportunities": {
+					"applied": false,
+					"base_geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					"hash": "",
+					"passages": [],
+					"reason": "non_target_map",
+					"version": "r16-opportunities-1"
+				},
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"paused_at_start": false,
+				"physics": {
+					"family": "source",
+					"fingerprint": {
+						"air_budget": "legacy",
+						"air_surface": "deadstrafe",
+						"cl_forwardspeed": 450.0,
+						"cl_sidespeed": 450.0,
+						"duck_air_anchor": "center",
+						"duck_air_crop": false,
+						"duck_eye_clearance": 2.0,
+						"duck_eye_height": 46.0,
+						"duck_eye_time": 0.1,
+						"duck_hull_height": 54.0,
+						"duck_multiplier": 0.34,
+						"eye_height": 64.0,
+						"ground_probe": 2.0,
+						"ground_speed_clamp": false,
+						"hull_height": 72.0,
+						"hull_width": 32.0,
+						"jump_clamp_factor": 1.1,
+						"jump_order": "source2013",
+						"non_jump_velocity": 140.0,
+						"player_maxspeed": 250.0,
+						"preset": "csgo_server",
+						"stamina_model": "gokz_fit",
+						"sv_accelerate": 5.5,
+						"sv_air_max_wishspeed": 30.0,
+						"sv_airaccelerate": 1000.0,
+						"sv_autobunnyhopping": true,
+						"sv_enablebunnyhopping": true,
+						"sv_friction": 5.2,
+						"sv_gravity": 800.0,
+						"sv_jump_impulse": 301.993377,
+						"sv_maxspeed": 320.0,
+						"sv_maxvelocity": 3500.0,
+						"sv_staminajumpcost": 0.0,
+						"sv_staminalandcost": 0.0,
+						"sv_staminamax": 0.0,
+						"sv_staminarecoveryrate": 0.0,
+						"sv_stepsize": 18.0,
+						"sv_stopspeed": 80.0,
+						"sv_walkable_normal": 0.7,
+						"tickrate": 128.0,
+						"water_multiplier": 0.8
+					},
+					"hull": {
+						"duck_air_anchor": "center",
+						"duck_height_u": 54.0,
+						"height_u": 72.0,
+						"shape": "box",
+						"width_u": 32.0
+					},
+					"hz": 128.0,
+					"mechanics": [],
+					"motor_version": "r15-source-crouch-2",
+					"runner": "res://scripts/r15_source_player.gd",
+					"standin": false
+				},
+				"practice_reason": "",
+				"practice_stage": -1.0,
+				"preset": "server128_aa1000",
+				"preset_label": "Bhop server AA 1000",
+				"record_identity": [
+					"r16-timing-1",
+					[
+						"night-shift",
+						"course",
+						"r15-night-shift",
+						1.0,
+						"nightshift"
+					],
+					"cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					[
+						"Throat",
+						"Turning loop",
+						"Wash bays",
+						"Flyover ramp",
+						"Flyover",
+						"Terminus"
+					],
+					"server128_aa1000",
+					"source",
+					"r15-source-crouch-2",
+					"res://scripts/r15_source_player.gd",
+					128.0,
+					"{\"air_budget\":\"legacy\",\"air_surface\":\"deadstrafe\",\"cl_forwardspeed\":450.0,\"cl_sidespeed\":450.0,\"duck_air_anchor\":\"center\",\"duck_air_crop\":false,\"duck_eye_clearance\":2.0,\"duck_eye_height\":46.0,\"duck_eye_time\":0.1,\"duck_hull_height\":54.0,\"duck_multiplier\":0.34,\"eye_height\":64.0,\"ground_probe\":2.0,\"ground_speed_clamp\":false,\"hull_height\":72.0,\"hull_width\":32.0,\"jump_clamp_factor\":1.1,\"jump_order\":\"source2013\",\"non_jump_velocity\":140.0,\"player_maxspeed\":250.0,\"preset\":\"csgo_server\",\"stamina_model\":\"gokz_fit\",\"sv_accelerate\":5.5,\"sv_air_max_wishspeed\":30.0,\"sv_airaccelerate\":1000.0,\"sv_autobunnyhopping\":true,\"sv_enablebunnyhopping\":true,\"sv_friction\":5.2,\"sv_gravity\":800.0,\"sv_jump_impulse\":301.993377,\"sv_maxspeed\":320.0,\"sv_maxvelocity\":3500.0,\"sv_staminajumpcost\":0.0,\"sv_staminalandcost\":0.0,\"sv_staminamax\":0.0,\"sv_staminarecoveryrate\":0.0,\"sv_stepsize\":18.0,\"sv_stopspeed\":80.0,\"sv_walkable_normal\":0.7,\"tickrate\":128,\"water_multiplier\":0.8}",
+					"{\"duck_air_anchor\":\"center\",\"duck_height_u\":54.0,\"height_u\":72.0,\"shape\":\"box\",\"width_u\":32.0}",
+					"[]",
+					"r16-opportunities-1:none (non_target_map)"
+				],
+				"sample": {
+					"actual_v": "the runner's own travel over its step, excluding duck-origin compensation; checked against (p - previous p - duck shift) / dt",
+					"version": "r16-sample-1",
+					"when": "end of each unpaused physics frame (priority 999, after the strafe stats): the body after this frame's motor step, the host state as this frame left it"
+				},
+				"scoring": {
+					"style": {
+						"event_format": 2.0,
+						"rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
+						"version": "r20-style-stack-1"
+					},
+					"style_key": "r20-style-stack-1/2/b133b80f118247cf",
+					"timing": "r16-timing-1"
+				},
+				"start_reason": "restart",
+				"timer_running_at_start": false
+			},
+			"os": "Linux",
+			"run_id": "night-shift_server128-aa1000_20261110-162939_350_8663a638",
+			"units": {
+				"angle": "rad",
+				"length": "m",
+				"time": "s",
+				"velocity": "m/s"
+			},
+			"vector_precision": "single",
+			"version": 1.0
+		},
+		"identity_text": "[\"r16-timing-1\",[\"night-shift\",\"course\",\"r15-night-shift\",1,\"nightshift\"],\"cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad\",[\"Throat\",\"Turning loop\",\"Wash bays\",\"Flyover ramp\",\"Flyover\",\"Terminus\"],\"server128_aa1000\",\"source\",\"r15-source-crouch-2\",\"res://scripts/r15_source_player.gd\",128,\"{\\\"air_budget\\\":\\\"legacy\\\",\\\"air_surface\\\":\\\"deadstrafe\\\",\\\"cl_forwardspeed\\\":450.0,\\\"cl_sidespeed\\\":450.0,\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_air_crop\\\":false,\\\"duck_eye_clearance\\\":2.0,\\\"duck_eye_height\\\":46.0,\\\"duck_eye_time\\\":0.1,\\\"duck_hull_height\\\":54.0,\\\"duck_multiplier\\\":0.34,\\\"eye_height\\\":64.0,\\\"ground_probe\\\":2.0,\\\"ground_speed_clamp\\\":false,\\\"hull_height\\\":72.0,\\\"hull_width\\\":32.0,\\\"jump_clamp_factor\\\":1.1,\\\"jump_order\\\":\\\"source2013\\\",\\\"non_jump_velocity\\\":140.0,\\\"player_maxspeed\\\":250.0,\\\"preset\\\":\\\"csgo_server\\\",\\\"stamina_model\\\":\\\"gokz_fit\\\",\\\"sv_accelerate\\\":5.5,\\\"sv_air_max_wishspeed\\\":30.0,\\\"sv_airaccelerate\\\":1000.0,\\\"sv_autobunnyhopping\\\":true,\\\"sv_enablebunnyhopping\\\":true,\\\"sv_friction\\\":5.2,\\\"sv_gravity\\\":800.0,\\\"sv_jump_impulse\\\":301.993377,\\\"sv_maxspeed\\\":320.0,\\\"sv_maxvelocity\\\":3500.0,\\\"sv_staminajumpcost\\\":0.0,\\\"sv_staminalandcost\\\":0.0,\\\"sv_staminamax\\\":0.0,\\\"sv_staminarecoveryrate\\\":0.0,\\\"sv_stepsize\\\":18.0,\\\"sv_stopspeed\\\":80.0,\\\"sv_walkable_normal\\\":0.7,\\\"tickrate\\\":128,\\\"water_multiplier\\\":0.8}\",\"{\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_height_u\\\":54.0,\\\"height_u\\\":72.0,\\\"shape\\\":\\\"box\\\",\\\"width_u\\\":32.0}\",\"[]\",\"r16-opportunities-1:none (non_target_map)\"]",
+		"inputs_sha256": {
+			"aux": "14c808575c8c93247fabfc4fdd95cef63346a0d080b1b8be3ff16a49093acad4",
+			"code": "88f366fd7345f2db41879e8723a6b506bef155d3f833b11af3c4a7da8d809e84",
+			"flags": "671de73e6d47b4427da5af0ccdb192e9acce7506574ae5c06642a5c4ad7d4e7c",
+			"kind": "fa186b1672c26dffa2994935baf04a96a5a85cb91a4c3040d3df2ce6ec363d14",
+			"tick": "df1ffe2aa5508ac58e8192da8f232cd5a007433f0a4c019b21d545cb03c01c52",
+			"x": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+			"x2": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+			"y": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+			"y2": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0"
+		},
+		"seal": {
+			"counts": {
+				"bytes": 6393.0,
+				"chunks": 1.0,
+				"events": 6.0,
+				"gaps": 0.0,
+				"inputs": 6.0,
+				"ticks": 8.0
+			},
+			"ended_unix": 1794328179.382818,
+			"final": {
+				"checkpoint": 0.0,
+				"clean": true,
+				"elapsed": 0.0,
+				"finished": false,
+				"p": [
+					0.0,
+					0.00116091629024595,
+					20.0
+				],
+				"respawns": 0.0,
+				"started": false,
+				"tick": 7.0
+			},
+			"finish_tick": -1.0,
+			"first_tick": 0.0,
+			"last_tick": 7.0,
+			"outcome": {
+				"checkpoint": 0.0,
+				"clean": false,
+				"elapsed": 0.0,
+				"finished": false,
+				"kind": "restart",
+				"practice_reason": "",
+				"respawns": 0.0,
+				"style": {
+					"by_kind": {},
+					"score": 0.0
+				}
+			},
+			"timer_start_tick": -1.0
+		},
+		"sha256": "48933061eef261318ce5da83744fe23ffe4f6e057339d5d3cc2022f8901365eb"
+	},
+	{
+		"columns_sha256": {
+			"actual_v": "c9b4547a7f1f1956b96dc10367918d1804bee0e104a672395fd6c7921dc33af3",
+			"checkpoint": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"dt": "bda8dac224b09366fa9ccbc5c7887a0be3c60c0184e0fb468acf0f4ba0135fcb",
+			"elapsed": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"flags": "839018c5d8d9b743f6ea9914c04117ca00c6c92a2cfe7ff0c3e4b1ae7dbe6552",
+			"held": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"p": "666b20f41188c2404481316c7057e0add60eeb4e04790af2890d6d27d48fc0b8",
+			"physics_hz": "81b0006182e2f4180d23d14f625a836f013f13c50bb9e085fcca8949834c8a1e",
+			"pitch": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"reference_p": "666b20f41188c2404481316c7057e0add60eeb4e04790af2890d6d27d48fc0b8",
+			"respawns": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"tick": "baed642339816affb3fe8719792d0e4ce82f12db72b7373d244eaa65445800fe",
+			"v": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+			"yaw": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925"
+		},
+		"events": [
+			{
+				"d": {
+					"names": [
+						"crouch",
+						"jump",
+						"look_down",
+						"look_left",
+						"look_right",
+						"look_up",
+						"move_back",
+						"move_forward",
+						"move_left",
+						"move_right",
+						"r15_grapple",
+						"r15_slide"
+					]
+				},
+				"k": "held_names",
+				"q": 0.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"index": 0.0,
+					"name": "restart"
+				},
+				"k": "action_name",
+				"q": 1.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"checkpoint": 0.0,
+					"dt": 0.0078125,
+					"mode": "run",
+					"motor_version": "r15-source-crouch-2",
+					"physics_hz": 128.0,
+					"practice_reason": "",
+					"respawns": 0.0
+				},
+				"k": "context",
+				"q": 2.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 3.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"edge": [
+						{
+							"echo": false,
+							"keycode": 4194333.0,
+							"physical_keycode": 4194333.0,
+							"pressed": true,
+							"type": "key"
+						},
+						{
+							"action": "r16_preset_2",
+							"pressed": true,
+							"type": "action"
+						}
+					],
+					"from": "server128_aa1000",
+					"inputs_carried": 0.0,
+					"paused": false,
+					"same_body": true,
+					"to": "server128",
+					"untouched": true
+				},
+				"k": "preset",
+				"q": 4.0,
+				"s": "event",
+				"t": 3.0
+			}
+		],
+		"file": "night-shift_server128-aa1000_20261110-162939_383_88d62f2b.r16run",
+		"header": {
+			"created_unix": 1794328179.383443,
+			"created_utc": "2026-11-10T16:29:39Z",
+			"engine": "4.7.2-stable (official)",
+			"format": "foldrunner-r16-run",
+			"identity": {
+				"course_key": "052f1b00d51dab56",
+				"format": "r16-motion-1",
+				"geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+				"map": "night-shift",
+				"motor": "r15-source-crouch-2",
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"physics_hz": 128.0,
+				"preset": "server128_aa1000",
+				"runner": "res://scripts/r15_source_player.gd",
+				"timing": "r16-timing-1"
+			},
+			"metadata": {
+				"attempt": 5.0,
+				"build": "spillway-2026.11.10-r20",
+				"build_label": "Spillway R20",
+				"clean_at_start": true,
+				"course_key": "052f1b00d51dab56",
+				"elapsed_at_start": 0.0,
+				"family": "source",
+				"held_actions": [
+					"move_forward",
+					"move_back",
+					"move_left",
+					"move_right",
+					"jump",
+					"crouch",
+					"r15_slide",
+					"r15_grapple",
+					"look_left",
+					"look_right",
+					"look_up",
+					"look_down"
+				],
+				"identity": {
+					"course_key": "052f1b00d51dab56",
+					"format": "r16-motion-1",
+					"geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					"map": "night-shift",
+					"motor": "r15-source-crouch-2",
+					"overlay": "r16-opportunities-1:none (non_target_map)",
+					"physics_hz": 128.0,
+					"preset": "server128_aa1000",
+					"runner": "res://scripts/r15_source_player.gd",
+					"timing": "r16-timing-1"
+				},
+				"lab": {},
+				"laws": {
+					"approved": "r15 source runner res://scripts/r15_source_player.gd with the r15 F2/F5 server presets, unchanged",
+					"course_law": "approved r15",
+					"experimental": [],
+					"r16_additions": "style scoring, recording and ghost are r16 game choices that only read the game"
+				},
+				"look": {
+					"family": "source",
+					"fov": 90.0,
+					"input": "screen_relative counts",
+					"m_pitch": 0.022,
+					"m_yaw": 0.022,
+					"pitch_rad_per_count": 0.00095993108859688,
+					"replay_override": true,
+					"sensitivity": 2.5,
+					"yaw_rad_per_count": 0.00095993108859688
+				},
+				"map": "night-shift",
+				"map_kind": "course",
+				"map_name": "Night Shift",
+				"opportunities": {
+					"applied": false,
+					"base_geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					"hash": "",
+					"passages": [],
+					"reason": "non_target_map",
+					"version": "r16-opportunities-1"
+				},
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"paused_at_start": false,
+				"physics": {
+					"family": "source",
+					"fingerprint": {
+						"air_budget": "legacy",
+						"air_surface": "deadstrafe",
+						"cl_forwardspeed": 450.0,
+						"cl_sidespeed": 450.0,
+						"duck_air_anchor": "center",
+						"duck_air_crop": false,
+						"duck_eye_clearance": 2.0,
+						"duck_eye_height": 46.0,
+						"duck_eye_time": 0.1,
+						"duck_hull_height": 54.0,
+						"duck_multiplier": 0.34,
+						"eye_height": 64.0,
+						"ground_probe": 2.0,
+						"ground_speed_clamp": false,
+						"hull_height": 72.0,
+						"hull_width": 32.0,
+						"jump_clamp_factor": 1.1,
+						"jump_order": "source2013",
+						"non_jump_velocity": 140.0,
+						"player_maxspeed": 250.0,
+						"preset": "csgo_server",
+						"stamina_model": "gokz_fit",
+						"sv_accelerate": 5.5,
+						"sv_air_max_wishspeed": 30.0,
+						"sv_airaccelerate": 1000.0,
+						"sv_autobunnyhopping": true,
+						"sv_enablebunnyhopping": true,
+						"sv_friction": 5.2,
+						"sv_gravity": 800.0,
+						"sv_jump_impulse": 301.993377,
+						"sv_maxspeed": 320.0,
+						"sv_maxvelocity": 3500.0,
+						"sv_staminajumpcost": 0.0,
+						"sv_staminalandcost": 0.0,
+						"sv_staminamax": 0.0,
+						"sv_staminarecoveryrate": 0.0,
+						"sv_stepsize": 18.0,
+						"sv_stopspeed": 80.0,
+						"sv_walkable_normal": 0.7,
+						"tickrate": 128.0,
+						"water_multiplier": 0.8
+					},
+					"hull": {
+						"duck_air_anchor": "center",
+						"duck_height_u": 54.0,
+						"height_u": 72.0,
+						"shape": "box",
+						"width_u": 32.0
+					},
+					"hz": 128.0,
+					"mechanics": [],
+					"motor_version": "r15-source-crouch-2",
+					"runner": "res://scripts/r15_source_player.gd",
+					"standin": false
+				},
+				"practice_reason": "",
+				"practice_stage": -1.0,
+				"preset": "server128_aa1000",
+				"preset_label": "Bhop server AA 1000",
+				"record_identity": [
+					"r16-timing-1",
+					[
+						"night-shift",
+						"course",
+						"r15-night-shift",
+						1.0,
+						"nightshift"
+					],
+					"cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					[
+						"Throat",
+						"Turning loop",
+						"Wash bays",
+						"Flyover ramp",
+						"Flyover",
+						"Terminus"
+					],
+					"server128_aa1000",
+					"source",
+					"r15-source-crouch-2",
+					"res://scripts/r15_source_player.gd",
+					128.0,
+					"{\"air_budget\":\"legacy\",\"air_surface\":\"deadstrafe\",\"cl_forwardspeed\":450.0,\"cl_sidespeed\":450.0,\"duck_air_anchor\":\"center\",\"duck_air_crop\":false,\"duck_eye_clearance\":2.0,\"duck_eye_height\":46.0,\"duck_eye_time\":0.1,\"duck_hull_height\":54.0,\"duck_multiplier\":0.34,\"eye_height\":64.0,\"ground_probe\":2.0,\"ground_speed_clamp\":false,\"hull_height\":72.0,\"hull_width\":32.0,\"jump_clamp_factor\":1.1,\"jump_order\":\"source2013\",\"non_jump_velocity\":140.0,\"player_maxspeed\":250.0,\"preset\":\"csgo_server\",\"stamina_model\":\"gokz_fit\",\"sv_accelerate\":5.5,\"sv_air_max_wishspeed\":30.0,\"sv_airaccelerate\":1000.0,\"sv_autobunnyhopping\":true,\"sv_enablebunnyhopping\":true,\"sv_friction\":5.2,\"sv_gravity\":800.0,\"sv_jump_impulse\":301.993377,\"sv_maxspeed\":320.0,\"sv_maxvelocity\":3500.0,\"sv_staminajumpcost\":0.0,\"sv_staminalandcost\":0.0,\"sv_staminamax\":0.0,\"sv_staminarecoveryrate\":0.0,\"sv_stepsize\":18.0,\"sv_stopspeed\":80.0,\"sv_walkable_normal\":0.7,\"tickrate\":128,\"water_multiplier\":0.8}",
+					"{\"duck_air_anchor\":\"center\",\"duck_height_u\":54.0,\"height_u\":72.0,\"shape\":\"box\",\"width_u\":32.0}",
+					"[]",
+					"r16-opportunities-1:none (non_target_map)"
+				],
+				"sample": {
+					"actual_v": "the runner's own travel over its step, excluding duck-origin compensation; checked against (p - previous p - duck shift) / dt",
+					"version": "r16-sample-1",
+					"when": "end of each unpaused physics frame (priority 999, after the strafe stats): the body after this frame's motor step, the host state as this frame left it"
+				},
+				"scoring": {
+					"style": {
+						"event_format": 2.0,
+						"rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
+						"version": "r20-style-stack-1"
+					},
+					"style_key": "r20-style-stack-1/2/b133b80f118247cf",
+					"timing": "r16-timing-1"
+				},
+				"start_reason": "restart",
+				"timer_running_at_start": false
+			},
+			"os": "Linux",
+			"run_id": "night-shift_server128-aa1000_20261110-162939_383_88d62f2b",
+			"units": {
+				"angle": "rad",
+				"length": "m",
+				"time": "s",
+				"velocity": "m/s"
+			},
+			"vector_precision": "single",
+			"version": 1.0
+		},
+		"identity_text": "[\"r16-timing-1\",[\"night-shift\",\"course\",\"r15-night-shift\",1,\"nightshift\"],\"cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad\",[\"Throat\",\"Turning loop\",\"Wash bays\",\"Flyover ramp\",\"Flyover\",\"Terminus\"],\"server128_aa1000\",\"source\",\"r15-source-crouch-2\",\"res://scripts/r15_source_player.gd\",128,\"{\\\"air_budget\\\":\\\"legacy\\\",\\\"air_surface\\\":\\\"deadstrafe\\\",\\\"cl_forwardspeed\\\":450.0,\\\"cl_sidespeed\\\":450.0,\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_air_crop\\\":false,\\\"duck_eye_clearance\\\":2.0,\\\"duck_eye_height\\\":46.0,\\\"duck_eye_time\\\":0.1,\\\"duck_hull_height\\\":54.0,\\\"duck_multiplier\\\":0.34,\\\"eye_height\\\":64.0,\\\"ground_probe\\\":2.0,\\\"ground_speed_clamp\\\":false,\\\"hull_height\\\":72.0,\\\"hull_width\\\":32.0,\\\"jump_clamp_factor\\\":1.1,\\\"jump_order\\\":\\\"source2013\\\",\\\"non_jump_velocity\\\":140.0,\\\"player_maxspeed\\\":250.0,\\\"preset\\\":\\\"csgo_server\\\",\\\"stamina_model\\\":\\\"gokz_fit\\\",\\\"sv_accelerate\\\":5.5,\\\"sv_air_max_wishspeed\\\":30.0,\\\"sv_airaccelerate\\\":1000.0,\\\"sv_autobunnyhopping\\\":true,\\\"sv_enablebunnyhopping\\\":true,\\\"sv_friction\\\":5.2,\\\"sv_gravity\\\":800.0,\\\"sv_jump_impulse\\\":301.993377,\\\"sv_maxspeed\\\":320.0,\\\"sv_maxvelocity\\\":3500.0,\\\"sv_staminajumpcost\\\":0.0,\\\"sv_staminalandcost\\\":0.0,\\\"sv_staminamax\\\":0.0,\\\"sv_staminarecoveryrate\\\":0.0,\\\"sv_stepsize\\\":18.0,\\\"sv_stopspeed\\\":80.0,\\\"sv_walkable_normal\\\":0.7,\\\"tickrate\\\":128,\\\"water_multiplier\\\":0.8}\",\"{\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_height_u\\\":54.0,\\\"height_u\\\":72.0,\\\"shape\\\":\\\"box\\\",\\\"width_u\\\":32.0}\",\"[]\",\"r16-opportunities-1:none (non_target_map)\"]",
+		"inputs_sha256": {
+			"aux": "59f897c1aca4a814dad339f4185fdf0a38a52c816ad14e94162466af79521357",
+			"code": "59f897c1aca4a814dad339f4185fdf0a38a52c816ad14e94162466af79521357",
+			"flags": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"kind": "77ee7ce65c84d38465b8162c58afd76001b97d06f7e68e7abc06ad7eee78756c",
+			"tick": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+		},
+		"seal": {
+			"counts": {
+				"bytes": 6366.0,
+				"chunks": 1.0,
+				"events": 5.0,
+				"gaps": 0.0,
+				"inputs": 2.0,
+				"ticks": 4.0
+			},
+			"ended_unix": 1794328179.400142,
+			"final": {
+				"checkpoint": 0.0,
+				"clean": true,
+				"elapsed": 0.0,
+				"finished": false,
+				"p": [
+					0.0,
+					0.00115448131691664,
+					20.0
+				],
+				"respawns": 0.0,
+				"started": false,
+				"tick": 3.0
+			},
+			"finish_tick": -1.0,
+			"first_tick": 0.0,
+			"last_tick": 3.0,
+			"outcome": {
+				"checkpoint": 0.0,
+				"clean": false,
+				"elapsed": 0.0,
+				"finished": false,
+				"kind": "preset",
+				"practice_reason": "",
+				"respawns": 0.0,
+				"style": {
+					"by_kind": {},
+					"score": 0.0
+				}
+			},
+			"timer_start_tick": -1.0
+		},
+		"sha256": "2fe8812b7f33007ab837112da97298448a895218b6b7732b85b478fe0860e338"
+	},
+	{
+		"columns_sha256": {
+			"actual_v": "3f68eb6424dd4e49b6cc554f936dbab732327f3abb9fb77386814c35f0da9e40",
+			"checkpoint": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"dt": "bda8dac224b09366fa9ccbc5c7887a0be3c60c0184e0fb468acf0f4ba0135fcb",
+			"elapsed": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"flags": "839018c5d8d9b743f6ea9914c04117ca00c6c92a2cfe7ff0c3e4b1ae7dbe6552",
+			"held": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"p": "7b3c205d508bc5befd8476e6875bc12d5bad1f68765f5fce44aee539c0d6da76",
+			"physics_hz": "81b0006182e2f4180d23d14f625a836f013f13c50bb9e085fcca8949834c8a1e",
+			"pitch": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"reference_p": "7b3c205d508bc5befd8476e6875bc12d5bad1f68765f5fce44aee539c0d6da76",
+			"respawns": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"tick": "baed642339816affb3fe8719792d0e4ce82f12db72b7373d244eaa65445800fe",
+			"v": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+			"yaw": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925"
+		},
+		"events": [
+			{
+				"d": {
+					"names": [
+						"crouch",
+						"jump",
+						"look_down",
+						"look_left",
+						"look_right",
+						"look_up",
+						"move_back",
+						"move_forward",
+						"move_left",
+						"move_right",
+						"r15_grapple",
+						"r15_slide"
+					]
+				},
+				"k": "held_names",
+				"q": 0.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"index": 0.0,
+					"name": "r16_preset_2"
+				},
+				"k": "action_name",
+				"q": 1.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"checkpoint": 0.0,
+					"dt": 0.0078125,
+					"mode": "run",
+					"motor_version": "r15-source-crouch-2",
+					"physics_hz": 128.0,
+					"practice_reason": "",
+					"respawns": 0.0
+				},
+				"k": "context",
+				"q": 2.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"edge": [
+						{
+							"echo": false,
+							"keycode": 82.0,
+							"physical_keycode": 82.0,
+							"pressed": true,
+							"type": "key"
+						},
+						{
+							"action": "restart",
+							"pressed": true,
+							"type": "action"
+						}
+					],
+					"inputs": [],
+					"paused": false
+				},
+				"k": "restart",
+				"q": 3.0,
+				"s": "event",
+				"t": 3.0
+			}
+		],
+		"file": "night-shift_server128_20261110-162939_419_69207f87.r16run",
+		"header": {
+			"created_unix": 1794328179.419916,
+			"created_utc": "2026-11-10T16:29:39Z",
+			"engine": "4.7.2-stable (official)",
+			"format": "foldrunner-r16-run",
+			"identity": {
+				"course_key": "43824c5606842c7d",
+				"format": "r16-motion-1",
+				"geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+				"map": "night-shift",
+				"motor": "r15-source-crouch-2",
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"physics_hz": 128.0,
+				"preset": "server128",
+				"runner": "res://scripts/r15_source_player.gd",
+				"timing": "r16-timing-1"
+			},
+			"metadata": {
+				"attempt": 5.0,
+				"build": "spillway-2026.11.10-r20",
+				"build_label": "Spillway R20",
+				"clean_at_start": true,
+				"course_key": "43824c5606842c7d",
+				"elapsed_at_start": 0.0,
+				"family": "source",
+				"held_actions": [
+					"move_forward",
+					"move_back",
+					"move_left",
+					"move_right",
+					"jump",
+					"crouch",
+					"r15_slide",
+					"r15_grapple",
+					"look_left",
+					"look_right",
+					"look_up",
+					"look_down"
+				],
+				"identity": {
+					"course_key": "43824c5606842c7d",
+					"format": "r16-motion-1",
+					"geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					"map": "night-shift",
+					"motor": "r15-source-crouch-2",
+					"overlay": "r16-opportunities-1:none (non_target_map)",
+					"physics_hz": 128.0,
+					"preset": "server128",
+					"runner": "res://scripts/r15_source_player.gd",
+					"timing": "r16-timing-1"
+				},
+				"lab": {},
+				"laws": {
+					"approved": "r15 source runner res://scripts/r15_source_player.gd with the r15 F2/F5 server presets, unchanged",
+					"course_law": "approved r15",
+					"experimental": [],
+					"r16_additions": "style scoring, recording and ghost are r16 game choices that only read the game"
+				},
+				"look": {
+					"family": "source",
+					"fov": 90.0,
+					"input": "screen_relative counts",
+					"m_pitch": 0.022,
+					"m_yaw": 0.022,
+					"pitch_rad_per_count": 0.00095993108859688,
+					"replay_override": true,
+					"sensitivity": 2.5,
+					"yaw_rad_per_count": 0.00095993108859688
+				},
+				"map": "night-shift",
+				"map_kind": "course",
+				"map_name": "Night Shift",
+				"opportunities": {
+					"applied": false,
+					"base_geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					"hash": "",
+					"passages": [],
+					"reason": "non_target_map",
+					"version": "r16-opportunities-1"
+				},
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"paused_at_start": false,
+				"physics": {
+					"family": "source",
+					"fingerprint": {
+						"air_budget": "legacy",
+						"air_surface": "deadstrafe",
+						"cl_forwardspeed": 450.0,
+						"cl_sidespeed": 450.0,
+						"duck_air_anchor": "center",
+						"duck_air_crop": false,
+						"duck_eye_clearance": 2.0,
+						"duck_eye_height": 46.0,
+						"duck_eye_time": 0.1,
+						"duck_hull_height": 54.0,
+						"duck_multiplier": 0.34,
+						"eye_height": 64.0,
+						"ground_probe": 2.0,
+						"ground_speed_clamp": false,
+						"hull_height": 72.0,
+						"hull_width": 32.0,
+						"jump_clamp_factor": 1.1,
+						"jump_order": "source2013",
+						"non_jump_velocity": 140.0,
+						"player_maxspeed": 250.0,
+						"preset": "csgo_server",
+						"stamina_model": "gokz_fit",
+						"sv_accelerate": 5.5,
+						"sv_air_max_wishspeed": 30.0,
+						"sv_airaccelerate": 100.0,
+						"sv_autobunnyhopping": true,
+						"sv_enablebunnyhopping": true,
+						"sv_friction": 5.2,
+						"sv_gravity": 800.0,
+						"sv_jump_impulse": 301.993377,
+						"sv_maxspeed": 320.0,
+						"sv_maxvelocity": 3500.0,
+						"sv_staminajumpcost": 0.0,
+						"sv_staminalandcost": 0.0,
+						"sv_staminamax": 0.0,
+						"sv_staminarecoveryrate": 0.0,
+						"sv_stepsize": 18.0,
+						"sv_stopspeed": 80.0,
+						"sv_walkable_normal": 0.7,
+						"tickrate": 128.0,
+						"water_multiplier": 0.8
+					},
+					"hull": {
+						"duck_air_anchor": "center",
+						"duck_height_u": 54.0,
+						"height_u": 72.0,
+						"shape": "box",
+						"width_u": 32.0
+					},
+					"hz": 128.0,
+					"mechanics": [],
+					"motor_version": "r15-source-crouch-2",
+					"runner": "res://scripts/r15_source_player.gd",
+					"standin": false
+				},
+				"practice_reason": "",
+				"practice_stage": -1.0,
+				"preset": "server128",
+				"preset_label": "CS:GO bhop server",
+				"record_identity": [
+					"r16-timing-1",
+					[
+						"night-shift",
+						"course",
+						"r15-night-shift",
+						1.0,
+						"nightshift"
+					],
+					"cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					[
+						"Throat",
+						"Turning loop",
+						"Wash bays",
+						"Flyover ramp",
+						"Flyover",
+						"Terminus"
+					],
+					"server128",
+					"source",
+					"r15-source-crouch-2",
+					"res://scripts/r15_source_player.gd",
+					128.0,
+					"{\"air_budget\":\"legacy\",\"air_surface\":\"deadstrafe\",\"cl_forwardspeed\":450.0,\"cl_sidespeed\":450.0,\"duck_air_anchor\":\"center\",\"duck_air_crop\":false,\"duck_eye_clearance\":2.0,\"duck_eye_height\":46.0,\"duck_eye_time\":0.1,\"duck_hull_height\":54.0,\"duck_multiplier\":0.34,\"eye_height\":64.0,\"ground_probe\":2.0,\"ground_speed_clamp\":false,\"hull_height\":72.0,\"hull_width\":32.0,\"jump_clamp_factor\":1.1,\"jump_order\":\"source2013\",\"non_jump_velocity\":140.0,\"player_maxspeed\":250.0,\"preset\":\"csgo_server\",\"stamina_model\":\"gokz_fit\",\"sv_accelerate\":5.5,\"sv_air_max_wishspeed\":30.0,\"sv_airaccelerate\":100.0,\"sv_autobunnyhopping\":true,\"sv_enablebunnyhopping\":true,\"sv_friction\":5.2,\"sv_gravity\":800.0,\"sv_jump_impulse\":301.993377,\"sv_maxspeed\":320.0,\"sv_maxvelocity\":3500.0,\"sv_staminajumpcost\":0.0,\"sv_staminalandcost\":0.0,\"sv_staminamax\":0.0,\"sv_staminarecoveryrate\":0.0,\"sv_stepsize\":18.0,\"sv_stopspeed\":80.0,\"sv_walkable_normal\":0.7,\"tickrate\":128,\"water_multiplier\":0.8}",
+					"{\"duck_air_anchor\":\"center\",\"duck_height_u\":54.0,\"height_u\":72.0,\"shape\":\"box\",\"width_u\":32.0}",
+					"[]",
+					"r16-opportunities-1:none (non_target_map)"
+				],
+				"sample": {
+					"actual_v": "the runner's own travel over its step, excluding duck-origin compensation; checked against (p - previous p - duck shift) / dt",
+					"version": "r16-sample-1",
+					"when": "end of each unpaused physics frame (priority 999, after the strafe stats): the body after this frame's motor step, the host state as this frame left it"
+				},
+				"scoring": {
+					"style": {
+						"event_format": 2.0,
+						"rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
+						"version": "r20-style-stack-1"
+					},
+					"style_key": "r20-style-stack-1/2/b133b80f118247cf",
+					"timing": "r16-timing-1"
+				},
+				"start_reason": "preset",
+				"timer_running_at_start": false
+			},
+			"os": "Linux",
+			"run_id": "night-shift_server128_20261110-162939_419_69207f87",
+			"units": {
+				"angle": "rad",
+				"length": "m",
+				"time": "s",
+				"velocity": "m/s"
+			},
+			"vector_precision": "single",
+			"version": 1.0
+		},
+		"identity_text": "[\"r16-timing-1\",[\"night-shift\",\"course\",\"r15-night-shift\",1,\"nightshift\"],\"cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad\",[\"Throat\",\"Turning loop\",\"Wash bays\",\"Flyover ramp\",\"Flyover\",\"Terminus\"],\"server128\",\"source\",\"r15-source-crouch-2\",\"res://scripts/r15_source_player.gd\",128,\"{\\\"air_budget\\\":\\\"legacy\\\",\\\"air_surface\\\":\\\"deadstrafe\\\",\\\"cl_forwardspeed\\\":450.0,\\\"cl_sidespeed\\\":450.0,\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_air_crop\\\":false,\\\"duck_eye_clearance\\\":2.0,\\\"duck_eye_height\\\":46.0,\\\"duck_eye_time\\\":0.1,\\\"duck_hull_height\\\":54.0,\\\"duck_multiplier\\\":0.34,\\\"eye_height\\\":64.0,\\\"ground_probe\\\":2.0,\\\"ground_speed_clamp\\\":false,\\\"hull_height\\\":72.0,\\\"hull_width\\\":32.0,\\\"jump_clamp_factor\\\":1.1,\\\"jump_order\\\":\\\"source2013\\\",\\\"non_jump_velocity\\\":140.0,\\\"player_maxspeed\\\":250.0,\\\"preset\\\":\\\"csgo_server\\\",\\\"stamina_model\\\":\\\"gokz_fit\\\",\\\"sv_accelerate\\\":5.5,\\\"sv_air_max_wishspeed\\\":30.0,\\\"sv_airaccelerate\\\":100.0,\\\"sv_autobunnyhopping\\\":true,\\\"sv_enablebunnyhopping\\\":true,\\\"sv_friction\\\":5.2,\\\"sv_gravity\\\":800.0,\\\"sv_jump_impulse\\\":301.993377,\\\"sv_maxspeed\\\":320.0,\\\"sv_maxvelocity\\\":3500.0,\\\"sv_staminajumpcost\\\":0.0,\\\"sv_staminalandcost\\\":0.0,\\\"sv_staminamax\\\":0.0,\\\"sv_staminarecoveryrate\\\":0.0,\\\"sv_stepsize\\\":18.0,\\\"sv_stopspeed\\\":80.0,\\\"sv_walkable_normal\\\":0.7,\\\"tickrate\\\":128,\\\"water_multiplier\\\":0.8}\",\"{\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_height_u\\\":54.0,\\\"height_u\\\":72.0,\\\"shape\\\":\\\"box\\\",\\\"width_u\\\":32.0}\",\"[]\",\"r16-opportunities-1:none (non_target_map)\"]",
+		"inputs_sha256": {
+			"aux": "b71e03575ecd61b8975529ad2d067fea4ce146aa20a5b8b9e66dfc0dd9008870",
+			"code": "b71e03575ecd61b8975529ad2d067fea4ce146aa20a5b8b9e66dfc0dd9008870",
+			"flags": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"kind": "77ee7ce65c84d38465b8162c58afd76001b97d06f7e68e7abc06ad7eee78756c",
+			"tick": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+		},
+		"seal": {
+			"counts": {
+				"bytes": 6251.0,
+				"chunks": 1.0,
+				"events": 4.0,
+				"gaps": 0.0,
+				"inputs": 2.0,
+				"ticks": 4.0
+			},
+			"ended_unix": 1794328179.437352,
+			"final": {
+				"checkpoint": 0.0,
+				"clean": true,
+				"elapsed": 0.0,
+				"finished": false,
+				"p": [
+					0.0,
+					0.00116091629024595,
+					20.0
+				],
+				"respawns": 0.0,
+				"started": false,
+				"tick": 3.0
+			},
+			"finish_tick": -1.0,
+			"first_tick": 0.0,
+			"last_tick": 3.0,
+			"outcome": {
+				"checkpoint": 0.0,
+				"clean": false,
+				"elapsed": 0.0,
+				"finished": false,
+				"kind": "restart",
+				"practice_reason": "",
+				"respawns": 0.0,
+				"style": {
+					"by_kind": {},
+					"score": 0.0
+				}
+			},
+			"timer_start_tick": -1.0
+		},
+		"sha256": "ec450c7fbec3fb9088b86678c6b32b7de198396d476afb9330f55de7b593d23f"
+	},
+	{
+		"columns_sha256": {
+			"actual_v": "c9b4547a7f1f1956b96dc10367918d1804bee0e104a672395fd6c7921dc33af3",
+			"checkpoint": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"dt": "bda8dac224b09366fa9ccbc5c7887a0be3c60c0184e0fb468acf0f4ba0135fcb",
+			"elapsed": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"flags": "839018c5d8d9b743f6ea9914c04117ca00c6c92a2cfe7ff0c3e4b1ae7dbe6552",
+			"held": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"p": "666b20f41188c2404481316c7057e0add60eeb4e04790af2890d6d27d48fc0b8",
+			"physics_hz": "81b0006182e2f4180d23d14f625a836f013f13c50bb9e085fcca8949834c8a1e",
+			"pitch": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925",
+			"reference_p": "666b20f41188c2404481316c7057e0add60eeb4e04790af2890d6d27d48fc0b8",
+			"respawns": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+			"tick": "baed642339816affb3fe8719792d0e4ce82f12db72b7373d244eaa65445800fe",
+			"v": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+			"yaw": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925"
+		},
+		"events": [
+			{
+				"d": {
+					"names": [
+						"crouch",
+						"jump",
+						"look_down",
+						"look_left",
+						"look_right",
+						"look_up",
+						"move_back",
+						"move_forward",
+						"move_left",
+						"move_right",
+						"r15_grapple",
+						"r15_slide"
+					]
+				},
+				"k": "held_names",
+				"q": 0.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"index": 0.0,
+					"name": "restart"
+				},
+				"k": "action_name",
+				"q": 1.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"checkpoint": 0.0,
+					"dt": 0.0078125,
+					"mode": "run",
+					"motor_version": "r15-source-crouch-2",
+					"physics_hz": 128.0,
+					"practice_reason": "",
+					"respawns": 0.0
+				},
+				"k": "context",
+				"q": 2.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"events": [
+						"land"
+					]
+				},
+				"k": "motion",
+				"q": 3.0,
+				"s": "recorder",
+				"t": 0.0
+			},
+			{
+				"d": {
+					"edge": [
+						{
+							"echo": false,
+							"keycode": 4194305.0,
+							"physical_keycode": 4194305.0,
+							"pressed": true,
+							"type": "key"
+						},
+						{
+							"action": "pause",
+							"pressed": true,
+							"type": "action"
+						}
+					],
+					"pending_inputs": 0.0
+				},
+				"k": "pause",
+				"q": 4.0,
+				"s": "event",
+				"t": 3.0
+			},
+			{
+				"d": {
+					"edge": [],
+					"from": "night-shift",
+					"inputs": [],
+					"paused": true,
+					"to": "experiment"
+				},
+				"k": "map",
+				"q": 5.0,
+				"s": "event",
+				"t": 3.0
+			}
+		],
+		"file": "night-shift_server128_20261110-162939_437_774d290f.r16run",
+		"header": {
+			"created_unix": 1794328179.437994,
+			"created_utc": "2026-11-10T16:29:39Z",
+			"engine": "4.7.2-stable (official)",
+			"format": "foldrunner-r16-run",
+			"identity": {
+				"course_key": "43824c5606842c7d",
+				"format": "r16-motion-1",
+				"geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+				"map": "night-shift",
+				"motor": "r15-source-crouch-2",
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"physics_hz": 128.0,
+				"preset": "server128",
+				"runner": "res://scripts/r15_source_player.gd",
+				"timing": "r16-timing-1"
+			},
+			"metadata": {
+				"attempt": 6.0,
+				"build": "spillway-2026.11.10-r20",
+				"build_label": "Spillway R20",
+				"clean_at_start": true,
+				"course_key": "43824c5606842c7d",
+				"elapsed_at_start": 0.0,
+				"family": "source",
+				"held_actions": [
+					"move_forward",
+					"move_back",
+					"move_left",
+					"move_right",
+					"jump",
+					"crouch",
+					"r15_slide",
+					"r15_grapple",
+					"look_left",
+					"look_right",
+					"look_up",
+					"look_down"
+				],
+				"identity": {
+					"course_key": "43824c5606842c7d",
+					"format": "r16-motion-1",
+					"geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					"map": "night-shift",
+					"motor": "r15-source-crouch-2",
+					"overlay": "r16-opportunities-1:none (non_target_map)",
+					"physics_hz": 128.0,
+					"preset": "server128",
+					"runner": "res://scripts/r15_source_player.gd",
+					"timing": "r16-timing-1"
+				},
+				"lab": {},
+				"laws": {
+					"approved": "r15 source runner res://scripts/r15_source_player.gd with the r15 F2/F5 server presets, unchanged",
+					"course_law": "approved r15",
+					"experimental": [],
+					"r16_additions": "style scoring, recording and ghost are r16 game choices that only read the game"
+				},
+				"look": {
+					"family": "source",
+					"fov": 90.0,
+					"input": "screen_relative counts",
+					"m_pitch": 0.022,
+					"m_yaw": 0.022,
+					"pitch_rad_per_count": 0.00095993108859688,
+					"replay_override": true,
+					"sensitivity": 2.5,
+					"yaw_rad_per_count": 0.00095993108859688
+				},
+				"map": "night-shift",
+				"map_kind": "course",
+				"map_name": "Night Shift",
+				"opportunities": {
+					"applied": false,
+					"base_geometry": "cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					"hash": "",
+					"passages": [],
+					"reason": "non_target_map",
+					"version": "r16-opportunities-1"
+				},
+				"overlay": "r16-opportunities-1:none (non_target_map)",
+				"paused_at_start": false,
+				"physics": {
+					"family": "source",
+					"fingerprint": {
+						"air_budget": "legacy",
+						"air_surface": "deadstrafe",
+						"cl_forwardspeed": 450.0,
+						"cl_sidespeed": 450.0,
+						"duck_air_anchor": "center",
+						"duck_air_crop": false,
+						"duck_eye_clearance": 2.0,
+						"duck_eye_height": 46.0,
+						"duck_eye_time": 0.1,
+						"duck_hull_height": 54.0,
+						"duck_multiplier": 0.34,
+						"eye_height": 64.0,
+						"ground_probe": 2.0,
+						"ground_speed_clamp": false,
+						"hull_height": 72.0,
+						"hull_width": 32.0,
+						"jump_clamp_factor": 1.1,
+						"jump_order": "source2013",
+						"non_jump_velocity": 140.0,
+						"player_maxspeed": 250.0,
+						"preset": "csgo_server",
+						"stamina_model": "gokz_fit",
+						"sv_accelerate": 5.5,
+						"sv_air_max_wishspeed": 30.0,
+						"sv_airaccelerate": 100.0,
+						"sv_autobunnyhopping": true,
+						"sv_enablebunnyhopping": true,
+						"sv_friction": 5.2,
+						"sv_gravity": 800.0,
+						"sv_jump_impulse": 301.993377,
+						"sv_maxspeed": 320.0,
+						"sv_maxvelocity": 3500.0,
+						"sv_staminajumpcost": 0.0,
+						"sv_staminalandcost": 0.0,
+						"sv_staminamax": 0.0,
+						"sv_staminarecoveryrate": 0.0,
+						"sv_stepsize": 18.0,
+						"sv_stopspeed": 80.0,
+						"sv_walkable_normal": 0.7,
+						"tickrate": 128.0,
+						"water_multiplier": 0.8
+					},
+					"hull": {
+						"duck_air_anchor": "center",
+						"duck_height_u": 54.0,
+						"height_u": 72.0,
+						"shape": "box",
+						"width_u": 32.0
+					},
+					"hz": 128.0,
+					"mechanics": [],
+					"motor_version": "r15-source-crouch-2",
+					"runner": "res://scripts/r15_source_player.gd",
+					"standin": false
+				},
+				"practice_reason": "",
+				"practice_stage": -1.0,
+				"preset": "server128",
+				"preset_label": "CS:GO bhop server",
+				"record_identity": [
+					"r16-timing-1",
+					[
+						"night-shift",
+						"course",
+						"r15-night-shift",
+						1.0,
+						"nightshift"
+					],
+					"cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad",
+					[
+						"Throat",
+						"Turning loop",
+						"Wash bays",
+						"Flyover ramp",
+						"Flyover",
+						"Terminus"
+					],
+					"server128",
+					"source",
+					"r15-source-crouch-2",
+					"res://scripts/r15_source_player.gd",
+					128.0,
+					"{\"air_budget\":\"legacy\",\"air_surface\":\"deadstrafe\",\"cl_forwardspeed\":450.0,\"cl_sidespeed\":450.0,\"duck_air_anchor\":\"center\",\"duck_air_crop\":false,\"duck_eye_clearance\":2.0,\"duck_eye_height\":46.0,\"duck_eye_time\":0.1,\"duck_hull_height\":54.0,\"duck_multiplier\":0.34,\"eye_height\":64.0,\"ground_probe\":2.0,\"ground_speed_clamp\":false,\"hull_height\":72.0,\"hull_width\":32.0,\"jump_clamp_factor\":1.1,\"jump_order\":\"source2013\",\"non_jump_velocity\":140.0,\"player_maxspeed\":250.0,\"preset\":\"csgo_server\",\"stamina_model\":\"gokz_fit\",\"sv_accelerate\":5.5,\"sv_air_max_wishspeed\":30.0,\"sv_airaccelerate\":100.0,\"sv_autobunnyhopping\":true,\"sv_enablebunnyhopping\":true,\"sv_friction\":5.2,\"sv_gravity\":800.0,\"sv_jump_impulse\":301.993377,\"sv_maxspeed\":320.0,\"sv_maxvelocity\":3500.0,\"sv_staminajumpcost\":0.0,\"sv_staminalandcost\":0.0,\"sv_staminamax\":0.0,\"sv_staminarecoveryrate\":0.0,\"sv_stepsize\":18.0,\"sv_stopspeed\":80.0,\"sv_walkable_normal\":0.7,\"tickrate\":128,\"water_multiplier\":0.8}",
+					"{\"duck_air_anchor\":\"center\",\"duck_height_u\":54.0,\"height_u\":72.0,\"shape\":\"box\",\"width_u\":32.0}",
+					"[]",
+					"r16-opportunities-1:none (non_target_map)"
+				],
+				"sample": {
+					"actual_v": "the runner's own travel over its step, excluding duck-origin compensation; checked against (p - previous p - duck shift) / dt",
+					"version": "r16-sample-1",
+					"when": "end of each unpaused physics frame (priority 999, after the strafe stats): the body after this frame's motor step, the host state as this frame left it"
+				},
+				"scoring": {
+					"style": {
+						"event_format": 2.0,
+						"rules_sha256": "b133b80f118247cf944f1c48bbe9f1a65e2b71653adff52d41563904be661688",
+						"version": "r20-style-stack-1"
+					},
+					"style_key": "r20-style-stack-1/2/b133b80f118247cf",
+					"timing": "r16-timing-1"
+				},
+				"start_reason": "restart",
+				"timer_running_at_start": false
+			},
+			"os": "Linux",
+			"run_id": "night-shift_server128_20261110-162939_437_774d290f",
+			"units": {
+				"angle": "rad",
+				"length": "m",
+				"time": "s",
+				"velocity": "m/s"
+			},
+			"vector_precision": "single",
+			"version": 1.0
+		},
+		"identity_text": "[\"r16-timing-1\",[\"night-shift\",\"course\",\"r15-night-shift\",1,\"nightshift\"],\"cb6cc0c00a76be15be81f7f505163620f966ef81f89a2597cd7b11d33e3628ad\",[\"Throat\",\"Turning loop\",\"Wash bays\",\"Flyover ramp\",\"Flyover\",\"Terminus\"],\"server128\",\"source\",\"r15-source-crouch-2\",\"res://scripts/r15_source_player.gd\",128,\"{\\\"air_budget\\\":\\\"legacy\\\",\\\"air_surface\\\":\\\"deadstrafe\\\",\\\"cl_forwardspeed\\\":450.0,\\\"cl_sidespeed\\\":450.0,\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_air_crop\\\":false,\\\"duck_eye_clearance\\\":2.0,\\\"duck_eye_height\\\":46.0,\\\"duck_eye_time\\\":0.1,\\\"duck_hull_height\\\":54.0,\\\"duck_multiplier\\\":0.34,\\\"eye_height\\\":64.0,\\\"ground_probe\\\":2.0,\\\"ground_speed_clamp\\\":false,\\\"hull_height\\\":72.0,\\\"hull_width\\\":32.0,\\\"jump_clamp_factor\\\":1.1,\\\"jump_order\\\":\\\"source2013\\\",\\\"non_jump_velocity\\\":140.0,\\\"player_maxspeed\\\":250.0,\\\"preset\\\":\\\"csgo_server\\\",\\\"stamina_model\\\":\\\"gokz_fit\\\",\\\"sv_accelerate\\\":5.5,\\\"sv_air_max_wishspeed\\\":30.0,\\\"sv_airaccelerate\\\":100.0,\\\"sv_autobunnyhopping\\\":true,\\\"sv_enablebunnyhopping\\\":true,\\\"sv_friction\\\":5.2,\\\"sv_gravity\\\":800.0,\\\"sv_jump_impulse\\\":301.993377,\\\"sv_maxspeed\\\":320.0,\\\"sv_maxvelocity\\\":3500.0,\\\"sv_staminajumpcost\\\":0.0,\\\"sv_staminalandcost\\\":0.0,\\\"sv_staminamax\\\":0.0,\\\"sv_staminarecoveryrate\\\":0.0,\\\"sv_stepsize\\\":18.0,\\\"sv_stopspeed\\\":80.0,\\\"sv_walkable_normal\\\":0.7,\\\"tickrate\\\":128,\\\"water_multiplier\\\":0.8}\",\"{\\\"duck_air_anchor\\\":\\\"center\\\",\\\"duck_height_u\\\":54.0,\\\"height_u\\\":72.0,\\\"shape\\\":\\\"box\\\",\\\"width_u\\\":32.0}\",\"[]\",\"r16-opportunities-1:none (non_target_map)\"]",
+		"inputs_sha256": {
+			"aux": "59f897c1aca4a814dad339f4185fdf0a38a52c816ad14e94162466af79521357",
+			"code": "59f897c1aca4a814dad339f4185fdf0a38a52c816ad14e94162466af79521357",
+			"flags": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"kind": "77ee7ce65c84d38465b8162c58afd76001b97d06f7e68e7abc06ad7eee78756c",
+			"tick": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"x2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+			"y2": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+		},
+		"seal": {
+			"counts": {
+				"bytes": 6321.0,
+				"chunks": 1.0,
+				"events": 6.0,
+				"gaps": 0.0,
+				"inputs": 2.0,
+				"ticks": 4.0
+			},
+			"ended_unix": 1794328179.459831,
+			"final": {
+				"checkpoint": 0.0,
+				"clean": true,
+				"elapsed": 0.0,
+				"finished": false,
+				"p": [
+					0.0,
+					0.00115448131691664,
+					20.0
+				],
+				"respawns": 0.0,
+				"started": false,
+				"tick": 3.0
+			},
+			"finish_tick": -1.0,
+			"first_tick": 0.0,
+			"last_tick": 3.0,
+			"outcome": {
+				"checkpoint": 0.0,
+				"clean": false,
+				"elapsed": 0.0,
+				"finished": false,
+				"kind": "map",
+				"practice_reason": "",
+				"respawns": 0.0,
+				"style": {
+					"by_kind": {},
+					"score": 0.0
+				}
+			},
+			"timer_start_tick": -1.0
+		},
+		"sha256": "9afc69bf790d7c8543da93cc44905d488945eea4a4f8fda2f1673fcf2820c29a"
+	}
+]

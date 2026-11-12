@@ -1,0 +1,119 @@
+[
+ {
+  "map": "breakwater",
+  "preset": "server128",
+  "tape": "tests/fixtures/original-map-parity/breakwater-basic/submitted.json",
+  "warmup": 33,
+  "name": "breakwater-basic"
+ },
+ {
+  "map": "whiteout-relay",
+  "preset": "server128",
+  "tape": "tests/fixtures/original-map-parity/whiteout-basic/submitted.json",
+  "warmup": 33,
+  "name": "whiteout-basic"
+ },
+ {
+  "map": "sunken-court",
+  "preset": "server128",
+  "tape": "tests/fixtures/original-map-parity/sunken-basic/submitted.json",
+  "warmup": 33,
+  "name": "sunken-basic"
+ },
+ {
+  "map": "rainline",
+  "preset": "server128",
+  "tape": "tests/fixtures/original-map-parity/rainline-basic/submitted.json",
+  "warmup": 33,
+  "name": "rainline-basic"
+ },
+ {
+  "map": "night-shift",
+  "preset": "server128",
+  "tape": "tests/fixtures/original-map-parity/night-basic/submitted.json",
+  "warmup": 33,
+  "name": "night-basic"
+ },
+ {
+  "map": "practice",
+  "preset": "server128",
+  "tape": "tests/fixtures/original-map-parity/penstock-advanced/submitted.json",
+  "sensitivity": 5.729577951308232,
+  "warmup": 33,
+  "name": "penstock-advanced"
+ },
+ {
+  "map": "overflow",
+  "preset": "server128",
+  "tape": "tests/fixtures/original-map-parity/overflow-f2/submitted.json",
+  "sensitivity": 5.729577951308232,
+  "warmup": 8,
+  "name": "overflow-f2"
+ },
+ {
+  "map": "overflow",
+  "preset": "server128_aa1000",
+  "tape": "tests/fixtures/original-map-parity/overflow-f5/submitted.json",
+  "sensitivity": 5.729577951308232,
+  "warmup": 8,
+  "name": "overflow-f5"
+ },
+ {
+  "map": "whiteout-relay",
+  "preset": "server128",
+  "tape": "tests/fixtures/original-map-parity/whiteout-crouch/submitted.json",
+  "warmup": 33,
+  "name": "whiteout-crouch"
+ },
+ {
+  "map": "sunken-court",
+  "preset": "server128",
+  "tape": "tests/fixtures/original-map-parity/sunken-crouch/submitted.json",
+  "warmup": 33,
+  "name": "sunken-crouch"
+ },
+ {
+  "map": "rainline",
+  "preset": "server128",
+  "tape": "tests/fixtures/original-map-parity/rainline-duct/submitted.json",
+  "warmup": 33,
+  "name": "rainline-duct"
+ },
+ {
+  "map": "night-shift",
+  "preset": "server128",
+  "tape": "tests/fixtures/original-map-parity/night-crouch/submitted.json",
+  "warmup": 33,
+  "name": "night-crouch"
+ },
+ {
+  "map": "night-shift",
+  "preset": "server128_aa1000",
+  "tape": "tests/fixtures/original-map-parity/night-f5-earned/submitted.json",
+  "warmup": 33,
+  "name": "night-f5-earned"
+ },
+ {
+  "map": "breakwater",
+  "preset": "server128",
+  "tape": "tests/fixtures/original-map-parity/breakwater-return/submitted.json",
+  "warmup": 33,
+  "name": "breakwater-return"
+ },
+ {
+  "map": "whiteout-relay",
+  "preset": "server128",
+  "tape": "tests/fixtures/original-map-parity/r16-whiteout-apron/submitted.json",
+  "sensitivity": 2.5,
+  "warmup": 33,
+  "name": "r16-whiteout-apron"
+ },
+ {
+  "map": "experiment",
+  "preset": "server128",
+  "tape": "tests/fixtures/original-map-parity/r16-lab-flow/submitted.json",
+  "sensitivity": 2.5,
+  "warmup": 33,
+  "name": "r16-lab-flow"
+ }
+]
