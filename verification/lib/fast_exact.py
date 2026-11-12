@@ -1,6 +1,7 @@
 """Skip recursion only for byte-identical builtin values, without loading pickle data."""
 import io
 import pickle
+import re
 
 
 class BuiltinPickler(pickle.Pickler):
@@ -14,7 +15,12 @@ def same(a, b):
         left, right = io.BytesIO(), io.BytesIO()
         BuiltinPickler(left, protocol=4).dump(a)
         BuiltinPickler(right, protocol=4).dump(b)
-        return left.getvalue() == right.getvalue()
+        encoded = left.getvalue()
+        # nonfinite floats retain each original comparator's distinct refusal semantics.
+        # a conservative byte match may skip the shortcut; it cannot skip a difference.
+        if re.search(rb"G[\x7f\xff][\xf0-\xff]", encoded):
+            return False
+        return encoded == right.getvalue()
     except (TypeError, pickle.PickleError):
         return False
 

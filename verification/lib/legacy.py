@@ -13,13 +13,6 @@ def write(path, value):
     path.write_text(json.dumps(value, indent=1) + '\n')
 
 
-def environment(ram):
-    env = {'PATH': os.environ['PATH'], 'LANG': 'C.UTF-8'}
-    for key in ['HOME', 'XDG_DATA_HOME', 'XDG_CONFIG_HOME', 'XDG_CACHE_HOME', 'XDG_STATE_HOME', 'XDG_RUNTIME_DIR']:
-        target = ram/key.lower()
-        target.mkdir(mode=0o700, exist_ok=True)
-        env[key] = str(target)
-    return env
 
 
 def canonical(value):
@@ -53,16 +46,6 @@ def difference(a, b, path='$'):
     return None
 
 
-def compare_traces(a, b):
-    import itertools
-    count = 0
-    bad = []
-    for x,y in itertools.zip_longest(stream(a),stream(b)):
-        count += 1
-        found = difference(canonical(x),canonical(y))
-        if found and len(bad)<4:
-            bad.append({'row':count-1, **found})
-    return {'ok': not bad, 'rows': count, 'first_differences':bad}
 
 
 def recording(path, analyzer):
@@ -86,23 +69,6 @@ def recording(path, analyzer):
     return rec, {'header':header,'columns':rec.columns,'inputs':rec.inputs,'events':rec.events,'seal':seal}
 
 
-def compare_reference(actual, reference):
-    import itertools
-    keys = ['tick','p','v','yaw','pitch','grounded','elapsed','checkpoint','finished','finish_kind','respawns']
-    refs = (r for r in stream(reference) if r.get('phase') == 'tape')
-    count = 0
-    bad = []
-    for a,b in itertools.zip_longest(stream(actual),refs):
-        count += 1
-        if a is None or b is None:
-            bad.append({'tick':count-1,'missing':'actual' if a is None else 'reference'})
-            break
-        translated = {'tick':b['tick'], **{k:b['post'][k] for k in ['p','v','yaw','pitch','grounded']},
-                      **{k:b['game'][k] for k in ['elapsed','checkpoint','finished','finish_kind','respawns']}}
-        found = difference({k:a[k] for k in keys}, translated)
-        if found and len(bad)<4:
-            bad.append({'tick':count-1, **found})
-    return {'ok':not bad,'ticks':count,'sha256':sha(reference),'path':str(reference),'differences':bad}
 
 
 def recording_alignment(rec, trace, offset):

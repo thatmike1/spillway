@@ -1,7 +1,0 @@
-Create and pursue this goal: rebuild Foldrunner into Spillway, a finished, satisfying and visually appealing parkour game, following /home/thatmike1/foldrunner-build-2026-11-05/wt/projects/foldrunner/docs/reboot/BRIEF.md. Read that contract first, then COUNCIL.md beside it and the current reboot checkpoint. The old Mirror's Edge reconstruction and folding-world targets are superseded.
-
-Work autonomously on the actual game until at least 20:00 Europe/Prague today, 2026-11-05. Make every decision without asking me. Build the representative Crest slice, challenge it through real inputs and rendered playback, then finish the whole three-part Spillway level. Do not stop at a plan, a test count or a council score. Enjoy the experiment and use your judgment to improve what is actually playable.
-
-Use GPT work freely. Use no more than one Opus 5.5 consultation per hour for code or visual/design critique, starting no earlier than 17:45 CET for the next one. The council's optional Gemini session failed; no Gemini advice exists. Keep progress resumable if capacity fails.
-
-Done means the new game opens by default, movement and stairs obey the new control contract, the complete level has meaningful safe/fast routes and recovery, native delivery is checked, rendered evidence and honest remaining limits are recorded, REPORT.md tells me how to play on Linux and Windows, and coherent commits are pushed to feat/foldrunner-me-build. Use bead ccChat-general-rowb in commit subjects. Do not claim human enjoyment is verified before I play.

@@ -23,13 +23,15 @@ def main():
     template = "linux_release.x86_64" if args.platform == "linux" else "windows_release_x86_64.exe"
     if engine.sha(engine.TEMPLATES / template) != engine.TEMPLATE_HASHES[template]:
         raise RuntimeError("The official Godot 4.7.2 release template hash differs.")
+    if engine.temporary_headroom() < 600 * 2**20:
+        raise RuntimeError("Need 600 MiB temporary/quota headroom.")
     output.mkdir(parents=True)
     with tempfile.TemporaryDirectory(prefix="spillway-export-") as temporary:
         work = Path(temporary)
         sys.path.insert(0, str(engine.PROJECT / "verification"))
         import parity
         source = work / "source"
-        parity.snapshot(source)
+        source_files = parity.snapshot(source)
         profile = work / "profile"
         profile.mkdir()
         engine.run(["--headless", "--editor", "--path", source, "--import"], cwd=source,
@@ -42,8 +44,13 @@ def main():
         if args.platform == "linux":
             executable.chmod(0o755)
         for name in ("LICENSE.txt", "COPYRIGHT.txt"):
-            shutil.copy2(engine.DEFAULT_CACHE / "godot-4.7.2/licenses" / ("GODOT-" + name), output / ("GODOT-" + name))
-        result = {"platform": args.platform, "pack_sha256": engine.sha(pack),
+            shutil.copy2(engine.PROJECT / "licenses" / ("GODOT-" + name), output / ("GODOT-" + name))
+        for notice in (engine.PROJECT / "assets").rglob("*"):
+            if notice.is_file() and any(word in notice.name.lower() for word in ("license", "licence", "copyright", "manifest", "provenance")):
+                target = output / "notices" / notice.relative_to(engine.PROJECT / "assets")
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(notice, target)
+        result = {"source_files": source_files, "platform": args.platform, "pack_sha256": engine.sha(pack),
                   "template_sha256": engine.sha(executable), "startup": "not executed on this platform"}
         if args.platform == "linux":
             empty = work / "empty"

@@ -6,12 +6,14 @@ import json
 from pathlib import Path
 import sys
 import tempfile
+import subprocess
 
 sys.dont_write_bytecode = True
 import engine
 
 spec = importlib.util.spec_from_file_location("spillway_verification", engine.PROJECT / "verification/parity.py")
 verification = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = verification
 spec.loader.exec_module(verification)
 
 
@@ -23,7 +25,12 @@ def main():
     out = args.out.resolve() if args.out else Path(tempfile.mkdtemp(prefix="spillway-check-"))
     if args.out:
         out.mkdir(parents=True, exist_ok=False)
+    if engine.temporary_headroom() < 1_200_000_000:
+        raise RuntimeError("Need 1.2 GB temporary/quota headroom.")
     engine.check_pin()
+    subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/movement_oracle.py"), "--self-test"], check=True)
+    subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_run_bundle.py")], check=True)
+    subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_shortcut.py")], check=True)
     routes, contract = verification.fixtures()
     pure = verification.audit.negative_seed(verification.FIXTURES / routes[0]["name"] / "old", out / "negative-controls", contract, "old")
     print(f"recording/metadata/coverage mutations rejected: {len(pure['checks'])}", flush=True)
@@ -33,9 +40,9 @@ def main():
     profile.mkdir()
     engine.run(["--headless", "--editor", "--path", source, "--import"], cwd=source,
                profile=profile, log=out / "import.log")
-    components = ["r21_surf_integration", "r21_tether_geometry", "r21_tether_component"]
+    components = ["saltglass_registration", "tether_geometry", "tether_coefficients"]
     if args.slow:
-        components.extend(["r20_style_stack", "r20_through_ordinary"])
+        components.extend(["direction_stack", "through_line_original_maps"])
     report = {"ok": False, "mutations": pure, "components": []}
     try:
         for name in components:
