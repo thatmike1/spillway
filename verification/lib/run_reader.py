@@ -2,7 +2,7 @@
 """r16 run analysis: read copied .r16run recordings (one file or folders) with the standard
 library only, validate them strictly, recover labelled partial streams, and summarise each run.
 
-python3 -I tools/analyze-r16-runs.py PATH... [--json OUT] [--loss-min 0.75] [--quiet] [--strict]
+python3 -I tools/analyze-runs.py PATH... [--json OUT] [--loss-min 0.75] [--quiet] [--strict]
 
 the byte layout is docs/r16/RECORDINGS.md. a recording is data: JSON sections are parsed with
 json, columns with struct; nothing is imported, evaluated or loaded from it. every length is

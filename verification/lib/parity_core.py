@@ -213,7 +213,7 @@ def finish_view(summary, records, original_directory=None):
 def route_command(route, variant, source, dest, golden, tape):
     need(variant in VARIANTS, 'unknown variant')
     command = [str(B.GODOT),'--headless','--audio-driver','Dummy','--path',str(source),'--fixed-fps','128',
-               '--script','res://tests/r21_parity.gd','--',f'--out={dest}',f'--tape={tape}','--physics-hz=128',
+               '--script','res://tests/original_map_parity.gd','--',f'--out={dest}',f'--tape={tape}','--physics-hz=128',
                f'--warmup={route["warmup"]}',f'--map={route["map"]}',f'--preset={route["preset"]}',
                f'--sensitivity={route.get("sensitivity",2.5)}',f'--variant={variant}','--frames=none',
                '--wall-budget-s=150','--host-scene='+SCENE,'--host-script='+SCRIPT,f'--ghost={golden}']
@@ -225,8 +225,8 @@ def route_command(route, variant, source, dest, golden, tape):
 def engine_guard(engine, old, command, profile):
     value = copy.deepcopy(engine)
     # validate actual process-bound presentation/path metadata before mapping only those exact fields.
-    exact(value['cmdline'], ['--script','res://tests/r21_parity.gd'], 'actual executor cmdline')
-    exact(value['executor_script'], 'res://tests/r21_parity.gd', 'actual executor script')
+    exact(value['cmdline'], ['--script','res://tests/original_map_parity.gd'], 'actual executor cmdline')
+    exact(value['executor_script'], 'res://tests/original_map_parity.gd', 'actual executor script')
     exact(value['game']['node_script'], SCRIPT, 'actual configured host script')
     exact(value['user_args'], command[command.index('--')+1:], 'actual complete route argv')
     expected_data = profile/'xdg_data_home/godot/app_userdata/Spillway'
