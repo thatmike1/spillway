@@ -14,3 +14,8 @@ __pycache__/
 *.tmp
 *.log
 !tests/fixtures/original-map-parity/**/runs/*.r16run
+
+*.pck
+*.x86_64
+*.exe
+*.zip

@@ -1,5 +1,7 @@
 # Saltglass: low exits and a working salt quay
 
+The example measurements in this document are reported by the original R21 component notes, not new measurements from this handover. Current validation is described in the handover results.
+
 R21 keeps the F2 runner and the two high-entry fins, lowers both first flat decks from 14 m to 7 m, and puts five metres of open water between each fin end and its deck. A normal-spawn input line finishes the configured `r21.tscn` course in **64.4765625 s**, without a fall, respawn, state correction, clock padding or artificial low speed target. This is one headless existence proof, not a fastest line or a feel verdict.
 
 ## Why the exits changed

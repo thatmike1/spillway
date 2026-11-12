@@ -1,5 +1,7 @@
 # Tether Yard movement and acquisition
 
+The example measurements in this document are reported by the original R21 component notes, not new measurements from this handover. Current validation is described in the handover results.
+
 Implementation: `scripts/movement/grapple_player.gd`; geometry: `scripts/maps/tether_yard.gd`. Historical resource aliases preserve recording identities.
 
 ## Laws and controls
