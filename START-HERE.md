@@ -48,7 +48,7 @@ Stable round-numbered aliases preserve resource paths used by recording identiti
 | Shelved: Fall Line / `fall-line` | `r19_fall_line_level.gd`; retained as a catalog dependency, removed from the current menu |
 | Shelved: Line Drive / `line-drive` | `r19_line_drive_level.gd`, `r19_line_drive_player.gd`; retained dependency, removed from the current menu |
 
-Paths in this table are under `scripts/`. `r16_style_opportunities.gd` adds optional style passages around original courses. `assets/` has game skies and licensed asset kits with manifests; `shaders/` supplies their rendering. Retired prototypes, delivery verifiers and receipts are in Git history. Per-round briefs/results are under `history/rounds/rNN/`; the history timeline and images are curated separately.
+Paths in this table are under `scripts/`. `r16_style_opportunities.gd` adds optional style passages around original courses. `assets/` has game skies and licensed asset kits with manifests; `shaders/` supplies their rendering. Retired prototypes, delivery verifiers and receipts are in Git history. The game's history lives in `history/`: [history/TIMELINE.md](history/TIMELINE.md) tells every round from the first Foldrunner prototype to R21, and `history/rounds/rNN/` holds each round's briefs, results, notes and frames (indexed in `history/MANIFEST.json`).
 
 ## Controls and vocabulary
 
