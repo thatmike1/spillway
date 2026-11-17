@@ -25,6 +25,20 @@ def external(path):
     return path
 
 
+def snapshot_ignore(checkout):
+    checkout = Path(checkout).resolve()
+    caches = shutil.ignore_patterns(".git", ".godot", "__pycache__", "builds")
+
+    def ignore(directory, names):
+        omitted = set(caches(directory, names))
+        # frozen recording fixtures are unnecessary for captures, unlike authored imports.
+        if Path(directory) == checkout / "tests":
+            omitted.add("fixtures")
+        return omitted
+
+    return ignore
+
+
 def answers(number, env=None):
     result = subprocess.run(["xdpyinfo", "-display", f":{number}"], env=env,
                             capture_output=True, timeout=5)
@@ -97,6 +111,7 @@ var capturing: bool = false
 var ready_to_run: bool = false
 var trace: FileAccess
 var driver: Node
+var clock: Node
 func _initialize() -> void:
 	RenderingServer.render_loop_enabled = false
 	options = JSON.parse_string(FileAccess.get_file_as_string("res://capture-options.json"))
@@ -112,6 +127,7 @@ func _start() -> void:
 		return
 	for key: String in options.settings:
 		main.call("change_setting", key, options.settings[key])
+	main.call("set_look", options.look != "old")
 	main.call("set_paused", false)
 	trace = FileAccess.open(str(options.out).path_join("frames.jsonl"), FileAccess.WRITE)
 	if options.mode == "route":
@@ -141,11 +157,14 @@ func _start() -> void:
 		main.call("set_physics_process", false)
 		main.get("player").set_physics_process(false)
 		main.get("player").set_process(false)
+	clock = CaptureClock.new()
+	clock.process_physics_priority = -200
+	main.add_child(clock)
 	ready_to_run = true
-func _process(delta: float) -> bool:
+func _process(_delta: float) -> bool:
 	if not ready_to_run:
 		return false
-	age += delta
+	age = float(clock.get("age"))
 	if age >= float(options.seconds) and not capturing and frame_index > 0:
 		main.call("request_quit", 0)
 		return false
@@ -173,7 +192,8 @@ func _capture() -> void:
 	var path := str(options.out).path_join("frame-%05d.png" % frame_index)
 	var error := root.get_texture().get_image().save_png(path)
 	var observation: Dictionary = player.call("get_motion_state") if player.has_method("get_motion_state") else {}
-	trace.store_line(JSON.stringify({"motion": observation, "frame": frame_index, "time": age, "path": path,
+	trace.store_line(JSON.stringify({"motion": observation, "finished": main.get("finished"), "finish_kind": main.get("finish_kind"),
+		"checkpoint": main.get("checkpoint_index"), "respawns": main.get("respawn_count"), "frame": frame_index, "time": age, "path": path,
 		"position": [player.global_position.x, player.global_position.y, player.global_position.z],
 		"mode": options.mode, "error": error}))
 	trace.flush()
@@ -182,6 +202,11 @@ func _capture() -> void:
 		quit(2)
 	frame_index += 1
 	capturing = false
+class CaptureClock extends Node:
+	var age: float = 0
+	func _physics_process(delta: float) -> void:
+		age += delta
+
 class TapeInput extends Node:
 	var options: Dictionary
 	var age: float = 0
@@ -194,6 +219,7 @@ class TapeInput extends Node:
 			if row.has("key"):
 				var key := InputEventKey.new()
 				key.keycode = OS.find_keycode_from_string(str(row.key))
+				key.physical_keycode = key.keycode
 				key.pressed = bool(row.pressed)
 				event = key
 			elif row.has("button"):
@@ -272,6 +298,7 @@ def main():
     mode.add_argument("--poses", type=Path)
     parser.add_argument("--setting", action="append", default=[], metavar="KEY=JSON", help="host setting, e.g. tether_model=\"elastic-arc\"")
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--look", choices=("old", "new"), default="new")
     parser.add_argument("--size", default="1280x720", help="frame size, WIDTHxHEIGHT")
     parser.add_argument("--seconds", type=float, default=12)
     parser.add_argument("--every", type=float, default=1)
@@ -292,7 +319,7 @@ def main():
         if not separator or not key:
             parser.error("setting requires KEY=JSON")
         settings[key] = json.loads(value)
-    options = dict(size=args.size, settings=settings, map=args.map, route=args.route, out=str(output), seconds=args.seconds, every=args.every,
+    options = dict(look=args.look, size=args.size, settings=settings, map=args.map, route=args.route, out=str(output), seconds=args.seconds, every=args.every,
                    mode="route" if args.route else ("tape" if args.tape else "poses"))
     if args.tape:
         options["events"] = read_sequence(args.tape, "tape")
@@ -309,7 +336,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix="spillway-shot-") as temporary:
         scratch = Path(temporary)
         source = scratch / "source"
-        shutil.copytree(checkout, source, ignore=shutil.ignore_patterns(".git", ".godot", "__pycache__", "builds"))
+        shutil.copytree(checkout, source, ignore=snapshot_ignore(checkout))
         (source / "capture.gd").write_text(HARNESS)
         (source / "capture-options.json").write_text(json.dumps(options))
         profile = scratch / "profile"
