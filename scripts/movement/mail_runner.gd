@@ -23,8 +23,15 @@ func _ready() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	_status = Label.new()
-	_status.position = Vector2(24, 150)
-	_status.add_theme_font_size_override("font_size", 20)
+	_status.position = Vector2(820, 108)
+	_status.add_theme_font_size_override("font_size", 18)
+	_status.add_theme_color_override("font_color", Color("172d32"))
+	_status.add_theme_color_override("font_outline_color", Color("fff4d6"))
+	_status.add_theme_constant_override("outline_size", 3)
+	preload("res://scripts/r18_ui_theme.gd").ticket(_status, "label", 18)
+	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_status.custom_minimum_size = Vector2(390, 0)
+	_status.size = Vector2(390, 0)
 	layer.add_child(_status)
 	_paper = MeshInstance3D.new()
 	var mesh := BoxMesh.new()
@@ -110,7 +117,22 @@ func _physics_process(delta: float) -> void:
 	_feedback.observe(mail_flight, false)
 	_paper.visible = mail_flight.active
 	_paper.global_position = mail_flight.position
-	_status.text = "MAIL %d / 3    MISSES %d\nLMB throw · mouse steer · RMB recall\nV view: %s (restarts)\n%s" % [mail_flight.delivered.size(), mail_flight.misses, view_mode, "BODY HELD · %.1fs" % maxf(0, FLIGHT.DURATION - mail_flight.age) if mail_flight.active else mail_flight.result.to_upper()]
+	_status.position = Vector2(maxf(24, get_viewport().get_visible_rect().size.x - 420), 108)
+	_status.text = "MAIL %d / 3    MISSES %d" % [mail_flight.delivered.size(), mail_flight.misses]
+	if mail_flight.active:
+		_status.text += "\nSTEER · RMB recall · %.1fs" % maxf(0, FLIGHT.DURATION - mail_flight.age)
+	elif not bool(get_parent().get("_started")):
+		_status.text += "\nLMB throw · mouse steer · RMB recall\nV: %s view (restarts)" % view_mode
+	else:
+		_status.text += "\nV: " + view_mode + " view"
+		if not mail_flight.result.is_empty():
+			_status.text += "\n" + mail_flight.result.to_upper()
+
+
+func _process(delta: float) -> void:
+	super(delta)
+	if _status != null:
+		_status.visible = input_enabled
 
 func _blocked(from: Vector3, to: Vector3) -> Dictionary:
 	var query := PhysicsRayQueryParameters3D.create(from, to, 1, [get_rid()])

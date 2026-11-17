@@ -45,17 +45,30 @@ func build() -> void:
 		var side := 1.0 if i != 1 else -1.0
 		var at := Vector3(side * 12, 4.0, -14.0 - i * 38)
 		mailboxes.append({"id": "mail-run-post-%d" % (i + 1), "bounds": AABB(at - Vector3(1.1, 0.8, 0.5), Vector3(2.2, 1.6, 1.0)), "position": at})
+		box("seawall_post_court_%d" % i, Vector3(side * 10.5, -1.4, at.z + 2), Vector3(9, 5.2, 12), Color("53666a"))
+		box("apron_%d" % i, Vector3(side * 10.5, 2.012, at.z + 4), Vector3(7, 0.018, 6), Color("aaa897"))
+		box("apron_lip_%d" % i, Vector3(side * 10.5, 2.03, at.z + 7.9), Vector3(9, 0.035, 0.10), Color("bc713e"))
 		box("post_%d" % i, at + Vector3(0, -3, -0.9), Vector3(6, 10, 2), Color("53666a"))
 		box("mouth_%d" % i, at + Vector3(0, 0, 0.15), Vector3(2.5, 1.8, 0.12), Color("172d32"))
 		box("lip_%d" % i, at + Vector3(0, 0.95, 0.25), Vector3(2.8, 0.12, 0.4), Color("bc713e"))
 		GEO.deck(self, "post_court_%d" % i, minf(side * 12 - 3, -6), maxf(side * 12 + 3, 6), at.z - 4, at.z + 8, 2, i)
 		label("post_number_%d" % i, at + Vector3(0, 2.4, 0.5), "%02d" % (i + 1), 0.03)
+		box("station_joint_%d" % i, at + Vector3(0, -1.3, 0.13), Vector3(6, 0.045, 0.035), Color("29464a"))
+		box("apron_drain_%d" % i, Vector3(side * 10.5, 2.026, at.z + 6.5), Vector3(6.5, 0.018, 0.12), Color("53666a"))
+		box("collection_plate_%d" % i, at + Vector3(0, 1.35, 0.32), Vector3(2.9, 0.55, 0.12), Color("ded8c2"))
+		label("post_name_%d" % i, at + Vector3(0, 1.35, 0.45), "COLLECTION", 0.007)
+		box("post_plinth_%d" % i, at + Vector3(0, -1.9, -0.85), Vector3(6.5, 0.25, 2.4), Color("ded8c2"))
 		box("post_cap_%d" % i, at + Vector3(0, 2.1, -0.9), Vector3(6.3, 0.25, 2.3), Color("ded8c2"))
-	label("entry", Vector3(0, 6, -2), "MAIL RUN\nTHROW WITHOUT LOSING THE HOP\nLMB throw · mouse steer · RMB recall\nV compares views (restarts)", 0.008)
 	label("finish", Vector3(0, 7, -135), "DISPATCH", 0.022)
 	for x: float in [-8, 8]:
 		box("arch_pier_%s" % x, Vector3(x, 7, -125), Vector3(3, 22, 5), Color("53666a"))
 	box("sorting_arch", Vector3(0, 17, -125), Vector3(19, 3, 5), Color("ded8c2"))
+	for mesh: MeshInstance3D in find_children("Mesh_deck_*", "MeshInstance3D", true, false):
+		mesh.name = "Mail_quay_" + str(mesh.name)
+		var material := MATERIAL.concrete(Color("53666a"))
+		material.set_shader_parameter("top_color", Color("d6d0bd"))
+		material.set_shader_parameter("deck", 1.0)
+		mesh.material_override = material
 	_environment()
 	routes = {"basic": [spawn.origin, finish_position], "advanced": [spawn.origin, Vector3(10, 2, -8), Vector3(-10, 2, -46), Vector3(10, 2, -84), finish_position]}
 
@@ -110,6 +123,8 @@ func _environment() -> void:
 	sun.rotation_degrees = Vector3(-40, -25, 0)
 	sun.light_color = Color("ffebca")
 	sun.light_energy = 0.9
+	sun.shadow_enabled = true
+	sun.directional_shadow_max_distance = 180.0
 	add_child(sun)
 	box("water", Vector3(0, -4, -60), Vector3(600, 0.1, 600), Color("749b9a"))
 
