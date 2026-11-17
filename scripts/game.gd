@@ -16,6 +16,11 @@ func _ready() -> void:
 	super._ready()
 	if startup_error.is_empty() and map_has_capability("grapple"):
 		hud.call("notify", map_revision_description())
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--r22-package-check="):
+			var probe := preload("res://scripts/persistence/package_probe.gd").new()
+			probe.output_path = arg.trim_prefix("--r22-package-check=")
+			add_child(probe)
 
 ## explicit injected registries are honored; ordinary startup composes the current menu.
 func _initial_maps() -> Dictionary:
