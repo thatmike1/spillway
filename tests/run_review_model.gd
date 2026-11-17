@@ -6,6 +6,10 @@ func check(condition: bool, message: String) -> void:
 		failures += 1
 		push_error(message)
 func _init() -> void:
+	var absent := "/tmp/r22-08-run-review/no-recordings-created"
+	check(not DirAccess.dir_exists_absolute(absent), "missing-directory precondition")
+	check(MODEL.list_attempts(absent).is_empty(), "missing recordings folder is an empty library")
+	check(not DirAccess.dir_exists_absolute(absent), "review does not create a recordings directory")
 	var root := "res://tests/fixtures/original-map-parity"
 	var pair: Dictionary = {}
 	for route: String in DirAccess.get_directories_at(root):
@@ -19,6 +23,10 @@ func _init() -> void:
 	if pair.is_empty():
 		quit(1)
 		return
+	var real_return := MODEL.load_attempt("res://tests/fixtures/original-map-parity/breakwater-return/old/runs/golden.r16run")
+	var real_comparison := MODEL.compare(real_return, pair)
+	check(real_comparison.ok, "two distinct real finishes compare")
+	check(is_equal_approx(real_comparison.splits.back().delta, 10.875), "real finish difference is 10.875 seconds")
 	var compared := MODEL.compare(pair, pair)
 	check(compared.ok and not compared.splits.is_empty(), "real pair produces splits")
 	for split: Dictionary in compared.splits:
