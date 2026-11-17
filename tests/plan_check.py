@@ -17,6 +17,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", required=True, type=Path)
     parser.add_argument("--only-west", action="store_true")
+    parser.add_argument("--persistence", action="store_true")
     parser.add_argument("--safe", action="store_true", help="check the safe-quay baseline")
     parser.add_argument("--trial", type=int, choices=range(3))
     parser.add_argument("--loadout", choices=["anchors", "one", "block", "pad", "pieces"], default="anchors")
@@ -28,6 +29,8 @@ def main():
         raise ValueError("evidence belongs outside Git")
     if not 0 <= args.delay <= 0.5 or not 0 < args.aim_ceiling <= 90:
         raise ValueError("invalid release delay or aim ceiling")
+    if args.persistence and (args.loadout != "anchors" or args.trial not in (None,0) or args.safe):
+        parser.error("--persistence needs the normal west tape")
     if args.safe and args.loadout != "anchors":
         parser.error("--safe is only the anchor baseline")
     if engine.temporary_headroom() < 1_200_000_000:
@@ -44,7 +47,7 @@ def main():
     try:
         hashes = verifier.snapshot(source)
         own_hashes = {name: digest for name, digest in hashes.items()
-                      if name.startswith(("scripts/plan/", "scripts/maps/plan_yard", "scripts/movement/plan_runner", "tests/plan_"))}
+                      if name.startswith(("scripts/plan/", "scripts/maps/plan_yard", "scripts/movement/plan_runner", "scripts/art/plan_", "tests/plan_"))}
         (out / "source-sha256.json").write_text(json.dumps(own_hashes, indent=2) + "\n")
         imported = engine.run(["--headless", "--editor", "--path", source, "--import"],
                               cwd=source, profile=profile, log=out / "import.log")
@@ -74,6 +77,16 @@ def main():
             except Exception as error:
                 failures.append(case)
                 report["checks"].append({"name": case, "ok": False, "error": str(error)})
+        if args.persistence and not failures:
+            persisted = out / "persistence"
+            persisted.mkdir()
+            shutil.copy2(out / "west-tape.json", persisted / "tape.json")
+            for mode in ("write", "readback"):
+                result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
+                                     "--fixed-fps", "128", "--script", "res://tests/plan_persistence.gd",
+                                     "--", "--out=" + str(persisted), *(["--readback"] if mode == "readback" else [])],
+                                    cwd=source, profile=profile, log=persisted / (mode + ".log"))
+                report["checks"].append({"name": "persistence-" + mode, "ok": True, **result})
         report["ok"] = not failures
     except Exception as error:
         report["error"] = str(error)

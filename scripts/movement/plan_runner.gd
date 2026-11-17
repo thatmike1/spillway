@@ -1,7 +1,13 @@
 extends "res://scripts/movement/grapple_player.gd"
 ## isolate planning from the inherited F2 motor and Arc force law.
 const OVERLAY := preload("res://scripts/plan/overlay.gd")
+const STORE := preload("res://scripts/plan/store.gd")
+const READER := preload("res://scripts/r16_run_reader.gd")
 const PIECES := preload("res://scripts/plan/pieces.gd")
+var plan_store := STORE.new()
+var best_plan := {}
+var _best_path := ""
+var _best_identity := ""
 var used_pad := false
 var launch_events: Array[Dictionary] = []
 var planner: Control
@@ -20,6 +26,16 @@ func _input(event: InputEvent) -> void:
 		var code: int = event.physical_keycode if event.physical_keycode else event.keycode
 		if code == KEY_TAB:
 			open_plan()
+			get_viewport().set_input_as_handled()
+		elif planning and code in [KEY_F6,KEY_F7,KEY_BRACKETLEFT,KEY_BRACKETRIGHT]:
+			if code == KEY_F6:
+				planner.save_plan()
+			elif code == KEY_F7:
+				planner.load_plan()
+			else:
+				planner.active_slot = posmod(planner.active_slot + (1 if code == KEY_BRACKETRIGHT else -1),3)
+				planner.notice = "Slot %d selected." % (planner.active_slot+1)
+				planner.queue_redraw()
 			get_viewport().set_input_as_handled()
 		elif planning and code in [KEY_A,KEY_B,KEY_P]:
 			planner.choose_brush({KEY_A:"anchor",KEY_B:"block",KEY_P:"pad"}[code],event.shift_pressed)
@@ -101,3 +117,36 @@ func get_motion_state() -> Dictionary:
 	var map: Node = host.get("level") if host != null else null
 	result["plan_yard"] = {"design":map.physical_design() if map != null and map.has_method("physical_design") else {},"pad_used":used_pad,"launches":launch_events.duplicate(true)}
 	return result
+
+func _process(delta: float) -> void:
+	super(delta)
+	sync_ghost_plan()
+	if planner != null and planner.visible:
+		planner.queue_redraw()
+func sync_ghost_plan() -> void:
+	var game := get_parent()
+	if game == null or game.get("session") == null:
+		return
+	var session: Node = game.session
+	var next_path := str(session.ghost_path) if session.ghost.loaded else ""
+	var identity: Dictionary = game.motion_identity()
+	var key := JSON.stringify(identity,"",true)
+	if next_path == _best_path and key == _best_identity:
+		return
+	_best_path = next_path
+	_best_identity = key
+	best_plan = {}
+	if next_path.is_empty():
+		return
+	var read: Dictionary = READER.read(next_path,false)
+	if not read.ok or not READER.identity_matches(read.header.get("identity"),identity).is_empty():
+		return
+	if str(read.header.get("run_id","")) != str(session.ghost.run_id):
+		return
+	var physics: Dictionary = read.header.get("metadata",{}).get("physics",{})
+	for entry: Variant in physics.get("mechanics",[]):
+		if entry is Dictionary and entry.get("id") == "plan-yard-design":
+			var checked := STORE.from_physical(entry.get("design"))
+			if checked.ok:
+				best_plan = {"version":PIECES.VERSION,"anchors":checked.design.anchors,"block":checked.design.block,"pad":checked.design.pad}
+			return

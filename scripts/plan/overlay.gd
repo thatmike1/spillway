@@ -4,6 +4,7 @@ const LAYOUT := preload("res://scripts/plan/layout.gd")
 const PIECES := preload("res://scripts/plan/pieces.gd")
 var runner: CharacterBody3D
 var brush := "anchor"
+var active_slot := 0
 var notice := ""
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -31,6 +32,24 @@ func choose_brush(kind: String, disable := false) -> void:
 	map.apply_design(map.plan,block,pad,map.budget,blocks,pads)
 	brush = "anchor" if disable else kind
 	notice = ""
+	queue_redraw()
+func save_plan() -> void:
+	var saved: Dictionary = runner.plan_store.save_slot(active_slot,level().design())
+	notice = "Saved in slot %d." % (active_slot+1) if saved.ok else saved.error
+	if saved.ok and saved.recovered:
+		notice += " The previous good save was restored first."
+	queue_redraw()
+func load_plan() -> void:
+	var loaded: Dictionary = runner.plan_store.load_slot(active_slot)
+	if not loaded.ok:
+		notice = loaded.error
+	else:
+		var d: Dictionary = loaded.design
+		var ok: bool = level().apply_design(d.anchors,d.block,d.pad,d.budget,d.blocks_enabled,d.pads_enabled)
+		notice = "Loaded slot %d. Enter runs this plan." % (active_slot+1) if ok else "Plan could not be loaded; the current plan is kept."
+		brush = "anchor"
+		if loaded.recovered:
+			notice += " Loaded from the previous good save."
 	queue_redraw()
 func toggle_budget() -> void:
 	var map := level()
@@ -94,10 +113,13 @@ func _draw() -> void:
 	draw_string(font,Vector2(30,275),"F8  Budget: %d piece%s" % [map.budget,"" if map.budget == 1 else "s"],HORIZONTAL_ALIGNMENT_LEFT,-1,21,ink)
 	draw_string(font,Vector2(30,299),"Changing budget removes extra pieces.",HORIZONTAL_ALIGNMENT_LEFT,-1,16,ink)
 	draw_string(font,Vector2(30,340),"Delete  Clear plan",HORIZONTAL_ALIGNMENT_LEFT,-1,18,ink)
-	draw_string(font,Vector2(30,370),"Click a zone or press its number (1–9).",HORIZONTAL_ALIGNMENT_LEFT,-1,17,ink)
-	draw_string(font,Vector2(30,400),"Each item costs one piece.",HORIZONTAL_ALIGNMENT_LEFT,-1,17,ink)
-	draw_string(font,Vector2(30,430),"One block and one pad maximum.",HORIZONTAL_ALIGNMENT_LEFT,-1,17,ink)
+	draw_string(font,Vector2(30,370),"Click/number toggles a piece (1–9).",HORIZONTAL_ALIGNMENT_LEFT,-1,17,ink)
+	draw_string(font,Vector2(30,400),"Remove one first if the budget is full.",HORIZONTAL_ALIGNMENT_LEFT,-1,17,ink)
+	draw_string(font,Vector2(30,430),"One item costs one; one block/pad max.",HORIZONTAL_ALIGNMENT_LEFT,-1,17,ink)
 	draw_string(font,Vector2(30,460),"Shift+B / Shift+P turn those options off.",HORIZONTAL_ALIGNMENT_LEFT,-1,17,ink)
+	draw_string(font,Vector2(30,534),"[ / ] Slot %d" % (active_slot+1),HORIZONTAL_ALIGNMENT_LEFT,-1,18,ink)
+	draw_string(font,Vector2(160,534),"F6 Save",HORIZONTAL_ALIGNMENT_LEFT,-1,18,ink)
+	draw_string(font,Vector2(285,534),"F7 Load",HORIZONTAL_ALIGNMENT_LEFT,-1,18,ink)
 	draw_string(font,Vector2(30,490),"Launch: 300+ u/s toward the far quay.",HORIZONTAL_ALIGNMENT_LEFT,-1,17,ink)
 	for rect: Rect2 in [Rect2(-18,5,36,15),Rect2(-18,-55,36,21),Rect2(-18,-34,7,39),Rect2(11,-34,7,39),Rect2(-5,-18,10,10),Rect2(-5,-30,10,9)]:
 		draw_rect(Rect2(point(Vector3(rect.position.x,0,rect.position.y)),rect.size*scale_factor()),Color("b9b8a5"))
@@ -120,6 +142,20 @@ func _draw() -> void:
 		draw_circle(p,13,Color("6c8f95"),false,2)
 		draw_rect(Rect2(p+Vector2(-29,15),Vector2(58,21)),Color("ddd7bd"))
 		draw_string(font,p+Vector2(-26,30),"%s%d +%dm" % [brush.substr(0,1).to_upper(),i+1,at.y],HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("203d45"))
+	var ghost: Dictionary = runner.best_plan
+	if not ghost.is_empty():
+		var color := Color("7ec4d0")
+		for index: int in ghost.anchors:
+			draw_circle(point(LAYOUT.SOCKETS[index]),18,color,false,3)
+		if ghost.block >= 0:
+			var p := point(PIECES.BLOCKS[ghost.block])
+			draw_rect(Rect2(p-Vector2.ONE*3.5*scale_factor(),Vector2.ONE*7*scale_factor()),color,false,3)
+		if ghost.pad >= 0:
+			draw_circle(point(PIECES.PADS[ghost.pad]),19,color,false,3)
+		var matching: bool = ghost == map.physical_design()
+		draw_string(font,Vector2(30,578),"Best ghost: this plan" if matching else "Ghost reference: previous plan",HORIZONTAL_ALIGNMENT_LEFT,-1,18,color)
+	for marker: Array in [[Vector3(-4.8,0,-12.5),"7m"],[Vector3(-4.8,0,-26.5),"9m"],[Vector3(-17.4,0,-15),"3m"],[Vector3(12,0,-15),"3m"]]:
+		draw_string(font,point(marker[0]),marker[1],HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("203d45"))
 	draw_circle(point(map.spawn.origin),6,Color("203d45"))
 	draw_string(font,point(Vector3(-17,0,17)),"SPAWN",HORIZONTAL_ALIGNMENT_LEFT,-1,17,Color("203d45"))
 	draw_string(font,point(Vector3(-17,0,-47)),"FINISH",HORIZONTAL_ALIGNMENT_LEFT,-1,17,Color("203d45"))
@@ -140,6 +176,17 @@ func _gui_input(event: InputEvent) -> void:
 		return
 	if Rect2(24,312,375,38).has_point(event.position):
 		clear_pieces()
+		accept_event()
+		return
+	if Rect2(24,510,375,34).has_point(event.position):
+		if event.position.x < 140:
+			active_slot = posmod(active_slot+1,3)
+			notice = "Slot %d selected." % (active_slot+1)
+		elif event.position.x < 270:
+			save_plan()
+		else:
+			load_plan()
+		queue_redraw()
 		accept_event()
 		return
 	var positions := {}

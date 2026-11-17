@@ -44,3 +44,11 @@ The centre block is a supported +8 m lift before the inspection channel. The sid
 Each retained tape finishes clean and replays exactly. The one/three comparison includes a different line and technique, not a causal speed multiplier per anchor. The block is the weakest option in these examples: it is slower, needs another deliberate landing/jump, and an earlier test finished without touching it. That earlier tape was rejected as proof of block use. The retained block tape proves operation, not necessity or enjoyment. Inventory limits and enabled-but-unused options do not split the identity of an otherwise identical physical plan.
 
 Run `python3 tests/plan_check.py --out /tmp/r22-14-anchor-plan/NEW-PIECES-NAME --loadout pieces` to check all three optional loadouts through one imported snapshot. The suite fails if the block is never stood on, the pad never fires, a run fails or replay differs. Geometry, height, invalid equipment/budget, planner timing and recording-boundary checks precede the tapes.
+
+## Saved plans and ghost plans
+
+The survey has three local slots. Brackets select a slot, F6 saves the current pieces and settings, and F7 loads it without starting the clock. Mouse targets perform the same actions. A loaded plan still needs Enter to run. Empty, oversized or invalid saves leave the current plan alone; checked atomic writes reuse the project's profile backend and keep a previous good backup. The save is `user://plan-yard-plans.cfg`, independent of run recordings.
+
+A matching best ghost supplies its physical plan from the recording's `header.metadata.physics.mechanics` entry `plan-yard-design`. The survey outlines those pieces in blue and says whether the pending plan matches. After Enter commits a changed physical plan, the existing course/geometry identity selects that plan's own best; it never compares different plans as one course. Inspecting the ghost plan only reads the recording. Budget and unused settings remain editable without creating different identities for identical placed equipment.
+
+`python3 tests/plan_check.py --out /tmp/r22-14-anchor-plan/NEW-SAVE-NAME --persistence` additionally drives save/load keys, records a complete clean production run, checks recipe display and different-plan rejection, verifies the recording SHA remains unchanged, then reads the saved plans and matching ghost in a fresh process.
