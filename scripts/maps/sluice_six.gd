@@ -73,7 +73,7 @@ func segment_at(feet: Vector3) -> int:
 		return 1
 	return 0
 func route_hint(stage: int, _feet: Vector3) -> String:
-	return ["Build speed on the apron; hop the broad settling piers.","Follow the offset caps, or keep the direct water-side line.","Narrow spill piers: keep speed and set the next landing early.","Through the open spill tower to the finish."][clampi(stage,0,3)]
+	return ["Build speed on the apron; hop the broad settling piers.","Follow the offset caps, or keep the direct water-side line.","Narrow spill piers: keep speed and set the next landing early.","Cross the painted line in the spill tower court."][clampi(stage,0,3)]
 func start_wheel() -> void:
 	pass
 func reset_state() -> void:
