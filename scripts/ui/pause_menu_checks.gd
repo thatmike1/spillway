@@ -215,10 +215,25 @@ func run() -> void:
 			var group: Dictionary = hud.mail_groups[choice]
 			if not game.player.has_method(group.getter):
 				continue
-			for value: String in group.buttons:
+			check(game.player.has_method(group.setter) and (group.section as Control).is_visible_in_tree(), "delivery group visible " + choice)
+			var choices: Array = group.buttons.keys()
+			choices.reverse()
+			for value: String in choices:
+				var target: Button = group.buttons[value]
+				var seen: Array[Control] = []
+				var next: Control = hud.resume_button
+				while next != null and next not in seen and seen.size() < 1000:
+					seen.append(next)
+					next = next.find_next_valid_focus()
+				check(target in seen, "Tab reaches delivery choice " + choice + "/" + value)
 				var before_identity: Dictionary = game.motion_identity().duplicate(true)
 				var before_value := str(game.player.call(group.getter))
-				(group.buttons[value] as Button).pressed.emit()
+				var button: Button = group.buttons[value]
+				button.grab_focus()
+				await settle()
+				check(button.has_focus(), "delivery choice accepts focus " + choice + "/" + value)
+				if before_value != value:
+					await click(button, hud._pause_scroll)
 				await settle()
 				check(str(game.player.call(group.getter)) == value, "delivery choice applies " + choice + "/" + value)
 				check(game.paused, "delivery choice keeps menu paused " + choice)

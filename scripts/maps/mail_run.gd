@@ -5,10 +5,10 @@ const GEO := preload("res://scripts/r19_course_geometry.gd")
 const MAP_ID := "mail-run"
 const MAP_ENTRY := {"name": "Mail Run", "theme": "Hold the hop. Steer the post.", "kind": "experiment", "experimental": true, "mail_delivery": true,
 	"runner": "res://scripts/movement/mail_runner.gd", "script": "res://scripts/maps/mail_run.gd", "reticle": true,
-	"instructions": "F2 bhop. LMB throws; mouse steers the envelope while your body is held. RMB recalls. Deliveries are optional score. V switches envelope/body view and restarts."}
+	"instructions": "F2 bhop. LMB throws; mouse steers. RMB recalls. Deliver all three before Dispatch. V changes view, B compares held/running body, N compares required/optional mail. Changes restart."}
 var level_id := "r22-mail-run"
 var level_name := "Mail Run"
-var level_version := 2
+var level_version := 3
 var variant := MAP_ID
 var spawn := Transform3D(Basis.IDENTITY, Vector3(0, 2.04, 12))
 var finish_title := "Dispatch"
@@ -21,7 +21,7 @@ var segment_bounds: Array[AABB] = []
 var progress_roles: Array = ["route"]
 var water_regions: Array[Dictionary] = []
 var water_audio_sources: Array[Vector3] = []
-var mechanics: Array = ["mail-flight-1", "body-hold", "optional-delivery"]
+var mechanics: Array = ["mail-flight-2", "body-hold-or-run", "delivery-goal-or-optional"]
 var manifest: Array[Dictionary] = []
 var prisms: Array[Dictionary] = []
 var art_manifest: Array = []
@@ -44,18 +44,34 @@ func build() -> void:
 	for i: int in 3:
 		var side := 1.0 if i != 1 else -1.0
 		var at := Vector3(side * 12, 4.0, -14.0 - i * 38)
-		mailboxes.append({"id": "mail-run-post-%d" % (i + 1), "bounds": AABB(at - Vector3(1.1, 0.8, 0.5), Vector3(2.2, 1.6, 1.0)), "position": at})
-		box("post_%d" % i, at + Vector3(0, -3, -0.9), Vector3(6, 10, 2), Color("53666a"))
-		box("mouth_%d" % i, at + Vector3(0, 0, 0.15), Vector3(2.5, 1.8, 0.12), Color("172d32"))
-		box("lip_%d" % i, at + Vector3(0, 0.95, 0.25), Vector3(2.8, 0.12, 0.4), Color("bc713e"))
+		var face := -1.0 if i == 1 else 1.0
+		mailboxes.append({"id": "mail-run-post-%d" % (i + 1), "bounds": AABB(at - Vector3(1.1, 0.8, 0.5), Vector3(2.2, 1.6, 1.0)), "position": at, "front": face})
+		box("seawall_post_court_%d" % i, Vector3(side * 10.5, -1.4, at.z + 2), Vector3(9, 5.2, 12), Color("53666a"))
+		box("apron_%d" % i, Vector3(side * 10.5, 2.012, at.z + 4), Vector3(7, 0.018, 6), Color("aaa897"))
+		box("apron_lip_%d" % i, Vector3(side * 10.5, 2.03, at.z + 7.9), Vector3(9, 0.035, 0.10), Color("bc713e"))
+		box("post_%d" % i, at + Vector3(0, -3, -0.9 * face), Vector3(6, 10, 2), Color("53666a"))
+		box("mouth_%d" % i, at + Vector3(0, 0, 0.15 * face), Vector3(2.5, 1.8, 0.12), Color("172d32"))
+		box("lip_%d" % i, at + Vector3(0, 0.95, 0.25 * face), Vector3(2.8, 0.12, 0.4), Color("bc713e"))
 		GEO.deck(self, "post_court_%d" % i, minf(side * 12 - 3, -6), maxf(side * 12 + 3, 6), at.z - 4, at.z + 8, 2, i)
-		label("post_number_%d" % i, at + Vector3(0, 2.4, 0.5), "%02d" % (i + 1), 0.03)
-		box("post_cap_%d" % i, at + Vector3(0, 2.1, -0.9), Vector3(6.3, 0.25, 2.3), Color("ded8c2"))
-	label("entry", Vector3(0, 6, -2), "MAIL RUN\nTHROW WITHOUT LOSING THE HOP\nLMB throw · mouse steer · RMB recall\nV compares views (restarts)", 0.008)
+		label("post_number_%d" % i, at + Vector3(0, 2.4, 0.5 * face), "%02d" % (i + 1), 0.03)
+		box("station_joint_%d" % i, at + Vector3(0, -1.3, 0.13 * face), Vector3(6, 0.045, 0.035), Color("29464a"))
+		box("apron_drain_%d" % i, Vector3(side * 10.5, 2.026, at.z + 6.5), Vector3(6.5, 0.018, 0.12), Color("53666a"))
+		box("collection_plate_%d" % i, at + Vector3(0, 1.35, 0.32 * face), Vector3(2.9, 0.55, 0.12), Color("ded8c2"))
+		label("post_name_%d" % i, at + Vector3(0, 1.35, 0.45 * face), "COLLECTION", 0.007, PI if face < 0 else 0.0)
+		box("post_plinth_%d" % i, at + Vector3(0, -1.9, -0.85 * face), Vector3(6.5, 0.25, 2.4), Color("ded8c2"))
+		box("post_cap_%d" % i, at + Vector3(0, 2.1, -0.9 * face), Vector3(6.3, 0.25, 2.3), Color("ded8c2"))
+		if face < 0:
+			label("rear_notice", at + Vector3(0, 2.4, 1.3), "02 · REAR SLOT", 0.018)
 	label("finish", Vector3(0, 7, -135), "DISPATCH", 0.022)
 	for x: float in [-8, 8]:
 		box("arch_pier_%s" % x, Vector3(x, 7, -125), Vector3(3, 22, 5), Color("53666a"))
 	box("sorting_arch", Vector3(0, 17, -125), Vector3(19, 3, 5), Color("ded8c2"))
+	for mesh: MeshInstance3D in find_children("Mesh_deck_*", "MeshInstance3D", true, false):
+		mesh.name = "Mail_quay_" + str(mesh.name)
+		var material := MATERIAL.concrete(Color("53666a"))
+		material.set_shader_parameter("top_color", Color("d6d0bd"))
+		material.set_shader_parameter("deck", 1.0)
+		mesh.material_override = material
 	_environment()
 	routes = {"basic": [spawn.origin, finish_position], "advanced": [spawn.origin, Vector3(10, 2, -8), Vector3(-10, 2, -46), Vector3(10, 2, -84), finish_position]}
 
@@ -85,11 +101,12 @@ func box(id: String, at: Vector3, size: Vector3, color: Color) -> void:
 		body.add_child(collision)
 		add_child(body)
 
-func label(id: String, at: Vector3, text: String, pixels: float) -> void:
+func label(id: String, at: Vector3, text: String, pixels: float, turn: float = 0.0) -> void:
 	var node := Label3D.new()
 	node.name = "Mail_" + id
 	node.position = at
 	node.text = text
+	node.rotation.y = turn
 	node.pixel_size = pixels
 	node.font_size = 48
 	node.modulate = Color("172d32")
@@ -110,14 +127,19 @@ func _environment() -> void:
 	sun.rotation_degrees = Vector3(-40, -25, 0)
 	sun.light_color = Color("ffebca")
 	sun.light_energy = 0.9
+	sun.shadow_enabled = true
+	sun.directional_shadow_max_distance = 180.0
 	add_child(sun)
 	box("water", Vector3(0, -4, -60), Vector3(600, 0.1, 600), Color("749b9a"))
 
 func is_finish_at(feet: Vector3) -> bool:
-	return finish_bounds.has_point(feet)
+	if not finish_bounds.has_point(feet):
+		return false
+	var runner: Variant = get_parent().get("player")
+	return runner == null or runner.delivery_goal_met()
 
 func geometry_hash() -> String:
 	return JSON.stringify([level_id, level_version, manifest, mailboxes, checkpoints, art_manifest, finish_bounds]).sha256_text()
 
 func route_hint(_stage: int, _feet: Vector3) -> String:
-	return "Centre line is fastest. Side courts shorten the throw. Mail is optional; every miss costs only the time spent steering."
+	return "The central quay is the direct line. Side courts shorten the throw; 02 opens at the rear. Deliver all three before Dispatch, or N selects the separate optional-mail goal. B compares held/running body."
