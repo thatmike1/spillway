@@ -130,7 +130,7 @@ func _process(delta: float) -> void:
 	if game != null and game.map_id == "through-line" and title_card != null:
 		(title_card.get_node("TitleKeys") as Label).text = "Bhop into the raised fork · 230+ u/s forward\nMore speed, more lift · air-strafe onto Second Run · keep moving"
 	if game != null and game.map_has_capability("grapple") and title_card != null:
-		(title_card.get_node("TitleKeys") as Label).text = "LMB hold to swing · RMB reel · release LMB to coast\nSpace jump · A/D strafe · Esc rope model and reel preference"
+		(title_card.get_node("TitleKeys") as Label).text = str(game.map_entry().get("start_controls", "LMB hold to swing · RMB reel · release LMB to coast\nSpace jump · A/D strafe · Esc rope model and reel preference"))
 
 func map_changed() -> void:
 	super()

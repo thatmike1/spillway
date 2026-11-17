@@ -17,6 +17,7 @@ var advanced_line := false
 var release_height := 7.5
 var hold_last := false
 var release_tick := -1
+var upper_landed_tick := -1
 
 func _initialize() -> void:
 	for arg: String in OS.get_cmdline_user_args():
@@ -51,6 +52,8 @@ func run() -> void:
 	for n: int in 4000:
 		tick = n
 		var feet := player.global_position
+		if advanced_line and upper_landed_tick < 0 and LEVEL.UPPER_LANDING.has_point(feet) and player.is_grounded():
+			upper_landed_tick = n
 		if bay < 3 and not player.grapple.is_empty():
 			attached[bay] = true
 		if bay < 3 and not (advanced_line and hold_last and bay == 2) and feet.z < LEVEL.V_ANCHORS[bay].z-2.0 and (bay == 0 or (feet.y > (release_height if advanced_line and bay == 2 else (3.5 if fast_line and bay == 2 else 5.0)) and (bay < 2 or feet.x < -1.0))):
@@ -65,8 +68,10 @@ func run() -> void:
 				aim = Vector3(-15,9,-68)
 		var destination: Vector3 = [Vector3(8,3,-23),Vector3(0,3,-53),Vector3(-8,2,-89),Vector3(-8,2,-94)][bay]
 		if advanced_line and bay >= 2:
-			destination = Vector3(-15,8,-68)
+			destination = Vector3(-15,8,-68) if upper_landed_tick < 0 or n < upper_landed_tick+64 else Vector3(-25,2,-96)
 		var delta: Vector3 = aim-player._eye() if bay < 3 else destination-player._eye()
+		if advanced_line and upper_landed_tick >= 0 and n < upper_landed_tick+64:
+			delta = Vector3(-15,10,-64.15)-player._eye()
 		var desired_yaw := atan2(-delta.x,-delta.z)
 		var desired_pitch := asin(delta.normalized().y)
 		var gain := deg_to_rad(float(player.settings.sensitivity)*float(player.settings.m_yaw))
@@ -76,6 +81,8 @@ func run() -> void:
 		events.append({"time":float(n)/128,"mouse":[motion.screen_relative.x,motion.screen_relative.y]})
 		var wish := (destination-feet)*Vector3(1,0,1)
 		wish = wish.normalized()
+		if advanced_line and upper_landed_tick >= 0 and n < upper_landed_tick+64:
+			wish = Vector3.ZERO
 		var forward := Vector3(-sin(player.yaw),0,-cos(player.yaw))
 		var right := Vector3(cos(player.yaw),0,-sin(player.yaw))
 		var f := clampf(wish.dot(forward),-1.0,1.0)
@@ -119,15 +126,15 @@ func run() -> void:
 		await physics_frame
 	var ok: bool = level.is_finish_at(player.global_position) and attached.all(func(v: bool) -> bool: return v)
 	if advanced_line:
-		ok = ok and LEVEL.UPPER_FINISH.has_point(player.global_position) and player.is_grounded()
+		ok = ok and upper_landed_tick >= 0
 	DirAccess.make_dir_recursive_absolute(output)
 	var file := FileAccess.open(output.path_join("route.json"),FileAccess.WRITE)
-	file.store_string(JSON.stringify({"ok":ok,"line":"advanced" if advanced_line else ("fast" if fast_line else "basic"),"ticks":tick+1,"release_tick":release_tick,"attached":attached,"feet":player.global_position,"samples":samples,"tape":tape},"\t"))
+	file.store_string(JSON.stringify({"ok":ok,"line":"advanced" if advanced_line else ("fast" if fast_line else "basic"),"ticks":tick+1,"release_tick":release_tick,"upper_landed_tick":upper_landed_tick,"attached":attached,"feet":player.global_position,"samples":samples,"tape":tape},"\t"))
 	file.close()
 	file = FileAccess.open(output.path_join("input.json"),FileAccess.WRITE)
 	file.store_string(JSON.stringify(events))
 	file.close()
-	print("VIADUCT ",ok," tick=",tick," feet=",player.global_position," attached=",attached)
+	print("VIADUCT ",ok," tick=",tick," feet=",player.global_position," attached=",attached," upper-landed-tick=",upper_landed_tick)
 	player.free()
 	level.free()
 	quit(0 if ok else 1)

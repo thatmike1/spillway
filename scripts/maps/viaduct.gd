@@ -7,15 +7,16 @@ const MAP_ENTRY := {"name": "Viaduct", "theme": "Link Elastic Arc swings beneath
 	"runner": "res://scripts/movement/grapple_player.gd", "script": "res://scripts/maps/viaduct.gd", "reticle": true,
 	"key_hint": " · LMB hold / RMB reel / release to transfer", "tether_model": "elastic-arc", "grapple": true,
 	"own_look": true,
-	"instructions": "Chain three rings to the west abutment. Advanced: overswing bay 3 onto the upper inspection pier. LMB holds, RMB reels; court ramps recover misses."}
+	"instructions": "Hold LMB + RMB through the low point. Wait until the pale landing is below you, then release on the rise. Looking away keeps the rope attached. Advanced: ride 03 higher and land on UPPER PIER, then rejoin the west FINISH. Court ramps recover misses.",
+	"start_controls": "Aim at 01. Space jumps; LMB holds; RMB reels.\nHold both through the low point; rise above the pale landing before release.\nLook ahead while attached. Court ramps recover misses.\nAdvanced: ride 03 higher and land on UPPER PIER, then rejoin the west FINISH."}
 const V_ANCHORS := [Vector3(4,12,-8), Vector3(8,12,-38), Vector3(-4,12,-68)]
 const V_DECKS := [[-7.0,7.0,0.0,18.0], [1.0,15.0,-30.0,-16.0], [-7.0,7.0,-60.0,-46.0], [-30.0,-1.0,-104.0,-74.0]]
 const V_HEIGHTS := [4.0,3.0,3.0,2.0]
-const UPPER_FINISH := AABB(Vector3(-17.4,7.9,-71.4),Vector3(4.8,2.8,6.8))
+const UPPER_LANDING := AABB(Vector3(-17.4,7.9,-71.4),Vector3(4.8,2.8,6.8))
 
 var level_id := "r22-viaduct"
 var level_name := "Viaduct"
-var level_version := 5
+var level_version := 6
 var variant := MAP_ID
 var spawn := Transform3D(Basis.IDENTITY,Vector3(0,4.04,12))
 var finish_title := "Viaduct finish"
@@ -63,7 +64,7 @@ func build() -> void:
 	GEO.deck(self,"viaduct_maintenance_court",-36,29,-110,44,-5,-1,"recovery")
 	GEO.prism(self,"viaduct_basin_foundation",GEO.rectangle(-36,29,-110,44,-5.8),-11,-1,"structure","basin-foundation")
 	# the inspection pier catches an overswing upstream, outside the existing downstream flight.
-	GEO.deck(self,"viaduct_upper_inspection",-18,-12,-72,-64,8,3)
+	GEO.deck(self,"viaduct_upper_inspection",-18,-12,-72,-64,8,2)
 	GEO.prism(self,"viaduct_upper_support",GEO.rectangle(-17.6,-12.4,-71.6,-64.4,7.2),-5.8,-1,"structure","support")
 	_box("Art_paint_upper_lip",Vector3(-15,8.02,-71.88),Vector3(6,0.03,0.22),Color("c77642"))
 	_box("viaduct_upper_board",Vector3(-15,10,-64.15),Vector3(2.8,1.2,0.16),Color("29464a"))
@@ -77,11 +78,11 @@ func build() -> void:
 	_sign("entry",Vector3(0,7,17),"VIADUCT\nLMB HOLD / RMB REEL / RELEASE",0.006)
 	_sign("finish",Vector3(-25,8.7,-94.76),"WEST ABUTMENT",0.008,Color("eee8d5"))
 	_sign("goal",Vector3(-25,9.7,-94.74),"FINISH",0.018,Color("eee8d5"))
-	_sign("upper_front",Vector3(-15,10,-64.05),"UPPER FINISH",0.008,Color("eee8d5"))
-	_sign("upper_back",Vector3(-15,10,-64.25),"UPPER FINISH",0.008,Color("eee8d5"))
+	_sign("upper_front",Vector3(-15,10,-64.05),"UPPER PIER",0.008,Color("eee8d5"))
+	_sign("upper_back",Vector3(-15,10,-64.25),"UPPER PIER",0.008,Color("eee8d5"))
 	get_node("Sign_upper_back").rotation.y = PI
 	routes = {"basic":[spawn.origin,Vector3(8,3,-22),Vector3(0,3,-52),finish_position]}
-	routes["advanced"] = [spawn.origin,Vector3(8,3,-22),Vector3(0,3,-52),Vector3(-15,8,-68)]
+	routes["advanced"] = [spawn.origin,Vector3(8,3,-22),Vector3(0,3,-52),Vector3(-15,8,-68),finish_position]
 
 func _viaduct_anchor(i: int) -> void:
 	var at: Vector3 = V_ANCHORS[i]
@@ -150,12 +151,14 @@ func _control_house() -> void:
 	for z: float in [-103.1,-94.9]:
 		_box("viaduct_house_coping_z_%s" % z,Vector3(-25,13.04,z),Vector3(8.4,0.10,0.16),Color("c77642"))
 
-func route_hint(stage: int, _feet: Vector3) -> String:
+func route_hint(stage: int, feet: Vector3) -> String:
 	if stage >= 3:
 		return "Cross the west abutment to finish. Missed the landing? The lower court and return ramps remain open."
 	if stage == 2:
-		return "Bay 3: release toward the west abutment, or hold the rising arc longer and turn back onto the upper inspection pier."
-	return "Aim at bay %d. Hold LMB, reel with RMB, then release toward the pale terrace. Lower court ramps return to the course." % mini(stage+1,3)
+		if UPPER_LANDING.has_point(feet):
+			return "Upper pier: settle on the pale top, then run across the pier and drop toward the west FINISH house."
+		return "Bay 3: release toward the west abutment, or ride higher onto the upper inspection pier, then rejoin the west FINISH."
+	return "Bay %d: LMB + RMB through the low point. Keep reeling until the pale top is below you; release on the rise toward it. Look ahead while attached." % mini(stage+1,3)
 
 func geometry_hash() -> String:
 	var data: Array = [level_id,level_version,MAP_ID,V_DECKS,V_HEIGHTS,progress_roles]
@@ -168,7 +171,7 @@ func geometry_hash() -> String:
 		data.append([piece.name,piece.stage,piece.role,piece.kind,points])
 	for checkpoint: Dictionary in checkpoints:
 		data.append([checkpoint.title,_v(checkpoint.pose.origin),_v(checkpoint.bounds.position),_v(checkpoint.bounds.size)])
-	data.append([_v(spawn.origin),_v(spawn.basis.x),_v(spawn.basis.y),_v(spawn.basis.z),_v(finish_position),finish_radius,_v(finish_bounds.position),_v(finish_bounds.size),_v(kill_bounds.position),_v(kill_bounds.size),_v(UPPER_FINISH.position),_v(UPPER_FINISH.size)])
+	data.append([_v(spawn.origin),_v(spawn.basis.x),_v(spawn.basis.y),_v(spawn.basis.z),_v(finish_position),finish_radius,_v(finish_bounds.position),_v(finish_bounds.size),_v(kill_bounds.position),_v(kill_bounds.size),_v(UPPER_LANDING.position),_v(UPPER_LANDING.size)])
 	return JSON.stringify(data,"",false,true).sha256_text()
 
 func _environment() -> void:
@@ -214,12 +217,4 @@ static func _v(p: Vector3) -> Array:
 	return [p.x, p.y, p.z]
 
 func is_finish_at(feet: Vector3) -> bool:
-	if finish_bounds.has_point(feet):
-		return true
-	if not UPPER_FINISH.has_point(feet):
-		return false
-	# a landing qualifies this exit; flying through its volume cannot skip the last checkpoint.
-	for body: Node in get_parent().get_children():
-		if body is CharacterBody3D and body.has_method("is_grounded") and body.global_position.distance_to(feet) < 0.1:
-			return bool(body.call("is_grounded"))
-	return false
+	return finish_bounds.has_point(feet)
