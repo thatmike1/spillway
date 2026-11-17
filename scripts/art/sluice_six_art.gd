@@ -15,15 +15,17 @@ static func dress(level: Node3D) -> void:
 	env.sky_rotation = Vector3(0,PI,0)
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color("cdd4d3")
-	env.ambient_light_energy = 0.52
+	env.ambient_light_energy = 0.40
 	world.environment = env
 	level.add_child(world)
 	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-32,-35,0)
-	sun.light_color = Color("fff5e7")
-	sun.light_energy = 0.48
+	sun.rotation_degrees = Vector3(-14,-145,0)
+	sun.light_color = Color("ffdbad")
+	sun.light_energy = 0.75
 	sun.shadow_enabled = true
+	sun.directional_shadow_max_distance = 260.0
 	level.add_child(sun)
+	env.sky_rotation = Vector3(0,PI+0.6,0)
 	for child: Node in level.get_children():
 		if child is MeshInstance3D:
 			var support := str(child.name).begins_with("Mesh_support_") or str(child.name).begins_with("Mesh_service_")
@@ -42,6 +44,9 @@ static func dress(level: Node3D) -> void:
 	for side: int in [-1,1]:
 		footprints.append(Vector4(side*14.8,-52,1.2,2.1))
 		footprints.append(Vector4(side*7,level.finish_position.z-15,1,5))
+	level.get_node("tidal_water").material_override = MATERIALS.water(footprints)
+	for bay: Vector2 in [Vector2(8,-22),Vector2(-42,-76),Vector2(-96,-130),Vector2(-144,-166)]:
+		footprints.append(Vector4(19,(bay.x+bay.y)*0.5,4,(bay.x-bay.y)*0.5))
 	level.get_node("tidal_water").material_override = MATERIALS.water(footprints)
 	# one connected waterworks: banks, section abutments, a service bridge and the spill tower.
 	# submerged bank foundations connect the works; the estuary side stays open to the horizon.
@@ -63,6 +68,8 @@ static func dress(level: Node3D) -> void:
 				_box(level,"bank_rail_post_%s_%s" % [x,z],Vector3(x,5.5,z),Vector3(0.08,1,0.08),Color("384b4f"))
 			_box(level,"bank_rail_%s_%s" % [x,middle],Vector3(x,6,middle),Vector3(0.08,0.08,length),Color("384b4f"))
 	_box(level,"service_bridge",Vector3(0,6.5,-52),Vector3(32,1,4.2),Color("7d8d87"),true)
+	for beam_z: float in [-53.6,-50.4]:
+		_box(level,"bridge_edge_beam_%s" % beam_z,Vector3(0,5.8,beam_z),Vector3(30,0.4,0.25),Color("697d7f"),true)
 	# a service bridge reads as an accessible walkway, with rails and steps onto the east bank.
 	for z: float in [-54,-50]:
 		for x: float in [-14,-7,0,7,14]:
@@ -72,22 +79,25 @@ static func dress(level: Node3D) -> void:
 		var top := 6.8-0.2*i
 		_box(level,"access_step_%d" % i,Vector3(16.15+0.3*i,(top+5.1)*0.5,-52),Vector3(0.3,top-5.1,3),Color("a5a797"),true)
 	var tower_z: float = level.finish_position.z - 15.0
-	_box(level,"tower_body",Vector3(0,16,tower_z),Vector3(12,12,10),Color("969887"),true)
+	_box(level,"tower_body",Vector3(0,16,tower_z),Vector3(12,12,10),Color("708c95"),true)
 	for side: int in [-1,1]:
-		_box(level,"tower_leg_%d" % side,Vector3(side*7,10,tower_z),Vector3(2,34,10),Color("969887"),true)
+		_box(level,"tower_leg_%d" % side,Vector3(side*7,10,tower_z),Vector3(2,34,10),Color("81999b"),true)
 	_box(level,"tower_crown",Vector3(0,27,tower_z),Vector3(16,2,10),Color("c7c8b4"),true)
 	# metal guides show where the raised gate travels, fixed into its concrete piers and crosshead.
 	for side: int in [-1,1]:
 		_box(level,"gate_guide_%d" % side,Vector3(side*5.85,3.5,tower_z+5.12),Vector3(0.16,13,0.22),Color("384b4f"))
 	_box(level,"gate_crosshead",Vector3(0,10,tower_z+5.12),Vector3(12,0.24,0.22),Color("384b4f"))
 	_gate_control(level,tower_z)
+	_gate_lift(level,tower_z)
+	_work_beacon(level,tower_z)
+	_pile_bearings(level)
 	var number := Label3D.new()
 	number.name = "TowerNumber"
 	number.text = "06"
 	number.font = load("res://assets/ui/fonts/BricolageGrotesque-variable.ttf")
 	number.font_size = 72
 	number.pixel_size = 0.08
-	number.modulate = Color("d2cfb7")
+	number.modulate = Color("ece3c8")
 	number.outline_size = 0
 	number.position = Vector3(0,14,tower_z+5.015)
 	level.add_child(number)
@@ -119,6 +129,7 @@ static func dress(level: Node3D) -> void:
 	inspection.modulate = Color("364e54")
 	inspection.position = Vector3(4.675,3.82,-37.23)
 	level.add_child(inspection)
+	load("res://scripts/art/sluice_six_estuary.gd").dress(level)
 	# the established contour builder inks actual visible boundaries and paints only jump lips.
 	var contours := CONTOURS.new()
 	level.add_child(contours.build(level,false))
@@ -131,7 +142,7 @@ static func dress(level: Node3D) -> void:
 		var corners: Array[Vector3] = [Vector3(x0,0.02,d.near),Vector3(x1,0.02,d.near),Vector3(x1,0.02,d.far),Vector3(x0,0.02,d.far)]
 		for i: int in 4:
 			edge_lines.line(corners[i],corners[(i+1)%4],0.018)
-			edge_lines.line(corners[i],Vector3(corners[i].x,-3.1,corners[i].z),0.022)
+			edge_lines.line(corners[i],Vector3(corners[i].x,-7.0 if d.id in ["start","tower_court"] else -0.5,corners[i].z),0.022)
 	for piece: Dictionary in level.manifest:
 		if piece.role not in ["support","obstacle"]:
 			continue
@@ -159,17 +170,7 @@ static func dress(level: Node3D) -> void:
 	level.add_child(ink)
 	var finish_z: float = level.finish_bounds.end.z
 	_box(level,"finish_line",Vector3(0,0.015,finish_z),Vector3(14,0.02,0.16),Color("3c5156"))
-	var finish := Label3D.new()
-	finish.name = "FinishStencil"
-	finish.text = "FINISH"
-	finish.font = number.font
-	finish.font_size = 48
-	finish.pixel_size = 0.025
-	finish.outline_size = 0
-	finish.modulate = Color("3c5156")
-	finish.rotation.x = -PI*0.5
-	finish.position = Vector3(0,0.028,finish_z-1.6)
-	level.add_child(finish)
+
 static func _material(color: Color) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.albedo_color = color
@@ -183,7 +184,7 @@ static func _box(level: Node3D, id: String, at: Vector3, size: Vector3, color: C
 	mesh.mesh = box
 	mesh.position = at
 	mesh.set_meta("sluice_structural",structural)
-	mesh.material_override = MATERIALS.concrete(color.lightened(0.15),color,false,AABB(at-size*0.5,size)) if structural else _material(color)
+	mesh.material_override = MATERIALS.concrete(color.lightened(0.15),color,false,AABB(-size*0.5,size)) if structural else _material(color)
 	level.add_child(mesh)
 
 static func _gate_control(level: Node3D, tower_z: float) -> void:
@@ -222,3 +223,58 @@ static func _gate_control(level: Node3D, tower_z: float) -> void:
 		level.add_child(spoke)
 	_box(level,"wheel_drive",Vector3(-5.225,12,tower_z+5.17),Vector3(1.25,0.11,0.11),Color("384b53"))
 	_box(level,"wheel_shaft",Vector3(-5.85,11,tower_z+5.17),Vector3(0.11,2,0.11),Color("384b53"))
+
+static func _pile_bearings(level: Node3D) -> void:
+	# each real pile carries the same steel bearing shoe into its transverse cap beam.
+	for piece: Dictionary in level.manifest:
+		if not str(piece.name).contains("_pile_"):
+			continue
+		var centre := Vector3.ZERO
+		for i: int in 4:
+			centre += piece.points[i]
+		centre *= 0.25
+		_box(level,"bearing_"+str(piece.name),centre-Vector3(0,0.11,0),Vector3(1.1,0.22,1.1),Color("465d65"))
+		for side: int in [-1,1]:
+			_box(level,"bearing_bolt_%s_%s" % [piece.name,side],centre+Vector3(side*0.46,-0.13,0.56),Vector3(0.09,0.09,0.04),Color("bec0ac"))
+
+static func _gate_lift(level: Node3D, z: float) -> void:
+	# a raised ribbed gate hangs from paired lift drums in the crown opening.
+	_box(level,"raised_gate",Vector3(0,9.1,z+5.35),Vector3(11.3,3,0.3),Color("4a666c"),true)
+	for x: float in [-4.5,-3,-1.5,0,1.5,3,4.5]:
+		_box(level,"gate_rib_%s" % x,Vector3(x,9.1,z+5.55),Vector3(0.10,2.8,0.13),Color("798c8c"))
+	_box(level,"hoist_crossbeam",Vector3(0,25.2,z+4.8),Vector3(12,0.45,1.1),Color("4c656b"),true)
+	for x: float in [-3.5,3.5]:
+		var drum := MeshInstance3D.new()
+		drum.name = "GateLiftDrum_%s" % x
+		var cylinder := CylinderMesh.new()
+		cylinder.top_radius = 1.1
+		cylinder.bottom_radius = 1.1
+		cylinder.height = 0.7
+		cylinder.radial_segments = 24
+		drum.mesh = cylinder
+		drum.rotation.x = PI*0.5
+		drum.position = Vector3(x,23.8,z+5.1)
+		drum.material_override = _material(Color("516c73"))
+		level.add_child(drum)
+		_box(level,"hoist_suspension_%s" % x,Vector3(x,24.8,z+4.8),Vector3(0.35,0.8,0.4),Color("536970"))
+		_box(level,"lift_rod_%s" % x,Vector3(x,17.3,z+5.57),Vector3(0.13,14.3,0.13),Color("3d555f"))
+	_box(level,"hoist_drive_shaft",Vector3(-5.85,18.5,z+5.17),Vector3(0.16,13,0.16),Color("3c535a"))
+	_box(level,"hoist_transmission",Vector3(0,23.8,z+5.17),Vector3(11.7,0.16,0.16),Color("3c535a"))
+
+static func _work_beacon(level: Node3D, z: float) -> void:
+	# an asymmetric service light marks the tower above the lifting gear.
+	_box(level,"beacon_bracket",Vector3(-5.5,27.8,z+0.4),Vector3(0.2,1.6,0.2),Color("465e66"))
+	_box(level,"beacon_canopy",Vector3(-5.5,28.7,z+0.4),Vector3(2.6,0.18,1.6),Color("58737a"))
+	var lamp := MeshInstance3D.new()
+	var bulb := SphereMesh.new()
+	bulb.radius = 0.55
+	bulb.height = 1.1
+	lamp.mesh = bulb
+	lamp.position = Vector3(-5.5,28.2,z+0.4)
+	var glow := StandardMaterial3D.new()
+	glow.albedo_color = Color("fff1c8")
+	glow.emission_enabled = true
+	glow.emission = Color("ffe8ad")
+	glow.emission_energy_multiplier = 2.0
+	lamp.material_override = glow
+	level.add_child(lamp)
