@@ -2,7 +2,7 @@
 
 The profile remains `user://spillway_r16.cfg`, using the existing ConfigFile sections and keys. Time records remain integer ticks; the store does no numerical conversion. Attempts/recordings are outside this store.
 
-`scripts/persistence/profile_store.gd` exposes `read_profile(path)` (error, config, state) and `write_profile(path, config)` (Error). The host must check the read result before changing any sections. A missing file may start empty. An unreadable or zero-byte existing file may not.
+`scripts/persistence/profile_store.gd` exposes `read_profile(path)` (error, config, state) and `write_profile(path, config)` (Error). The host must check the read result before changing any sections. A profile may start empty only when both primary and backup reads report not-found; existence checks cannot turn another read error into absence. An unreadable or zero-byte existing file may not.
 
 A write serializes beside the destination as `.tmp`, loads it back and compares the complete encoding. It copies the current readable profile into `.bak.tmp` and atomically replaces `.bak`, then atomically replaces the destination with `.tmp`. On first save the checked new profile also seeds the backup. A failure returns an error, cleans temporary files, and never falls back to writing directly over the destination. A failed replacement leaves the original primary and its other-map records intact. An old `.tmp` is never a source of records.
 
