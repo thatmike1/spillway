@@ -3,8 +3,11 @@ extends SceneTree
 const LEVEL := preload("res://scripts/maps/viaduct.gd")
 const PLAYER := preload("res://scripts/movement/grapple_player.gd")
 var tape_paths: Array[String] = []
+var expect_upper_landing := false
 func _initialize() -> void:
 	for arg: String in OS.get_cmdline_user_args():
+		if arg == "--upper":
+			expect_upper_landing = true
 		if arg.begins_with("--tape="):
 			tape_paths.append(arg.trim_prefix("--tape="))
 	run.call_deferred()
@@ -47,6 +50,7 @@ func replay(tape_path: String) -> bool:
 	player.input_enabled = true
 	var cursor := 0
 	var finished := false
+	var landed_upper := false
 	var last_tick := 0
 	var preview_run := [0,0,0]
 	var preview_best := [0,0,0]
@@ -58,6 +62,7 @@ func replay(tape_path: String) -> bool:
 			inject_event(player,event)
 			cursor += 1
 		player._physics_process(1.0/128)
+		landed_upper = landed_upper or (LEVEL.UPPER_LANDING.has_point(player.global_position) and player.is_grounded())
 		for bay: int in 3:
 			if not player.grapple.is_empty() and player.grapple.position == LEVEL.V_ANCHORS[bay]:
 				var target: Vector3 = LEVEL.V_ANCHORS[bay+1] if bay < 2 else level.finish_position+Vector3(0,2,0)
@@ -70,8 +75,8 @@ func replay(tape_path: String) -> bool:
 		if cursor == events.size():
 			break
 		await physics_frame
-	print("VIADUCT TAPE REPLAY ",finished," ticks=",last_tick+1," feet=",player.global_position," attachments=",player.grapple_count," visible-preview-ticks=",preview_best," geometry-version=",level.level_version)
-	var ok: bool = finished and player.grapple_count >= 3 and preview_best.all(func(ticks: int) -> bool: return ticks >= 16)
+	print("VIADUCT TAPE REPLAY ",finished," ticks=",last_tick+1," feet=",player.global_position," attachments=",player.grapple_count," visible-preview-ticks=",preview_best," geometry-version=",level.level_version," upper-landed=",landed_upper)
+	var ok: bool = (not expect_upper_landing or landed_upper) and finished and player.grapple_count >= 3 and preview_best.all(func(ticks: int) -> bool: return ticks >= 16)
 	player.free()
 	level.free()
 	await physics_frame

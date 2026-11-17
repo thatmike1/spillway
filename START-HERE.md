@@ -43,13 +43,15 @@ Stable round-numbered aliases preserve resource paths used by recording identiti
 | Overflow / `overflow` | `momentum_overflow_level.gd`; F2/F5 or the advanced R13 comparison runner |
 | Movement Lab / `experiment` | `r15_experiment_level.gd`, `r16_experiment_player.gd`; isolated slide, wall-jump and grapple loadouts |
 | Saltglass / `saltglass` | **`maps/saltglass.gd`**, course player; surf/exits experiment |
-| Saltglass Seaward / `saltglass-seaward` | `maps/saltglass_seaward.gd`, course player; separate visible receiver, original Saltglass unchanged |
+| Saltglass / Seaward / `saltglass-seaward` | `maps/saltglass_seaward.gd`, course player; separate visible receiver, original Saltglass unchanged |
 | Tether Yard / `tether-yard` | **`maps/tether_yard.gd`**, **`movement/grapple_player.gd`**; six rope laws and optional anchor acquisition assist |
 | Through Line / `through-line` | `r20_through_level.gd`, `r20_through_player.gd`; movement experiment |
 | Viaduct / `viaduct` | `maps/viaduct.gd`, grapple player; fixed Arc transfers and lower-court returns |
 | Gantry / `gantry` | `maps/gantry.gd`, grapple player; F2 ground sections joined by fixed Arc transfers |
+| Gantry Chain / `gantry-chain` | `maps/gantry_chain.gd`, grapple player; separate longer course with a third hop-to-Arc transfer |
 | Mail Run / `mail-run` | `maps/mail_run.gd`, `movement/mail_runner.gd`; F2 with held or running envelope steering |
 | Sluice Six / `sluice-six` | `maps/sluice_six.gd`, course player; F2 settling piers, offset caps and spill tower |
+| Outer Reach / `outer-reach` | `maps/outer_reach.gd`, course player; long acceleration quay and sustained F2 air corridors |
 | Foundry / `foundry` | `maps/foundry.gd`, grapple player; continuous gallery, shaft shortcut and descending catch |
 | Plan Yard / `plan-yard` | `maps/plan_yard.gd`, `movement/plan_runner.gd`; place a one/three-piece plan before timing, then run F2 and fixed Arc |
 | Shelved: Fall Line / `fall-line` | `r19_fall_line_level.gd`; retained as a catalog dependency, removed from the current menu |

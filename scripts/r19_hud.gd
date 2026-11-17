@@ -140,7 +140,7 @@ func _build_map_cards() -> void:
 
 func _refresh_map_note() -> void:
 	if map_note != null:
-		map_note.text = "%d maps. Each starts at its spawn and keeps your preset." % map_buttons.size()
+		map_note.text = "%d maps. Hover or focus to preview.\nClick a map or press Enter to start at spawn with your preset." % map_buttons.size()
 
 func _layout_pause(size: Vector2) -> void:
 	super(size)

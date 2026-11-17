@@ -14,9 +14,11 @@ const FRAMES := {
 	"through-line": preload("res://scripts/ui/map_previews/through-line.png"),
 	"viaduct": preload("res://scripts/ui/map_previews/viaduct.png"),
 	"gantry": preload("res://scripts/ui/map_previews/gantry.png"),
+	"gantry-chain": preload("res://scripts/ui/map_previews/gantry-chain.png"),
 	"mail-run": preload("res://scripts/ui/map_previews/mail-run.png"),
 	"sluice-six": preload("res://scripts/ui/map_previews/sluice-six.png"),
 	"foundry": preload("res://scripts/ui/map_previews/foundry.png"),
 	"saltglass-seaward": preload("res://scripts/ui/map_previews/saltglass-seaward.png"),
 	"plan-yard": preload("res://scripts/ui/map_previews/plan-yard.png"),
+	"outer-reach": preload("res://scripts/ui/map_previews/outer-reach.png"),
 }

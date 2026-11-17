@@ -11,6 +11,8 @@ func run() -> void:
 	assert(level.level_id == "r22-viaduct")
 	assert(level.variant == "viaduct")
 	assert(level.spawn.origin == Vector3(0,4.04,12))
+	assert(level.get_node("viaduct_upper_inspection_0_0").get_meta("progress_stage") == 2)
+	assert(not level.is_finish_at(LEVEL.UPPER_LANDING.get_center()))
 	var yard := preload("res://scripts/maps/tether_yard.gd").new()
 	assert(level.geometry_hash() != yard.geometry_hash())
 	yard.free()

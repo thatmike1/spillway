@@ -1,6 +1,8 @@
 extends RefCounted
 ## original procedural architecture; private reference imagery is never loaded by the game.
 const GEO := preload("res://scripts/r19_course_geometry.gd")
+const CABLE := preload("res://scripts/art/foundry_cable.gd")
+const SEA_GATE := preload("res://scripts/art/foundry_sea_gate.gd")
 const CONCRETE := preload("res://assets/maps/foundry/concrete.gdshader")
 
 static func dress(level: Node3D) -> void:
@@ -8,12 +10,16 @@ static func dress(level: Node3D) -> void:
 	concrete.shader = CONCRETE
 	var ink := ShaderMaterial.new()
 	ink.shader = preload("res://assets/maps/foundry/outline.gdshader")
+	ink.set_shader_parameter("width",0.06)
 	concrete.next_pass = ink
 	for child: Node in level.get_children():
 		if child is MeshInstance3D and str(child.name).begins_with("Mesh_") and not str(child.name).begins_with("Mesh_structure_crane_"):
 			child.material_override = concrete
 	# recovery concrete stays visually above water rather than sharing the same plane.
 	level.get_node("Water").position.y = -10
+	var sea := ShaderMaterial.new()
+	sea.shader = preload("res://assets/maps/foundry/sea.gdshader")
+	level.get_node("Water").material_override = sea
 	for row: Array in level.art_manifest:
 		if row[0] == "Water":
 			row[1] = [0,-10,-40]
@@ -61,6 +67,35 @@ static func dress(level: Node3D) -> void:
 			env.ambient_light_energy = 0.32
 			env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 			env.tonemap_exposure = 0.95
+
+	# one cooling main joins the existing right-side pipework and wall buttresses.
+	var duct_material := SEA_GATE.painted(Color("476968"),ink)
+	SEA_GATE.block(level,"cooling_main",Vector3(27.3,16.4,-32),Vector3(1.0,1.4,88),duct_material)
+	SEA_GATE.block(level,"cooling_intake",Vector3(27.3,4.2,12),Vector3(1.0,24.4,1.4),duct_material)
+	SEA_GATE.block(level,"cooling_crossfeed",Vector3(20.15,16.4,-48),Vector3(14.3,1.4,1.0),duct_material)
+	SEA_GATE.block(level,"cooling_drop",Vector3(13,14.2,-48),Vector3(1.0,4.4,1.0),duct_material)
+	for z: float in [-16.0,-48.0,-76.0]:
+		SEA_GATE.block(level,"cooling_bearing",Vector3(27.7,15.5,z),Vector3(1.4,0.3,1.8),duct_material)
+	# the twin drops join a supplied manifold; the pipe heads no longer end in space.
+	SEA_GATE.block(level,"cooling_manifold",Vector3(19.15,12,-36),Vector3(16.3,0.9,1.2),duct_material)
+	SEA_GATE.block(level,"manifold_supply",Vector3(27.3,14.2,-36),Vector3(1.0,4.4,1.2),duct_material)
+	for x: float in [11.0,13.0]:
+		SEA_GATE.cylinder(level,"header_flange",Vector3(x,12,-35.4),0.18,0.75,0.75,duct_material)
+		var flange: MeshInstance3D = level.get_child(level.get_child_count()-1)
+		flange.rotation.x = PI/2
+
+	for child: Node in level.get_children():
+		if child is MeshInstance3D and (str(child.name).begins_with("tailrace_pipe_") or str(child.name).begins_with("Mesh_structure_crane_") or str(child.name).begins_with("crane_drop_")):
+			if child.material_override != null:
+				child.material_override.next_pass = ink
+
+	var gate := SEA_GATE.new()
+	gate.name = "SeaGate"
+	level.add_child(gate)
+	gate.build(concrete)
+	var cable := CABLE.new()
+	cable.name = "FoundryCable"
+	level.add_child(cable)
 
 static func box(level: Node3D, id: String, at: Vector3, size: Vector3, material: Material) -> void:
 	var half := size*0.5

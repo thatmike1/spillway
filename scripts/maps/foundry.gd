@@ -49,7 +49,8 @@ func build() -> void:
 	_sign("direct",Vector3(4,11.6,-19.97),"SHAFT",0.014)
 	_sign("court",Vector3(0,-7.94,-17),"COURT\nRETURN LEFT",0.035)
 	routes = {"basic": [spawn.origin,Vector3(-16,18,6),Vector3(-16,12,-24),Vector3(0,12,-33),finish_position],
-		"advanced": [spawn.origin,Vector3(0,18,0),Vector3(0,12,-28),finish_position]}
+		"advanced": [spawn.origin,Vector3(0,18,0),Vector3(0,12,-28),finish_position],
+		"shaft-carry": [spawn.origin,Vector3(0,18,3),Vector3(0,18.8,-8),Vector3(0,12,-24),Vector3(0,12,-36),Vector3(0,2,-66),finish_position]}
 	jump_gaps = [{"label":"shaft", "edge":Vector3(0,18,0),"land":Vector3(0,12,-20),"recovery":"court and wall ramp"},
 		{"label":"descending catch","edge":Vector3(0,12,-36),"land":Vector3(0,2,-50),"recovery":"court and tailrace ramp"}]
 	FOUNDRY_ART.dress(self)
@@ -102,7 +103,7 @@ func _sign(id: String, at: Vector3, text: String, pixels: float) -> void:
 		label.outline_size = 0
 
 func route_hint(stage: int, _feet: Vector3) -> String:
-	return "Gallery left, shaft ahead. LMB holds, RMB reels; release toward the far deck." if stage < 1 else "The next ring leads down to Tailrace. The lower court has recovery ramps."
+	return "Gallery left, shaft ahead. LMB holds, RMB reels; release toward the far deck." if stage < 1 else "Carry shaft speed with hops to skip the next ring, or swing down to Tailrace. Court ramps recover misses."
 
 func geometry_hash() -> String:
 	return (super.geometry_hash() + JSON.stringify([level_id, level_version, FOUNDRY_ID, FOUNDRY_ANCHORS])).sha256_text()

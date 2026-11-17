@@ -187,8 +187,8 @@
       ],
       "yaw": 0.0
     },
-    "image_sha256": "fd06cc3630157dd90192fb72492bca9ccdb8c53abf1ee5c2a8a055362f9d70e0",
-    "source_commit": "9a5ac15916f2878bbad045bb060ae193157c14e2",
+    "image_sha256": "e30b3d6d18b3721306876586c797af76b1995442fe8529081a20139890e4df9c",
+    "source_commit": "bf52fa8d1175b76c2044cf3f89b84e4e8d9e60ec",
     "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
   },
   {
@@ -203,8 +203,24 @@
       ],
       "yaw": 0.0
     },
-    "image_sha256": "24e9fde3f1e3e0506d96d40237729565df1c0ec50b019d7be5ff7c8c732ba13e",
-    "source_commit": "730e39e56d6ef521e4820af82a97e3d46c3e19e2",
+    "image_sha256": "228c2f7ce177b2e059efcf05415ac65777e633edbcc99fa385aa7e733b4e64b0",
+    "source_commit": "bf52fa8d1175b76c2044cf3f89b84e4e8d9e60ec",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "gantry-chain",
+    "name": "Gantry Chain",
+    "pose": {
+      "position": [
+        5.3,
+        5.6656,
+        -81
+      ],
+      "yaw": 12,
+      "pitch": 0
+    },
+    "image_sha256": "fd7d45e63b71fa7de317bd8a05cf89fb80369239657204365fe99dbb767c92f4",
+    "source_commit": "bf52fa8d1175b76c2044cf3f89b84e4e8d9e60ec",
     "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
   },
   {
@@ -235,8 +251,8 @@
       ],
       "yaw": 0.0
     },
-    "image_sha256": "5dcaaa84b2d0f9db945b78c07e31d86f8fa9c3813e409b5201c6cf18a1f8f05f",
-    "source_commit": "9a5ac15916f2878bbad045bb060ae193157c14e2",
+    "image_sha256": "2db39bf7ce017aff73b641ec16fe9dcea34b247605727d37b854103cdbf5029d",
+    "source_commit": "bf52fa8d1175b76c2044cf3f89b84e4e8d9e60ec",
     "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
   },
   {
@@ -251,8 +267,8 @@
       ],
       "yaw": 0.0
     },
-    "image_sha256": "fae8e28bc97105ff40d6d48580ee42c91a8a44c78ca2dbe698452cf5ecbffcf8",
-    "source_commit": "730e39e56d6ef521e4820af82a97e3d46c3e19e2",
+    "image_sha256": "8b17ff5ab7c1c69acd7ea6c88d118dd1624f11b5e4d6f9a07187972fea338ab0",
+    "source_commit": "bf52fa8d1175b76c2044cf3f89b84e4e8d9e60ec",
     "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
   },
   {
@@ -285,6 +301,22 @@
     },
     "image_sha256": "5ab0d55c2fb91d6ab1a774f63ff83d3c9140362ae3edb1e0feba981623e5dcdf",
     "source_commit": "9a5ac15916f2878bbad045bb060ae193157c14e2",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "outer-reach",
+    "name": "Outer Reach",
+    "pose": {
+      "position": [
+        -224,
+        1.6656,
+        -51
+      ],
+      "yaw": -2,
+      "pitch": -4
+    },
+    "image_sha256": "16b62d9d88bcb70b12a82ddd2bee23b5bb6381c217594ba6ac71af2833f307f8",
+    "source_commit": "bf52fa8d1175b76c2044cf3f89b84e4e8d9e60ec",
     "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
   }
 ]

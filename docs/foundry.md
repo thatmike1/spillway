@@ -85,9 +85,10 @@ python3 tools/test.py --out /tmp/foundry-fast
 
 The fast gate needs a new output directory. The route fixtures construct command
 tapes from normal spawn with the production runner at server128/128 Hz, then
-replay mouse/buttons without steering position or velocity. The gallery takes
-1810 ticks (14.140625 s); the shaft takes 1108 (8.65625 s), saving 702 ticks
-(5.484375 s). Both collect every shared checkpoint and earn the descending catch.
+replay mouse/buttons without steering position or velocity. The original exported tapes span
+1810 ticks (14.140625 s) and 1108 (8.65625 s), respectively. First entry into
+the same finish bounds occurs at 1792/1090 ticks, also 702 ticks
+(5.484375 s) apart. Both collect every shared checkpoint and earn the descending catch.
 The chosen tape releases the first ring after 140 held ticks and the final ring
 after 145. These are measured examples, not required human timings or enjoyment
 claims. A no-rope replay is a negative control for that earned shortcut.
@@ -104,3 +105,69 @@ brief. The current material transform follows the official
 
 Movement fixtures silence only the auxiliary release-cue playback, following the
 existing component-test boundary; native host captures retain the real cue path.
+
+## Sea-gate set piece (Wave 2)
+
+The seaward end now has one raised gate and hoist, supported on two foundations
+beyond the playable court. Its service trolley travels on the upper rail. The
+new node creates meshes only; it supplies no collision, anchors, checkpoints,
+triggers or movement callbacks. Existing route geometry and the Arc runner stay
+unchanged. The first-wave geometry/anchor digest is locked by
+`tests/foundry_scenery.gd`, which also checks collision before/after animation
+and requires that the trolley actually moves. Three native look passes each received a fresh review. The last correction
+enlarges and lights the navigation beacon, warms the large poured wall sections,
+adds a restrained waterline wash, and joins the twin pipe heads to the cooling main.
+These are visual checks; traversal tapes and reviews do not establish enjoyment.
+
+The third look pass deepens the offshore breakwater profile, adds localized salt
+and edge paint loss, and narrows the ordinary drawn rope through a map-local
+mesh clone (restored on map exit). This addresses lane 04's sibling eye-wedge
+report without editing the inherited runner. Collision and actual anchor
+identity/positions still have to remain exact under the scenery fixture.
+
+`tests/foundry_cable.gd` checks render-mesh cloning, reuse and ownership-safe
+restoration on map exit. The ordinary rope is 1.5 mm in radius in Foundry only.
+The inherited rope law, solver and original mesh resource are unchanged.
+
+## Shaft carry (Wave 2)
+
+The `shaft-carry` line keeps the first shaft release and bunnyhops twice across
+the receiver, then descends to the existing catch without a second hook. It adds
+route metadata and a short hint only. Collision, three anchor positions/IDs,
+Arc forces and the level's recording identity remain unchanged. The existing
+gallery and two-hook shaft remain available.
+
+The selected input holds/reels the first ring for 155 ticks and reaches finish
+bounds after 811 motor steps from spawn (6.3359375 s). The ordinary shaft first enters
+the same bounds at 1090 steps (8.515625 s), so the carry saves 279 steps
+(2.1796875 s). Its original 1108-step tape includes 18 steps after first finish;
+using its full length here would overstate the saving. The native finish card reads 6.16 s because the run clock starts
+after the first 0.5 m of movement. Among nine tested hold times, 155 is fastest;
+140 takes 824 ticks with the same carry policy, while 135 and 160 miss the receiver.
+Those are tested examples, not a unique release window or a global optimum.
+Removing the rope or post-release hops fails within the 811-step tape.
+
+`tests/foundry_advanced.gd` regenerates both existing routes and the carry,
+replays its mouse/buttons with exact per-tick body position/velocity assertions,
+and exports a nine-second input/expected trace. Movement and jump release after
+first finish; the stopping tail lands safely on the catch. Cumulative motor
+counters and slight mouse-angle rounding are outside the body equality claim.
+Native samples check the actual public-host clean finish, ordered checkpoints,
+one hook, zero respawns and a grounded stop. They do not establish unsampled
+native tick parity or enjoyment.
+
+```sh
+python3 tools/play.py --headless --audio-driver Dummy --quit-after 64 --script res://tests/foundry_advanced.gd -- --out=/tmp/foundry-carry
+python3 tools/play.py --headless --audio-driver Dummy --quit-after 64 --script res://tests/foundry_scenery.gd -- --out=/tmp/foundry-scenery
+python3 tools/play.py --headless --audio-driver Dummy --quit-after 64 --script res://tests/foundry_cable.gd -- --out=/tmp/foundry-cable
+```
+
+`tests/foundry_capture_match.py` accepts that expected trace, events, wrapper
+capture metadata, frame trace and source receipt. It checks coverage from the
+first motor tick through the stopping tail, source/events correspondence, all
+F2 cvars and the elastic-arc law, plus exact sampled body positions/serialized
+velocities. Its `--challenge` option rejects eight mutations of the real capture,
+including the wrong serialized preset, sparse late-only samples, changed tape
+or source, wrong law, moved body, respawn and an airborne stop. The source receipt
+records frozen runtime hashes separately from the wrapper's commit/status
+metadata; it does not claim the wrapper itself emitted a per-file source manifest.

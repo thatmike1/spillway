@@ -4,13 +4,26 @@
       "path": "concrete.gdshader",
       "origin": "original Spillway source using the project's world-space surface and toon-lighting conventions",
       "rights": "project-authored source; no external asset import",
-      "purpose": "large quiet concrete patches, vertical runoff and a casting joint"
+      "purpose": "joint-edge wear, narrow runoff and a damp lower waterline"
+    },
+    {
+      "path": "water.gdshader",
+      "origin": "original Spillway shader, informed by project water conventions",
+      "rights": "project-authored source; no external asset import",
+      "purpose": "quiet narrow broken ripples and distant sky wash"
+    },
+    {
+      "path": "outline.gdshader",
+      "origin": "original inverted-hull shader following project ink conventions",
+      "rights": "project-authored source",
+      "purpose": "restrained dark structural silhouettes"
     }
   ],
   "reused_project_resources": [
     "res://assets/look/painted-wear.png",
     "res://assets/look/cloud-sky.png",
-    "res://shaders/look/water.gdshader"
+    "res://shaders/look/water.gdshader",
+    "res://shaders/look/ink.gdshader"
   ],
   "private_references_included": false,
   "original_scenery": {
@@ -20,7 +33,16 @@
       "supported gate crane",
       "suspended ribbed caisson",
       "connected harbour wall",
-      "continuous distant headland"
+      "continuous distant headland",
+      "servicing hall",
+      "visible receiver crossheads",
+      "post-finish dispatch courts",
+      "rail trucks and lifting carriages",
+      "connected harbour signal house"
+    ],
+    "supporting_sources": [
+      "res://scripts/art/gantry_dress.gd",
+      "res://scripts/art/gantry_arrival.gd"
     ]
   }
 }
