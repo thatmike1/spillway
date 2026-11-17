@@ -42,6 +42,9 @@ def main():
                 if args.only and args.only != name:
                     continue
                 extra = ["--", primary] if name == "replace" else []
+                if name == "failures":
+                    extra = ["--", "--r16-profile=" + str(out / "probe-seed.cfg"), "--no-run-recordings",
+                             "--r22-package-check=" + str(out / "probe-seed.json")]
                 result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source, "--script", "res://tests/profile_store_" + name + ".gd", *extra], cwd=source, profile=profile / name, log=out / (name + ".log"))
                 results.append({"name": name, **result})
         finally:
