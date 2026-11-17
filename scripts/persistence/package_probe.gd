@@ -1,5 +1,6 @@
 extends Node
 ## opt-in release-package probe; refuses a normal profile or a desktop launch.
+const STORE = preload("res://scripts/persistence/profile_store.gd")
 var output_path := ""
 var game: Node
 var failures: Array[String] = []
@@ -33,11 +34,19 @@ func run() -> void:
 		var ticks: Variant = saved.get_value("package-other-map", "clean_best_ticks", -1)
 		check(typeof(ticks) == TYPE_INT and ticks == 9007199254740993, "other-map integer best survived saves")
 	else:
-		var seed := ConfigFile.new()
-		if FileAccess.file_exists(profile):
-			check(seed.load(profile) == OK, "private seed readable")
+		var store := STORE.new()
+		var seed_read := store.read_profile(profile)
+		check(seed_read.error == OK, "private seed readable")
+		if seed_read.error != OK:
+			complete()
+			return
+		var seed: ConfigFile = seed_read.config
 		seed.set_value("package-other-map", "clean_best_ticks", 9007199254740993)
-		check(seed.save(profile) == OK, "seed private other-map best")
+		var seed_error := store.write_profile(profile, seed)
+		check(seed_error == OK, "seed private other-map best")
+		if seed_error != OK:
+			complete()
+			return
 		var ids: Array = game.call("map_ids")
 		check(not ids.is_empty(), "menu has maps")
 		for id: String in ids:
