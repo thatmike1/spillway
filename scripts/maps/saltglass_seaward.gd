@@ -4,7 +4,7 @@ extends Node3D
 const GEO := preload("res://scripts/r19_course_geometry.gd")
 const LEVEL_ID := "r22-saltglass-seaward"
 const LEVEL_NAME := "Saltglass / Seaward"
-const LEVEL_VERSION := 1
+const LEVEL_VERSION := 2
 const MAP_ID := "saltglass-seaward"
 const MAP_ENTRY := {"name": LEVEL_NAME, "theme": "Separate route revision: visible seaward receiver", "kind": "course", "look_palette": "practice", "script": "res://scripts/maps/saltglass_seaward.gd"}
 var level_id := LEVEL_ID
@@ -55,7 +55,7 @@ func build() -> void:
 		GEO.deck(self, "quay_neck_%d" % i, x - 3, x, 32, 44, 6.8 - 0.3 * i, 3)
 	GEO.deck(self, "outside_lip", 220, 223, 49, 54, 5.0, 3)
 	# the receiver projects beyond the store so its pale top is visible before takeoff.
-	GEO.deck(self, "seaward_receiver", 217, 226, 54, 60, 5.0, 3)
+	GEO.deck(self, "seaward_receiver", 217, 226, 55.5, 61.5, 5.0, 3)
 	GEO.deck(self, "house_neck", 296, 300, 32, 44, 4.1, 3)
 	GEO.deck(self, "salt_house", 300, 322, 27, 64, 4, 3)
 	# the store's south face ends at the quay edge. outside it there is only sea.
@@ -251,7 +251,7 @@ func _dressing() -> void:
 	(get_node("Sign_store_stencil") as Label3D).modulate = Color("e8dfc9")
 	_sign("outer_quay", Vector3(214.97, 6.35, 52.0), -PI * 0.5, "OUTER QUAY\nJUMP", 0.01)
 	(get_node("Sign_outer_quay") as Label3D).modulate = Color("e8dfc9")
-	for foot: Vector3 in [Vector3(210, 5.3, 52.8), Vector3(248, 4.7, 52.8), Vector3(286, 4.1, 52.8), Vector3(312, 4, 52.8)]:
+	for foot: Vector3 in [Vector3(210, 5.3, 49.3), Vector3(248, 4.7, 52.8), Vector3(286, 4.1, 52.8), Vector3(312, 4, 52.8)]:
 		_work_lamp("quay_%d" % int(foot.x), foot, 3.8)
 	# this founded harbour beacon sits seaward of the blind corner, not on a fake platform.
 	_work_lamp("seaward_beacon", Vector3(221.5, -9, 62.5), 18.0)
@@ -289,7 +289,7 @@ func _readable_surfaces() -> void:
 	# short edge bands announce takeoff and the tiny receiver in both look modes.
 	_art_box("paint_lip_outside_takeoff", Vector3(212.8, 5.312, 53.82), Vector3(2.2, 0.025, 0.3), Color("d95b30"))
 	_art_box("paint_lip_outside_receiver", Vector3(221.5, 5.012, 53.82), Vector3(3, 0.025, 0.3), Color("d95b30"))
-	_art_box("paint_lip_seaward_receiver", Vector3(221.5, 5.012, 59.82), Vector3(9, 0.025, 0.3), Color("d95b30"))
+	_art_box("paint_lip_seaward_receiver", Vector3(221.5, 5.012, 61.32), Vector3(9, 0.025, 0.3), Color("d95b30"))
 	# paint follows the actual seaward store edge around the blind corner, with no fake ledge.
 	_art_box("paint_hazard_store_corner", Vector3(214.992, 5.45, 53.84), Vector3(0.016, 0.3, 0.32), Color("d95b30"))
 	_art_box("paint_hazard_store_seaward", Vector3(217.5, 5.45, 54.008), Vector3(5, 0.3, 0.016), Color("d95b30"))
