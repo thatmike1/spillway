@@ -14,7 +14,7 @@ Validation uses the production game host, normal spawn, F2, actual InputEventAct
 
 ## Three executed plans
 
-Geometry revision 7 starts at the western service entrance. The caisson has a +7 m front crown, an open 3 m inspection channel and a +9 m rear crown. Anchor elevations are fixed at +11/+14 m; the overhead survey shows that datum. There are no serpentine corner cuts. While an anchor is ready under aim or attached, a contextual A-number and elevation connect the world ring to its survey socket. The label observes the inherited acquisition snapshot and never changes selection.
+Geometry revision 7 starts at the western service entrance. The caisson has a +7 m front crown, an open 3 m inspection channel and a +9 m rear crown. Anchor elevations are fixed at +11/+14 m; the overhead survey shows that datum. There are no serpentine corner cuts. While an anchor is ready under aim or attached, a contextual A-number and elevation connect the world ring to its survey socket. Its text scales within a restrained range with view distance. The label observes the inherited acquisition snapshot and never changes selection.
 
 | plan / keys | clean | releases +120 ms | upward look limited to 30° | risk |
 | --- | ---: | ---: | ---: | --- |

@@ -226,8 +226,8 @@ class Readout extends Control:
 		var detail := "K parks you; then bring the envelope."
 		var title := "Envelope spitball · first body"
 		if relay.phase == "carry":
-			title = "You carry the envelope"
-			detail = "Flying to your waiting body." if relay.flying else "E throws to your waiting body · %.1f m" % relay.runner.global_position.distance_to(relay.waiting.position)
+			title = "Envelope in flight" if relay.flying else "You carry the envelope"
+			detail = "Delivery resumes your waiting body." if relay.flying else "E throws to your waiting body · %.1f m" % relay.runner.global_position.distance_to(relay.waiting.position)
 		elif relay.phase == "resumed":
 			title = "You are the first body again"
 			detail = "Envelope received. Finish ahead."

@@ -188,6 +188,7 @@ func _process(delta: float) -> void:
 	if socket_label.visible:
 		var at: Vector3 = target.position
 		socket_label.global_position = at+Vector3.DOWN
+		socket_label.scale = Vector3.ONE*clampf(camera.global_position.distance_to(at)/10.0,0.5,3.5)
 		socket_label.text = "%s · +%dm" % [str(target.name).replace("Socket ","A"),roundi(at.y)]
 	if planner != null and planning:
 		var game := get_parent()
