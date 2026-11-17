@@ -18,6 +18,7 @@ def main():
     parser.add_argument("--out", required=True, type=Path)
     parser.add_argument("--only-west", action="store_true")
     parser.add_argument("--persistence", action="store_true")
+    parser.add_argument("--pause-only", action="store_true", help="only check pause routing, without placement/route proof")
     parser.add_argument("--safe", action="store_true", help="check the safe-quay baseline")
     parser.add_argument("--trial", type=int, choices=range(3))
     parser.add_argument("--loadout", choices=["anchors", "one", "block", "pad", "pieces"], default="anchors")
@@ -49,45 +50,52 @@ def main():
         own_hashes = {name: digest for name, digest in hashes.items()
                       if name.startswith(("scripts/plan/", "scripts/maps/plan_yard", "scripts/movement/plan_runner", "scripts/art/plan_", "tests/plan_"))}
         (out / "source-sha256.json").write_text(json.dumps(own_hashes, indent=2) + "\n")
-        imported = engine.run(["--headless", "--editor", "--path", source, "--import"],
-                              cwd=source, profile=profile, log=out / "import.log")
-        report["checks"].append({"name": "import", **imported})
-        checked = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
-                              "--fixed-fps", "128", "--script", "res://tests/plan_contract.gd"],
-                             cwd=source, profile=profile, log=out / "plan_contract.log")
-        report["checks"].append({"name": "contract", **checked})
-        cases = ["one", "block", "pad"] if args.loadout == "pieces" else [args.loadout]
-        for case in cases:
-            folder = out / case if args.loadout == "pieces" else out
-            folder.mkdir(exist_ok=True)
-            route_args = ["--loadout=" + case, "--delay=" + str(args.delay),
-                          "--aim-ceiling=" + str(args.aim_ceiling)]
-            route_args += ["--only-west"] if args.only_west or args.safe else []
-            route_args += [] if args.safe else ["--arc"]
-            if args.trial is not None:
-                route_args += ["--trial=" + str(args.trial)]
-            elif case != "anchors":
-                route_args += ["--trial=0"]
-            try:
-                result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
-                                     "--fixed-fps", "128", "--script", "res://tests/plan_routes.gd",
-                                     "--", "--out=" + str(folder), *route_args],
-                                    cwd=source, profile=profile, log=folder / "plan_routes.log")
-                report["checks"].append({"name": case, "ok": True, **result})
-            except Exception as error:
-                failures.append(case)
-                report["checks"].append({"name": case, "ok": False, "error": str(error)})
-        if args.persistence and not failures:
-            persisted = out / "persistence"
-            persisted.mkdir()
-            shutil.copy2(out / "west-tape.json", persisted / "tape.json")
-            for mode in ("write", "readback"):
-                result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
-                                     "--fixed-fps", "128", "--script", "res://tests/plan_persistence.gd",
-                                     "--", "--out=" + str(persisted), *(["--readback"] if mode == "readback" else [])],
-                                    cwd=source, profile=profile, log=persisted / (mode + ".log"))
-                report["checks"].append({"name": "persistence-" + mode, "ok": True, **result})
-        report["ok"] = not failures
+        with engine.locked():
+            imported = engine.run(["--headless", "--editor", "--path", source, "--import"],
+                                  cwd=source, profile=profile, log=out / "import.log")
+            report["checks"].append({"name": "import", **imported})
+            for name in (["plan_pause"] if args.pause_only else ["plan_contract", "plan_pause"]):
+                checked = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
+                                      "--fixed-fps", "128", "--script", "res://tests/" + name + ".gd",
+                                      "--", "--out=" + str(out / name)],
+                                     cwd=source, profile=profile, log=out / (name + ".log"))
+                report["checks"].append({"name": name, **checked})
+            if args.pause_only:
+                report["ok"] = True
+                print("PASS pause routing: " + str(out / "RESULT.json"))
+                return
+            cases = ["one", "block", "pad"] if args.loadout == "pieces" else [args.loadout]
+            for case in cases:
+                folder = out / case if args.loadout == "pieces" else out
+                folder.mkdir(exist_ok=True)
+                route_args = ["--loadout=" + case, "--delay=" + str(args.delay),
+                              "--aim-ceiling=" + str(args.aim_ceiling)]
+                route_args += ["--only-west"] if args.only_west or args.safe else []
+                route_args += [] if args.safe else ["--arc"]
+                if args.trial is not None:
+                    route_args += ["--trial=" + str(args.trial)]
+                elif case != "anchors":
+                    route_args += ["--trial=0"]
+                try:
+                    result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
+                                         "--fixed-fps", "128", "--script", "res://tests/plan_routes.gd",
+                                         "--", "--out=" + str(folder), *route_args],
+                                        cwd=source, profile=profile, log=folder / "plan_routes.log")
+                    report["checks"].append({"name": case, "ok": True, **result})
+                except Exception as error:
+                    failures.append(case)
+                    report["checks"].append({"name": case, "ok": False, "error": str(error)})
+            if args.persistence and not failures:
+                persisted = out / "persistence"
+                persisted.mkdir()
+                shutil.copy2(out / "west-tape.json", persisted / "tape.json")
+                for mode in ("write", "readback"):
+                    result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
+                                         "--fixed-fps", "128", "--script", "res://tests/plan_persistence.gd",
+                                         "--", "--out=" + str(persisted), *(["--readback"] if mode == "readback" else [])],
+                                        cwd=source, profile=profile, log=persisted / (mode + ".log"))
+                    report["checks"].append({"name": "persistence-" + mode, "ok": True, **result})
+            report["ok"] = not failures
     except Exception as error:
         report["error"] = str(error)
         raise

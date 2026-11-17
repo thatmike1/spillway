@@ -14,6 +14,12 @@ var planner: Control
 var planning := false
 func _ready() -> void:
 	super()
+	# this mesh belongs to this runner; its width never enters rope forces.
+	var cable: CylinderMesh = _tether.mesh
+	cable.top_radius = 0.004
+	cable.bottom_radius = 0.004
+	_tether.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_tether_material.albedo_color = Color("45636b")
 	var layer := CanvasLayer.new()
 	layer.layer = 30
 	add_child(layer)
@@ -22,6 +28,10 @@ func _ready() -> void:
 	layer.add_child(planner)
 	planner.hide()
 func _input(event: InputEvent) -> void:
+	if bool(get_parent().get("paused")):
+		if planning:
+			planner.hide()
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var code: int = event.physical_keycode if event.physical_keycode else event.keycode
 		if code == KEY_TAB:
@@ -121,7 +131,14 @@ func get_motion_state() -> Dictionary:
 func _process(delta: float) -> void:
 	super(delta)
 	sync_ghost_plan()
-	if planner != null and planner.visible:
+	if planner != null and planning:
+		var game := get_parent()
+		planner.visible = not game.paused
+		input_enabled = false
+		if not game.paused:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+			if game.session.attempt_live:
+				game.session.boundary("restart",{"phase":"planning_resume"})
 		planner.queue_redraw()
 func sync_ghost_plan() -> void:
 	var game := get_parent()

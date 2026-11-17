@@ -6,7 +6,7 @@ const PIECES := preload("res://scripts/plan/pieces.gd")
 const RUNNER := preload("res://scripts/movement/grapple_player.gd")
 const ART := preload("res://scripts/art/plan_look.gd")
 const MAP_ID := "plan-yard"
-const MAP_ENTRY := {"name": "Plan Yard", "theme": "Place a line, then run it", "kind": "experiment", "experimental": true, "own_look": true, "grapple": true, "tether_model": "elastic-arc", "runner": "res://scripts/movement/plan_runner.gd", "script": "res://scripts/maps/plan_yard.gd", "reticle": true, "instructions": "Tab: plan from above. Click up to three surveyed sockets. Enter: run. LMB: Arc rope, RMB: reel. R: retry the same plan.", "key_hint": " · Tab plans; Enter runs"}
+const MAP_ENTRY := {"name": "Plan Yard", "theme": "Place a line, then run it", "kind": "experiment", "experimental": true, "own_look": true, "teach_until_clock": 0.75, "grapple": true, "tether_model": "elastic-arc", "runner": "res://scripts/movement/plan_runner.gd", "script": "res://scripts/maps/plan_yard.gd", "reticle": true, "instructions": "Tab plans. Enter runs. LMB Arc. RMB reel. R retries this plan.", "key_hint": " · Tab plans; Enter runs"}
 var level_id := "r22-plan-yard"
 var level_name := "Plan Yard"
 var level_version := 7
@@ -56,7 +56,7 @@ func build() -> void:
 			box("gantry_column", Vector3(x, 4, z), Vector3(0.7, 22, 0.9), Color("344e52"))
 			box("gantry_foot",Vector3(x,-4.5,z),Vector3(2.6,5,2.6),Color("57787b"))
 	for x: float in [-12, 0, 12]:
-		box("travelling_rail", Vector3(x,15,-22), Vector3(0.3,0.35,54), Color("344e52"))
+		box("travelling_rail", Vector3(x,15,-24), Vector3(0.3,0.35,50), Color("344e52"))
 	var env := WorldEnvironment.new()
 	env.environment = Environment.new()
 	env.environment.background_mode = Environment.BG_COLOR
@@ -82,6 +82,7 @@ func deck(id: String, x0: float, x1: float, z0: float, z1: float, height: float)
 func box(id: String, at: Vector3, size: Vector3, color: Color, parent: Node3D = self) -> void:
 	var mesh := MeshInstance3D.new()
 	mesh.name = id
+	mesh.set_meta("plan_art_id",id)
 	mesh.position = at
 	var shape := BoxMesh.new()
 	shape.size = size
@@ -134,7 +135,8 @@ func apply_design(next: Array, block: int, pad: int, limit: int, blocks_on: bool
 		ring.rotation.x = PI/2
 		ring.material_override = RUNNER._flat(Color("c17846"))
 		anchor.add_child(ring)
-		box("hanger", Vector3(at.x, (at.y+15)/2, at.z), Vector3(0.12, 15-at.y, 0.12), Color("344e52"), pieces)
+		box("hanger", Vector3(at.x, (at.y+0.65+15)/2, at.z), Vector3(0.12, 15-at.y-0.65, 0.12), Color("344e52"), pieces)
+		box("hanger_mount",at+Vector3.UP*0.68,Vector3(0.3,0.16,0.25),Color("344e52"),pieces)
 	if block_slot >= 0:
 		var top: Vector3 = PIECES.BLOCKS[block_slot]
 		_solid_piece("PlanLift",Vector3(top.x,(top.y-5)/2,top.z),Vector3(7,top.y+5,7),Color("687b7b"))
@@ -174,6 +176,6 @@ func _solid_piece(id: String, at: Vector3, size: Vector3, color: Color) -> Stati
 func is_finish_at(feet: Vector3) -> bool:
 	return finish_bounds.has_point(feet)
 func route_hint(_stage: int, _feet: Vector3) -> String:
-	return "Tab plans at spawn. Left and right quays are safe; the central caisson needs height."
+	return "Tab plans at spawn. Quays +3m; caisson +7/+9m."
 func geometry_hash() -> String:
 	return JSON.stringify([level_id, level_version, physical_design(), LAYOUT.SOCKETS, PIECES.BLOCKS, PIECES.PADS, PIECES.LAUNCH.LAUNCH_LAW], "", false, true).sha256_text()

@@ -55,6 +55,13 @@ func run() -> void:
 	game.seed_from_r15 = false
 	game.set_window_title = false
 	root.add_child(game)
+	var caisson: MeshInstance3D = game.level.get_node("Mesh_deck_caisson_rear")
+	var material: Material = caisson.material_override
+	if not material is ShaderMaterial or material.shader.resource_path != "res://scripts/art/plan_concrete.gdshader":
+		push_error("plan-yard authored concrete was replaced by the generic experiment palette")
+		quit(1)
+		return
+	assert(absf(float(material.get_shader_parameter("top_y"))-9.0) < 0.001)
 	var initial: String = game.course_key
 	game.player.open_plan()
 	assert(not game.session.attempt_live and game.session.pending.is_empty())
