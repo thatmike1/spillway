@@ -256,7 +256,7 @@ func attach_map(source: Node3D, identity: Dictionary) -> void:
 
 func _load_preview() -> void:
 	var why: String = stage.load_pair(comparison)
-	view_note.text = why + " Back to the pause menu, then Maps, to load the matching map and preset." if not why.is_empty() else ""
+	view_note.text = why + " Use Back: Maps selects the map; Settings selects the preset." if not why.is_empty() else ""
 	if why.is_empty(): _update_follow_note()
 	_update_view_visibility()
 	_update_practice_action()
@@ -269,7 +269,7 @@ func _update_practice_action() -> void:
 	if practice_note.visible:
 		var preset := str(request.identity.get("preset", ""))
 		preset = {"server128": "F2", "server128_aa1000": "F5"}.get(preset, preset)
-		practice_note.text = "Back to the pause menu, then Maps: load %s / %s with its recorded layout. Current: %s." % [str(request.identity.get("map", "")).replace("-", " ").capitalize(), preset, str(_map_identity.get("map", "unavailable")).replace("-", " ").capitalize()]
+		practice_note.text = "Use Back, then Maps for %s and Settings for %s. Match the recorded layout. Current: %s / %s." % [str(request.identity.get("map", "")).replace("-", " ").capitalize(), preset, str(_map_identity.get("map", "unavailable")).replace("-", " ").capitalize(), {"server128": "F2", "server128_aa1000": "F5"}.get(str(_map_identity.get("preset", "")), str(_map_identity.get("preset", "unavailable")))]
 	practice_button.tooltip_text = "Start a normal practice attempt at %s with the best ghost. Existing recordings stay unchanged." % request.get("label", "") if not practice_button.disabled else (str(request.error) if not request.ok else "Load the matching map, movement preset and layout to practise this segment.")
 
 func _style_data_control(control: Control) -> void:

@@ -83,6 +83,12 @@ func run() -> void:
 		check(screen.trace.visible and screen.splits.visible and not screen.stage.visible, "valid to unavailable restores analysis")
 		check(screen.practice_button.disabled, "different map cannot start practice")
 		check(screen.practice_note.visible and screen.practice_note.text.contains("Whiteout"), "practice mismatch explanation is visible without hovering")
+		check(screen.practice_note.text.contains("Settings for F2") and screen.view_note.text.contains("Settings selects the preset"), "recovery names the actual preset destination")
+		var faster: Dictionary = screen.comparison.attempt.identity.duplicate(true)
+		faster.preset = "server128_aa1000"
+		screen.attach_map(source, faster)
+		check(screen.practice_button.disabled and screen.practice_note.text.contains("Current: Breakwater / F5"), "preset mismatch names the loaded preset")
+		screen.attach_map(source, other.identity)
 		screen.select_attempt(selected)
 		check(screen.trace.visible and screen.splits.visible, "selection preserves unavailable fallback")
 		screen.refresh()

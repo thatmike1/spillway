@@ -49,3 +49,5 @@ Follow view has an explicit Attempt/Personal best camera selector. If the loaded
 `python3 tests/test_run_review_capture.py --matrix --out /absolute/new/external/folder` requires a clean source commit and captures five static states at 1280×720 and 960×640: analysis, following attempt, following best, a real host map switch to unavailable Whiteout, and an incomplete attempt. Recording-copy hashes are checked within the capture harness. This complements the separate host practice and menu-input checks.
 
 At compact window widths the viewer raises its logical body and table type sizes to counter the project canvas scaling. The matching best is marked in the attempt list and identified by finish time and UTC date above the comparison. Incomplete recordings hide follow and practice controls and explain which completed attempt to select.
+
+Recovery routes through Back, then Maps for the course and Settings for the movement preset. Selecting a map preserves the current preset, so both destinations are named when the loaded identity differs.
