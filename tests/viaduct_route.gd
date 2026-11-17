@@ -13,11 +13,21 @@ var samples: Array = []
 var events: Array = []
 var previous_hold := false
 var fast_line := false
+var advanced_line := false
+var release_height := 7.5
+var hold_last := false
+var release_tick := -1
 
 func _initialize() -> void:
 	for arg: String in OS.get_cmdline_user_args():
 		if arg == "--fast":
 			fast_line = true
+		if arg == "--advanced":
+			advanced_line = true
+		if arg == "--hold-last":
+			hold_last = true
+		if arg.begins_with("--release-height="):
+			release_height = float(arg.trim_prefix("--release-height="))
 		if arg.begins_with("--out="):
 			output = arg.trim_prefix("--out=")
 	run.call_deferred()
@@ -43,13 +53,19 @@ func run() -> void:
 		var feet := player.global_position
 		if bay < 3 and not player.grapple.is_empty():
 			attached[bay] = true
-		if bay < 3 and feet.z < LEVEL.V_ANCHORS[bay].z-2.0 and (bay == 0 or (feet.y > (3.5 if fast_line and bay == 2 else 5.0) and (bay < 2 or feet.x < -1.0))):
+		if bay < 3 and not (advanced_line and hold_last and bay == 2) and feet.z < LEVEL.V_ANCHORS[bay].z-2.0 and (bay == 0 or (feet.y > (release_height if advanced_line and bay == 2 else (3.5 if fast_line and bay == 2 else 5.0)) and (bay < 2 or feet.x < -1.0))):
 			bay += 1
+			if bay == 3:
+				release_tick = n
 		var aim: Vector3 = LEVEL.V_ANCHORS[mini(bay,2)]
 		# attachment persists independently of view: preview the next transfer before releasing.
 		if bay < 3 and not player.grapple.is_empty() and feet.z < LEVEL.V_ANCHORS[bay].z+6.0:
 			aim = LEVEL.V_ANCHORS[bay+1] if bay < 2 else level.finish_position+Vector3(0,2,0)
+			if advanced_line and bay == 2:
+				aim = Vector3(-15,9,-68)
 		var destination: Vector3 = [Vector3(8,3,-23),Vector3(0,3,-53),Vector3(-8,2,-89),Vector3(-8,2,-94)][bay]
+		if advanced_line and bay >= 2:
+			destination = Vector3(-15,8,-68)
 		var delta: Vector3 = aim-player._eye() if bay < 3 else destination-player._eye()
 		var desired_yaw := atan2(-delta.x,-delta.z)
 		var desired_pitch := asin(delta.normalized().y)
@@ -74,8 +90,12 @@ func run() -> void:
 				Input.action_press(pair[0],pair[1])
 			else:
 				Input.action_release(pair[0])
-		Input.action_press("jump")
-		events.append({"time":float(n)/128,"action":"jump","pressed":true})
+		var jump: bool = not advanced_line or bay < 3
+		if jump:
+			Input.action_press("jump")
+		else:
+			Input.action_release("jump")
+		events.append({"time":float(n)/128,"action":"jump","pressed":jump})
 		if n == 0:
 			var reel := InputEventMouseButton.new()
 			reel.button_index = MOUSE_BUTTON_RIGHT
@@ -98,9 +118,11 @@ func run() -> void:
 			break
 		await physics_frame
 	var ok: bool = level.is_finish_at(player.global_position) and attached.all(func(v: bool) -> bool: return v)
+	if advanced_line:
+		ok = ok and LEVEL.UPPER_FINISH.has_point(player.global_position) and player.is_grounded()
 	DirAccess.make_dir_recursive_absolute(output)
 	var file := FileAccess.open(output.path_join("route.json"),FileAccess.WRITE)
-	file.store_string(JSON.stringify({"ok":ok,"line":"fast" if fast_line else "basic","ticks":tick+1,"attached":attached,"feet":player.global_position,"samples":samples,"tape":tape},"\t"))
+	file.store_string(JSON.stringify({"ok":ok,"line":"advanced" if advanced_line else ("fast" if fast_line else "basic"),"ticks":tick+1,"release_tick":release_tick,"attached":attached,"feet":player.global_position,"samples":samples,"tape":tape},"\t"))
 	file.close()
 	file = FileAccess.open(output.path_join("input.json"),FileAccess.WRITE)
 	file.store_string(JSON.stringify(events))

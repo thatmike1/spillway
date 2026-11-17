@@ -25,11 +25,12 @@ func run() -> void:
 	var dam := game.level.get_node("ViaductDam")
 	assert(dam.find_children("*","CollisionObject3D",true,false).is_empty())
 	assert(dam.find_children("*","CollisionShape3D",true,false).is_empty())
-	assert(identity.course_key == "710f5abd3eb4befe")
+	assert(identity.course_key == "44de048079be5549")
 	var law: String = game.player.r21_law_sha256()
 	await process_frame
 	await process_frame
 	var checks := [is_equal_approx(float(tether.mesh.get("top_radius")),0.0015),tether.mesh != original_mesh,tether.material_override != original_material,game.motion_identity() == identity,game.player.r21_law_sha256() == law]
+	checks.append(not game.level.is_finish_at(game.level.UPPER_FINISH.get_center()))
 	var deck := game.level.get_node("Mesh_deck_viaduct_terrace_0_0_0") as MeshInstance3D
 	checks.append(deck.material_override is ShaderMaterial and deck.material_override.shader.resource_path == "res://shaders/look/surface.gdshader")
 	checks.append(deck.material_override.get_shader_parameter("top_color") == Color("cfc9b9"))
