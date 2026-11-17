@@ -32,6 +32,8 @@ func _start() -> void:
 	game.map_id = MAP.MAP_ID
 	root.add_child(game)
 	game.player.view_mode = "envelope"
+	assert(game.level.checkpoints.size() == 4)
+	assert(game.level.routes.advanced.size() > game.level.routes.basic.size())
 	Input.action_press("move_forward")
 	events = [{"time": 0.0, "action": "move_forward", "pressed": true}, {"time": 0.8, "action": "jump", "pressed": true}]
 
@@ -77,13 +79,13 @@ func _physics_process(_dt: float) -> bool:
 			throws += 1
 	if game.finished:
 		identities.append(game.course_key)
-		if not tape_out.is_empty():
+		if not tape_out.is_empty() and variant < 2:
 			DirAccess.make_dir_recursive_absolute(tape_out)
 			var file := FileAccess.open(tape_out.path_join(runner.view_mode + ".json"), FileAccess.WRITE)
 			file.store_string(JSON.stringify(events))
 		if game.session.actual_v_mismatches != 0:
 			failures.append("recorded actual velocity mismatch")
-		if flight.delivered.size() != 3:
+		if flight.delivered.size() != (0 if variant == 2 else 3):
 			failures.append("view %s delivered %d" % [runner.view_mode, flight.delivered.size()])
 		print("MAIL TAPE view=%s delivered=%d misses=%d finished=%s ticks=%d" % [runner.view_mode, flight.delivered.size(), flight.misses, game.finished, frames])
 		if variant == 0:
@@ -93,11 +95,19 @@ func _physics_process(_dt: float) -> bool:
 			Input.action_release("jump")
 			runner.set_mail_view("body")
 			events = [{"time": 0.0, "action": "move_forward", "pressed": true}, {"time": 0.8, "action": "jump", "pressed": true}]
-		else:
+		elif variant == 1:
 			if identities[0] == identities[1]:
 				failures.append("view identities collided")
+			variant = 2
+			frames = 0
+			throws = 3
+			Input.action_release("jump")
+			game.restart_run()
+		else:
 			Input.action_release("move_forward")
 			Input.action_release("jump")
+			for failure: String in failures:
+				push_error(failure)
 			game.queue_free()
 			quit(0 if failures.is_empty() else 1)
 	if frames > 12000:

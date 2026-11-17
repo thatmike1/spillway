@@ -1,8 +1,10 @@
 extends "res://scripts/movement/course_player.gd"
 ## mail controls exist only on mail-run; the inherited f2 motor is untouched.
+const FEEDBACK := preload("res://scripts/mail/feedback.gd")
 const FLIGHT := preload("res://scripts/mail/flight.gd")
 var mail_flight := FLIGHT.new()
 var view_mode := "envelope"
+var _feedback: Node3D
 var _throw_pending := false
 var _cancel_pending := false
 var _turn := Vector2.ZERO
@@ -13,6 +15,8 @@ var _frozen_step := false
 
 func _ready() -> void:
 	super()
+	_feedback = FEEDBACK.new()
+	add_child(_feedback)
 	for arg: String in OS.get_cmdline_user_args():
 		if arg == "--mail-view=body":
 			view_mode = "body"
@@ -51,6 +55,8 @@ func set_mail_view(value: String) -> void:
 
 func reset_to(pose: Transform3D) -> void:
 	mail_flight.clear()
+	if _feedback != null:
+		_feedback.reset()
 	_throw_pending = false
 	_cancel_pending = false
 	_turn = Vector2.ZERO
@@ -75,6 +81,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _physics_process(delta: float) -> void:
 	if not input_enabled:
+		_feedback.observe(mail_flight, true)
 		super(delta)
 		return
 	var level: Variant = get_parent().get("level")
@@ -100,6 +107,7 @@ func _physics_process(delta: float) -> void:
 		mail_flight.step(delta, _mailboxes, _blocked)
 	else:
 		super(delta)
+	_feedback.observe(mail_flight, false)
 	_paper.visible = mail_flight.active
 	_paper.global_position = mail_flight.position
 	_status.text = "MAIL %d / 3    MISSES %d\nLMB throw · mouse steer · RMB recall\nV view: %s (restarts)\n%s" % [mail_flight.delivered.size(), mail_flight.misses, view_mode, "BODY HELD · %.1fs" % maxf(0, FLIGHT.DURATION - mail_flight.age) if mail_flight.active else mail_flight.result.to_upper()]

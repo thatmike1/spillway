@@ -1,5 +1,6 @@
 extends Node3D
 ## the postal quay: one supported seawall, three delivery courts and a sorting arch.
+const MATERIAL := preload("res://scripts/art/mail_material.gd")
 const GEO := preload("res://scripts/r19_course_geometry.gd")
 const MAP_ID := "mail-run"
 const MAP_ENTRY := {"name": "Mail Run", "theme": "Hold the hop. Steer the post.", "kind": "experiment", "experimental": true, "mail_delivery": true,
@@ -7,7 +8,7 @@ const MAP_ENTRY := {"name": "Mail Run", "theme": "Hold the hop. Steer the post."
 	"instructions": "F2 bhop. LMB throws; mouse steers the envelope while your body is held. RMB recalls. Deliveries are optional score. V switches envelope/body view and restarts."}
 var level_id := "r22-mail-run"
 var level_name := "Mail Run"
-var level_version := 1
+var level_version := 2
 var variant := MAP_ID
 var spawn := Transform3D(Basis.IDENTITY, Vector3(0, 2.04, 12))
 var finish_title := "Dispatch"
@@ -61,7 +62,7 @@ func build() -> void:
 func box(id: String, at: Vector3, size: Vector3, color: Color) -> void:
 	art_manifest.append([id, at, size, color])
 	var node := MeshInstance3D.new()
-	node.name = "Mail_" + id
+	node.name = "Water" if id == "water" else "Mail_" + id
 	node.position = at
 	var mesh := BoxMesh.new()
 	mesh.size = size
@@ -70,7 +71,19 @@ func box(id: String, at: Vector3, size: Vector3, color: Color) -> void:
 	mat.albedo_color = color
 	mat.roughness = 0.95
 	node.material_override = mat
+	if id.begins_with("post_") or id.begins_with("seawall") or id.begins_with("arch_") or id == "sorting_arch":
+		node.material_override = MATERIAL.concrete(Color("53666a"))
 	add_child(node)
+	if id.begins_with("post_") or id.begins_with("arch_pier") or id == "sorting_arch" or id.begins_with("seawall_"):
+		var body := StaticBody3D.new()
+		body.name = "Mail_wall_" + id
+		body.position = at
+		var shape := BoxShape3D.new()
+		shape.size = size
+		var collision := CollisionShape3D.new()
+		collision.shape = shape
+		body.add_child(collision)
+		add_child(body)
 
 func label(id: String, at: Vector3, text: String, pixels: float) -> void:
 	var node := Label3D.new()
