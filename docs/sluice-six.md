@@ -4,7 +4,7 @@ Sluice Six is a tidal settling channel whose maintenance caps have become a runn
 
 ## Route and measurements
 
-The apron provides 20 m of acceleration before the first gap. Four broad 12 m caps introduce timing; five 9 m caps offset across the race test landing placement; five 3.2512 m square caps narrow the final approach. Four checkpoints support practice without changing F2. The direct centre line is reserved for the faster proof; ordinary caps remain wide enough to change approach.
+The apron provides 20 m of acceleration before the first gap. Four broad 12 m caps introduce timing; five 9 m caps offset across the race test landing placement; five 3.2512 m square caps narrow the final approach. Four checkpoints support practice without changing F2. Both proof lines use the open centre corridor; the faster line earns speed through air strafes, and the broad caps leave room to change approach.
 
 `tests/sluice_six_measure.gd` instantiates all three original R15 maps and emits every route-piece footprint, top elevation, gap distance and rise. Raw evidence stays outside Git under the run folder. Collision pieces are not whole platforms: a Breakwater container roof is 2.438 m wide but six roofs form its 14.628 m landing.
 
@@ -14,11 +14,11 @@ The apron provides 20 m of acceleration before the first gap. Four broad 12 m ca
 | Whiteout Relay | 2–6.5 m | -1–0.4 m | 3–28 m collision-piece widths |
 | Sunken Court | 2–8.382 m | -1.2–0.8 m | 0.583–28 m collision-piece widths, including curved wedges |
 
-These are measurements of built geometry and authored gap declarations, not inferred jump limits. The initial Sluice Six greybox uses flat 6.5 m caps, 2 m opening gap and 2.5 m repeating gaps. Community-map comparison remains pending until lane 12's reference sheet arrives.
+These are measurements of built geometry and authored gap declarations, not inferred jump limits. The initial Sluice Six greybox used flat 6.5 m caps, a 2 m opening gap and 2.5 m repeating gaps. The community-scale revision below records the subsequent change.
 
 ## Verification
 
-`tests/sluice_six_tapes.gd` drives the unchanged course player from normal spawn using input commands at 128 Hz. Evidence includes its F2 identity, geometry digest and per-tick commands outside Git. The lane report distinguishes complete slices from pending work.
+`tests/sluice_six_tapes.gd` drives the unchanged course player from normal spawn using input commands at 128 Hz. Evidence includes its F2 identity, geometry digest and per-tick commands outside Git. The lane report retains the final command replay, native traversal captures and component-gate evidence.
 
 ## Community-scale revision
 
@@ -28,7 +28,7 @@ The final five Sluice Six caps now measure 128×128 u (3.2512 m square), down fr
 
 ## Retained fast-line proof
 
-The normal v2 tape finishes in 2821 ticks; the paired-strafe line finishes in 2491 ticks, 330 ticks faster at the same F2 preset. The fast driver releases W while airborne, completes matched strafe pairs before coasting, and avoids steering during the initial spawn-floor settle. Its view yaw stays within 0.120 radians of forward on this straight course. This proves a scripted faster line, not a human difficulty rating.
+Both final geometry-version-4 tapes finish from normal spawn. The normal tape finishes in 2821 ticks; the paired-strafe line finishes in 2491 ticks, 330 ticks faster at the same F2 preset. The fast driver releases W while airborne, completes matched strafe pairs before coasting, and avoids steering during the initial spawn-floor settle. Its view yaw stays within 0.120 radians of forward on this straight course. This proves a scripted faster line, not a human difficulty rating.
 
 Generate both tapes with `python3 tools/play.py --headless --fixed-fps 128 --script res://tests/sluice_six_tapes.gd -- --expert --out=/absolute/external/new-folder`. The output contains commands, action/mouse event arrays, tick counts, grounded section visits and the geometry hash. Independently replay its `tapes.json` with `python3 tools/play.py --headless --fixed-fps 128 --script res://tests/sluice_six_replay.gd -- --tape=/absolute/path/tapes.json --out=/absolute/external/replay-folder`. Replay reads commands without choosing takeoffs or consulting landing geometry, rejects mismatched geometry/preset, and verifies safe completion and the recorded final-position strings.
 
