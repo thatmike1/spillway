@@ -1,0 +1,11 @@
+# Saltglass / Seaward
+
+This is a separately labelled route revision, not a replacement for the R21 course. It uses the same working salt facility: seawater passes through the fin feed races into rising evaporation pans, pan-mounted pumps share a brine header, crystallised salt moves to the quay store, and the loading canopy covers bulk salt for shipping. The runner crosses the maintenance decks between those processes. The framed intake tank remains the landmark visible from spawn.
+
+Matched first-person frames of the original outside approach showed a wall and open water with the receiver concealed behind the store. More paint did not reveal the actual landing. This revision adds one supported receiver at x=217..226, z=54..60, top y=5 m, beyond the store’s seaward face. The existing narrow lip and every original solid remain identical. The founded beacon moves farther seaward, clear of the new landing; a short orange band identifies its real outer edge.
+
+Menu ID `saltglass-seaward`, level ID `r22-saltglass-seaward`, version 1 and its geometry hash separate records from `saltglass`. It uses the unchanged F2 course runner and `practice` look palette. The original Saltglass art branch can ship without this revision.
+
+`tests/saltglass_seaward.gd` compares all 56 original solids by actual transforms and convex points, requires exactly one added receiver, checks distinct identities and ray-tests the approach: the original receiver is occluded by `salt_store`, while the new top has a clear sightline. `tests/saltglass_outside_fixture.gd` drives the same local policy from rest on the actual quay pan using only forward, mouse and jump inputs. The policy falls on the original and lands on the new receiver at approximately (217.18, 5.03, 56.30), without a respawn. Its fixture start is explicitly local; it neither proves the original outside line impossible nor claims a fastest line.
+
+Read-only replay of one sealed human finish also completes the variant from normal spawn in 36.7421875 seconds with zero respawns and zero position differences. That played inland line avoids the new receiver. Native matched approach frames establish the visible landing; static poses do not prove player discovery. Mike still decides whether the clearer, more forgiving outside landing improves the map.
