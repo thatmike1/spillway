@@ -1,9 +1,12 @@
 extends SceneTree
 ## two normal-spawn roof loops exercise player-chosen order and an earned curved delivery.
+const PROBE := preload("res://tests/mail_roofs_probe.gd")
 const HOST := preload("res://scripts/game.gd")
 const MAP := preload("res://scripts/maps/mail_roofs.gd")
 const CLOCKWISE := [[Vector3(12, 10, 4), 0], [Vector3(12, 10, -28), 1], [Vector3(12, 10, -60), 2], [Vector3(12, 10, -60), -1], [Vector3(-12, 10, -60), -1], [Vector3(-12, 10, -28), 3], [Vector3(-12, 10, 4), 4], [Vector3(-7, 10, 12), -1]]
 const COUNTER := [[Vector3(-12, 10, 4), 4], [Vector3(-12, 10, -28), 3], [Vector3(-12, 10, -60), -1], [Vector3(0, 10, -59), 2], [Vector3(12, 10, -60), -1], [Vector3(12, 10, -28), 1], [Vector3(12, 10, 4), 0], [Vector3(-7, 10, 12), -1]]
+var ticket_probe: Node
+var baseline_runner := ""
 var game: Node
 var step := 0
 var ticks := 0
@@ -26,18 +29,28 @@ func _start() -> void:
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--mail-roofs-out="):
 			out = arg.trim_prefix("--mail-roofs-out=")
+		elif arg.begins_with("--mail-roofs-baseline="):
+			baseline_runner = arg.trim_prefix("--mail-roofs-baseline=")
 	game = HOST.new()
 	game.map_registry = preload("res://scripts/maps/catalog.gd").make()
-	game.map_registry.catalog[MAP.ROOF_ID] = MAP.ROOF_ENTRY
+	var entry: Dictionary = MAP.ROOF_ENTRY.duplicate(true)
+	if not baseline_runner.is_empty():
+		entry.runner = baseline_runner
+	game.map_registry.catalog[MAP.ROOF_ID] = entry
 	game.map_registry.order.append(MAP.ROOF_ID)
 	game.map_registry.default_chain = [MAP.ROOF_ID]
 	game.map_id = MAP.ROOF_ID
 	game.persist = false
 	game.record_runs = false
 	root.add_child(game)
+	ticket_probe = PROBE.new()
+	ticket_probe.game = game
+	ticket_probe.process_physics_priority = 1000
+	root.add_child(ticket_probe)
 	_begin()
 
 func _begin() -> void:
+	ticket_probe.clear_counts()
 	game.restart_run("roof_tape")
 	step = 0
 	ticks = 0
@@ -123,6 +136,8 @@ func _physics_process(_dt: float) -> bool:
 	if game.finished:
 		assert(flight.delivered.size() == 5 and flight.misses == 0 and game.clean_eligible and game.session.actual_v_mismatches == 0)
 		assert(direct_blocked)
+		assert(ticket_probe.flight_checks > 0, "late physics UI probe never observed a flight")
+		print("MAIL ROOFS late UI PASS flight_samples=%d finish_samples=%d" % [ticket_probe.flight_checks, ticket_probe.finish_checks])
 		_action("move_forward", false)
 		if not out.is_empty():
 			var name := "clockwise" if variant == 0 else "counterclockwise"
@@ -137,6 +152,8 @@ func _physics_process(_dt: float) -> bool:
 			game.set_paused(true)
 			_begin.call_deferred()
 		else:
+			ticket_probe.game = null
+			ticket_probe.queue_free()
 			game.queue_free(); quit()
 	if ticks > 20000:
 		push_error("roof tape timeout step=%d position=%s" % [step, runner.position]); quit(1)

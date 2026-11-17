@@ -38,8 +38,10 @@ func _refresh_roof_ticket() -> void:
 		var plate: Label3D = level.get_node_or_null("Mail_number_%d" % i)
 		if plate != null:
 			plate.text = "SENT" if sent else "%02d" % (i + 1)
+			plate.pixel_size = 0.014 if sent else 0.022
 		if i == 2:
 			level.get_node("Mail_window_number").text = "SENT" if sent else "03"
+			level.get_node("Mail_window_number").pixel_size = 0.014 if sent else 0.025
 	_status.text = "MAIL %d / 5    MISSES %d" % [mail_flight.delivered.size(), mail_flight.misses]
 	var view := "Envelope camera" if view_mode == "envelope" else "Runner camera"
 	var body := "Body held" if body_mode == "hold" else "Body running"

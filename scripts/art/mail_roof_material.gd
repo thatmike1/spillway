@@ -17,8 +17,11 @@ void fragment(){
  vec2 grid=abs(fract(wall/vec2(4.0,2.0)+0.5)-0.5)*vec2(4.0,2.0);
  float joint=1.0-smoothstep(0.025,0.065,min(grid.x,grid.y));
  float grain=fract(sin(dot(floor(wall*12.0),vec2(12.9898,78.233)))*43758.5453);
- vec3 side=side_color.rgb*(0.98+grain*0.025);
+ vec3 side=side_color.rgb*(0.97+grain*0.045);
  side=mix(side,vec3(0.45,0.43,0.35),joint*0.18);
+ float edge_wear=(1.0-smoothstep(0.05,0.32,min(grid.x,grid.y)))*(0.3+grain*0.7);
+ side=mix(side,side_color.rgb*vec3(1.12,1.07,0.98),edge_wear*0.3);
+ side*=0.92+0.15*wn.x-0.08*wn.z;
  side*=mix(0.66,1.0,smoothstep(-2.5,1.0,wp.y));
  vec2 cells=abs(fract(wp.xz/vec2(4.0,6.0)+0.5)-0.5)*vec2(4.0,6.0);
  vec2 aa=max(fwidth(wp.xz),vec2(0.005));

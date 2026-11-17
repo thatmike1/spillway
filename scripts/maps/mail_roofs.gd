@@ -9,7 +9,7 @@ const ROOF_ENTRY := {"name": "Mail Roofs", "theme": "Five slots. Your order.", "
 func _init() -> void:
 	level_id = "r22-mail-roofs"
 	level_name = "Mail Roofs"
-	level_version = 3
+	level_version = 4
 	variant = ROOF_ID
 	spawn = Transform3D(Basis.IDENTITY, Vector3(0, 10.04, 12))
 	finish_position = Vector3(-7, 10, 12)
@@ -102,6 +102,24 @@ func build() -> void:
 		box("gallery_cornice_%s" % side, Vector3(side * 21.5, 14.6, -23), Vector3(3.4, 0.3, 48), Color("ded8c2"))
 		for z: int in range(-44, 1, 4):
 			box("gallery_window_%s_%s" % [side, z], Vector3(side * 19.96, 12, z), Vector3(0.08, 1.35, 1.5), Color("29464a"))
+	for side: int in [-1, 1]:
+		box("dispatch_jamb_%d" % side, Vector3(-7 + side * 1.75, 11.3, 16.78), Vector3(0.17, 2.6, 0.24), Color("aaa897"))
+	box("dispatch_lintel", Vector3(-7, 12.6, 16.78), Vector3(3.65, 0.17, 0.24), Color("aaa897"))
+	# a supported roof lantern identifies the later sorting gallery without adding route clutter.
+	for side: int in [-1, 1]:
+		var outside := -21.5 + side * 1.5
+		GEO.prism(self, "lantern_%d" % side, [Vector3(outside, 15.2, -30), Vector3(outside, 15.2, -18), Vector3(-21.5, 17, -18), Vector3(-21.5, 17, -30)], 14.5, 0, "architecture", "lantern")
+		var roof := get_node("Mesh_lantern_lantern_%d" % side) as MeshInstance3D
+		roof.name = "Mail_lantern_%d" % side
+		roof.material_override = ROOF_MATERIAL.concrete(Color("53666a"), true)
+	for z: int in range(-44, 1, 4):
+		box("gallery_mullion_%d" % z, Vector3(-19.89, 12, z), Vector3(0.04, 1.35, 0.07), Color("29464a"))
+	for z: int in [-44, -28, -12]:
+		box("gallery_lamp_back_%d" % z, Vector3(-19.9, 13.8, z), Vector3(0.2, 0.45, 0.35), Color("29464a"))
+		box("gallery_lamp_lens_%d" % z, Vector3(-19.74, 13.7, z), Vector3(0.12, 0.12, 0.3), Color("ded8c2"))
+		_local_light(Vector3(-19.5, 13.4, z), 0.35, 8)
+	box("chamber_light_mount", Vector3(3, 15.6, -70), Vector3(0.8, 0.15, 0.45), Color("ded8c2"))
+	_local_light(Vector3(3, 14.8, -70), 0.8, 8)
 	box("post_tower_link", Vector3(0, 15.7, -79.5), Vector3(5, 0.6, 3), Color("ded8c2"))
 	for mesh: MeshInstance3D in find_children("Mesh_deck_*", "MeshInstance3D", true, false):
 		mesh.name = "Mail_roof_" + str(mesh.name)
@@ -122,3 +140,11 @@ func _roof(id: String, left: float, right: float, back: float, front: float) -> 
 
 func route_hint(_stage: int, _feet: Vector3) -> String:
 	return "Five collection slots, either direction around the atrium. Bend the flight around the chimney for 03. Return to Dispatch. B/V/N compare body, view and goal."
+
+func _local_light(at: Vector3, energy: float, distance: float) -> void:
+	var lamp := OmniLight3D.new()
+	lamp.position = at
+	lamp.light_color = Color("fff0cf")
+	lamp.light_energy = energy
+	lamp.omni_range = distance
+	add_child(lamp)
