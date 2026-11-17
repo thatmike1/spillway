@@ -1,5 +1,7 @@
 extends RefCounted
 ## compose current courses while retaining shelved experiment source in the R19 catalog.
+## metadata stays outside the persisted/observed delivered entry dictionaries.
+const CAPABILITIES := {"tether-yard": {"grapple": true}}
 const BASE := preload("res://scripts/r19_map_catalog.gd")
 const THROUGH := preload("res://scripts/r20_through_level.gd")
 const SURF := preload("res://scripts/r20_surf_level.gd")
