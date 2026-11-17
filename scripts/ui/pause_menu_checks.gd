@@ -215,15 +215,64 @@ func run() -> void:
 			var group: Dictionary = hud.mail_groups[choice]
 			if not game.player.has_method(group.getter):
 				continue
-			for value: String in group.buttons:
+			check(game.player.has_method(group.setter) and (group.section as Control).is_visible_in_tree(), "delivery group visible " + choice)
+			var choices: Array = group.buttons.keys()
+			choices.reverse()
+			for value: String in choices:
+				var target: Button = group.buttons[value]
+				var seen: Array[Control] = []
+				var next: Control = hud.resume_button
+				while next != null and next not in seen and seen.size() < 1000:
+					seen.append(next)
+					next = next.find_next_valid_focus()
+				check(target in seen, "Tab reaches delivery choice " + choice + "/" + value)
 				var before_identity: Dictionary = game.motion_identity().duplicate(true)
 				var before_value := str(game.player.call(group.getter))
-				(group.buttons[value] as Button).pressed.emit()
+				var button: Button = group.buttons[value]
+				button.grab_focus()
+				await settle()
+				check(button.has_focus(), "delivery choice accepts focus " + choice + "/" + value)
+				if before_value != value:
+					await click(button, hud._pause_scroll)
 				await settle()
 				check(str(game.player.call(group.getter)) == value, "delivery choice applies " + choice + "/" + value)
 				check(game.paused, "delivery choice keeps menu paused " + choice)
+				if choice == "goal":
+					var optional := value == "optional"
+					check(("Mail is optional; reach Dispatch to finish." in hud.map_controls.text) == optional and ("Deliver all three before Dispatch." in hud.map_controls.text) != optional, "delivery instructions match goal " + value)
 				if before_value != value:
 					check(game.motion_identity() != before_identity, "delivery choice separates recording identity " + choice)
+		for viewport: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(1280, 720)]:
+			root.size = viewport
+			hud._layout()
+			hud.show_pause_destination("Practice")
+			await settle()
+			var scroll: ScrollContainer = hud._pause_scroll
+			var point := scroll.get_global_rect().get_center()
+			var motion := InputEventMouseMotion.new()
+			motion.position = point
+			motion.global_position = point
+			root.push_input(motion, true)
+			await process_frame
+			for i: int in 30:
+				for down: bool in [true, false]:
+					var wheel := InputEventMouseButton.new()
+					wheel.position = point
+					wheel.global_position = point
+					wheel.button_index = MOUSE_BUTTON_WHEEL_DOWN
+					wheel.pressed = down
+					root.push_input(wheel, true)
+				await process_frame
+			await settle()
+			var overflow := scroll.get_v_scroll_bar().max_value > scroll.get_v_scroll_bar().page
+			check(not overflow or scroll.scroll_vertical > 0, "mouse wheel handles Mail overflow at " + str(viewport))
+			var goal: Button = hud.mail_groups["goal"].buttons["optional"]
+			check(scroll.get_global_rect().encloses(goal.get_global_rect()), "mouse wheel reaches last Mail choice at " + str(viewport))
+			for group: Dictionary in hud.mail_groups.values():
+				for button: Button in group.buttons.values():
+					button.grab_focus()
+					await settle()
+					check(button.has_focus() and scroll.get_global_rect().encloses(button.get_global_rect()), "Mail choice fits after focus/resize " + str(button.name) + " " + str(viewport))
 	var ok := checks.all(func(row: Dictionary) -> bool: return row.ok)
 	var file := FileAccess.open(output.path_join("menu-checks.json"), FileAccess.WRITE)
 	file.store_string(JSON.stringify({"ok": ok, "checks": checks}, "\t"))

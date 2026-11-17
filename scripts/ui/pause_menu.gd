@@ -183,6 +183,12 @@ func _layout_pause(size: Vector2) -> void:
 	_pause_scroll.position.y += header_height
 	_pause_scroll.size.y = maxf(80.0, _pause_scroll.size.y - header_height)
 
+func lab_controls_text() -> String:
+	var instructions := super()
+	if game != null and is_instance_valid(game.player) and game.player.has_method("mail_goal") and str(game.player.call("mail_goal")) == "optional":
+		instructions = instructions.replace("Deliver all three before Dispatch.", "Mail is optional; reach Dispatch to finish.")
+	return instructions
+
 func _refresh_pause() -> void:
 	super()
 	_refresh_mail()
