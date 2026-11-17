@@ -79,7 +79,7 @@ class Driver extends Node:
 		events.append(row)
 
 	func command(cmd: Dictionary) -> void:
-		var stamp := (tick + 1) / 128.0
+		var stamp := tick / 128.0
 		if cmd.action != prior_action:
 			if not prior_action.is_empty():
 				emit_input({"time": stamp, "action": prior_action, "pressed": false})
@@ -127,7 +127,7 @@ class Driver extends Node:
 			var slot := 0 if p.position.z > -30 else (1 if p.position.z > -78 else 2)
 			command(harness.control(fast, tick, slot))
 		else:
-			var stamp := (tick + 1) / 128.0
+			var stamp := tick / 128.0
 			while event_index < playback.size() and float(playback[event_index].time) <= stamp:
 				emit_input(playback[event_index])
 				event_index += 1
@@ -158,6 +158,7 @@ func attempt(fast: bool, tape: Array = []) -> Dictionary:
 	await process_frame
 	player = game.player
 	assert(game.startup_error.is_empty() and game.tether_model() == "elastic-arc")
+	game.restart_run()
 	game.set_paused(false)
 	var driver := Driver.new()
 	driver.harness = self
