@@ -14,6 +14,10 @@ Longitudinal pads and clear gaps are both 1.6256 m (64 Source units), with 3.251
 
 The source row establishes adjacent support spacing, not one jump per pad or F2 difficulty. Gantry's tapes skip pads according to earned speed. No external BSP, screenshot or concept image enters the repository. Materials and sky reuse the project's existing assets and shaders.
 
+## Authored look
+
+`own_look: true` keeps the map's sky and materials instead of the inherited Practice fallback. The concrete shader and its provenance are under `assets/maps/gantry/`; existing project sky, wear and water resources are reused. Receiving aprons carry continuous orange edge paint, while ordinary hop pads remain pale. Cross-bearings connect the pads to the crane quays below the route tops; gantry foot plates make the post connections visible. Those bearings are collision geometry with the structure role, not extra route platforms. The Gantry-only rope stroke copies the runner's visual mesh at a smaller radius and never writes motor settings or force coefficients.
+
 ## Earned hop and swing comparison
 
 Both ordinary-event tapes finish in the production host with zero respawns, then replay exactly through that host. The host timer reads 10.4375 s for basic air strafing and 7.8359375 s for the faster technique. Input durations including the run-up before the timer starts are 1,360 ticks (10.625 s) and 1,027 ticks (8.0234375 s). Basic starts hopping after tick 50 and releases 14 m past the takeoff edge; faster starts after tick 80 and releases 12 m past it. Basic stops adding air-strafe speed around 350 u/s; faster continues. These are two complete techniques, not an isolated single-variable trial. No position, velocity or view angle is injected: buttons/actions and relative mouse events drive the real host and motor.
