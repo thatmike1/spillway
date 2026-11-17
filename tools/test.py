@@ -45,7 +45,7 @@ def main():
                profile=profile, log=out / "import.log")
     components = [
         "saltglass_registration", "tether_geometry", "tether_coefficients",
-        "grapple_capability", "r22_registration", "host_capabilities", "teaching_cap",
+        "grapple_capability", "r22_registration", "host_capabilities", "teaching_cap", "plan_contract", "plan_pause",
         "tether_feedback_identity", "tether_feedback_audio", "registry_injection",
         "style_suspension", "tether_feedback_lens", "saltglass_art", "seaward_registration", "gantry_runner", "gantry_rope",
         "mail_flight", "mail_motor", "mail_courts", "mail_tape", "sluice_six_style",
