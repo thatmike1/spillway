@@ -216,7 +216,7 @@ func _ready() -> void:
 		preset_id = DEFAULT_PRESET
 	preset = PRESETS.entry(preset_id)
 	Engine.physics_ticks_per_second = physics_hz
-	maps = (map_registry if not map_registry.is_empty() else MAPS.make()).duplicate(true)
+	maps = _initial_maps()
 	if maps.catalog.has("experiment"):
 		maps.catalog.experiment.theme = "Movement experiments"
 	if level_script != null:
@@ -492,7 +492,15 @@ func map_entry(id: String = "") -> Dictionary:
 
 ## map capabilities apply to the selected catalog entry, not a particular map id.
 func map_has_capability(capability: String) -> bool:
-	return bool(map_entry().get(capability, false))
+	var inherited: Dictionary = _catalog_capabilities().get(map_id, {})
+	return bool(map_entry().get(capability, inherited.get(capability, false)))
+
+func _catalog_capabilities() -> Dictionary:
+	return {}
+
+## the startup registry is an injection contract; live hosts may compose an expanded copy.
+func _initial_maps() -> Dictionary:
+	return (map_registry if not map_registry.is_empty() else MAPS.make()).duplicate(true)
 
 func map_name() -> String:
 	if map_id == "fixture":
