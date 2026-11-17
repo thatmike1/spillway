@@ -27,7 +27,7 @@ func _ready() -> void:
 	waiting_body = body(Color(0.12,0.44,0.53,0.75))
 	delivery_body = body(Color(0.8,0.65,0.45,0.45))
 	var recipient := Label3D.new()
-	recipient.text = "FIRST BODY"
+	recipient.text = "YOUR WAITING BODY"
 	recipient.position.y = 1.22
 	recipient.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	recipient.font_size = 40
@@ -183,9 +183,10 @@ func resume_waiting() -> void:
 	runner.reset_to(Transform3D(Basis.IDENTITY,waiting.position))
 	runner.state = waiting.state.duplicate(true)
 	runner.velocity = waiting.velocity
-	runner.yaw = waiting.yaw
-	runner.pitch = waiting.pitch
-	runner._tick_yaw = waiting.yaw
+	var onward: Vector3 = map().finish_position-waiting.position
+	runner.yaw = atan2(-onward.x,-onward.z) if Vector2(onward.x,onward.z).length_squared() > 0.000001 else float(waiting.yaw)
+	runner.pitch = 0.0
+	runner._tick_yaw = runner.yaw
 	runner.used_pad = waiting.pad_used
 	runner.launch_events.assign(waiting.launches)
 	transferring = false
@@ -198,7 +199,7 @@ func resume_waiting() -> void:
 	game().session.lifecycle("practice",{"phase":"plan_envelope_catch","position":waiting.position,"throws":throws},"envelope_handoff",true)
 	notice = ""
 func snapshot() -> Dictionary:
-	return {"version":"plan-envelope-2","phase":phase,"waiting":waiting.get("position",Vector3.ZERO),
+	return {"version":"plan-envelope-3","phase":phase,"waiting":waiting.get("position",Vector3.ZERO),
 		"first_seconds":first_seconds,"throws":throws,"misses":misses,"flying":flying,"projectile":projectile_position}
 func _process(_delta: float) -> void:
 	var visible_now: bool = active() and not runner.planning and not game().paused and not game().finished
@@ -222,14 +223,14 @@ class Readout extends Control:
 		var y := 275.0
 		var font := ThemeDB.fallback_font
 		draw_rect(Rect2(x,y,350,64),Color("203d45"))
-		var detail := "K waits on a deck."
+		var detail := "K parks you; then bring the envelope."
 		var title := "Envelope spitball · first body"
 		if relay.phase == "carry":
-			title = "Envelope spitball · delivery"
-			detail = "E throws to FIRST BODY · %.1f m" % relay.runner.global_position.distance_to(relay.waiting.position)
+			title = "You carry the envelope"
+			detail = "Flying to your waiting body." if relay.flying else "E throws to your waiting body · %.1f m" % relay.runner.global_position.distance_to(relay.waiting.position)
 		elif relay.phase == "resumed":
-			title = "Envelope spitball · first body"
-			detail = "Resumed. Finish on the far quay."
+			title = "You are the first body again"
+			detail = "Envelope received. Finish ahead."
 		if not relay.notice.is_empty():
 			detail = relay.notice
 		draw_string(font,Vector2(x+12,y+23),title,HORIZONTAL_ALIGNMENT_LEFT,326,16,Color("efe8cf"))

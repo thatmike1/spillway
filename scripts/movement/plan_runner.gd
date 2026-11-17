@@ -66,7 +66,7 @@ func _input(event: InputEvent) -> void:
 			map.envelope_enabled = not map.envelope_enabled
 			map.apply_design(map.plan,map.block_slot,map.pad_slot,map.budget,map.blocks_enabled,map.pads_enabled)
 			envelope.reset()
-			planner.notice = "Envelope: K waits on deck; E throws. One handoff." if map.envelope_enabled else "Envelope off. Ordinary plan times again."
+			planner.notice = "K leaves your first body waiting. E delivers; you control it again." if map.envelope_enabled else "Envelope off. Ordinary plan times again."
 			planner.queue_redraw()
 			get_viewport().set_input_as_handled()
 		elif not planning and code in [KEY_K,KEY_E] and envelope != null and envelope.active():
@@ -164,7 +164,7 @@ func run_review_unavailable_reason() -> String:
 		return "Resume the survey and commit with Enter before 3D review or segment practice."
 	var host := get_parent()
 	var level: Node = host.get("level") if host != null else null
-	if level != null and bool(level.get("envelope_enabled")):
+	if level != null and level.get("envelope_enabled") == true:
 		return "3D review and segment practice are unavailable in envelope mode. Turn it off in the survey."
 	return ""
 

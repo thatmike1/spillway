@@ -116,17 +116,6 @@ func baseline(at_tick: int) -> void:
 	for row: Dictionary in centre:
 		if not row.has("key") and roundi(float(row.time)*128) == at_tick and at_tick > 0:
 			event(row)
-func restore_controls(at_tick: int) -> void:
-	var held := {}
-	for row: Dictionary in centre:
-		if roundi(float(row.time)*128) >= at_tick:
-			break
-		if row.has("action"):
-			held["action:"+row.action] = row
-		elif row.has("button"):
-			held["button:"+str(row.button)] = row
-	for row: Dictionary in held.values():
-		event(row)
 func aim(at: Vector3) -> void:
 	var player: CharacterBody3D = game.player
 	var direction: Vector3 = at-player.camera.global_position
@@ -136,7 +125,7 @@ func aim(at: Vector3) -> void:
 	var pitch := atan2(direction.y,Vector2(direction.x,direction.z).length())
 	var meta: Dictionary = game.look_metadata()
 	event({"mouse":[-wrapf(yaw-player.yaw,-PI,PI)/float(meta.yaw_rad_per_count),(player.pitch-pitch)/float(meta.pitch_rad_per_count)]})
-func leave_block() -> void:
+func finish_first_body() -> void:
 	var player: CharacterBody3D = game.player
 	var direction := Vector3(-player.global_position.x,0,-49-player.global_position.z)
 	var yaw := atan2(-direction.x,-direction.z)
@@ -147,7 +136,7 @@ func leave_block() -> void:
 	for id: String in ["move_back","move_left","move_right"]:
 		event({"action":id,"pressed":false,"strength":0.0})
 	event({"action":"move_forward","pressed":true,"strength":1.0})
-	var jump: bool = player.global_position.z < -18.0
+	var jump: bool = loadout != "block" or player.global_position.z < -18.0
 	event({"action":"jump","pressed":jump,"strength":1.0 if jump else 0.0})
 func _physics_process(_delta: float) -> bool:
 	if not ready:
@@ -174,10 +163,7 @@ func _physics_process(_delta: float) -> bool:
 				key("E")
 			elif relay.phase == "resumed":
 				local_tick = parked_tick
-				if loadout == "block":
-					leave_block()
-				else:
-					restore_controls(local_tick)
+				finish_first_body()
 			prior_phase = relay.phase
 		if relay.phase in ["carry","resumed"] and not paused_checks.has(relay.phase):
 			paused_checks[relay.phase] = true
@@ -200,8 +186,8 @@ func _physics_process(_delta: float) -> bool:
 			for index: int in [1,2]:
 				event({"button":index,"pressed":false})
 		else:
-			if relay.phase == "resumed" and loadout == "block":
-				leave_block()
+			if relay.phase == "resumed":
+				finish_first_body()
 			elif relay.phase == "carry" and not throw_done and relay.misses >= 1 and game.player.global_position.distance_to(relay.waiting.position) < 8.0:
 				for index: int in [1,2]:
 					event({"button":index,"pressed":false})
