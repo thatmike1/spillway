@@ -15,16 +15,21 @@ func run() -> void:
 	assert(level.geometry_hash() == HASH, "art must retain delivered r21 identity")
 	assert(AUDIT.audit(level).ok, "manifest must match actual collision")
 	for node: Node in level.get_children():
-		if not str(node.name).begins_with("Art_paint_lip_"):
+		var lip := str(node.name).begins_with("Art_paint_lip_")
+		var pump := str(node.name).begins_with("Art_pan_pump_")
+		if not lip and not pump:
 			continue
-		var supported := false
+		var support_y := -INF
 		for piece: Dictionary in level.manifest:
+			if piece.role != "route":
+				continue
 			var polygon := PackedVector2Array()
 			for point: Vector3 in piece.points.slice(0, 4):
 				polygon.append(Vector2(point.x, point.z))
 			if Geometry2D.is_point_in_polygon(Vector2(node.position.x, node.position.z), polygon):
-				supported = supported or absf(node.position.y - piece.points[0].y) < 0.03
-		assert(supported, "paint lip must sit on a real deck: " + str(node.name))
+				support_y = maxf(support_y, piece.points[0].y)
+		var bottom: float = node.position.y - node.mesh.size.y * 0.5 if pump else node.position.y
+		assert(is_finite(support_y) and absf(bottom - support_y) < 0.03, "paint/pump must meet the actual highest deck: " + str(node.name))
 	var before := solids(level)
 	var look := LOOK.new()
 	root.add_child(look)

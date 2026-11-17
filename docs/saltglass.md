@@ -43,12 +43,16 @@ The outside fixture reaches its first receiving landing 1.5234375 s after the fo
 
 ## R22 presentation contract
 
-Saltglass is a coastal salt works where seawater is lifted into two long feed races before concentrating in rising evaporation pans.
-The runner follows the maintenance decks along these feed races, then crosses the crystallising pans to the shipping quay.
-A supported pump header serves the pans, so machinery belongs to the process rather than floating beside it.
-The salt store above the quay is the single tall landmark, with a loading canopy at the finish and mooring piles below.
-From the west entry the pale running face descends toward the sea, the pan sequence crosses the horizon and the salt-store tower stands beyond.
+Saltglass is a coastal salt works where seawater evaporates in rising pans and leaves salt for the quay store.
+Pan-mounted pumps and a continuous brine header serve two sloping feed races rather than standing as disconnected boxes over the sea.
+A framed brine tank on the east intake is the single tall landmark visible ahead and to the right from the west spawn.
+Crystallised salt is stored beside the quay and shipped beneath the supported loading canopy at the finish.
+The runner follows pale maintenance faces down the first race, across the rising pans, down the return race and along the shipping quay.
 
 The map-local `saltglass_surface.gdshader` classifies the 56.31 degree running faces by their upward normal (approximately 0.555), using a 0.35–0.52 transition. The common Look C shader's 0.65–0.92 transition classifies those faces as sides. Local mesh names opt these surfaces out of the common material swap, keeping slope/underside contrast in both L modes. Short orange edge bands identify low exits and the outside takeoff/receiver. No collision is added by these cues.
 
 `tests/saltglass_art.gd` pins the delivered R21 geometry hash and compares actual solid transforms and convex points before/after both look states. The existing registration test remains untouched. Visual acceptance still requires matched first-person frames and Mike's playtest; headless passing does not establish readability or enjoyment.
+
+The structure pass plants every pump on an actual pan, connects the pumps with a brine header and carries decks/fins down to visible sea foundations. The east intake landmark is a cylindrical tank inside an open four-column frame, with bearing deck and crown connected to those columns. The loading canopy now has four deck-mounted columns; louvres fit inside the actual store face. These are non-colliding visual structures, preserving the existing play surfaces.
+
+Surf ridge/toe ink and panel seams are shader marks, not additional crest geometry. Existing original `assets/look/painted-wear.png` supplies restrained surface wear; low-face colour variation describes the slope. A map-local, low-contrast sea replaces the busy wave pattern in both look modes. The floating outside text is removed; short physical lip bands remain, and the separate geometry experiment will address the receiver's occlusion.
