@@ -40,3 +40,15 @@ The outside fixture reaches its first receiving landing 1.5234375 s after the fo
 ## Verification
 
 `python3 tools/test.py` runs `tests/saltglass_registration.gd`, including actual production registration, map revision separation, original identities and collision/look checks. The slow tier verifies all original maps without differences. Historical surf route/native delivery verifiers and their external receipts remain in Git history and the original build workspace.
+
+## R22 presentation contract
+
+Saltglass is a coastal salt works where seawater is lifted into two long feed races before concentrating in rising evaporation pans.
+The runner follows the maintenance decks along these feed races, then crosses the crystallising pans to the shipping quay.
+A supported pump header serves the pans, so machinery belongs to the process rather than floating beside it.
+The salt store above the quay is the single tall landmark, with a loading canopy at the finish and mooring piles below.
+From the west entry the pale running face descends toward the sea, the pan sequence crosses the horizon and the salt-store tower stands beyond.
+
+The map-local `saltglass_surface.gdshader` classifies the 56.31 degree running faces by their upward normal (approximately 0.555), using a 0.35–0.52 transition. The common Look C shader's 0.65–0.92 transition classifies those faces as sides. Local mesh names opt these surfaces out of the common material swap, keeping slope/underside contrast in both L modes. Short orange edge bands identify low exits and the outside takeoff/receiver. No collision is added by these cues.
+
+`tests/saltglass_art.gd` pins the delivered R21 geometry hash and compares actual solid transforms and convex points before/after both look states. The existing registration test remains untouched. Visual acceptance still requires matched first-person frames and Mike's playtest; headless passing does not establish readability or enjoyment.

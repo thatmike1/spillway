@@ -72,6 +72,7 @@ func build() -> void:
 	_sign("title", Vector3(10, 19, 24), PI, "SALTGLASS\nHIGH FINS / RISING CRESCENT / SALT STEPS", 0.006)
 	_sign("surf_entry", Vector3(15, 20, 2), 0.0, "SURF\nA / D INTO THE FACE\nLET THE FIN CARRY YOU TO THE LOW DECK", 0.005)
 	_sign("crescent", Vector3(120, 20, -236), 0, "CRESCENT\nCLIMB THROUGH THE HOPS", 0.007)
+	_readable_surfaces()
 	_dressing()
 	_sign("salt_house", Vector3(322, 8, 38), -PI * 0.5, "SALT HOUSE\nFINISH", 0.009)
 
@@ -211,3 +212,19 @@ func _art_box(id: String, at: Vector3, dimensions: Vector3, color: Color) -> voi
 	material.roughness = 0.95
 	node.material_override = material
 	add_child(node)
+
+func _readable_surfaces() -> void:
+	# map-local names keep the shared look swap from erasing slope readability.
+	for node: Node in get_children():
+		if node is MeshInstance3D and str(node.name).begins_with("Mesh_"):
+			var material := ShaderMaterial.new()
+			material.shader = preload("res://shaders/look/saltglass_surface.gdshader")
+			material.set_shader_parameter("surf", "steel_ramp" in str(node.name))
+			node.material_override = material
+			node.name = "SaltglassSurface_" + str(node.name)
+	# short edge bands announce takeoff and the tiny receiver in both look modes.
+	_art_box("paint_lip_outside_takeoff", Vector3(210.8, 5.312, 53.82), Vector3(7.5, 0.025, 0.3), Color("d95b30"))
+	_art_box("paint_lip_outside_receiver", Vector3(221.5, 5.012, 53.82), Vector3(3, 0.025, 0.3), Color("d95b30"))
+	_art_box("paint_lip_west_land", Vector3(2, 7.012, -173.15), Vector3(36, 0.025, 0.3), Color("d95b30"))
+	_art_box("paint_lip_east_land", Vector3(130, 7.012, 5.15), Vector3(36, 0.025, 0.3), Color("d95b30"))
+	_sign("outside_choice", Vector3(210, 7.4, 53.9), -PI * 0.5, "SEAWARD LIP\nLOW / FAST", 0.004)
