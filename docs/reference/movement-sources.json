@@ -1,0 +1,124 @@
+{
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/ValveSoftware/source-sdk-2013/master/src/game/shared/gamemovement.cpp",
+      "sha256": "d192edad0dda43e7be8761f113450300d5d313a6cdbf42044f4d6019e5ff5b20",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/ValveSoftware/source-sdk-2013/master/src/game/shared/movevars_shared.cpp",
+      "sha256": "c7800728329a97c3fd34738105a90ec4d257e5618a0729ac423b4ff1efdee9a8",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/ValveSoftware/source-sdk-2013/master/src/game/shared/shareddefs.h",
+      "sha256": "551f0c8e38d448e6bf61d86c22782423e668c5afc12662cbdb3587fd410e4558",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/ValveSoftware/source-sdk-2013/master/src/game/shared/baseplayer_shared.cpp",
+      "sha256": "1f2f6435c9b6cb3c70fa4f76dd33f31971cb3400a8179b1bc626b5779bb220c0",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/ValveSoftware/source-sdk-2013/master/src/game/shared/gamerules.cpp",
+      "sha256": "343ad1974f97ed88648bce94b08ac0d6fbe4a16efbada2810d64e86c7812b394",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/ValveSoftware/source-sdk-2013/0d8dceea4310fde5706b3ce1c70609d72a38efdf/mp/src/game/shared/gamemovement.cpp",
+      "sha256": "df0550f3ed8eaf2d2ecc12ca6720240ecd46aea90658e5542c47307dae5a1b68",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/ValveSoftware/source-sdk-2013/0d8dceea4310fde5706b3ce1c70609d72a38efdf/mp/src/game/shared/gamemovement.h",
+      "sha256": "e6a2dd6736c8580931b9b8707e4b7fd5320b8e58c93dfbb55c9afd78452a5730",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/shavitush/bhoptimer/master/addons/sourcemod/scripting/shavit-core.sp",
+      "sha256": "ce509b74c071d7a78d25786e30ff845b98aac14c16a53658fe80a768164688cd",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/shavitush/bhoptimer/master/addons/sourcemod/configs/shavit-styles.cfg",
+      "sha256": "db7d1d5bf5c0d5822ef006992632c1ebbea61282687d3c964ad3e9bfc88f0bd0",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://gist.githubusercontent.com/zer0k-z/808bc8bfc494e0bbb5a423c2b1ca6685/raw",
+      "sha256": "fd85cfab7ad5ab17f35c4cee23673260fd284131465e77ecb8f032c69bbe4624",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://gist.githubusercontent.com/eguven/779902f22124e5d69d1e76c138bbdfa2/raw",
+      "sha256": "67e28e25f01072e420549d00a06eb3c3176c7a9574b8eeb4c8cbfbceb41e29e8",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/wiki/KZGlobalTeam/gokz/Modes.md",
+      "sha256": "21b5d85ff437d9ea39031ac6fbea96b31c86f7f018dc7ad1002e19bf5ad9595c",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/KZGlobalTeam/gokz/master/addons/sourcemod/scripting/gokz-mode-vanilla.sp",
+      "sha256": "a2bc2c7c1e121be93f28c7e1c0380ecd0cd832bb172e6e606bfe33c486465460",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/KZGlobalTeam/csgo-docs/master/README.md",
+      "sha256": "f275290cf562a316035506fd6eeb7de0d33b8938c06a808bd6b4ffe35b6b9526",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://codeload.github.com/KZGlobalTeam/csgo-docs/tar.gz/refs/heads/master",
+      "sha256": "84509047e6fabe5a3abb4a030d90949f93aaf103b8937849d48cd8b5448882d8",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/KZGlobalTeam/gokz/master/addons/sourcemod/scripting/include/gokz/kzplayer.inc",
+      "sha256": "1dc415a994921681a7d65e6c97c8a18d0a7a590ec03a97b017b3afee90b5065a",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/alliedmodders/hl2sdk/csgo/game/shared/gamerules.cpp",
+      "sha256": "bb1ebc0cb4452a233c2bdeb05158c6ac4ec33b3db33d6233511c3bd20ee0cbe5",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/danzayau/MovementAPI/master/README.md",
+      "sha256": "faff2f064b21f10e9c7f32be5599cf6d952fcd5bfa249bd4b5a6433e99dc87e9",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/danzayau/MovementAPI/master/addons/sourcemod/scripting/include/movement.inc",
+      "sha256": "e0659280336683ecbfbcd2521ff2b2cf3c45f878a5cb1529c6ededa2dfd49a20",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/shavitush/bhopstats/master/scripting/bhopstats.sp",
+      "sha256": "187871d96790be08538a303233c750e589fa4ec9195c7e2d4c34e8e95cd0d14f",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/shavitush/bhopstats/master/README.md",
+      "sha256": "1d9dae54181a3a6caf404b70dc8260a667fd5a79b483608195ca04147aad0139",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/KZGlobalTeam/gokz/master/addons/sourcemod/scripting/gokz-jumpstats.sp",
+      "sha256": "1f5d4616117c6d861283c1eace5db6e8ae9a092e60fe800169106953d97c9141",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/KZGlobalTeam/gokz/master/README.md",
+      "sha256": "7785c8f17307c73b40d3f5aee758416618544584cdd2113d9a08fa6500d77bb0",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/zer0k-z/tickrate_enabler_csgo/master/README.md",
+      "sha256": "fc2ba4f972766197cca00ff91e1c02cbc6c167309fc99dfb296029d9fedac899",
+      "fetched_utc": "2026-11-08T10:52:01.301722+00:00"
+    }
+  ]
+}
