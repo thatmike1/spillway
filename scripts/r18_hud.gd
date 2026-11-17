@@ -19,6 +19,11 @@ const TITLE_KEYS := "R restart  ·  F last checkpoint  ·  G ghost  ·  L look  
 ## teaching text leaves once the run is under way: four seconds in, or at this speed, whichever is first.
 const TEACH_SPEED_U := 280.0
 
+var pause_pages: Dictionary = {}
+var pause_tabs: Dictionary = {}
+var pause_destination := "Maps"
+var current_map_button: Button
+
 var telemetry: bool = false
 var map_title: Label
 var preset_line: Label
@@ -162,8 +167,10 @@ func _style_menu() -> void:
 		resume_button.get_parent(), ghost_switch, ghost_state_label, recording_line]
 	for i: int in order.size():
 		_pause_column.move_child(order[i], i)
-	map_note = _small(_pause_column, "")
-	_pause_column.move_child(map_note, map_heading.get_index() + 1)
+	for node: Control in [ghost_switch, ghost_state_label, recording_line]:
+		node.reparent(pause_pages["Runs"])
+	map_note = _small(pause_pages["Maps"], "")
+	map_note.get_parent().move_child(map_note, map_heading.get_index() + 1)
 	for button: Button in [resume_button]:
 		var strong := UI.flat(UI.INK, 2, Vector4(16, 8, 16, 9))
 		strong.border_color = UI.EDGE
@@ -272,7 +279,7 @@ func _process(delta: float) -> void:
 	var elapsed := float(game.elapsed)
 	if not started or elapsed < _last_elapsed:
 		_teach_gone = false
-	elif elapsed > 4.0 or float(game.call("display_speed_u")) > TEACH_SPEED_U:
+	elif elapsed > float(game.call("map_entry").get("teach_until_clock", 4.0)) or float(game.call("display_speed_u")) > TEACH_SPEED_U:
 		_teach_gone = true
 	_last_elapsed = elapsed
 	_teach_alpha = move_toward(_teach_alpha, 0.0 if _teach_gone or _title_alpha > 0.0 else 1.0, delta * 2.5)
@@ -455,6 +462,7 @@ func _make_pause() -> void:
 	pause_panel.add_child(_pause_edge)
 	_pause_scroll = ScrollContainer.new()
 	_pause_scroll.name = "PauseScroll"
+	_pause_scroll.follow_focus = true
 	_pause_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_pause_side.add_child(_pause_scroll)
 	_pause_column = VBoxContainer.new()
@@ -485,7 +493,26 @@ func _make_pause() -> void:
 	restart_button = _button(buttons, "Restart  R", func() -> void: game.restart_run())
 	practice_button = _button(buttons, "Last checkpoint  F", func() -> void: game.practice_restart())
 	quit_button = _button(buttons, "Quit", func() -> void: game.request_quit())
-	_spacer(column)
+	current_map_button = _button(column, "Current map controls", _show_current_map_controls)
+	current_map_button.name = "CurrentMapControls"
+	var navigation := HFlowContainer.new()
+	navigation.name = "PauseDestinations"
+	navigation.add_theme_constant_override("h_separation", 8)
+	navigation.add_theme_constant_override("v_separation", 8)
+	column.add_child(navigation)
+	for destination: String in ["Maps", "Practice", "Settings", "Runs"]:
+		var tab := _button(navigation, destination, show_pause_destination.bind(destination))
+		tab.name = "PauseTab_" + destination
+		tab.toggle_mode = true
+		pause_tabs[destination] = tab
+	for destination: String in pause_tabs:
+		var page := VBoxContainer.new()
+		page.name = "PausePage_" + destination
+		page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		page.add_theme_constant_override("separation", 9)
+		column.add_child(page)
+		pause_pages[destination] = page
+	column = pause_pages["Maps"]
 	map_heading = _heading(column, "Maps")
 	map_grid = GridContainer.new()
 	map_grid.name = "MapGrid"
@@ -494,7 +521,8 @@ func _make_pause() -> void:
 	column.add_child(map_grid)
 	_build_map_cards()
 	_spacer(column)
-	_heading(column, "Checkpoint practice  (not recorded)")
+	column = pause_pages["Practice"]
+	_heading(column, "Checkpoint practice")
 	practice_note = _small(column, "Start from any checkpoint. Practice attempts are recorded, never a best.")
 	var stages := HBoxContainer.new()
 	stages.name = "StageRow"
@@ -529,6 +557,12 @@ func _make_pause() -> void:
 	_small(lab_box, "All three start on in the lab. Off means the key does nothing and the approved F2/F5 movement plays unchanged. Records keep each loadout apart.")
 	_sync_lab_switches()
 	_spacer(column)
+	var settings_page: VBoxContainer = pause_pages["Settings"]
+	var movement_options := VBoxContainer.new()
+	movement_options.name = "MovementOptions"
+	movement_options.add_theme_constant_override("separation", 9)
+	settings_page.add_child(movement_options)
+	column = movement_options
 	_heading(column, "Movement")
 	_small(column, "Switching keeps your position, speed and view.")
 	var presets: Script = game.PRESETS
@@ -552,7 +586,12 @@ func _make_pause() -> void:
 			_preset_button(advanced_box, presets, id)
 	_small(advanced_box, "F1 vanilla (64 Hz) is not in R15; the delivered R14 build keeps it.")
 	_show_advanced(false)
-	_spacer(column)
+	var common_controls := VBoxContainer.new()
+	common_controls.name = "CommonSettings"
+	common_controls.add_theme_constant_override("separation", 9)
+	settings_page.add_child(common_controls)
+	settings_page.move_child(common_controls, 0)
+	column = common_controls
 	_heading(column, "Look and sound")
 	pause_look = _small(column, "", INK)
 	for item: Array in [["Source sensitivity (Source units, m_yaw 0.022)", "source_sensitivity", 0.2, 10.0, 0.05], ["Source FOV (4:3 reference, widened for the screen)", "source_fov", 70.0, 110.0, 1.0],
@@ -564,28 +603,73 @@ func _make_pause() -> void:
 		label.add_theme_font_size_override("font_size", 13)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		setting_parent.add_child(label)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		setting_parent.add_child(row)
 		var slider := HSlider.new()
-		slider.name = "Setting_" + str(item[1])
+		var key := str(item[1])
+		slider.name = "Setting_" + key
+		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		slider.min_value = item[2]
 		slider.max_value = item[3]
 		slider.step = item[4]
-		slider.value = game.settings[item[1]]
+		slider.value = game.settings[key]
+		slider.focus_mode = Control.FOCUS_ALL
+		row.add_child(slider)
+		var number := _small(row, slider_value_text(key, slider.value))
+		number.name = "Value_" + key
+		number.size_flags_horizontal = Control.SIZE_SHRINK_END
+		number.custom_minimum_size.x = 44
 		slider.value_changed.connect(func(value: float) -> void:
-			game.change_setting(str(item[1]), value)
+			game.change_setting(key, value)
+			number.text = slider_value_text(key, value)
 			pause_look.text = str(game.call("look_description")))
-		setting_parent.add_child(slider)
+		var default_value := float(game.DEFAULT_SETTINGS[key])
+		var reset := _button(row, "Reset", func() -> void: slider.value = default_value)
+		reset.name = "Reset_" + key
+		reset.tooltip_text = "Reset to " + slider_value_text(key, default_value)
 	var metric := CheckButton.new()
 	metric.name = "Setting_show_ms"
 	metric.text = "Show m/s under u/s"
 	metric.button_pressed = game.settings.show_ms
 	metric.toggled.connect(func(value: bool) -> void: game.change_setting("show_ms", value))
 	column.add_child(metric)
+	column = settings_page
 	_small(column, "Speed is measured horizontal travel over the last 0.1 s (1 u = 0.0254 m); a crouch moving the body's height never counts as speed. Sync counts air ticks with one of A/D held while the view turns: good when it turns toward the key. No such ticks shows %s. Contact is speed that walls, lips and ramps changed in the air, kept apart from sync. Nothing here rates how efficient a strafe was." % NO_SAMPLES)
 	_spacer(column)
 	_heading(column, "Keys")
 	pause_keys = _small(column, "", INK)
+	show_pause_destination("Maps", false)
 	pause_panel.hide()
 	_layout_pause(get_viewport().get_visible_rect().size)
+
+func _preset_button(parent: Control, presets: Script, id: String) -> void:
+	super(parent, presets, id)
+	var entry: Dictionary = presets.call("entry", id)
+	var description := parent.get_child(parent.get_child_count() - 1) as Label
+	description.name = "PresetDetails_" + id
+	description.text = "%s · %d Hz · autohop · no stamina or takeoff clamp" % [str(entry.air), int(entry.rate)] if id in presets.PRIMARY else str(entry.summary)
+
+func _show_current_map_controls() -> void:
+	show_pause_destination("Practice")
+
+func show_pause_destination(destination: String, focus_tab: bool = true) -> void:
+	if not pause_pages.has(destination):
+		return
+	pause_destination = destination
+	for id: String in pause_pages:
+		(pause_pages[id] as Control).visible = id == destination
+		(pause_tabs[id] as Button).set_pressed_no_signal(id == destination)
+	_pause_scroll.scroll_vertical = 0
+	if focus_tab:
+		(pause_tabs[destination] as Button).grab_focus()
+
+static func slider_value_text(key: String, value: float) -> String:
+	if key == "volume":
+		return "%d %%" % roundi(value * 100.0)
+	if key.ends_with("fov"):
+		return "%d°" % roundi(value)
+	return "%.2f" % value
 
 func _show_advanced(on: bool) -> void:
 	super(on)
