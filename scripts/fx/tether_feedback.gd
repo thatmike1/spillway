@@ -2,6 +2,7 @@ extends Node3D
 ## optional presentation observer; never changes runner state or acquisition readiness.
 const KEYS := ["tether_rope_visual", "tether_attach_cue", "tether_reel_audio", "tether_tension_audio", "tether_wind_audio", "tether_speed_fov", "tether_anchor_readability"]
 const SOUND := preload("res://scripts/audio/tether_sound.gd")
+const LENS := preload("res://scripts/fx/tether_lens.gd")
 const SEGMENTS := 20
 var options := {}
 var runner: Node3D
@@ -13,6 +14,7 @@ var _flash_left := 0.0
 var _material: StandardMaterial3D
 var _last_count := -1
 var _sound: Node
+var _lens: Camera3D
 
 func _ready() -> void:
 	process_priority = 100
@@ -34,6 +36,8 @@ func _ready() -> void:
 	_ready_marker = _ring(Color("e8dfbd"), 0.90, 0.96)
 	_sound = SOUND.new()
 	add_child(_sound)
+	_lens = LENS.new()
+	add_child(_lens)
 	reset()
 
 func attach(body: Node3D) -> bool:
@@ -48,11 +52,15 @@ func configure(settings: Dictionary) -> void:
 		_sound.set_volume(float(settings.get("volume", 0.8)))
 		if not enabled("tether_attach_cue"):
 			_sound.voices.attach.stop()
+	if _lens != null and not enabled("tether_speed_fov"):
+		_lens.reset()
 
 func enabled(key: String) -> bool:
 	return bool(options.get(key, false))
 
 func reset() -> void:
+	if _lens != null:
+		_lens.reset()
 	if _sound != null:
 		_sound.stop_all()
 	_was_attached = false
@@ -69,7 +77,7 @@ func _process(delta: float) -> void:
 	observe(delta)
 
 func observe(delta: float) -> void:
-	if not is_instance_valid(runner) or get_tree().paused or not bool(runner.get("input_enabled")):
+	if not is_instance_valid(runner) or not runner.is_inside_tree() or get_tree().paused or not bool(runner.get("input_enabled")):
 		reset()
 		return
 	var snapshot: Dictionary = runner.call("r21_acquisition_snapshot")
@@ -100,6 +108,7 @@ func observe(delta: float) -> void:
 	tension = maxf(tension, clampf((pull + catch_).length() * hz / 1800.0, 0.0, 1.0))
 	var speed := (runner.get("velocity") as Vector3).length() / float(runner.get("U"))
 	_sound.update(delta, attached, bool(runner.call("reel_active")), tension, speed, options)
+	_lens.update(camera, speed, delta, enabled("tether_speed_fov"))
 	var sag := minf(1.8, maxf(0.0, rest_m - distance) * 0.45) if attached else 0.0
 	for i: int in SEGMENTS:
 		var piece := _segments[i]

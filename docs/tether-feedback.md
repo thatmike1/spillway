@@ -21,10 +21,10 @@ Every setting is an independent boolean, missing means false:
 | `tether_reel_audio` | Real reel activity drives a quiet mechanism loop | off |
 | `tether_tension_audio` | Applied grapple impulses and extension drive a low load tone | off |
 | `tether_wind_audio` | Speed above 250 u/s raises a bounded wind layer | off |
-| `tether_speed_fov` | Pending slice 3 | off |
-| `tether_anchor_readability` | Pending slice 3 | off |
+| `tether_speed_fov` | Separate presentation lens, maximum +3° at 1.5°/s | off |
+| `tether_anchor_readability` | Larger cream ring only for the cached ready anchor | off |
 
-No setting is part of movement or recording identity, and toggles must not restart attempts.
+No setting is part of movement or recording identity, and toggles must not restart attempts. Handle these keys before the generic host `change_setting`: assign the boolean, call observer.configure(settings), save, and return. The generic handler treats names ending in `fov` as a style discontinuity and reapplies runner settings, which is inappropriate for these presentation toggles.
 
 ## Verification
 
@@ -42,3 +42,11 @@ Output is external scratch; read results and remove it. Visual acceptance and pl
 ## Audio lifecycle and provenance
 
 All four new sounds are synthesized by `scripts/audio/tether_sound.gd`; `assets/audio/tether/MANIFEST.json` records provenance. A private RNG seed leaves the global random stream untouched. Loop frequencies are integer multiples over one second, so each wrap is continuous. Gains follow volume, independently stop when toggled off, and all voices stop on observer reset/free, pause or invalid runner. Reel and load changes ease over about 0.125 s; they never delay physics. The existing release and break cues are untouched. The observer reads actual per-tick `grapple_pull`/`grapple_rope` impulses plus extension for load, and real `reel_active()` for reel state.
+
+## Lens and anchor readability
+
+The lens is a separate observer-owned Camera3D. It copies the source pose, projection, culling, environment, compositor and attributes, then adds up to 3 degrees across 400–1000 u/s with a slow response and a 1.5 degree/second rate limit. Disabling or resetting it restores the original viewport camera; if that camera was freed or detached during a map boundary, it requests the next registered camera instead. It never edits runner camera properties or `settings.fov`, which physics acquisition uses. There is no shake, blur, pose offset or FOV impulse on attach/release. Godot's [Camera3D API](https://docs.godotengine.org/en/stable/classes/class_camera3d.html) defines the separate viewport camera selection.
+
+The cream ready ring supplements, rather than replaces, the existing preview. It reads only the cached snapshot `ready` and position. No separate range estimate, raycast or target search can disagree with the runner's published candidate. A parallel-up guard keeps rings valid when looking directly above/below.
+
+Additional checks: `tests/tether_feedback_audio.gd` covers all-off defaults, rope endpoints/sag, deterministic PCM and audio stop/reset; `tests/tether_feedback_lens.gd` alternates speed at 60 Hz and checks bounds, rate limit, source-FOV preservation and lens restoration. Run these with the same `tools/play.py --headless --audio-driver Dummy --script res://tests/NAME.gd` wrapper.
