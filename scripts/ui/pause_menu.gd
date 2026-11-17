@@ -178,6 +178,9 @@ func _process(delta: float) -> void:
 		controls.modulate.a = 0.0
 		hint.modulate.a = 0.0
 		keys_line.modulate.a = 0.0
+	elif game != null and game.map_has_capability("grapple"):
+		controls.text = "LMB hold to swing · RMB reel · release to coast\nEsc map controls"
+		keys_line.modulate.a = 0.0
 	_refresh_anchor_readout()
 
 func _refresh_anchor_readout() -> void:

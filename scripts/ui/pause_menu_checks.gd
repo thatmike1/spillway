@@ -106,6 +106,7 @@ func run() -> void:
 	hud.show_pause_destination("Practice")
 	await settle()
 	check(hud.tether_section.is_visible_in_tree(), "rope controls in Practice")
+	check("LMB" in hud.controls.text and hud.controls.text.split("\n").size() <= 2, "grapple teaching stays compact")
 	check(hud.tether_models.size() == 6, "all six rope laws reachable")
 	check(hud.tether_models.values().all(func(button: Button) -> bool: return button.disabled), "fixed-law map locks model selection")
 	check(hud.tether_models["elastic-arc"].button_pressed, "fixed-law map shows effective model")
@@ -142,6 +143,7 @@ func run() -> void:
 		hud.show_pause_destination("Practice")
 		await settle()
 		check(hud.mail_section.is_visible_in_tree(), "mail controls appear on delivery map")
+		check(is_zero_approx(hud.controls.modulate.a) and is_zero_approx(hud.keys_line.modulate.a), "mail view suppresses generic teaching")
 		for view: String in ["body", "envelope"]:
 			hud.mail_views[view].pressed.emit()
 			await settle()
