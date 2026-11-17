@@ -37,27 +37,44 @@ def main():
     pure = verification.audit.negative_seed(verification.FIXTURES / routes[0]["name"] / "old", out / "negative-controls", contract, "old")
     print(f"recording/metadata/coverage mutations rejected: {len(pure['checks'])}", flush=True)
     source = out / "source"
-    verification.snapshot(source)
+    source_files = verification.snapshot(source)
     profile = out / "profile"
     profile.mkdir()
     engine.run(["--headless", "--editor", "--path", source, "--import"], cwd=source,
                profile=profile, log=out / "import.log")
-    components = ["saltglass_registration", "tether_geometry", "tether_coefficients", "grapple_capability", "r22_registration", "host_capabilities", "tether_feedback_identity", "tether_feedback_audio"]
+    components = [
+        "saltglass_registration", "tether_geometry", "tether_coefficients",
+        "grapple_capability", "r22_registration", "host_capabilities",
+        "tether_feedback_identity", "tether_feedback_audio", "registry_injection",
+        "style_suspension", "tether_feedback_lens", "saltglass_art", "gantry_runner",
+        "mail_flight", "mail_motor", "mail_courts", "mail_tape", "sluice_six_style",
+        "viaduct_presentation", "foundry_routes", "foundry_fork",
+        "scripts/ui/pause_menu_checks.gd",
+    ]
     if args.slow:
         components.extend(["direction_stack", "through_line_original_maps"])
-    report = {"ok": False, "mutations": pure, "components": []}
+    report = {"ok": False, "mutations": pure, "source": source_files, "components": []}
     try:
         for name in components:
-            folder = out / name
+            folder = out / Path(name).stem
             folder.mkdir()
             print("check " + name, flush=True)
+            script = "res://" + name if "/" in name else "res://tests/" + name + ".gd"
             result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
-                                 "--fixed-fps", "128", "--script", "res://tests/" + name + ".gd",
+                                 "--fixed-fps", "128", "--script", script,
                                  "--", "--out=" + str(folder), "--menu-contract=" + str(verification.FIXTURES / "contract.json")], cwd=source, profile=profile,
                                 log=folder / "engine.log", timeout=300)
             report["components"].append({"name": name, **result})
+        (out / "COMPONENTS.json").write_text(json.dumps({**report, "ok": True}, indent=1) + "\n")
         if args.slow:
             report["parity"] = verification.run(out / "parity")
+            runtime_roots = {"scripts", "assets", "scenes", "shaders", "data"}
+            def runtime_files(files):
+                return {name: digest for name, digest in files.items()
+                        if Path(name).parts[0] in runtime_roots
+                        or name in {"project.godot", "export_presets.cfg"}}
+            if runtime_files(source_files) != runtime_files(report["parity"]["source"]):
+                raise RuntimeError("Component and parity snapshots used different authored runtime bytes.")
         report["ok"] = True
         print("PASS; results: " + str(out / "RESULT.json"), flush=True)
     finally:

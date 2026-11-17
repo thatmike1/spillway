@@ -2,10 +2,13 @@ extends Node3D
 ## optional presentation observer; never changes runner state or acquisition readiness.
 const KEYS := ["tether_rope_visual", "tether_attach_cue", "tether_reel_audio", "tether_tension_audio", "tether_wind_audio", "tether_speed_fov", "tether_anchor_readability"]
 const SOUND := preload("res://scripts/audio/tether_sound.gd")
+const LENS := preload("res://scripts/fx/tether_lens.gd")
 const SEGMENTS := 20
+const ROPE_RADIUS := 0.002
 var options := {}
 var runner: Node3D
 var _segments: Array[MeshInstance3D] = []
+var _outlines: Array[MeshInstance3D] = []
 var _flash: MeshInstance3D
 var _ready_marker: MeshInstance3D
 var _was_attached := false
@@ -13,27 +16,23 @@ var _flash_left := 0.0
 var _material: StandardMaterial3D
 var _last_count := -1
 var _sound: Node
+var _lens: Camera3D
 
 func _ready() -> void:
 	process_priority = 100
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_material = _flat(Color("e8dfbd"))
+	var ink := _flat(Color("29464a"))
+	ink.cull_mode = BaseMaterial3D.CULL_FRONT
 	for i: int in SEGMENTS:
-		var piece := MeshInstance3D.new()
-		var mesh_ := CylinderMesh.new()
-		mesh_.top_radius = 0.026
-		mesh_.bottom_radius = 0.026
-		mesh_.height = 1.0
-		mesh_.radial_segments = 6
-		piece.mesh = mesh_
-		piece.material_override = _material
-		piece.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		add_child(piece)
-		_segments.append(piece)
+		_segments.append(_rope_piece(_material))
+		_outlines.append(_rope_piece(ink))
 	_flash = _ring(Color("e8dfbd"), 0.22, 0.27)
 	_ready_marker = _ring(Color("e8dfbd"), 0.90, 0.96)
 	_sound = SOUND.new()
 	add_child(_sound)
+	_lens = LENS.new()
+	add_child(_lens)
 	reset()
 
 func attach(body: Node3D) -> bool:
@@ -48,17 +47,21 @@ func configure(settings: Dictionary) -> void:
 		_sound.set_volume(float(settings.get("volume", 0.8)))
 		if not enabled("tether_attach_cue"):
 			_sound.voices.attach.stop()
+	if _lens != null and not enabled("tether_speed_fov"):
+		_lens.reset()
 
 func enabled(key: String) -> bool:
 	return bool(options.get(key, false))
 
 func reset() -> void:
+	if _lens != null:
+		_lens.reset()
 	if _sound != null:
 		_sound.stop_all()
 	_was_attached = false
 	_flash_left = 0.0
 	_last_count = -1
-	for piece: MeshInstance3D in _segments:
+	for piece: MeshInstance3D in _segments + _outlines:
 		piece.visible = false
 	if _flash != null:
 		_flash.visible = false
@@ -69,7 +72,7 @@ func _process(delta: float) -> void:
 	observe(delta)
 
 func observe(delta: float) -> void:
-	if not is_instance_valid(runner) or get_tree().paused or not bool(runner.get("input_enabled")):
+	if not is_instance_valid(runner) or not runner.is_inside_tree() or get_tree().paused or not bool(runner.get("input_enabled")):
 		reset()
 		return
 	var snapshot: Dictionary = runner.call("r21_acquisition_snapshot")
@@ -88,7 +91,6 @@ func observe(delta: float) -> void:
 	if camera == null:
 		return
 	var endpoint: Vector3 = snapshot.get("position", Vector3.ZERO)
-	var start := camera.global_position + camera.global_basis * Vector3(0.23, -0.26, -0.48)
 	var rest_m := float(runner.get("grapple_length_u")) * float(runner.get("U"))
 	var centre: Vector3 = runner.call("_hull_centre")
 	var distance := centre.distance_to(endpoint)
@@ -100,10 +102,16 @@ func observe(delta: float) -> void:
 	tension = maxf(tension, clampf((pull + catch_).length() * hz / 1800.0, 0.0, 1.0))
 	var speed := (runner.get("velocity") as Vector3).length() / float(runner.get("U"))
 	_sound.update(delta, attached, bool(runner.call("reel_active")), tension, speed, options)
+	_lens.update(camera, speed, delta, enabled("tether_speed_fov"))
+	var view_fov := _lens.fov if _lens.current else camera.fov
+	var start := rope_origin(camera, view_fov)
+	var pixel_height := maxf(1.0, camera.get_viewport().get_visible_rect().size.y)
 	var sag := minf(1.8, maxf(0.0, rest_m - distance) * 0.45) if attached else 0.0
 	for i: int in SEGMENTS:
 		var piece := _segments[i]
+		var outline := _outlines[i]
 		piece.visible = attached and enabled("tether_rope_visual")
+		outline.visible = piece.visible
 		if not piece.visible:
 			continue
 		var a := rope_point(start, endpoint, sag, float(i) / SEGMENTS)
@@ -111,19 +119,53 @@ func observe(delta: float) -> void:
 		var along := b - a
 		if along.length_squared() < 0.000001:
 			piece.visible = false
+			outline.visible = false
 			continue
 		var y := along.normalized()
 		var helper := Vector3.RIGHT if absf(y.dot(Vector3.UP)) > 0.98 else Vector3.UP
 		var x := y.cross(helper).normalized()
-		piece.global_transform = Transform3D(Basis(x * (1.0 + tension * 0.15), y * along.length(), x.cross(y) * (1.0 + tension * 0.15)), (a + b) * 0.5)
+		var midpoint := (a + b) * 0.5
+		var world_per_pixel := 2.0 * tan(deg_to_rad(view_fov) * 0.5) * camera.global_position.distance_to(midpoint) / pixel_height
+		var radii := cable_radii(world_per_pixel, tension)
+		var inner_scale := radii.x / ROPE_RADIUS
+		var outer_scale := radii.y / ROPE_RADIUS
+		piece.global_transform = Transform3D(Basis(x * inner_scale, y * along.length(), x.cross(y) * inner_scale), midpoint)
+		outline.global_transform = Transform3D(Basis(x * outer_scale, y * along.length(), x.cross(y) * outer_scale), midpoint)
 	_material.albedo_color = Color("e8dfbd").lerp(Color("b5683c"), tension * 0.65)
 	_flash.visible = attached and enabled("tether_attach_cue") and _flash_left > 0.0
 	if _flash.visible:
 		_face_ring(_flash, endpoint, camera)
-		_flash.scale = Vector3.ONE * (1.0 + (1.0 - _flash_left / 0.18) * 2.0)
+		_flash.scale = Vector3.ONE * (1.0 + (1.0 - _flash_left / 0.18) * 2.0) * cue_scale(camera.global_position.distance_to(endpoint))
 	_ready_marker.visible = enabled("tether_anchor_readability") and not attached and bool(snapshot.get("ready", false))
 	if _ready_marker.visible:
 		_face_ring(_ready_marker, endpoint, camera)
+		_ready_marker.scale = Vector3.ONE * cue_scale(camera.global_position.distance_to(endpoint))
+
+static func rope_origin(camera: Camera3D, view_fov: float) -> Vector3:
+	# terminate below the viewport so the cable never floats loose inside the aiming view.
+	return camera.global_position + camera.global_basis * Vector3(0.23, -0.48 * tan(deg_to_rad(view_fov) * 0.5) * 1.12, -0.48)
+
+static func cable_radii(world_per_pixel: float, tension: float) -> Vector2:
+	# a small physical cable near the hand, with a restrained pixel floor at distance.
+	var load_scale := 1.0 + clampf(tension, 0.0, 1.0) * 0.15
+	return Vector2(clampf(world_per_pixel * 0.6, 0.002, 0.05), clampf(world_per_pixel * 1.35, 0.0032, 0.09)) * load_scale
+
+static func cue_scale(distance: float) -> float:
+	# keep endpoint rings below about six degrees of angular radius near the camera.
+	return clampf(distance / 10.0, 0.0, 1.0)
+
+func _rope_piece(material: StandardMaterial3D) -> MeshInstance3D:
+	var piece := MeshInstance3D.new()
+	var mesh_ := CylinderMesh.new()
+	mesh_.top_radius = ROPE_RADIUS
+	mesh_.bottom_radius = ROPE_RADIUS
+	mesh_.height = 1.0
+	mesh_.radial_segments = 6
+	piece.mesh = mesh_
+	piece.material_override = material
+	piece.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(piece)
+	return piece
 
 static func rope_point(start: Vector3, end: Vector3, sag: float, t: float) -> Vector3:
 	return start.lerp(end, t) + Vector3.DOWN * (4.0 * t * (1.0 - t) * sag)
@@ -142,7 +184,13 @@ func _ring(color: Color, inner: float, outer: float) -> MeshInstance3D:
 	mesh_.inner_radius = inner
 	mesh_.outer_radius = outer
 	node.mesh = mesh_
-	node.material_override = _flat(color)
+	var material := _flat(color)
+	var ink := _flat(Color("29464a"))
+	ink.cull_mode = BaseMaterial3D.CULL_FRONT
+	ink.grow = true
+	ink.grow_amount = 0.08
+	material.next_pass = ink
+	node.material_override = material
 	node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(node)
 	return node

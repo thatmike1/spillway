@@ -28,6 +28,13 @@ class ShotTests(unittest.TestCase):
             for name in ("assets/fixtures/texture.png", "assets/paint.png.import", "tests/map_test.gd"):
                 self.assertEqual((target / name).read_text(), "preserve")
 
+    def test_movie_inspection_refuses_an_audio_only_container(self):
+        with tempfile.TemporaryDirectory() as folder, patch.object(shot.subprocess, "run") as run:
+            run.return_value.stdout = json.dumps({"streams": [{"codec_type": "audio", "codec_name": "pcm_s16le"}]})
+            with self.assertRaisesRegex(RuntimeError, "video stream"):
+                shot.inspect_movie(Path(folder))
+            run.assert_called_once()
+
     def test_output_rejects_git_ancestors(self):
         with tempfile.TemporaryDirectory() as root:
             folder = Path(root)
@@ -132,7 +139,8 @@ func _start() -> void:
 	main.call("restart_run", "capture")
 	var rows: Array = []
 	# these independent commands define the zero-based normal-spawn contract.
-	for strength: float in [.25, .75, 0.0, 0.0, 0.0, 0.0]:
+	for index: int in 32:
+		var strength: float = .25 if index == 0 else (.75 if index == 1 else 0.0)
 		if strength > 0:
 			Input.action_press("move_forward", strength)
 		else:
@@ -147,7 +155,7 @@ func _start() -> void:
 '''
 
 
-def native_contract(output):
+def native_contract(output, movie=False, movie_fps=30):
     output = shot.external(output)
     output.mkdir(parents=True, exist_ok=False)
     tape = output / "input.json"
@@ -157,8 +165,8 @@ def native_contract(output):
         {"time": 2 / 128, "action": "move_forward", "pressed": False, "strength": .9},
     ]))
     subprocess.run([sys.executable, "-B", str(shot.engine.PROJECT / "tools/shot.py"),
-                    "--map", "breakwater", "--tape", str(tape), "--seconds", str(6 / 128),
-                    "--every", str(1 / 128), "--size", "640x360", "--out", str(output / "native")], check=True)
+                    "--map", "breakwater", "--tape", str(tape), "--seconds", str((12 if movie else 6) / 128),
+                    "--every", str(1 / 128), "--size", "640x360", "--out", str(output / "native"), *(["--movie", "--movie-fps", str(movie_fps)] if movie else [])], check=True)
     with tempfile.TemporaryDirectory(prefix="canonical-", dir=output) as temporary:
         root = Path(temporary)
         source = root / "source"
@@ -166,7 +174,7 @@ def native_contract(output):
         (source / "canonical.gd").write_text(CANONICAL)
         shot.engine.run(["--headless", "--editor", "--path", source, "--import"], cwd=source,
                         profile=root / "profile", log=output / "canonical-import.log")
-        shot.engine.run(["--headless", "--path", source, "--fixed-fps", "128", "--audio-driver", "Dummy",
+        shot.engine.run(["--headless", "--path", source, "--fixed-fps", str(movie_fps) if movie else "128", "--audio-driver", "Dummy",
                          "--script", "res://canonical.gd", "--", "--r16-map=breakwater",
                          "--no-records", "--no-run-recordings", str(output / "expected.json")],
                         cwd=source, profile=root / "profile", log=output / "canonical.log")
@@ -182,9 +190,11 @@ def native_contract(output):
             (output / "mismatch.json").write_text(json.dumps({"tick": tick, "actual": frame, "expected": reference}, indent=2))
             raise AssertionError(f"native normal-spawn tape diverged at tick {tick}; read {output / 'mismatch.json'}")
         ticks.append(tick)
-    if not {1, 2}.issubset(ticks):
+    if not movie and not {1, 2}.issubset(ticks):
         raise AssertionError(f"native samples must observe the distinct t0/t1 commands: {ticks}")
-    (output / "RESULT.json").write_text(json.dumps({"ok": True, "exact_positions_and_state_ticks": ticks}) + "\n")
+    if not ticks:
+        raise AssertionError("no native motor observations")
+    (output / "RESULT.json").write_text(json.dumps({"ok": True, "movie": movie, "movie_fps": movie_fps, "exact_positions_and_state_ticks": ticks}) + "\n")
     print("native normal-spawn positions/state match canonical ticks:", ticks)
 
 
@@ -193,6 +203,9 @@ if __name__ == "__main__":
         parser = argparse.ArgumentParser()
         parser.add_argument("--native-contract", action="store_true")
         parser.add_argument("--out", type=Path, required=True)
-        native_contract(parser.parse_args().out)
+        parser.add_argument("--movie", action="store_true")
+        parser.add_argument("--movie-fps", type=int, choices=(30, 60), default=30)
+        args = parser.parse_args()
+        native_contract(args.out, args.movie, args.movie_fps)
     else:
         unittest.main()

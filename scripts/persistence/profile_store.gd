@@ -7,9 +7,10 @@ func read_profile(path: String) -> Dictionary:
 	if error == OK:
 		return {"error": OK, "config": config, "state": "loaded"}
 	var backup := ConfigFile.new()
-	if _load_checked(path + ".bak", backup) == OK:
+	var backup_error := _load_checked(path + ".bak", backup)
+	if backup_error == OK:
 		# preserve unreadable bytes before replacing them, including syntactically damaged files.
-		if FileAccess.file_exists(path):
+		if error != ERR_FILE_NOT_FOUND or FileAccess.file_exists(path):
 			var aside := path + ".unreadable-" + str(Time.get_unix_time_from_system()) + "-" + str(Time.get_ticks_usec())
 			var preserved := _copy(path, aside)
 			if preserved != OK:
@@ -22,7 +23,7 @@ func read_profile(path: String) -> Dictionary:
 			return {"error": restored, "config": ConfigFile.new(), "state": "recovery failed"}
 		return {"error": OK, "config": backup, "state": "restored backup"}
 	# only a genuinely absent profile, with no backup artifact, may start empty.
-	if error == ERR_FILE_NOT_FOUND and not FileAccess.file_exists(path + ".bak") and not DirAccess.dir_exists_absolute(path):
+	if error == ERR_FILE_NOT_FOUND and backup_error == ERR_FILE_NOT_FOUND and not FileAccess.file_exists(path) and not FileAccess.file_exists(path + ".bak") and not DirAccess.dir_exists_absolute(path):
 		return {"error": OK, "config": ConfigFile.new(), "state": "new"}
 	return {"error": error, "config": ConfigFile.new(), "state": "unreadable"}
 

@@ -2,8 +2,13 @@ extends SceneTree
 ## the caller supplies a non-writable directory with writable primary and temporary files.
 func _initialize() -> void:
 	Engine.print_error_messages = false
-	var path := OS.get_cmdline_user_args()[0]
-	var host: Node = load("res://scripts/r16_main.gd").new()
+	var args := OS.get_cmdline_user_args()
+	var path := args[0]
+	var host_path := "res://scripts/r16_main.gd"
+	for arg: String in args:
+		if arg.begins_with("--test-host="):
+			host_path = arg.trim_prefix("--test-host=")
+	var host: Node = load(host_path).new()
 	host.profile_path = path
 	var original := FileAccess.get_file_as_bytes(path)
 	var config := ConfigFile.new()

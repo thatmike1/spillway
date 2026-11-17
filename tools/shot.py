@@ -113,8 +113,8 @@ var trace: FileAccess
 var driver: Node
 var clock: Node
 func _initialize() -> void:
-	RenderingServer.render_loop_enabled = false
 	options = JSON.parse_string(FileAccess.get_file_as_string("res://capture-options.json"))
+	RenderingServer.render_loop_enabled = bool(options.get("movie", false))
 	_start.call_deferred()
 func _start() -> void:
 	main = load("res://scripts/game.gd").new()
@@ -138,13 +138,21 @@ func _start() -> void:
 			push_error("map has no named route: " + str(options.route))
 			quit(2)
 			return
-		var points: Array = routes[str(options.route)]
-		for i: int in points.size():
-			if points[i] is Vector3:
-				points[i] = {"pos": points[i], "radius": 1.0}
+		var original_points: Array = routes[str(options.route)]
+		var original_routes: PackedByteArray = var_to_bytes(routes)
+		var points: Array = []
+		for entry: Variant in original_points:
+			points.append({"pos": entry, "radius": 1.0} if entry is Vector3 else entry)
+		# attach copies its navigation tape; restore the authored hints before any motor tick.
+		routes[str(options.route)] = points
 		driver = load("res://scripts/spillway_driver.gd").new()
 		main.add_child(driver)
 		driver.call("attach", main, str(options.route), 0)
+		routes[str(options.route)] = original_points
+		if var_to_bytes(routes) != original_routes:
+			push_error("named route capture changed authored route hints")
+			quit(2)
+			return
 		if bool(driver.get("done")):
 			push_error("route setup failed: " + str(driver.get("failure_reason")))
 			quit(2)
@@ -192,7 +200,10 @@ func _capture() -> void:
 		# camera internal transforms must reach the rendering server before readback.
 		await process_frame
 		await process_frame
-	RenderingServer.force_draw(true, float(options.every))
+	if bool(options.get("movie", false)):
+		await RenderingServer.frame_post_draw
+	else:
+		RenderingServer.force_draw(true, float(options.every))
 	var path := str(options.out).path_join("frame-%05d.png" % frame_index)
 	var error := root.get_texture().get_image().save_png(path)
 	var observation: Dictionary = player.call("get_motion_state") if player.has_method("get_motion_state") else {}
@@ -295,6 +306,22 @@ def sys_exit():
     raise SystemExit("capture interrupted")
 
 
+def inspect_movie(output):
+    movie = output / "capture.avi"
+    result = subprocess.run(["ffprobe", "-v", "error", "-show_streams", "-show_format", "-of", "json", str(movie)],
+                            capture_output=True, text=True, check=True, timeout=30)
+    info = json.loads(result.stdout)
+    video = next((s for s in info["streams"] if s.get("codec_type") == "video"), None)
+    if video is None:
+        raise RuntimeError("MovieMaker did not produce a video stream")
+    audio = next((s for s in info["streams"] if s.get("codec_type") == "audio"), None)
+    if audio is None or not audio.get("codec_name", "").startswith("pcm_"):
+        raise RuntimeError("MovieMaker did not produce the expected uncompressed audio stream")
+    subprocess.run(["ffmpeg", "-v", "error", "-i", str(movie), "-map", "0:a:0", "-c:a", "pcm_s16le",
+                    str(output / "capture.wav")], check=True, timeout=30)
+    return info
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkout", type=Path, default=engine.PROJECT)
@@ -305,17 +332,23 @@ def main():
     mode.add_argument("--poses", type=Path)
     parser.add_argument("--setting", action="append", default=[], metavar="KEY=JSON", help="host setting, e.g. tether_model=\"elastic-arc\"")
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--movie", action="store_true", help="full-render MovieMaker AVI with native PCM audio")
+    parser.add_argument("--movie-fps", type=int, choices=(30, 60), default=30)
     parser.add_argument("--look", choices=("old", "new"), default="new")
     parser.add_argument("--size", default="1280x720", help="frame size, WIDTHxHEIGHT")
-    parser.add_argument("--seconds", type=float, default=12)
+    parser.add_argument("--seconds", type=float)
     parser.add_argument("--every", type=float, default=1)
     args = parser.parse_args()
+    if args.seconds is None:
+        args.seconds = 3.0 if args.movie else 12.0
     if not all(math.isfinite(v) and v > 0 for v in (args.seconds, args.every)):
         parser.error("seconds/every must be finite and positive")
     if not re.fullmatch(r"[1-9][0-9]{1,3}x[1-9][0-9]{1,3}", args.size):
         parser.error("size must be WIDTHxHEIGHT")
     if any(v > 4096 for v in map(int, args.size.split("x"))):
         parser.error("size must be at most 4096 per side")
+    if args.movie and (args.seconds > 10 or any(v > limit for v, limit in zip(map(int, args.size.split("x")), (1920, 1080)))):
+        parser.error("software movie capture is limited to 10 seconds and 1920x1080")
     checkout = args.checkout.resolve()
     if not (checkout / "project.godot").is_file():
         parser.error("checkout must contain project.godot")
@@ -326,13 +359,15 @@ def main():
         if not separator or not key:
             parser.error("setting requires KEY=JSON")
         settings[key] = json.loads(value)
-    options = dict(look=args.look, size=args.size, settings=settings, map=args.map, route=args.route, out=str(output), seconds=args.seconds, every=args.every,
+    options = dict(movie=args.movie, movie_fps=args.movie_fps, look=args.look, size=args.size, settings=settings, map=args.map, route=args.route, out=str(output), seconds=args.seconds, every=args.every,
                    mode="route" if args.route else ("tape" if args.tape else "poses"))
     if args.tape:
         options["events"] = read_sequence(args.tape, "tape")
     if args.poses:
         options["poses"] = read_sequence(args.poses, "poses")
         options["seconds"] = max(args.seconds, len(options["poses"]) * args.every + 2)
+    if args.movie and options["seconds"] > 10:
+        parser.error("movie pose sequences must finish within 10 seconds")
     provenance = subprocess.run(["git", "-C", str(checkout), "rev-parse", "HEAD"],
                                 capture_output=True, text=True, check=True).stdout.strip()
     dirty = subprocess.run(["git", "-C", str(checkout), "status", "--porcelain"],
@@ -353,20 +388,22 @@ def main():
         env.update(LIBGL_ALWAYS_SOFTWARE="1", GALLIUM_DRIVER="llvmpipe")
         with engine.locked(), private_display(output / "display.log", env, args.size) as display:
             env["DISPLAY"] = display
+            movie_arguments = ["--write-movie", str(output / "capture.avi")] if args.movie else []
             with (output / "engine.log").open("w") as log:
                 result = subprocess.run([str(engine.GODOT), "--path", str(source), "--script", "res://capture.gd",
                     "--display-driver", "x11", "--rendering-method", "gl_compatibility", "--audio-driver", "Dummy",
-                    "--windowed", "--resolution", args.size, "--position", "0,0", "--fixed-fps", "128", "--",
+                    "--windowed", "--resolution", args.size, "--position", "0,0", "--fixed-fps", str(args.movie_fps if args.movie else 128), *movie_arguments, "--",
                     "--r16-map=" + args.map, "--no-records", "--no-run-recordings", "--route=" + (args.route or "safe"),
                     "--evidence-dir=" + str(output)], env=env, cwd=source, stdout=log, stderr=subprocess.STDOUT,
                     timeout=max(180, options["seconds"] * 30))
         log_text = (output / "engine.log").read_text()
         if result.returncode or any(s in log_text for s in ("ERROR:", "SCRIPT ERROR:", "Parse Error")):
             raise RuntimeError(f"capture failed; read {output / 'engine.log'}\n{log_text[-2500:]}")
+    movie_info = inspect_movie(output) if args.movie else None
     frames = sorted(output.glob("frame-*.png"))
     contact_sheet.create(frames, output / "contact-sheet.png")
     (output / "capture.json").write_text(json.dumps({**options, "checkout": str(checkout),
-        "source_commit": provenance, "source_status": dirty, "engine_sha256": engine.EDITOR_SHA256, "renderer": "Compatibility / Mesa llvmpipe software",
+        "movie_info": movie_info, "source_commit": provenance, "source_status": dirty, "engine_sha256": engine.EDITOR_SHA256, "renderer": "Compatibility / Mesa llvmpipe software",
         "frames": [p.name for p in frames], "display": display}, indent=2) + "\n")
     print(output / "contact-sheet.png")
 
