@@ -4,12 +4,12 @@ const ROOF_MATERIAL := preload("res://scripts/art/mail_roof_material.gd")
 const ROOF_ID := "mail-roofs"
 const ROOF_ENTRY := {"name": "Mail Roofs", "theme": "Five slots. Your order.", "kind": "experiment", "experimental": true, "mail_delivery": true,
 	"runner": "res://scripts/movement/mail_roofs_runner.gd", "script": "res://scripts/maps/mail_roofs.gd", "reticle": true,
-	"instructions": "F2 bhop. Deliver all five in any order, then return to Dispatch. LMB throws, mouse steers, RMB recalls. Slot 03 needs a curved flight around the chimney. V view, B body, N goal; changes restart."}
+	"instructions": "F2 bhop. Required goal: all five slots in any order, then Dispatch. Optional goal: reach Dispatch without mail. LMB throws, mouse steers, RMB recalls. Slot 03 needs a curved flight around the chimney. V view, B body, N goal; changes restart."}
 
 func _init() -> void:
 	level_id = "r22-mail-roofs"
 	level_name = "Mail Roofs"
-	level_version = 2
+	level_version = 3
 	variant = ROOF_ID
 	spawn = Transform3D(Basis.IDENTITY, Vector3(0, 10.04, 12))
 	finish_position = Vector3(-7, 10, 12)
@@ -50,11 +50,21 @@ func build() -> void:
 	box("window_trim_top", Vector3(6, 12.5, -65.6), Vector3(2, 0.15, 0.15), Color("ded8c2"))
 	box("window_trim_bottom", Vector3(6, 11.5, -65.6), Vector3(2, 0.15, 0.15), Color("bc713e"))
 	box("window_number_board", Vector3(6, 14, -65.55), Vector3(2.5, 1.5, 0.1), Color("ded8c2"))
+	for side: int in [-1, 1]:
+		box("window_jamb_%d" % side, Vector3(6 + side * 0.9, 12, -65.5), Vector3(0.14, 1.14, 0.16), Color("ded8c2"))
 	label("window_number", Vector3(6, 14, -65.4), "03", 0.025)
 	# this founded chimney occludes the direct flight from the east approach to slot 03.
 	box("post_chimney", Vector3(3, 8, -70), Vector3(3.2, 24, 3), Color("53666a"))
 	box("post_chimney_cap", Vector3(3, 20.1, -70), Vector3(3.8, 0.35, 3.6), Color("ded8c2"))
 	box("flue_dark", Vector3(3, 20.29, -70), Vector3(2.4, 0.03, 2.2), Color("172d32"))
+	# one continuous wharf and its crane give the western sea edge a working-waterfront context.
+	box("post_harbour_wharf", Vector3(-78, -3, -28), Vector3(18, 6, 136), Color("53666a"))
+	box("post_harbour_store", Vector3(-81, 2, -28), Vector3(12, 10, 94), Color("53666a"))
+	box("harbour_store_roof", Vector3(-81, 7.15, -28), Vector3(13, 0.3, 95), Color("aaa897"))
+	for z: float in [-68, -35]:
+		box("post_harbour_crane_pier_%s" % z, Vector3(-72, 8, z), Vector3(1.1, 18, 1.1), Color("53666a"))
+	box("post_harbour_crane_beam", Vector3(-72, 17, -51.5), Vector3(1.8, 1.4, 35), Color("53666a"))
+	box("harbour_quay_edge", Vector3(-68.8, 0.12, -28), Vector3(0.3, 0.24, 136), Color("ded8c2"))
 	# a clock and open bell frame form the single skyline landmark.
 	box("post_tower", Vector3(0, 12, -85), Vector3(8, 32, 8), Color("ded8c2"))
 	box("tower_face", Vector3(0, 23.5, -80.9), Vector3(6.5, 6.5, 0.15), Color("ded8c2"))
@@ -94,6 +104,7 @@ func build() -> void:
 			box("gallery_window_%s_%s" % [side, z], Vector3(side * 19.96, 12, z), Vector3(0.08, 1.35, 1.5), Color("29464a"))
 	box("post_tower_link", Vector3(0, 15.7, -79.5), Vector3(5, 0.6, 3), Color("ded8c2"))
 	for mesh: MeshInstance3D in find_children("Mesh_deck_*", "MeshInstance3D", true, false):
+		mesh.name = "Mail_roof_" + str(mesh.name)
 		mesh.material_override = ROOF_MATERIAL.concrete(Color("53666a"), true)
 	for pattern: String in ["Mail_post_*", "Mail_seawall_*"]:
 		for mesh: MeshInstance3D in find_children(pattern, "MeshInstance3D", true, false):

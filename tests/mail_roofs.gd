@@ -42,6 +42,7 @@ func _begin() -> void:
 	step = 0
 	ticks = 0
 	steering = false
+	direct_blocked = false
 	events = []
 	observations = []
 	order = []
@@ -93,6 +94,14 @@ func _physics_process(_dt: float) -> bool:
 					assert(not hit.is_empty(), "chamber must block the direct delivery")
 					var inner_hit: Dictionary = runner._blocked(Vector3(6, 12, -66.4), target)
 					assert(not inner_hit.is_empty() and "chimney" in str(inner_hit.collider.name), "chimney must occlude the window-to-slot line")
+					assert(float(runner.settings.duck_hull_height) * runner.U > 0.8, "body must not fit through the envelope window")
+					for wx: float in [5.21, 6.79]:
+						for wy: float in [11.61, 12.39]:
+							for tx: float in [-1.09, 1.09]:
+								for ty: float in [11.21, 12.79]:
+									var corner_hit: Dictionary = runner._blocked(Vector3(wx, wy, -66.4), Vector3(tx, ty, -73.5))
+									assert(not corner_hit.is_empty() and "chimney" in str(corner_hit.collider.name), "a straight corner ray bypassed the chimney")
+					print("MAIL ROOFS chamber: 16 entry/target corner rays blocked; crouched body taller than window")
 					var straight := preload("res://scripts/mail/flight.gd").new()
 					straight.launch(start, (target - start).normalized())
 					while straight.active:
@@ -113,7 +122,7 @@ func _physics_process(_dt: float) -> bool:
 			_action("move_forward", true)
 	if game.finished:
 		assert(flight.delivered.size() == 5 and flight.misses == 0 and game.clean_eligible and game.session.actual_v_mismatches == 0)
-		assert(variant != 0 or direct_blocked)
+		assert(direct_blocked)
 		_action("move_forward", false)
 		if not out.is_empty():
 			var name := "clockwise" if variant == 0 else "counterclockwise"
