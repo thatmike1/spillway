@@ -1,15 +1,18 @@
 """Pinned Godot entry point shared by local development and verification."""
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 import fcntl
 import hashlib
 import os
 from pathlib import Path
 import subprocess
+import threading
 
 PROJECT = Path(__file__).resolve().parents[1]
 VERSION = "4.7.2.stable.official.ed1daf0bf"
 EDITOR_SHA256 = "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
 LOCK = Path("/tmp/spillway-r21-engine.lock")
+_THREAD_LOCK = threading.RLock()
+_lock_depth = 0
 DEFAULT_CACHE = Path.home() / ".local/share/foldrunner"
 GODOT = Path(os.environ.get("GODOT", DEFAULT_CACHE / "godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64"))
 TEMPLATES = Path(os.environ.get("GODOT_TEMPLATES", DEFAULT_CACHE / "godot-4.7.2-templates"))
@@ -31,10 +34,18 @@ def check_pin():
 
 @contextmanager
 def locked():
-    # all sibling capture and game processes share this lock on the build machine.
-    with LOCK.open("a") as stream:
-        fcntl.flock(stream, fcntl.LOCK_EX)
-        yield
+    global _lock_depth
+    # serialize threads; only the owning thread can reuse the outer file lease.
+    with _THREAD_LOCK, ExitStack() as lease:
+        if _lock_depth == 0:
+            # all sibling capture and game processes share this exact lock file.
+            stream = lease.enter_context(LOCK.open("a"))
+            fcntl.flock(stream, fcntl.LOCK_EX)
+        _lock_depth += 1
+        try:
+            yield
+        finally:
+            _lock_depth -= 1
 
 
 def environment(profile):
