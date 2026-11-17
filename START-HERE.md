@@ -49,6 +49,7 @@ Stable round-numbered aliases preserve resource paths used by recording identiti
 | Gantry / `gantry` | `maps/gantry.gd`, grapple player; F2 ground sections joined by fixed Arc transfers |
 | Mail Run / `mail-run` | `maps/mail_run.gd`, `movement/mail_runner.gd`; F2 with held or running envelope steering |
 | Sluice Six / `sluice-six` | `maps/sluice_six.gd`, course player; F2 settling piers, offset caps and spill tower |
+| Foundry / `foundry` | `maps/foundry.gd`, grapple player; continuous gallery, shaft shortcut and descending catch |
 | Shelved: Fall Line / `fall-line` | `r19_fall_line_level.gd`; retained as a catalog dependency, removed from the current menu |
 | Shelved: Line Drive / `line-drive` | `r19_line_drive_level.gd`, `r19_line_drive_player.gd`; retained dependency, removed from the current menu |
 

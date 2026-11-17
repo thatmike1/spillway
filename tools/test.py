@@ -48,6 +48,7 @@ def main():
         "tether_feedback_identity", "tether_feedback_audio", "registry_injection",
         "style_suspension", "tether_feedback_lens", "saltglass_art", "gantry_runner",
         "mail_flight", "mail_motor", "mail_courts", "mail_tape", "sluice_six_style",
+        "viaduct_presentation", "foundry_routes", "foundry_fork",
         "scripts/ui/pause_menu_checks.gd",
     ]
     if args.slow:
