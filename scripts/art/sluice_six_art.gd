@@ -33,8 +33,8 @@ static func dress(level: Node3D) -> void:
 	for side: int in [-1,1]:
 		_box(level,"bank_%d" % side,Vector3(side*19,-1,-74),Vector3(8,12,184),Color("687b7a"))
 		_box(level,"bank_cap_%d" % side,Vector3(side*19,5.1,-74),Vector3(8.2,0.25,184),Color("bcbdaa"))
-		_box(level,"tower_leg_%d" % side,Vector3(side*8,10,-154),Vector3(4,34,12),Color("7d8d87"))
-	_box(level,"tower_crown",Vector3(0,26,-154),Vector3(20,3,12),Color("c7c8b4"))
+		_box(level,"tower_leg_%d" % side,Vector3(side*8,10,level.finish_position.z-4),Vector3(4,34,12),Color("7d8d87"))
+	_box(level,"tower_crown",Vector3(0,26,level.finish_position.z-4),Vector3(20,3,12),Color("c7c8b4"))
 	for d: Dictionary in level.decks:
 		for z: float in [d.near,d.far]:
 			_box(level,"lip_%s_%s" % [d.id,z],Vector3(d.x,0.012,z),Vector3(d.width,0.025,0.12),Color("bd743f"))

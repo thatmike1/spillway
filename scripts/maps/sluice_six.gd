@@ -4,7 +4,7 @@ const GEO := preload("res://scripts/r19_course_geometry.gd")
 const ART := preload("res://scripts/art/sluice_six_art.gd")
 const LEVEL_ID := "r22-sluice-six"
 const LEVEL_NAME := "Sluice Six"
-const LEVEL_VERSION := 1
+const LEVEL_VERSION := 2
 const MAP_ID := "sluice-six"
 const MAP_ENTRY := {"name": LEVEL_NAME, "theme": "Tidal settling decks / pier rhythm / spill tower", "kind":"course", "script":"res://scripts/maps/sluice_six.gd"}
 var level_id := LEVEL_ID
@@ -13,9 +13,9 @@ var level_version := LEVEL_VERSION
 var variant := MAP_ID
 var spawn := Transform3D(Basis.IDENTITY, Vector3(0, 0.04, 6))
 var finish_title := "Spill tower"
-var finish_position := Vector3(0, 0, -150)
+var finish_position := Vector3(0, 0, -135)
 var finish_radius := 4.0
-var finish_bounds := AABB(Vector3(-7,-0.3,-158),Vector3(14,4,10))
+var finish_bounds := AABB(Vector3(-7,-0.3,-143),Vector3(14,4,10))
 var kill_bounds := AABB(Vector3(-36,-4,-180),Vector3(72,70,200))
 var checkpoints: Array[Dictionary] = []
 var segment_bounds: Array[AABB] = []
@@ -36,11 +36,13 @@ func build() -> void:
 	_deck("start", 0, 14, 10, -14, 0)
 	# three rooms share one tidal channel: broad, offset, then narrow on the spill approach.
 	for i: int in 14:
-		var near_z := -16.0 - i * 9.0
-		var width := 12.0 if i < 4 else (9.0 if i < 9 else 6.0)
-		var x := 0.0 if i < 4 else (1.5 if i % 2 == 0 else -1.5)
-		_deck("pier_%02d" % i, x, width, near_z, near_z - 6.5, mini(2, (i + 1) / 5))
-	_deck("tower_court", 0, 16, -142, -162, 3)
+		var near_z := -16.0 - i * 9.0 if i < 9 else -97.0 - (i - 9) * 6.0
+		var width := 12.0 if i < 4 else (9.0 if i < 9 else 3.2512)
+		var offset := 1.5 if i < 9 else 0.8
+		var x := 0.0 if i < 4 else (offset if i % 2 == 0 else -offset)
+		var length := 6.5 if i < 9 else 3.2512
+		_deck("pier_%02d" % i, x, width, near_z, near_z - length, mini(2, (i + 1) / 5))
+	_deck("tower_court", 0, 16, -127, -147, 3)
 	for i: int in range(1, decks.size()):
 		var a: Dictionary = decks[i-1]
 		var b: Dictionary = decks[i]
@@ -51,7 +53,7 @@ func build() -> void:
 		if i == 0:
 			pose = spawn
 		checkpoints.append({"pose":pose,"title":["Settling apron","Offset piers","Spill race","Tower court"][checkpoints.size()],"bounds":AABB(Vector3(d.x-d.width/2,-0.3,d.far),Vector3(d.width,4,d.near-d.far))})
-	routes = {"basic":[spawn.origin,Vector3(0,0,-40),Vector3(1.5,0,-70),Vector3(-1.5,0,-110),finish_position],"fast":[spawn.origin,Vector3(0,0,-135),finish_position]}
+	routes = {"basic":[spawn.origin,Vector3(0,0,-40),Vector3(1.5,0,-70),Vector3(-1.5,0,-110),finish_position],"fast":[spawn.origin,Vector3(0,0,-120),finish_position]}
 	ART.dress(self)
 
 func _deck(id: String, x: float, width: float, near_z: float, far_z: float, stage: int) -> void:
@@ -63,7 +65,7 @@ func _deck(id: String, x: float, width: float, near_z: float, far_z: float, stag
 func is_finish_at(feet: Vector3) -> bool:
 	return finish_bounds.has_point(feet)
 func segment_at(feet: Vector3) -> int:
-	if feet.z < -142:
+	if feet.z < -127:
 		return 3
 	if feet.z < -97:
 		return 2
