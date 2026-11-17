@@ -62,8 +62,8 @@ func run() -> void:
 		wish = wish.normalized()
 		var forward := Vector3(-sin(player.yaw),0,-cos(player.yaw))
 		var right := Vector3(cos(player.yaw),0,-sin(player.yaw))
-		var f := wish.dot(forward)
-		var s := wish.dot(right)
+		var f := clampf(wish.dot(forward),-1.0,1.0)
+		var s := clampf(wish.dot(right),-1.0,1.0)
 		var hold: bool = bay < 3
 		# one released tick between bays lets the production fresh-press guard rearm.
 		if bay > 0 and not player.grapple.is_empty() and player.grapple.position != LEVEL.V_ANCHORS[mini(bay,2)]:

@@ -33,6 +33,7 @@ func replay(tape_path: String) -> bool:
 	player.set_process_unhandled_input(false)
 	game.restart_run("restart")
 	var identity: Dictionary = game.motion_identity()
+	var law: String = player.r21_law_sha256()
 	var cursor := 0
 	var ticks := 0
 	await physics_frame
@@ -46,7 +47,7 @@ func replay(tape_path: String) -> bool:
 		if game.finished or cursor == events.size():
 			break
 		await physics_frame
-	var ok: bool = game.startup_error.is_empty() and game.finished and game.finish_kind == "clean" and game.checkpoint_index == 3 and game.respawn_count == 0 and identity.map == "viaduct" and player.model == "elastic-arc"
+	var ok: bool = game.startup_error.is_empty() and game.finished and game.finish_kind == "clean" and game.checkpoint_index == 3 and game.respawn_count == 0 and identity.map == "viaduct" and player.model == "elastic-arc" and game.motion_identity() == identity and player.r21_law_sha256() == law
 	print("VIADUCT LIVE HOST ",ok," ticks=",ticks," finish=",game.finish_kind," checkpoint=",game.checkpoint_index," respawns=",game.respawn_count," map=",identity.map," model=",player.model," course=",identity.course_key," geometry-version=",game.level.level_version)
 	game.request_quit(0)
 	game.free()
