@@ -76,6 +76,8 @@ func run() -> void:
 		check(not screen.practice_button.disabled, "matching map enables practice action")
 		screen.practice_button.pressed.emit()
 		check(requested[0].get("stage") == 1, "practice action requests largest-loss start checkpoint")
+		check(screen.practice_button.text.contains("Checkpoint 1 to Checkpoint 2"), "practice button names its fixed largest-loss target")
+		check(screen.message.text.contains("44.602 s") and screen.attempts.get_item_text(screen._marked_best).begins_with("Best"), "personal best is recognizable in header and list")
 		var other := MODEL.load_attempt("res://tests/fixtures/original-map-parity/whiteout-crouch/old/runs/golden.r16run")
 		screen.attach_map(source, other.identity)
 		check(screen.trace.visible and screen.splits.visible and not screen.stage.visible, "valid to unavailable restores analysis")
@@ -110,10 +112,18 @@ func run() -> void:
 		check(screen.attempts.get_item_text(partial_index).contains("incomplete"), "partial status is visible")
 		screen.select_attempt(partial_index)
 		check(screen.attempts.get_selected_items()[0] == partial_index, "selected row matches displayed incomplete state")
+		check(not screen.follow.visible and not screen.follow.button_pressed, "incomplete state has no active-looking follow switch")
 		check(not screen.trace.visible and not screen.splits.visible and not screen.stage.visible and screen.practice_button.disabled, "incomplete attempt never shows stale analysis or practice")
-		check(screen.message.text.contains("Choose a sealed attempt"), "incomplete state explains recovery")
+		check(screen.message.text.contains("Select a finish or restart"), "incomplete state explains recovery")
 		screen.select_attempt(selected)
 		check(screen.trace.visible and screen.splits.visible, "valid selection restores analysis after incomplete file")
+	var window_size := root.size
+	root.size = Vector2i(960, 640)
+	await process_frame
+	await process_frame
+	check(screen.attempts.get_theme_font_size("font_size") >= 18, "resize retains readable compact type")
+	root.size = window_size
+	await process_frame
 	check(inventory(folder) == before, "review leaves recording folder byte-identical")
 	var close_seen: Array[bool] = [false]
 	screen.closed.connect(func() -> void: close_seen[0] = true)

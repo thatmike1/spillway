@@ -5,7 +5,7 @@ const READER := preload("res://scripts/recordings/reader.gd")
 static func load_attempt(path: String) -> Dictionary:
 	var run := READER.read(path, true)
 	if not run.ok:
-		var reason := "This recording is incomplete or was interrupted. Choose a sealed attempt to compare." if run.status in ["partial", "aborted", "sealed-unrenamed"] else "This recording is damaged or unreadable. Choose another attempt."
+		var reason := "Incomplete recording. Select a finish or restart attempt, or play a new attempt." if run.status in ["partial", "aborted", "sealed-unrenamed"] else "This recording is damaged or unreadable. Choose another attempt."
 		return {"ok": false, "error": reason, "status": run.status}
 	if not run.header.get("identity") is Dictionary:
 		return {"ok": false, "error": "The recording has no motion identity."}
@@ -143,12 +143,16 @@ static func practice_request(pair: Dictionary) -> Dictionary:
 
 
 static func attempt_label(entry: Dictionary) -> String:
-	var created := float(entry.get("created", 0.0))
-	var stamp := "Unknown time"
-	if created > 0:
-		stamp = Time.get_datetime_string_from_unix_time(int(created), true) + ".%03dZ" % int(floorf((created - floorf(created)) * 1000.0))
+	var stamp := recorded_time(entry.get("created", 0.0))
 	var status: String = str(entry.outcome.get("kind", "complete")) if entry.ok else {"partial": "incomplete", "aborted": "aborted", "sealed-unrenamed": "not finalized"}.get(entry.status, "damaged")
 	var detail := " %.3f s" % float(entry.outcome.time) if entry.ok and entry.outcome.get("kind") == "finish" and (entry.outcome.get("time") is float or entry.outcome.get("time") is int) else ""
 	var preset := str(entry.identity.get("preset", ""))
 	preset = {"server128": "F2", "server128_aa1000": "F5"}.get(preset, preset)
 	return "%s / %s · %s%s · %s" % [entry.identity.get("map", "Unknown map"), preset, status, detail, stamp]
+
+
+static func recorded_time(value: Variant) -> String:
+	if not (value is float or value is int) or not is_finite(float(value)) or float(value) <= 0 or float(value) >= 253402300799.0:
+		return "Unknown time"
+	var created := float(value)
+	return Time.get_datetime_string_from_unix_time(int(created), true) + ".%03dZ" % int(floorf((created - floorf(created)) * 1000.0))

@@ -24,7 +24,7 @@ Instantiate `scripts/ui/run_review.gd` in the paused menu. Set `directory` befor
 
 The callout names the individual segment with the largest positive loss, rather than the largest cumulative gap. If no completed segment lost time, it says so. An unfinished tail has no loss attributed to it.
 
-The optional `attach_map(host.level, host.motion_identity())` API enables Follow camera. The preview uses an independent World3D with MeshInstance3D and MultiMeshInstance3D copies of the current map, shared immutable mesh/material resources, its own lighting, and two nonphysical capsule ghosts. No source scripts, collisions or player are copied. It interpolates recorded feet on the common course clock, holds each endpoint outside its recorded interval, and follows the selected attempt. Teal is the attempt, rust the best. Other recording identities remain available in the split/speed view and receive an explanation in the 3D view. This choice avoids displaying an old recording against a map rebuilt with different geometry.
+The optional `attach_map(host.level, host.motion_identity())` API enables Follow camera. The preview uses an independent World3D with MeshInstance3D and MultiMeshInstance3D copies of the current map, shared immutable mesh/material resources, its own lighting, and two nonphysical capsule ghosts. No source scripts, collisions or player are copied. It interpolates recorded feet on the common course clock, holds each endpoint outside its recorded interval, and follows the explicitly selected Attempt or Personal best target. Teal is the attempt, rust the best. Other recording identities remain available in the split/speed view and receive an explanation in the 3D view. This choice avoids displaying an old recording against a map rebuilt with different geometry.
 
 Godot's [Viewport reference](https://docs.godotengine.org/en/stable/classes/class_viewport.html) describes independent viewport worlds. The [MeshInstance3D reference](https://docs.godotengine.org/en/stable/classes/class_meshinstance3d.html) defines material lookup used for the render-only map copies.
 
@@ -38,7 +38,7 @@ At course time zero the preview holds the last recorded pre-start feet, matching
 
 ## Practise the largest-loss segment
 
-The largest-loss callout offers `Practise this segment` when the loaded map, layout and movement identity match. The screen emits `practice_requested(request)`; the pause-menu owner closes review and restores host input before calling `scripts/recordings/run_review_practice.gd.start(game, request)`. A refusal keeps the game paused and explains the missing map, checkpoint or PB recording.
+The largest-loss callout offers `Practise largest loss: <checkpoint interval>` when the loaded map, layout and movement identity match. The screen emits `practice_requested(request)`; the pause-menu owner closes review and restores host input before calling `scripts/recordings/run_review_practice.gd.start(game, request)`. A refusal keeps the game paused and explains the missing map, checkpoint or PB recording.
 
 The helper validates the PB with the existing production ghost loader and calls `practise_stage()` once. The player uses the authored checkpoint pose and existing zero-speed start. A temporary production ghost follows the PB's recorded checkpoint entry time, then holds the next checkpoint or finish pose. Restart, a different identity or finish retires it. Ghost preferences are preserved. The host's existing recorder creates an ordinary ineligible practice attempt; the reviewed recordings and bests stay unchanged. No recording schema is added.
 
@@ -47,3 +47,5 @@ Attempt rows include a recorded UTC timestamp, movement preset and finish/restar
 Follow view has an explicit Attempt/Personal best camera selector. If the loaded map identity is incompatible, the requested follow state explains why while preserving the valid chart, split table and scrubber.
 
 `python3 tests/test_run_review_capture.py --matrix --out /absolute/new/external/folder` requires a clean source commit and captures five static states at 1280×720 and 960×640: analysis, following attempt, following best, a real host map switch to unavailable Whiteout, and an incomplete attempt. Recording-copy hashes are checked within the capture harness. This complements the separate host practice and menu-input checks.
+
+At compact window widths the viewer raises its logical body and table type sizes to counter the project canvas scaling. The matching best is marked in the attempt list and identified by finish time and UTC date above the comparison. Incomplete recordings hide follow and practice controls and explain which completed attempt to select.

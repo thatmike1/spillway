@@ -28,6 +28,9 @@ var _map_identity := {}
 var scanning := false
 var _scan := {}
 var _follow_mode := false
+var _compact := false
+var _readability_ready := false
+var _marked_best := -1
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -85,7 +88,7 @@ func _ready() -> void:
 	_details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	columns.add_child(_details)
 	legend = Label.new()
-	legend.text = "Speed over time (m/s)   •   Teal: attempt   •   Rust: personal best"
+	legend.text = "Speed (m/s)   •   Attempt: teal   •   Best: rust"
 	_details.add_child(legend)
 	follow = CheckButton.new()
 	follow.text = "Follow camera"
@@ -139,15 +142,19 @@ func _ready() -> void:
 		_update_view_visibility())
 	if is_instance_valid(_map_source):
 		stage.attach_map(_map_source, _map_identity)
+	get_window().size_changed.connect(_apply_readability)
+	_apply_readability()
 	refresh()
 	close.grab_focus()
 
 func refresh() -> void:
 	comparison = {}
+	_mark_best()
 	practice_button.disabled = true
 	practice_note.visible = false
 	practice_button.tooltip_text = "Choose a comparable attempt with a completed segment first."
 	stage.clear()
+	_marked_best = -1
 	entries.clear()
 	attempts.clear()
 	splits.clear()
@@ -187,9 +194,9 @@ func _finish_list() -> void:
 func select_attempt(index: int) -> void:
 	attempts.select(index)
 	comparison = {}
+	_mark_best()
 	practice_note.visible = false
 	practice_button.disabled = true
-	practice_note.visible = false
 	practice_button.tooltip_text = "Choose a comparable attempt with a completed segment first."
 	stage.clear()
 	stage.visible = false
@@ -209,7 +216,8 @@ func select_attempt(index: int) -> void:
 	if not comparison.ok:
 		message.text = comparison.error
 		return
-	message.text = "Compared with %s. Positive time means slower; unfinished attempts show only reached checkpoints." % best.path.get_file()
+	_mark_best()
+	message.text = "Personal best: %.3f s · %s. Positive time means slower." % [best.duration, MODEL.recorded_time(best.run.header.get("created_unix", 0.0))]
 	message.text += "\n" + MODEL.biggest_loss(comparison)
 	_load_preview()
 	var root := splits.create_item()
@@ -248,19 +256,20 @@ func attach_map(source: Node3D, identity: Dictionary) -> void:
 
 func _load_preview() -> void:
 	var why: String = stage.load_pair(comparison)
-	view_note.text = why if not why.is_empty() else ""
+	view_note.text = why + " Back to the pause menu, then Maps, to load the matching map and preset." if not why.is_empty() else ""
 	if why.is_empty(): _update_follow_note()
 	_update_view_visibility()
 	_update_practice_action()
 
 func _update_practice_action() -> void:
 	var request := MODEL.practice_request(comparison)
+	practice_button.text = "Practise largest loss: " + str(request.label) if request.ok else "Practise largest loss"
 	practice_button.disabled = not request.ok or not MODEL.READER.identity_matches(request.get("identity", {}), _map_identity).is_empty()
 	practice_note.visible = request.ok and practice_button.disabled
 	if practice_note.visible:
 		var preset := str(request.identity.get("preset", ""))
 		preset = {"server128": "F2", "server128_aa1000": "F5"}.get(preset, preset)
-		practice_note.text = "Practice needs %s / %s with its recorded layout. Current map: %s." % [str(request.identity.get("map", "")).replace("-", " ").capitalize(), preset, str(_map_identity.get("map", "unavailable")).replace("-", " ").capitalize()]
+		practice_note.text = "Back to the pause menu, then Maps: load %s / %s with its recorded layout. Current: %s." % [str(request.identity.get("map", "")).replace("-", " ").capitalize(), preset, str(_map_identity.get("map", "unavailable")).replace("-", " ").capitalize()]
 	practice_button.tooltip_text = "Start a normal practice attempt at %s with the best ghost. Existing recordings stay unchanged." % request.get("label", "") if not practice_button.disabled else (str(request.error) if not request.ok else "Load the matching map, movement preset and layout to practise this segment.")
 
 func _style_data_control(control: Control) -> void:
@@ -285,8 +294,44 @@ func _update_view_visibility() -> void:
 	legend.visible = valid and not showing_follow
 	scrubber.visible = valid
 	clock.visible = valid
+	follow.visible = valid
+	practice_button.visible = valid
+	if not valid:
+		_follow_mode = false
+		follow.set_pressed_no_signal(false)
+	follow.text = "Follow camera" if stage.tracks.size() == 2 else "Follow camera (unavailable)"
 	follow.disabled = not valid
 	view_note.visible = valid and _follow_mode
 
 func _update_follow_note() -> void:
 	view_note.text = "Following %s. Teal: attempt; rust: personal best. Switch targets if the other ghost is ahead, behind or hidden by scenery." % ("the attempt" if stage.follow_target == 0 else "the personal best")
+
+func _mark_best() -> void:
+	if _marked_best >= 0 and _marked_best < entries.size() and _marked_best < attempts.item_count:
+		attempts.set_item_text(_marked_best, MODEL.attempt_label(entries[_marked_best]))
+	_marked_best = -1
+	if not comparison.get("ok", false): return
+	for i: int in entries.size():
+		if entries[i].path == comparison.best.path:
+			attempts.set_item_text(i, MODEL.attempt_label(entries[i]).replace(str(entries[i].identity.get("map", "Unknown map")) + " / ", "Best / "))
+			_marked_best = i
+			break
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_RESIZED and attempts != null and trace != null:
+		_apply_readability()
+
+func _apply_readability() -> void:
+	var compact := get_window().size.x < 1100
+	if _readability_ready and compact == _compact: return
+	_readability_ready = true
+	_compact = compact
+	var body_size := 19 if compact else 15
+	theme.default_font_size = body_size
+	for type: String in ["Button", "OptionButton", "CheckButton", "Tree"]:
+		theme.set_font_size("font_size", type, body_size)
+	theme.set_font_size("title_button_font_size", "Tree", body_size)
+	attempts.add_theme_font_size_override("font_size", 19 if compact else 14)
+	attempts.custom_minimum_size.x = 560 if compact else 430
+	trace.font_size = 18 if compact else 13
+	trace.queue_redraw()
