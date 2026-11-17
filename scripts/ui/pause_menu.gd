@@ -182,6 +182,7 @@ func _open_run_review() -> void:
 	review_host_input = game.is_processing_input()
 	game.set_process_input(false)
 	review_screen = RUN_REVIEW.new()
+	review_screen.spatial_unavailable_reason = RUN_REVIEW_PRACTICE.unavailable_reason(game)
 	if not str(game.session.directory).is_empty():
 		review_screen.set("directory", str(game.session.directory))
 	pause_panel.add_child(review_screen)

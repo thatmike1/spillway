@@ -17,7 +17,8 @@ pose = out.parent / (out.name + "-placeholder-pose.json")
 pose.parent.mkdir(parents=True, exist_ok=True)
 pose.write_text('[{"position":[0,0,0]}]\n')
 # preserve shot.main's pin, snapshot, locks, private display and cleanup.
-shot.HARNESS = (engine.PROJECT / "scripts/ui/planner_menu_checks.gd").read_text()
+shot.HARNESS = (engine.PROJECT / "scripts/ui/planner_menu_checks.gd").read_text().replace(
+    "res://tests/fixtures/", str(engine.PROJECT / "tests/fixtures") + "/")
 sys.argv = ["shot.py", "--checkout", str(engine.PROJECT), "--map", "plan-yard",
             "--poses", str(pose), "--size", "1920x1080", "--seconds", ".1",
             "--every", ".1", "--out", str(out)]

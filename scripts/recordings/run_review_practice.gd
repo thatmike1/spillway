@@ -10,11 +10,29 @@ var pb_start := 0.0
 var pb_end := 0.0
 var identity := {}
 
+static func unavailable_reason(host: Node) -> String:
+	if not is_instance_valid(host):
+		return "3D review and segment practice are unavailable until the course is ready."
+	var runner: Variant = host.get("player")
+	if not runner is Node or not is_instance_valid(runner):
+		return "3D review and segment practice are unavailable until the course is ready."
+	if runner.has_method("run_review_unavailable_reason"):
+		var reason: Variant = runner.call("run_review_unavailable_reason")
+		return reason if reason is String else "3D review and segment practice are unavailable in this mode."
+	if host.has_method("motion_identity"):
+		var identity: Variant = host.call("motion_identity")
+		if identity is Dictionary and str(identity.get("map", "")).begins_with("plan-yard"):
+			return "Plan Yard supports split and speed review only in this build. Use its planning controls."
+	return ""
+
 static func start(host: Node, request: Dictionary) -> Dictionary:
 	if not is_instance_valid(host) or not host.has_method("practise_stage") or not host.has_method("motion_identity"):
 		return {"ok": false, "error": "Practice is unavailable in this host."}
 	if not bool(host.get("paused")):
 		return {"ok": false, "error": "Open the paused run review before practising a segment."}
+	var unavailable := unavailable_reason(host)
+	if not unavailable.is_empty():
+		return {"ok": false, "error": unavailable}
 	if not request.get("ok", false) or not request.get("identity") is Dictionary:
 		return {"ok": false, "error": "Choose a completed segment with time lost first."}
 	var why := READER.identity_matches(request.identity, host.call("motion_identity"))
