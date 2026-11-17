@@ -40,8 +40,11 @@ static func dress(level: Node3D) -> void:
 		level._box("Art_quay_cap_%s" % x, Vector3(x, 3.94, -42), Vector3(5, 0.16, 138), Color("8f9e95"))
 		level._box("Art_rail_%s" % x, Vector3(x, 4.1, -42), Vector3(0.18, 0.17, 138), Color("263d45"))
 		level._box("Art_crane_run_%s" % x, Vector3(x, 15.1, -45), Vector3(0.7, 0.7, 48.7), Color("29464a"))
+	var paint := StandardMaterial3D.new()
+	paint.albedo_color = Color("cf7746")
+	paint.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	var metal := StandardMaterial3D.new()
-	metal.albedo_color = Color("3a5357")
+	metal.albedo_color = Color("849a98")
 	metal.roughness = 0.92
 	for i: int in level.ANCHORS.size():
 		var at: Vector3 = level.ANCHORS[i]
@@ -51,7 +54,8 @@ static func dress(level: Node3D) -> void:
 		# cross-bearings connect each casting to the crane quays, below the route top.
 		GEO.prism(level, "bearing_%d_%d" % [pad.stage, pad.index], GEO.rectangle(-13.4, 13.4, pad.far + 0.15, pad.near - 0.15, 3.15), 2.55, -1, "structure", "gantry_bearing")
 		if pad.index == -1 and pad.stage > 0:
-			level._box("Art_paint_orange_receiver_%d" % pad.stage, Vector3(0, 4.025, pad.near - 0.08), Vector3(level.HALF_WIDTH * 2, 0.035, 0.16), Color("b5683c"))
+			level._box("Art_paint_orange_receiver_%d" % pad.stage, Vector3(0, 4.009, pad.near - 0.2), Vector3(level.HALF_WIDTH * 2, 0.012, 0.45), Color("b5683c"))
+			level._box("Art_paint_orange_receiver_face_%d" % pad.stage, Vector3(0, 3.85, pad.near + 0.015), Vector3(level.HALF_WIDTH * 2, 0.28, 0.025), Color("b5683c"))
 		for x: float in [pad.x0, pad.x1]:
 			level._box("Art_ink_edge_%d_%d_%s" % [pad.stage, pad.index, x], Vector3(x, 4.016, (pad.far + pad.near) / 2), Vector3(0.035, 0.018, pad.near - pad.far), Color("405358"))
 		level._box("Art_bearing_joint_%d_%d" % [pad.stage, pad.index], Vector3(0, 3.2, pad.near + 0.014), Vector3(level.HALF_WIDTH * 2 - 0.06, 0.035, 0.025), Color("354e52"))
@@ -60,6 +64,8 @@ static func dress(level: Node3D) -> void:
 			node.material_override = concrete
 		if node is MeshInstance3D and str(node.name).begins_with("Mesh_gantry_bearing"):
 			node.material_override = metal
+		if node is MeshInstance3D and str(node.name).begins_with("Art_paint_orange_receiver"):
+			node.material_override = paint
 
 	var stroke := RopeStroke.new()
 	stroke.name = "GantryRopeStroke"
