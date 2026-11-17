@@ -386,5 +386,5 @@
    "reason": "albedo screening only (no full sets): noisy, beige, too dark, blotchy or paver-patterned"
   }
  ],
- "evidence": "outside Git: /home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r13/material-kit/"
+ "evidence": "R13 material screening evidence included albedo comparisons, running-view pixel-shift measurements and licence/API-terms snapshots with checksums; this evidence is not retained in the repository."
 }

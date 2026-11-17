@@ -48,6 +48,8 @@ func run() -> void:
 		root.add_child(game)
 		game.set_physics_process(false)
 		check(game.startup_error.is_empty(), "new map starts: " + id)
+		check(game.map_registry == BASE.make(), "legacy startup registry remains stable: " + id)
+		check(id in game.map_ids() and game.maps.catalog.has(id), "live menu includes the new map: " + id)
 		if is_instance_valid(game.player):
 			game.player.set_physics_process(false)
 			var identity: Dictionary = game.motion_identity()
