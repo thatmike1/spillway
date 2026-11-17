@@ -1355,13 +1355,16 @@ func _load_settings() -> void:
 	if not persist:
 		profile_state = "off"
 		return
-	var config := ConfigFile.new()
-	if config.load(profile_path) == OK:
-		profile_state = "loaded"
+	var loaded := preload("res://scripts/persistence/profile_store.gd").new().read_profile(profile_path)
+	var config: ConfigFile = loaded.config
+	if loaded.error == OK and loaded.state != "new":
+		profile_state = loaded.state
 		for key: String in settings:
 			settings[key] = _setting_value(key, config.get_value("settings", key, settings[key]))
 		return
-	profile_state = "new"
+	profile_state = loaded.state
+	if loaded.error != OK:
+		return
 	if not seed_from_r15 or FileAccess.file_exists(profile_path):
 		return
 	# first launch seeds only r15 look settings; old records are never read or written.
@@ -1378,9 +1381,10 @@ func _load_settings() -> void:
 func _load_records() -> void:
 	if not persist:
 		return
-	var config := ConfigFile.new()
-	if config.load(profile_path) != OK:
+	var loaded := preload("res://scripts/persistence/profile_store.gd").new().read_profile(profile_path)
+	if loaded.error != OK:
 		return
+	var config: ConfigFile = loaded.config
 	_load_style_and_ghost(config)
 	var section := _section()
 	if not config.has_section(section):
@@ -1515,9 +1519,11 @@ func _save() -> void:
 	last_save_ok = false
 	if not persist:
 		return
-	var config := ConfigFile.new()
-	# keep every other key's records; only this key's section is rewritten.
-	config.load(profile_path)
+	var loaded := preload("res://scripts/persistence/profile_store.gd").new().read_profile(profile_path)
+	if loaded.error != OK:
+		profile_state = "unreadable; original preserved"
+		return
+	var config: ConfigFile = loaded.config
 	config.set_value("profile", "format", PROFILE_FORMAT)
 	config.set_value("profile", "build", BUILD_ID)
 	for key: String in settings:
@@ -1577,17 +1583,6 @@ func _save() -> void:
 		push_warning("r16: " + text)
 		hud.call("notify", text)
 
-## p / a whole new file beside the old one, then a rename over it, so a crash mid-write never
-## leaves a half profile. a platform that refuses the rename gets a direct save instead.
+## preserves the previous good profile; replacement errors never use a direct overwrite.
 func _write_config(config: ConfigFile) -> Error:
-	var target := ProjectSettings.globalize_path(profile_path)
-	var temp := target + ".tmp"
-	var error := config.save(temp)
-	if error != OK:
-		DirAccess.remove_absolute(temp)
-		return error
-	error = DirAccess.rename_absolute(temp, target)
-	if error != OK:
-		DirAccess.remove_absolute(temp)
-		error = config.save(target)
-	return error
+	return preload("res://scripts/persistence/profile_store.gd").new().write_profile(profile_path, config)
