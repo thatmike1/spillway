@@ -49,7 +49,7 @@ func run() -> void:
 			var command := {"forward":1.0,"side":0.0,"yaw":0.0,"jump":jump}
 			if player.is_grounded():
 				air_tick = 0
-			if fast and not player.is_grounded():
+			if fast and not player.is_grounded() and Vector2(player.velocity.x,player.velocity.z).length() > 3.0:
 				command.forward = 0.0
 				if Vector2(player.velocity.x,player.velocity.z).length() < 8.0 or air_tick % 2 == 1:
 					if air_tick % 2 == 0:
