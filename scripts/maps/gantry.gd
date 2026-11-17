@@ -6,7 +6,7 @@ const GEO := preload("res://scripts/r19_course_geometry.gd")
 const RUNNER := preload("res://scripts/r21_tether_player.gd")
 const LEVEL_ID := "r22-gantry"
 const LEVEL_NAME := "Gantry"
-const LEVEL_VERSION := 1
+const LEVEL_VERSION := 2
 const DECK_HEIGHTS := [4.0, 4.0, 4.0]
 const MAP_ID := "gantry"
 const MAP_ENTRY := {"name": LEVEL_NAME, "theme": "Build a hop line; carry it through the crane slots", "kind": "experiment",
@@ -14,7 +14,11 @@ const MAP_ENTRY := {"name": LEVEL_NAME, "theme": "Build a hop line; carry it thr
 	"reticle": true, "grapple": true, "tether_model": "elastic-arc", "key_hint": " · Space hops · LMB swing · RMB reel",
 	"instructions": "Build speed on the pale aprons with Space and air strafing. Hold LMB at a ring across each water slot. RMB reels; release to land and hop again. Arc rope law."}
 const ANCHORS := [Vector3(0, 14, -21), Vector3(0, 14, -69)]
-const DECKS := [[-8.0, 8.0, -12.0, 24.0], [-8.0, 8.0, -60.0, -30.0], [-8.0, 8.0, -108.0, -78.0]]
+const HALF_WIDTH := 6.5024
+const HOP_PAD := 1.6256
+const HOP_GAP := 1.6256
+const PAD_COUNTS := [9, 7, 7]
+const DECKS := [[-HALF_WIDTH, HALF_WIDTH, -12.0, 24.0], [-HALF_WIDTH, HALF_WIDTH, -60.0, -30.0], [-HALF_WIDTH, HALF_WIDTH, -108.0, -78.0]]
 var level_id := LEVEL_ID
 var level_name := LEVEL_NAME
 var level_version := LEVEL_VERSION
@@ -36,6 +40,7 @@ var prisms: Array[Dictionary] = []
 var art_manifest: Array = []
 var jump_gaps: Array[Dictionary] = []
 var routes: Dictionary = {}
+var hop_pads: Array[Dictionary] = []
 var _built := false
 
 func build() -> void:
@@ -44,12 +49,18 @@ func build() -> void:
 	_built = true
 	for i: int in DECKS.size():
 		var d: Array = DECKS[i]
-		GEO.deck(self, "apron_%d" % i, d[0], d[1], d[2], d[3], 4, i)
+		var count: int = PAD_COUNTS[i]
+		var apron_far: float = d[2] + count * (HOP_PAD + HOP_GAP)
+		_pad(i, -1, d[0], d[1], apron_far, d[3])
+		var near: float = apron_far - HOP_GAP
+		for j: int in count:
+			_pad(i, j, d[0], d[1], near - HOP_PAD, near)
+			jump_gaps.append({"label": "gantry-hop-%d-%d" % [i, j], "edge": Vector3(0, 4, near + HOP_GAP), "land": Vector3(0, 4, near), "recovery": "restart or checkpoint"})
+			near -= HOP_PAD + HOP_GAP
 		var pose := spawn if i == 0 else Transform3D(Basis.IDENTITY, Vector3(0, 4.04, d[3] - 3))
 		checkpoints.append({"pose": pose, "title": ["Runway", "Transfer apron", "Dispatch"][i],
 			"bounds": AABB(Vector3(d[0], 3.8, d[2]), Vector3(d[1] - d[0], 2, d[3] - d[2]))})
-		_box("Art_paint_orange_lip_%d" % i, Vector3(0, 4.025, d[2] + 0.12), Vector3(16, 0.035, 0.20), Color("b5683c"))
-		_box("Art_pier_%d" % i, Vector3(0, -0.5, (d[2] + d[3]) * 0.5), Vector3(15.8, 8.2, d[3] - d[2] - 0.2), Color("405b5d"))
+		_box("Art_paint_orange_lip_%d" % i, Vector3(0, 4.025, d[2] + 0.12), Vector3(HALF_WIDTH * 2, 0.035, 0.20), Color("b5683c"))
 	for i: int in ANCHORS.size():
 		_anchor(i, ANCHORS[i])
 	_environment()
@@ -60,6 +71,10 @@ func build() -> void:
 	routes["advanced"] = routes.basic
 	for i: int in 2:
 		jump_gaps.append({"label": "gantry-slot-%d" % i, "edge": Vector3(0, 4, DECKS[i][2]), "land": Vector3(0, 4, DECKS[i + 1][3]), "recovery": "restart or checkpoint"})
+
+func _pad(stage: int, index: int, x0: float, x1: float, far: float, near: float) -> void:
+	GEO.prism(self, "apron_%d_pad_%d" % [stage, index], GEO.rectangle(x0, x1, far, near, 4), -5, stage, "route")
+	hop_pads.append({"stage": stage, "index": index, "x0": x0, "x1": x1, "far": far, "near": near})
 
 func _anchor(index: int, at: Vector3) -> void:
 	var anchor := Node3D.new()

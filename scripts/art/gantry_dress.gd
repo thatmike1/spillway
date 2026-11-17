@@ -33,12 +33,10 @@ static func dress(level: Node3D) -> void:
 		level._box("Art_quay_cap_%s" % x, Vector3(x, 3.94, -42), Vector3(5, 0.16, 138), Color("b5b5a3"))
 		level._box("Art_rail_%s" % x, Vector3(x, 4.1, -42), Vector3(0.18, 0.17, 138), Color("263d45"))
 		level._box("Art_crane_run_%s" % x, Vector3(x, 15.1, -45), Vector3(0.7, 0.7, 48.7), Color("29464a"))
-	for i: int in level.DECKS.size():
-		var deck: Array = level.DECKS[i]
-		for x: float in [-7.98, 7.98]:
-			level._box("Art_ink_edge_%d_%s" % [i, x], Vector3(x, 4.016, (deck[2] + deck[3]) / 2), Vector3(0.035, 0.018, deck[3] - deck[2]), Color("405358"))
-		# receiving edges stay pale; a dark vertical fascia separates them from water.
-		level._box("Art_fascia_%d" % i, Vector3(0, 3.63, deck[3] + 0.012), Vector3(16, 0.7, 0.025), Color("29464a"))
+	for pad: Dictionary in level.hop_pads:
+		for x: float in [pad.x0, pad.x1]:
+			level._box("Art_ink_edge_%d_%d_%s" % [pad.stage, pad.index, x], Vector3(x, 4.016, (pad.far + pad.near) / 2), Vector3(0.035, 0.018, pad.near - pad.far), Color("405358"))
+		level._box("Art_paint_orange_hop_%d_%d" % [pad.stage, pad.index], Vector3(0, 4.018, pad.far + 0.05), Vector3(level.HALF_WIDTH * 2, 0.025, 0.10), Color("b5683c"))
 	for node in level.get_children():
 		if node is MeshInstance3D and str(node.name).begins_with("Mesh_deck"):
 			node.material_override = concrete

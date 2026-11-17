@@ -5,9 +5,11 @@ const RUNNER := preload("res://scripts/movement/grapple_player.gd")
 const PRESETS := preload("res://scripts/r14_presets.gd")
 var player
 var level
-var output := "/tmp/gantry-routes"
+var output := "/tmp/r22-03-hop-into-swing/routes"
 var left := false
-var release_after := 12.0
+var release_after := 14.0
+var jump_after := 50
+var basic_target := 350.0
 
 func _initialize() -> void:
 	for arg in OS.get_cmdline_user_args():
@@ -50,11 +52,12 @@ func control(fast: bool, tick: int, slot: int) -> Dictionary:
 	var edge := -12.0 - slot * 48.0
 	if slot < 2 and p.z < edge + 4 and p.z > edge - release_after:
 		hold = true
-		aim = LEVEL.ANCHORS[slot] - player._eye()
+		if not attached:
+			aim = LEVEL.ANCHORS[slot] - player._eye()
 	var yaw := atan2(-aim.x, -aim.z)
 	var pitch := atan2(aim.y, Vector2(aim.x, aim.z).length()) if hold else 0.0
 	var action := "" if attached else "move_forward"
-	if fast and not hold and not attached and not player.state.grounded:
+	if (fast or player.control_speed() / player.U < basic_target) and not hold and not attached and not player.state.grounded:
 		var v: Vector2 = Vector2(player.velocity.x, player.velocity.z) / player.U
 		var desired := Vector2(-p.x * 0.6, -10).normalized()
 		if v.length() > 40:
@@ -65,7 +68,7 @@ func control(fast: bool, tick: int, slot: int) -> Dictionary:
 			var side := 1.0 if wish.x > 0 else -1.0
 			yaw = atan2(-wish.y * side, wish.x * side)
 			action = "move_right" if side > 0 else "move_left"
-	return {"jump": tick > 50, "yaw": yaw, "pitch": clampf(pitch, -player.PITCH_LIMIT, player.PITCH_LIMIT), "hold": hold, "action": action}
+	return {"jump": tick > jump_after, "yaw": yaw, "pitch": clampf(pitch, -player.PITCH_LIMIT, player.PITCH_LIMIT), "hold": hold, "action": action}
 
 func attempt(fast: bool, tape: Array = []) -> Dictionary:
 	button(false)
@@ -89,7 +92,7 @@ func attempt(fast: bool, tape: Array = []) -> Dictionary:
 		if attached != previous:
 			transfers.append({"tick": tick, "attached": attached, "speed_ups": speed, "z": player.position.z, "y": player.position.y, "vy": player.velocity.y / player.U})
 		previous = attached
-		if tick % 256 == 0:
+		if tick % 512 == 0:
 			print("route ", fast, " tick ", tick, " pos ", player.position, " speed ", speed, " rope ", attached)
 		if level.is_finish_at(player.position):
 			return {"finished": true, "ticks": tick + 1, "seconds": (tick + 1) / 128.0, "peak_ups": peak, "transfers": transfers, "jumps": player.state.jump_count, "tape": commands}
@@ -103,7 +106,7 @@ func save_timeline(tape: Array, path: String) -> void:
 	var gain := deg_to_rad(2.5 * 0.022)
 	for tick: int in tape.size():
 		var cmd: Dictionary = tape[tick]
-		var time := tick / 128.0
+		var time := (tick + 1) / 128.0
 		if cmd.action != prior.action:
 			if not str(prior.action).is_empty():
 				events.append({"time": time, "action": prior.action, "pressed": false})
@@ -138,12 +141,18 @@ func run() -> void:
 	var results: Array = []
 	for fast in [false, true]:
 		var result: Dictionary = {}
-		for release_distance: float in [12.0, 10.0, 14.0, 8.0, 16.0]:
-			release_after = release_distance
-			result = attempt(fast)
-			print("RELEASE_SWEEP fast=", fast, " after=", release_after, " finished=", result.finished)
+		for phase: int in [50, 40, 60, 70, 80, 90, 100, 32, 24]:
+			jump_after = phase
+			for release_distance: float in [14.0, 16.0, 12.0]:
+				release_after = release_distance
+				result = attempt(fast)
+				print("TAPE_SWEEP fast=", fast, " jump_after=", jump_after, " release_after=", release_after, " finished=", result.finished)
+				if result.finished:
+					break
 			if result.finished:
 				break
+		result["jump_after_tick"] = jump_after
+		result["basic_target_ups"] = basic_target
 		result["release_after_m"] = release_after
 		var tape: Array = result.tape
 		result.erase("tape")
