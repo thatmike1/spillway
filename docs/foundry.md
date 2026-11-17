@@ -127,3 +127,44 @@ identity/positions still have to remain exact under the scenery fixture.
 `tests/foundry_cable.gd` checks render-mesh cloning, reuse and ownership-safe
 restoration on map exit. The ordinary rope is 1.5 mm in radius in Foundry only.
 The inherited rope law, solver and original mesh resource are unchanged.
+
+## Shaft carry (Wave 2)
+
+The `shaft-carry` line keeps the first shaft release and bunnyhops twice across
+the receiver, then descends to the existing catch without a second hook. It adds
+route metadata and a short hint only. Collision, three anchor positions/IDs,
+Arc forces and the level's recording identity remain unchanged. The existing
+gallery and two-hook shaft remain available.
+
+The selected input holds/reels the first ring for 155 ticks and reaches finish
+bounds after 811 motor steps from spawn (6.3359375 s), compared with 1108 for the
+ordinary shaft. The native finish card reads 6.16 s because the run clock starts
+after the first 0.5 m of movement. Among nine tested hold times, 155 is fastest;
+140 takes 824 ticks with the same carry policy, while 135 and 160 miss the receiver.
+Those are tested examples, not a unique release window or a global optimum.
+Removing the rope or post-release hops fails within the 811-step tape.
+
+`tests/foundry_advanced.gd` regenerates both existing routes and the carry,
+replays its mouse/buttons with exact per-tick body position/velocity assertions,
+and exports a nine-second input/expected trace. Movement and jump release after
+first finish; the stopping tail lands safely on the catch. Cumulative motor
+counters and slight mouse-angle rounding are outside the body equality claim.
+Native samples check the actual public-host clean finish, ordered checkpoints,
+one hook, zero respawns and a grounded stop. They do not establish unsampled
+native tick parity or enjoyment.
+
+```sh
+python3 tools/play.py --headless --audio-driver Dummy --quit-after 64 --script res://tests/foundry_advanced.gd -- --out=/tmp/foundry-carry
+python3 tools/play.py --headless --audio-driver Dummy --quit-after 64 --script res://tests/foundry_scenery.gd -- --out=/tmp/foundry-scenery
+python3 tools/play.py --headless --audio-driver Dummy --quit-after 64 --script res://tests/foundry_cable.gd -- --out=/tmp/foundry-cable
+```
+
+`tests/foundry_capture_match.py` accepts that expected trace, events, wrapper
+capture metadata, frame trace and source receipt. It checks coverage from the
+first motor tick through the stopping tail, source/events correspondence, all
+F2 cvars and the elastic-arc law, plus exact sampled body positions/serialized
+velocities. Its `--challenge` option rejects eight mutations of the real capture,
+including the wrong serialized preset, sparse late-only samples, changed tape
+or source, wrong law, moved body, respawn and an airborne stop. The source receipt
+records frozen runtime hashes separately from the wrapper's commit/status
+metadata; it does not claim the wrapper itself emitted a per-file source manifest.
