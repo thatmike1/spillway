@@ -78,9 +78,7 @@ func build() -> void:
 func deck(id: String, x0: float, x1: float, z0: float, z1: float, height: float) -> void:
 	GEO.prism(self, id, GEO.rectangle(x0, x1, z0, z1, height), -5, 0, "route")
 	box(id + "_top", Vector3((x0+x1)/2, height+0.01, (z0+z1)/2), Vector3(x1-x0, 0.02, z1-z0), Color("ddd7bd"))
-	box(id + "_lip", Vector3((x0+x1)/2, height+0.025, z0+0.1), Vector3(x1-x0, 0.03, 0.16), Color("b66d43"))
-	if id.begins_with("caisson") and height > 0:
-		box(id+"_near_lip",Vector3((x0+x1)/2,height+0.025,z1-0.1),Vector3(x1-x0,0.03,0.16),Color("b66d43"))
+
 func box(id: String, at: Vector3, size: Vector3, color: Color, parent: Node3D = self) -> void:
 	var mesh := MeshInstance3D.new()
 	mesh.name = id
