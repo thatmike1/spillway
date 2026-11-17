@@ -26,7 +26,7 @@ static func dress(level: Node3D) -> void:
 	level.add_child(sun)
 	for child: Node in level.get_children():
 		if child is MeshInstance3D:
-			var support := str(child.name).begins_with("Mesh_support_")
+			var support := str(child.name).begins_with("Mesh_support_") or str(child.name).begins_with("Mesh_service_")
 			var top_color := Color("b7b7a5") if support else Color("c8c4b8")
 			var side_color := Color("8a9186") if support else Color("73818c")
 			if str(child.name).begins_with("Mesh_deck_pier_"):
@@ -105,6 +105,20 @@ static func dress(level: Node3D) -> void:
 	sign.modulate = Color("e0dccb")
 	sign.position = Vector3(0,4,tower_z+5.13)
 	level.add_child(sign)
+	# lip paint and a small equipment stencil distinguish the optional inspection opening.
+	for side: int in [-1,1]:
+		_box(level,"inspection_lip_%d" % side,Vector3(4.675+side*0.555,1.8,-37.24),Vector3(0.06,3.6,0.014),Color("d95b30"))
+	_box(level,"inspection_lip_top",Vector3(4.675,3.63,-37.24),Vector3(1.05,0.06,0.014),Color("d95b30"))
+	var inspection := Label3D.new()
+	inspection.name = "InspectionStencil"
+	inspection.text = "INSPECTION"
+	inspection.font = number.font
+	inspection.font_size = 24
+	inspection.pixel_size = 0.007
+	inspection.outline_size = 0
+	inspection.modulate = Color("364e54")
+	inspection.position = Vector3(4.675,3.82,-37.23)
+	level.add_child(inspection)
 	# the established contour builder inks actual visible boundaries and paints only jump lips.
 	var contours := CONTOURS.new()
 	level.add_child(contours.build(level,false))
@@ -119,7 +133,7 @@ static func dress(level: Node3D) -> void:
 			edge_lines.line(corners[i],corners[(i+1)%4],0.018)
 			edge_lines.line(corners[i],Vector3(corners[i].x,-3.1,corners[i].z),0.022)
 	for piece: Dictionary in level.manifest:
-		if piece.role != "support":
+		if piece.role not in ["support","obstacle"]:
 			continue
 		var points: Array = piece.points
 		for i: int in 4:

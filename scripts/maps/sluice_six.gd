@@ -4,7 +4,7 @@ const GEO := preload("res://scripts/r19_course_geometry.gd")
 const ART := preload("res://scripts/art/sluice_six_art.gd")
 const LEVEL_ID := "r22-sluice-six"
 const LEVEL_NAME := "Sluice Six"
-const LEVEL_VERSION := 3
+const LEVEL_VERSION := 4
 const MAP_ID := "sluice-six"
 const MAP_ENTRY := {"name": LEVEL_NAME, "theme": "Tidal settling decks / pier rhythm / spill tower", "kind":"course", "own_look":true, "script":"res://scripts/maps/sluice_six.gd"}
 var level_id := LEVEL_ID
@@ -28,6 +28,7 @@ var jump_gaps: Array[Dictionary] = []
 var routes: Dictionary = {}
 var decks: Array[Dictionary] = []
 var supports: Array[Vector4] = []
+var style_opportunities: Array[Dictionary] = []
 var _built := false
 
 func build() -> void:
@@ -55,6 +56,7 @@ func build() -> void:
 			pose = spawn
 		checkpoints.append({"pose":pose,"title":["Settling apron","Offset piers","Spill race","Tower court"][checkpoints.size()],"bounds":AABB(Vector3(d.x-d.width/2,-0.3,d.far),Vector3(d.width,4,d.near-d.far))})
 	routes = {"basic":[spawn.origin,Vector3(0,0,-40),Vector3(1.5,0,-70),Vector3(-1.5,0,-110),finish_position],"fast":[spawn.origin,Vector3(0,0,-120),finish_position]}
+	_style_frame()
 	ART.dress(self)
 
 func _deck(id: String, x: float, width: float, near_z: float, far_z: float, stage: int) -> void:
@@ -81,6 +83,16 @@ func _deck(id: String, x: float, width: float, near_z: float, far_z: float, stag
 	decks.append({"id":id,"x":x,"width":width,"near":near_z,"far":far_z})
 	segment_bounds.append(AABB(Vector3(-20,-2,far_z),Vector3(40,15,near_z-far_z)))
 
+func _style_frame() -> void:
+	# an optional inspection gantry stands on the broad third pier, clear of the ordinary line.
+	var x := 4.675
+	var z := -38.0
+	for side: int in [-1,1]:
+		var post_x := x+side*0.675
+		GEO.prism(self,"inspection_left" if side < 0 else "inspection_right",GEO.rectangle(post_x-0.15,post_x+0.15,z-0.75,z+0.75,3.6),-0.25,-1,"obstacle","service")
+	GEO.prism(self,"inspection_lintel",GEO.rectangle(x-0.825,x+0.825,z-0.75,z+0.75,4.0),3.6,-1,"obstacle","service")
+	style_opportunities.append({"id":"inspection-frame","kind":"near_miss","center":Vector3(x,0,z),"opening_m":Vector2(1.05,3.6),"depth_m":1.5,"ordinary_line":"open to the west"})
+
 func is_finish_at(feet: Vector3) -> bool:
 	return finish_bounds.has_point(feet)
 func segment_at(feet: Vector3) -> int:
@@ -92,7 +104,7 @@ func segment_at(feet: Vector3) -> int:
 		return 1
 	return 0
 func route_hint(stage: int, _feet: Vector3) -> String:
-	return ["Build speed on the apron; hop the broad settling piers.","Follow the offset caps, or keep the direct water-side line.","Narrow spill piers: keep speed and set the next landing early.","Cross the painted line in the spill tower court."][clampi(stage,0,3)]
+	return ["Build speed on the apron; hop the broad settling piers. The inspection frame is an optional close pass on the right.","Follow the offset caps, or keep the direct water-side line.","Narrow spill piers: keep speed and set the next landing early.","Cross the painted line in the spill tower court."][clampi(stage,0,3)]
 func start_wheel() -> void:
 	pass
 func reset_state() -> void:
