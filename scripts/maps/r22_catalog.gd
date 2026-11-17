@@ -3,4 +3,7 @@ extends RefCounted
 const BASE := preload("res://scripts/maps/catalog.gd")
 
 static func make() -> Dictionary:
-	return BASE.make().duplicate(true)
+	var maps := BASE.make().duplicate(true)
+	maps.catalog["plan-yard"] = preload("res://scripts/maps/plan_yard.gd").MAP_ENTRY.duplicate(true)
+	maps.order.append("plan-yard")
+	return maps
