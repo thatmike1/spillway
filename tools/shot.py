@@ -332,6 +332,7 @@ def main():
     mode.add_argument("--poses", type=Path)
     parser.add_argument("--setting", action="append", default=[], metavar="KEY=JSON", help="host setting, e.g. tether_model=\"elastic-arc\"")
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--verbose", action="store_true", help="verbose native Godot diagnostics in engine.log")
     parser.add_argument("--movie", action="store_true", help="full-render MovieMaker AVI with native PCM audio")
     parser.add_argument("--movie-fps", type=int, choices=(30, 60), default=30)
     parser.add_argument("--look", choices=("old", "new"), default="new")
@@ -359,7 +360,7 @@ def main():
         if not separator or not key:
             parser.error("setting requires KEY=JSON")
         settings[key] = json.loads(value)
-    options = dict(movie=args.movie, movie_fps=args.movie_fps, look=args.look, size=args.size, settings=settings, map=args.map, route=args.route, out=str(output), seconds=args.seconds, every=args.every,
+    options = dict(verbose=args.verbose, movie=args.movie, movie_fps=args.movie_fps, look=args.look, size=args.size, settings=settings, map=args.map, route=args.route, out=str(output), seconds=args.seconds, every=args.every,
                    mode="route" if args.route else ("tape" if args.tape else "poses"))
     if args.tape:
         options["events"] = read_sequence(args.tape, "tape")
@@ -390,7 +391,7 @@ def main():
             env["DISPLAY"] = display
             movie_arguments = ["--write-movie", str(output / "capture.avi")] if args.movie else []
             with (output / "engine.log").open("w") as log:
-                result = subprocess.run([str(engine.GODOT), "--path", str(source), "--script", "res://capture.gd",
+                result = subprocess.run([str(engine.GODOT), *(["--verbose"] if args.verbose else []), "--path", str(source), "--script", "res://capture.gd",
                     "--display-driver", "x11", "--rendering-method", "gl_compatibility", "--audio-driver", "Dummy",
                     "--windowed", "--resolution", args.size, "--position", "0,0", "--fixed-fps", str(args.movie_fps if args.movie else 128), *movie_arguments, "--",
                     "--r16-map=" + args.map, "--no-records", "--no-run-recordings", "--route=" + (args.route or "safe"),
