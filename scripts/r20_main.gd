@@ -52,8 +52,8 @@ func recording_metadata(reason: String) -> Dictionary:
 func map_revision_description() -> String:
 	if map_id == "saltglass":
 		return "Older Saltglass ghosts use the low fins and return ramps and cannot race this map revision."
-	if map_id == "tether-yard":
-		return "R19 E ghosts and different rope models/reel preferences cannot race this Tether identity."
+	if map_has_capability("grapple"):
+		return {"tether-yard": "R19 E ghosts and different rope models/reel preferences cannot race this Tether identity."}.get(map_id, "Rope models and reel preferences have separate recording identities.")
 	return super()
 
 func select_map(id: String) -> void:
@@ -124,10 +124,14 @@ func _setting_value(key: String, value: Variant) -> Variant:
 		return bool(value)
 	return super(key, value)
 
+## a map may fix a comparison law; ordinary tether maps retain the saved preference.
+func tether_model() -> String:
+	return str(_setting_value("tether_model", map_entry().get("tether_model", settings.get("tether_model", "classic"))))
+
 func _make_runner(entry: Dictionary) -> CharacterBody3D:
 	var runner := super(entry)
 	if runner.has_method("configure_tether"):
-		runner.call("configure_tether", str(settings.get("tether_model", "classic")), bool(settings.get("tether_auto_reel", false)))
+		runner.call("configure_tether", tether_model(), bool(settings.get("tether_auto_reel", false)))
 		runner.connect("tether_diagnostic", _tether_diagnostic)
 	if runner.has_signal("through_diagnostic"):
 		runner.connect("through_diagnostic", _through_diagnostic)
@@ -156,7 +160,7 @@ func respawn() -> void:
 
 func mechanics() -> Array:
 	var out := super()
-	if map_id == "tether-yard" and is_instance_valid(player) and player.has_method("tether_identity"):
+	if map_has_capability("grapple") and is_instance_valid(player) and player.has_method("tether_identity"):
 		out.append(player.call("tether_identity"))
 	return out
 
@@ -176,7 +180,7 @@ func change_setting(key: String, value: Variant) -> void:
 	if key not in ["tether_model", "tether_auto_reel"]:
 		super(key, value)
 		return
-	if map_id != "tether-yard":
+	if not map_has_capability("grapple") or (key == "tether_model" and map_entry().has("tether_model")):
 		return
 	var next: Variant = _setting_value(key, value)
 	if settings.get(key) == next:
@@ -186,7 +190,7 @@ func change_setting(key: String, value: Variant) -> void:
 	_discard_direction("tether_settings")
 	session.boundary("loadout", {"key": key, "from": settings.get(key), "to": next})
 	settings[key] = next
-	player.call("configure_tether", str(settings.tether_model), bool(settings.tether_auto_reel))
+	player.call("configure_tether", tether_model(), bool(settings.tether_auto_reel))
 	_refresh_records()
 	restart_run("tether_settings")
 	set_paused(was_paused)
