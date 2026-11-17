@@ -23,6 +23,8 @@ Input tapes are ordered JSON arrays. Times are simulation seconds; action names 
  {"time":2,"action":"move_forward","pressed":false}]
 ```
 
+PNG tapes can resize the real private game window with `{"time":2,"resize":[1280,720]}`. Start with `--size 1920x1080` to allocate a display large enough for a720p→1080p→720p sequence. Dimensions must be positive integers within that initial display; resize and input use separate rows. The event assigns the public [Window.size property](https://docs.godotengine.org/en/stable/classes/class_window.html#class-window-property-size), leaving the game's normal resize/layout callbacks to respond. It works while paused. `frames.jsonl` records actual `window_size` and readback `png_size`; allow a later sample for layout to settle rather than treating a request as completed. Resize tapes are refused in MovieMaker mode, whose encoded dimensions must stay fixed. No desktop window or display is resized.
+
 Pose arrays use camera world positions and degrees (`yaw`, `pitch`, default zero). They freeze the player/host physics and move only the active camera. They do not demonstrate traversal, reaching an anchor, or a playable landing:
 
 ```json
@@ -46,6 +48,8 @@ Snapshots omit only `tests/fixtures` for frozen recording payloads, alongside ge
 Tape timestamps are zero-based motor time: time0 applies before the first tick, time1/128 before the second. Events dispatch before the tape clock advances. Pressed actions preserve optional numeric `strength` in[0,1] (default1); released actions always use0. The public `restart_run("capture")` establishes normal spawn immediately before route/tape playback, after startup warm-up. Tapes exported for the older age-before-dispatch convention need re-exporting against this contract.
 
 Run `python3 -B tests/test_shot.py --native-contract --out /absolute/new/external/folder` for native PNG-observed positions and complete motor-state comparison against an independent canonical normal-spawn tape with distinct t0/t1 strengths. This integration check uses the shared engine lock and private display; ordinary unit tests remain headless and lightweight.
+
+Add `--resize` to that PNG contract check to interleave window resizes with moving input. It requires both actual readback sizes and compares the same complete motor observations against the independent canonical run, which performs no resize.
 
 ## Audible offline clips
 
