@@ -122,6 +122,16 @@ func run() -> void:
 	await process_frame
 	await process_frame
 	check(screen.attempts.get_theme_font_size("font_size") >= 18, "resize retains readable compact type")
+	var compact_font := screen.attempts.get_theme_font("font")
+	var compact_size := screen.attempts.get_theme_font_size("font_size")
+	for i: int in screen.entries.size():
+		var width := compact_font.get_string_size(screen.attempts.get_item_text(i), HORIZONTAL_ALIGNMENT_LEFT, -1, compact_size).x
+		check(width <= screen.attempts.size.x - 20, "compact timestamp row fits on one line")
+	var item := screen.splits.get_root().get_first_child()
+	while item != null:
+		var width := screen.splits.get_theme_font("font").get_string_size(item.get_text(0), HORIZONTAL_ALIGNMENT_LEFT, -1, screen.splits.get_theme_font_size("font_size")).x
+		check(screen.splits.get_column_width(0) >= width + 16, "compact checkpoint number stays visible")
+		item = item.get_next()
 	root.size = window_size
 	await process_frame
 	check(inventory(folder) == before, "review leaves recording folder byte-identical")

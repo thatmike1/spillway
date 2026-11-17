@@ -333,5 +333,6 @@ func _apply_readability() -> void:
 	theme.set_font_size("title_button_font_size", "Tree", body_size)
 	attempts.add_theme_font_size_override("font_size", 19 if compact else 14)
 	attempts.custom_minimum_size.x = 560 if compact else 430
+	splits.set_column_custom_minimum_width(0, 150 if compact else 0)
 	trace.font_size = 18 if compact else 13
 	trace.queue_redraw()
