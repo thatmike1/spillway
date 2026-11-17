@@ -55,8 +55,14 @@ func toggle_budget() -> void:
 	var map := level()
 	var limit := 1 if map.budget == 3 else 3
 	var anchors: Array = map.plan.slice(0,limit)
-	map.apply_design(anchors,-1,-1,limit,map.blocks_enabled,map.pads_enabled)
-	notice = "Budget changed; equipment cleared except retained anchors."
+	var block: int = map.block_slot
+	var pad: int = map.pad_slot
+	if PIECES.count(anchors,block,pad) > limit:
+		pad = -1
+	if PIECES.count(anchors,block,pad) > limit:
+		block = -1
+	map.apply_design(anchors,block,pad,limit,map.blocks_enabled,map.pads_enabled)
+	notice = "Budget reduced; kept the first piece." if limit == 1 else "Budget increased; your plan is kept."
 	queue_redraw()
 func clear_pieces() -> void:
 	var map := level()
@@ -97,7 +103,7 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO,size),Color("203d45"))
 	draw_string(font,Vector2(30,42),"Plan Yard / survey",HORIZONTAL_ALIGNMENT_LEFT,-1,26,ink)
 	draw_string(font,Vector2(30,74),"Choose a plan, then Enter runs. Tab returns here at spawn.",HORIZONTAL_ALIGNMENT_LEFT,-1,18,ink)
-	var names := {"anchor":"A  Rope anchors", "block":"B  Rising block", "pad":"P  Launch pad"}
+	var names := {"anchor":"A  Rope anchors", "block":"B  Raised block", "pad":"P  Launch pad"}
 	var kinds := ["anchor","block","pad"]
 	for i: int in 3:
 		var kind: String = kinds[i]

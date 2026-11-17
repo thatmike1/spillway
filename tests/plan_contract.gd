@@ -69,6 +69,11 @@ func run() -> void:
 	for i: int in 4:
 		await physics_frame
 	assert(game.elapsed == 0 and not game._started)
+	assert(game.level.apply_design([],-1,7,1,false,true))
+	overlay.toggle_budget()
+	assert(game.level.budget == 3 and game.level.pad_slot == 7)
+	overlay.toggle_budget()
+	assert(game.level.budget == 1 and game.level.pad_slot == 7)
 	game.player.close_plan()
 	assert(game.session.attempt_live)
 	assert(game.course_key != initial)

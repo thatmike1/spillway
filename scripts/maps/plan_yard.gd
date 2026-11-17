@@ -4,8 +4,9 @@ const GEO := preload("res://scripts/r19_course_geometry.gd")
 const LAYOUT := preload("res://scripts/plan/layout.gd")
 const PIECES := preload("res://scripts/plan/pieces.gd")
 const RUNNER := preload("res://scripts/movement/grapple_player.gd")
+const ART := preload("res://scripts/art/plan_look.gd")
 const MAP_ID := "plan-yard"
-const MAP_ENTRY := {"name": "Plan Yard", "theme": "Place a line, then run it", "kind": "experiment", "experimental": true, "grapple": true, "tether_model": "elastic-arc", "runner": "res://scripts/movement/plan_runner.gd", "script": "res://scripts/maps/plan_yard.gd", "reticle": true, "instructions": "Tab: plan from above. Click up to three surveyed sockets. Enter: run. LMB: Arc rope, RMB: reel. R: retry the same plan.", "key_hint": " · Tab plans; Enter runs"}
+const MAP_ENTRY := {"name": "Plan Yard", "theme": "Place a line, then run it", "kind": "experiment", "experimental": true, "own_look": true, "grapple": true, "tether_model": "elastic-arc", "runner": "res://scripts/movement/plan_runner.gd", "script": "res://scripts/maps/plan_yard.gd", "reticle": true, "instructions": "Tab: plan from above. Click up to three surveyed sockets. Enter: run. LMB: Arc rope, RMB: reel. R: retry the same plan.", "key_hint": " · Tab plans; Enter runs"}
 var level_id := "r22-plan-yard"
 var level_name := "Plan Yard"
 var level_version := 7
@@ -36,6 +37,7 @@ var pad_body: StaticBody3D
 var pad_bounds := AABB()
 var pieces: Node3D
 var _built := false
+var art := ART.new()
 func build() -> void:
 	if _built:
 		return
@@ -48,12 +50,13 @@ func build() -> void:
 	deck("caisson_rear", -5, 5, -30, -21, 9)
 	deck("caisson_foundation", -5, 5, -21, -18, -3)
 	checkpoints.append({"pose": spawn, "title": "Choose your line", "bounds": AABB(Vector3(-18, 2.8, 5), Vector3(36, 3, 15))})
-	for z: float in [1, -11, -25]:
-		box("gantry_beam", Vector3(0, 15, z), Vector3(40, 0.5, 0.6), Color("344e52"))
+	for z: float in [1, -11, -25, -49]:
+		box("gantry_beam", Vector3(0, 15, z), Vector3(40, 1.1, 0.9), Color("344e52"))
 		for x: float in [-20, 20]:
 			box("gantry_column", Vector3(x, 4, z), Vector3(0.7, 22, 0.9), Color("344e52"))
+			box("gantry_foot",Vector3(x,-4.5,z),Vector3(2.6,5,2.6),Color("57787b"))
 	for x: float in [-12, 0, 12]:
-		box("travelling_rail", Vector3(x,15,-12), Vector3(0.3,0.35,34), Color("344e52"))
+		box("travelling_rail", Vector3(x,15,-22), Vector3(0.3,0.35,54), Color("344e52"))
 	var env := WorldEnvironment.new()
 	env.environment = Environment.new()
 	env.environment.background_mode = Environment.BG_COLOR
@@ -71,10 +74,13 @@ func build() -> void:
 	pieces.name = "PlanPieces"
 	add_child(pieces)
 	apply_plan(plan)
+	art.attach(self)
 func deck(id: String, x0: float, x1: float, z0: float, z1: float, height: float) -> void:
 	GEO.prism(self, id, GEO.rectangle(x0, x1, z0, z1, height), -5, 0, "route")
 	box(id + "_top", Vector3((x0+x1)/2, height+0.01, (z0+z1)/2), Vector3(x1-x0, 0.02, z1-z0), Color("ddd7bd"))
 	box(id + "_lip", Vector3((x0+x1)/2, height+0.025, z0+0.1), Vector3(x1-x0, 0.03, 0.16), Color("b66d43"))
+	if id.begins_with("caisson") and height > 0:
+		box(id+"_near_lip",Vector3((x0+x1)/2,height+0.025,z1-0.1),Vector3(x1-x0,0.03,0.16),Color("b66d43"))
 func box(id: String, at: Vector3, size: Vector3, color: Color, parent: Node3D = self) -> void:
 	var mesh := MeshInstance3D.new()
 	mesh.name = id
@@ -150,6 +156,7 @@ func apply_design(next: Array, block: int, pad: int, limit: int, blocks_on: bool
 		label.modulate = Color("29464a")
 		label.outline_size = 0
 		pieces.add_child(label)
+	art.style(pieces)
 	return true
 func _solid_piece(id: String, at: Vector3, size: Vector3, color: Color) -> StaticBody3D:
 	var body := StaticBody3D.new()
