@@ -123,3 +123,19 @@ static func biggest_loss(comparison: Dictionary) -> String:
 	if worst.is_empty():
 		return "No time lost against the best across the completed segments." if not comparison.splits.is_empty() else "Reach a checkpoint to compare a complete segment."
 	return "Biggest loss: %.3f s between %s and %s." % [worst.loss, worst.from, worst.label]
+
+static func practice_request(pair: Dictionary) -> Dictionary:
+	if not pair.get("ok", false):
+		return {"ok": false, "error": "Choose a comparable attempt first."}
+	var worst := -1
+	for i: int in pair.splits.size():
+		if float(pair.splits[i].loss) > (float(pair.splits[worst].loss) if worst >= 0 else 0.0):
+			worst = i
+	if worst < 0:
+		return {"ok": false, "error": "No completed segment lost time against this best."}
+	var stage := 0
+	if worst > 0:
+		stage = int(str(pair.best.marks[worst - 1].key).trim_prefix("checkpoint-"))
+	return {"ok": true, "stage": stage, "pb_start": 0.0 if worst == 0 else float(pair.best.marks[worst - 1].time),
+		"pb_end": float(pair.best.marks[worst].time), "best_path": str(pair.best.path),
+		"identity": pair.attempt.identity.duplicate(true), "label": "%s to %s" % [pair.splits[worst].from, pair.splits[worst].label]}

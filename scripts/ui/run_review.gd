@@ -1,6 +1,7 @@
 extends PanelContainer
-## a read-only screen. the owner controls pause and removes it after closed.
+## browsing is read-only. the owner closes review before executing the explicit practice request.
 signal closed
+signal practice_requested(request: Dictionary)
 const MODEL := preload("res://scripts/recordings/run_review_model.gd")
 const LOOK := preload("res://scripts/r18_ui_theme.gd")
 const STAGE := preload("res://scripts/ui/run_review_stage.gd")
@@ -14,6 +15,7 @@ var trace: Control
 var scrubber: HSlider
 var message: Label
 var clock: Label
+var practice_button: Button
 var legend: Label
 var _details: VBoxContainer
 var stage
@@ -47,6 +49,15 @@ func _ready() -> void:
 	message = Label.new()
 	message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.add_child(message)
+	practice_button = Button.new()
+	practice_button.text = "Practise this segment"
+	practice_button.disabled = true
+	practice_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	practice_button.pressed.connect(func() -> void:
+		var request := MODEL.practice_request(comparison)
+		if request.ok and MODEL.READER.identity_matches(request.identity, _map_identity).is_empty():
+			practice_requested.emit(request))
+	body.add_child(practice_button)
 	var columns := HSplitContainer.new()
 	columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_child(columns)
@@ -111,6 +122,7 @@ func _ready() -> void:
 
 func refresh() -> void:
 	comparison = {}
+	practice_button.disabled = true
 	stage.clear()
 	entries.clear()
 	attempts.clear()
@@ -148,6 +160,7 @@ func _finish_list() -> void:
 
 func select_attempt(index: int) -> void:
 	comparison = {}
+	practice_button.disabled = true
 	stage.clear()
 	stage.visible = false
 	view_note.text = "Choose a comparable recording pair first."
@@ -207,6 +220,12 @@ func _load_preview() -> void:
 	var why: String = stage.load_pair(comparison)
 	view_note.text = why if not why.is_empty() else "Teal is this attempt; rust is its personal best. Scrub below to follow both on the course clock."
 	_update_view_visibility()
+	_update_practice_action()
+
+func _update_practice_action() -> void:
+	var request := MODEL.practice_request(comparison)
+	practice_button.disabled = not request.ok or not MODEL.READER.identity_matches(request.get("identity", {}), _map_identity).is_empty()
+	practice_button.tooltip_text = "Start a normal practice attempt at %s with the best ghost. Existing recordings stay unchanged." % request.get("label", "") if not practice_button.disabled else (str(request.error) if not request.ok else "Load the matching map, movement preset and layout to practise this segment.")
 
 func _style_data_control(control: Control) -> void:
 	control.add_theme_stylebox_override("panel", LOOK.flat(LOOK.CREAM_DEEP))

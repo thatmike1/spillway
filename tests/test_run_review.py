@@ -13,8 +13,8 @@ import engine
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path)
-    parser.add_argument("--checks", nargs="+", choices=["model", "screen", "3d", "performance"],
-                        default=["model", "screen", "3d", "performance"])
+    parser.add_argument("--checks", nargs="+", choices=["model", "screen", "3d", "performance", "practice"],
+                        default=["model", "screen", "3d", "performance", "practice"])
     args = parser.parse_args()
     out = args.out.resolve() if args.out else Path(tempfile.mkdtemp(prefix="r22-run-review-"))
     out.mkdir(parents=True, exist_ok=True)
