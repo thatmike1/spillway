@@ -11,6 +11,21 @@ import shot
 
 
 class ShotTests(unittest.TestCase):
+    def test_snapshot_excludes_only_the_frozen_fixture_directory(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            source = root / "checkout"
+            for name in ("tests/fixtures/recording.r16run", "assets/fixtures/texture.png",
+                         "assets/paint.png.import", "tests/map_test.gd"):
+                path = source / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("preserve")
+            target = root / "snapshot"
+            shot.shutil.copytree(source, target, ignore=shot.snapshot_ignore(source))
+            self.assertFalse((target / "tests/fixtures").exists())
+            for name in ("assets/fixtures/texture.png", "assets/paint.png.import", "tests/map_test.gd"):
+                self.assertEqual((target / name).read_text(), "preserve")
+
     def test_output_rejects_git_ancestors(self):
         with tempfile.TemporaryDirectory() as root:
             folder = Path(root)
