@@ -1,14 +1,6 @@
 extends "res://tests/viaduct_replay.gd"
 ## raw event replay through the live menu host, checkpoint lifecycle and recording identity.
 const HOST := preload("res://scripts/game.gd")
-var expect_upper_finish := false
-
-func _initialize() -> void:
-	for arg: String in OS.get_cmdline_user_args():
-		if arg == "--upper":
-			expect_upper_finish = true
-	super._initialize()
-
 func replay(tape_path: String) -> bool:
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(tape_path))
 	if not parsed is Array or parsed.is_empty():
@@ -43,6 +35,7 @@ func replay(tape_path: String) -> bool:
 	var law: String = player.r21_law_sha256()
 	var cursor := 0
 	var ticks := 0
+	var landed_upper := false
 	await physics_frame
 	for tick: int in 4000:
 		ticks = tick+1
@@ -50,15 +43,16 @@ func replay(tape_path: String) -> bool:
 			inject_event(player,events[cursor])
 			cursor += 1
 		player._physics_process(1.0/128)
+		landed_upper = landed_upper or (LEVEL.UPPER_LANDING.has_point(player.global_position) and player.is_grounded())
 		game._physics_process(1.0/128)
 		if game.finished or cursor == events.size():
 			break
 		await physics_frame
 	var ok: bool = game.startup_error.is_empty() and game.finished and game.finish_kind == "clean" and game.checkpoint_index == 3 and game.respawn_count == 0 and identity.map == "viaduct" and player.model == "elastic-arc" and game.motion_identity() == identity and player.r21_law_sha256() == law
-	if expect_upper_finish:
-		ok = ok and game.level.UPPER_FINISH.has_point(player.global_position) and player.is_grounded()
+	if expect_upper_landing:
+		ok = ok and landed_upper and game.level.finish_bounds.has_point(player.global_position)
 	print("VIADUCT LIVE HOST ",ok," ticks=",ticks," finish=",game.finish_kind," checkpoint=",game.checkpoint_index," respawns=",game.respawn_count," map=",identity.map," model=",player.model," course=",identity.course_key," geometry-version=",game.level.level_version)
-	print("VIADUCT END feet=",player.global_position," upper-required=",expect_upper_finish," grounded=",player.is_grounded())
+	print("VIADUCT END feet=",player.global_position," upper-required=",expect_upper_landing," upper-landed=",landed_upper," grounded=",player.is_grounded())
 	game.request_quit(0)
 	game.free()
 	await physics_frame

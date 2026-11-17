@@ -25,12 +25,32 @@ func run() -> void:
 	var dam := game.level.get_node("ViaductDam")
 	assert(dam.find_children("*","CollisionObject3D",true,false).is_empty())
 	assert(dam.find_children("*","CollisionShape3D",true,false).is_empty())
-	assert(identity.course_key == "44de048079be5549")
+	assert(identity.course_key == "be901b697eb867b0")
 	var law: String = game.player.r21_law_sha256()
 	await process_frame
 	await process_frame
 	var checks := [is_equal_approx(float(tether.mesh.get("top_radius")),0.0015),tether.mesh != original_mesh,tether.material_override != original_material,game.motion_identity() == identity,game.player.r21_law_sha256() == law]
-	checks.append(not game.level.is_finish_at(game.level.UPPER_FINISH.get_center()))
+	checks.append(not game.level.is_finish_at(game.level.UPPER_LANDING.get_center()))
+	game.player.reset_to(Transform3D(Basis.IDENTITY,Vector3(-15,10,-68)))
+	for _tick: int in 4:
+		await physics_frame
+		game.player._physics_process(1.0/128)
+	var inside_upper: bool = game.level.UPPER_LANDING.has_point(game.player.global_position)
+	var airborne: bool = not game.player.is_grounded()
+	var upper_rejected: bool = not game.level.is_finish_at(game.player.global_position)
+	checks.append(inside_upper)
+	checks.append(airborne)
+	checks.append(upper_rejected)
+	print("VIADUCT AIRBORNE UPPER inside=",inside_upper," airborne=",airborne," rejected=",upper_rejected)
+	for _tick: int in 200:
+		if game.player.is_grounded():
+			break
+		await physics_frame
+		game.player._physics_process(1.0/128)
+	checks.append(game.level.UPPER_LANDING.has_point(game.player.global_position) and game.player.is_grounded())
+	checks.append(not game.level.is_finish_at(game.player.global_position))
+	print("VIADUCT UPPER LANDING feet=",game.player.global_position," grounded=",game.player.is_grounded()," finish=",game.level.is_finish_at(game.player.global_position))
+	game.player.reset_to(game.level.spawn)
 	var deck := game.level.get_node("Mesh_deck_viaduct_terrace_0_0_0") as MeshInstance3D
 	checks.append(deck.material_override is ShaderMaterial and deck.material_override.shader.resource_path == "res://shaders/look/surface.gdshader")
 	checks.append(deck.material_override.get_shader_parameter("top_color") == Color("cfc9b9"))
