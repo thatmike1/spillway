@@ -12,6 +12,7 @@ func _initialize() -> void:
 	assert(host.tether_model() == "classic")
 	var original: Dictionary = host.map_entry().duplicate(true)
 	host.maps.catalog["capability-fixture"] = original.duplicate(true)
+	host.maps.catalog["capability-fixture"]["grapple"] = true
 	host.maps.catalog["capability-fixture"].erase("revision_notice")
 	host.map_id = "capability-fixture"
 	assert(host.map_has_capability("grapple"))

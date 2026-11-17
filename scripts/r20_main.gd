@@ -31,6 +31,9 @@ func export_my_runs(label: String) -> Dictionary:
 			run_export_directory, label, str(ProjectSettings.get_setting("application/config/version")))
 	return last_run_export
 
+func _catalog_capabilities() -> Dictionary:
+	return R20_MAPS.CAPABILITIES
+
 func _ready() -> void:
 	if map_registry.is_empty():
 		map_registry = R20_MAPS.make()
