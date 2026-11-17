@@ -32,6 +32,7 @@ def main():
     subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_run_bundle.py")], check=True)
     subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_shortcut.py")], check=True)
     subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_shot.py")], check=True)
+    subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_check_package.py")], check=True)
     routes, contract = verification.fixtures()
     pure = verification.audit.negative_seed(verification.FIXTURES / routes[0]["name"] / "old", out / "negative-controls", contract, "old")
     print(f"recording/metadata/coverage mutations rejected: {len(pure['checks'])}", flush=True)
@@ -41,7 +42,7 @@ def main():
     profile.mkdir()
     engine.run(["--headless", "--editor", "--path", source, "--import"], cwd=source,
                profile=profile, log=out / "import.log")
-    components = ["saltglass_registration", "tether_geometry", "tether_coefficients", "grapple_capability", "r22_registration"]
+    components = ["saltglass_registration", "tether_geometry", "tether_coefficients", "grapple_capability", "r22_registration", "host_capabilities", "tether_feedback_identity", "tether_feedback_audio"]
     if args.slow:
         components.extend(["direction_stack", "through_line_original_maps"])
     report = {"ok": False, "mutations": pure, "components": []}
@@ -52,7 +53,7 @@ def main():
             print("check " + name, flush=True)
             result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
                                  "--fixed-fps", "128", "--script", "res://tests/" + name + ".gd",
-                                 "--", "--out=" + str(folder)], cwd=source, profile=profile,
+                                 "--", "--out=" + str(folder), "--menu-contract=" + str(verification.FIXTURES / "contract.json")], cwd=source, profile=profile,
                                 log=folder / "engine.log", timeout=300)
             report["components"].append({"name": name, **result})
         if args.slow:
