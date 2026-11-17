@@ -102,5 +102,6 @@ func run() -> void:
 	var summary := {"ok": failures.is_empty(), "failures": failures, "motion_sha256": hash.finish().hex_encode(), "bytes_compared": on.bytes.size(), "ticks": 384, "attached_ticks": on.attached_ticks, "reel_ticks": on.reel_ticks, "slack_ticks": on.slack_ticks, "scope": "real runner input tape in empty physics world; not a route or full-host recording acceptance"}
 	FileAccess.open(output.path_join("summary.json"), FileAccess.WRITE).store_string(JSON.stringify(summary, "\t"))
 	print(JSON.stringify(summary))
-	await process_frame
+	for frame: int in 4:
+		await process_frame
 	quit(0 if failures.is_empty() else 1)

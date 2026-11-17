@@ -17,10 +17,10 @@ Every setting is an independent boolean, missing means false:
 | Setting | Effect | Default |
 | --- | --- | --- |
 | `tether_rope_visual` | Cream segmented line; slack sag capped at 1.8 m; warm tension tint | off |
-| `tether_attach_cue` | 0.18 s expanding endpoint ring | off |
-| `tether_reel_audio` | Pending slice 2 | off |
-| `tether_tension_audio` | Pending slice 2 | off |
-| `tether_wind_audio` | Pending slice 2 | off |
+| `tether_attach_cue` | 0.18 s expanding endpoint ring and 90 ms synthesized latch click | off |
+| `tether_reel_audio` | Real reel activity drives a quiet mechanism loop | off |
+| `tether_tension_audio` | Applied grapple impulses and extension drive a low load tone | off |
+| `tether_wind_audio` | Speed above 250 u/s raises a bounded wind layer | off |
 | `tether_speed_fov` | Pending slice 3 | off |
 | `tether_anchor_readability` | Pending slice 3 | off |
 
@@ -38,3 +38,7 @@ python3 tools/test.py --out /tmp/r22-04-swing-feel/fast
 ```
 
 Output is external scratch; read results and remove it. Visual acceptance and play preference require captured first-person footage and Mike's reaction.
+
+## Audio lifecycle and provenance
+
+All four new sounds are synthesized by `scripts/audio/tether_sound.gd`; `assets/audio/tether/MANIFEST.json` records provenance. A private RNG seed leaves the global random stream untouched. Loop frequencies are integer multiples over one second, so each wrap is continuous. Gains follow volume, independently stop when toggled off, and all voices stop on observer reset/free, pause or invalid runner. Reel and load changes ease over about 0.125 s; they never delay physics. The existing release and break cues are untouched. The observer reads actual per-tick `grapple_pull`/`grapple_rope` impulses plus extension for load, and real `reel_active()` for reel state.

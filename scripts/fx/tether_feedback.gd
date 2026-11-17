@@ -1,6 +1,7 @@
 extends Node3D
 ## optional presentation observer; never changes runner state or acquisition readiness.
 const KEYS := ["tether_rope_visual", "tether_attach_cue", "tether_reel_audio", "tether_tension_audio", "tether_wind_audio", "tether_speed_fov", "tether_anchor_readability"]
+const SOUND := preload("res://scripts/audio/tether_sound.gd")
 const SEGMENTS := 20
 var options := {}
 var runner: Node3D
@@ -11,6 +12,7 @@ var _was_attached := false
 var _flash_left := 0.0
 var _material: StandardMaterial3D
 var _last_count := -1
+var _sound: Node
 
 func _ready() -> void:
 	process_priority = 100
@@ -30,6 +32,8 @@ func _ready() -> void:
 		_segments.append(piece)
 	_flash = _ring(Color("e8dfbd"), 0.22, 0.27)
 	_ready_marker = _ring(Color("e8dfbd"), 0.90, 0.96)
+	_sound = SOUND.new()
+	add_child(_sound)
 	reset()
 
 func attach(body: Node3D) -> bool:
@@ -40,11 +44,17 @@ func attach(body: Node3D) -> bool:
 func configure(settings: Dictionary) -> void:
 	for key: String in KEYS:
 		options[key] = bool(settings.get(key, false))
+	if _sound != null:
+		_sound.set_volume(float(settings.get("volume", 0.8)))
+		if not enabled("tether_attach_cue"):
+			_sound.voices.attach.stop()
 
 func enabled(key: String) -> bool:
 	return bool(options.get(key, false))
 
 func reset() -> void:
+	if _sound != null:
+		_sound.stop_all()
 	_was_attached = false
 	_flash_left = 0.0
 	_last_count = -1
@@ -70,6 +80,8 @@ func observe(delta: float) -> void:
 	_last_count = count
 	if attached and not _was_attached:
 		_flash_left = 0.18
+		if enabled("tether_attach_cue"):
+			_sound.attach_cue()
 	_was_attached = attached
 	_flash_left = maxf(0.0, _flash_left - clampf(delta, 0.0, 0.1))
 	var camera: Camera3D = runner.get("camera")
@@ -81,6 +93,13 @@ func observe(delta: float) -> void:
 	var centre: Vector3 = runner.call("_hull_centre")
 	var distance := centre.distance_to(endpoint)
 	var tension := clampf((distance - rest_m) / 1.2, 0.0, 1.0) if attached else 0.0
+	var impulses: Dictionary = runner.get("impulses")
+	var pull: Vector3 = impulses.get("grapple_pull", Vector3.ZERO)
+	var catch_: Vector3 = impulses.get("grapple_rope", Vector3.ZERO)
+	var hz := float(runner.get("physics_hz"))
+	tension = maxf(tension, clampf((pull + catch_).length() * hz / 1800.0, 0.0, 1.0))
+	var speed := (runner.get("velocity") as Vector3).length() / float(runner.get("U"))
+	_sound.update(delta, attached, bool(runner.call("reel_active")), tension, speed, options)
 	var sag := minf(1.8, maxf(0.0, rest_m - distance) * 0.45) if attached else 0.0
 	for i: int in SEGMENTS:
 		var piece := _segments[i]
@@ -112,7 +131,9 @@ static func rope_point(start: Vector3, end: Vector3, sag: float, t: float) -> Ve
 func _face_ring(ring: MeshInstance3D, at: Vector3, camera: Camera3D) -> void:
 	ring.global_position = at
 	if at.distance_squared_to(camera.global_position) > 0.0001:
-		ring.look_at(camera.global_position, Vector3.UP)
+		var direction := (camera.global_position - at).normalized()
+		var up := Vector3.RIGHT if absf(direction.dot(Vector3.UP)) > 0.98 else Vector3.UP
+		ring.look_at(camera.global_position, up)
 		ring.rotate_object_local(Vector3.RIGHT, PI * 0.5)
 
 func _ring(color: Color, inner: float, outer: float) -> MeshInstance3D:
