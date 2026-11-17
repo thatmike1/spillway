@@ -20,7 +20,7 @@ These are implementation choices for Mike to judge, not playtest findings.
 
 ## Verification
 
-`python3 tools/play.py --headless --script res://tests/mail_tape.gd` runs the deterministic lane tape. `python3 tools/test.py --out /tmp/r22-mail-run/fast-N` runs the shared component gate. Slow original-map parity belongs to the integrator for this run.
+For a fresh worktree, import resources once with `python3 tools/play.py --headless --editor --import --quit`. Then `python3 tools/play.py --headless --audio-driver Dummy --fixed-fps 128 --script res://tests/mail_tape.gd` runs the deterministic lane tape. `python3 tools/test.py --out /tmp/r22-mail-run/fast-N` runs the shared component gate. Slow original-map parity belongs to the integrator for this run.
 
 Original art is procedural geometry and flat materials in `scripts/maps/mail_run.gd`; no reference or generated concept image is a runtime asset.
 

@@ -57,7 +57,7 @@ func _physics_process(_dt: float) -> bool:
 		held = true
 	else:
 		held = false
-	if flight.active:
+	if flight.active and variant < 2:
 		var target: Vector3 = game.level.mailboxes[throws - 1].position
 		var desired: Vector3 = (target - flight.position).normalized()
 		var right: Vector3 = flight.direction.cross(Vector3.UP).normalized()
@@ -68,7 +68,7 @@ func _physics_process(_dt: float) -> bool:
 		if runner.global_position.z < target.z + 14:
 			var aim: Vector3 = (target - (runner.global_position + Vector3.UP * 1.6)).normalized()
 			var desired_yaw := atan2(-aim.x, -aim.z)
-			var desired_pitch := asin(aim.y) + 0.03
+			var desired_pitch := 1.0 if variant == 3 else asin(aim.y) + 0.03
 			_mouse(runner, Vector2((runner.yaw - desired_yaw) / runner.tape_radians_per_count, (runner.pitch - desired_pitch) / runner.tape_radians_per_count))
 			var click := InputEventMouseButton.new()
 			click.button_index = MOUSE_BUTTON_LEFT
@@ -76,7 +76,7 @@ func _physics_process(_dt: float) -> bool:
 			runner._unhandled_input(click)
 			events.append({"time": frames / 128.0, "button": 1, "pressed": true})
 			events.append({"time": (frames + 1) / 128.0, "button": 1, "pressed": false})
-			throws += 1
+			throws = 3 if variant == 3 else throws + 1
 	if game.finished:
 		identities.append(game.course_key)
 		if not tape_out.is_empty() and variant < 2:
@@ -85,7 +85,9 @@ func _physics_process(_dt: float) -> bool:
 			file.store_string(JSON.stringify(events))
 		if game.session.actual_v_mismatches != 0:
 			failures.append("recorded actual velocity mismatch")
-		if flight.delivered.size() != (0 if variant == 2 else 3):
+		if variant == 3 and flight.misses != 1:
+			failures.append("miss did not cost exactly one miss")
+		if flight.delivered.size() != (0 if variant >= 2 else 3):
 			failures.append("view %s delivered %d" % [runner.view_mode, flight.delivered.size()])
 		print("MAIL TAPE view=%s delivered=%d misses=%d finished=%s ticks=%d" % [runner.view_mode, flight.delivered.size(), flight.misses, game.finished, frames])
 		if variant == 0:
@@ -101,6 +103,12 @@ func _physics_process(_dt: float) -> bool:
 			variant = 2
 			frames = 0
 			throws = 3
+			Input.action_release("jump")
+			game.restart_run()
+		elif variant == 2:
+			variant = 3
+			frames = 0
+			throws = 0
 			Input.action_release("jump")
 			game.restart_run()
 		else:
