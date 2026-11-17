@@ -42,3 +42,7 @@ Tape events run in a physics callback at priority -100, before the ordinary moto
 Capture spacing and duration use a dedicated physics clock, matching tape timestamps, rather than accumulated render-process deltas. Sample times are simulation seconds, including while the game is paused for menu inspection.
 
 Snapshots omit only `tests/fixtures` for frozen recording payloads, alongside generated caches/builds. Other directories named `fixtures` and authored `.import` settings remain included.
+
+Tape timestamps are zero-based motor time: time0 applies before the first tick, time1/128 before the second. Events dispatch before the tape clock advances. Pressed actions preserve optional numeric `strength` in[0,1] (default1); released actions always use0. The public `restart_run("capture")` establishes normal spawn immediately before route/tape playback, after startup warm-up. Tapes exported for the older age-before-dispatch convention need re-exporting against this contract.
+
+Run `python3 -B tests/test_shot.py --native-contract --out /absolute/new/external/folder` for native PNG-observed positions and complete motor-state comparison against an independent canonical normal-spawn tape with distinct t0/t1 strengths. This integration check uses the shared engine lock and private display; ordinary unit tests remain headless and lightweight.
