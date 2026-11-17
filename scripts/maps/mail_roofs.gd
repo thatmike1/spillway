@@ -9,7 +9,7 @@ const ROOF_ENTRY := {"name": "Mail Roofs", "theme": "Five slots. Your order.", "
 func _init() -> void:
 	level_id = "r22-mail-roofs"
 	level_name = "Mail Roofs"
-	level_version = 4
+	level_version = 5
 	variant = ROOF_ID
 	spawn = Transform3D(Basis.IDENTITY, Vector3(0, 10.04, 12))
 	finish_position = Vector3(-7, 10, 12)
@@ -89,6 +89,7 @@ func build() -> void:
 		box("post_bell_pier_%s" % x, Vector3(x, 32, -85), Vector3(0.8, 8, 8), Color("ded8c2"))
 	box("post_bell_roof", Vector3(0, 36, -85), Vector3(8.8, 0.7, 8.8), Color("ded8c2"))
 	box("bell", Vector3(0, 31.5, -85), Vector3(2.2, 2.5, 2.2), Color("92836b"))
+	box("bell_hanger", Vector3(0, 34.3, -85), Vector3(0.2, 3.2, 0.2), Color("aaa897"))
 	for side: int in [-1, 1]:
 		for z: int in range(-60, 12, 8):
 			box("facade_pier_%s_%s" % [side, z], Vector3(side * 10, 1, z), Vector3(0.5, 17, 0.7), Color("aaa897"))
@@ -96,15 +97,37 @@ func build() -> void:
 	box("post_dispatch_hall", Vector3(-7, 3.4, 18.5), Vector3(14, 18.8, 3), Color("53666a"))
 	box("dispatch_door", Vector3(-7, 11.25, 16.94), Vector3(3.2, 2.5, 0.10), Color("172d32"))
 	box("dispatch_board", Vector3(-7, 13.2, 16.8), Vector3(6, 1, 0.15), Color("ded8c2"))
+	box("dispatch_upper", Vector3(-7, 14.15, 18.5), Vector3(14, 2.7, 3), Color("53666a"))
+	get_node("Mail_dispatch_upper").material_override = ROOF_MATERIAL.concrete(Color("53666a"))
+	box("dispatch_canopy", Vector3(-7, 14.5, 16), Vector3(8, 0.3, 3), Color("ded8c2"))
+	box("dispatch_canopy_lip", Vector3(-7, 14.6, 14.45), Vector3(8.1, 0.1, 0.12), Color("bc713e"))
+	for x: float in [-9.8, -4.2]:
+		box("dispatch_bracket_%s" % x, Vector3(x, 14.05, 16.7), Vector3(0.25, 0.6, 1.8), Color("aaa897"))
+	for x: float in [-12, -2]:
+		box("dispatch_window_frame_%s" % x, Vector3(x, 11.6, 16.91), Vector3(2.4, 1.8, 0.15), Color("aaa897"))
+		box("dispatch_window_glass_%s" % x, Vector3(x, 11.6, 16.8), Vector3(1.95, 1.35, 0.08), Color("718987"))
+	box("dispatch_lamp", Vector3(-7, 14.29, 15.8), Vector3(0.7, 0.12, 0.4), Color("ded8c2"))
+	_local_light(Vector3(-7, 14, 15.6), 0.55, 7)
 	label("dispatch", Vector3(-7, 13.2, 16.68), "DISPATCH", 0.015, PI)
 	for side: int in [-1, 1]:
 		box("post_gallery_%s" % side, Vector3(side * 21.5, 5.25, -23), Vector3(3, 18.5, 48), Color("53666a"))
 		box("gallery_cornice_%s" % side, Vector3(side * 21.5, 14.6, -23), Vector3(3.4, 0.3, 48), Color("ded8c2"))
 		for z: int in range(-44, 1, 4):
+			if side == -1 and z == -12:
+				continue
 			box("gallery_window_%s_%s" % [side, z], Vector3(side * 19.96, 12, z), Vector3(0.08, 1.35, 1.5), Color("29464a"))
 	for side: int in [-1, 1]:
 		box("dispatch_jamb_%d" % side, Vector3(-7 + side * 1.75, 11.3, 16.78), Vector3(0.17, 2.6, 0.24), Color("aaa897"))
 	box("dispatch_lintel", Vector3(-7, 12.6, 16.78), Vector3(3.65, 0.17, 0.24), Color("aaa897"))
+	# one service entrance gives the later gallery a functional distinction at running eye height.
+	box("service_door", Vector3(-19.94, 11.8, -12), Vector3(0.08, 3.6, 4), Color("52666a"))
+	box("service_glazing", Vector3(-19.89, 12.7, -12), Vector3(0.06, 1.2, 3.6), Color("81948f"))
+	box("service_seam", Vector3(-19.84, 11.8, -12), Vector3(0.04, 3.3, 0.06), Color("aaa897"))
+	for z: float in [-14.1, -9.9]:
+		box("service_jamb_%s" % z, Vector3(-19.83, 11.8, z), Vector3(0.35, 3.6, 0.18), Color("aaa897"))
+	box("service_lintel", Vector3(-19.83, 13.65, -12), Vector3(0.4, 0.2, 4.5), Color("aaa897"))
+	box("service_threshold", Vector3(-19.83, 10.08, -12), Vector3(0.4, 0.12, 4.5), Color("aaa897"))
+	box("service_canopy", Vector3(-19.75, 13.82, -12), Vector3(1, 0.2, 4.8), Color("ded8c2"))
 	# a supported roof lantern identifies the later sorting gallery without adding route clutter.
 	for side: int in [-1, 1]:
 		var outside := -21.5 + side * 1.5
@@ -131,6 +154,10 @@ func build() -> void:
 		var mesh := get_node_or_null("Mail_" + id) as MeshInstance3D
 		if mesh != null:
 			mesh.material_override = ROOF_MATERIAL.concrete(Color("aaa897"))
+	for i: int in 5:
+		get_node("Mail_post_house_%d" % i).material_override = ROOF_MATERIAL.concrete(Color("64736f"))
+	for pair: Array in [["post_chamber_west", "6e7b78"], ["post_chamber_east", "617774"], ["post_chamber_roof", "90988b"], ["post_chimney", "7d8278"]]:
+		get_node("Mail_" + str(pair[0])).material_override = ROOF_MATERIAL.concrete(Color(str(pair[1])))
 	_environment()
 	routes = {"basic": [spawn.origin, Vector3(15, 10, 0), Vector3(15, 10, -50), Vector3(0, 10, -59), Vector3(-15, 10, -50), Vector3(-15, 10, 0), finish_position]}
 

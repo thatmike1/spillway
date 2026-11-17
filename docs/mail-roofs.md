@@ -16,7 +16,7 @@ The sole practice checkpoint restarts the complete roof loop, with all five slot
 
 ## Presentation
 
-Connected service galleries, a roof lantern on the later gallery, a supported Dispatch doorway and a west wharf/warehouse/gantry give the loop its setting. Roof joints, restrained weather at joints/waterlines, shaded-face separation and local service lighting supply surface/depth cues. Pale number plates and window framing identify the receiving openings. Camera/body wording distinguishes the steering view from body hold, and the mail ticket hides at finish.
+Connected service galleries, an eye-height glazed service entrance, a roof lantern and a west wharf/warehouse/gantry give the loop its setting. Dispatch has a covered counter frontage with visible brackets and service windows; the sorting bell hangs from its overhead frame. Warm pale roof joints, restrained weather at joints/waterlines, distinct chamber/cabinet values and local service lighting supply surface/depth cues. Pale number plates and window framing identify the receiving openings. Camera/body wording distinguishes the steering view from body hold, and the mail ticket hides at finish.
 
 Roof mesh names deliberately avoid the shared look layer's `Mesh_*` material replacements, as the original quay does. These are visual names; collision/progress prisms retain their authored identifiers. All new geometry, shader code and fixtures are original procedural work. References and the generated concept stay outside Git; none is a runtime asset.
 

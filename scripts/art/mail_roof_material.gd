@@ -26,7 +26,7 @@ void fragment(){
  vec2 cells=abs(fract(wp.xz/vec2(4.0,6.0)+0.5)-0.5)*vec2(4.0,6.0);
  vec2 aa=max(fwidth(wp.xz),vec2(0.005));
  float seam=1.0-min(smoothstep(0.025-aa.x,0.025+aa.x,cells.x),smoothstep(0.025-aa.y,0.025+aa.y,cells.y));
- vec3 cap=vec3(0.72,0.71,0.64);
+ vec3 cap=vec3(0.78,0.77,0.73);
  if(roof){ cap=mix(cap,vec3(0.34,0.40,0.39),seam*0.42); }
  ALBEDO=mix(side,cap,top); ROUGHNESS=0.95; SPECULAR=0.0;
 }
