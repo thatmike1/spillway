@@ -53,6 +53,13 @@ def static_check(folder, platform, linux_pack=None):
     build = json.loads((folder / "BUILD.json").read_text())
     if build.get("platform") != platform or build.get("pack_sha256") != engine.sha(pack) or build.get("template_sha256") != engine.sha(executable):
         raise ValueError("BUILD.json does not describe these bytes")
+    for source_name, digest in build.get("source_files", {}).items():
+        source = Path(source_name)
+        if not source_name.startswith("assets/") or not any(word in source.name.lower() for word in ("license", "licence", "copyright", "manifest", "provenance")):
+            continue
+        notice = (folder / "notices" / source.relative_to("assets")).resolve()
+        if not notice.is_relative_to(folder.resolve()) or not notice.is_file() or engine.sha(notice) != digest:
+            raise ValueError("Missing or changed package notice: " + source_name)
     if platform == "linux" and "scripts/persistence/package_probe.gd" not in build.get("source_files", {}):
         raise ValueError("Export lacks the opt-in package probe; build the integrated r22 source first")
     result = {"platform": platform, "pack_sha256": engine.sha(pack), "executable_sha256": engine.sha(executable)}

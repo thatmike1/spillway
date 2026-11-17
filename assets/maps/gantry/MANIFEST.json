@@ -1,0 +1,16 @@
+{
+  "assets": [
+    {
+      "path": "concrete.gdshader",
+      "origin": "original Spillway source using the project's world-space surface and toon-lighting conventions",
+      "rights": "project-authored source; no external asset import",
+      "purpose": "large quiet concrete patches, vertical runoff and a casting joint"
+    }
+  ],
+  "reused_project_resources": [
+    "res://assets/look/painted-wear.png",
+    "res://assets/look/cloud-sky.png",
+    "res://shaders/look/water.gdshader"
+  ],
+  "private_references_included": false
+}

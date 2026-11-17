@@ -12,9 +12,12 @@ var tape: Array = []
 var samples: Array = []
 var events: Array = []
 var previous_hold := false
+var fast_line := false
 
 func _initialize() -> void:
 	for arg: String in OS.get_cmdline_user_args():
+		if arg == "--fast":
+			fast_line = true
 		if arg.begins_with("--out="):
 			output = arg.trim_prefix("--out=")
 	run.call_deferred()
@@ -40,7 +43,7 @@ func run() -> void:
 		var feet := player.global_position
 		if bay < 3 and not player.grapple.is_empty():
 			attached[bay] = true
-		if bay < 3 and feet.z < LEVEL.V_ANCHORS[bay].z-2.0 and (bay == 0 or (feet.y > 5.0 and (bay < 2 or feet.x < -1.0))):
+		if bay < 3 and feet.z < LEVEL.V_ANCHORS[bay].z-2.0 and (bay == 0 or (feet.y > (3.5 if fast_line and bay == 2 else 5.0) and (bay < 2 or feet.x < -1.0))):
 			bay += 1
 		var aim: Vector3 = LEVEL.V_ANCHORS[mini(bay,2)]
 		# attachment persists independently of view: preview the next transfer before releasing.
@@ -59,8 +62,8 @@ func run() -> void:
 		wish = wish.normalized()
 		var forward := Vector3(-sin(player.yaw),0,-cos(player.yaw))
 		var right := Vector3(cos(player.yaw),0,-sin(player.yaw))
-		var f := wish.dot(forward)
-		var s := wish.dot(right)
+		var f := clampf(wish.dot(forward),-1.0,1.0)
+		var s := clampf(wish.dot(right),-1.0,1.0)
 		var hold: bool = bay < 3
 		# one released tick between bays lets the production fresh-press guard rearm.
 		if bay > 0 and not player.grapple.is_empty() and player.grapple.position != LEVEL.V_ANCHORS[mini(bay,2)]:
@@ -97,7 +100,7 @@ func run() -> void:
 	var ok: bool = level.is_finish_at(player.global_position) and attached.all(func(v: bool) -> bool: return v)
 	DirAccess.make_dir_recursive_absolute(output)
 	var file := FileAccess.open(output.path_join("route.json"),FileAccess.WRITE)
-	file.store_string(JSON.stringify({"ok":ok,"ticks":tick+1,"attached":attached,"feet":player.global_position,"samples":samples,"tape":tape},"\t"))
+	file.store_string(JSON.stringify({"ok":ok,"line":"fast" if fast_line else "basic","ticks":tick+1,"attached":attached,"feet":player.global_position,"samples":samples,"tape":tape},"\t"))
 	file.close()
 	file = FileAccess.open(output.path_join("input.json"),FileAccess.WRITE)
 	file.store_string(JSON.stringify(events))

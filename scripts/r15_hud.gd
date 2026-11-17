@@ -653,6 +653,8 @@ func _build_map_cards() -> void:
 	map_buttons.clear()
 	for id: String in ids:
 		var entry: Dictionary = game.call("map_entry", id)
+		if id == "experiment":
+			entry.theme = "Slide, wall jump and grapple"
 		var button := Button.new()
 		button.name = "Map_" + id
 		button.toggle_mode = true
@@ -668,7 +670,7 @@ func _build_map_cards() -> void:
 	map_heading.text = "Map  ·  %d playable  (starts at its spawn, keeps your preset)" % ids.size()
 
 static func map_card_text(entry: Dictionary) -> String:
-	var words := str(KIND_WORDS.get(str(entry.get("kind", "")), ""))
+	var words := "Not a course" if str(entry.get("kind", "")) == "lab" else str(KIND_WORDS.get(str(entry.get("kind", "")), ""))
 	var sub := str(entry.get("theme", ""))
 	if not words.is_empty():
 		sub = words if sub.is_empty() else "%s · %s" % [sub, words]
