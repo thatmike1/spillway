@@ -653,6 +653,8 @@ func _build_map_cards() -> void:
 	map_buttons.clear()
 	for id: String in ids:
 		var entry: Dictionary = game.call("map_entry", id)
+		if id == "experiment":
+			entry.theme = "Slide, wall jump and grapple"
 		var button := Button.new()
 		button.name = "Map_" + id
 		button.toggle_mode = true

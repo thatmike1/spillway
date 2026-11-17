@@ -174,6 +174,10 @@ func _refresh_tether() -> void:
 
 func _process(delta: float) -> void:
 	super(delta)
+	if game != null and game.map_has_capability("mail_delivery"):
+		controls.modulate.a = 0.0
+		hint.modulate.a = 0.0
+		keys_line.modulate.a = 0.0
 	_refresh_anchor_readout()
 
 func _refresh_anchor_readout() -> void:

@@ -21,7 +21,7 @@ const CATALOG := {
 	"night-shift": {"name": "Night Shift", "theme": "Neon transit works", "kind": "course", "script": "res://scripts/r15_nightshift_level.gd"},
 	"practice": {"name": "Penstock Yard", "theme": "R14 practice yard", "kind": "legacy", "script": "res://scripts/r14_practice_level.gd", "variant": "practice", "roles": ["route"], "dress": true},
 	"overflow": {"name": "Overflow", "theme": "R13/R14 dam course", "kind": "legacy", "script": "res://scripts/momentum_overflow_level.gd", "variant": "course", "dress": true},
-	"experiment": {"name": "Movement Lab", "theme": "Slide, wall jump and grapple", "kind": "lab", "script": "res://scripts/r15_experiment_level.gd"},
+	"experiment": {"name": "Movement Lab", "theme": "Experimental moves, not a course", "kind": "lab", "script": "res://scripts/r15_experiment_level.gd"},
 }
 const ORDER := ["breakwater", "whiteout-relay", "sunken-court", "rainline", "night-shift", "practice", "overflow", "experiment"]
 ## the first available of these is the default map. penstock is the labelled development
