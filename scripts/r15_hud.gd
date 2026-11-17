@@ -30,7 +30,7 @@ const CARD_GAP := 8
 const MAX_COLUMNS := 4
 const PANEL_MAX_WIDTH := 900.0
 const PANEL_MIN_WIDTH := 460.0
-const KIND_WORDS := {"course": "", "legacy": "R14 map", "lab": "Experiment · not a course", "fixture": "FIXTURE"}
+const KIND_WORDS := {"course": "", "legacy": "R14 map", "lab": "Not a course", "fixture": "FIXTURE"}
 
 var game: Node
 var overlay: Control
@@ -653,6 +653,8 @@ func _build_map_cards() -> void:
 	map_buttons.clear()
 	for id: String in ids:
 		var entry: Dictionary = game.call("map_entry", id)
+		if id == "experiment":
+			entry.theme = "Slide, wall jump and grapple"
 		var button := Button.new()
 		button.name = "Map_" + id
 		button.toggle_mode = true
