@@ -130,6 +130,8 @@ func _start() -> void:
 	main.call("set_look", options.look != "old")
 	main.call("set_paused", false)
 	trace = FileAccess.open(str(options.out).path_join("frames.jsonl"), FileAccess.WRITE)
+	if options.mode in ["route", "tape"]:
+		main.call("restart_run", "capture")
 	if options.mode == "route":
 		var routes: Dictionary = main.get("level").get("routes")
 		if not routes.has(str(options.route)):
@@ -165,6 +167,8 @@ func _process(_delta: float) -> bool:
 	if not ready_to_run:
 		return false
 	age = float(clock.get("age"))
+	if age <= 0:
+		return false
 	if age >= float(options.seconds) and not capturing and frame_index > 0:
 		main.call("request_quit", 0)
 		return false
@@ -212,7 +216,6 @@ class TapeInput extends Node:
 	var age: float = 0
 	var event_index: int = 0
 	func _physics_process(delta: float) -> void:
-		age += delta
 		while event_index < options.events.size() and float(options.events[event_index].time) <= age:
 			var row: Dictionary = options.events[event_index]
 			var event: InputEvent
@@ -231,7 +234,7 @@ class TapeInput extends Node:
 				var action := InputEventAction.new()
 				action.action = str(row.action)
 				action.pressed = bool(row.pressed)
-				action.strength = 1.0 if action.pressed else 0.0
+				action.strength = float(row.get("strength", 1.0)) if action.pressed else 0.0
 				event = action
 			else:
 				var motion := InputEventMouseMotion.new()
@@ -241,6 +244,7 @@ class TapeInput extends Node:
 			Input.parse_input_event(event)
 			Input.flush_buffered_events()
 			event_index += 1
+		age += delta
 '''
 
 
@@ -273,7 +277,10 @@ def read_sequence(path, mode):
             elif "action" in row:
                 if not isinstance(row["action"], str) or not isinstance(row.get("pressed"), bool):
                     raise ValueError("action requires a name and boolean pressed")
-                values = [stamp]
+                strength = row.get("strength", 1.0)
+                if type(strength) not in (int, float) or not math.isfinite(strength) or not 0 <= strength <= 1:
+                    raise ValueError("action strength must be a finite number in [0,1]")
+                values = [stamp, strength]
             else:
                 mouse = row.get("mouse")
                 if not isinstance(mouse, list) or len(mouse) != 2:
