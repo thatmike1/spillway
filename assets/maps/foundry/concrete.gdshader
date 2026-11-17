@@ -35,21 +35,22 @@ void fragment() {
     float block = hash(floor(wall_uv));
     float tide = smoothstep(-7.0, 1.0, world.y);
     vec3 side = mix(vec3(0.15, 0.24, 0.24), vec3(0.34, 0.39, 0.36), tide);
-    side *= 0.86 + block * 0.20;
+    side *= 0.96 + block * 0.07;
     side *= 1.0 - wall_joint * 0.24;
-    float coarse = hash(floor(face * vec2(1.1, 1.7)));
-    float chip = smoothstep(0.76, 0.98, coarse) * smoothstep(0.15, 0.9, wall_joint);
-    side = mix(side, vec3(0.46, 0.46, 0.39), chip * 0.55);
-    float streak = smoothstep(0.82, 0.97, hash(vec2(floor(face.x * 1.8), 4.0)));
-    side *= 1.0 - streak * 0.15 * (1.0 - tide * 0.6);
-    float worn = weather(face * vec2(0.38, 0.48));
-    float broken = weather(face * 2.4);
-    float coating = smoothstep(0.36, 0.68, worn + (broken - 0.5) * 0.18);
-    side = mix(side * 0.78, side * 1.23 + vec3(0.025, 0.021, 0.008), coating);
-    float edge_wear = smoothstep(0.05, 0.32, wall_joint) * smoothstep(0.48, 0.72, broken);
-    side = mix(side, vec3(0.49, 0.47, 0.39), edge_wear * 0.35);
-    float damp = (1.0 - tide) * smoothstep(0.28, 0.73, weather(face * vec2(0.6, 0.16)));
-    side *= 1.0 - damp * 0.24;
+    vec2 joint_distance = min(fract(wall_uv), 1.0 - fract(wall_uv)) * vec2(4.5, 2.5);
+    float seam_edge = 1.0 - smoothstep(0.035, 0.16, min(joint_distance.x, joint_distance.y));
+    float broken = weather(face * 5.0);
+    float damage = hash(vec2(floor(face.x / 1.7), floor(wall_uv.y)));
+    float chipped = seam_edge * smoothstep(0.62, 0.85, damage) * smoothstep(0.43, 0.76, broken);
+    side = mix(side, vec3(0.46, 0.45, 0.38), chipped * 0.42);
+    float course_distance = (1.0 - fract(wall_uv.y)) * 2.5;
+    float stain = hash(vec2(floor(face.x / 0.65), floor(wall_uv.y) + 17.0));
+    float runoff = (1.0 - smoothstep(0.04, mix(0.18, 0.9, stain), course_distance))
+        * smoothstep(0.80, 0.96, stain) * smoothstep(0.45, 0.8, damage);
+    side *= 1.0 - runoff * 0.13;
+    float waterline = (1.0 - smoothstep(-6.2, -4.8, world.y))
+        * (0.8 + weather(vec2(face.x * 1.2, world.y * 2.0)) * 0.2);
+    side *= 1.0 - waterline * 0.18;
     ALBEDO = mix(side, cap, top);
     ROUGHNESS = 0.97;
 }

@@ -15,5 +15,5 @@ original procedural slab joints, per-slab warm variation, wet streaks and
 localized joint chipping. No image or reference pixels are sampled for these
 materials. The optional sky reuse is the only bitmap in this art treatment.
 
-Broad interpolated procedural weathering, broken coating and damp regions give
-vertical concrete irregular wear without introducing a fine repeating texture.
+Procedural wear is confined to broken slab-joint edges, short seam runoff and
+the lower waterline. Broad pale/dark mottles are deliberately absent.

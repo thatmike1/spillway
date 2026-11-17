@@ -55,8 +55,8 @@ its authored materials. Pale slab tops, darker weathered sides, restrained ink
 and orange lips use original procedural shaders. The painted sky reuses the
 existing practice-sky resource. Rights and source paths are recorded in
 `assets/maps/foundry/MANIFEST.md`; private concept/reference pixels are absent.
-Broad mottled coating and damp regions weather vertical concrete while keeping
-the landing tops quiet. Pale level bands on the existing tailrace pipe drops
+Joint-edge chips, short seam runoff and lower waterline stains weather vertical
+concrete while keeping large faces and landing tops quiet. Pale level bands on the existing tailrace pipe drops
 compare the high handoff, midpoint and low catch. The catch itself is a flat
 landing ten metres below the takeoff, not a ramp.
 
