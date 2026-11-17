@@ -33,6 +33,10 @@ func run() -> void:
 		var file := FileAccess.open(review_folder.path_join(route + ".r16run"), FileAccess.WRITE)
 		file.store_buffer(bytes)
 		file.close()
+	var prefix := FileAccess.get_file_as_bytes(review_folder.path_join("return.r16run"))
+	var partial := FileAccess.open(review_folder.path_join("zzz-partial.r16run.part"), FileAccess.WRITE)
+	partial.store_buffer(prefix.slice(0, prefix.size() / 2))
+	partial.close()
 	var review_before := inventory(review_folder)
 	var screen := SCREEN.new()
 	screen.directory = review_folder
@@ -45,6 +49,7 @@ func run() -> void:
 		if screen.entries[i].name == "return.r16run":
 			selected = i
 	check(selected >= 0, "fixture listed")
+	check(screen.entries[screen.attempts.get_selected_items()[0]].ok, "default selection skips the newest still-open attempt")
 	if selected >= 0:
 		screen.select_attempt(selected)
 		check(screen.comparison.get("ok", false), "screen displays real recording pair")
@@ -58,6 +63,11 @@ func run() -> void:
 		root.add_child(source)
 		screen.attach_map(source, screen.comparison.attempt.identity)
 		check(screen.stage.visible and not screen.trace.visible, "available follow shows stage")
+		screen.camera_target.select(1)
+		screen.camera_target.item_selected.emit(1)
+		check(screen.stage.follow_target == 1 and screen.view_note.text.contains("personal best"), "follow target explicitly switches to best")
+		screen.camera_target.select(0)
+		screen.camera_target.item_selected.emit(0)
 		var requested: Array[Dictionary] = [{}]
 		screen.practice_requested.connect(func(value: Dictionary) -> void: requested[0] = value)
 		check(not screen.practice_button.disabled, "matching map enables practice action")
@@ -70,9 +80,9 @@ func run() -> void:
 		screen.select_attempt(selected)
 		check(screen.trace.visible and screen.splits.visible, "selection preserves unavailable fallback")
 		screen.refresh()
-		check(screen.trace.visible and screen.splits.visible, "refresh retains unavailable fallback")
 		while screen.scanning:
 			await process_frame
+		check(screen.comparison.ok and screen.trace.visible and screen.splits.visible, "completed refresh restores unavailable fallback")
 		screen.select_attempt(selected)
 		follow.button_pressed = false
 		source.queue_free()
@@ -83,6 +93,20 @@ func run() -> void:
 		row.select(0)
 		screen.splits.item_selected.emit()
 		check(is_equal_approx(screen.scrubber.value, float(row.get_metadata(0))), "checkpoint selection scrubs")
+	var partial_index := -1
+	for i: int in screen.entries.size():
+		var label := screen.attempts.get_item_text(i)
+		check(label.contains("2026-") and label.contains("Z"), "recorded date/time is visible in attempt row")
+		if screen.entries[i].name == "zzz-partial.r16run.part":
+			partial_index = i
+	check(partial_index >= 0, "partial attempt is listed")
+	if partial_index >= 0:
+		check(screen.attempts.get_item_text(partial_index).contains("incomplete"), "partial status is visible")
+		screen.select_attempt(partial_index)
+		check(not screen.trace.visible and not screen.splits.visible and not screen.stage.visible and screen.practice_button.disabled, "incomplete attempt never shows stale analysis or practice")
+		check(screen.message.text.contains("Choose a sealed attempt"), "incomplete state explains recovery")
+		screen.select_attempt(selected)
+		check(screen.trace.visible and screen.splits.visible, "valid selection restores analysis after incomplete file")
 	check(inventory(folder) == before, "review leaves recording folder byte-identical")
 	var close_seen: Array[bool] = [false]
 	screen.closed.connect(func() -> void: close_seen[0] = true)

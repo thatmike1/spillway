@@ -16,6 +16,8 @@ var scrubber: HSlider
 var message: Label
 var clock: Label
 var practice_button: Button
+var follow: CheckButton
+var camera_target: OptionButton
 var legend: Label
 var _details: VBoxContainer
 var stage
@@ -61,21 +63,39 @@ func _ready() -> void:
 	var columns := HSplitContainer.new()
 	columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_child(columns)
+	var library := VBoxContainer.new()
+	columns.add_child(library)
+	var heading := Label.new()
+	heading.text = "Recent attempts · UTC"
+	library.add_child(heading)
 	attempts = ItemList.new()
-	attempts.custom_minimum_size.x = 290
+	attempts.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	attempts.custom_minimum_size.x = 320
+	attempts.icon_mode = ItemList.ICON_MODE_TOP
+	attempts.fixed_column_width = 296
+	attempts.max_text_lines = 3
+	attempts.add_theme_font_size_override("font_size", 14)
 	attempts.size_flags_horizontal = Control.SIZE_FILL
 	_style_data_control(attempts)
 	attempts.item_selected.connect(select_attempt)
-	columns.add_child(attempts)
+	library.add_child(attempts)
 	_details = VBoxContainer.new()
 	_details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	columns.add_child(_details)
 	legend = Label.new()
 	legend.text = "Speed over time (m/s)   •   Teal: attempt   •   Rust: personal best"
 	_details.add_child(legend)
-	var follow := CheckButton.new()
+	follow = CheckButton.new()
 	follow.text = "Follow camera"
 	_details.add_child(follow)
+	camera_target = OptionButton.new()
+	camera_target.add_item("Follow attempt")
+	camera_target.add_item("Follow personal best")
+	camera_target.item_selected.connect(func(index: int) -> void:
+		stage.follow_target = index
+		stage.scrub_to(scrubber.value)
+		_update_follow_note())
+	_details.add_child(camera_target)
 	stage = STAGE.new()
 	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_details.add_child(stage)
@@ -123,6 +143,7 @@ func _ready() -> void:
 func refresh() -> void:
 	comparison = {}
 	practice_button.disabled = true
+	practice_button.tooltip_text = "Choose a comparable attempt with a completed segment first."
 	stage.clear()
 	entries.clear()
 	attempts.clear()
@@ -148,19 +169,22 @@ func _process(_delta: float) -> void:
 func _finish_list() -> void:
 	for entry: Dictionary in entries:
 		var identity: Dictionary = entry.identity
-		var outcome: Dictionary = entry.outcome
-		var detail := "%.3f s" % float(outcome.time) if outcome.get("kind") == "finish" and (outcome.get("time") is float or outcome.get("time") is int) else str(outcome.get("kind", entry.status))
-		var text := "%s · %s" % [identity.get("map", "Unknown map"), detail]
-		attempts.add_item(text)
+		attempts.add_item(MODEL.attempt_label(entry))
 		attempts.set_item_tooltip(attempts.item_count - 1, "%s\n%s" % [entry.name, identity.get("preset", "")])
 	message.text = "Pick an attempt to compare it with its matching personal best." if not entries.is_empty() else "No recordings yet. Play an attempt, then return here."
 	if not entries.is_empty():
-		attempts.select(0)
-		select_attempt(0)
+		var preferred := 0
+		for i: int in entries.size():
+			if entries[i].ok:
+				preferred = i
+				break
+		attempts.select(preferred)
+		select_attempt(preferred)
 
 func select_attempt(index: int) -> void:
 	comparison = {}
 	practice_button.disabled = true
+	practice_button.tooltip_text = "Choose a comparable attempt with a completed segment first."
 	stage.clear()
 	stage.visible = false
 	view_note.text = "Choose a comparable recording pair first."
@@ -218,7 +242,8 @@ func attach_map(source: Node3D, identity: Dictionary) -> void:
 
 func _load_preview() -> void:
 	var why: String = stage.load_pair(comparison)
-	view_note.text = why if not why.is_empty() else "Teal is this attempt; rust is its personal best. Scrub below to follow both on the course clock."
+	view_note.text = why if not why.is_empty() else ""
+	if why.is_empty(): _update_follow_note()
 	_update_view_visibility()
 	_update_practice_action()
 
@@ -240,9 +265,17 @@ func _style_data_control(control: Control) -> void:
 	control.add_theme_stylebox_override("focus", focus)
 
 func _update_view_visibility() -> void:
-	var showing_follow: bool = _follow_mode and stage.tracks.size() == 2
+	var valid := bool(comparison.get("ok", false))
+	var showing_follow: bool = valid and _follow_mode and stage.tracks.size() == 2
 	stage.visible = showing_follow
-	trace.visible = not showing_follow
-	splits.visible = not showing_follow
-	legend.visible = not showing_follow
-	view_note.visible = _follow_mode
+	camera_target.visible = showing_follow
+	trace.visible = valid and not showing_follow
+	splits.visible = valid and not showing_follow
+	legend.visible = valid and not showing_follow
+	scrubber.visible = valid
+	clock.visible = valid
+	follow.disabled = not valid
+	view_note.visible = valid and _follow_mode
+
+func _update_follow_note() -> void:
+	view_note.text = "Following %s. Teal: attempt; rust: personal best. Switch targets if the other ghost is ahead, behind or hidden by scenery." % ("the attempt" if stage.follow_target == 0 else "the personal best")
