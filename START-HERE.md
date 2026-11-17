@@ -48,6 +48,7 @@ Stable round-numbered aliases preserve resource paths used by recording identiti
 | Viaduct / `viaduct` | `maps/viaduct.gd`, grapple player; fixed Arc transfers and lower-court returns |
 | Gantry / `gantry` | `maps/gantry.gd`, grapple player; F2 ground sections joined by fixed Arc transfers |
 | Mail Run / `mail-run` | `maps/mail_run.gd`, `movement/mail_runner.gd`; F2 with held or running envelope steering |
+| Sluice Six / `sluice-six` | `maps/sluice_six.gd`, course player; F2 settling piers, offset caps and spill tower |
 | Shelved: Fall Line / `fall-line` | `r19_fall_line_level.gd`; retained as a catalog dependency, removed from the current menu |
 | Shelved: Line Drive / `line-drive` | `r19_line_drive_level.gd`, `r19_line_drive_player.gd`; retained dependency, removed from the current menu |
 
