@@ -16,19 +16,19 @@ var _list_signature := ""
 
 func attach(main: Node) -> void:
 	super(main)
-	share_toggle = _button(_pause_column, "", func() -> void: _show_share(not share_section.visible))
+	share_toggle = _button(pause_pages["Runs"], "", func() -> void: _show_share(not share_section.visible))
 	share_toggle.name = "GhostSharingToggle"
 	share_toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	_pause_column.move_child(share_toggle, map_heading.get_index())
-	share_selection = _small(_pause_column, "")
-	_pause_column.move_child(share_selection, map_heading.get_index())
-	share_revision = _small(_pause_column, "")
-	_pause_column.move_child(share_revision, map_heading.get_index())
+
+	share_selection = _small(pause_pages["Runs"], "")
+
+	share_revision = _small(pause_pages["Runs"], "")
+
 	share_section = VBoxContainer.new()
 	share_section.name = "GhostSharing"
 	share_section.add_theme_constant_override("separation", 8)
-	_pause_column.add_child(share_section)
-	_pause_column.move_child(share_section, map_heading.get_index())
+	pause_pages["Runs"].add_child(share_section)
+
 	_small(share_section, "Send one best-run file. Your friend drops it in their ghosts folder, then opens Esc or presses Refresh. Nothing is uploaded.")
 	share_path = LineEdit.new()
 	share_path.name = "GhostFolderPath"
@@ -78,6 +78,7 @@ func attach(main: Node) -> void:
 	share_status.name = "GhostShareStatus"
 	var scroll := ScrollContainer.new()
 	scroll.name = "ImportedGhostsScroll"
+	scroll.follow_focus = true
 	scroll.custom_minimum_size = Vector2(0, 200)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	share_section.add_child(scroll)
@@ -110,17 +111,17 @@ func _build_map_cards() -> void:
 			child.queue_free()
 	super()
 	if experiments_grid == null:
-		experiments_heading = _heading(_pause_column, "Experiments")
+		experiments_heading = _heading(pause_pages["Maps"], "Experiments")
 		experiments_heading.name = "ExperimentsHeading"
-		_pause_column.move_child(experiments_heading, map_grid.get_index() + 1)
-		experiments_note = _small(_pause_column, "Separate maps with experimental rules. The main maps keep their movement.")
-		_pause_column.move_child(experiments_note, experiments_heading.get_index() + 1)
+		pause_pages["Maps"].move_child(experiments_heading, map_grid.get_index() + 1)
+		experiments_note = _small(pause_pages["Maps"], "Separate maps with experimental rules. The main maps keep their movement.")
+		pause_pages["Maps"].move_child(experiments_note, experiments_heading.get_index() + 1)
 		experiments_grid = GridContainer.new()
 		experiments_grid.name = "ExperimentsGrid"
 		experiments_grid.add_theme_constant_override("h_separation", CARD_GAP)
 		experiments_grid.add_theme_constant_override("v_separation", CARD_GAP)
-		_pause_column.add_child(experiments_grid)
-		_pause_column.move_child(experiments_grid, experiments_note.get_index() + 1)
+		pause_pages["Maps"].add_child(experiments_grid)
+		pause_pages["Maps"].move_child(experiments_grid, experiments_note.get_index() + 1)
 	for id: String in map_buttons:
 		var entry: Dictionary = game.call("map_entry", id)
 		if str(entry.get("kind", "")) != "experiment":
