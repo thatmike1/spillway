@@ -11,9 +11,11 @@ var displayed_anchor: Dictionary = {}
 var pause_header: VBoxContainer
 var mail_section: VBoxContainer
 var mail_views := {}
+var mail_groups := {}
 var feedback_switches := {}
 var review_button: Button
 var review_screen: Control
+var review_host_input := true
 var map_controls: Label
 
 func attach(main: Node) -> void:
@@ -70,26 +72,48 @@ func _attach_mail_preferences() -> void:
 	mail_section.name = "MailPreferences"
 	mail_section.add_theme_constant_override("separation", 8)
 	pause_pages["Practice"].add_child(mail_section)
-	_heading(mail_section, "Delivery view")
-	_small(mail_section, "LMB throw · mouse steer · RMB recall. Changing view restarts the attempt with its own recording identity.")
-	for id: String in ["envelope", "body"]:
-		var button := _button(mail_section, "Envelope" if id == "envelope" else "Runner's eyes", func() -> void:
-			if game.player.has_method("set_mail_view"):
-				var was_paused := bool(game.paused)
-				game.player.call("set_mail_view", id)
-				game.set_paused(was_paused)
-				_refresh_mail())
-		button.name = "MailView_" + id
-		mail_views[id] = button
+	_small(mail_section, "LMB throw · mouse steer · RMB recall. Changing a choice restarts the attempt with its own recording identity.")
+	_add_mail_group("view", "Delivery view", "mail_view", "set_mail_view", {"envelope": "Envelope", "body": "Runner's eyes"})
+	_add_mail_group("body", "Body while steering", "mail_body", "set_mail_body", {"hold": "Held", "run": "Keep running"})
+	_add_mail_group("goal", "Dispatch goal", "mail_goal", "set_mail_goal", {"deliver": "Deliver all three", "optional": "Optional mail"})
+	mail_views = mail_groups["view"].buttons
+	_refresh_mail()
+
+func _add_mail_group(id: String, title: String, getter: String, setter: String, choices: Dictionary) -> void:
+	var group := VBoxContainer.new()
+	group.name = "MailChoice_" + id
+	group.add_theme_constant_override("separation", 8)
+	mail_section.add_child(group)
+	_heading(group, title)
+	var buttons := {}
+	for value: String in choices:
+		var button := _button(group, str(choices[value]), _set_mail_preference.bind(setter, value))
+		button.name = "Mail_" + id + "_" + value
+		buttons[value] = button
+	mail_groups[id] = {"section": group, "getter": getter, "setter": setter, "buttons": buttons}
+
+func _set_mail_preference(setter: String, value: String) -> void:
+	if not is_instance_valid(game.player) or not game.player.has_method(setter):
+		return
+	var was_paused := bool(game.paused)
+	game.player.call(setter, value)
+	game.set_paused(was_paused)
 	_refresh_mail()
 
 func _refresh_mail() -> void:
 	if mail_section == null:
 		return
 	mail_section.visible = is_instance_valid(game.player) and game.player.has_method("mail_view")
-	if mail_section.visible:
-		for id: String in mail_views:
-			(mail_views[id] as Button).disabled = str(game.player.call("mail_view")) == id
+	if not mail_section.visible:
+		return
+	for id: String in mail_groups:
+		var group: Dictionary = mail_groups[id]
+		var supported: bool = game.player.has_method(group.getter) and game.player.has_method(group.setter)
+		(group.section as Control).visible = supported
+		if supported:
+			var selected := str(game.player.call(group.getter))
+			for value: String in group.buttons:
+				(group.buttons[value] as Button).disabled = selected == value
 
 func _attach_feedback_preferences() -> void:
 	_heading(tether_section, "Swing feedback")
@@ -111,6 +135,8 @@ func _attach_feedback_preferences() -> void:
 func _open_run_review() -> void:
 	if review_screen != null:
 		return
+	review_host_input = game.is_processing_input()
+	game.set_process_input(false)
 	review_screen = RUN_REVIEW.new()
 	if not str(game.session.directory).is_empty():
 		review_screen.set("directory", str(game.session.directory))
@@ -126,6 +152,7 @@ func _close_run_review() -> void:
 	if review_screen != null:
 		review_screen.queue_free()
 		review_screen = null
+		game.set_process_input(review_host_input)
 	_pause_side.show()
 	_pause_edge.show()
 	review_button.grab_focus()

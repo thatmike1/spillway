@@ -51,6 +51,7 @@ func run() -> void:
 		var id := "menu-capacity-%d" % i
 		var entry: Dictionary = game.map_entry("breakwater").duplicate(true)
 		entry.name = "Additional map %d with a longer title" % i
+		entry.kind = "course" if i == 0 else "experiment"
 		game.maps.catalog[id] = entry
 		game.maps.order.append(id)
 	hud._build_map_cards()
@@ -105,6 +106,25 @@ func run() -> void:
 	check(not "not recorded" in hud.practice_note.text, "practice recording copy agrees")
 	var card: Button = hud.map_buttons["experiment"]
 	check(card.text.to_lower().count("not a course") == 1, "lab classification appears once")
+	for id: String in hud.lab_switches:
+		var toggle: CheckButton = hud.lab_switches[id]
+		toggle.button_pressed = false
+		check(not bool(game.lab_moves().get(id, true)), "lab switch disables " + id)
+		toggle.button_pressed = true
+		check(bool(game.lab_moves().get(id, false)), "lab switch enables " + id)
+	game.select_map("tether-yard")
+	game.set_paused(true)
+	for model: String in hud.tether_models:
+		var button: Button = hud.tether_models[model]
+		if not button.disabled:
+			button.pressed.emit()
+		await settle()
+		check(game.tether_model() == model and game.paused, "rope choice applies while paused " + model)
+	hud.reel_automatic.pressed.emit()
+	check(bool(game.settings.tether_auto_reel) and game.paused, "automatic reel applies while paused")
+	hud.reel_manual.pressed.emit()
+	check(not bool(game.settings.tether_auto_reel) and game.paused, "manual reel applies while paused")
+	game.select_map("breakwater")
 	game.maps.catalog["tether-yard"]["tether_model"] = "elastic-arc"
 	game.select_map("tether-yard")
 	game.set_paused(true)
@@ -131,15 +151,29 @@ func run() -> void:
 		hud.review_button.pressed.emit()
 		await settle()
 		check(hud.review_screen != null and hud.review_screen.is_visible_in_tree() and game.paused, "review opens while game stays paused")
+		var attempt_before_review := int(game.attempts)
+		var restart_key := InputEventKey.new()
+		restart_key.keycode = KEY_R
+		restart_key.physical_keycode = KEY_R
+		restart_key.pressed = true
+		Input.parse_input_event(restart_key)
+		await settle()
+		restart_key = InputEventKey.new()
+		restart_key.keycode = KEY_R
+		restart_key.physical_keycode = KEY_R
+		Input.parse_input_event(restart_key)
+		check(int(game.attempts) == attempt_before_review and game.paused, "review blocks gameplay restart input")
 		var escape := InputEventKey.new()
 		escape.keycode = KEY_ESCAPE
+		escape.physical_keycode = KEY_ESCAPE
 		escape.pressed = true
 		Input.parse_input_event(escape)
 		await settle()
 		escape = InputEventKey.new()
 		escape.keycode = KEY_ESCAPE
+		escape.physical_keycode = KEY_ESCAPE
 		Input.parse_input_event(escape)
-		check(hud.review_screen == null and game.paused and hud.review_button.has_focus(), "Escape returns from review to paused menu with focus")
+		check(hud.review_screen == null and game.paused and hud.review_button.has_focus() and game.is_processing_input(), "Escape returns from review to paused menu with focus")
 	for id: String in game.map_ids():
 		if not bool(game.map_entry(id).get("mail_delivery", false)):
 			continue
@@ -149,11 +183,19 @@ func run() -> void:
 		await settle()
 		check(hud.mail_section.is_visible_in_tree(), "mail controls appear on delivery map")
 		check(is_zero_approx(hud.controls.modulate.a) and is_zero_approx(hud.keys_line.modulate.a), "mail view suppresses generic teaching")
-		for view: String in ["body", "envelope"]:
-			hud.mail_views[view].pressed.emit()
-			await settle()
-			check(str(game.player.call("mail_view")) == view, "delivery view applies " + view)
-			check(game.paused, "delivery view keeps menu paused")
+		for choice: String in hud.mail_groups:
+			var group: Dictionary = hud.mail_groups[choice]
+			if not game.player.has_method(group.getter):
+				continue
+			for value: String in group.buttons:
+				var before_identity: Dictionary = game.motion_identity().duplicate(true)
+				var before_value := str(game.player.call(group.getter))
+				(group.buttons[value] as Button).pressed.emit()
+				await settle()
+				check(str(game.player.call(group.getter)) == value, "delivery choice applies " + choice + "/" + value)
+				check(game.paused, "delivery choice keeps menu paused " + choice)
+				if before_value != value:
+					check(game.motion_identity() != before_identity, "delivery choice separates recording identity " + choice)
 	var ok := checks.all(func(row: Dictionary) -> bool: return row.ok)
 	var file := FileAccess.open(output.path_join("menu-checks.json"), FileAccess.WRITE)
 	file.store_string(JSON.stringify({"ok": ok, "checks": checks}, "\t"))
