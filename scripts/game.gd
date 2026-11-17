@@ -1,6 +1,6 @@
 extends "res://scripts/r20_main.gd"
 ## r21 composes revised experimental courses around the frozen r20 host.
-const R21_MAPS := preload("res://scripts/r21_map_catalog.gd")
+const R21_MAPS := preload("res://scripts/maps/r22_catalog.gd")
 
 func _ready() -> void:
 	if map_registry.is_empty():
@@ -54,7 +54,7 @@ func change_setting(key: String, value: Variant) -> void:
 	if key != "tether_anchor_assist":
 		super(key, value)
 		return
-	if not map_has_capability("grapple") or str(settings.get("tether_model", "classic")) in ["classic", "pendulum"]:
+	if not map_has_capability("grapple") or tether_model() in ["classic", "pendulum"]:
 		return
 	var next := bool(_setting_value(key, value))
 	if bool(settings.get(key, true)) == next:

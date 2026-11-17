@@ -124,10 +124,14 @@ func _setting_value(key: String, value: Variant) -> Variant:
 		return bool(value)
 	return super(key, value)
 
+## a map may fix a comparison law; ordinary tether maps retain the saved preference.
+func tether_model() -> String:
+	return str(_setting_value("tether_model", map_entry().get("tether_model", settings.get("tether_model", "classic"))))
+
 func _make_runner(entry: Dictionary) -> CharacterBody3D:
 	var runner := super(entry)
 	if runner.has_method("configure_tether"):
-		runner.call("configure_tether", str(settings.get("tether_model", "classic")), bool(settings.get("tether_auto_reel", false)))
+		runner.call("configure_tether", tether_model(), bool(settings.get("tether_auto_reel", false)))
 		runner.connect("tether_diagnostic", _tether_diagnostic)
 	if runner.has_signal("through_diagnostic"):
 		runner.connect("through_diagnostic", _through_diagnostic)
@@ -176,7 +180,7 @@ func change_setting(key: String, value: Variant) -> void:
 	if key not in ["tether_model", "tether_auto_reel"]:
 		super(key, value)
 		return
-	if not map_has_capability("grapple"):
+	if not map_has_capability("grapple") or (key == "tether_model" and map_entry().has("tether_model")):
 		return
 	var next: Variant = _setting_value(key, value)
 	if settings.get(key) == next:
@@ -186,7 +190,7 @@ func change_setting(key: String, value: Variant) -> void:
 	_discard_direction("tether_settings")
 	session.boundary("loadout", {"key": key, "from": settings.get(key), "to": next})
 	settings[key] = next
-	player.call("configure_tether", str(settings.tether_model), bool(settings.tether_auto_reel))
+	player.call("configure_tether", tether_model(), bool(settings.tether_auto_reel))
 	_refresh_records()
 	restart_run("tether_settings")
 	set_paused(was_paused)
