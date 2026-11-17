@@ -35,6 +35,7 @@ func run() -> void:
 	game.set_paused(true)
 	var hud: Node = game.hud
 	check(hud.pause_pages.keys() == ["Maps", "Practice", "Settings", "Runs"], "four destinations")
+	check(hud.tether_history_text("Arc\nLMB attached\nReleased · coast", "Released · coast") == "Arc\nLMB attached\nRecent: Released · coast", "release history is distinct from current attachment")
 	for key: String in ["source_sensitivity", "source_fov", "r13_sensitivity", "r13_fov", "volume"]:
 		hud.show_pause_destination("Settings")
 		hud._show_advanced(true)

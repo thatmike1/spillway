@@ -210,6 +210,16 @@ func _process(delta: float) -> void:
 		keys_line.modulate.a = 0.0
 	_refresh_anchor_readout()
 
+func _lab_text() -> void:
+	super()
+	if game != null and game.map_has_capability("grapple") and is_instance_valid(game.player):
+		var recent: Variant = game.player.get("release_notice")
+		if recent is String:
+			lab_panel.text = tether_history_text(lab_panel.text, recent)
+
+static func tether_history_text(status: String, recent: String) -> String:
+	return status.replace("\n" + recent, "\nRecent: " + recent) if not recent.is_empty() else status
+
 func _refresh_anchor_readout() -> void:
 	if anchor_readout == null:
 		return
@@ -226,6 +236,9 @@ func _refresh_anchor_readout() -> void:
 	if name.is_empty():
 		return
 	var attached := bool(candidate.get("attached", false))
+	if attached and "attempt restarted" in message.text and "release mouse buttons" in message.text:
+		_message_time = 0.0
+		message.modulate.a = 0.0
 	if not attached and not bool(candidate.get("ready", false)):
 		return
 	anchor_readout.text = "%s: %s · %.1f m" % ["Attached" if attached else "Next", name, float(candidate.get("distance_m", 0.0))]
