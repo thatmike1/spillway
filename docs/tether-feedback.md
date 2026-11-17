@@ -64,3 +64,19 @@ The identity test also writes two disposable fixture recordings through the prod
 Three temporary full-host catalog entries explicitly declare `grapple: true` and the unchanged shared Arc runner under different IDs. They check observer replacement, fresh runner binding, unchanged motor/attempt/identity on all toggles, lens handoff, pause reset and return to an original map with no observer. These are ephemeral capability-dispatch fixtures, not newly published levels or claims that another lane's route finishes. The host owns capability gating; the observer never tests map names.
 
 The player end follows the current projection to sit just below the viewport, avoiding a loose endpoint inside the aiming view without inventing a hand or moving the camera. A projection test covers 45°, 80° and 120° FOV. Endpoint rings have an original dark inverted-hull contour for contrast against pale clouds; their total apparent radius, including the outline and full attach expansion, remains about six degrees or less.
+
+## Ordinary rope and the near-camera stroke
+
+The ordinary renderer and this observer use separate meshes. With
+`tether_rope_visual=false`, the host restores `GrappleTether.layers` and every
+observer cable segment stays hidden. The inherited renderer places a fixed-radius
+cylinder at a hand point only 0.35 m ahead of the eye. Gantry's map-local
+`RopeStroke` clones that cylinder at radius 0.006 m. Its near end therefore grows
+in apparent width under perspective. This is not a width change made by the
+feedback observer.
+
+With the option enabled, the host hides the ordinary cylinder. The observer uses
+a 0.002 m minimum core, bounded pixel-floor radii and a below-viewport origin.
+The off case remains the map's own presentation; the observer never rewrites its
+mesh or the inherited runner. Changes to Gantry's ordinary stroke belong in its
+map art, rather than in the observer or frozen motor.
