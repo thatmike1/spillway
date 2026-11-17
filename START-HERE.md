@@ -18,7 +18,7 @@ The ordinary check imports a fresh source snapshot, challenges real recording by
 
 The export tool builds a PCK and uses the pinned Linux release template. It starts that exact pack from an empty directory outside the checkout. `--platform windows` assembles a Windows build but does not execute it. New exports verify source; the published **r21** ZIPs are the exact previously verified delivery bytes. Release builds are distributed through this private repository's GitHub releases.
 
-On the shared build laptop, all wrappers use `/tmp/spillway-r21-engine.lock`, including headless launches. Do not bypass it while capture work runs. The build workspace requires at least **15,000,000,000 bytes free on /home**; the replay also requires temporary headroom and caps its own allocated scratch at 600 MiB. Check the tmpfs user's quota as well as `df` before a large run.
+On the shared build laptop, all wrappers use `/tmp/spillway-r21-engine.lock`, including headless launches. Do not bypass it while capture work runs. The verification tools retain at least **2,000,000,000 bytes free on /home**; source snapshots, import caches and replay evidence go beneath the external output directory, normally on `/tmp`. Run-bundle import separately budgets its bounded payload above that reserve. The replay also requires temporary headroom and caps its own allocated scratch at 600 MiB. Check the tmpfs user's quota as well as `df` before a large run.
 
 ## Follow one playable run
 
