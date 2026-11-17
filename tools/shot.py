@@ -138,13 +138,21 @@ func _start() -> void:
 			push_error("map has no named route: " + str(options.route))
 			quit(2)
 			return
-		var points: Array = routes[str(options.route)]
-		for i: int in points.size():
-			if points[i] is Vector3:
-				points[i] = {"pos": points[i], "radius": 1.0}
+		var original_points: Array = routes[str(options.route)]
+		var original_routes: PackedByteArray = var_to_bytes(routes)
+		var points: Array = []
+		for entry: Variant in original_points:
+			points.append({"pos": entry, "radius": 1.0} if entry is Vector3 else entry)
+		# attach copies its navigation tape; restore the authored hints before any motor tick.
+		routes[str(options.route)] = points
 		driver = load("res://scripts/spillway_driver.gd").new()
 		main.add_child(driver)
 		driver.call("attach", main, str(options.route), 0)
+		routes[str(options.route)] = original_points
+		if var_to_bytes(routes) != original_routes:
+			push_error("named route capture changed authored route hints")
+			quit(2)
+			return
 		if bool(driver.get("done")):
 			push_error("route setup failed: " + str(driver.get("failure_reason")))
 			quit(2)
