@@ -68,7 +68,7 @@ func _physics_process(_dt: float) -> bool:
 					curve_step += 1
 			var desired: Vector3 = (target - flight.position).normalized()
 			var correction: Vector3 = desired - flight.direction
-			_mouse(Vector2(correction.dot(flight.direction.cross(Vector3.UP).normalized()), -correction.y) * 20)
+			_mouse(Vector2(correction.dot(flight.direction.cross(Vector3.UP).normalized()), -correction.y) * 60)
 		elif flight.result == "hit":
 			order.append(post + 1)
 			print("MAIL ROOFS delivery=%d order=%s ticks=%d" % [post + 1, order, ticks])

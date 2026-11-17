@@ -1,5 +1,6 @@
 extends "res://scripts/maps/mail_run.gd"
 ## a connected postal roof quarter around a tidal atrium, with an unordered five-slot loop.
+const ROOF_MATERIAL := preload("res://scripts/art/mail_roof_material.gd")
 const ROOF_ID := "mail-roofs"
 const ROOF_ENTRY := {"name": "Mail Roofs", "theme": "Five slots. Your order.", "kind": "experiment", "experimental": true, "mail_delivery": true,
 	"runner": "res://scripts/movement/mail_roofs_runner.gd", "script": "res://scripts/maps/mail_roofs.gd", "reticle": true,
@@ -8,7 +9,7 @@ const ROOF_ENTRY := {"name": "Mail Roofs", "theme": "Five slots. Your order.", "
 func _init() -> void:
 	level_id = "r22-mail-roofs"
 	level_name = "Mail Roofs"
-	level_version = 1
+	level_version = 2
 	variant = ROOF_ID
 	spawn = Transform3D(Basis.IDENTITY, Vector3(0, 10.04, 12))
 	finish_position = Vector3(-7, 10, 12)
@@ -29,13 +30,14 @@ func build() -> void:
 	for i: int in slots.size():
 		var at: Vector3 = slots[i]
 		mailboxes.append({"id": "mail-roofs-post-%d" % (i + 1), "bounds": AABB(at - Vector3(1.1, 0.8, 0.5), Vector3(2.2, 1.6, 1)), "position": at, "front": 1.0})
-		box("post_house_%d" % i, at + Vector3(0, -7.5, -1.6), Vector3(5.4, 20, 2), Color("53666a"))
-		box("post_crown_%d" % i, at + Vector3(0, 2.6, -1.6), Vector3(5.8, 0.35, 2.4), Color("ded8c2"))
-		box("opening_%d" % i, at + Vector3(0, 0, -0.51), Vector3(2.5, 1.8, 0.12), Color("172d32"))
+		box("post_house_%d" % i, at + Vector3(0, -7.5, -0.9), Vector3(5.4, 20, 2), Color("53666a"))
+		box("post_crown_%d" % i, at + Vector3(0, 2.6, -0.9), Vector3(6.4, 0.35, 2.4), Color("ded8c2"))
+		box("opening_%d" % i, at + Vector3(0, 0, 0.15), Vector3(2.5, 1.8, 0.12), Color("172d32"))
 		for edge: int in [-1, 1]:
-			box("jamb_%d_%d" % [i, edge], at + Vector3(edge * 1.25, 0, -0.4), Vector3(0.12, 1.8, 0.2), Color("ded8c2"))
-		box("sill_%d" % i, at + Vector3(0, -0.85, -0.4), Vector3(2.6, 0.12, 0.25), Color("bc713e"))
-		label("number_%d" % i, at + Vector3(0, 1.7, -0.4), "%02d" % (i + 1), 0.022)
+			box("jamb_%d_%d" % [i, edge], at + Vector3(edge * 1.25, 0, 0.24), Vector3(0.12, 1.8, 0.2), Color("ded8c2"))
+		box("sill_%d" % i, at + Vector3(0, -0.85, 0.24), Vector3(2.6, 0.12, 0.25), Color("bc713e"))
+		box("number_board_%d" % i, at + Vector3(0, 1.7, 0.25), Vector3(2.3, 1.2, 0.12), Color("ded8c2"))
+		label("number_%d" % i, at + Vector3(0, 1.7, 0.33), "%02d" % (i + 1), 0.022)
 	_roof("sorting_chamber", -10, 10, -78, -66)
 	box("post_window_left", Vector3(-2.4, 13, -66), Vector3(15.2, 6, 0.6), Color("53666a"))
 	box("post_window_right", Vector3(8.4, 13, -66), Vector3(3.2, 6, 0.6), Color("53666a"))
@@ -47,7 +49,8 @@ func build() -> void:
 	box("post_chamber_roof", Vector3(0, 16, -72), Vector3(20.6, 0.5, 12.6), Color("ded8c2"))
 	box("window_trim_top", Vector3(6, 12.5, -65.6), Vector3(2, 0.15, 0.15), Color("ded8c2"))
 	box("window_trim_bottom", Vector3(6, 11.5, -65.6), Vector3(2, 0.15, 0.15), Color("bc713e"))
-	label("window_number", Vector3(6, 14, -65.6), "03", 0.025)
+	box("window_number_board", Vector3(6, 14, -65.55), Vector3(2.5, 1.5, 0.1), Color("ded8c2"))
+	label("window_number", Vector3(6, 14, -65.4), "03", 0.025)
 	# this founded chimney occludes the direct flight from the east approach to slot 03.
 	box("post_chimney", Vector3(3, 8, -70), Vector3(3.2, 24, 3), Color("53666a"))
 	box("post_chimney_cap", Vector3(3, 20.1, -70), Vector3(3.8, 0.35, 3.6), Color("ded8c2"))
@@ -80,11 +83,25 @@ func build() -> void:
 		for z: int in range(-60, 12, 8):
 			box("facade_pier_%s_%s" % [side, z], Vector3(side * 10, 1, z), Vector3(0.5, 17, 0.7), Color("aaa897"))
 		box("cornice_%s" % side, Vector3(side * 10, 8.9, -32), Vector3(0.7, 0.45, 48), Color("ded8c2"))
-	label("dispatch", Vector3(-7, 12, 15.5), "DISPATCH", 0.015)
+	box("post_dispatch_hall", Vector3(-7, 3.4, 18.5), Vector3(14, 18.8, 3), Color("53666a"))
+	box("dispatch_door", Vector3(-7, 11.25, 16.94), Vector3(3.2, 2.5, 0.10), Color("172d32"))
+	box("dispatch_board", Vector3(-7, 13.2, 16.8), Vector3(6, 1, 0.15), Color("ded8c2"))
+	label("dispatch", Vector3(-7, 13.2, 16.68), "DISPATCH", 0.015, PI)
+	for side: int in [-1, 1]:
+		box("post_gallery_%s" % side, Vector3(side * 21.5, 5.25, -23), Vector3(3, 18.5, 48), Color("53666a"))
+		box("gallery_cornice_%s" % side, Vector3(side * 21.5, 14.6, -23), Vector3(3.4, 0.3, 48), Color("ded8c2"))
+		for z: int in range(-44, 1, 4):
+			box("gallery_window_%s_%s" % [side, z], Vector3(side * 19.96, 12, z), Vector3(0.08, 1.35, 1.5), Color("29464a"))
+	box("post_tower_link", Vector3(0, 15.7, -79.5), Vector3(5, 0.6, 3), Color("ded8c2"))
+	for mesh: MeshInstance3D in find_children("Mesh_deck_*", "MeshInstance3D", true, false):
+		mesh.material_override = ROOF_MATERIAL.concrete(Color("53666a"), true)
+	for pattern: String in ["Mail_post_*", "Mail_seawall_*"]:
+		for mesh: MeshInstance3D in find_children(pattern, "MeshInstance3D", true, false):
+			mesh.material_override = ROOF_MATERIAL.concrete(Color("53666a"))
 	for id: String in ["post_tower", "post_bell_pier_-3.6", "post_bell_pier_3.6", "post_bell_roof"]:
 		var mesh := get_node_or_null("Mail_" + id) as MeshInstance3D
 		if mesh != null:
-			mesh.material_override = MATERIAL.concrete(Color("aaa897"))
+			mesh.material_override = ROOF_MATERIAL.concrete(Color("aaa897"))
 	_environment()
 	routes = {"basic": [spawn.origin, Vector3(15, 10, 0), Vector3(15, 10, -50), Vector3(0, 10, -59), Vector3(-15, 10, -50), Vector3(-15, 10, 0), finish_position]}
 
