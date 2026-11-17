@@ -167,3 +167,12 @@ func sync_ghost_plan() -> void:
 			if checked.ok:
 				best_plan = {"version":PIECES.VERSION,"anchors":checked.design.anchors,"block":checked.design.block,"pad":checked.design.pad}
 			return
+
+func run_review_unavailable_reason() -> String:
+	if planning:
+		return "Resume the survey and commit with Enter before 3D review or segment practice."
+	var host := get_parent()
+	var level: Node = host.get("level") if host != null else null
+	if level != null and level.get("envelope_enabled") == true:
+		return "3D review and segment practice are unavailable in envelope mode. Turn it off in the survey."
+	return ""
