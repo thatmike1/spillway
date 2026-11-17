@@ -12,7 +12,7 @@ Map ID `mail-roofs` has its own geometry and runner identity. It extends the [Ma
 
 Both directions around the atrium are valid. Open slot numbers remain in the ticket; completed plates say SENT. No single next target is imposed. The north chamber has a 1.6 × 0.8 m window: lower than the F2 crouched hull. The chimney blocks straight lines from the window to the receiving area, with turning room to its east. The opening is physical occlusion, not a painted suggestion.
 
-The sole practice checkpoint restarts the complete roof loop, with all five slots still required and no clean-best eligibility. A miss costs steering time and permits retry. Optional mail is a separate direct-return experiment: it imposes no roof-loop requirement, so reaching nearby Dispatch without deliveries is allowed.
+The sole practice checkpoint restarts the complete roof loop, with all five slots still required in Required mode and no clean-best eligibility. A miss costs steering time and permits retry. Optional mail is a separate direct-return experiment: it imposes no roof-loop requirement, so reaching nearby Dispatch without deliveries is allowed.
 
 ## Presentation
 
@@ -40,4 +40,4 @@ The native executor delivers and finishes in both orders from normal spawn, with
 
 `mail_material_startup.gd` checks both mail maps from an absent profile: the default painted sky/ink remains enabled, authored floor shaders survive L on/off/on, and record identity stays unchanged.
 
-`mail_roofs_match.py` compares sampled rendered body positions, delivery/flight/finish states and default comparison settings against the native export, and requires a clean five-delivery end. The tests use a proportional aiming controller; they prove feasibility, not human comfort, optimal route or enjoyment. Software-rendered frames do not establish hardware performance. Original-map slow parity and candidate packaging belong to the integrator during this run.
+`mail_roofs_match.py` compares sampled rendered body positions, delivery/flight/finish states and default comparison settings against the native export, and requires a clean five-delivery end. It also rejects differing native/startup identities and checks clean completion, delivery and flight state in every post-native-end sample. Body settling after the native executor stops is not compared. `tests/mail_match_checks.py` challenges those guards against retained evidence with deliberate mutations. The tests use a proportional aiming controller; they prove feasibility, not human comfort, optimal route or enjoyment. Software-rendered frames do not establish hardware performance. Original-map slow parity and candidate packaging belong to the integrator during this run.
