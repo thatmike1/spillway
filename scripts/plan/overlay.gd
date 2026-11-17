@@ -176,7 +176,7 @@ func _gui_input(event: InputEvent) -> void:
 		map.envelope_enabled = not map.envelope_enabled
 		map.apply_design(map.plan,map.block_slot,map.pad_slot,map.budget,map.blocks_enabled,map.pads_enabled)
 		runner.envelope.reset()
-		notice = "Envelope spitball: one waiting body, one throw, practice only." if map.envelope_enabled else "Envelope off. Ordinary plan times again."
+		notice = "Envelope: K waits on deck; E throws. One handoff." if map.envelope_enabled else "Envelope off. Ordinary plan times again."
 		queue_redraw()
 		accept_event()
 		return

@@ -66,7 +66,7 @@ func _input(event: InputEvent) -> void:
 			map.envelope_enabled = not map.envelope_enabled
 			map.apply_design(map.plan,map.block_slot,map.pad_slot,map.budget,map.blocks_enabled,map.pads_enabled)
 			envelope.reset()
-			planner.notice = "Envelope spitball: one waiting body, one throw, practice only." if map.envelope_enabled else "Envelope off. Ordinary plan times again."
+			planner.notice = "Envelope: K waits on deck; E throws. One handoff." if map.envelope_enabled else "Envelope off. Ordinary plan times again."
 			planner.queue_redraw()
 			get_viewport().set_input_as_handled()
 		elif not planning and code in [KEY_K,KEY_E] and envelope != null and envelope.active():

@@ -220,7 +220,7 @@ func finish() -> void:
 	var support: Dictionary = game.player.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(foot+Vector3.UP*0.05,foot-Vector3.UP*0.15,1,[game.player.get_rid()]))
 	var support_name := str(support.collider.name) if not support.is_empty() else "<none>"
 	var row := {"finished":game.finished,"finish_kind":game.finish_kind,"respawns":game.respawn_count,
-		"ticks":tick,"time":game.elapsed,"total":game.elapsed+relay.first_seconds,"position":str(game.player.global_position),
+		"ticks":tick,"time":game.elapsed,"total":game.elapsed,"position":str(game.player.global_position),
 		"identity":game.motion_identity(),"relay":relay.snapshot(),"waiting_support":support_name,"loadout":loadout,"parked_tick":parked_tick,"replay":replay}
 	print(JSON.stringify(row))
 	if not game.finished or game.respawn_count > 0:

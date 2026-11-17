@@ -24,18 +24,27 @@ func map() -> Node:
 func active() -> bool:
 	return map() != null and bool(map().envelope_enabled)
 func _ready() -> void:
-	waiting_body = body(Color(0.35,0.7,0.8,0.55))
+	waiting_body = body(Color(0.12,0.44,0.53,0.75))
 	delivery_body = body(Color(0.8,0.65,0.45,0.45))
 	var recipient := Label3D.new()
 	recipient.text = "FIRST BODY"
 	recipient.position.y = 1.22
 	recipient.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	recipient.font_size = 28
-	recipient.pixel_size = 0.003
+	recipient.font_size = 40
+	recipient.pixel_size = 0.006
 	recipient.modulate = Color("b4e6ed")
 	recipient.outline_modulate = Color("203d45")
 	recipient.outline_size = 5
 	waiting_body.add_child(recipient)
+	var target_ring := MeshInstance3D.new()
+	var torus := TorusMesh.new()
+	torus.inner_radius = 0.55
+	torus.outer_radius = 0.61
+	target_ring.mesh = torus
+	target_ring.position.y = -0.85
+	target_ring.material_override = material(Color("64bbc9"))
+	target_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	waiting_body.add_child(target_ring)
 	envelope_mesh = MeshInstance3D.new()
 	var paper := BoxMesh.new()
 	paper.size = Vector3(0.25,0.16,0.025)
@@ -104,10 +113,10 @@ func mark_practice() -> void:
 	game().practice_stage = 0
 func park() -> void:
 	if phase != "first" or game().finished:
-		notice = "One handoff only. R restarts both legs."
+		notice = "One handoff. R restarts both legs."
 		return
 	if not runner.is_grounded() or runner.ducked:
-		notice = "Stand on a deck first. Release Space before K."
+		notice = "Land, release Space, then K."
 		return
 	first_seconds = float(game().elapsed)
 	waiting = {"position":runner.global_position,"yaw":runner.yaw,"pitch":runner.pitch,
@@ -117,10 +126,13 @@ func park() -> void:
 	waiting_body.show()
 	phase = "carry"
 	transferring = true
-	game().restart_run("restart")
+	runner.reset_to(map().spawn)
 	transferring = false
 	mark_practice()
-	game().session.lifecycle("plan_envelope_wait",{"position":waiting.position,"first_seconds":first_seconds})
+	game()._rebase_compensation()
+	game()._clear_speed()
+	game().stats.watch(runner)
+	game().session.lifecycle("practice",{"phase":"plan_envelope_wait","position":map().spawn.origin,"waiting":waiting.position,"first_seconds":first_seconds},"envelope_wait",true)
 	notice = ""
 func throw_envelope() -> void:
 	if phase != "carry" or flying or cooldown > 0 or game().finished:
@@ -137,7 +149,7 @@ func miss() -> void:
 	flying = false
 	cooldown = 0.35
 	misses += 1
-	notice = "Miss. Envelope returned; E retries."
+	notice = "Miss. E retries."
 	game().session.lifecycle("plan_envelope_miss",{"misses":misses})
 func step(delta: float) -> void:
 	if not active() or runner.planning or game().paused:
@@ -180,14 +192,16 @@ func resume_waiting() -> void:
 	phase = "resumed"
 	map().envelope_delivered = true
 	mark_practice()
+	game()._rebase_compensation()
+	game()._clear_speed()
 	game().stats.watch(runner)
 	game().session.lifecycle("practice",{"phase":"plan_envelope_catch","position":waiting.position,"throws":throws},"envelope_handoff",true)
 	notice = ""
 func snapshot() -> Dictionary:
-	return {"version":"plan-envelope-1","phase":phase,"waiting":waiting.get("position",Vector3.ZERO),
+	return {"version":"plan-envelope-2","phase":phase,"waiting":waiting.get("position",Vector3.ZERO),
 		"first_seconds":first_seconds,"throws":throws,"misses":misses,"flying":flying,"projectile":projectile_position}
 func _process(_delta: float) -> void:
-	var visible_now: bool = active() and not runner.planning and not game().paused
+	var visible_now: bool = active() and not runner.planning and not game().paused and not game().finished
 	readout.visible = visible_now
 	envelope_mesh.visible = visible_now and phase == "carry"
 	if envelope_mesh.visible:
@@ -204,19 +218,19 @@ class Readout extends Control:
 		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 	func _draw() -> void:
-		var x := maxf(30,size.x-680.0) if size.x >= 1200 else 30.0
-		var y := 86.0 if size.x >= 1200 or bool(relay.game().finished) else 275.0
+		var x := 30.0
+		var y := 275.0
 		var font := ThemeDB.fallback_font
-		draw_rect(Rect2(x,y,370,72),Color("203d45"))
-		var detail := "First leg: release Space on deck, K waits."
+		draw_rect(Rect2(x,y,350,64),Color("203d45"))
+		var detail := "K waits on a deck."
+		var title := "Envelope spitball · first body"
 		if relay.phase == "carry":
-			detail = "Delivery: E throws to blue body · %.1f m" % relay.runner.global_position.distance_to(relay.waiting.position)
+			title = "Envelope spitball · delivery"
+			detail = "E throws to FIRST BODY · %.1f m" % relay.runner.global_position.distance_to(relay.waiting.position)
 		elif relay.phase == "resumed":
-			detail = "First body resumed · continue to the far quay"
+			title = "Envelope spitball · first body"
+			detail = "Resumed. Finish on the far quay."
 		if not relay.notice.is_empty():
 			detail = relay.notice
-		var total: float = float(relay.game().elapsed) + (relay.first_seconds if relay.phase != "first" else 0.0)
-		if relay.game().finished:
-			detail = "Done: first %.2f + delivery/resume %.2f s" % [relay.first_seconds,relay.game().elapsed]
-		draw_string(font,Vector2(x+12,y+23),"Envelope spitball · combined %.2f s" % total,HORIZONTAL_ALIGNMENT_LEFT,346,16,Color("efe8cf"))
-		draw_string(font,Vector2(x+12,y+50),detail,HORIZONTAL_ALIGNMENT_LEFT,346,16,Color("efe8cf"))
+		draw_string(font,Vector2(x+12,y+23),title,HORIZONTAL_ALIGNMENT_LEFT,326,16,Color("efe8cf"))
+		draw_string(font,Vector2(x+12,y+47),detail,HORIZONTAL_ALIGNMENT_LEFT,326,16,Color("efe8cf"))
