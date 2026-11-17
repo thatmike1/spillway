@@ -7,6 +7,7 @@ var reel_manual: Button
 var reel_automatic: Button
 var tether_models := {}
 var tether_note: Label
+var tether_model_lock: Label
 
 var export_name: LineEdit
 var export_path: LineEdit
@@ -28,8 +29,7 @@ func _attach_run_export() -> void:
 	var section := VBoxContainer.new()
 	section.name = "RunExport"
 	section.add_theme_constant_override("separation", 6)
-	_pause_column.add_child(section)
-	_pause_column.move_child(section, recording_line.get_index() + 1)
+	pause_pages["Runs"].add_child(section)
 	export_name = LineEdit.new()
 	export_name.name = "RunExportPlayer"
 	export_name.placeholder_text = "Your player name (for Mike)"
@@ -68,9 +68,8 @@ func attach(main: Node) -> void:
 	tether_section = VBoxContainer.new()
 	tether_section.name = "TetherPreferences"
 	tether_section.add_theme_constant_override("separation", 8)
-	_pause_column.add_child(tether_section)
-	_pause_column.move_child(tether_section, experiments_grid.get_index() + 1)
-	_heading(tether_section, "Tether Yard · rope")
+	pause_pages["Practice"].add_child(tether_section)
+	_heading(tether_section, "Current map · rope")
 	reel_manual = _button(tether_section, "Reel on right mouse", func() -> void: game.change_setting("tether_auto_reel", false))
 	reel_manual.name = "ReelOnRightMouse"
 	reel_automatic = _button(tether_section, "Reel automatically while attached", func() -> void: game.change_setting("tether_auto_reel", true))
@@ -78,9 +77,12 @@ func attach(main: Node) -> void:
 	for id: String in TETHER.MODELS:
 		var button := _button(tether_section, TETHER.NOTES[id], _choose_model.bind(id))
 		button.name = "TetherModel_" + id
+		button.toggle_mode = true
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		tether_models[id] = button
 	tether_note = _small(tether_section, "Changing either restarts the attempt. Release mouse buttons after the menu; a fresh LMB press arms the line. Classic: 3 s / 1300 u/s². Alternatives: 5 s. All: 30 m aim / 32.03 m break / 2.44 m reel minimum. E belongs to Movement Lab.")
+	tether_model_lock = _small(tether_section, "")
+	tether_model_lock.name = "TetherFixedLaw"
 	_refresh_tether()
 	through_cue = ColorRect.new()
 	through_cue.name = "ThroughCreamCue"
@@ -112,7 +114,11 @@ func _refresh_tether() -> void:
 	reel_manual.disabled = not bool(game.settings.tether_auto_reel)
 	reel_automatic.disabled = bool(game.settings.tether_auto_reel)
 	for id: String in tether_models:
-		tether_models[id].disabled = str(game.settings.tether_model) == id
+		tether_models[id].disabled = game.map_entry().has("tether_model") or game.tether_model() == id
+		(tether_models[id] as Button).set_pressed_no_signal(game.tether_model() == id)
+	if tether_model_lock != null:
+		tether_model_lock.visible = game.map_entry().has("tether_model")
+		tether_model_lock.text = "This map fixes the rope law to %s. Reel and feedback controls are below." % game.tether_model()
 
 func _process(delta: float) -> void:
 	super(delta)
