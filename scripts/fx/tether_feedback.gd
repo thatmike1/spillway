@@ -105,7 +105,9 @@ func observe(delta: float) -> void:
 	_lens.update(camera, speed, delta, enabled("tether_speed_fov"))
 	var view_fov := _lens.fov if _lens.current else camera.fov
 	var start := rope_origin(camera, view_fov)
+	var view_camera: Camera3D = _lens if _lens.current else camera
 	var pixel_height := maxf(1.0, camera.get_viewport().get_visible_rect().size.y)
+	var world_per_pixel_depth := 2.0 / (pixel_height * absf(view_camera.get_camera_projection().y.y))
 	var sag := minf(1.8, maxf(0.0, rest_m - distance) * 0.45) if attached else 0.0
 	for i: int in SEGMENTS:
 		var piece := _segments[i]
@@ -116,6 +118,13 @@ func observe(delta: float) -> void:
 			continue
 		var a := rope_point(start, endpoint, sag, float(i) / SEGMENTS)
 		var b := rope_point(start, endpoint, sag, float(i + 1) / SEGMENTS)
+		var clipped := clip_segment(view_camera, a, b)
+		if clipped.is_empty():
+			piece.visible = false
+			outline.visible = false
+			continue
+		a = clipped[0]
+		b = clipped[1]
 		var along := b - a
 		if along.length_squared() < 0.000001:
 			piece.visible = false
@@ -125,12 +134,19 @@ func observe(delta: float) -> void:
 		var helper := Vector3.RIGHT if absf(y.dot(Vector3.UP)) > 0.98 else Vector3.UP
 		var x := y.cross(helper).normalized()
 		var midpoint := (a + b) * 0.5
-		var world_per_pixel := 2.0 * tan(deg_to_rad(view_fov) * 0.5) * camera.global_position.distance_to(midpoint) / pixel_height
-		var radii := cable_radii(world_per_pixel, tension)
-		var inner_scale := radii.x / ROPE_RADIUS
-		var outer_scale := radii.y / ROPE_RADIUS
-		piece.global_transform = Transform3D(Basis(x * inner_scale, y * along.length(), x.cross(y) * inner_scale), midpoint)
-		outline.global_transform = Transform3D(Basis(x * outer_scale, y * along.length(), x.cross(y) * outer_scale), midpoint)
+		var depth_a := -view_camera.global_basis.z.dot(a - view_camera.global_position)
+		var depth_b := -view_camera.global_basis.z.dot(b - view_camera.global_position)
+		var perspective := view_camera.projection != Camera3D.PROJECTION_ORTHOGONAL
+		var radii_a := cable_radii(world_per_pixel_depth * depth_a if perspective else world_per_pixel_depth, tension)
+		var radii_b := cable_radii(world_per_pixel_depth * depth_b if perspective else world_per_pixel_depth, tension)
+		# matching endpoint radii join adjacent segments without a sudden change in stroke.
+		(piece.mesh as CylinderMesh).bottom_radius = radii_a.x
+		(piece.mesh as CylinderMesh).top_radius = radii_b.x
+		(outline.mesh as CylinderMesh).bottom_radius = radii_a.y
+		(outline.mesh as CylinderMesh).top_radius = radii_b.y
+		var transform_ := Transform3D(Basis(x, y * along.length(), x.cross(y)), midpoint)
+		piece.global_transform = transform_
+		outline.global_transform = transform_
 	_material.albedo_color = Color("e8dfbd").lerp(Color("b5683c"), tension * 0.65)
 	_flash.visible = attached and enabled("tether_attach_cue") and _flash_left > 0.0
 	if _flash.visible:
@@ -146,9 +162,21 @@ static func rope_origin(camera: Camera3D, view_fov: float) -> Vector3:
 	return camera.global_position + camera.global_basis * Vector3(0.23, -0.48 * tan(deg_to_rad(view_fov) * 0.5) * 1.12, -0.48)
 
 static func cable_radii(world_per_pixel: float, tension: float) -> Vector2:
-	# a small physical cable near the hand, with a restrained pixel floor at distance.
+	# cap the physical minimum in screen space when a cable passes close to the eye.
 	var load_scale := 1.0 + clampf(tension, 0.0, 1.0) * 0.15
-	return Vector2(clampf(world_per_pixel * 0.6, 0.002, 0.05), clampf(world_per_pixel * 1.35, 0.0032, 0.09)) * load_scale
+	return Vector2(minf(clampf(world_per_pixel, 0.002, 0.05), world_per_pixel * 1.25), minf(clampf(world_per_pixel * 2.0, 0.0032, 0.09), world_per_pixel * 2.5)) * load_scale
+
+static func clip_segment(camera: Camera3D, a: Vector3, b: Vector3) -> PackedVector3Array:
+	# clip before sizing the mesh; a midpoint behind the near plane has no useful scale.
+	var depth_a := -camera.global_basis.z.dot(a - camera.global_position)
+	var depth_b := -camera.global_basis.z.dot(b - camera.global_position)
+	if depth_a < camera.near and depth_b < camera.near:
+		return PackedVector3Array()
+	if depth_a < camera.near:
+		a = a.lerp(b, (camera.near - depth_a) / (depth_b - depth_a))
+	elif depth_b < camera.near:
+		b = b.lerp(a, (camera.near - depth_b) / (depth_a - depth_b))
+	return PackedVector3Array([a, b])
 
 static func cue_scale(distance: float) -> float:
 	# keep endpoint rings below about six degrees of angular radius near the camera.
