@@ -67,4 +67,6 @@ WASD and mouse move/look. Hold Space or use scroll to hop; release W and combine
 - **Attempt:** one recorded lifecycle beginning at spawn/restart/practice and ending at a finish or an explicit boundary such as map change or quit.
 - **Ghost:** playback of the fastest clean, complete recording matching the current motion identity; independent of style best.
 
+A map entry may set `teach_until_clock` for the generic teaching-text cutoff; the default remains four seconds and the existing 280 u/s dismissal still applies.
+
 Settings/bests use `user://spillway_r16.cfg`; attempts use `user://r16_runs/` and `.r16run` files. Those names are persisted interfaces, not the release number. Analyze files with `python3 tools/analyze-runs.py PATH`; importing a friend's run bundle is the explicit, bounded `tools/import-runs.py` operation. Read [docs/recordings.md](docs/recordings.md), [docs/run-export.md](docs/run-export.md), [docs/tether-yard.md](docs/tether-yard.md), [docs/saltglass.md](docs/saltglass.md) and [docs/movement-reference.md](docs/movement-reference.md) as needed. [AGENTS.md](AGENTS.md) gives the change/parity/privacy rules.

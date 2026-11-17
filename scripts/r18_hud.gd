@@ -279,7 +279,7 @@ func _process(delta: float) -> void:
 	var elapsed := float(game.elapsed)
 	if not started or elapsed < _last_elapsed:
 		_teach_gone = false
-	elif elapsed > 4.0 or float(game.call("display_speed_u")) > TEACH_SPEED_U:
+	elif elapsed > float(game.call("map_entry").get("teach_until_clock", 4.0)) or float(game.call("display_speed_u")) > TEACH_SPEED_U:
 		_teach_gone = true
 	_last_elapsed = elapsed
 	_teach_alpha = move_toward(_teach_alpha, 0.0 if _teach_gone or _title_alpha > 0.0 else 1.0, delta * 2.5)
