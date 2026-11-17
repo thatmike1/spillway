@@ -1,6 +1,13 @@
 extends "res://tests/viaduct_replay.gd"
 ## raw event replay through the live menu host, checkpoint lifecycle and recording identity.
 const HOST := preload("res://scripts/game.gd")
+var expect_upper_finish := false
+
+func _initialize() -> void:
+	for arg: String in OS.get_cmdline_user_args():
+		if arg == "--upper":
+			expect_upper_finish = true
+	super._initialize()
 
 func replay(tape_path: String) -> bool:
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(tape_path))
@@ -48,7 +55,10 @@ func replay(tape_path: String) -> bool:
 			break
 		await physics_frame
 	var ok: bool = game.startup_error.is_empty() and game.finished and game.finish_kind == "clean" and game.checkpoint_index == 3 and game.respawn_count == 0 and identity.map == "viaduct" and player.model == "elastic-arc" and game.motion_identity() == identity and player.r21_law_sha256() == law
+	if expect_upper_finish:
+		ok = ok and game.level.UPPER_FINISH.has_point(player.global_position) and player.is_grounded()
 	print("VIADUCT LIVE HOST ",ok," ticks=",ticks," finish=",game.finish_kind," checkpoint=",game.checkpoint_index," respawns=",game.respawn_count," map=",identity.map," model=",player.model," course=",identity.course_key," geometry-version=",game.level.level_version)
+	print("VIADUCT END feet=",player.global_position," upper-required=",expect_upper_finish," grounded=",player.is_grounded())
 	game.request_quit(0)
 	game.free()
 	await physics_frame
