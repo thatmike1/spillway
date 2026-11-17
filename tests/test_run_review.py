@@ -13,13 +13,15 @@ import engine
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path)
+    parser.add_argument("--checks", nargs="+", choices=["model", "screen", "3d", "performance"],
+                        default=["model", "screen", "3d", "performance"])
     args = parser.parse_args()
     out = args.out.resolve() if args.out else Path(tempfile.mkdtemp(prefix="r22-run-review-"))
     out.mkdir(parents=True, exist_ok=True)
     fixtures = engine.PROJECT / "tests/fixtures/original-map-parity/breakwater-basic/old/runs"
     before = {p.name: engine.sha(p) for p in fixtures.iterdir() if p.is_file()}
     checks = []
-    for name in ("model", "screen", "3d", "performance"):
+    for name in args.checks:
         result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", engine.PROJECT,
                              "--script", "res://tests/run_review_" + name + ".gd"],
                             cwd=engine.PROJECT, profile=out / "profile", log=out / (name + ".log"))
