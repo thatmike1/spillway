@@ -1,5 +1,7 @@
 """Capture safety and input validation checks; no desktop process is launched."""
+import argparse
 import json
+import subprocess
 from pathlib import Path
 import sys
 import tempfile
@@ -39,6 +41,18 @@ class ShotTests(unittest.TestCase):
             for rows in ([{"time": 1, "mouse": [0, 0]}, {"time": 0, "mouse": [0, 0]}],
                          [{"time": 0, "mouse": [float("nan"), 0]}],
                          [{"time": 0, "action": "jump", "pressed": "false"}]):
+                path.write_text(json.dumps(rows))
+                with self.assertRaises(ValueError):
+                    shot.read_sequence(path, "tape")
+
+    def test_action_strength_is_preserved_and_bounded(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "tape.json"
+            rows = [{"time": 0, "action": "move_forward", "pressed": True, "strength": .25}]
+            path.write_text(json.dumps(rows))
+            self.assertEqual(shot.read_sequence(path, "tape"), rows)
+            for strength in (-.1, 1.1, True, "0.5", float("nan")):
+                rows[0]["strength"] = strength
                 path.write_text(json.dumps(rows))
                 with self.assertRaises(ValueError):
                     shot.read_sequence(path, "tape")
@@ -103,5 +117,82 @@ class ShotTests(unittest.TestCase):
             start.assert_not_called()
 
 
+CANONICAL = r'''
+extends SceneTree
+func _initialize() -> void:
+	_start.call_deferred()
+func _start() -> void:
+	var main: Node = load("res://scripts/game.gd").new()
+	root.add_child(main)
+	await process_frame
+	await process_frame
+	main.set_physics_process(false)
+	var player: Node3D = main.get("player")
+	player.set_physics_process(false)
+	main.call("restart_run", "capture")
+	var rows: Array = []
+	# these independent commands define the zero-based normal-spawn contract.
+	for strength: float in [.25, .75, 0.0, 0.0, 0.0, 0.0]:
+		if strength > 0:
+			Input.action_press("move_forward", strength)
+		else:
+			Input.action_release("move_forward")
+		player.call("_physics_process", 1.0 / 128)
+		rows.append({"position": [player.global_position.x, player.global_position.y, player.global_position.z],
+			"motion": player.call("get_motion_state").duplicate(true)})
+	var output := FileAccess.open(str(OS.get_cmdline_user_args()[-1]), FileAccess.WRITE)
+	output.store_string(JSON.stringify(rows))
+	output.close()
+	main.call("request_quit", 0)
+'''
+
+
+def native_contract(output):
+    output = shot.external(output)
+    output.mkdir(parents=True, exist_ok=False)
+    tape = output / "input.json"
+    tape.write_text(json.dumps([
+        {"time": 0, "action": "move_forward", "pressed": True, "strength": .25},
+        {"time": 1 / 128, "action": "move_forward", "pressed": True, "strength": .75},
+        {"time": 2 / 128, "action": "move_forward", "pressed": False, "strength": .9},
+    ]))
+    subprocess.run([sys.executable, "-B", str(shot.engine.PROJECT / "tools/shot.py"),
+                    "--map", "breakwater", "--tape", str(tape), "--seconds", str(6 / 128),
+                    "--every", str(1 / 128), "--size", "640x360", "--out", str(output / "native")], check=True)
+    with tempfile.TemporaryDirectory(prefix="canonical-", dir=output) as temporary:
+        root = Path(temporary)
+        source = root / "source"
+        shot.shutil.copytree(shot.engine.PROJECT, source, ignore=shot.snapshot_ignore(shot.engine.PROJECT))
+        (source / "canonical.gd").write_text(CANONICAL)
+        shot.engine.run(["--headless", "--editor", "--path", source, "--import"], cwd=source,
+                        profile=root / "profile", log=output / "canonical-import.log")
+        shot.engine.run(["--headless", "--path", source, "--fixed-fps", "128", "--audio-driver", "Dummy",
+                         "--script", "res://canonical.gd", "--", "--r16-map=breakwater",
+                         "--no-records", "--no-run-recordings", str(output / "expected.json")],
+                        cwd=source, profile=root / "profile", log=output / "canonical.log")
+    expected = json.loads((output / "expected.json").read_text())
+    actual = [json.loads(line) for line in (output / "native/frames.jsonl").read_text().splitlines()]
+    ticks = []
+    for frame in actual:
+        tick = round(frame["time"] * 128)
+        if tick < 1 or tick > len(expected):
+            raise AssertionError(f"capture clock outside canonical ticks: {frame['time']}")
+        reference = expected[tick - 1]
+        if frame["position"] != reference["position"] or frame["motion"] != reference["motion"]:
+            (output / "mismatch.json").write_text(json.dumps({"tick": tick, "actual": frame, "expected": reference}, indent=2))
+            raise AssertionError(f"native normal-spawn tape diverged at tick {tick}; read {output / 'mismatch.json'}")
+        ticks.append(tick)
+    if not {1, 2}.issubset(ticks):
+        raise AssertionError(f"native samples must observe the distinct t0/t1 commands: {ticks}")
+    (output / "RESULT.json").write_text(json.dumps({"ok": True, "exact_positions_and_state_ticks": ticks}) + "\n")
+    print("native normal-spawn positions/state match canonical ticks:", ticks)
+
+
 if __name__ == "__main__":
-    unittest.main()
+    if "--native-contract" in sys.argv:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--native-contract", action="store_true")
+        parser.add_argument("--out", type=Path, required=True)
+        native_contract(parser.parse_args().out)
+    else:
+        unittest.main()
