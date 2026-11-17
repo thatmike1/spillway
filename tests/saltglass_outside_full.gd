@@ -38,7 +38,13 @@ func feed_inputs() -> void:
 		var released := {}
 		for row: Dictionary in tape:
 			if float(row.time) < FORK_TICK / 128.0:
-				driven_tape.append(row.duplicate(true))
+				var copied: Dictionary = row.duplicate(true)
+				if copied.has("button"):
+					copied.button = int(copied.button)
+				if copied.has("keycode"):
+					copied.keycode = int(copied.keycode)
+					copied.physical_keycode = int(copied.physical_keycode)
+				driven_tape.append(copied)
 			if row.has("key") and not released.has(row.key):
 				released[row.key] = true
 				var event := InputEventKey.new()
