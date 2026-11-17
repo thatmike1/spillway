@@ -43,6 +43,17 @@ func run() -> void:
 	identity.geometry = "different"
 	stage.attach_map(source, identity)
 	check(not stage.load_pair(pair).is_empty() and stage.tracks.is_empty() and not stage.actors[0].visible, "mismatch clears old ghosts")
+	var slower := MODEL.load_attempt("res://tests/fixtures/original-map-parity/breakwater-return/old/runs/golden.r16run")
+	stage.attach_map(source, recording.identity)
+	check(stage.load_pair(MODEL.compare(slower, recording)).is_empty(), "distinct real pair loads for target choice")
+	stage.follow_target = 0
+	stage.scrub_to(27.0)
+	var attempt_camera: Vector3 = stage.camera.position
+	stage.follow_target = 1
+	stage.scrub_to(27.0)
+	check(not stage.camera.position.is_equal_approx(attempt_camera), "best target moves camera to the other run")
+	check(stage.camera.position.distance_to(stage.actors[1].position) < stage.camera.position.distance_to(stage.actors[0].position), "best camera follows best rather than offscreen attempt")
+	stage.follow_target = 0
 	var crouch := MODEL.load_attempt("res://tests/fixtures/original-map-parity/whiteout-crouch/old/runs/golden.r16run")
 	stage.attach_map(source, crouch.identity)
 	check(stage.load_pair(MODEL.compare(crouch, crouch)).is_empty(), "real crouch recording accepted")

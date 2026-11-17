@@ -1,0 +1,21 @@
+extends RefCounted
+## first-person frames captured with tools/shot.py; see map_previews/PROVENANCE.md.
+const FRAMES := {
+	"breakwater": preload("res://scripts/ui/map_previews/breakwater.png"),
+	"whiteout-relay": preload("res://scripts/ui/map_previews/whiteout-relay.png"),
+	"sunken-court": preload("res://scripts/ui/map_previews/sunken-court.png"),
+	"rainline": preload("res://scripts/ui/map_previews/rainline.png"),
+	"night-shift": preload("res://scripts/ui/map_previews/night-shift.png"),
+	"practice": preload("res://scripts/ui/map_previews/practice.png"),
+	"overflow": preload("res://scripts/ui/map_previews/overflow.png"),
+	"experiment": preload("res://scripts/ui/map_previews/experiment.png"),
+	"saltglass": preload("res://scripts/ui/map_previews/saltglass.png"),
+	"tether-yard": preload("res://scripts/ui/map_previews/tether-yard.png"),
+	"through-line": preload("res://scripts/ui/map_previews/through-line.png"),
+	"viaduct": preload("res://scripts/ui/map_previews/viaduct.png"),
+	"gantry": preload("res://scripts/ui/map_previews/gantry.png"),
+	"mail-run": preload("res://scripts/ui/map_previews/mail-run.png"),
+	"sluice-six": preload("res://scripts/ui/map_previews/sluice-six.png"),
+	"foundry": preload("res://scripts/ui/map_previews/foundry.png"),
+	"saltglass-seaward": preload("res://scripts/ui/map_previews/saltglass-seaward.png"),
+}

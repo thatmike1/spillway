@@ -13,8 +13,8 @@ import engine
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path)
-    parser.add_argument("--checks", nargs="+", choices=["model", "screen", "3d", "performance"],
-                        default=["model", "screen", "3d", "performance"])
+    parser.add_argument("--checks", nargs="+", choices=["model", "screen", "3d", "performance", "practice", "capture"],
+                        default=["model", "screen", "3d", "performance", "practice"])
     args = parser.parse_args()
     out = args.out.resolve() if args.out else Path(tempfile.mkdtemp(prefix="r22-run-review-"))
     out.mkdir(parents=True, exist_ok=True)
@@ -23,7 +23,8 @@ def main():
     checks = []
     for name in args.checks:
         result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", engine.PROJECT,
-                             "--script", "res://tests/run_review_" + name + ".gd"],
+                             "--script", "res://tests/run_review_" + name + ".gd",
+                             "--", "--out=" + str(out / name)],
                             cwd=engine.PROJECT, profile=out / "profile", log=out / (name + ".log"))
         checks.append({"name": name, **result})
     after = {p.name: engine.sha(p) for p in fixtures.iterdir() if p.is_file()}

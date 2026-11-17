@@ -9,6 +9,7 @@ var actors: Array[MeshInstance3D] = []
 var tracks: Array = []
 var world_identity := {}
 var scenery: Node3D
+var follow_target := 0
 
 func _ready() -> void:
 	stretch = true
@@ -133,7 +134,8 @@ func scrub_to(time: float) -> void:
 		actors[i].visible = true
 		actors[i].position = pose.feet + Vector3.UP * height * 0.5
 		actors[i].rotation.y = pose.yaw
-	var at := actors[0].position
-	var facing := Basis(Vector3.UP, float(_sample(tracks[0], time).yaw))
+	var target := clampi(follow_target, 0, 1)
+	var at := actors[target].position
+	var facing := Basis(Vector3.UP, float(_sample(tracks[target], time).yaw))
 	camera.position = at + facing * Vector3(0, 3.5, 7)
 	camera.look_at(at + Vector3.UP * 0.2)

@@ -37,7 +37,7 @@ Use repeated `--setting 'KEY=JSON'` switches for public host settings, for examp
 
 Rendering lifecycle follows the official [RenderingServer reference](https://docs.godotengine.org/en/stable/classes/class_renderingserver.html#class-renderingserver-property-render-loop-enabled): disabling the render loop retains engine logic, and `force_draw` draws viewports from the main thread.
 
-Static pose mode hides the HUD so the stationary start card cannot cover map comparisons. Route and tape modes preserve the normal HUD for gameplay/menu review. Use tape mode for UI checks.
+Static pose mode hides the host HUD and runner-owned CanvasLayers, including the separate Mail status ticket, so controls cannot cover map comparisons. Map-owned art layers remain visible. Route and tape modes preserve the normal HUD for gameplay/menu review. Use tape mode for UI checks.
 
 Tape events run in a physics callback at priority -100, before the ordinary motor, using 128 Hz simulation time. This preserves sub-frame action ordering when rendering is sparse. Captures observe the result; they never reposition the runner in route/tape mode.
 
@@ -50,6 +50,8 @@ Tape timestamps are zero-based motor time: time0 applies before the first tick, 
 Run `python3 -B tests/test_shot.py --native-contract --out /absolute/new/external/folder` for native PNG-observed positions and complete motor-state comparison against an independent canonical normal-spawn tape with distinct t0/t1 strengths. This integration check uses the shared engine lock and private display; ordinary unit tests remain headless and lightweight.
 
 Add `--resize` to that PNG contract check to interleave window resizes with moving input. It requires both actual readback sizes and compares the same complete motor observations against the independent canonical run, which performs no resize.
+
+Add `--render-phase` to compare a read-only idle priority100 presentation poll with the captured motor state. The sampler runs at idle priority200, after the default-priority HUD and the injected idle priority100 presentation probe; physics/input priorities stay unchanged. The test exercises native callback ordering without manually advancing player or observer processing. It can be combined with `--resize` or either movie FPS. Godot documents the ordering in its [Node process-priority reference](https://docs.godotengine.org/en/stable/classes/class_node.html#class-node-property-process-priority).
 
 ## Audible offline clips
 

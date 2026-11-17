@@ -17,7 +17,7 @@ var export_open: Button
 
 func _export_runs() -> void:
 	export_button.disabled = true
-	export_status.text = "Packing every local attempt…"
+	export_status.text = "Packing saved attempts…"
 	var result: Dictionary = game.export_my_runs(export_name.text)
 	export_button.disabled = false
 	export_status.text = str(result.get("message", result.get("error", "Export failed.")))
@@ -30,9 +30,10 @@ func _attach_run_export() -> void:
 	section.name = "RunExport"
 	section.add_theme_constant_override("separation", 6)
 	pause_pages["Runs"].add_child(section)
+	_small(section, "Player name in the exported ZIP").name = "RunExportPlayerLabel"
 	export_name = LineEdit.new()
 	export_name.name = "RunExportPlayer"
-	export_name.placeholder_text = "Your player name (for Mike)"
+	export_name.placeholder_text = "Your player name"
 	export_name.max_length = 64
 	export_name.text = str(game.ghost_share.player_name)
 	if export_name.text.strip_edges().is_empty():
@@ -50,7 +51,7 @@ func _attach_run_export() -> void:
 		export_status.text = "Folder opened. Send the ZIP manually." if code == OK else "Folder could not open. Select the ZIP path below and copy it.")
 	export_open.name = "OpenRunExportFolder"
 	export_open.hide()
-	export_status = _small(section, "Every attempt + settings. Nothing uploads.")
+	export_status = _small(section, "Saved attempts + settings. Nothing uploads.")
 	export_status.name = "RunExportResult"
 	export_path = LineEdit.new()
 	export_path.name = "RunExportPath"

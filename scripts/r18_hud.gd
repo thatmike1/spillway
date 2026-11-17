@@ -696,8 +696,10 @@ func _build_map_cards() -> void:
 
 func _refresh_pause() -> void:
 	super()
+	if practice_note != null:
+		practice_note.text = "Start from any checkpoint. Practice attempts are recorded, never a best." if bool(game.session.recorder.enabled) else "Start from any checkpoint. Recording is off; practice never sets a best."
 	(pause_panel.find_child("PauseHeading", true, false) as Label).text = str(game.call("map_name"))
-	pause_kicker.text = "Paused  ·  %s" % str(game.preset.label) + ("  ·  Experimental" if bool(game.call("is_lab")) else "")
+	pause_kicker.text = "Paused  ·  Current map  ·  %s" % str(game.preset.label) + ("  ·  Experimental" if bool(game.call("is_lab")) else "")
 	pause_identity.visible = telemetry
 	map_heading.text = "Maps"
 	map_note.text = "%d maps. Each starts at its spawn and keeps your preset." % map_buttons.size()
@@ -708,6 +710,11 @@ func _refresh_pause() -> void:
 		var rec := str(game.session.call("recording_text"))
 		recording_line.text = ("Every attempt is recorded on this machine (r16_runs). F9 shows the folder." if rec.begins_with("Recording every") else rec)
 	pause_keys.text = keys_line.text + "  ·  L look  ·  F9 telemetry  ·  F11 fullscreen"
+
+func practice_started(stage_title: String, note: String = "") -> void:
+	finish_panel.hide()
+	var recording := "recorded" if bool(game.session.recorder.enabled) else "recording off"
+	notify("Practice from %s · %s, no best%s" % [stage_title, recording, "" if note.is_empty() else "  ·  " + note])
 
 func set_paused(value: bool) -> void:
 	super(value)
