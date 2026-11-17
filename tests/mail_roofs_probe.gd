@@ -33,6 +33,11 @@ func _physics_process(_dt: float) -> void:
 			if game.level.get_node("Mail_number_%d" % i).text != "SENT":
 				_fail("completed slot plate was not updated")
 
+	var cue: Label3D = game.level.get_node("Mail_window_cue")
+	var sent_03: bool = runner.mail_flight.delivered.has("mail-roofs-post-3")
+	if cue.visible == sent_03 or not "PASS CHIMNEY" in cue.text or not "THEN LEFT" in cue.text:
+		_fail("window turn cue is missing or contradicts the delivered state")
+
 func _fail(reason: String) -> void:
 	push_error("MAIL ROOFS late physics UI: " + reason)
 	set_physics_process(false)

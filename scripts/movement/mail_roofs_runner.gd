@@ -40,6 +40,7 @@ func _refresh_roof_ticket() -> void:
 			plate.text = "SENT" if sent else "%02d" % (i + 1)
 			plate.pixel_size = 0.014 if sent else 0.022
 		if i == 2:
+			level.get_node("Mail_window_cue").visible = not sent
 			level.get_node("Mail_window_number").text = "SENT" if sent else "03"
 			level.get_node("Mail_window_number").pixel_size = 0.014 if sent else 0.025
 	_status.text = "MAIL %d / 5    MISSES %d" % [mail_flight.delivered.size(), mail_flight.misses]

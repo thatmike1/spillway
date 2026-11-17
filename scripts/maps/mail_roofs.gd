@@ -4,12 +4,12 @@ const ROOF_MATERIAL := preload("res://scripts/art/mail_roof_material.gd")
 const ROOF_ID := "mail-roofs"
 const ROOF_ENTRY := {"name": "Mail Roofs", "theme": "Five slots. Your order.", "kind": "experiment", "experimental": true, "mail_delivery": true,
 	"runner": "res://scripts/movement/mail_roofs_runner.gd", "script": "res://scripts/maps/mail_roofs.gd", "reticle": true,
-	"instructions": "F2 bhop. Required goal: all five slots in any order, then Dispatch. Optional goal: reach Dispatch without mail. LMB throws, mouse steers, RMB recalls. Slot 03 needs a curved flight around the chimney. V view, B body, N goal; changes restart."}
+	"instructions": "F2 bhop. Required goal: all five slots in any order, then Dispatch. Optional goal: reach Dispatch without mail. LMB throws, mouse steers, RMB recalls. 03: throw close to the window; pass the chimney, then left. V view, B body, N goal; changes restart."}
 
 func _init() -> void:
 	level_id = "r22-mail-roofs"
 	level_name = "Mail Roofs"
-	level_version = 5
+	level_version = 6
 	variant = ROOF_ID
 	spawn = Transform3D(Basis.IDENTITY, Vector3(0, 10.04, 12))
 	finish_position = Vector3(-7, 10, 12)
@@ -49,10 +49,11 @@ func build() -> void:
 	box("post_chamber_roof", Vector3(0, 16, -72), Vector3(20.6, 0.5, 12.6), Color("ded8c2"))
 	box("window_trim_top", Vector3(6, 12.5, -65.6), Vector3(2, 0.15, 0.15), Color("ded8c2"))
 	box("window_trim_bottom", Vector3(6, 11.5, -65.6), Vector3(2, 0.15, 0.15), Color("bc713e"))
-	box("window_number_board", Vector3(6, 14, -65.55), Vector3(2.5, 1.5, 0.1), Color("ded8c2"))
+	box("window_number_board", Vector3(6, 14.3, -65.55), Vector3(3.6, 2.6, 0.1), Color("ded8c2"))
 	for side: int in [-1, 1]:
 		box("window_jamb_%d" % side, Vector3(6 + side * 0.9, 12, -65.5), Vector3(0.14, 1.14, 0.16), Color("ded8c2"))
-	label("window_number", Vector3(6, 14, -65.4), "03", 0.025)
+	label("window_number", Vector3(6, 14.8, -65.4), "03", 0.025)
+	label("window_cue", Vector3(6, 13.6, -65.4), "PASS CHIMNEY\nTHEN LEFT", 0.008)
 	# this founded chimney occludes the direct flight from the east approach to slot 03.
 	box("post_chimney", Vector3(3, 8, -70), Vector3(3.2, 24, 3), Color("53666a"))
 	box("post_chimney_cap", Vector3(3, 20.1, -70), Vector3(3.8, 0.35, 3.6), Color("ded8c2"))
@@ -166,7 +167,7 @@ func _roof(id: String, left: float, right: float, back: float, front: float) -> 
 	box("seawall_" + id, Vector3((left + right) * 0.5, 1.9, (back + front) * 0.5), Vector3(right - left, 16, front - back), Color("53666a"))
 
 func route_hint(_stage: int, _feet: Vector3) -> String:
-	return "Five collection slots, either direction around the atrium. Bend the flight around the chimney for 03. Return to Dispatch. B/V/N compare body, view and goal."
+	return "Five collection slots, either direction around the atrium. For 03, throw near the window; pass the chimney, then turn left. Return to Dispatch. B/V/N compare body, view and goal."
 
 func _local_light(at: Vector3, energy: float, distance: float) -> void:
 	var lamp := OmniLight3D.new()
