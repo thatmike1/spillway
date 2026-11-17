@@ -1,12 +1,9 @@
 extends SceneTree
-## controller records ordinary buttons and view angles; playback never writes position or velocity.
+## earn and replay ordinary input in the production host, including spawn settling and lifecycle.
+const HOST := preload("res://scripts/game.gd")
 const LEVEL := preload("res://scripts/maps/gantry.gd")
-const RUNNER := preload("res://scripts/movement/grapple_player.gd")
-const PRESETS := preload("res://scripts/r14_presets.gd")
 var player
-var level
-var output := "/tmp/r22-03-hop-into-swing/routes"
-var left := false
+var output := "/tmp/r22-03-hop-into-swing/host-routes"
 var release_after := 14.0
 var jump_after := 50
 var basic_target := 350.0
@@ -16,33 +13,6 @@ func _initialize() -> void:
 		if arg.begins_with("--out="):
 			output = arg.trim_prefix("--out=")
 	run.call_deferred()
-
-func button(on: bool) -> void:
-	if left == on:
-		return
-	left = on
-	var event := InputEventMouseButton.new()
-	event.button_index = MOUSE_BUTTON_LEFT
-	event.pressed = on
-	Input.parse_input_event(event)
-	Input.flush_buffered_events()
-	player._unhandled_input(event)
-	var reel := InputEventMouseButton.new()
-	reel.button_index = MOUSE_BUTTON_RIGHT
-	reel.pressed = on
-	Input.parse_input_event(reel)
-	Input.flush_buffered_events()
-
-func command(cmd: Dictionary) -> void:
-	for action in ["move_forward", "move_back", "move_left", "move_right", "jump"]:
-		Input.action_release(action)
-	if cmd.jump:
-		Input.action_press("jump")
-	if not str(cmd.action).is_empty():
-		Input.action_press(cmd.action)
-	player.yaw = cmd.yaw
-	player.pitch = cmd.pitch
-	button(cmd.hold)
 
 func control(fast: bool, tick: int, slot: int) -> Dictionary:
 	var p: Vector3 = player.position
@@ -70,103 +40,168 @@ func control(fast: bool, tick: int, slot: int) -> Dictionary:
 			action = "move_right" if side > 0 else "move_left"
 	return {"jump": tick > jump_after, "yaw": yaw, "pitch": clampf(pitch, -player.PITCH_LIMIT, player.PITCH_LIMIT), "hold": hold, "action": action}
 
-func attempt(fast: bool, tape: Array = []) -> Dictionary:
-	button(false)
-	player.reset_to(level.spawn)
-	player.configure_tether("elastic-arc", false)
-	var commands: Array = []
-	var transfers: Array = []
-	var slot := 0
-	var previous := false
-	var peak := 0.0
-	for tick in (5000 if tape.is_empty() else tape.size()):
-		if slot < 2 and player.position.z < -30.0 - slot * 48:
-			slot += 1
-		var cmd: Dictionary = tape[tick] if not tape.is_empty() else control(fast, tick, slot)
-		command(cmd)
-		player._physics_process(1.0 / 128)
-		commands.append(cmd)
-		var attached: bool = not player.grapple.is_empty()
-		var speed: float = Vector2(player.velocity.x, player.velocity.z).length() / player.U
-		peak = maxf(peak, speed)
-		if attached != previous:
-			transfers.append({"tick": tick, "attached": attached, "speed_ups": speed, "z": player.position.z, "y": player.position.y, "vy": player.velocity.y / player.U})
-		previous = attached
-		if tick % 512 == 0:
-			print("route ", fast, " tick ", tick, " pos ", player.position, " speed ", speed, " rope ", attached)
-		if level.is_finish_at(player.position):
-			return {"finished": true, "ticks": tick + 1, "seconds": (tick + 1) / 128.0, "peak_ups": peak, "transfers": transfers, "jumps": player.state.jump_count, "tape": commands}
-		if player.position.y < -6:
-			break
-	return {"finished": false, "position": str(player.position), "transfers": transfers, "tape": commands}
-
-func save_timeline(tape: Array, path: String) -> void:
+class Driver extends Node:
+	signal complete(result: Dictionary)
+	var harness
+	var game
+	var fast := false
+	var playback: Array = []
 	var events: Array = []
-	var prior := {"action": "", "jump": false, "hold": false, "yaw": 0.0, "pitch": 0.0}
-	var gain := deg_to_rad(2.5 * 0.022)
-	for tick: int in tape.size():
-		var cmd: Dictionary = tape[tick]
-		var time := (tick + 1) / 128.0
-		if cmd.action != prior.action:
-			if not str(prior.action).is_empty():
-				events.append({"time": time, "action": prior.action, "pressed": false})
+	var transfers: Array = []
+	var tick := 0
+	var event_index := 0
+	var prior_action := ""
+	var prior_jump := false
+	var prior_hold := false
+	var prior_attached := false
+	var peak := 0.0
+
+	func emit_input(row: Dictionary) -> void:
+		var event: InputEvent
+		if row.has("action"):
+			var action := InputEventAction.new()
+			action.action = row.action
+			action.pressed = row.pressed
+			action.strength = 1.0 if row.pressed else 0.0
+			event = action
+		elif row.has("button"):
+			var button := InputEventMouseButton.new()
+			button.button_index = row.button
+			button.pressed = row.pressed
+			event = button
+		else:
+			var mouse := InputEventMouseMotion.new()
+			mouse.relative = Vector2(row.mouse[0], row.mouse[1])
+			mouse.screen_relative = mouse.relative
+			event = mouse
+		Input.parse_input_event(event)
+		Input.flush_buffered_events()
+		events.append(row)
+
+	func command(cmd: Dictionary) -> void:
+		var stamp := (tick + 1) / 128.0
+		if cmd.action != prior_action:
+			if not prior_action.is_empty():
+				emit_input({"time": stamp, "action": prior_action, "pressed": false})
 			if not str(cmd.action).is_empty():
-				events.append({"time": time, "action": cmd.action, "pressed": true})
-		if cmd.jump != prior.jump:
-			events.append({"time": time, "action": "jump", "pressed": cmd.jump})
-		if cmd.yaw != prior.yaw or cmd.pitch != prior.pitch:
-			events.append({"time": time, "mouse": [-wrapf(cmd.yaw - prior.yaw, -PI, PI) / gain, -(cmd.pitch - prior.pitch) / gain]})
-		if cmd.hold != prior.hold:
+				emit_input({"time": stamp, "action": cmd.action, "pressed": true})
+		if cmd.jump != prior_jump:
+			emit_input({"time": stamp, "action": "jump", "pressed": cmd.jump})
+		var p = game.player
+		var gain := deg_to_rad(2.5 * 0.022)
+		var dx: float = -wrapf(cmd.yaw - p.yaw, -PI, PI) / gain
+		var dy: float = -(cmd.pitch - p.pitch) / gain
+		if absf(dx) > 0.00001 or absf(dy) > 0.00001:
+			emit_input({"time": stamp, "mouse": [dx, dy]})
+		if cmd.hold != prior_hold:
 			for index in [1, 2]:
-				events.append({"time": time, "button": index, "pressed": cmd.hold})
-		prior = cmd
-	FileAccess.open(path, FileAccess.WRITE).store_string(JSON.stringify(events))
+				emit_input({"time": stamp, "button": index, "pressed": cmd.hold})
+		prior_action = cmd.action
+		prior_jump = cmd.jump
+		prior_hold = cmd.hold
+
+	func end_attempt(ok: bool) -> void:
+		set_physics_process(false)
+		game.set_paused(true)
+		complete.emit({"finished": ok, "ticks": tick, "input_seconds": tick / 128.0,
+			"game_seconds": game.elapsed, "respawns": game.respawn_count,
+			"peak_ups": peak, "transfers": transfers, "jumps": game.player.state.jump_count,
+			"position": str(game.player.position), "tape": events})
+
+	func _physics_process(_delta: float) -> void:
+		var p = game.player
+		var attached: bool = not p.grapple.is_empty()
+		var speed: float = p.control_speed() / p.U
+		peak = maxf(peak, speed)
+		if attached != prior_attached:
+			transfers.append({"tick": tick, "attached": attached, "speed_ups": speed,
+				"z": p.position.z, "y": p.position.y})
+		prior_attached = attached
+		if game.finished:
+			end_attempt(game.respawn_count == 0)
+			return
+		if game.respawn_count > 0 or p.position.y < -5 or tick >= 5000:
+			end_attempt(false)
+			return
+		if playback.is_empty():
+			var slot := 0 if p.position.z > -30 else (1 if p.position.z > -78 else 2)
+			command(harness.control(fast, tick, slot))
+		else:
+			var stamp := (tick + 1) / 128.0
+			while event_index < playback.size() and float(playback[event_index].time) <= stamp:
+				emit_input(playback[event_index])
+				event_index += 1
+		tick += 1
+
+func attempt(fast: bool, tape: Array = []) -> Dictionary:
+	for action in ["move_forward", "move_back", "move_left", "move_right", "jump"]:
+		if InputMap.has_action(action):
+			Input.action_release(action)
+	for index in [1, 2]:
+		var event := InputEventMouseButton.new()
+		event.button_index = index
+		event.pressed = false
+		Input.parse_input_event(event)
+	Input.flush_buffered_events()
+	var game := HOST.new()
+	game.map_id = "gantry"
+	game.motor = "server128"
+	game.persist = false
+	game.record_runs = false
+	game.seed_from_r15 = false
+	game.set_window_title = false
+	game.profile_path = output.path_join("absent.cfg")
+	game.ghosts_directory = output.path_join("ghosts")
+	game.ghost_share_storage = output.path_join("selection.cfg")
+	root.add_child(game)
+	await process_frame
+	await process_frame
+	player = game.player
+	assert(game.startup_error.is_empty() and game.tether_model() == "elastic-arc")
+	game.set_paused(false)
+	var driver := Driver.new()
+	driver.harness = self
+	driver.game = game
+	driver.fast = fast
+	driver.playback = tape
+	driver.process_physics_priority = -100
+	game.add_child(driver)
+	var result: Dictionary = await driver.complete
+	game.queue_free()
+	await process_frame
+	return result
 
 func run() -> void:
+	RenderingServer.render_loop_enabled = false
 	Engine.physics_ticks_per_second = 128
-	for action in ["move_forward", "move_back", "move_left", "move_right", "jump", "crouch", "look_left", "look_right", "look_up", "look_down"]:
-		if not InputMap.has_action(action):
-			InputMap.add_action(action)
-	level = LEVEL.new()
-	root.add_child(level)
-	level.build()
-	player = RUNNER.new()
-	player.apply_settings(PRESETS.source_settings("server128", {}))
-	root.add_child(player)
-	player.set_physics_process(false)
-	player.set_process(false)
-	player.input_enabled = true
-	await physics_frame
 	DirAccess.make_dir_recursive_absolute(output)
 	var results: Array = []
-	for fast in [false, true]:
+	for fast: bool in [false, true]:
 		var result: Dictionary = {}
 		for phase: int in [50, 40, 60, 70, 80, 90, 100, 32, 24]:
 			jump_after = phase
 			for release_distance: float in [14.0, 16.0, 12.0]:
 				release_after = release_distance
-				result = attempt(fast)
-				print("TAPE_SWEEP fast=", fast, " jump_after=", jump_after, " release_after=", release_after, " finished=", result.finished)
+				result = await attempt(fast)
+				print("HOST_SWEEP fast=", fast, " phase=", phase, " release=", release_after, " finished=", result.finished)
 				if result.finished:
 					break
 			if result.finished:
 				break
 		result["jump_after_tick"] = jump_after
-		result["basic_target_ups"] = basic_target
 		result["release_after_m"] = release_after
 		var tape: Array = result.tape
 		result.erase("tape")
-		FileAccess.open(output + ("/fast.json" if fast else "/basic.json"), FileAccess.WRITE).store_string(JSON.stringify(tape))
 		if result.finished:
-			var replay := attempt(fast, tape)
-			result["replay_exact_ticks"] = replay.finished and replay.ticks == result.ticks
+			var replay: Dictionary = await attempt(fast, tape)
+			result["host_replay_exact"] = replay.finished and replay.ticks == result.ticks and replay.respawns == 0
 		else:
-			result["replay_exact_ticks"] = false
-		save_timeline(tape, output + ("/fast-timeline.json" if fast else "/basic-timeline.json"))
+			result["host_replay_exact"] = false
+		FileAccess.open(output.path_join("fast-timeline.json" if fast else "basic-timeline.json"), FileAccess.WRITE).store_string(JSON.stringify(tape))
 		print("RESULT ", JSON.stringify(result))
 		results.append(result)
-	FileAccess.open(output + "/result.json", FileAccess.WRITE).store_string(JSON.stringify(results, "\t"))
-	var ok: bool = results[0].finished and results[1].finished and results[0].replay_exact_ticks and results[1].replay_exact_ticks
+	FileAccess.open(output.path_join("result.json"), FileAccess.WRITE).store_string(JSON.stringify(results, "\t"))
+	var ok: bool = results[0].finished and results[1].finished and results[0].host_replay_exact and results[1].host_replay_exact
 	if ok:
 		ok = results[1].ticks < results[0].ticks and results[0].transfers.size() >= 4 and results[1].transfers.size() >= 4
 	quit(0 if ok else 1)
