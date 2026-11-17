@@ -17,6 +17,7 @@ import parity
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True, help="new external evidence directory")
+    parser.add_argument("--probe", action="store_true", help="also exercise the source-side package probe twice")
     args = parser.parse_args()
     out = args.out.resolve()
     if out.is_relative_to(engine.PROJECT):
@@ -42,6 +43,16 @@ def main():
                 results.append({"name": name, **result})
         finally:
             denied.chmod(0o755)
+        if args.probe:
+            for phase in ("first", "reload"):
+                arguments = ["--headless", "--audio-driver", "Dummy", "--path", source, "--script", "res://tests/profile_store_package_probe.gd", "--", "--r16-profile=" + str(out / "spillway_r16.cfg"), "--no-run-recordings", "--r22-package-check=" + str(out / (phase + ".json"))]
+                if phase == "reload":
+                    arguments.append("--package-reload")
+                result = engine.run(arguments, cwd=source, profile=profile / "probe", log=out / ("probe-" + phase + ".log"))
+                receipt = json.loads((out / (phase + ".json")).read_text())
+                if not receipt.get("ok"):
+                    raise RuntimeError("Probe failed: " + str(receipt))
+                results.append({"name": "probe-" + phase, **result, **receipt})
         (out / "RESULT.json").write_text(json.dumps({"ok": True, "checks": results}, indent=2) + "\n")
         print("PASS " + str(out / "RESULT.json"))
     finally:

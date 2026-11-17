@@ -84,6 +84,10 @@ func run() -> void:
 	game.set_look(true)
 	check(game.look_layer.enabled and game.motion_identity() == before, "declared palette preserves identity through both modes")
 	check(game.level.find_children("*", "CollisionShape3D", true, false).size() == solids, "declared palette preserves collision count")
+	game.maps.catalog["palette-fixture"]["own_look"] = true
+	game.select_map("breakwater")
+	game.select_map("palette-fixture")
+	check(not is_instance_valid(game.look_layer), "own look opts out of generic palette fallback")
 	game.request_quit(0)
 	game.free()
 	var ok := checks.all(func(row: Dictionary) -> bool: return row.ok)
