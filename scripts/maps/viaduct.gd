@@ -13,7 +13,7 @@ const V_HEIGHTS := [4.0,3.0,3.0,2.0]
 
 var level_id := "r22-viaduct"
 var level_name := "Viaduct"
-var level_version := 1
+var level_version := 3
 var variant := MAP_ID
 var spawn := Transform3D(Basis.IDENTITY,Vector3(0,4.04,12))
 var finish_title := "West abutment"
@@ -42,6 +42,13 @@ func build() -> void:
 		var d: Array = V_DECKS[i]
 		var h: float = V_HEIGHTS[i]
 		GEO.deck(self,"viaduct_terrace_%d" % i,d[0],d[1],d[2],d[3],h,i)
+		if i in [1,2]:
+			# the next return enters beneath this terrace; keep a clear four-metre arch.
+			var passage_x: float = V_DECKS[i+1][1]+3
+			for span: Array in [[d[0]+0.4,passage_x-2],[passage_x+2,d[1]-0.4]]:
+				GEO.prism(self,"viaduct_plinth_%d_%s" % [i,span[0]],GEO.rectangle(span[0],span[1],d[2]+0.4,d[3]-0.4,h-0.8),-5.8,-1,"structure","support")
+		else:
+			GEO.prism(self,"viaduct_plinth_%d" % i,GEO.rectangle(d[0]+0.4,d[1]-0.4,d[2]+0.4,d[3]-0.4,h-0.8),-5.8,-1,"structure","support")
 		var pose := spawn if i == 0 else Transform3D(Basis.IDENTITY,Vector3((d[0]+d[1])/2,h+0.04,d[3]-2))
 		checkpoints.append({"pose":pose,"title":["Intake","East pier","Central pier","West abutment"][i],"bounds":AABB(Vector3(d[0],h-0.2,d[2]),Vector3(d[1]-d[0],3,d[3]-d[2]))})
 		_box("Art_paint_orange_lip_%d" % i,Vector3((d[0]+d[1])/2,h+0.02,d[2]+0.15),Vector3(d[1]-d[0],0.03,0.22),Color("b5683c"))
@@ -98,7 +105,18 @@ func route_hint(stage: int, _feet: Vector3) -> String:
 	return "Aim at bay %d. Hold LMB, reel with RMB, then release toward the pale terrace. Lower court ramps return to the course." % mini(stage+1,3)
 
 func geometry_hash() -> String:
-	return JSON.stringify([level_id,level_version,V_ANCHORS,V_DECKS,V_HEIGHTS,manifest,spawn,finish_bounds,kill_bounds],"",false,true).sha256_text()
+	var data: Array = [level_id,level_version,MAP_ID,V_DECKS,V_HEIGHTS,progress_roles]
+	for i: int in V_ANCHORS.size():
+		data.append(["viaduct-bay-%d" % (i+1),_v(V_ANCHORS[i])])
+	for piece: Dictionary in manifest:
+		var points: Array = []
+		for point: Vector3 in piece.points:
+			points.append(_v(point))
+		data.append([piece.name,piece.stage,piece.role,piece.kind,points])
+	for checkpoint: Dictionary in checkpoints:
+		data.append([checkpoint.title,_v(checkpoint.pose.origin),_v(checkpoint.bounds.position),_v(checkpoint.bounds.size)])
+	data.append([_v(spawn.origin),_v(spawn.basis.x),_v(spawn.basis.y),_v(spawn.basis.z),_v(finish_position),finish_radius,_v(finish_bounds.position),_v(finish_bounds.size),_v(kill_bounds.position),_v(kill_bounds.size)])
+	return JSON.stringify(data,"",false,true).sha256_text()
 
 func _environment() -> void:
 	var world := WorldEnvironment.new()

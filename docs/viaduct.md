@@ -28,3 +28,15 @@ python3 tools/play.py --headless --fixed-fps 128 --script res://tests/viaduct_re
 ```
 
 Generated tapes and route traces belong outside Git. These are mechanical proofs, not human difficulty or enjoyment ratings.
+
+Reference revision 2 reports five mover pads per recovery target median and explicitly finds no comparable measured rope-course spacing standard. Its 0.813 m Eazy figure is adjacent-pad spacing, not a measured runner jump gap: players can skip pads. The later independent-review correction withdraws the bonus gap percentiles because missing sloped supports made false gaps; neither statistic is used as a Viaduct spacing target. Viaduct's 14–16 m gaps therefore remain grounded in its own Arc motor proofs, rather than widened or narrowed to fit bhop measurements. Its per-bay recovery is intentionally more frequent than the sampled bhop grouping, so failed rope acquisitions can be isolated. The last bay changes both transfer direction and receiving footprint; this follows the sheet's recommendation to vary direction, elevation and recovery rather than merely escalating every gap. The wider final abutment is the concrete spacing revision prompted by executable flight evidence. No downloaded reference geometry or art is used.
+
+## Earlier-release line
+
+`tests/viaduct_route.gd --fast` keeps the first two verified transfers and releases the third once the feet rise above 3.5 m rather than 5 m. It cuts across the lower outside arc into the broad abutment, with less height available for correction. The real-motor planner and independent saved-event replay both finish in 1237 ticks (9.6640625 s), 84 ticks / 0.65625 s earlier than the basic line. All three rings attach. This is the intended tighter timing challenge; its human difficulty remains for playtesting.
+
+Geometry version 2 adds solid concrete plinths beneath every terrace, rooted at y=-5.8. Both saved tapes replay with identical finish ticks/endpoints after this addition, and the normal-spawn walk-off recovery still returns without a reset. The deck footprints, rings and Arc law remain the same.
+
+Geometry version 3 cuts clear four-metre arches around the two return ramps that enter beneath earlier terraces. Four low-court motor fixtures independently walk every return to its terrace. Both canonical tapes still finish clean through the live host with every checkpoint and zero respawns. The numeric geometry digest includes collision points, anchor IDs, checkpoint poses, spawn basis and course bounds.
+
+The later played-reference samples are SourceJump rank-one/world-record AA1000 runs, not typical-player routing or F2 calibration. Duster's measured flat-hop medians include a 7.315 m gap, 6.502 m landed support width and 26.084 m/s horizontal travel speed. That example reinforces the need to consider receiving width and speed together. Viaduct's 14–16 m spans instead rely on the 30 m-range Arc rope and its local tapes; a SourceJump gap is not a rope-gap target. The course changes horizontal direction and receiver width across three bays rather than simply enlarging every gap. Slower human lines may use the recovery terraces differently.
