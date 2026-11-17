@@ -24,6 +24,11 @@ func run() -> void:
 	var end := Vector3(0, 0, -20)
 	check(FX.rope_point(start, end, 1.8, 0) == start and FX.rope_point(start, end, 1.8, 1) == end, "rope endpoints fixed")
 	check(is_equal_approx(FX.rope_point(start, end, 1.8, 0.5).y, -1.8), "slack bounded at midpoint")
+	for pixel: float in [0.000001, 0.01, 100.0]:
+		var radii := FX.cable_radii(pixel, 1.0)
+		check(radii.x > 0 and radii.y > radii.x and radii.y <= 0.104, "cable widths stay nested and bounded")
+	for distance: float in [0.001, 0.1, 1.0, 9.0, 30.0]:
+		check(FX.cue_scale(distance) <= 1.0 and 0.96 * FX.cue_scale(distance) / distance <= 0.107, "ring angular size bounded")
 	for kind: String in ["attach", "reel", "tension", "wind"]:
 		var a := SOUND.synthesize(kind)
 		var b := SOUND.synthesize(kind)
