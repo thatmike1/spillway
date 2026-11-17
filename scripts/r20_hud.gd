@@ -108,7 +108,7 @@ func _refresh_pause() -> void:
 func _refresh_tether() -> void:
 	if tether_section == null:
 		return
-	tether_section.visible = game.map_id == "tether-yard"
+	tether_section.visible = game.map_has_capability("grapple")
 	reel_manual.disabled = not bool(game.settings.tether_auto_reel)
 	reel_automatic.disabled = bool(game.settings.tether_auto_reel)
 	for id: String in tether_models:
@@ -123,7 +123,7 @@ func _process(delta: float) -> void:
 			through_cue.modulate.a = minf(1.0, float(game.player.cue_left_s) / 0.15)
 	if game != null and game.map_id == "through-line" and title_card != null:
 		(title_card.get_node("TitleKeys") as Label).text = "Bhop into the raised fork · 230+ u/s forward\nMore speed, more lift · air-strafe onto Second Run · keep moving"
-	if game != null and game.map_id == "tether-yard" and title_card != null:
+	if game != null and game.map_has_capability("grapple") and title_card != null:
 		(title_card.get_node("TitleKeys") as Label).text = "LMB hold to swing · RMB reel · release LMB to coast\nSpace jump · A/D strafe · Esc rope model and reel preference"
 
 func map_changed() -> void:

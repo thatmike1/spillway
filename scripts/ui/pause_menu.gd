@@ -48,7 +48,7 @@ func _refresh_anchor_readout() -> void:
 		return
 	displayed_anchor = {}
 	anchor_readout.hide()
-	if game == null or game.map_id != "tether-yard" or game.paused or game.finished:
+	if game == null or not game.map_has_capability("grapple") or game.paused or game.finished:
 		return
 	if not is_instance_valid(game.player) or not game.player.has_method("r21_acquisition_snapshot"):
 		return

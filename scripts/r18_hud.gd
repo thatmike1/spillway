@@ -494,7 +494,7 @@ func _make_pause() -> void:
 	column.add_child(map_grid)
 	_build_map_cards()
 	_spacer(column)
-	_heading(column, "Checkpoint practice  (not recorded)")
+	_heading(column, "Checkpoint practice")
 	practice_note = _small(column, "Start from any checkpoint. Practice attempts are recorded, never a best.")
 	var stages := HBoxContainer.new()
 	stages.name = "StageRow"
