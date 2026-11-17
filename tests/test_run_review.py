@@ -23,7 +23,8 @@ def main():
     checks = []
     for name in args.checks:
         result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", engine.PROJECT,
-                             "--script", "res://tests/run_review_" + name + ".gd"],
+                             "--script", "res://tests/run_review_" + name + ".gd",
+                             "--", "--out=" + str(out / name)],
                             cwd=engine.PROJECT, profile=out / "profile", log=out / (name + ".log"))
         checks.append({"name": name, **result})
     after = {p.name: engine.sha(p) for p in fixtures.iterdir() if p.is_file()}

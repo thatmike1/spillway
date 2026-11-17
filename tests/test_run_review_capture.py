@@ -23,7 +23,8 @@ def main():
     poses = out / "static-ui.json"
     poses.write_text('[{"position":[0,0,0]}]\n')
     # retain shot.main's pin, snapshot, lock, display, receipts and cleanup unchanged.
-    shot.HARNESS = (engine.PROJECT / "tests/run_review_capture.gd").read_text()
+    shot.HARNESS = (engine.PROJECT / "tests/run_review_capture.gd").read_text().replace(
+        "res://tests/fixtures/", str(engine.PROJECT / "tests/fixtures") + "/")
     variants = [("matrix-1280", "1280x720", False), ("matrix-960", "960x640", False)] if args.matrix else [
         ("splits-1280", "1280x720", False), ("splits-960", "960x640", False), ("follow-1280", "1280x720", True)]
     for name, size, follow in variants:

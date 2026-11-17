@@ -1,4 +1,6 @@
 extends SceneTree
+const SUPPORT := preload("res://tests/run_review_test_support.gd")
+var test_output := ""
 const MODEL := preload("res://scripts/recordings/run_review_model.gd")
 const PRACTICE := preload("res://scripts/recordings/run_review_practice.gd")
 var failures := 0
@@ -9,6 +11,7 @@ func check(value: bool, why: String) -> void:
 func _initialize() -> void:
 	run.call_deferred()
 func run() -> void:
+	test_output = SUPPORT.output()
 	var best := MODEL.load_attempt("res://tests/fixtures/original-map-parity/breakwater-basic/old/runs/golden.r16run")
 	var attempt := MODEL.load_attempt("res://tests/fixtures/original-map-parity/breakwater-return/old/runs/golden.r16run")
 	var before := FileAccess.get_sha256(best.path)
@@ -18,7 +21,7 @@ func run() -> void:
 	check(not MODEL.practice_request(MODEL.compare(best, best)).ok, "no loss offers no practice action")
 	var host := preload("res://scripts/game.gd").new()
 	host.record_runs = true
-	host.recordings_dir = "/tmp/r22-08-run-review/practice-live"
+	host.recordings_dir = test_output.path_join("practice-live")
 	root.add_child(host)
 	await process_frame
 	host.set_physics_process(false)
@@ -30,7 +33,7 @@ func run() -> void:
 	bad.identity.geometry = "wrong"
 	check(not PRACTICE.start(host, bad).ok and host.attempts == previous and host.paused, "mismatch refuses before changing the attempt")
 	var missing := request.duplicate(true)
-	missing.best_path = "/tmp/r22-08-run-review/missing-best.r16run"
+	missing.best_path = test_output.path_join("missing-best.r16run")
 	check(not PRACTICE.start(host, missing).ok and host.attempts == previous and host.paused, "missing best refuses before changing the attempt")
 	var result := PRACTICE.start(host, request)
 	check(result.ok, "existing host practice command succeeds")
@@ -56,8 +59,8 @@ func run() -> void:
 	check(FileAccess.get_sha256(best.path) == before, "personal best recording remains byte-identical")
 	host.queue_free()
 	await process_frame
-	for file: String in DirAccess.get_files_at("/tmp/r22-08-run-review/practice-live"):
-		DirAccess.remove_absolute("/tmp/r22-08-run-review/practice-live/" + file)
-	DirAccess.remove_absolute("/tmp/r22-08-run-review/practice-live")
+	for file: String in DirAccess.get_files_at(test_output.path_join("practice-live")):
+		DirAccess.remove_absolute(test_output.path_join("practice-live").path_join(file))
+	DirAccess.remove_absolute(test_output.path_join("practice-live"))
 	print("RUN_REVIEW_PRACTICE: ", "PASS" if failures == 0 else "FAIL")
 	quit(0 if failures == 0 else 1)

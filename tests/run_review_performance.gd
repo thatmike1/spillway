@@ -1,7 +1,10 @@
 extends SceneTree
+const SUPPORT := preload("res://tests/run_review_test_support.gd")
+var test_output := ""
 const MODEL := preload("res://scripts/recordings/run_review_model.gd")
 func _init() -> void:
-	var folder := "/tmp/r22-08-run-review/performance-attempts"
+	test_output = SUPPORT.output()
+	var folder := test_output.path_join("performance-attempts")
 	DirAccess.make_dir_recursive_absolute(folder)
 	var bytes := FileAccess.get_file_as_bytes("res://tests/fixtures/original-map-parity/breakwater-basic/old/runs/golden.r16run")
 	for i: int in 300:

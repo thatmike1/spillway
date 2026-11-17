@@ -1,4 +1,6 @@
 extends SceneTree
+const SUPPORT := preload("res://tests/run_review_test_support.gd")
+var test_output := ""
 const SCREEN := preload("res://scripts/ui/run_review.gd")
 const MODEL := preload("res://scripts/recordings/run_review_model.gd")
 var failures := 0
@@ -14,8 +16,9 @@ func inventory(directory: String) -> Dictionary:
 func _initialize() -> void:
 	run.call_deferred()
 func run() -> void:
+	test_output = SUPPORT.output()
 	var empty := SCREEN.new()
-	empty.directory = "/tmp/r22-08-run-review/no-recordings-created"
+	empty.directory = test_output.path_join("no-recordings-created")
 	root.add_child(empty)
 	paused = true
 	while empty.scanning:
@@ -26,7 +29,7 @@ func run() -> void:
 	await process_frame
 	var folder := "res://tests/fixtures/original-map-parity/breakwater-basic/old/runs"
 	var before := inventory(folder)
-	var review_folder := "/tmp/r22-08-run-review/screen-pair"
+	var review_folder := test_output.path_join("screen-pair")
 	DirAccess.make_dir_recursive_absolute(review_folder)
 	for route: String in ["basic", "return"]:
 		var bytes := FileAccess.get_file_as_bytes("res://tests/fixtures/original-map-parity/breakwater-%s/old/runs/golden.r16run" % route)
@@ -77,6 +80,7 @@ func run() -> void:
 		screen.attach_map(source, other.identity)
 		check(screen.trace.visible and screen.splits.visible and not screen.stage.visible, "valid to unavailable restores analysis")
 		check(screen.practice_button.disabled, "different map cannot start practice")
+		check(screen.practice_note.visible and screen.practice_note.text.contains("Whiteout"), "practice mismatch explanation is visible without hovering")
 		screen.select_attempt(selected)
 		check(screen.trace.visible and screen.splits.visible, "selection preserves unavailable fallback")
 		screen.refresh()
@@ -97,12 +101,15 @@ func run() -> void:
 	for i: int in screen.entries.size():
 		var label := screen.attempts.get_item_text(i)
 		check(label.contains("2026-") and label.contains("Z"), "recorded date/time is visible in attempt row")
+		var width := screen.attempts.get_theme_font("font").get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
+		check(width <= screen.attempts.size.x - 20, "timestamp row fits on one line")
 		if screen.entries[i].name == "zzz-partial.r16run.part":
 			partial_index = i
 	check(partial_index >= 0, "partial attempt is listed")
 	if partial_index >= 0:
 		check(screen.attempts.get_item_text(partial_index).contains("incomplete"), "partial status is visible")
 		screen.select_attempt(partial_index)
+		check(screen.attempts.get_selected_items()[0] == partial_index, "selected row matches displayed incomplete state")
 		check(not screen.trace.visible and not screen.splits.visible and not screen.stage.visible and screen.practice_button.disabled, "incomplete attempt never shows stale analysis or practice")
 		check(screen.message.text.contains("Choose a sealed attempt"), "incomplete state explains recovery")
 		screen.select_attempt(selected)

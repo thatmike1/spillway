@@ -16,6 +16,7 @@ var scrubber: HSlider
 var message: Label
 var clock: Label
 var practice_button: Button
+var practice_note: Label
 var follow: CheckButton
 var camera_target: OptionButton
 var legend: Label
@@ -60,6 +61,10 @@ func _ready() -> void:
 		if request.ok and MODEL.READER.identity_matches(request.identity, _map_identity).is_empty():
 			practice_requested.emit(request))
 	body.add_child(practice_button)
+	practice_note = Label.new()
+	practice_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	practice_note.visible = false
+	body.add_child(practice_note)
 	var columns := HSplitContainer.new()
 	columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_child(columns)
@@ -70,10 +75,7 @@ func _ready() -> void:
 	library.add_child(heading)
 	attempts = ItemList.new()
 	attempts.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	attempts.custom_minimum_size.x = 320
-	attempts.icon_mode = ItemList.ICON_MODE_TOP
-	attempts.fixed_column_width = 296
-	attempts.max_text_lines = 3
+	attempts.custom_minimum_size.x = 430
 	attempts.add_theme_font_size_override("font_size", 14)
 	attempts.size_flags_horizontal = Control.SIZE_FILL
 	_style_data_control(attempts)
@@ -143,6 +145,7 @@ func _ready() -> void:
 func refresh() -> void:
 	comparison = {}
 	practice_button.disabled = true
+	practice_note.visible = false
 	practice_button.tooltip_text = "Choose a comparable attempt with a completed segment first."
 	stage.clear()
 	entries.clear()
@@ -182,8 +185,11 @@ func _finish_list() -> void:
 		select_attempt(preferred)
 
 func select_attempt(index: int) -> void:
+	attempts.select(index)
 	comparison = {}
+	practice_note.visible = false
 	practice_button.disabled = true
+	practice_note.visible = false
 	practice_button.tooltip_text = "Choose a comparable attempt with a completed segment first."
 	stage.clear()
 	stage.visible = false
@@ -250,6 +256,11 @@ func _load_preview() -> void:
 func _update_practice_action() -> void:
 	var request := MODEL.practice_request(comparison)
 	practice_button.disabled = not request.ok or not MODEL.READER.identity_matches(request.get("identity", {}), _map_identity).is_empty()
+	practice_note.visible = request.ok and practice_button.disabled
+	if practice_note.visible:
+		var preset := str(request.identity.get("preset", ""))
+		preset = {"server128": "F2", "server128_aa1000": "F5"}.get(preset, preset)
+		practice_note.text = "Practice needs %s / %s with its recorded layout. Current map: %s." % [str(request.identity.get("map", "")).replace("-", " ").capitalize(), preset, str(_map_identity.get("map", "unavailable")).replace("-", " ").capitalize()]
 	practice_button.tooltip_text = "Start a normal practice attempt at %s with the best ghost. Existing recordings stay unchanged." % request.get("label", "") if not practice_button.disabled else (str(request.error) if not request.ok else "Load the matching map, movement preset and layout to practise this segment.")
 
 func _style_data_control(control: Control) -> void:
