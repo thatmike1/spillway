@@ -46,7 +46,7 @@ waypoint; the eventual fixed tape replay is the independent acceptance step.
 
 Read `/home/thatmike1/spillway-r22-run/reference/MAP-DESIGN.md` (17 Nov,
 first measured sheet). Its dominant `bhop_eazy` mover pads (180 of 188) are 64 Source units
-(1.6256 m), with eight narrow or angled exceptions, compared with this map's 12 m gallery and 20 m direct catch width.
+(1.6256 m), with eight narrow or angled exceptions, compared with this map's 12 m gallery, 32 m shared landing and 20 m tailrace catch.
 Those generous surfaces are intentional recovery space, not borrowed bhop tier
 numbers. The sheet supplies no route-only rope gaps; it cannot validate the
 20 m shaft or 14 m descending gap. Production Arc route tapes must validate those.

@@ -1,5 +1,6 @@
 extends "res://scripts/maps/tether_yard.gd"
 ## a crane hall with a continuous wall route and a released swing across its shaft.
+const FOUNDRY_ART := preload("res://scripts/art/foundry_hall.gd")
 const FOUNDRY_ID := "foundry"
 const FOUNDRY_ENTRY := {"name": "Foundry", "theme": "High gallery or committed shaft crossing", "kind": "experiment", "experimental": true,
 	"runner": "res://scripts/movement/grapple_player.gd", "script": "res://scripts/maps/foundry.gd", "reticle": true,
@@ -47,6 +48,7 @@ func build() -> void:
 		"advanced": [spawn.origin,Vector3(0,18,0),Vector3(0,12,-28),finish_position]}
 	jump_gaps = [{"label":"shaft", "edge":Vector3(0,18,0),"land":Vector3(0,12,-20),"recovery":"court and wall ramp"},
 		{"label":"descending catch","edge":Vector3(0,12,-36),"land":Vector3(0,2,-50),"recovery":"court and tailrace ramp"}]
+	FOUNDRY_ART.dress(self)
 
 func _ramp(id: String, x0: float, x1: float, z0: float, z1: float, y0: float, y1: float, stage: int) -> void:
 	# keep convex pieces within the same 24 m scale as the shared deck builder.
@@ -80,7 +82,7 @@ func _foundry_anchor(i: int, at: Vector3) -> void:
 	_box("crane_beam_%d" % i,Vector3(0,at.y+1.5,at.z),Vector3(52,1,1.2),Color("29464a"))
 	_box("crane_drop_%d" % i,at+Vector3(0,0.7,0),Vector3(0.18,1.4,0.18),Color("29464a"))
 	for x: float in [-26.0,26.0]:
-		_box("crane_column_%d_%s" % [i,x],Vector3(x,(at.y-6)/2,at.z),Vector3(1.5,at.y+9,1.5),Color("29464a"))
+		_box("crane_column_%d_%s" % [i,x],Vector3(x,(at.y-6)/2,at.z),Vector3(1.5,at.y+10,1.5),Color("29464a"))
 
 func route_hint(stage: int, _feet: Vector3) -> String:
 	return "Left gallery stays connected. The shaft is shorter: hold the high ring, then release toward the far deck." if stage < 1 else "Use the tailrace ring for the descending catch. Lower court ramps recover every miss."
