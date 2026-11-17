@@ -33,6 +33,8 @@ var pad_slot := -1
 var budget := 3
 var blocks_enabled := false
 var pads_enabled := false
+var envelope_enabled := false
+var envelope_delivered := false
 var pad_body: StaticBody3D
 var pad_bounds := AABB()
 var pieces: Node3D
@@ -112,6 +114,8 @@ func apply_design(next: Array, block: int, pad: int, limit: int, blocks_on: bool
 	mechanics = [RUNNER.TETHER_LAW,{"id":"plan-yard-design","version":PIECES.VERSION,"design":physical_design()}]
 	if pad_slot >= 0:
 		mechanics.append({"id":"plan-launch","on":true,"tuning":PIECES.LAUNCH.LAUNCH_LAW})
+	if envelope_enabled:
+		mechanics.append({"id":"plan-envelope-1","handoffs":1,"standing_wait":true,"throw_mps":18.0,"gravity":9.8,"catch_radius":1.6,"ttl":3.0,"practice":true})
 	if pieces == null:
 		return true
 	for child: Node in pieces.get_children():
@@ -174,8 +178,13 @@ func _solid_piece(id: String, at: Vector3, size: Vector3, color: Color) -> Stati
 	return body
 
 func is_finish_at(feet: Vector3) -> bool:
-	return finish_bounds.has_point(feet)
+	return finish_bounds.has_point(feet) and (not envelope_enabled or envelope_delivered)
+func practice_message() -> String:
+	return "Envelope practice · no best · Tab, Q turns it off" if envelope_enabled else ""
 func route_hint(_stage: int, _feet: Vector3) -> String:
 	return "Tab plans at spawn. Quays +3m; caisson +7/+9m."
 func geometry_hash() -> String:
-	return JSON.stringify([level_id, level_version, physical_design(), LAYOUT.SOCKETS, PIECES.BLOCKS, PIECES.PADS, PIECES.LAUNCH.LAUNCH_LAW], "", false, true).sha256_text()
+	var recipe := [level_id, level_version, physical_design(), LAYOUT.SOCKETS, PIECES.BLOCKS, PIECES.PADS, PIECES.LAUNCH.LAUNCH_LAW]
+	if envelope_enabled:
+		recipe.append("plan-envelope-1")
+	return JSON.stringify(recipe, "", false, true).sha256_text()

@@ -4,6 +4,8 @@ const OVERLAY := preload("res://scripts/plan/overlay.gd")
 const STORE := preload("res://scripts/plan/store.gd")
 const READER := preload("res://scripts/r16_run_reader.gd")
 const PIECES := preload("res://scripts/plan/pieces.gd")
+const ENVELOPE := preload("res://scripts/plan/envelope.gd")
+var envelope: Node3D
 var plan_store := STORE.new()
 var best_plan := {}
 var _best_path := ""
@@ -27,6 +29,9 @@ func _ready() -> void:
 	planner.runner = self
 	layer.add_child(planner)
 	planner.hide()
+	envelope = ENVELOPE.new()
+	envelope.runner = self
+	add_child(envelope)
 func _input(event: InputEvent) -> void:
 	if bool(get_parent().get("paused")):
 		if planning:
@@ -55,6 +60,20 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif planning and code == KEY_DELETE:
 			planner.clear_pieces()
+			get_viewport().set_input_as_handled()
+		elif planning and code == KEY_Q:
+			var map: Node = get_parent().get("level")
+			map.envelope_enabled = not map.envelope_enabled
+			map.apply_design(map.plan,map.block_slot,map.pad_slot,map.budget,map.blocks_enabled,map.pads_enabled)
+			envelope.reset()
+			planner.notice = "Envelope spitball: one waiting body, one throw, practice only." if map.envelope_enabled else "Envelope off. Ordinary plan times again."
+			planner.queue_redraw()
+			get_viewport().set_input_as_handled()
+		elif not planning and code in [KEY_K,KEY_E] and envelope != null and envelope.active():
+			if code == KEY_K:
+				envelope.park()
+			else:
+				envelope.throw_envelope()
 			get_viewport().set_input_as_handled()
 		elif planning and code >= KEY_1 and code <= KEY_9:
 			planner.toggle_socket(code-KEY_1)
@@ -87,11 +106,15 @@ func _physics_process(delta: float) -> void:
 		return
 	_step_pad()
 	super(delta)
+	if envelope != null:
+		envelope.step(delta)
 
 func reset_to(pose: Transform3D) -> void:
 	used_pad = false
 	launch_events.clear()
 	super(pose)
+	if envelope != null:
+		envelope.reset()
 func _step_pad() -> void:
 	if not input_enabled or used_pad or not is_grounded():
 		return
@@ -126,7 +149,24 @@ func get_motion_state() -> Dictionary:
 	var host := get_parent()
 	var map: Node = host.get("level") if host != null else null
 	result["plan_yard"] = {"design":map.physical_design() if map != null and map.has_method("physical_design") else {},"pad_used":used_pad,"launches":launch_events.duplicate(true)}
+	if envelope != null and envelope.active():
+		result["plan_yard"]["envelope"] = envelope.snapshot()
 	return result
+
+func experiment_status() -> String:
+	var text := super()
+	if notice_left_s > 0 and not release_notice.is_empty():
+		text = text.replace("\n"+release_notice,"\nPrevious line: "+release_notice)
+	return text
+
+func run_review_unavailable_reason() -> String:
+	if planning:
+		return "Resume the survey and commit with Enter before 3D review or segment practice."
+	var host := get_parent()
+	var level: Node = host.get("level") if host != null else null
+	if level != null and bool(level.get("envelope_enabled")):
+		return "3D review and segment practice are unavailable in envelope mode. Turn it off in the survey."
+	return ""
 
 func _process(delta: float) -> void:
 	super(delta)
