@@ -8,7 +8,7 @@ const MAP_ENTRY := {"name": "Mail Run", "theme": "Hold the hop. Steer the post."
 	"instructions": "F2 bhop. LMB throws; mouse steers. RMB recalls. Deliver all three before Dispatch. V changes view, B compares held/running body, N compares required/optional mail. Changes restart."}
 var level_id := "r22-mail-run"
 var level_name := "Mail Run"
-var level_version := 3
+var level_version := 4
 var variant := MAP_ID
 var spawn := Transform3D(Basis.IDENTITY, Vector3(0, 2.04, 12))
 var finish_title := "Dispatch"
@@ -51,9 +51,13 @@ func build() -> void:
 		box("apron_lip_%d" % i, Vector3(side * 10.5, 2.03, at.z + 7.9), Vector3(9, 0.035, 0.10), Color("bc713e"))
 		box("post_%d" % i, at + Vector3(0, -3, -0.9 * face), Vector3(6, 10, 2), Color("53666a"))
 		box("mouth_%d" % i, at + Vector3(0, 0, 0.15 * face), Vector3(2.5, 1.8, 0.12), Color("172d32"))
+		for edge: int in [-1, 1]:
+			box("slot_jamb_%d_%d" % [i, edge], at + Vector3(edge * 1.24, 0, 0.24 * face), Vector3(0.12, 1.8, 0.16), Color("ded8c2"))
+		box("slot_sill_%d" % i, at + Vector3(0, -0.85, 0.24 * face), Vector3(2.6, 0.10, 0.16), Color("ded8c2"))
 		box("lip_%d" % i, at + Vector3(0, 0.95, 0.25 * face), Vector3(2.8, 0.12, 0.4), Color("bc713e"))
 		GEO.deck(self, "post_court_%d" % i, minf(side * 12 - 3, -6), maxf(side * 12 + 3, 6), at.z - 4, at.z + 8, 2, i)
-		label("post_number_%d" % i, at + Vector3(0, 2.4, 0.5 * face), "%02d" % (i + 1), 0.03)
+		if face > 0:
+			label("post_number_%d" % i, at + Vector3(0, 2.4, 0.5 * face), "%02d" % (i + 1), 0.03)
 		box("station_joint_%d" % i, at + Vector3(0, -1.3, 0.13 * face), Vector3(6, 0.045, 0.035), Color("29464a"))
 		box("apron_drain_%d" % i, Vector3(side * 10.5, 2.026, at.z + 6.5), Vector3(6.5, 0.018, 0.12), Color("53666a"))
 		box("collection_plate_%d" % i, at + Vector3(0, 1.35, 0.32 * face), Vector3(2.9, 0.55, 0.12), Color("ded8c2"))
