@@ -75,7 +75,9 @@ func _attach_mail_preferences() -> void:
 	for id: String in ["envelope", "body"]:
 		var button := _button(mail_section, "Envelope" if id == "envelope" else "Runner's eyes", func() -> void:
 			if game.player.has_method("set_mail_view"):
+				var was_paused := bool(game.paused)
 				game.player.call("set_mail_view", id)
+				game.set_paused(was_paused)
 				_refresh_mail())
 		button.name = "MailView_" + id
 		mail_views[id] = button
@@ -117,8 +119,6 @@ func _open_run_review() -> void:
 	if review_screen.has_method("attach_map"):
 		review_screen.call("attach_map", game.level, game.motion_identity())
 	review_screen.closed.connect(_close_run_review)
-	if review_screen.has_method("attach_map"):
-		review_screen.call("attach_map", game.level, game.motion_identity())
 	_pause_side.hide()
 	_pause_edge.hide()
 

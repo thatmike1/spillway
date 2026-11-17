@@ -118,7 +118,7 @@ func _refresh_tether() -> void:
 		(tether_models[id] as Button).set_pressed_no_signal(game.tether_model() == id)
 	if tether_model_lock != null:
 		tether_model_lock.visible = game.map_entry().has("tether_model")
-		tether_model_lock.text = "This map fixes the rope law to %s. Reel and feedback controls are below." % game.tether_model()
+		tether_model_lock.text = "This map fixes the rope law to %s. Reel controls are above; feedback controls are below." % game.tether_model()
 
 func _process(delta: float) -> void:
 	super(delta)
