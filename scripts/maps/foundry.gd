@@ -47,8 +47,6 @@ func build() -> void:
 	_sign("entry",Vector3(0,21,-20),"FOUNDRY",0.008)
 	_sign("fork",Vector3(-26.97,17,-16),"GALLERY",0.014)
 	_sign("direct",Vector3(4,11.6,-19.97),"SHAFT",0.014)
-	_sign("tailrace",Vector3(0,8,-75),"TAILRACE",0.012)
-	_sign("next",Vector3(0,17,-44),"TAILRACE",0.006)
 	_sign("court",Vector3(0,-7.94,-17),"COURT\nRETURN LEFT",0.035)
 	routes = {"basic": [spawn.origin,Vector3(-16,18,6),Vector3(-16,12,-24),Vector3(0,12,-33),finish_position],
 		"advanced": [spawn.origin,Vector3(0,18,0),Vector3(0,12,-28),finish_position]}
