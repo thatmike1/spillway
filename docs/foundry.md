@@ -85,9 +85,10 @@ python3 tools/test.py --out /tmp/foundry-fast
 
 The fast gate needs a new output directory. The route fixtures construct command
 tapes from normal spawn with the production runner at server128/128 Hz, then
-replay mouse/buttons without steering position or velocity. The gallery takes
-1810 ticks (14.140625 s); the shaft takes 1108 (8.65625 s), saving 702 ticks
-(5.484375 s). Both collect every shared checkpoint and earn the descending catch.
+replay mouse/buttons without steering position or velocity. The original exported tapes span
+1810 ticks (14.140625 s) and 1108 (8.65625 s), respectively. First entry into
+the same finish bounds occurs at 1792/1090 ticks, also 702 ticks
+(5.484375 s) apart. Both collect every shared checkpoint and earn the descending catch.
 The chosen tape releases the first ring after 140 held ticks and the final ring
 after 145. These are measured examples, not required human timings or enjoyment
 claims. A no-rope replay is a negative control for that earned shortcut.
@@ -137,8 +138,10 @@ Arc forces and the level's recording identity remain unchanged. The existing
 gallery and two-hook shaft remain available.
 
 The selected input holds/reels the first ring for 155 ticks and reaches finish
-bounds after 811 motor steps from spawn (6.3359375 s), compared with 1108 for the
-ordinary shaft. The native finish card reads 6.16 s because the run clock starts
+bounds after 811 motor steps from spawn (6.3359375 s). The ordinary shaft first enters
+the same bounds at 1090 steps (8.515625 s), so the carry saves 279 steps
+(2.1796875 s). Its original 1108-step tape includes 18 steps after first finish;
+using its full length here would overstate the saving. The native finish card reads 6.16 s because the run clock starts
 after the first 0.5 m of movement. Among nine tested hold times, 155 is fastest;
 140 takes 824 ticks with the same carry policy, while 135 and 160 miss the receiver.
 Those are tested examples, not a unique release window or a global optimum.

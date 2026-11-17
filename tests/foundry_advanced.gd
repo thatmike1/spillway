@@ -14,6 +14,19 @@ func write_json(name: String, value: Variant, indent: String = "") -> void:
 	write_ok = write_ok and file.get_error()==OK
 	file.close()
 
+func first_finish_tick(rows: Array) -> int:
+	for tick: int in rows.size():
+		var at: Array = rows[tick].position
+		if level.is_finish_at(Vector3(at[0],at[1],at[2])):
+			return tick+1
+	return -1
+
+func body_positions(rows: Array) -> Array:
+	var positions: Array = []
+	for row: Dictionary in rows:
+		positions.append(row.position)
+	return positions
+
 func step(at: Vector3, rope: bool, jump: bool, forward: bool = true) -> void:
 	super.step(at,rope,jump,forward)
 	trace.append({"position":[player.position.x,player.position.y,player.position.z],"velocity":[player.velocity.x,player.velocity.y,player.velocity.z],"motion":player.get_motion_state()})
@@ -94,8 +107,14 @@ func run() -> void:
 	player.set_process(false)
 	player.apply_settings(PRESETS.source_settings("server128", {}))
 	await physics_frame
+	trace = []
 	var gallery: Dictionary = await route(false,0)
+	gallery["first_finish_tick"] = first_finish_tick(trace)
+	write_json("gallery-body-trace.json",body_positions(trace))
+	trace = []
 	var shaft: Dictionary = await route(true,140)
+	shaft["first_finish_tick"] = first_finish_tick(trace)
+	write_json("shaft-body-trace.json",body_positions(trace))
 	var baselines_ok: bool = gallery.finish and gallery.replay.finish and gallery.descending_catch and gallery.checkpoints.size()==3 and gallery.position==gallery.replay.position and gallery.ticks==1810 and shaft.finish and shaft.replay.finish and shaft.descending_catch and shaft.checkpoints.size()==3 and shaft.position==shaft.replay.position and shaft.ticks==1108
 	var results: Array = []
 	var best: Dictionary = {}
@@ -131,8 +150,8 @@ func run() -> void:
 		write_json("carry-stopped-events.json",event_tape(stopped))
 	var early_fails: bool = not results[2].finish and results[2].hold==135
 	var late_fails: bool = not results[7].finish and results[7].hold==160
-	var ok: bool = write_ok and baselines_ok and not best.is_empty() and best.hold==155 and best.ticks==811 and best.ticks<shaft.ticks and best.grapples==1 and best.receiver_hops==2 and replayed.finish and replayed.checkpoints.size()==3 and replayed.grapples==1 and replayed.all_body_positions_exact and replayed.all_body_velocities_exact and not no_rope.finish and no_rope.grapples==0 and not no_bunny.finish and early_fails and late_fails and stopping_tail.first_finish_tick==811 and stopping_tail.finish and stopping_tail.grounded and stopping_tail.grapples==1 and level.geometry_hash()=="544896293f49e30f6cecb277b4cfba5298a820ad662a044ab4418db4a17228f5"
-	write_json("summary.json",{"ok":ok,"existing_gallery":gallery,"existing_shaft":shaft,"candidates":results,"best":best,"fixed_replay":replayed,"no_rope_control":no_rope,"no_bunny_control":no_bunny,"early_release_fails":early_fails,"late_release_fails":late_fails,"stopping_tail":stopping_tail,"geometry_hash":level.geometry_hash()},"\t")
+	var ok: bool = write_ok and baselines_ok and not best.is_empty() and best.hold==155 and best.ticks==811 and gallery.first_finish_tick>0 and shaft.first_finish_tick>0 and best.ticks<shaft.first_finish_tick and best.grapples==1 and best.receiver_hops==2 and replayed.finish and replayed.checkpoints.size()==3 and replayed.grapples==1 and replayed.all_body_positions_exact and replayed.all_body_velocities_exact and not no_rope.finish and no_rope.grapples==0 and not no_bunny.finish and early_fails and late_fails and stopping_tail.first_finish_tick==811 and stopping_tail.finish and stopping_tail.grounded and stopping_tail.grapples==1 and level.geometry_hash()=="544896293f49e30f6cecb277b4cfba5298a820ad662a044ab4418db4a17228f5"
+	write_json("summary.json",{"ok":ok,"existing_gallery":gallery,"existing_shaft":shaft,"same_finish_saving_ticks":shaft.first_finish_tick-best.ticks if not best.is_empty() else null,"candidates":results,"best":best,"fixed_replay":replayed,"no_rope_control":no_rope,"no_bunny_control":no_bunny,"early_release_fails":early_fails,"late_release_fails":late_fails,"stopping_tail":stopping_tail,"geometry_hash":level.geometry_hash()},"\t")
 	mouse(false)
 	player.free()
 	level.free()
