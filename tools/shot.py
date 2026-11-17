@@ -205,12 +205,14 @@ func _capture() -> void:
 	else:
 		RenderingServer.force_draw(true, float(options.every))
 	var path := str(options.out).path_join("frame-%05d.png" % frame_index)
-	var error := root.get_texture().get_image().save_png(path)
+	var image := root.get_texture().get_image()
+	var error := image.save_png(path)
 	var observation: Dictionary = player.call("get_motion_state") if player.has_method("get_motion_state") else {}
 	trace.store_line(JSON.stringify({"motion": observation, "finished": main.get("finished"), "finish_kind": main.get("finish_kind"),
 		"checkpoint": main.get("checkpoint_index"), "respawns": main.get("respawn_count"), "frame": frame_index, "time": age, "path": path,
 		"position": [player.global_position.x, player.global_position.y, player.global_position.z],
-		"mode": options.mode, "error": error}))
+		"mode": options.mode, "error": error, "window_size": [root.size.x, root.size.y],
+		"png_size": [image.get_width(), image.get_height()]}))
 	trace.flush()
 	if error != OK:
 		push_error("PNG capture failed")
@@ -229,6 +231,10 @@ class TapeInput extends Node:
 	func _physics_process(delta: float) -> void:
 		while event_index < options.events.size() and float(options.events[event_index].time) <= age:
 			var row: Dictionary = options.events[event_index]
+			if row.has("resize"):
+				get_tree().root.size = Vector2i(int(row.resize[0]), int(row.resize[1]))
+				event_index += 1
+				continue
 			var event: InputEvent
 			if row.has("key"):
 				var key := InputEventKey.new()
@@ -259,7 +265,7 @@ class TapeInput extends Node:
 '''
 
 
-def read_sequence(path, mode):
+def read_sequence(path, mode, max_size=(4096, 4096)):
     rows = json.loads(Path(path).read_text())
     if not isinstance(rows, list) or not rows:
         raise ValueError("sequence must be a nonempty JSON array")
@@ -277,7 +283,15 @@ def read_sequence(path, mode):
             if not isinstance(stamp, (int, float)) or stamp < previous or stamp < 0:
                 raise ValueError("tape times must be nonnegative and ordered")
             previous = stamp
-            if "key" in row:
+            if "resize" in row:
+                size = row["resize"]
+                if (not isinstance(size, list) or len(size) != 2
+                        or any(type(v) is not int or not 1 <= v <= limit for v, limit in zip(size, max_size))):
+                    raise ValueError("resize requires integer [width,height] within the private display")
+                if any(key in row for key in ("key", "button", "action", "mouse")):
+                    raise ValueError("resize must be a separate tape event")
+                values = [stamp]
+            elif "key" in row:
                 if not isinstance(row["key"], str) or not row["key"] or not isinstance(row.get("pressed"), bool):
                     raise ValueError("key requires a name and boolean pressed")
                 values = [stamp]
@@ -363,7 +377,9 @@ def main():
     options = dict(verbose=args.verbose, movie=args.movie, movie_fps=args.movie_fps, look=args.look, size=args.size, settings=settings, map=args.map, route=args.route, out=str(output), seconds=args.seconds, every=args.every,
                    mode="route" if args.route else ("tape" if args.tape else "poses"))
     if args.tape:
-        options["events"] = read_sequence(args.tape, "tape")
+        options["events"] = read_sequence(args.tape, "tape", tuple(map(int, args.size.split("x"))))
+        if args.movie and any("resize" in row for row in options["events"]):
+            parser.error("resize tapes require PNG mode; movie dimensions must stay fixed")
     if args.poses:
         options["poses"] = read_sequence(args.poses, "poses")
         options["seconds"] = max(args.seconds, len(options["poses"]) * args.every + 2)
