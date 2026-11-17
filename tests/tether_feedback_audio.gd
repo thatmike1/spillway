@@ -41,9 +41,14 @@ func run() -> void:
 	sound.update(0.1, true, true, 1.0, 1000.0, opts)
 	sound.attach_cue()
 	check(sound.voices.values().all(func(v: AudioStreamPlayer) -> bool: return v.playing), "all enabled audio channels start")
-	await create_timer(0.12).timeout
+	# fixed-fps advances simulation timers faster than the audio mixer thread.
+	await process_frame
+	OS.delay_msec(120)
+	await process_frame
 	sound.stop_all()
-	await create_timer(0.05).timeout
+	await process_frame
+	OS.delay_msec(60)
+	await process_frame
 	check(sound.voices.values().all(func(v: AudioStreamPlayer) -> bool: return not v.playing), "boundary stops every audio channel")
 	sound.update(0.1, true, true, 1.0, 1000.0, {})
 	check(sound.voices.values().all(func(v: AudioStreamPlayer) -> bool: return not v.playing), "disabled channels stay stopped")
