@@ -7,6 +7,16 @@ var output := "/tmp/r22-03-hop-into-swing/host-routes"
 var release_after := 14.0
 var jump_after := 50
 var basic_target := 350.0
+var route_map := "gantry"
+var registry: Dictionary = {}
+var route_edges := [-12.0, -60.0]
+var route_limits := [-30.0, -78.0]
+var route_anchors: Array = LEVEL.ANCHORS
+var goal_z := -120.0
+var trace_enabled := false
+var stop_tick := 0
+var entry_lead := 4.0
+var coast_ticks := 0
 
 func _initialize() -> void:
 	for arg in OS.get_cmdline_user_args():
@@ -18,12 +28,12 @@ func control(fast: bool, tick: int, slot: int) -> Dictionary:
 	var p: Vector3 = player.position
 	var attached: bool = not player.grapple.is_empty()
 	var hold := false
-	var aim := Vector3(0, p.y, -120) - p
-	var edge := -12.0 - slot * 48.0
-	if slot < 2 and p.z < edge + 4 and p.z > edge - release_after:
+	var aim := Vector3(0, p.y, goal_z) - p
+	var edge: float = route_edges[mini(slot, route_edges.size() - 1)]
+	if slot < route_edges.size() and p.z < edge + entry_lead and p.z > edge - release_after:
 		hold = true
 		if not attached:
-			aim = LEVEL.ANCHORS[slot] - player._eye()
+			aim = (route_anchors[slot] as Vector3) - player._eye()
 	var yaw := atan2(-aim.x, -aim.z)
 	var pitch := atan2(aim.y, Vector2(aim.x, aim.z).length()) if hold else 0.0
 	var action := "" if attached else "move_forward"
@@ -55,6 +65,11 @@ class Driver extends Node:
 	var prior_hold := false
 	var prior_attached := false
 	var peak := 0.0
+	var motion_trace: Array = []
+	var last_jump_tick := -10000
+	var prior_jumps := 0
+	var finish_tick := -1
+	var coast_min_feet := INF
 
 	func emit_input(row: Dictionary) -> void:
 		var event: InputEvent
@@ -106,25 +121,47 @@ class Driver extends Node:
 		complete.emit({"finished": ok, "ticks": tick, "input_seconds": tick / 128.0,
 			"game_seconds": game.elapsed, "respawns": game.respawn_count,
 			"peak_ups": peak, "transfers": transfers, "jumps": game.player.state.jump_count,
-			"position": str(game.player.position), "tape": events})
+			"position": str(game.player.position), "tape": events, "motion_trace": motion_trace,
+			"timer_finished": game.finished, "finish_tick": finish_tick,
+			"coast_min_feet": coast_min_feet if finish_tick >= 0 else null})
 
 	func _physics_process(_delta: float) -> void:
 		var p = game.player
 		var attached: bool = not p.grapple.is_empty()
 		var speed: float = p.control_speed() / p.U
+		if p.state.jump_count != prior_jumps:
+			last_jump_tick = tick
+		prior_jumps = p.state.jump_count
+		if harness.trace_enabled:
+			motion_trace.append([p.position, p.velocity, p.state.jump_count, p.state.land_count, p.state.grounded])
 		peak = maxf(peak, speed)
 		if attached != prior_attached:
 			transfers.append({"tick": tick, "attached": attached, "speed_ups": speed,
-				"z": p.position.z, "y": p.position.y})
+				"z": p.position.z, "y": p.position.y, "since_jump_ticks": tick - last_jump_tick, "jumps": p.state.jump_count})
 		prior_attached = attached
 		if game.finished:
-			end_attempt(game.respawn_count == 0)
+			if harness.coast_ticks == 0:
+				end_attempt(game.respawn_count == 0)
+				return
+			if finish_tick < 0:
+				finish_tick = tick
+			coast_min_feet = minf(coast_min_feet, p.position.y)
+			if tick >= finish_tick + harness.coast_ticks:
+				end_attempt(game.respawn_count == 0 and coast_min_feet >= 3.8)
+			else:
+				# retain the tape's ordinary held input after winning, as native playback does.
+				tick += 1
+			return
+		if harness.stop_tick > 0 and tick >= harness.stop_tick:
+			end_attempt(false)
 			return
 		if game.respawn_count > 0 or p.position.y < -5 or tick >= 5000:
 			end_attempt(false)
 			return
 		if playback.is_empty():
-			var slot := 0 if p.position.z > -30 else (1 if p.position.z > -78 else 2)
+			var slot := 0
+			while slot < harness.route_limits.size() and p.position.z <= harness.route_limits[slot]:
+				slot += 1
 			command(harness.control(fast, tick, slot))
 		else:
 			var stamp := tick / 128.0
@@ -144,7 +181,8 @@ func attempt(fast: bool, tape: Array = []) -> Dictionary:
 		Input.parse_input_event(event)
 	Input.flush_buffered_events()
 	var game := HOST.new()
-	game.map_id = "gantry"
+	game.map_id = route_map
+	game.map_registry = registry.duplicate(true)
 	game.motor = "server128"
 	game.persist = false
 	game.record_runs = false
