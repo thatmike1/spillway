@@ -1,6 +1,6 @@
 import gzip,hashlib,json,math,os,struct,shutil
 from pathlib import Path
-MIN_FREE = 15_000_000_000
+MIN_FREE = 2_000_000_000
 def sha(path):
     h = hashlib.sha256()
     with path.open('rb') as f:

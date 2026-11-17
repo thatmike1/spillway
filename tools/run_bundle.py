@@ -23,7 +23,7 @@ MAX_TOTAL = 512 * 1024 * 1024
 MAX_MANIFEST = 1024 * 1024
 MAX_ARCHIVE = MAX_TOTAL + 8 * 1024 * 1024
 CHUNK = 64 * 1024
-RESERVE = 15_000_000_000
+RESERVE = 2_000_000_000
 # decoded recording expansion is independently bounded before the old reader allocates columns.
 MAX_DECODED_FILE = 64 * 1024 * 1024
 MAX_DECODED_TOTAL = 512 * 1024 * 1024
@@ -319,7 +319,7 @@ def ingest(bundle, destination, player):
     require(isinstance(player, str) and 0 < len(player.strip()) <= 64 and not any(ord(c) < 32 for c in player), "explicit player label required (1–64 characters)")
     bundle, destination = Path(bundle), Path(destination)
     require(bundle.is_file() and not bundle.is_symlink(), "bundle must be a regular file")
-    require(shutil.disk_usage(Path.home()).free >= RESERVE, "HOME must retain 15 GB free")
+    require(shutil.disk_usage(Path.home()).free >= RESERVE, "HOME must retain 2 GB free")
     with bundle.open("rb") as f:
         before = os.fstat(f.fileno())
         check_zip_header(f)
@@ -327,7 +327,7 @@ def ingest(bundle, destination, player):
         f.seek(0)
         with zipfile.ZipFile(f) as z:
             manifest, raw_manifest, members, total = manifest_from(z)
-            require(shutil.disk_usage(Path.home()).free >= RESERVE + total + 8 * MAX_MANIFEST, "import estimate would reduce HOME below 15 GB")
+            require(shutil.disk_usage(Path.home()).free >= RESERVE + total + 8 * MAX_MANIFEST, "import estimate would reduce HOME below 2 GB")
             slug = re.sub("[^a-z0-9]+", "-", player.lower()).strip("-")[:40] or "player"
             player_folder = destination / (slug + "-" + hashlib.sha256(player.encode()).hexdigest()[:12])
             volume = destination
