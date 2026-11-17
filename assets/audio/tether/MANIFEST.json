@@ -1,0 +1,13 @@
+{
+  "kit": "Spillway optional tether feedback (r22)",
+  "source": "res://scripts/audio/tether_sound.gd:synthesize",
+  "author": "Spillway project contributors",
+  "provenance": "Original code-generated signed 16-bit mono PCM, 22050 Hz. No imported recordings, samples or third-party assets.",
+  "sounds": [
+    {"id": "attach", "use": "90 ms damped two-tone latch click; one shot"},
+    {"id": "reel", "use": "112 Hz mechanism with 16 Hz gated 336 Hz tooth tone; one-second periodic loop"},
+    {"id": "tension", "use": "68/136 Hz low string load tone with periodic 3 Hz phase variation; one-second periodic loop"},
+    {"id": "wind", "use": "24 integer-frequency partials, 80–2600 Hz, private seed 220417; one-second periodic loop"}
+  ],
+  "modifications": "Synthesized at runtime. Every channel independently toggleable, defaults off. Existing release and break sounds unchanged. No generated binary assets retained."
+}
