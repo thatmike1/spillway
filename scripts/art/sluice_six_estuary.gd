@@ -111,7 +111,7 @@ static func _tidal_flat(level: Node3D, id: String, at: Vector3, size: Vector3, c
 	for x: int in 24:
 		for z: int in 32:
 			var corners: Array[Vector2] = [Vector2(x,z),Vector2(x+1,z),Vector2(x+1,z+1),Vector2(x,z+1)]
-			for i: int in [0,2,1,0,3,2]:
+			for i: int in [0,1,2,0,2,3]:
 				var uv := corners[i]/Vector2(12,16)-Vector2.ONE
 				var height := _flat_height(uv.x,uv.y)
 				var band := 0.5+0.5*sin(height*22.0)
