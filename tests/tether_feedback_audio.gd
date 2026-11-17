@@ -28,7 +28,7 @@ func run() -> void:
 		var radii := FX.cable_radii(pixel, 1.0)
 		check(radii.x > 0 and radii.y > radii.x and radii.y <= 0.104, "cable widths stay nested and bounded")
 	for distance: float in [0.001, 0.1, 1.0, 9.0, 30.0]:
-		check(FX.cue_scale(distance) <= 1.0 and 0.96 * FX.cue_scale(distance) / distance <= 0.107, "ring angular size bounded")
+		check(FX.cue_scale(distance) <= 1.0 and 1.05 * FX.cue_scale(distance) / distance <= 0.106, "ring angular size bounded")
 	for kind: String in ["attach", "reel", "tension", "wind"]:
 		var a := SOUND.synthesize(kind)
 		var b := SOUND.synthesize(kind)

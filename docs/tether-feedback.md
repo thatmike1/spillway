@@ -53,12 +53,14 @@ Additional checks: `tests/tether_feedback_audio.gd` covers all-off defaults, rop
 
 ## Visual bounds
 
-The cable has a 2 mm core radius near the hand with a 3.2 mm inverted-hull outline. At distance a restrained pixel floor keeps the connection legible against bright clouds: approximately 1.2 pixels for the core and 2.2 pixels for the outline at ordinary FOV, with at most 15% load widening. World radii remain bounded (core ≤57.5 mm, outline ≤103.5 mm). The outline culls front faces as documented in Godot's [BaseMaterial3D reference](https://docs.godotengine.org/en/stable/classes/class_basematerial3d.html#enum-basematerial3d-cullmode), so it frames rather than covers the core. Neither part casts shadows or changes collision.
+The cable has a 2 mm core radius near the hand with a 3.2 mm inverted-hull outline. At distance a restrained pixel floor keeps the connection legible against bright clouds: approximately 1.2 pixels for the core and 2.7 pixels for the outline at ordinary FOV, with at most 15% load widening. World radii remain bounded (core ≤57.5 mm, outline ≤103.5 mm). The outline culls front faces as documented in Godot's [BaseMaterial3D reference](https://docs.godotengine.org/en/stable/classes/class_basematerial3d.html#enum-basematerial3d-cullmode), so it frames rather than covers the core. Neither part casts shadows or changes collision.
 
-Ready and attach rings shrink within 9 m of the eye, capping their angular radius at about six degrees even when passing close to an anchor. Ready still means exactly the cached physics candidate; it does not promise a future line or select a different anchor.
+Ready and attach rings shrink within 10 m of the eye, capping their angular radius at about six degrees even when passing close to an anchor. Ready still means exactly the cached physics candidate; it does not promise a future line or select a different anchor.
 
 ## Portable-map and recording proof
 
 The identity test also writes two disposable fixture recordings through the production recorder, reads them through the production reader, and compares serialized motion columns bit for bit. Headers contain creation timestamps/run IDs and are deliberately excluded. Fixtures are not clean or finished runs and live only beneath the supplied external output path. Neither recorder nor reader implementation is changed.
 
 Three temporary full-host catalog entries explicitly declare `grapple: true` and the unchanged shared Arc runner under different IDs. They check observer replacement, fresh runner binding, unchanged motor/attempt/identity on all toggles, lens handoff, pause reset and return to an original map with no observer. These are ephemeral capability-dispatch fixtures, not newly published levels or claims that another lane's route finishes. The host owns capability gating; the observer never tests map names.
+
+The player end follows the current projection to sit just below the viewport, avoiding a loose endpoint inside the aiming view without inventing a hand or moving the camera. A projection test covers 45°, 80° and 120° FOV. Endpoint rings have an original dark inverted-hull contour for contrast against pale clouds; their total apparent radius, including the outline and full attach expansion, remains about six degrees or less.

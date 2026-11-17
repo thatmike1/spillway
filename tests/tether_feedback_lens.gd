@@ -16,6 +16,10 @@ func check(ok: bool, label_: String) -> void:
 func run() -> void:
 	var base := Camera3D.new()
 	root.add_child(base)
+	for angle: float in [45.0, 80.0, 120.0]:
+		base.fov = angle
+		var projected := base.unproject_position(FX.rope_origin(base, angle))
+		check(projected.y > root.get_visible_rect().size.y, "cable termination stays below viewport: " + str(angle))
 	base.fov = 80
 	base.make_current()
 	var lens := LENS.new()

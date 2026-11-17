@@ -91,7 +91,6 @@ func observe(delta: float) -> void:
 	if camera == null:
 		return
 	var endpoint: Vector3 = snapshot.get("position", Vector3.ZERO)
-	var start := camera.global_position + camera.global_basis * Vector3(0.23, -0.26, -0.48)
 	var rest_m := float(runner.get("grapple_length_u")) * float(runner.get("U"))
 	var centre: Vector3 = runner.call("_hull_centre")
 	var distance := centre.distance_to(endpoint)
@@ -105,6 +104,7 @@ func observe(delta: float) -> void:
 	_sound.update(delta, attached, bool(runner.call("reel_active")), tension, speed, options)
 	_lens.update(camera, speed, delta, enabled("tether_speed_fov"))
 	var view_fov := _lens.fov if _lens.current else camera.fov
+	var start := rope_origin(camera, view_fov)
 	var pixel_height := maxf(1.0, camera.get_viewport().get_visible_rect().size.y)
 	var sag := minf(1.8, maxf(0.0, rest_m - distance) * 0.45) if attached else 0.0
 	for i: int in SEGMENTS:
@@ -141,14 +141,18 @@ func observe(delta: float) -> void:
 		_face_ring(_ready_marker, endpoint, camera)
 		_ready_marker.scale = Vector3.ONE * cue_scale(camera.global_position.distance_to(endpoint))
 
+static func rope_origin(camera: Camera3D, view_fov: float) -> Vector3:
+	# terminate below the viewport so the cable never floats loose inside the aiming view.
+	return camera.global_position + camera.global_basis * Vector3(0.23, -0.48 * tan(deg_to_rad(view_fov) * 0.5) * 1.12, -0.48)
+
 static func cable_radii(world_per_pixel: float, tension: float) -> Vector2:
 	# a small physical cable near the hand, with a restrained pixel floor at distance.
 	var load_scale := 1.0 + clampf(tension, 0.0, 1.0) * 0.15
-	return Vector2(clampf(world_per_pixel * 0.6, 0.002, 0.05), clampf(world_per_pixel * 1.1, 0.0032, 0.09)) * load_scale
+	return Vector2(clampf(world_per_pixel * 0.6, 0.002, 0.05), clampf(world_per_pixel * 1.35, 0.0032, 0.09)) * load_scale
 
 static func cue_scale(distance: float) -> float:
 	# keep endpoint rings below about six degrees of angular radius near the camera.
-	return clampf(distance / 9.0, 0.0, 1.0)
+	return clampf(distance / 10.0, 0.0, 1.0)
 
 func _rope_piece(material: StandardMaterial3D) -> MeshInstance3D:
 	var piece := MeshInstance3D.new()
@@ -180,7 +184,13 @@ func _ring(color: Color, inner: float, outer: float) -> MeshInstance3D:
 	mesh_.inner_radius = inner
 	mesh_.outer_radius = outer
 	node.mesh = mesh_
-	node.material_override = _flat(color)
+	var material := _flat(color)
+	var ink := _flat(Color("29464a"))
+	ink.cull_mode = BaseMaterial3D.CULL_FRONT
+	ink.grow = true
+	ink.grow_amount = 0.08
+	material.next_pass = ink
+	node.material_override = material
 	node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(node)
 	return node
