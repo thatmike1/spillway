@@ -45,7 +45,7 @@ def main():
                profile=profile, log=out / "import.log")
     components = [
         "saltglass_registration", "tether_geometry", "tether_coefficients",
-        "grapple_capability", "r22_registration", "host_capabilities", "teaching_cap", "plan_contract", "plan_pause", "plan_review_guard",
+        "grapple_capability", "r22_registration", "host_capabilities", "profile_store_failures", "teaching_cap", "plan_contract", "plan_pause", "plan_review_guard",
         "tether_feedback_identity", "tether_feedback_audio", "registry_injection",
         "style_suspension", "tether_feedback_lens", "saltglass_art", "seaward_registration", "gantry_runner", "gantry_rope", "gantry_chain", "gantry_coast",
         "mail_flight", "mail_motor", "mail_courts", "mail_tape", "sluice_six_style", "outer_reach_tape",
@@ -62,9 +62,13 @@ def main():
                 folder.mkdir()
                 print("check " + name, flush=True)
                 script = "res://" + name if "/" in name else "res://tests/" + name + ".gd"
+                extra = []
+                if name == "profile_store_failures":
+                    extra = ["--r16-profile=" + str(folder / "probe-seed.cfg"), "--no-run-recordings",
+                             "--r22-package-check=" + str(folder / "probe-seed.json")]
                 result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
                                      "--fixed-fps", "128", "--script", script,
-                                     "--", "--out=" + str(folder), "--menu-contract=" + str(verification.FIXTURES / "contract.json")], cwd=source, profile=profile,
+                                     "--", "--out=" + str(folder), "--menu-contract=" + str(verification.FIXTURES / "contract.json"), *extra], cwd=source, profile=profile,
                                     log=folder / "engine.log", timeout=300)
                 report["components"].append({"name": name, **result})
         (out / "COMPONENTS.json").write_text(json.dumps({**report, "ok": True}, indent=1) + "\n")
