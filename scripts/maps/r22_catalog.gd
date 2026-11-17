@@ -3,6 +3,7 @@ extends RefCounted
 const MAIL := preload("res://scripts/maps/mail_run.gd")
 const SLUICE := preload("res://scripts/maps/sluice_six.gd")
 const BASE := preload("res://scripts/maps/catalog.gd")
+const SEAWARD := preload("res://scripts/maps/saltglass_seaward.gd")
 const VIADUCT := preload("res://scripts/maps/viaduct.gd")
 const GANTRY := preload("res://scripts/maps/gantry.gd")
 const FOUNDRY := preload("res://scripts/maps/foundry.gd")
@@ -19,4 +20,6 @@ static func make() -> Dictionary:
 	maps.order.append(SLUICE.MAP_ID)
 	maps.catalog[FOUNDRY.FOUNDRY_ID] = FOUNDRY.FOUNDRY_ENTRY.duplicate(true)
 	maps.order.append(FOUNDRY.FOUNDRY_ID)
+	maps.catalog[SEAWARD.MAP_ID] = SEAWARD.MAP_ENTRY.duplicate(true)
+	maps.order.append(SEAWARD.MAP_ID)
 	return maps

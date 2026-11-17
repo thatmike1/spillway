@@ -14,6 +14,7 @@ var trace: Control
 var scrubber: HSlider
 var message: Label
 var clock: Label
+var legend: Label
 var _details: VBoxContainer
 var stage
 var view_note: Label
@@ -58,7 +59,7 @@ func _ready() -> void:
 	_details = VBoxContainer.new()
 	_details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	columns.add_child(_details)
-	var legend := Label.new()
+	legend = Label.new()
 	legend.text = "Speed over time (m/s)   •   Teal: attempt   •   Rust: personal best"
 	_details.add_child(legend)
 	var follow := CheckButton.new()
@@ -102,11 +103,7 @@ func _ready() -> void:
 	_details.add_child(splits)
 	follow.toggled.connect(func(enabled: bool) -> void:
 		_follow_mode = enabled
-		stage.visible = enabled and stage.tracks.size() == 2
-		view_note.visible = enabled
-		trace.visible = not enabled
-		splits.visible = not enabled
-		legend.visible = not enabled)
+		_update_view_visibility())
 	if is_instance_valid(_map_source):
 		stage.attach_map(_map_source, _map_identity)
 	refresh()
@@ -124,6 +121,8 @@ func refresh() -> void:
 	message.text = "Reading local attempts… You can go back while they load."
 	_scan = MODEL.begin_scan(directory)
 	scanning = true
+	view_note.text = "Choose a comparable recording pair first."
+	_update_view_visibility()
 
 func _process(_delta: float) -> void:
 	if not scanning:
@@ -152,6 +151,7 @@ func select_attempt(index: int) -> void:
 	stage.clear()
 	stage.visible = false
 	view_note.text = "Choose a comparable recording pair first."
+	_update_view_visibility()
 	splits.clear()
 	trace.series = []
 	trace.queue_redraw()
@@ -206,7 +206,7 @@ func attach_map(source: Node3D, identity: Dictionary) -> void:
 func _load_preview() -> void:
 	var why: String = stage.load_pair(comparison)
 	view_note.text = why if not why.is_empty() else "Teal is this attempt; rust is its personal best. Scrub below to follow both on the course clock."
-	stage.visible = _follow_mode and why.is_empty()
+	_update_view_visibility()
 
 func _style_data_control(control: Control) -> void:
 	control.add_theme_stylebox_override("panel", LOOK.flat(LOOK.CREAM_DEEP))
@@ -219,3 +219,11 @@ func _style_data_control(control: Control) -> void:
 	focus.border_color = LOOK.EDGE
 	focus.set_border_width_all(2)
 	control.add_theme_stylebox_override("focus", focus)
+
+func _update_view_visibility() -> void:
+	var showing_follow: bool = _follow_mode and stage.tracks.size() == 2
+	stage.visible = showing_follow
+	trace.visible = not showing_follow
+	splits.visible = not showing_follow
+	legend.visible = not showing_follow
+	view_note.visible = _follow_mode

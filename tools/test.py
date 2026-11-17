@@ -29,6 +29,7 @@ def main():
         raise RuntimeError("Need 1.2 GB temporary/quota headroom.")
     engine.check_pin()
     subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/movement_oracle.py"), "--self-test"], check=True)
+    subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_engine_lock.py")], check=True)
     subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_run_bundle.py")], check=True)
     subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_shortcut.py")], check=True)
     subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_shot.py")], check=True)
@@ -46,7 +47,7 @@ def main():
         "saltglass_registration", "tether_geometry", "tether_coefficients",
         "grapple_capability", "r22_registration", "host_capabilities",
         "tether_feedback_identity", "tether_feedback_audio", "registry_injection",
-        "style_suspension", "tether_feedback_lens", "saltglass_art", "gantry_runner",
+        "style_suspension", "tether_feedback_lens", "saltglass_art", "seaward_registration", "gantry_runner",
         "mail_flight", "mail_motor", "mail_courts", "mail_tape", "sluice_six_style",
         "viaduct_presentation", "foundry_routes", "foundry_fork",
         "scripts/ui/pause_menu_checks.gd",
@@ -55,16 +56,17 @@ def main():
         components.extend(["direction_stack", "through_line_original_maps"])
     report = {"ok": False, "mutations": pure, "source": source_files, "components": []}
     try:
-        for name in components:
-            folder = out / Path(name).stem
-            folder.mkdir()
-            print("check " + name, flush=True)
-            script = "res://" + name if "/" in name else "res://tests/" + name + ".gd"
-            result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
-                                 "--fixed-fps", "128", "--script", script,
-                                 "--", "--out=" + str(folder), "--menu-contract=" + str(verification.FIXTURES / "contract.json")], cwd=source, profile=profile,
-                                log=folder / "engine.log", timeout=300)
-            report["components"].append({"name": name, **result})
+        with engine.locked():
+            for name in components:
+                folder = out / Path(name).stem
+                folder.mkdir()
+                print("check " + name, flush=True)
+                script = "res://" + name if "/" in name else "res://tests/" + name + ".gd"
+                result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
+                                     "--fixed-fps", "128", "--script", script,
+                                     "--", "--out=" + str(folder), "--menu-contract=" + str(verification.FIXTURES / "contract.json")], cwd=source, profile=profile,
+                                    log=folder / "engine.log", timeout=300)
+                report["components"].append({"name": name, **result})
         (out / "COMPONENTS.json").write_text(json.dumps({**report, "ok": True}, indent=1) + "\n")
         if args.slow:
             report["parity"] = verification.run(out / "parity")

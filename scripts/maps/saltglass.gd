@@ -69,12 +69,8 @@ func build() -> void:
 	_gap("salt_house", Vector3(296, 4.1, 53), Vector3(310, 4, 53))
 	_define_progress()
 	_environment()
-	_sign("title", Vector3(10, 19, 24), PI, "SALTGLASS\nHIGH FINS / RISING CRESCENT / SALT STEPS", 0.006)
-	_sign("surf_entry", Vector3(15, 20, 2), 0.0, "SURF\nA / D INTO THE FACE\nLET THE FIN CARRY YOU TO THE LOW DECK", 0.005)
-	_sign("crescent", Vector3(120, 20, -236), 0, "CRESCENT\nCLIMB THROUGH THE HOPS", 0.007)
 	_readable_surfaces()
 	_dressing()
-	_sign("salt_house", Vector3(322, 8, 38), -PI * 0.5, "SALT HOUSE\nFINISH", 0.009)
 	_fixture_look.call_deferred()
 
 func _fin(id: String, pose: Transform3D, stage: int) -> void:
@@ -100,7 +96,7 @@ func _define_progress() -> void:
 func route_hint(stage: int, _feet: Vector3) -> String:
 	match stage:
 		0:
-			return "Enter high, then let the fin carry you low and long to the flat deck. Water below."
+			return "A / D into the face. Enter high, then let the fin carry you low and long to the flat deck. Water below."
 		1:
 			return "Link the climbing salt pans to the high east headrace. Every rise needs a clean hop."
 		2:
@@ -247,7 +243,9 @@ func _dressing() -> void:
 		heap.name = "SaltglassSalt_%d" % int(x)
 	_sign("store_stencil", Vector3(214.97, 8.8, 49), -PI * 0.5, "SALT\n04", 0.025)
 	(get_node("Sign_store_stencil") as Label3D).modulate = Color("e8dfc9")
-	for foot: Vector3 in [Vector3(210, 5.3, 52.8), Vector3(248, 4.7, 52.8), Vector3(286, 4.1, 52.8), Vector3(312, 4, 52.8)]:
+	_sign("outer_quay", Vector3(214.97, 6.65, 51.5), -PI * 0.5, "OUTER QUAY\nLOW LIP BEYOND STORE\nCARRY SPEED", 0.008)
+	(get_node("Sign_outer_quay") as Label3D).modulate = Color("e8dfc9")
+	for foot: Vector3 in [Vector3(210, 5.3, 49.3), Vector3(248, 4.7, 52.8), Vector3(286, 4.1, 52.8), Vector3(312, 4, 52.8)]:
 		_work_lamp("quay_%d" % int(foot.x), foot, 3.8)
 	# this founded harbour beacon sits seaward of the blind corner, not on a fake platform.
 	_work_lamp("seaward_beacon", Vector3(221.5, -9, 57.5), 18.0)
@@ -283,8 +281,9 @@ func _readable_surfaces() -> void:
 			node.material_override = material
 			node.name = "SaltglassSurface_" + str(node.name)
 	# short edge bands announce takeoff and the tiny receiver in both look modes.
-	_art_box("paint_lip_outside_takeoff", Vector3(210.8, 5.312, 53.82), Vector3(7.5, 0.025, 0.3), Color("d95b30"))
+	_art_box("paint_lip_outside_takeoff", Vector3(213.0, 5.312, 53.82), Vector3(2.2, 0.025, 0.3), Color("d95b30"))
 	_art_box("paint_lip_outside_receiver", Vector3(221.5, 5.012, 53.82), Vector3(3, 0.025, 0.3), Color("d95b30"))
+	_art_box("paint_receiver_fascia", Vector3(221.5, 4.85, 54.006), Vector3(3, 0.3, 0.016), Color("d95b30"))
 	# paint follows the actual seaward store edge around the blind corner, with no fake ledge.
 	_art_box("paint_hazard_store_corner", Vector3(214.992, 5.45, 53.84), Vector3(0.016, 0.3, 0.32), Color("d95b30"))
 	_art_box("paint_hazard_store_seaward", Vector3(217.5, 5.45, 54.008), Vector3(5, 0.3, 0.016), Color("d95b30"))
