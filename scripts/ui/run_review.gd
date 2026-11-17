@@ -50,8 +50,9 @@ func _ready() -> void:
 	columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_child(columns)
 	attempts = ItemList.new()
-	attempts.custom_minimum_size.x = 250
-	attempts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	attempts.custom_minimum_size.x = 290
+	attempts.size_flags_horizontal = Control.SIZE_FILL
+	_style_data_control(attempts)
 	attempts.item_selected.connect(select_attempt)
 	columns.add_child(attempts)
 	_details = VBoxContainer.new()
@@ -83,6 +84,11 @@ func _ready() -> void:
 	scrubber.value_changed.connect(scrub_to)
 	_details.add_child(scrubber)
 	splits = Tree.new()
+	_style_data_control(splits)
+	splits.add_theme_color_override("title_button_color", LOOK.INK)
+	splits.add_theme_color_override("guide_color", Color(LOOK.INK, 0.12))
+	for state: String in ["normal", "hover", "pressed"]:
+		splits.add_theme_stylebox_override("title_button_" + state, LOOK.flat(LOOK.CREAM_SHADE))
 	splits.columns = 5
 	splits.hide_root = true
 	splits.column_titles_visible = true
@@ -131,9 +137,11 @@ func _process(_delta: float) -> void:
 func _finish_list() -> void:
 	for entry: Dictionary in entries:
 		var identity: Dictionary = entry.identity
-		var text := "%s · %s\n%s · %s" % [identity.get("map", "Unknown map"), identity.get("preset", ""), entry.name, entry.outcome.get("kind", entry.status)]
+		var outcome: Dictionary = entry.outcome
+		var detail := "%.3f s" % float(outcome.time) if outcome.get("kind") == "finish" and (outcome.get("time") is float or outcome.get("time") is int) else str(outcome.get("kind", entry.status))
+		var text := "%s · %s" % [identity.get("map", "Unknown map"), detail]
 		attempts.add_item(text)
-		attempts.set_item_tooltip(attempts.item_count - 1, entry.name)
+		attempts.set_item_tooltip(attempts.item_count - 1, "%s\n%s" % [entry.name, identity.get("preset", "")])
 	message.text = "Pick an attempt to compare it with its matching personal best." if not entries.is_empty() else "No recordings yet. Play an attempt, then return here."
 	if not entries.is_empty():
 		attempts.select(0)
@@ -199,3 +207,15 @@ func _load_preview() -> void:
 	var why: String = stage.load_pair(comparison)
 	view_note.text = why if not why.is_empty() else "Teal is this attempt; rust is its personal best. Scrub below to follow both on the course clock."
 	stage.visible = _follow_mode and why.is_empty()
+
+func _style_data_control(control: Control) -> void:
+	control.add_theme_stylebox_override("panel", LOOK.flat(LOOK.CREAM_DEEP))
+	control.add_theme_stylebox_override("selected", LOOK.flat(LOOK.INK))
+	control.add_theme_stylebox_override("selected_focus", LOOK.flat(LOOK.INK))
+	control.add_theme_color_override("font_color", LOOK.INK)
+	control.add_theme_color_override("font_selected_color", LOOK.CREAM)
+	var focus := LOOK.flat(Color.TRANSPARENT)
+	focus.draw_center = false
+	focus.border_color = LOOK.EDGE
+	focus.set_border_width_all(2)
+	control.add_theme_stylebox_override("focus", focus)

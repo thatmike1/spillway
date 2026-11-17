@@ -89,13 +89,20 @@ func load_pair(pair: Dictionary) -> String:
 		var times := PackedFloat64Array()
 		var poses := PackedVector3Array()
 		var yaw := PackedFloat64Array()
+		var ducked := PackedByteArray()
 		for i: int in columns.tick.size():
 			if columns.flags[i] & 1 != 0:
+				if times.is_empty() and i > 0:
+					times.append(0.0)
+					poses.append(columns.p[i - 1])
+					yaw.append(columns.yaw[i - 1])
+					ducked.append(1 if columns.flags[i - 1] & 16 != 0 else 0)
 				times.append(columns.elapsed[i])
 				poses.append(columns.p[i])
 				yaw.append(columns.yaw[i])
+				ducked.append(1 if columns.flags[i] & 16 != 0 else 0)
 				if columns.flags[i] & 2 != 0: break
-		tracks.append({"times": times, "poses": poses, "yaw": yaw})
+		tracks.append({"times": times, "poses": poses, "yaw": yaw, "ducked": ducked})
 	scrub_to(0)
 	return ""
 
@@ -105,20 +112,28 @@ func clear() -> void:
 		actor.visible = false
 
 func pose_at(track: Dictionary, time: float) -> Vector3:
+	return _sample(track, time).feet
+
+func _sample(track: Dictionary, time: float) -> Dictionary:
 	var hi := clampi(track.times.bsearch(time), 0, track.times.size() - 1)
 	var lo := maxi(hi - 1, 0)
 	var span: float = track.times[hi] - track.times[lo]
 	var weight := clampf((time - track.times[lo]) / span, 0, 1) if span > 0 else 0.0
-	return (track.poses[lo] as Vector3).lerp(track.poses[hi], weight)
+	return {"feet": (track.poses[lo] as Vector3).lerp(track.poses[hi], weight),
+		"yaw": lerp_angle(track.yaw[lo], track.yaw[hi], weight),
+		"ducked": track.ducked[hi if weight >= 0.5 else lo] != 0}
 
 func scrub_to(time: float) -> void:
 	if tracks.size() != 2:
 		return
 	for i: int in 2:
+		var pose := _sample(tracks[i], time)
+		var height := 1.30 if pose.ducked else 1.75
+		(actors[i].mesh as CapsuleMesh).height = height
 		actors[i].visible = true
-		actors[i].position = pose_at(tracks[i], time) + Vector3.UP * 0.875
+		actors[i].position = pose.feet + Vector3.UP * height * 0.5
+		actors[i].rotation.y = pose.yaw
 	var at := actors[0].position
-	var index := clampi(tracks[0].times.bsearch(time), 0, tracks[0].yaw.size() - 1)
-	var facing := Basis(Vector3.UP, tracks[0].yaw[index])
+	var facing := Basis(Vector3.UP, float(_sample(tracks[0], time).yaw))
 	camera.position = at + facing * Vector3(0, 3.5, 7)
 	camera.look_at(at + Vector3.UP * 0.2)

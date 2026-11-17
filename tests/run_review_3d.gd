@@ -27,6 +27,10 @@ func run() -> void:
 	for time: float in [0.0, 1.0, 2.0, recording.duration, recording.duration + 100]:
 		stage.scrub_to(time)
 		check(stage.actors[0].position.is_equal_approx(stage.actors[1].position), "same recording overlaps at common time")
+	var start := 0
+	while recording.run.columns.flags[start] & 1 == 0: start += 1
+	var initial: Vector3 = recording.run.columns.p[maxi(start - 1, 0)]
+	check(stage.pose_at(stage.tracks[0], 0.0).is_equal_approx(initial), "time zero holds last pre-start feet")
 	var track: Dictionary = stage.tracks[0]
 	var midpoint: float = (track.times[4] + track.times[5]) * 0.5
 	var halfway: Vector3 = (track.poses[4] as Vector3).lerp(track.poses[5], 0.5)
@@ -39,6 +43,17 @@ func run() -> void:
 	identity.geometry = "different"
 	stage.attach_map(source, identity)
 	check(not stage.load_pair(pair).is_empty() and stage.tracks.is_empty() and not stage.actors[0].visible, "mismatch clears old ghosts")
+	var crouch := MODEL.load_attempt("res://tests/fixtures/original-map-parity/whiteout-crouch/old/runs/golden.r16run")
+	stage.attach_map(source, crouch.identity)
+	check(stage.load_pair(MODEL.compare(crouch, crouch)).is_empty(), "real crouch recording accepted")
+	var saw_duck := false
+	for i: int in crouch.run.columns.flags.size():
+		if crouch.run.columns.flags[i] & 17 == 17:
+			stage.scrub_to(crouch.run.columns.elapsed[i])
+			check(is_equal_approx((stage.actors[0].mesh as CapsuleMesh).height, 1.30), "recorded crouch changes ghost height")
+			saw_duck = true
+			break
+	check(saw_duck, "fixture contains a timed crouch")
 	source.queue_free()
 	stage.queue_free()
 	await process_frame
