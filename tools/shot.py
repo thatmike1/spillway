@@ -164,32 +164,41 @@ func _start() -> void:
 		main.add_child(playback)
 	elif options.mode == "poses":
 		main.get("hud").hide()
+		for layer: CanvasLayer in main.get("player").find_children("*", "CanvasLayer", true, false):
+			layer.hide()
 		main.call("set_physics_process", false)
 		main.get("player").set_physics_process(false)
 		main.get("player").set_process(false)
 	clock = CaptureClock.new()
 	clock.process_physics_priority = -200
 	main.add_child(clock)
+	var sampler := CaptureSampler.new()
+	sampler.process_mode = Node.PROCESS_MODE_ALWAYS
+	sampler.process_priority = 200
+	main.add_child(sampler)
 	ready_to_run = true
-func _process(_delta: float) -> bool:
+func _sample_frame(_delta: float) -> void:
 	if not ready_to_run:
-		return false
+		return
 	age = float(clock.get("age"))
 	if age <= 0:
-		return false
+		return
 	if age >= float(options.seconds) and not capturing and frame_index > 0:
 		main.call("request_quit", 0)
-		return false
+		return
 	if not capturing and age >= next_capture:
 		if options.mode == "poses" and frame_index >= options.poses.size():
 			main.call("request_quit", 0)
-			return false
+			return
 		capturing = true
 		_capture.call_deferred()
 		next_capture = age + float(options.every)
 	if age >= float(options.seconds) and not capturing:
 		main.call("request_quit", 0)
-	return false
+class CaptureSampler extends Node:
+	func _process(delta: float) -> void:
+		get_tree().call("_sample_frame", delta)
+
 func _capture() -> void:
 	var player: Node3D = main.get("player")
 	if options.mode == "poses":
