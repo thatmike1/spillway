@@ -2,89 +2,105 @@
 
 Foundry is a coastal pump hall with an open shaft between two working galleries.
 Its landmark is the supported crane spanning the shaft, with a ring suspended over the void.
-From the high entry, the player sees the continuous left gallery and the lower far landing at once.
-A released swing takes the direct line while a wide descending gallery provides a forgiving alternative.
+From the high entry, the player can inspect the continuous left gallery and the lower far landing from the front crosswalk.
+A released swing takes the direct line while a wide descending gallery provides the forgiving alternative.
 Beyond their meeting point, the tailrace drops another ten metres into a broad catch above the recovery court.
 
-## Route plan (metres)
+## Routes and anchors
 
 ```text
-                         x=-16 gallery       x=0 direct
-spawn y18 z12 -------------+---------------------+
-                           |                     |
-                           |       crane (0,29,-8)
-             ring (-16,25,-12)                  void
-                           |                     |
-rejoin y12 z-28 -----------+---------------------+
-                                                 |
-                                  crane (0,21,-40)
-                                                 |
-catch y2 z-50 ----------------------------------+
+                              gallery x=-16        shaft x=0
+entry y18 z12 ---------------------+-------------------+
+front crosswalk y18 z0..3 ---------+-------------------+
+                                  |                   |
+                   gallery ring (-16,25,-12)    shaft ring (0,29,-8)
+                                  |                   | 20 m gap
+rejoin y12 z-20..-36 --------------+-------------------+
+                                      right-side preview opening
+                                                      |
+                                           ring (0,21,-44)
+                                                      | 14 m gap / 10 m drop
+catch y2 z-50..-78 -----------------------------------+
 finish y2 z-70
-court y-8: full floor, outer return ramp to entry; right ramp to tailrace
+court y-8: full recovery floor; left wall ramp returns to entry
 ```
 
-The Arc law is inherited unchanged from `movement/grapple_player.gd`.
-Anchor IDs are `foundry-0`, `foundry-1`, `foundry-2`.
-The dedicated geometry identity is `r22-foundry`, version 1.
-No checkpoint is required to take the shortcut; checkpoints provide practice poses.
-Private concept art lives outside the repository in the lane run folder.
+LMB holds, RMB reels, release LMB to coast. Foundry fixes the model to
+`elastic-arc` through its catalog entry and uses
+`scripts/movement/grapple_player.gd` unchanged. The normal tapes use explicit
+LMB/RMB input, not an automatic-reel preference. Rope forces are not tuned here.
 
-The scored checkpoints are on the shared entry, rejoin and tailrace decks.
-The wall gallery has no exclusive scored checkpoint, so taking the direct shaft
-cannot make an otherwise complete run incomplete.
+The gallery stays connected. The front crosswalk also lets a player inspect the
+shaft and still walk to the gallery without jumping. Both routes share the
+rejoin and Tailrace checkpoints; no gallery-only scored checkpoint invalidates
+the shortcut. Each shared checkpoint supplies a practice pose. Falling into the
+court does not require restart: the left ramp spans x=-27..-23, from y=-8 at
+z=-78 to y=18 at z=18, then joins the entry apron. A separate right ramp can
+recover a missed final catch into Tailrace. Kill bounds cover these routes.
 
-## Input proof
+## Geometry, identity and look
 
-`tests/foundry_routes.gd` constructs command tapes with forward/jump/rope buttons
-and view angles. It uses the production runner and collision geometry at 128 Hz,
-normal authored spawn, server128 settings, Arc and explicit LMB/RMB input. It never
-writes velocity or position during a route. Input construction may follow a
-waypoint; the eventual fixed tape replay is the independent acceptance step.
+Map ID: `foundry`. Level ID: `r22-foundry`, version 4. Stable anchor IDs:
+`foundry-0`, `foundry-1`, `foundry-2`, in the order listed in
+`FOUNDRY_ANCHORS`. The geometry digest includes the current level ID/version,
+actual collision manifests and authored anchors. Old map identities do not mix.
 
-## Spacing check against lane 12's measured sheet
+Large walls, piers and gantries have collision matching their visible prism
+bounds. Piers stop at deck undersides, avoiding coplanar top faces. The return
+ramp runs in the clear corridor beside the supports. Orange paint and text are
+visual and add no motion impulse, landing bridge or progress trigger.
 
-Read `/home/thatmike1/spillway-r22-run/reference/MAP-DESIGN.md` (17 Nov,
-first measured sheet). Its dominant `bhop_eazy` mover pads (180 of 188) are 64 Source units
-(1.6256 m), with eight narrow or angled exceptions, compared with this map's 12 m gallery, 32 m shared landing and 20 m tailrace catch.
-Those generous surfaces are intentional recovery space, not borrowed bhop tier
-numbers. The sheet supplies no route-only rope gaps; it cannot validate the
-20 m shaft or 14 m descending gap. Production Arc route tapes must validate those.
-Shared checkpoints sit after the crossing and descending catch, at actual
-failure-section boundaries. The supported crane remains the single landmark.
+The map declares `own_look` so the inherited experiment palette cannot replace
+its authored materials. Pale slab tops, darker weathered sides, restrained ink
+and orange lips use original procedural shaders. The painted sky reuses the
+existing practice-sky resource. Rights and source paths are recorded in
+`assets/maps/foundry/MANIFEST.md`; private concept/reference pixels are absent.
+Broad mottled coating and damp regions weather vertical concrete while keeping
+the landing tops quiet. Pale level bands on the existing tailrace pipe drops
+compare the high handoff, midpoint and low catch. The catch itself is a flat
+landing ten metres below the takeoff, not a ramp.
 
-Revision 2 and its independent-review correction distinguish adjacent-pad
-spacing from actual landing sequences and withdraw bonus gap percentiles.
-Neither establishes a comparable rope-law/anchor-spacing recommendation.
-Foundry therefore keeps its independently exercised 20 m shaft and 14 m
-falling catch, rather than transplanting bhop distances into a rope course.
-The sequence changes elevation, contact and recovery: continuous gallery or
-released crossing, common landing, descending catch. Nothing downloaded is used.
+## Spacing check
 
-## Measured greybox acceptance
+The final 17 November lane-12 measured sheet separates performed SourceJump
+rank-one jumps from adjacent-pad spacing. Its Fury 2 flat-hop sample has a
+6.502 m median support gap and 1.626 m median landing short side; Duster's are
+7.315 m and 6.502 m. Those AA1000/100 Hz runs do not prescribe F2 difficulty or
+rope geometry. The earlier Eazy tour gap recommendations were withdrawn.
 
-The production runner completed the gallery in 2001 ticks (15.6328125 s) and
-the shaft line in 1238 ticks (9.671875 s). Both collected all shared checkpoints
-and earned the descending catch. Mouse-input replay reproduced each final
-position exactly. The shortcut saved 763 ticks (5.9609375 s). A deliberate fall
-to the court then climbed the outer ramp back to the entry in 5140 ticks,
-without a reset. These are scripted acceptance measurements, not a playtest.
+Foundry deliberately retains a continuous 12 m gallery, broad shared landings,
+a 20 m shaft crossing and a 14 m descending catch. The reference establishes no
+comparable rope-law/anchor-spacing prescription. These rope gaps are justified
+by earned Arc input tapes and recovery checks, rather than by transplanting
+ordinary-hop distances. The sequence changes elevation, contact and recovery
+instead of repeating a flat chain of pads. Nothing downloaded is redistributed.
 
-The direct tape holds the shaft ring for 140 ticks, releasing before passing
-beneath it. Earlier releases tested short; later holds tested past the useful
-forward phase. Recovery remains available below either miss.
+## Verification
 
-## Look pass two
+```sh
+python3 tools/play.py --headless --audio-driver Dummy --script res://tests/foundry_routes.gd -- --out=/tmp/foundry-routes
+python3 tools/play.py --headless --audio-driver Dummy --script res://tests/foundry_fork.gd -- --out=/tmp/foundry-fork
+python3 tools/test.py --out /tmp/foundry-fast
+```
 
-The first fresh image-only review identified hidden fork entrances, weak shaft
-depth, and a gallery bend that resembled a dead end. A connected intake opening
-now separates the two apron arms before the crossing; it exposes the lower
-court without moving either route's anchors. The geometry version advances to 2.
-Orange paint follows the current landing lips and gallery boundary, including
-the bend, rather than obsolete greybox coordinates. Wall tidemarks and connected
-pipe headers give the drop scale. The input camera looks down toward surfaces
-after release and along the descent; pitch does not steer the motor's wish yaw.
-The real input routes and deliberate-fall recovery are rerun after this change.
+The fast gate needs a new output directory. The route fixtures construct command
+tapes from normal spawn with the production runner at server128/128 Hz, then
+replay mouse/buttons without steering position or velocity. The gallery takes
+1810 ticks (14.140625 s); the shaft takes 1108 (8.65625 s), saving 702 ticks
+(5.484375 s). Both collect every shared checkpoint and earn the descending catch.
+The chosen tape releases the first ring after 140 held ticks and the final ring
+after 145. These are measured examples, not required human timings or enjoyment
+claims. A no-rope replay is a negative control for that earned shortcut.
 
-The concrete's normal transform was checked against the official
-[Godot spatial shader reference](https://docs.godotengine.org/en/stable/tutorials/shaders/shader_reference/spatial_shader.html).
+The fork fixture uses a real-input approach, a visible pause after movement to
+let teaching clear, then a lateral running inspection from the front crosswalk.
+At 1280x720 it tests projection and physics line of sight to both route surfaces
+and the court before any jump, then finishes/replays the gallery. Static camera
+supplements are labelled separately and do not prove traversal.
+
+Original-map slow parity remains the integration lane's gate under the r22 run
+brief. The current material transform follows the official
+[Godot spatial-shader contract](https://docs.godotengine.org/en/stable/tutorials/shaders/shader_reference/spatial_shader.html).
+
+Movement fixtures silence only the auxiliary release-cue playback, following the
+existing component-test boundary; native host captures retain the real cue path.

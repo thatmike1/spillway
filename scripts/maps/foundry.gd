@@ -2,16 +2,16 @@ extends "res://scripts/maps/tether_yard.gd"
 ## a crane hall with a continuous wall route and a released swing across its shaft.
 const FOUNDRY_ART := preload("res://scripts/art/foundry_hall.gd")
 const FOUNDRY_ID := "foundry"
-const FOUNDRY_ENTRY := {"name": "Foundry", "theme": "High gallery or committed shaft crossing", "kind": "experiment", "experimental": true,
+const FOUNDRY_ENTRY := {"name": "Foundry", "theme": "High gallery or committed shaft crossing", "kind": "experiment", "experimental": true, "own_look": true,
 	"runner": "res://scripts/movement/grapple_player.gd", "script": "res://scripts/maps/foundry.gd", "reticle": true,
 	"grapple": true, "tether_model": "elastic-arc", "key_hint": " · LMB swing / RMB reel",
-	"instructions": "Arc rope. The left gallery is continuous and forgiving. Swing across the open shaft for the direct line. Release before the far landing, then drop toward the lower catch. Misses land in the recovery court; the outer ramp leads back up."}
-const FOUNDRY_ANCHORS := [Vector3(0, 29, -8), Vector3(-16, 25, -12), Vector3(0, 21, -40)]
+	"instructions": "Gallery left is continuous. The shaft is the shorter released swing; the lower court and ramps recover misses."}
+const FOUNDRY_ANCHORS := [Vector3(0, 29, -8), Vector3(-16, 25, -12), Vector3(0, 21, -44)]
 
 func _init() -> void:
 	level_id = "r22-foundry"
 	level_name = "Foundry"
-	level_version = 2
+	level_version = 4
 	variant = FOUNDRY_ID
 	spawn = Transform3D(Basis.IDENTITY, Vector3(0, 18.04, 12))
 	finish_title = "Tailrace"
@@ -26,11 +26,13 @@ func build() -> void:
 	GEO.deck(self, "entry_back", -22, 10, 8, 24, 18, 0)
 	GEO.deck(self, "gallery_apron", -22, -9, 0, 8, 18, 0)
 	GEO.deck(self, "shaft_apron", -3, 10, 0, 8, 18, 0)
+	GEO.deck(self, "front_crosswalk", -12, 1, 0, 3, 18, 0)
 	_ramp("wall_gallery", -22, -10, 0, -24, 18, 12, 0)
-	GEO.deck(self, "rejoin", -22, 10, -36, -20, 12, 1)
+	GEO.deck(self, "rejoin_near", -22, 10, -28, -20, 12, 1)
+	GEO.deck(self, "rejoin_exit", -22, 1, -36, -28, 12, 1)
 	GEO.deck(self, "tailrace", -10, 10, -78, -50, 2, 2)
 	GEO.deck(self, "catch_court", -32, 28, -82, 26, -8, -1, "recovery")
-	_ramp("return_ramp", -32, -25, -78, 18, -8, 18, -1)
+	_ramp("return_ramp", -27, -23, -78, 18, -8, 18, -1)
 	GEO.deck(self, "return_bridge", -32, -20, 18, 24, 18, -1, "recovery")
 	# a lower continuous spill ledge offers an accessible finish after a missed final catch.
 	_ramp("tailrace_recovery", 14, 24, -24, -68, -8, 2, -1)
@@ -43,9 +45,11 @@ func build() -> void:
 		_foundry_anchor(i, FOUNDRY_ANCHORS[i])
 	_environment()
 	_sign("entry",Vector3(0,21,-20),"FOUNDRY",0.008)
-	_sign("fork",Vector3(-16,19,-5),"GALLERY",0.007)
-	_sign("direct",Vector3(6,20,-5),"SHAFT",0.007)
+	_sign("fork",Vector3(-26.97,17,-16),"GALLERY",0.014)
+	_sign("direct",Vector3(4,11.6,-19.97),"SHAFT",0.014)
 	_sign("tailrace",Vector3(0,8,-75),"TAILRACE",0.012)
+	_sign("next",Vector3(0,17,-44),"TAILRACE",0.006)
+	_sign("court",Vector3(0,-7.94,-17),"COURT\nRETURN LEFT",0.035)
 	routes = {"basic": [spawn.origin,Vector3(-16,18,6),Vector3(-16,12,-24),Vector3(0,12,-33),finish_position],
 		"advanced": [spawn.origin,Vector3(0,18,0),Vector3(0,12,-28),finish_position]}
 	jump_gaps = [{"label":"shaft", "edge":Vector3(0,18,0),"land":Vector3(0,12,-20),"recovery":"court and wall ramp"},
@@ -81,13 +85,26 @@ func _foundry_anchor(i: int, at: Vector3) -> void:
 	ring.rotation.x = PI / 2
 	ring.material_override = RUNNER._flat(Color("b5683c"))
 	anchor.add_child(ring)
-	_box("crane_beam_%d" % i,Vector3(0,at.y+1.5,at.z),Vector3(52,1,1.2),Color("29464a"))
+	FOUNDRY_ART.box(self,"crane_beam_%d" % i,Vector3(0,at.y+1.5,at.z),Vector3(52,1,1.2),RUNNER._flat(Color("29464a")))
 	_box("crane_drop_%d" % i,at+Vector3(0,0.7,0),Vector3(0.18,1.4,0.18),Color("29464a"))
 	for x: float in [-26.0,26.0]:
-		_box("crane_column_%d_%s" % [i,x],Vector3(x,(at.y-6)/2,at.z),Vector3(1.5,at.y+10,1.5),Color("29464a"))
+		FOUNDRY_ART.box(self,"crane_column_%d_%s" % [i,x],Vector3(x,(at.y-6)/2,at.z),Vector3(1.5,at.y+10,1.5),RUNNER._flat(Color("29464a")))
+
+func _sign(id: String, at: Vector3, text: String, pixels: float) -> void:
+	super._sign(id,at,text,pixels)
+	var label: Label3D = get_child(get_child_count()-1)
+	label.modulate = Color("e8dfc9")
+	label.outline_size = 4
+	label.outline_modulate = Color("203c3d")
+	if id == "fork":
+		label.rotation.y = PI/2
+	if id == "court":
+		label.rotation.x = -PI/2
+		label.modulate = Color("29464a")
+		label.outline_size = 0
 
 func route_hint(stage: int, _feet: Vector3) -> String:
-	return "Left gallery stays connected. The shaft is shorter: hold the high ring, then release toward the far deck." if stage < 1 else "Use the tailrace ring for the descending catch. Lower court ramps recover every miss."
+	return "Gallery left, shaft ahead. LMB holds, RMB reels; release toward the far deck." if stage < 1 else "The next ring leads down to Tailrace. The lower court has recovery ramps."
 
 func geometry_hash() -> String:
-	return (super.geometry_hash() + JSON.stringify([FOUNDRY_ID, FOUNDRY_ANCHORS])).sha256_text()
+	return (super.geometry_hash() + JSON.stringify([level_id, level_version, FOUNDRY_ID, FOUNDRY_ANCHORS])).sha256_text()

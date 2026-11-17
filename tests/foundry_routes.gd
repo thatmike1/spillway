@@ -33,10 +33,16 @@ func mouse(on: bool) -> void:
 	Input.parse_input_event(reel)
 	Input.flush_buffered_events()
 
+func silence_fixture_audio() -> void:
+	# audio is outside the movement fixture; native host captures retain the real cue path.
+	player.cue_player.free()
+	player.cue_player = null
+
 func reset() -> void:
 	reached = [0]
 	mouse(false)
 	Input.action_release("move_forward")
+	Input.action_release("move_left")
 	Input.action_release("jump")
 	player.reset_to(level.spawn)
 	player.configure_tether("elastic-arc", false)
@@ -50,6 +56,7 @@ func aim(at: Vector3) -> void:
 
 func step(at: Vector3, rope: bool, jump: bool, forward: bool = true) -> void:
 	aim(at)
+	Input.action_release("move_left")
 	mouse(rope)
 	if forward:
 		Input.action_press("move_forward")
@@ -68,12 +75,12 @@ func observe_checkpoints() -> void:
 		if level.checkpoints[i].bounds.has_point(player.position) and i not in reached:
 			reached.append(i)
 
-func walk(at: Vector3, limit: int = 1400) -> bool:
+func walk(at: Vector3, limit: int = 1400, level_view: bool = false) -> bool:
 	for tick: int in limit:
 		var flat := Vector2(player.position.x-at.x,player.position.z-at.z).length()
 		if flat < 1.1:
 			return true
-		var look_y := minf(at.y+1.5,player._eye().y-flat*tan(deg_to_rad(12.0)))
+		var look_y: float = player._eye().y if level_view else minf(at.y+1.5,player._eye().y-flat*tan(deg_to_rad(12.0)))
 		await step(Vector3(at.x,look_y,at.z),false,false)
 	return false
 
@@ -87,7 +94,7 @@ func crossing(anchor: Vector3, target: Vector3, hold_ticks: int) -> void:
 		if player.position.y < -6:
 			break
 
-func route(shortcut: bool, hold_ticks: int) -> Dictionary:
+func route(shortcut: bool, hold_ticks: int, tail_hold: int = 145) -> Dictionary:
 	await reset()
 	tape = []
 	if shortcut:
@@ -96,21 +103,22 @@ func route(shortcut: bool, hold_ticks: int) -> Dictionary:
 	else:
 		await walk(Vector3(-16,18,7))
 		await walk(Vector3(-16,12,-24))
-		await walk(Vector3(0,12,-33))
+		await walk(Vector3(0,12,-30))
 	var crossed := player.position.y > 11 and player.position.z < -19 and player.position.z > -37
 	var crossing_ticks := tape.size()
 	if crossed:
-		await walk(Vector3(0,12,-33))
-		await crossing(LEVEL.FOUNDRY_ANCHORS[2],Vector3(0,2,-56),110)
+		await walk(Vector3(0,12,-33),1400,true)
+		await crossing(LEVEL.FOUNDRY_ANCHORS[2],Vector3(0,2,-56),tail_hold)
 		var caught := player.position.y > 0
 		last_catch = caught
 		if not caught:
-			await walk(Vector3(19,-8,-26))
+			await walk(Vector3(10,-8,-20))
+			await walk(Vector3(19,-8,-20))
 			await walk(Vector3(19,2,-73))
 			await walk(Vector3(0,2,-73))
 		else:
 			await walk(level.finish_position)
-	var result := {"shortcut":shortcut,"hold":hold_ticks,"crossed":crossed,"finish":level.is_finish_at(player.position),"checkpoints":reached.duplicate(),"descending_catch":last_catch,"ticks":tape.size(),"crossing_ticks":crossing_ticks,"position":str(player.position),"grapples":player.grapple_count}
+	var result := {"shortcut":shortcut,"hold":hold_ticks,"tail_hold":tail_hold,"crossed":crossed,"finish":level.is_finish_at(player.position),"checkpoints":reached.duplicate(),"descending_catch":last_catch,"ticks":tape.size(),"crossing_ticks":crossing_ticks,"position":str(player.position),"grapples":player.grapple_count}
 	if result.finish:
 		var file := FileAccess.open(output.path_join("shortcut.json" if shortcut else "gallery.json"),FileAccess.WRITE)
 		file.store_string(JSON.stringify(tape))
@@ -119,41 +127,42 @@ func route(shortcut: bool, hold_ticks: int) -> Dictionary:
 	print(JSON.stringify(result))
 	return result
 
-func replay(commands: Array) -> Dictionary:
+func replay(commands: Array, rope_enabled: bool = true) -> Dictionary:
 	await reset()
 	for cmd: Dictionary in commands:
 		var event := InputEventMouseMotion.new()
 		event.screen_relative = Vector2(-wrapf(float(cmd.yaw)-player.yaw,-PI,PI),-(float(cmd.pitch)-player.pitch))/deg_to_rad(2.5*0.022)
 		player._unhandled_input(event)
-		mouse(bool(cmd.rope))
-		for action: String in ["move_forward", "jump"]:
-			var on: bool = bool(cmd.forward) if action == "move_forward" else bool(cmd.jump)
+		mouse(bool(cmd.rope) and rope_enabled)
+		for action: String in ["move_forward", "jump", "move_left"]:
+			var key: String = {"move_forward":"forward","jump":"jump","move_left":"left"}[action]
+			var on := bool(cmd.get(key,false))
 			if on:
 				Input.action_press(action)
 			else:
 				Input.action_release(action)
 		player._physics_process(1.0/128)
 		observe_checkpoints()
-	return {"checkpoints":reached.duplicate(),"finish":level.is_finish_at(player.position),"position":str(player.position),"ticks":commands.size()}
+	return {"grapples":player.grapple_count,"checkpoints":reached.duplicate(),"finish":level.is_finish_at(player.position),"position":str(player.position),"ticks":commands.size()}
 
 func event_tape(commands: Array) -> Array:
 	var events: Array = []
-	var previous := {"yaw":0.0,"pitch":0.0,"rope":false,"jump":false,"forward":false}
+	var previous := {"yaw":0.0,"pitch":0.0,"rope":false,"jump":false,"forward":false,"left":false}
 	var count_scale := deg_to_rad(2.5 * 0.022)
 	for tick: int in commands.size():
 		var cmd: Dictionary = commands[tick]
-		var time := float(tick+1)/128
+		var time := float(tick)/128
 		var dx := -wrapf(float(cmd.yaw)-float(previous.yaw),-PI,PI)/count_scale
 		var dy := -(float(cmd.pitch)-float(previous.pitch))/count_scale
 		if absf(dx)+absf(dy) > 0:
 			events.append({"time":time,"mouse":[dx,dy]})
-		for key: String in ["rope","jump","forward"]:
-			if bool(cmd[key]) != bool(previous[key]):
+		for key: String in ["rope","jump","forward","left"]:
+			if bool(cmd.get(key,false)) != bool(previous.get(key,false)):
 				if key == "rope":
 					events.append({"time":time,"button":1,"pressed":cmd[key]})
 					events.append({"time":time,"button":2,"pressed":cmd[key]})
 				else:
-					events.append({"time":time,"action":"move_forward" if key == "forward" else "jump","pressed":cmd[key]})
+					events.append({"time":time,"action":{"forward":"move_forward","jump":"jump","left":"move_left"}[key],"pressed":bool(cmd.get(key,false))})
 		previous = cmd
 	return events
 
@@ -168,6 +177,7 @@ func run() -> void:
 	level.build()
 	player = PLAYER.new()
 	root.add_child(player)
+	silence_fixture_audio()
 	player.set_physics_process(false)
 	player.set_process(false)
 	player.apply_settings(PRESETS.source_settings("server128", {}))
@@ -176,6 +186,10 @@ func run() -> void:
 	results.append(await route(false,0))
 	for ticks: int in [140]:
 		results.append(await route(true,ticks))
+	var no_rope: Dictionary = {"finish":true,"grapples":-1}
+	if results[1].finish:
+		var direct_commands: Array = JSON.parse_string(FileAccess.get_file_as_string(output.path_join("shortcut.json")))
+		no_rope = await replay(direct_commands,false)
 	await reset()
 	tape = []
 	await walk(Vector3(8,18,3))
@@ -185,16 +199,23 @@ func run() -> void:
 			break
 	var fell := player.position.y < -7.8
 	await walk(Vector3(0,-8,-80))
-	await walk(Vector3(-28,-8,-80))
-	await walk(Vector3(-28,18,21),2600)
+	await walk(Vector3(-24.5,-8,-80))
+	await walk(Vector3(-24.5,18,21),2600)
 	await walk(Vector3(-16,18,21))
 	await walk(level.spawn.origin)
+	var recovery_events := event_tape(tape)
+	recovery_events.append({"time":float(tape.size())/128,"action":"move_forward","pressed":false})
+	FileAccess.open(output.path_join("recovery-events.json"),FileAccess.WRITE).store_string(JSON.stringify(recovery_events))
 	var recovery := {"fell_to_court":fell,"returned_without_reset":player.position.distance_to(level.spawn.origin)<1.2,"ticks":tape.size(),"position":str(player.position)}
-	var ok: bool = results.all(func(r: Dictionary) -> bool: return r.finish and r.replay.finish and r.descending_catch and r.position == r.replay.position and r.checkpoints.size()==3 and r.replay.checkpoints.size()==3) and results[1].ticks < results[0].ticks and recovery.fell_to_court and recovery.returned_without_reset
+	var ok: bool = results.all(func(r: Dictionary) -> bool: return r.finish and r.replay.finish and r.descending_catch and r.position == r.replay.position and r.checkpoints.size()==3 and r.replay.checkpoints.size()==3) and results[1].ticks < results[0].ticks and recovery.fell_to_court and recovery.returned_without_reset and not no_rope.finish and no_rope.grapples == 0
 	var file := FileAccess.open(output.path_join("summary.json"),FileAccess.WRITE)
-	file.store_string(JSON.stringify({"ok":ok,"routes":results,"recovery":recovery,"geometry_hash":level.geometry_hash()},"\t"))
+	file.store_string(JSON.stringify({"ok":ok,"routes":results,"no_rope_control":no_rope,"recovery":recovery,"geometry_hash":level.geometry_hash()},"\t"))
 	file.close()
 	mouse(false)
+	if player.cue_player != null:
+		player.cue_player.stop()
 	player.free()
 	level.free()
+	await process_frame
+	await process_frame
 	quit(0 if ok else 1)
