@@ -32,6 +32,7 @@ def main():
     subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_run_bundle.py")], check=True)
     subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_shortcut.py")], check=True)
     subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_shot.py")], check=True)
+    subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_check_package.py")], check=True)
     routes, contract = verification.fixtures()
     pure = verification.audit.negative_seed(verification.FIXTURES / routes[0]["name"] / "old", out / "negative-controls", contract, "old")
     print(f"recording/metadata/coverage mutations rejected: {len(pure['checks'])}", flush=True)
