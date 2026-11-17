@@ -18,6 +18,10 @@ This is a single-writer store. It protects ordinary write/replace failures and i
 
 The export must include the opt-in host hook and probe module. For source-side checking, add `--probe` to the profile-suite invocation; this checks the same actions and relaunch against a fresh imported source snapshot. Source-side success is not acceptance of a release package.
 
-For Windows, add `--platform windows --linux-pack PATH`. Checks require the official template hash, the Godot notices, asset notices matching their source hashes, matching BUILD.json hashes and a byte-identical Linux pack, which is stronger than resource-name equality. **Windows is not executed.** A different pack, even one that might be equivalent, is refused rather than guessed safe. ZIP members cannot traverse outside extraction or create symlinks. `python3 -B tests/test_check_package.py` runs the static negative controls.
+For Windows, add `--platform windows --linux-pack PATH`. Checks require the official template hash, Godot notices, asset notices matching their source hashes, matching BUILD.json hashes and a byte-identical Linux pack. **Windows is not executed.** A different pack, even one that might be equivalent, is refused.
+
+The export wrapper uses the same Repository Pack preset for both platforms. Assemble a matched verification pair with the checked Linux PCK, pinned Windows template and required notices. First verify both runtime inventories against the same gated commit, then record the reused Linux artifact and update the Windows BUILD pack hash. Independent exports of the same source have produced different pack bytes; reuse the checked resource bytes for the matched pair.
+
+ZIP members cannot traverse outside extraction or create symlinks. `python3 -B tests/test_check_package.py` runs the static negative controls.
 
 `python3 -B tests/profile_store_crash.py --out /tmp/r22-safety/crash-proof` watches only a private primary file and kills its Godot process if an in-place write begins. The readable primary and temporary files sit in a directory that denies replacement. The patched writer must return an error with every primary byte unchanged. Add `--baseline-ref 231b6d2` to reproduce the original writer's truncation after failed rename. This Linux-only permission test requires a non-root user; it never watches a real profile or kills another process.
