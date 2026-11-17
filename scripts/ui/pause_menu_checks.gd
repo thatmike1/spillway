@@ -59,6 +59,11 @@ func run() -> void:
 	game.set_paused(true)
 	var hud: Node = game.hud
 	check(hud.pause_pages.keys() == ["Maps", "Practice", "Settings", "Runs"], "four destinations")
+	check("Current map" in hud.pause_kicker.text, "paused heading identifies current map")
+	check("Recording is off" in hud.practice_note.text, "practice explains disabled recording")
+	check(hud.pause_panel.find_child("RunExportPlayerLabel", true, false) != null, "run export player field has a persistent purpose label")
+	check(hud.pause_panel.find_child("GhostPlayerNameLabel", true, false) != null, "ghost export player field has a persistent purpose label")
+	check("No compatible racing ghost" in hud.share_selection.text and not "Racing your local best" in hud.share_selection.text, "empty ghost library does not claim an active local best")
 	check(hud.tether_history_text("Arc\nLMB attached\nReleased · coast", "Released · coast") == "Arc\nLMB attached\nRecent: Released · coast", "release history is distinct from current attachment")
 	for key: String in ["source_sensitivity", "source_fov", "r13_sensitivity", "r13_fov", "volume"]:
 		hud.show_pause_destination("Settings")
@@ -71,6 +76,9 @@ func run() -> void:
 		check(number.text == hud.slider_value_text(key, slider.value), "slider number " + key)
 		await click(reset, hud._pause_scroll)
 		check(is_equal_approx(slider.value, float(game.DEFAULT_SETTINGS[key])), "slider reset " + key)
+	var preview_data: Script = preload("res://scripts/ui/map_previews.gd")
+	for id: String in game.map_ids():
+		check(preview_data.FRAMES.has(id) and preview_data.FRAMES[id] is Texture2D, "captured preview exists " + id)
 	var initial_map_count := int(game.map_ids().size())
 	for i: int in 5:
 		var id := "menu-capacity-%d" % i
@@ -81,6 +89,7 @@ func run() -> void:
 		game.maps.order.append(id)
 	hud._build_map_cards()
 	check(hud.map_buttons.size() == initial_map_count + 5 and game.map_ids().size() == initial_map_count + 5, "five additional maps represented")
+	check(hud.map_note.text.begins_with(str(game.map_ids().size()) + " maps."), "Maps count includes experiments")
 	for viewport: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(1280, 720)]:
 		root.size = viewport
 		hud._layout()
@@ -94,6 +103,9 @@ func run() -> void:
 				hud._show_share(true)
 			await settle()
 			check(hud.pause_destination == destination and hud.pause_pages[destination].visible, "navigate " + destination)
+			check(hud.map_preview.visible == (destination == "Maps"), "preview belongs only to Maps " + destination)
+			if destination == "Maps":
+				check(Rect2(Vector2.ZERO, Vector2(viewport)).encloses(hud.map_preview.get_global_rect()), "preview fits viewport " + str(viewport))
 			if destination == "Settings":
 				var viewport_bounds: Rect2 = hud._pause_scroll.get_global_rect()
 				for key: String in ["source_sensitivity", "source_fov", "volume"]:
@@ -113,6 +125,23 @@ func run() -> void:
 				control.grab_focus()
 				await settle()
 				check(control.has_focus(), "focus " + str(control.name))
+				if str(control.name).begins_with("Map_"):
+					var id := str(control.name).trim_prefix("Map_")
+					check(hud.map_preview.selected_id == id, "focus updates map preview " + id)
+					if preview_data.FRAMES.has(id):
+						check(hud.map_preview.image.texture == preview_data.FRAMES[id], "focus shows its own captured frame " + id)
+					hud.map_preview.show_map("", {})
+					for point: Vector2 in [Vector2(-10, -10), control.get_global_rect().get_center()]:
+						var motion := InputEventMouseMotion.new()
+						motion.position = point
+						motion.global_position = point
+						root.push_input(motion, true)
+						await process_frame
+					check(hud.map_preview.selected_id == id, "mouse hover updates map preview " + id)
+					if preview_data.FRAMES.has(id):
+						check(hud.map_preview.image.texture == preview_data.FRAMES[id], "hover shows its own captured frame " + id)
+					else:
+						check(hud.map_preview.image.texture == null and "unavailable" in hud.map_preview.caption.text, "missing map has honest preview fallback " + id)
 				var bounds := control.get_global_rect()
 				if hud._pause_scroll.is_ancestor_of(control):
 					var scroll_bounds: Rect2 = hud._pause_scroll.get_global_rect()
@@ -165,6 +194,7 @@ func run() -> void:
 	check(hud.tether_models["elastic-arc"].button_pressed, "fixed-law map shows effective model")
 	check(not hud.anchor_assist_switch.disabled, "assist uses effective map law")
 	check(hud.feedback_switches.size() == 7, "all swing feedback toggles represented")
+	check(hud.feedback_switches["tether_wind_audio"].text == "Speed wind", "speed wind uses final feedback wording")
 	if game.settings.has("tether_rope_visual"):
 		var identity: Dictionary = game.motion_identity().duplicate(true)
 		var attempts := int(game.attempts)
@@ -210,6 +240,19 @@ func run() -> void:
 		hud.show_pause_destination("Practice")
 		await settle()
 		check(hud.mail_section.is_visible_in_tree(), "mail controls appear on delivery map")
+		if game.player.has_method("delivery_progress"):
+			var progress: Vector2i = game.player.call("delivery_progress")
+			check(hud.mail_groups["goal"].buttons["deliver"].text == ("Deliver mail (%d required)" % progress.y if progress.y > 0 else "Reach Dispatch"), "delivery goal shows the actual required count " + id)
+			for stage: int in int(game.stage_count()):
+				game.practise_stage(stage)
+				game.set_paused(true)
+				hud._refresh_mail()
+				progress = game.player.call("delivery_progress")
+				check(hud.mail_groups["goal"].buttons["deliver"].text == ("Deliver mail (%d required)" % progress.y if progress.y > 0 else "Reach Dispatch"), "delivery goal follows practice count " + id + "/" + str(stage))
+			game.restart_run("restart")
+			game.set_paused(true)
+			hud.show_pause_destination("Practice")
+			await settle()
 		check(is_zero_approx(hud.controls.modulate.a) and is_zero_approx(hud.keys_line.modulate.a), "mail view suppresses generic teaching")
 		for choice: String in hud.mail_groups:
 			var group: Dictionary = hud.mail_groups[choice]
@@ -273,6 +316,15 @@ func run() -> void:
 					button.grab_focus()
 					await settle()
 					check(button.has_focus() and scroll.get_global_rect().encloses(button.get_global_rect()), "Mail choice fits after focus/resize " + str(button.name) + " " + str(viewport))
+	game.session.recorder.enabled = true
+	hud._refresh_pause()
+	check("are recorded" in hud.practice_note.text, "practice explains enabled recording")
+	hud.practice_started("copy check")
+	check("recorded, no best" in hud.message.text, "practice notification agrees with enabled recording")
+	game.session.recorder.enabled = false
+	hud._refresh_pause()
+	hud.practice_started("copy check")
+	check("Recording is off" in hud.practice_note.text and "recording off, no best" in hud.message.text, "practice notification and instructions agree with disabled recording")
 	var ok := checks.all(func(row: Dictionary) -> bool: return row.ok)
 	var file := FileAccess.open(output.path_join("menu-checks.json"), FileAccess.WRITE)
 	file.store_string(JSON.stringify({"ok": ok, "checks": checks}, "\t"))

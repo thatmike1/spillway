@@ -4,6 +4,7 @@ const LOOK := preload("res://scripts/r18_ui_theme.gd")
 var series: Array = []
 var duration := 1.0
 var cursor := 0.0
+var font_size := 13
 func _draw() -> void:
 	var area := Rect2(Vector2(48, 24), size - Vector2(64, 56))
 	if area.size.x <= 0 or area.size.y <= 0:
@@ -15,7 +16,7 @@ func _draw() -> void:
 	for step: int in 3:
 		var y := area.end.y - step * area.size.y / 2.0
 		draw_line(Vector2(area.position.x, y), Vector2(area.end.x, y), Color(LOOK.INK, 0.12))
-		draw_string(LOOK.font("smallnum"), Vector2(0, y + 4), "%.0f" % (peak * step / 2.0), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, LOOK.INK)
+		draw_string(LOOK.font("smallnum"), Vector2(0, y + 4), "%.0f" % (peak * step / 2.0), HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, LOOK.INK)
 	for n: int in series.size():
 		var points := PackedVector2Array()
 		var track: Array = series[n]
@@ -44,5 +45,7 @@ func _draw() -> void:
 			draw_polyline(points, LOOK.TEAL if n == 0 else LOOK.CORAL_DEEP, 2.0, true)
 	var x := area.position.x + cursor / maxf(duration, 0.001) * area.size.x
 	draw_line(Vector2(x, area.position.y), Vector2(x, area.end.y), LOOK.INK, 1.0)
-	draw_string(LOOK.font("smallnum"), Vector2(area.position.x, size.y - 7), "0 s", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, LOOK.INK)
-	draw_string(LOOK.font("smallnum"), Vector2(area.end.x - 55, size.y - 7), "%.2f s" % duration, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, LOOK.INK)
+	draw_string(LOOK.font("smallnum"), Vector2(area.position.x, size.y - 7), "0 s", HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, LOOK.INK)
+	var end_label := "%.2f s" % duration
+	var end_width := LOOK.font("smallnum").get_string_size(end_label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	draw_string(LOOK.font("smallnum"), Vector2(area.end.x - end_width, size.y - 7), end_label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, LOOK.INK)

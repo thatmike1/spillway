@@ -51,6 +51,7 @@ func attach(main: Node) -> void:
 		game.ghost_share.scan()
 		_list_signature = ""
 		_refresh_share()).name = "RefreshGhosts"
+	_small(share_section, "Player name in the ghost file").name = "GhostPlayerNameLabel"
 	share_name = LineEdit.new()
 	share_name.name = "GhostPlayerName"
 	share_name.placeholder_text = "Your player name"
@@ -139,7 +140,7 @@ func _build_map_cards() -> void:
 
 func _refresh_map_note() -> void:
 	if map_note != null:
-		map_note.text = "%d maps. Each starts at its spawn and keeps your preset." % map_grid.get_child_count()
+		map_note.text = "%d maps. Hover or focus to preview.\nClick a map or press Enter to start at spawn with your preset." % map_buttons.size()
 
 func _layout_pause(size: Vector2) -> void:
 	super(size)
@@ -178,9 +179,14 @@ func _refresh_share() -> void:
 	share_status.visible = not share_status.text.is_empty()
 	share_revision.text = str(game.call("map_revision_description"))
 	share_revision.visible = not share_revision.text.is_empty()
-	share_selection.text = "Racing your local best" if str(service.selected).is_empty() else ("Chosen friend is paused on this map or preset; racing your local best" if str(service.active).is_empty() else "Racing the selected friend")
+	if not str(service.active).is_empty():
+		share_selection.text = "Ghost source: selected friend"
+	elif str(game.session.ghost_state) == "loaded":
+		share_selection.text = "Ghost source: local best" if str(service.selected).is_empty() else "Chosen friend unavailable here; ghost source: local best"
+	else:
+		share_selection.text = "No compatible racing ghost for this map and preset" if str(service.selected).is_empty() else "Chosen friend unavailable here; no compatible local best ghost"
 	if ghost_switch != null:
-		ghost_switch.text = "Show racing ghost  (G)"
+		ghost_switch.text = "Show available racing ghost  (G)"
 	var signature := JSON.stringify([service.rows, service.active, game.course_key])
 	if signature == _list_signature:
 		return

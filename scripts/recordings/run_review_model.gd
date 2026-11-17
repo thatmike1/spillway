@@ -5,7 +5,8 @@ const READER := preload("res://scripts/recordings/reader.gd")
 static func load_attempt(path: String) -> Dictionary:
 	var run := READER.read(path, true)
 	if not run.ok:
-		return {"ok": false, "error": "Cannot review this %s recording: %s" % [run.status, str(run.errors)], "status": run.status}
+		var reason := "Incomplete recording. Select a finish or restart attempt, or play a new attempt." if run.status in ["partial", "aborted", "sealed-unrenamed"] else "This recording is damaged or unreadable. Choose another attempt."
+		return {"ok": false, "error": reason, "status": run.status}
 	if not run.header.get("identity") is Dictionary:
 		return {"ok": false, "error": "The recording has no motion identity."}
 	var c: Dictionary = run.columns
@@ -80,7 +81,7 @@ static func step_scan(scan: Dictionary, budget_usec: int = 4000) -> bool:
 	while scan.index < scan.files.size():
 		var filename: String = scan.files[scan.index]
 		scan.index += 1
-		if filename.ends_with(".r16run"):
+		if filename.ends_with(".r16run") or filename.ends_with(".r16run.part") or filename.ends_with(".r16run.aborted"):
 			scan.entries.append(read_summary(scan.directory.path_join(filename)))
 		if Time.get_ticks_usec() - start >= budget_usec:
 			return false
@@ -92,7 +93,7 @@ static func read_summary(path: String) -> Dictionary:
 	var identity: Variant = run.header.get("identity", {})
 	var outcome: Variant = run.seal.get("outcome", {})
 	var created: Variant = run.header.get("created_unix", 0)
-	return {"path": path, "name": path.get_file(), "ok": run.ok, "status": run.status, "identity": identity if identity is Dictionary else {}, "created": float(created) if created is float or created is int else 0.0, "outcome": outcome if outcome is Dictionary else {}}
+	return {"path": path, "name": path.get_file(), "ok": run.ok, "status": run.status, "identity": identity if identity is Dictionary else {}, "created": float(created) if (created is float or created is int) and is_finite(float(created)) and float(created) > 0 and float(created) < 253402300799.0 else 0.0, "outcome": outcome if outcome is Dictionary else {}}
 
 static func list_attempts(directory: String) -> Array:
 	var scan := begin_scan(directory)
@@ -123,3 +124,35 @@ static func biggest_loss(comparison: Dictionary) -> String:
 	if worst.is_empty():
 		return "No time lost against the best across the completed segments." if not comparison.splits.is_empty() else "Reach a checkpoint to compare a complete segment."
 	return "Biggest loss: %.3f s between %s and %s." % [worst.loss, worst.from, worst.label]
+
+static func practice_request(pair: Dictionary) -> Dictionary:
+	if not pair.get("ok", false):
+		return {"ok": false, "error": "Choose a comparable attempt first."}
+	var worst := -1
+	for i: int in pair.splits.size():
+		if float(pair.splits[i].loss) > (float(pair.splits[worst].loss) if worst >= 0 else 0.0):
+			worst = i
+	if worst < 0:
+		return {"ok": false, "error": "No completed segment lost time against this best."}
+	var stage := 0
+	if worst > 0:
+		stage = int(str(pair.best.marks[worst - 1].key).trim_prefix("checkpoint-"))
+	return {"ok": true, "stage": stage, "pb_start": 0.0 if worst == 0 else float(pair.best.marks[worst - 1].time),
+		"pb_end": float(pair.best.marks[worst].time), "best_path": str(pair.best.path),
+		"identity": pair.attempt.identity.duplicate(true), "label": "%s to %s" % [pair.splits[worst].from, pair.splits[worst].label]}
+
+
+static func attempt_label(entry: Dictionary) -> String:
+	var stamp := recorded_time(entry.get("created", 0.0))
+	var status: String = str(entry.outcome.get("kind", "complete")) if entry.ok else {"partial": "incomplete", "aborted": "aborted", "sealed-unrenamed": "not finalized"}.get(entry.status, "damaged")
+	var detail := " %.3f s" % float(entry.outcome.time) if entry.ok and entry.outcome.get("kind") == "finish" and (entry.outcome.get("time") is float or entry.outcome.get("time") is int) else ""
+	var preset := str(entry.identity.get("preset", ""))
+	preset = {"server128": "F2", "server128_aa1000": "F5"}.get(preset, preset)
+	return "%s / %s · %s%s · %s" % [entry.identity.get("map", "Unknown map"), preset, status, detail, stamp]
+
+
+static func recorded_time(value: Variant) -> String:
+	if not (value is float or value is int) or not is_finite(float(value)) or float(value) <= 0 or float(value) >= 253402300799.0:
+		return "Unknown time"
+	var created := float(value)
+	return Time.get_datetime_string_from_unix_time(int(created), true) + ".%03dZ" % int(floorf((created - floorf(created)) * 1000.0))

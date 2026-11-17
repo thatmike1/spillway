@@ -1,0 +1,322 @@
+[
+  {
+    "id": "breakwater",
+    "name": "Breakwater",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        0.0,
+        1.66559994220734,
+        4.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "e40bb1e07d3082d2103f8b48abc6a2654ec217b9a40a7362fcaeb0f0796171c5",
+    "source_commit": "c631bb136ec87920c63c9979bdb09b08d2eaa5d8",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "whiteout-relay",
+    "name": "Whiteout Relay",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        0.0,
+        1.66559994220734,
+        8.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "8f723878f52094409fae644e337e45ac7394bf4f24b055e0b89d64d2d6459621",
+    "source_commit": "c631bb136ec87920c63c9979bdb09b08d2eaa5d8",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "sunken-court",
+    "name": "Sunken Court",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        0.0,
+        9.66559982299805,
+        10.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "c78decc19721a2d73469a5f25397903f57b2d3ad8d29b510960dc4e2ed37e635",
+    "source_commit": "c631bb136ec87920c63c9979bdb09b08d2eaa5d8",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "rainline",
+    "name": "Rainline",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        0.0,
+        1.66559994220734,
+        11.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "a74f885e9f0a0afbe252757b55319b676574614d8b2e6ec49705a05c0e9b30fc",
+    "source_commit": "c631bb136ec87920c63c9979bdb09b08d2eaa5d8",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "night-shift",
+    "name": "Night Shift",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        0.0,
+        1.66559994220734,
+        20.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "d98118a549e168c752b678c4f1a561cb6d2e1d464ab3cf0b0ff627509ce230d1",
+    "source_commit": "c631bb136ec87920c63c9979bdb09b08d2eaa5d8",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "practice",
+    "name": "Penstock Yard",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        0.0,
+        1.66559994220734,
+        4.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "a5dff35b0058853fcc49370c947a32e2d9cb1bba40a5981f74a60cee58fcbffa",
+    "source_commit": "c631bb136ec87920c63c9979bdb09b08d2eaa5d8",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "overflow",
+    "name": "Overflow",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        0.0,
+        22.1656017303467,
+        52.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "04e6ae1f6198bcc020170a28e4191806d1051ca401af253c7dfec2109b399ead",
+    "source_commit": "c631bb136ec87920c63c9979bdb09b08d2eaa5d8",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "experiment",
+    "name": "Movement Lab",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        0.0,
+        1.66559994220734,
+        4.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "881cb1d02505402bf282ee63b05aaac7c866c60c1618ecf00b01fb8c68922f6e",
+    "source_commit": "c631bb136ec87920c63c9979bdb09b08d2eaa5d8",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "saltglass",
+    "name": "Saltglass",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        9.69999980926514,
+        17.165599822998,
+        16.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "05518ef06b0809aea4ff55168137becbe1baffbcb337e2b76e8832d68b83e7c3",
+    "source_commit": "582883582fb1f122c2275a012a8c5c3435265e0a",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "tether-yard",
+    "name": "Tether Yard",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        0.0,
+        5.66559982299805,
+        12.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "1481b7f0a0bdc524bdb50ccc74ce8ac6ed6dfce9ef0da7452e10a56df48a0be1",
+    "source_commit": "c631bb136ec87920c63c9979bdb09b08d2eaa5d8",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "through-line",
+    "name": "Through Line",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        0.0,
+        5.66559982299805,
+        12.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "fd4d991876d80663376db6a660b0a07b0bb3893cd4b9a600960b18fba1dc07ed",
+    "source_commit": "c631bb136ec87920c63c9979bdb09b08d2eaa5d8",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "viaduct",
+    "name": "Viaduct",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        0.0,
+        5.66559982299805,
+        12.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "e30b3d6d18b3721306876586c797af76b1995442fe8529081a20139890e4df9c",
+    "source_commit": "bf52fa8d1175b76c2044cf3f89b84e4e8d9e60ec",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "gantry",
+    "name": "Gantry",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        0.0,
+        5.66559982299805,
+        20.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "228c2f7ce177b2e059efcf05415ac65777e633edbcc99fa385aa7e733b4e64b0",
+    "source_commit": "bf52fa8d1175b76c2044cf3f89b84e4e8d9e60ec",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "gantry-chain",
+    "name": "Gantry Chain",
+    "pose": {
+      "position": [
+        5.3,
+        5.6656,
+        -81
+      ],
+      "yaw": 12,
+      "pitch": 0
+    },
+    "image_sha256": "fd7d45e63b71fa7de317bd8a05cf89fb80369239657204365fe99dbb767c92f4",
+    "source_commit": "bf52fa8d1175b76c2044cf3f89b84e4e8d9e60ec",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "mail-run",
+    "name": "Mail Run",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        0.0,
+        3.66559982299805,
+        12.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "d964649141a94d40160e3659d94c5da9f23a7cd5b6ae3902b26b0ee12cecbd3d",
+    "source_commit": "582883582fb1f122c2275a012a8c5c3435265e0a",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "sluice-six",
+    "name": "Sluice Six",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        0.0,
+        1.66559994220734,
+        6.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "2db39bf7ce017aff73b641ec16fe9dcea34b247605727d37b854103cdbf5029d",
+    "source_commit": "bf52fa8d1175b76c2044cf3f89b84e4e8d9e60ec",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "foundry",
+    "name": "Foundry",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        0.0,
+        19.6656017303467,
+        12.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "8b17ff5ab7c1c69acd7ea6c88d118dd1624f11b5e4d6f9a07187972fea338ab0",
+    "source_commit": "bf52fa8d1175b76c2044cf3f89b84e4e8d9e60ec",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "saltglass-seaward",
+    "name": "Saltglass / Seaward",
+    "pose": {
+      "position": [
+        205,
+        7.2,
+        52
+      ],
+      "yaw": -105,
+      "pitch": -6
+    },
+    "image_sha256": "1a78e68968737c331da34d71462ca8a9af664f64fe70a1dbc8c0d100295d7177",
+    "source_commit": "582883582fb1f122c2275a012a8c5c3435265e0a",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "plan-yard",
+    "name": "Plan Yard",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        -4.0,
+        4.66559982299805,
+        13.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "5ab0d55c2fb91d6ab1a774f63ff83d3c9140362ae3edb1e0feba981623e5dcdf",
+    "source_commit": "9a5ac15916f2878bbad045bb060ae193157c14e2",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "outer-reach",
+    "name": "Outer Reach",
+    "pose": {
+      "position": [
+        -224,
+        1.6656,
+        -51
+      ],
+      "yaw": -2,
+      "pitch": -4
+    },
+    "image_sha256": "16b62d9d88bcb70b12a82ddd2bee23b5bb6381c217594ba6ac71af2833f307f8",
+    "source_commit": "bf52fa8d1175b76c2044cf3f89b84e4e8d9e60ec",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  }
+]

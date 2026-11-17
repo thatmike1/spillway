@@ -1,5 +1,7 @@
 extends "res://scripts/r20_hud.gd"
 ## r21 adds tuning controls and displays the runner's authoritative prospective anchor.
+const MAP_PREVIEW := preload("res://scripts/ui/map_preview.gd")
+const RUN_REVIEW_PRACTICE := preload("res://scripts/recordings/run_review_practice.gd")
 const RUN_REVIEW := preload("res://scripts/ui/run_review.gd")
 const R21_TUNING_NOTES := {
 	"elastic-soft": "Soft catch · less outward damping; more room to swing.",
@@ -8,11 +10,13 @@ const R21_TUNING_NOTES := {
 var anchor_assist_switch: CheckButton
 var anchor_readout: Label
 var displayed_anchor: Dictionary = {}
+var map_preview: PanelContainer
 var pause_header: VBoxContainer
 var mail_section: VBoxContainer
 var mail_views := {}
 var mail_groups := {}
 var feedback_switches := {}
+var review_practice_status: Label
 var review_button: Button
 var review_screen: Control
 var review_host_input := true
@@ -51,8 +55,42 @@ func attach(main: Node) -> void:
 	review_button.name = "ReviewLocalRuns"
 	pause_pages["Runs"].move_child(review_button, 0)
 	review_button.tooltip_text = "Read recorded attempts, compare splits and scrub the speed trace."
+	review_practice_status = _small(pause_pages["Runs"], "")
+	review_practice_status.name = "ReviewPracticeStatus"
+	pause_pages["Runs"].move_child(review_practice_status, 1)
+	review_practice_status.hide()
 	_pin_pause_header()
+	map_preview = MAP_PREVIEW.new()
+	map_preview.name = "MapPreview"
+	pause_panel.add_child(map_preview)
+	_wire_map_previews()
+	map_preview.show_map(str(game.map_id), game.map_entry())
+	map_preview.visible = pause_destination == "Maps"
+	_layout_pause(get_viewport().get_visible_rect().size)
 	_refresh_tether()
+
+func _wire_map_previews() -> void:
+	if map_preview == null:
+		return
+	for id: String in map_buttons:
+		var button: Button = map_buttons[id]
+		if button.has_meta("preview_connected"):
+			continue
+		button.set_meta("preview_connected", true)
+		var show_view: Callable = map_preview.show_map.bind(id, game.map_entry(id))
+		button.mouse_entered.connect(show_view)
+		button.focus_entered.connect(show_view)
+
+func _build_map_cards() -> void:
+	super()
+	_wire_map_previews()
+
+func show_pause_destination(destination: String, focus_tab: bool = true) -> void:
+	super(destination, focus_tab)
+	if map_preview != null:
+		map_preview.visible = destination == "Maps"
+		if destination == "Maps":
+			map_preview.show_map(str(game.map_id), game.map_entry())
 
 func _show_current_map_controls() -> void:
 	show_pause_destination("Practice")
@@ -75,7 +113,7 @@ func _attach_mail_preferences() -> void:
 	_small(mail_section, "LMB throw · mouse steer · RMB recall. Changing a choice restarts the attempt with its own recording identity.")
 	_add_mail_group("view", "Delivery view", "mail_view", "set_mail_view", {"envelope": "Envelope", "body": "Runner's eyes"})
 	_add_mail_group("body", "Body while steering", "mail_body", "set_mail_body", {"hold": "Held", "run": "Keep running"})
-	_add_mail_group("goal", "Dispatch goal", "mail_goal", "set_mail_goal", {"deliver": "Deliver all three", "optional": "Optional mail"})
+	_add_mail_group("goal", "Dispatch goal", "mail_goal", "set_mail_goal", {"deliver": "Deliver all mail", "optional": "Optional mail"})
 	mail_views = mail_groups["view"].buttons
 	_refresh_mail()
 
@@ -106,6 +144,11 @@ func _refresh_mail() -> void:
 	mail_section.visible = is_instance_valid(game.player) and game.player.has_method("mail_view")
 	if not mail_section.visible:
 		return
+	var deliver: Button = mail_groups["goal"].buttons["deliver"]
+	deliver.text = "Deliver all mail"
+	if game.player.has_method("delivery_progress"):
+		var progress: Vector2i = game.player.call("delivery_progress")
+		deliver.text = "Deliver mail (%d required)" % progress.y if progress.y > 0 else "Reach Dispatch"
 	for id: String in mail_groups:
 		var group: Dictionary = mail_groups[id]
 		var supported: bool = game.player.has_method(group.getter) and game.player.has_method(group.setter)
@@ -121,7 +164,7 @@ func _attach_feedback_preferences() -> void:
 	var labels := {
 		"tether_rope_visual": "Readable rope", "tether_attach_cue": "Attach flash and click",
 		"tether_reel_audio": "Reel sound", "tether_tension_audio": "Rope tension sound",
-		"tether_wind_audio": "Swing speed wind", "tether_speed_fov": "Small speed FOV (up to +3°)",
+		"tether_wind_audio": "Speed wind", "tether_speed_fov": "Small speed FOV (up to +3°)",
 		"tether_anchor_readability": "Anchor ready marker"}
 	for key: String in labels:
 		var toggle := CheckButton.new()
@@ -135,9 +178,11 @@ func _attach_feedback_preferences() -> void:
 func _open_run_review() -> void:
 	if review_screen != null:
 		return
+	review_practice_status.hide()
 	review_host_input = game.is_processing_input()
 	game.set_process_input(false)
 	review_screen = RUN_REVIEW.new()
+	review_screen.spatial_unavailable_reason = RUN_REVIEW_PRACTICE.unavailable_reason(game)
 	if not str(game.session.directory).is_empty():
 		review_screen.set("directory", str(game.session.directory))
 	pause_panel.add_child(review_screen)
@@ -145,8 +190,18 @@ func _open_run_review() -> void:
 	if review_screen.has_method("attach_map"):
 		review_screen.call("attach_map", game.level, game.motion_identity())
 	review_screen.closed.connect(_close_run_review)
+	review_screen.practice_requested.connect(_on_review_practice_requested)
 	_pause_side.hide()
 	_pause_edge.hide()
+
+func _on_review_practice_requested(request: Dictionary) -> void:
+	_close_run_review()
+	var result: Dictionary = RUN_REVIEW_PRACTICE.start(game, request)
+	if not result.ok:
+		review_practice_status.text = str(result.error)
+		review_practice_status.show()
+		_pause_scroll.scroll_vertical = 0
+		notify(str(result.error))
 
 func _close_run_review() -> void:
 	if review_screen != null:
@@ -159,6 +214,8 @@ func _close_run_review() -> void:
 
 func set_paused(value: bool) -> void:
 	super(value)
+	if value and map_preview != null and pause_destination == "Maps":
+		map_preview.show_map(str(game.map_id), game.map_entry())
 	if not value and review_screen != null:
 		_close_run_review()
 
@@ -182,6 +239,8 @@ func _layout_pause(size: Vector2) -> void:
 	var header_height := pause_header.get_combined_minimum_size().y + 9.0
 	_pause_scroll.position.y += header_height
 	_pause_scroll.size.y = maxf(80.0, _pause_scroll.size.y - header_height)
+	if map_preview != null:
+		map_preview.arrange(size, _pause_side.get_global_rect())
 
 func lab_controls_text() -> String:
 	var instructions := super()
@@ -226,6 +285,17 @@ func _lab_text() -> void:
 static func tether_history_text(status: String, recent: String) -> String:
 	return status.replace("\n" + recent, "\nRecent: " + recent) if not recent.is_empty() else status
 
+func _run_text() -> String:
+	var original := super()
+	for child: Node in game.get_children():
+		if child.get_meta("run_review_practice", false) and int(child.get("attempt")) == int(game.attempts) and not game.finished:
+			var parts: Array = [] if original.is_empty() else Array(original.split("  ·  "))
+			if not parts.is_empty() and (str(parts[0]).begins_with("ghost ") or str(parts[0]) == "no ghost yet" or str(parts[0]).begins_with("racing ")):
+				parts.pop_front()
+			parts.push_front("PB segment guide")
+			return "  ·  ".join(parts)
+	return original
+
 func _refresh_anchor_readout() -> void:
 	if anchor_readout == null:
 		return
@@ -250,6 +320,6 @@ func _refresh_anchor_readout() -> void:
 	anchor_readout.text = "%s: %s · %.1f m" % ["Attached" if attached else "Next", name, float(candidate.get("distance_m", 0.0))]
 	anchor_readout.reset_size()
 	var view := get_viewport().get_visible_rect().size
-	anchor_readout.position = Vector2((view.x - anchor_readout.size.x) * 0.5, view.y * 0.5 + 24.0)
+	anchor_readout.position = Vector2(32.0, maxf(120.0, view.y - 168.0)) if bool(game.map_entry().get("own_look", false)) else Vector2((view.x - anchor_readout.size.x) * 0.5, view.y * 0.5 + 24.0)
 	anchor_readout.show()
 	displayed_anchor = candidate.duplicate(true)
