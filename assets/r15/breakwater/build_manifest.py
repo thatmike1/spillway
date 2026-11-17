@@ -4,7 +4,11 @@ records saved at download time (files/<asset> and info/<asset>, plus the downloa
 url, md5 and sha256 of every byte fetched). every shipped file is byte-identical to its
 upstream download; this checks that and records the use and the in-game modifications.
 
-python3 -I assets/r15/breakwater/build_manifest.py --api DIR   (DIR outside the checkout)
+the original download records are not retained in the repository. --api explicitly
+selects caller-supplied public api records; this optional provenance rebuild is not
+required to run, test or export the game.
+
+python3 -I assets/r15/breakwater/build_manifest.py --api DIR
 """
 import argparse
 import hashlib
