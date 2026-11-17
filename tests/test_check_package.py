@@ -50,6 +50,20 @@ class PackageChecks(unittest.TestCase):
                 result = checker.static_check(root, "windows", linux)
                 self.assertFalse(result["executed"])
                 self.assertEqual(result["limitation"], "Windows was not executed")
+                notice = root / "notices/kit/LICENSE.txt"
+                notice.parent.mkdir(parents=True)
+                notice.write_bytes(b"original notice")
+                manifest["source_files"] = {"assets/kit/LICENSE.txt": checker.engine.sha(notice)}
+                (root / "BUILD.json").write_text(json.dumps(manifest))
+                checker.static_check(root, "windows", linux)
+                notice.write_bytes(b"changed")
+                with self.assertRaisesRegex(ValueError, "package notice"):
+                    checker.static_check(root, "windows", linux)
+                notice.unlink()
+                with self.assertRaisesRegex(ValueError, "package notice"):
+                    checker.static_check(root, "windows", linux)
+                manifest.pop("source_files")
+                (root / "BUILD.json").write_text(json.dumps(manifest))
                 linux.write_bytes(b"GDPCdifferent")
                 with self.assertRaisesRegex(ValueError, "byte-identical"):
                     checker.static_check(root, "windows", linux)
