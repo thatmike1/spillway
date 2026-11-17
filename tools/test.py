@@ -42,17 +42,25 @@ def main():
     profile.mkdir()
     engine.run(["--headless", "--editor", "--path", source, "--import"], cwd=source,
                profile=profile, log=out / "import.log")
-    components = ["saltglass_registration", "tether_geometry", "tether_coefficients", "grapple_capability", "r22_registration", "host_capabilities", "tether_feedback_identity", "tether_feedback_audio", "registry_injection"]
+    components = [
+        "saltglass_registration", "tether_geometry", "tether_coefficients",
+        "grapple_capability", "r22_registration", "host_capabilities",
+        "tether_feedback_identity", "tether_feedback_audio", "registry_injection",
+        "style_suspension", "tether_feedback_lens", "saltglass_art", "gantry_runner",
+        "mail_flight", "mail_motor", "mail_courts", "mail_tape",
+        "scripts/ui/pause_menu_checks.gd",
+    ]
     if args.slow:
         components.extend(["direction_stack", "through_line_original_maps"])
     report = {"ok": False, "mutations": pure, "components": []}
     try:
         for name in components:
-            folder = out / name
+            folder = out / Path(name).stem
             folder.mkdir()
             print("check " + name, flush=True)
+            script = "res://" + name if "/" in name else "res://tests/" + name + ".gd"
             result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
-                                 "--fixed-fps", "128", "--script", "res://tests/" + name + ".gd",
+                                 "--fixed-fps", "128", "--script", script,
                                  "--", "--out=" + str(folder), "--menu-contract=" + str(verification.FIXTURES / "contract.json")], cwd=source, profile=profile,
                                 log=folder / "engine.log", timeout=300)
             report["components"].append({"name": name, **result})

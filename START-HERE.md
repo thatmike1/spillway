@@ -14,7 +14,7 @@ python3 tools/test.py --slow
 python3 tools/export.py --out builds/linux
 ```
 
-The ordinary check imports a fresh source snapshot, challenges real recording bytes and checks Saltglass production registration plus Tether geometry and force coefficients. The current gate also checks live catalog additions, full-host presentation toggles and exact observer motion identity. The slow tier adds direction-stack/Through Line checks and **48 plays, 16 routes, 288 exact comparisons** against frozen original-map fixtures. Every original-map comparison must have zero differences. It checks recordings, motion, ghosts, observations, controls and finish, across old/new/toggle looks. Logs and snapshots go to an external temporary folder; `--out /absolute/new/path` keeps them at a chosen location. See [verification/README.md](verification/README.md).
+The ordinary check imports a fresh source snapshot, challenges real recording bytes and checks Saltglass production registration plus Tether geometry and force coefficients. The current gate also checks live catalog additions, full-host presentation toggles, exact observer motion identity, suspension continuity, visual bounds, Gantry's F2 ground law, Mail Run and the pause menu. The slow tier adds direction-stack/Through Line checks and **48 plays, 16 routes, 288 exact comparisons** against frozen original-map fixtures. Every original-map comparison must have zero differences. It checks recordings, motion, ghosts, observations, controls and finish, across old/new/toggle looks. Logs and snapshots go to an external temporary folder; `--out /absolute/new/path` keeps them at a chosen location. See [verification/README.md](verification/README.md).
 
 The export tool builds a PCK and uses the pinned Linux release template. It starts that exact pack from an empty directory outside the checkout. `--platform windows` assembles a Windows build but does not execute it. New exports verify source; the published **r21** ZIPs are the exact previously verified delivery bytes. Release builds are distributed through this private repository's GitHub releases.
 
@@ -45,6 +45,9 @@ Stable round-numbered aliases preserve resource paths used by recording identiti
 | Saltglass / `saltglass` | **`maps/saltglass.gd`**, course player; surf/exits experiment |
 | Tether Yard / `tether-yard` | **`maps/tether_yard.gd`**, **`movement/grapple_player.gd`**; six rope laws and optional anchor acquisition assist |
 | Through Line / `through-line` | `r20_through_level.gd`, `r20_through_player.gd`; movement experiment |
+| Viaduct / `viaduct` | `maps/viaduct.gd`, grapple player; fixed Arc transfers and lower-court returns |
+| Gantry / `gantry` | `maps/gantry.gd`, grapple player; F2 ground sections joined by fixed Arc transfers |
+| Mail Run / `mail-run` | `maps/mail_run.gd`, `movement/mail_runner.gd`; F2 with held or running envelope steering |
 | Shelved: Fall Line / `fall-line` | `r19_fall_line_level.gd`; retained as a catalog dependency, removed from the current menu |
 | Shelved: Line Drive / `line-drive` | `r19_line_drive_level.gd`, `r19_line_drive_player.gd`; retained dependency, removed from the current menu |
 
@@ -52,7 +55,7 @@ Paths in this table are under `scripts/`. `r16_style_opportunities.gd` adds opti
 
 ## Controls and vocabulary
 
-WASD and mouse move/look. Hold Space or use scroll to hop; release W and combine A/D with the same-direction mouse turn to air-strafe. Ctrl/C crouches. R restarts, F practises a checkpoint, Esc opens the menu, G toggles the fastest clean ghost and L compares the look. Movement Lab alone uses Shift for slide and E for grapple. Tether Yard uses LMB to attach/hold, RMB to reel and LMB release to coast.
+WASD and mouse move/look. Hold Space or use scroll to hop; release W and combine A/D with the same-direction mouse turn to air-strafe. Ctrl/C crouches. R restarts, F practises a checkpoint, Esc opens the menu, G toggles the fastest clean ghost and L compares the look. Movement Lab alone uses Shift for slide and E for grapple. Grapple maps use LMB to attach/hold, RMB to reel and LMB release to coast. Mail Run uses LMB to throw, mouse to steer and RMB to recall; B/V/N change body, view and delivery goal with a fresh identity. The pause menu groups Maps, Practice, Settings and Runs. Runs opens the read-only local attempt review.
 
 - **F2 / server128:** the primary 128 Hz bhop preset, AA 100, autohop, no stamina/takeoff clamp. `server128` is its stable stored ID.
 - **F5:** the same family at AA 1000. **AA** means air acceleration, not a global speed limit. F3/R13 and F4/Quake-inspired are advanced comparisons.
