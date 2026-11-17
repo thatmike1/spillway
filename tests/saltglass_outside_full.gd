@@ -111,10 +111,11 @@ func observe() -> void:
 		route_samples.append({"tick": ticks - 1, "phase": phase, "position": [p.x, p.y, p.z], "support": support})
 	if game.finished or game.respawn_count > 0 or ticks >= 128 * 100:
 		live = false
-		var result := {"ok": game.finished and game.respawn_count == 0 and receiver_landed and next_pan_landed and differences == 0,
+		var result := {"ok": game.finished and game.respawn_count == 0 and receiver_landed and next_pan_landed and differences == 0 and worst == 0.0,
 			"map": target_map, "normal_spawn": true, "finished": game.finished, "finish_kind": game.finish_kind,
 			"elapsed": game.elapsed, "respawns": game.respawn_count, "ticks": ticks, "phase": phase,
-			"prefix_ticks": FORK_TICK, "prefix_position_differences": differences, "receiver_landed": receiver_landed,
+			"prefix_ticks": FORK_TICK, "prefix_position_differences": differences,
+			"prefix_exact_match_required": true, "prefix_worst_position_error_m": worst, "receiver_landed": receiver_landed,
 			"receiving_pan_landed": next_pan_landed, "samples": route_samples,
 			"source_sha256": FileAccess.get_sha256(source_path),
 			"limit": "normal-spawn input-only outside completion; scripted steering does not prove first-time discovery, fastest routing or preference"}

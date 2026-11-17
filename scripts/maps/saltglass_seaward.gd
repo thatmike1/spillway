@@ -71,12 +71,8 @@ func build() -> void:
 	_gap("salt_house", Vector3(296, 4.1, 53), Vector3(310, 4, 53))
 	_define_progress()
 	_environment()
-	_sign("title", Vector3(10, 19, 24), PI, "SALTGLASS\nHIGH FINS / RISING CRESCENT / SALT STEPS", 0.006)
-	_sign("surf_entry", Vector3(15, 20, 2), 0.0, "SURF\nA / D INTO THE FACE\nLET THE FIN CARRY YOU TO THE LOW DECK", 0.005)
-	_sign("crescent", Vector3(120, 20, -236), 0, "CRESCENT\nCLIMB THROUGH THE HOPS", 0.007)
 	_readable_surfaces()
 	_dressing()
-	_sign("salt_house", Vector3(322, 8, 38), -PI * 0.5, "SALT HOUSE\nFINISH", 0.009)
 	_fixture_look.call_deferred()
 
 func _fin(id: String, pose: Transform3D, stage: int) -> void:
@@ -102,7 +98,7 @@ func _define_progress() -> void:
 func route_hint(stage: int, _feet: Vector3) -> String:
 	match stage:
 		0:
-			return "Enter high, then let the fin carry you low and long to the flat deck. Water below."
+			return "A / D into the face. Enter high, then let the fin carry you low and long to the flat deck. Water below."
 		1:
 			return "Link the climbing salt pans to the high east headrace. Every rise needs a clean hop."
 		2:
