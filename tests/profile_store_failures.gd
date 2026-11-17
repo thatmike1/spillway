@@ -5,6 +5,9 @@ class FaultStore extends "res://scripts/persistence/profile_store.gd":
 	var deny_write := false
 	var deny_replace := false
 	var deny_backup := false
+	var denied_read_path := ""
+	func _load_checked(path: String, config: ConfigFile) -> Error:
+		return ERR_FILE_NO_PERMISSION if path == denied_read_path else super(path, config)
 	func _save(config: ConfigFile, path: String) -> Error:
 		return ERR_FILE_NO_PERMISSION if deny_write else super(config, path)
 	func _replace(source: String, target: String) -> Error:
@@ -61,6 +64,10 @@ func run() -> void:
 			preserved = FileAccess.get_file_as_string("user://" + name) == corrupt
 	check(preserved, "unreadable original kept aside")
 	DirAccess.remove_absolute(path)
+	store.denied_read_path = path
+	check(store.read_profile(path).error != OK, "unreadable primary is not absent")
+	check(not FileAccess.file_exists(path), "uncertain primary is not replaced without preserving bytes")
+	store.denied_read_path = ""
 	check(store.read_profile(path).state == "restored backup", "missing primary restored")
 	DirAccess.remove_absolute(path + ".bak")
 	file = FileAccess.open(path, FileAccess.WRITE)
@@ -73,6 +80,12 @@ func run() -> void:
 	file.close()
 	check(store.read_profile(path).error != OK, "zero-byte profile is not a new profile")
 	check(store.write_profile(path, config) != OK, "zero-byte original is preserved")
+	DirAccess.remove_absolute(path)
+	store.denied_read_path = path + ".bak"
+	check(store.read_profile(path).error != OK, "unreadable backup is not absent")
+	check(store.write_profile(path, config) != OK, "refuse a new profile while backup status is unknown")
+	store.denied_read_path = ""
+	Engine.print_error_messages = true
 	for message: String in failures:
 		printerr(message)
 	print("profile store: ", "PASS" if failures.is_empty() else "FAIL", " (", failures.size(), " failures)")
