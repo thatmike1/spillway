@@ -65,6 +65,11 @@ func run() -> void:
 				hud._show_share(true)
 			await settle()
 			check(hud.pause_destination == destination and hud.pause_pages[destination].visible, "navigate " + destination)
+			if destination == "Settings":
+				var viewport_bounds: Rect2 = hud._pause_scroll.get_global_rect()
+				for key: String in ["source_sensitivity", "source_fov", "volume"]:
+					var reset: Control = hud.pause_panel.find_child("Reset_" + key, true, false)
+					check(viewport_bounds.encloses(reset.get_global_rect()), "common adjustment visible on Settings landing " + key)
 			var focusables: Array[Control] = []
 			for node: Node in hud.pause_panel.find_children("*", "Control", true, false):
 				if node is Control and node.is_visible_in_tree() and node.focus_mode == Control.FOCUS_ALL and not (node is BaseButton and node.disabled):
