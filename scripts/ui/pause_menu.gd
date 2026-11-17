@@ -113,7 +113,7 @@ func _attach_mail_preferences() -> void:
 	_small(mail_section, "LMB throw · mouse steer · RMB recall. Changing a choice restarts the attempt with its own recording identity.")
 	_add_mail_group("view", "Delivery view", "mail_view", "set_mail_view", {"envelope": "Envelope", "body": "Runner's eyes"})
 	_add_mail_group("body", "Body while steering", "mail_body", "set_mail_body", {"hold": "Held", "run": "Keep running"})
-	_add_mail_group("goal", "Dispatch goal", "mail_goal", "set_mail_goal", {"deliver": "Deliver all three", "optional": "Optional mail"})
+	_add_mail_group("goal", "Dispatch goal", "mail_goal", "set_mail_goal", {"deliver": "Deliver all mail", "optional": "Optional mail"})
 	mail_views = mail_groups["view"].buttons
 	_refresh_mail()
 
@@ -144,6 +144,11 @@ func _refresh_mail() -> void:
 	mail_section.visible = is_instance_valid(game.player) and game.player.has_method("mail_view")
 	if not mail_section.visible:
 		return
+	var deliver: Button = mail_groups["goal"].buttons["deliver"]
+	deliver.text = "Deliver all mail"
+	if game.player.has_method("delivery_progress"):
+		var progress: Vector2i = game.player.call("delivery_progress")
+		deliver.text = "Deliver mail (%d required)" % progress.y if progress.y > 0 else "Reach Dispatch"
 	for id: String in mail_groups:
 		var group: Dictionary = mail_groups[id]
 		var supported: bool = game.player.has_method(group.getter) and game.player.has_method(group.setter)
@@ -159,7 +164,7 @@ func _attach_feedback_preferences() -> void:
 	var labels := {
 		"tether_rope_visual": "Readable rope", "tether_attach_cue": "Attach flash and click",
 		"tether_reel_audio": "Reel sound", "tether_tension_audio": "Rope tension sound",
-		"tether_wind_audio": "Swing speed wind", "tether_speed_fov": "Small speed FOV (up to +3°)",
+		"tether_wind_audio": "Speed wind", "tether_speed_fov": "Small speed FOV (up to +3°)",
 		"tether_anchor_readability": "Anchor ready marker"}
 	for key: String in labels:
 		var toggle := CheckButton.new()
@@ -279,6 +284,17 @@ func _lab_text() -> void:
 static func tether_history_text(status: String, recent: String) -> String:
 	return status.replace("\n" + recent, "\nRecent: " + recent) if not recent.is_empty() else status
 
+func _run_text() -> String:
+	var original := super()
+	for child: Node in game.get_children():
+		if child.get_meta("run_review_practice", false) and int(child.get("attempt")) == int(game.attempts) and not game.finished:
+			var parts: Array = [] if original.is_empty() else Array(original.split("  ·  "))
+			if not parts.is_empty() and (str(parts[0]).begins_with("ghost ") or str(parts[0]) == "no ghost yet" or str(parts[0]).begins_with("racing ")):
+				parts.pop_front()
+			parts.push_front("PB segment guide")
+			return "  ·  ".join(parts)
+	return original
+
 func _refresh_anchor_readout() -> void:
 	if anchor_readout == null:
 		return
@@ -303,6 +319,6 @@ func _refresh_anchor_readout() -> void:
 	anchor_readout.text = "%s: %s · %.1f m" % ["Attached" if attached else "Next", name, float(candidate.get("distance_m", 0.0))]
 	anchor_readout.reset_size()
 	var view := get_viewport().get_visible_rect().size
-	anchor_readout.position = Vector2((view.x - anchor_readout.size.x) * 0.5, view.y * 0.5 + 24.0)
+	anchor_readout.position = Vector2(32.0, maxf(120.0, view.y - 168.0)) if bool(game.map_entry().get("own_look", false)) else Vector2((view.x - anchor_readout.size.x) * 0.5, view.y * 0.5 + 24.0)
 	anchor_readout.show()
 	displayed_anchor = candidate.duplicate(true)

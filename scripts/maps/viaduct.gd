@@ -3,7 +3,7 @@ extends Node3D
 const GEO := preload("res://scripts/r19_course_geometry.gd")
 const RUNNER := preload("res://scripts/movement/grapple_player.gd")
 const MAP_ID := "viaduct"
-const MAP_ENTRY := {"name": "Viaduct", "theme": "Chain Arc swings beneath the flood-control bridge", "kind": "experiment", "experimental": true,
+const MAP_ENTRY := {"name": "Viaduct", "theme": "Link Elastic Arc swings beneath the maintenance bridge", "kind": "experiment", "experimental": true,
 	"runner": "res://scripts/movement/grapple_player.gd", "script": "res://scripts/maps/viaduct.gd", "reticle": true,
 	"key_hint": " · LMB hold / RMB reel / release to transfer", "tether_model": "elastic-arc", "grapple": true,
 	"own_look": true,
@@ -63,7 +63,6 @@ func build() -> void:
 	GEO.prism(self,"viaduct_basin_foundation",GEO.rectangle(-36,29,-110,44,-5.8),-11,-1,"structure","basin-foundation")
 	for i: int in 3:
 		_viaduct_anchor(i)
-	_box("Art_paint_orange_finish_lip",Vector3(-15.5,2.025,-86),Vector3(29,0.04,0.22),Color("c77642"))
 	_control_house()
 	_environment()
 	preload("res://scripts/art/viaduct_look.gd").apply(self)
@@ -106,9 +105,11 @@ func _viaduct_anchor(i: int) -> void:
 	for side: float in [-21.0,21.0]:
 		_box("viaduct_pier_%d_%s" % [i,side],Vector3(at.x+side,2.6,at.z),Vector3(2.8,23.2,3.2),Color("566563"))
 		_box("viaduct_foot_%d_%s" % [i,side],Vector3(at.x+side,-7.25,at.z),Vector3(5,4.5,7),Color("40565a"))
-		_box("viaduct_joint_%d_%s" % [i,side],at+Vector3(side,1.6,1.01),Vector3(2.6,0.85,0.12),Color("738280"))
-		for bolt_x: float in [-0.9,0.9]:
-			_box("viaduct_fastener_%d_%s_%s" % [i,side,bolt_x],at+Vector3(side+bolt_x,1.6,1.10),Vector3(0.12,0.12,0.08),Color("b8b5a5"))
+		# the post front is z+1.6; plates and bolt heads must stand outside that face.
+		_box("viaduct_joint_%d_%s" % [i,side],at+Vector3(side,1.6,1.69),Vector3(3.5,1.5,0.16),Color("879ba0"))
+		for bolt_x: float in [-1.2,1.2]:
+			for bolt_y: float in [1.15,2.05]:
+				_box("viaduct_fastener_%d_%s_%s_%s" % [i,side,bolt_x,bolt_y],at+Vector3(side+bolt_x,bolt_y,1.83),Vector3(0.16,0.16,0.10),Color("c0c2b0"))
 	_box("viaduct_hanger_%d" % i,at+Vector3(0,1.05,0),Vector3(0.32,1.1,0.5),Color("aab0a3"))
 	_box("viaduct_clevis_pin_%d" % i,at+Vector3(0,0.7,0.15),Vector3(0.65,0.14,0.62),Color("738280"))
 	if i < 2:

@@ -264,6 +264,10 @@ func _process(delta: float) -> void:
 	super(delta)
 	if game == null or game.player == null:
 		return
+	if not bool(game.clean_eligible):
+		var custom_practice := practice_message()
+		if not custom_practice.is_empty():
+			practice_tag.text = custom_practice
 	var started := bool(game.get("_started"))
 	if started or bool(game.paused):
 		_title_dismissed = _title_dismissed or started
@@ -279,7 +283,7 @@ func _process(delta: float) -> void:
 	var elapsed := float(game.elapsed)
 	if not started or elapsed < _last_elapsed:
 		_teach_gone = false
-	elif elapsed > 4.0 or float(game.call("display_speed_u")) > TEACH_SPEED_U:
+	elif elapsed > float(game.call("map_entry").get("teach_until_clock", 4.0)) or float(game.call("display_speed_u")) > TEACH_SPEED_U:
 		_teach_gone = true
 	_last_elapsed = elapsed
 	_teach_alpha = move_toward(_teach_alpha, 0.0 if _teach_gone or _title_alpha > 0.0 else 1.0, delta * 2.5)
@@ -698,6 +702,8 @@ func _refresh_pause() -> void:
 	super()
 	if practice_note != null:
 		practice_note.text = "Start from any checkpoint. Practice attempts are recorded, never a best." if bool(game.session.recorder.enabled) else "Start from any checkpoint. Recording is off; practice never sets a best."
+	practice_button.text = "Practise checkpoint  F"
+	practice_button.tooltip_text = "Start practice at " + str(game.call("stage_title", int(game.checkpoint_index)))
 	(pause_panel.find_child("PauseHeading", true, false) as Label).text = str(game.call("map_name"))
 	pause_kicker.text = "Paused  ·  Current map  ·  %s" % str(game.preset.label) + ("  ·  Experimental" if bool(game.call("is_lab")) else "")
 	pause_identity.visible = telemetry
@@ -715,6 +721,10 @@ func practice_started(stage_title: String, note: String = "") -> void:
 	finish_panel.hide()
 	var recording := "recorded" if bool(game.session.recorder.enabled) else "recording off"
 	notify("Practice from %s · %s, no best%s" % [stage_title, recording, "" if note.is_empty() else "  ·  " + note])
+
+func practice_message() -> String:
+	var level: Node = game.get("level")
+	return str(level.call("practice_message")) if is_instance_valid(level) and level.has_method("practice_message") else ""
 
 func set_paused(value: bool) -> void:
 	super(value)
@@ -800,6 +810,9 @@ func show_finish(is_best: bool, is_open_best: bool) -> void:
 			result = ("New open line best" if is_open_best else "Open line best %s" % _time(float(game.open_best_time))) + "\nA checkpoint was skipped, so not a full-course time"
 		_:
 			result = "No best (%s)  ·  R starts a clean run" % _reason(str(game.practice_reason))
+			var custom_practice := practice_message()
+			if not custom_practice.is_empty():
+				result = custom_practice
 			color = UI.INK_SOFT
 	_finish_result.text = result
 	_finish_result.add_theme_color_override("font_color", color)

@@ -53,7 +53,7 @@ Additional checks: `tests/tether_feedback_audio.gd` covers all-off defaults, rop
 
 ## Visual bounds
 
-The cable has a 2 mm core radius near the hand with a 3.2 mm inverted-hull outline. At distance a restrained pixel floor keeps the connection legible against bright clouds: approximately 1.2 pixels for the core and 2.7 pixels for the outline at ordinary FOV, with at most 15% load widening. World radii remain bounded (core ≤57.5 mm, outline ≤103.5 mm). The outline culls front faces as documented in Godot's [BaseMaterial3D reference](https://docs.godotengine.org/en/stable/classes/class_basematerial3d.html#enum-basematerial3d-cullmode), so it frames rather than covers the core. Neither part casts shadows or changes collision.
+The cable targets a 2-pixel core and 4-pixel inverted-hull outline at distance. Near the eye, a screen-space cap limits nominal diameter to 2.5 pixels for the core and 5 pixels for the outline before at most 15% load widening. The 2 mm/3.2 mm physical radius minima apply only where those pixel caps permit them. World radii remain bounded (core ≤57.5 mm, outline ≤103.5 mm). The outline culls front faces as documented in Godot's [BaseMaterial3D reference](https://docs.godotengine.org/en/stable/classes/class_basematerial3d.html#enum-basematerial3d-cullmode), so it frames rather than covers the core. Neither part casts shadows or changes collision.
 
 Ready and attach rings shrink within 10 m of the eye, capping their angular radius at about six degrees even when passing close to an anchor. Ready still means exactly the cached physics candidate; it does not promise a future line or select a different anchor.
 
@@ -64,3 +64,63 @@ The identity test also writes two disposable fixture recordings through the prod
 Three temporary full-host catalog entries explicitly declare `grapple: true` and the unchanged shared Arc runner under different IDs. They check observer replacement, fresh runner binding, unchanged motor/attempt/identity on all toggles, lens handoff, pause reset and return to an original map with no observer. These are ephemeral capability-dispatch fixtures, not newly published levels or claims that another lane's route finishes. The host owns capability gating; the observer never tests map names.
 
 The player end follows the current projection to sit just below the viewport, avoiding a loose endpoint inside the aiming view without inventing a hand or moving the camera. A projection test covers 45°, 80° and 120° FOV. Endpoint rings have an original dark inverted-hull contour for contrast against pale clouds; their total apparent radius, including the outline and full attach expansion, remains about six degrees or less.
+
+## Ordinary rope and the near-camera stroke
+
+The ordinary renderer and this observer use separate meshes. With
+`tether_rope_visual=false`, the host restores `GrappleTether.layers` and every
+observer cable segment stays hidden. The inherited renderer places a fixed-radius
+cylinder at a hand point only 0.35 m ahead of the eye. Gantry's map-local
+`RopeStroke` clones that cylinder at radius 0.006 m. Its near end therefore grows
+in apparent width under perspective. This is not a width change made by the
+feedback observer.
+
+With the option enabled, the host hides the ordinary cylinder. The observer uses
+a small core, bounded pixel-floor radii and a below-viewport origin.
+The off case remains the map's own presentation; the observer never rewrites its
+mesh or the inherited runner. Changes to Gantry's ordinary stroke belong in its
+map art, rather than in the observer or frozen motor.
+
+## Recommended first trial on the new maps
+
+This is a manual trial recommendation, not an automatic preset. All seven
+persisted defaults remain false. Enable only `tether_rope_visual` initially;
+leave the other six switches off. Compare it with the map's ordinary cable
+before adding other layers.
+
+| Map | Recommended trial | Reason |
+| --- | --- | --- |
+| Viaduct | Readable rope only | The dark edge separates the cable from pale deck/clouds and dark supports; the ordinary thin tan cable is more subdued. |
+| Foundry | Readable rope only | Replace the broad ordinary foreground cylinder with a connection that leaves the crane aperture clear. |
+| Gantry | Readable rope only | Remove the ordinary near-eye flare and separate the connection from teal concrete without changing the pad sightline. |
+
+The extra ready marker and attach flash add circles around already conspicuous
+physical anchor hardware. The original ready preview and release/break cues
+remain active with these additions off. The attach switch also controls its
+click, so this recommendation disables both together. An isolated readiness
+benefit has not been established on every new map.
+
+Keep speed FOV off for the first trial so view changes do not accompany the
+cable comparison. Wind follows total speed even while unattached, making it a
+poor indicator of rope engagement. Tension hum adds a continuous load layer;
+reel sound is a separate action-feedback experiment. Their synthesis and
+lifecycle are verified, but silent visual comparisons do not establish that
+any timbre is enjoyable. These are reasons to leave them out of the starting
+set, not claims that the sounds are defective.
+
+The public settings remain independently selectable. No map ID or recommendation
+is baked into the observer, host defaults, motor, or recording identity.
+
+### Oblique near-camera crossing
+
+Cable sizes use endpoint depth and the active camera projection, rather than
+Euclidean midpoint distance. Segments crossing the near plane are clipped before
+sizing, and each cylinder tapers between shared endpoint radii. This avoids the
+broad strip and abrupt joint that could appear when passing an anchor. No camera
+pose, runner state or input is changed.
+
+The lens test also creates a real observer/runner visual fixture at an oblique
+near-plane crossing, measures actual projected mesh endpoints, checks an
+8-pixel outer-stroke ceiling, and verifies shared radii and clipping. This is a
+renderer regression fixture without motor steps, not a played transfer. Native
+capture of the original Viaduct tape supplies the separate moving visual check.

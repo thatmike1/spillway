@@ -187,8 +187,8 @@
       ],
       "yaw": 0.0
     },
-    "image_sha256": "f34a32edd92dc34ad387a35014ad078b122d95a16ab45547cf063d53f6557fd0",
-    "source_commit": "1040c8bd96d38f397f2d9c85015eae2973c920ff",
+    "image_sha256": "fd06cc3630157dd90192fb72492bca9ccdb8c53abf1ee5c2a8a055362f9d70e0",
+    "source_commit": "9a5ac15916f2878bbad045bb060ae193157c14e2",
     "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
   },
   {
@@ -235,8 +235,8 @@
       ],
       "yaw": 0.0
     },
-    "image_sha256": "e44ffd948279b411ed7ea8cd117fe2edac9a08a3b2c0039f464d612ae2655caf",
-    "source_commit": "730e39e56d6ef521e4820af82a97e3d46c3e19e2",
+    "image_sha256": "5dcaaa84b2d0f9db945b78c07e31d86f8fa9c3813e409b5201c6cf18a1f8f05f",
+    "source_commit": "9a5ac15916f2878bbad045bb060ae193157c14e2",
     "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
   },
   {
@@ -269,6 +269,22 @@
     },
     "image_sha256": "1a78e68968737c331da34d71462ca8a9af664f64fe70a1dbc8c0d100295d7177",
     "source_commit": "582883582fb1f122c2275a012a8c5c3435265e0a",
+    "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+  },
+  {
+    "id": "plan-yard",
+    "name": "Plan Yard",
+    "pose": {
+      "pitch": 0.0,
+      "position": [
+        -4.0,
+        4.66559982299805,
+        13.0
+      ],
+      "yaw": 0.0
+    },
+    "image_sha256": "5ab0d55c2fb91d6ab1a774f63ff83d3c9140362ae3edb1e0feba981623e5dcdf",
+    "source_commit": "9a5ac15916f2878bbad045bb060ae193157c14e2",
     "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
   }
 ]

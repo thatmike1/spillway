@@ -64,6 +64,7 @@ func run() -> void:
 	if controller != null:
 		check(is_equal_approx(float(controller.pb_start), 5.7421875) and is_equal_approx(float(controller.ghost.get("_time")), 5.7421875), "best ghost begins at the selected checkpoint clock")
 	check(JSON.stringify(game.settings, "", true) == settings_before, "practice preserves user settings")
+	check(hud._run_text().begins_with("PB segment guide") and not "no ghost yet" in hud._run_text(), "HUD identifies the active separate PB segment guide")
 	game.set_paused(true)
 	hud.show_pause_destination("Runs")
 	hud.review_button.pressed.emit()
@@ -74,6 +75,9 @@ func run() -> void:
 	check(hud.review_screen == null and game.paused and game.is_processing_input(), "invalid practice returns to paused Runs with input restored")
 	check(game.attempts == attempts_before and hud.review_practice_status.is_visible_in_tree() and not hud.review_practice_status.text.is_empty(), "invalid practice explains failure without starting an attempt")
 	check(hud.review_button.has_focus(), "invalid practice restores review action focus")
+	game.restart_run("restart")
+	await settle()
+	check(not "PB segment guide" in hud._run_text() and JSON.stringify(game.settings, "", true) == settings_before, "ordinary restart restores the normal ghost status without changing preferences")
 	check([FileAccess.get_sha256(best_path), FileAccess.get_sha256(attempt_path)] == before, "both sealed recording files retain their hashes")
 	var ok := checks.all(func(row: Dictionary) -> bool: return row.ok)
 	var file := FileAccess.open(output.path_join("review-menu-checks.json"), FileAccess.WRITE)

@@ -51,6 +51,7 @@ Stable round-numbered aliases preserve resource paths used by recording identiti
 | Mail Run / `mail-run` | `maps/mail_run.gd`, `movement/mail_runner.gd`; F2 with held or running envelope steering |
 | Sluice Six / `sluice-six` | `maps/sluice_six.gd`, course player; F2 settling piers, offset caps and spill tower |
 | Foundry / `foundry` | `maps/foundry.gd`, grapple player; continuous gallery, shaft shortcut and descending catch |
+| Plan Yard / `plan-yard` | `maps/plan_yard.gd`, `movement/plan_runner.gd`; place a one/three-piece plan before timing, then run F2 and fixed Arc |
 | Shelved: Fall Line / `fall-line` | `r19_fall_line_level.gd`; retained as a catalog dependency, removed from the current menu |
 | Shelved: Line Drive / `line-drive` | `r19_line_drive_level.gd`, `r19_line_drive_player.gd`; retained dependency, removed from the current menu |
 
@@ -66,5 +67,7 @@ WASD and mouse move/look. Hold Space or use scroll to hop; release W and combine
 - **Style:** geometry-backed events and scoring, separate from fastest time. **Gap** measures an airborne passage between supports; **near-miss** measures a qualifying close obstacle passage. Proximity alone is not enough to score.
 - **Attempt:** one recorded lifecycle beginning at spawn/restart/practice and ending at a finish or an explicit boundary such as map change or quit.
 - **Ghost:** playback of the fastest clean, complete recording matching the current motion identity; independent of style best.
+
+A map entry may set `teach_until_clock` for the generic teaching-text cutoff; the default remains four seconds and the existing 280 u/s dismissal still applies.
 
 Settings/bests use `user://spillway_r16.cfg`; attempts use `user://r16_runs/` and `.r16run` files. Those names are persisted interfaces, not the release number. Analyze files with `python3 tools/analyze-runs.py PATH`; importing a friend's run bundle is the explicit, bounded `tools/import-runs.py` operation. Read [docs/recordings.md](docs/recordings.md), [docs/run-export.md](docs/run-export.md), [docs/tether-yard.md](docs/tether-yard.md), [docs/saltglass.md](docs/saltglass.md) and [docs/movement-reference.md](docs/movement-reference.md) as needed. [AGENTS.md](AGENTS.md) gives the change/parity/privacy rules.

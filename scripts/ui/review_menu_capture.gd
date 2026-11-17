@@ -29,7 +29,7 @@ func capture(index: int, state: String) -> void:
 	var error := root.get_texture().get_image().save_png(path)
 	rows.append({"frame": index, "state": state, "error": error, "path": path,
 		"paused": game.paused, "practice_stage": game.practice_stage, "attempts": game.attempts,
-		"host_input": game.is_processing_input(), "window_size": [root.size.x, root.size.y]})
+		"host_input": game.is_processing_input(), "window_size": [root.size.x, root.size.y], "run_status": hud._run_text()})
 	assert(error == OK)
 
 func run() -> void:
@@ -86,6 +86,7 @@ func run() -> void:
 	if not expect(root.gui_get_hovered_control() == review.practice_button, "mouse must reach the enabled practice button"):
 		return
 	var attempts_before := int(game.attempts)
+	var settings_before := JSON.stringify(game.settings, "", true)
 	for down: bool in [true, false]:
 		var click := InputEventMouseButton.new()
 		click.position = point
@@ -100,7 +101,14 @@ func run() -> void:
 		return
 	if not expect(game.practice_stage == 1 and game.attempts == attempts_before + 1 and not game.clean_eligible, "native click must start one non-best checkpoint attempt"):
 		return
+	if not expect(hud._run_text().begins_with("PB segment guide") and not "no ghost yet" in hud._run_text(), "native practice HUD must identify the separate PB guide"):
+		return
 	await capture(1, "practice-after-mouse")
+	game.restart_run("restart")
+	await settle()
+	if not expect(not "PB segment guide" in hud._run_text() and JSON.stringify(game.settings, "", true) == settings_before, "ordinary restart must restore normal status without preference mutation"):
+		return
+	await capture(2, "ordinary-restart")
 	var after: Array = []
 	for path: String in fixture_paths:
 		after.append(FileAccess.get_sha256(path))

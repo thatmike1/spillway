@@ -18,4 +18,5 @@ const FRAMES := {
 	"sluice-six": preload("res://scripts/ui/map_previews/sluice-six.png"),
 	"foundry": preload("res://scripts/ui/map_previews/foundry.png"),
 	"saltglass-seaward": preload("res://scripts/ui/map_previews/saltglass-seaward.png"),
+	"plan-yard": preload("res://scripts/ui/map_previews/plan-yard.png"),
 }

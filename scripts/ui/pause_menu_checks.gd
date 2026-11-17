@@ -194,6 +194,7 @@ func run() -> void:
 	check(hud.tether_models["elastic-arc"].button_pressed, "fixed-law map shows effective model")
 	check(not hud.anchor_assist_switch.disabled, "assist uses effective map law")
 	check(hud.feedback_switches.size() == 7, "all swing feedback toggles represented")
+	check(hud.feedback_switches["tether_wind_audio"].text == "Speed wind", "speed wind uses final feedback wording")
 	if game.settings.has("tether_rope_visual"):
 		var identity: Dictionary = game.motion_identity().duplicate(true)
 		var attempts := int(game.attempts)
@@ -239,6 +240,19 @@ func run() -> void:
 		hud.show_pause_destination("Practice")
 		await settle()
 		check(hud.mail_section.is_visible_in_tree(), "mail controls appear on delivery map")
+		if game.player.has_method("delivery_progress"):
+			var progress: Vector2i = game.player.call("delivery_progress")
+			check(hud.mail_groups["goal"].buttons["deliver"].text == ("Deliver mail (%d required)" % progress.y if progress.y > 0 else "Reach Dispatch"), "delivery goal shows the actual required count " + id)
+			for stage: int in int(game.stage_count()):
+				game.practise_stage(stage)
+				game.set_paused(true)
+				hud._refresh_mail()
+				progress = game.player.call("delivery_progress")
+				check(hud.mail_groups["goal"].buttons["deliver"].text == ("Deliver mail (%d required)" % progress.y if progress.y > 0 else "Reach Dispatch"), "delivery goal follows practice count " + id + "/" + str(stage))
+			game.restart_run("restart")
+			game.set_paused(true)
+			hud.show_pause_destination("Practice")
+			await settle()
 		check(is_zero_approx(hud.controls.modulate.a) and is_zero_approx(hud.keys_line.modulate.a), "mail view suppresses generic teaching")
 		for choice: String in hud.mail_groups:
 			var group: Dictionary = hud.mail_groups[choice]

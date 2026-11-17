@@ -22,4 +22,6 @@ static func make() -> Dictionary:
 	maps.order.append(FOUNDRY.FOUNDRY_ID)
 	maps.catalog[SEAWARD.MAP_ID] = SEAWARD.MAP_ENTRY.duplicate(true)
 	maps.order.append(SEAWARD.MAP_ID)
+	maps.catalog["plan-yard"] = preload("res://scripts/maps/plan_yard.gd").MAP_ENTRY.duplicate(true)
+	maps.order.append("plan-yard")
 	return maps
