@@ -1,6 +1,6 @@
 extends "res://scripts/r20_main.gd"
 ## r21 composes revised experimental courses around the frozen r20 host.
-const R21_MAPS := preload("res://scripts/r21_map_catalog.gd")
+const R21_MAPS := preload("res://scripts/maps/r22_catalog.gd")
 
 func _ready() -> void:
 	if map_registry.is_empty():
