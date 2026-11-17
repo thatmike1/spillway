@@ -1,5 +1,5 @@
 extends SceneTree
-## replay retained commands without the geometry-aware controller that generated them.
+## replay retained action and mouse-count events without geometry-aware steering or yaw correction.
 const LEVEL := preload("res://scripts/maps/sluice_six.gd")
 const PLAYER := preload("res://scripts/movement/course_player.gd")
 var tape_path := ""
@@ -20,7 +20,7 @@ func run() -> void:
 	var level := LEVEL.new()
 	root.add_child(level)
 	level.build()
-	if source.preset != "server128" or source.geometry_hash != level.geometry_hash():
+	if source.preset != "server128" or source.geometry_hash != level.geometry_hash() or source.get("look", {}) != {"sensitivity":2.5,"fov":90.0}:
 		push_error("tape identity does not match this geometry and f2")
 		quit(1)
 		return
@@ -31,7 +31,7 @@ func run() -> void:
 	var player := PLAYER.new()
 	root.add_child(player)
 	player.set_physics_process(false)
-	player.apply_preset("csgo_server")
+	player.apply_preset("csgo_server", {"sensitivity":2.5,"fov":90.0})
 	await physics_frame
 	var rows: Array = []
 	for tape: Dictionary in source.results:
@@ -39,18 +39,20 @@ func run() -> void:
 			Input.action_release(action)
 		player.reset_to(level.spawn)
 		var safe := true
-		for command: Dictionary in tape.commands:
-			for action: String in ["move_forward","move_left","move_right","jump"]:
-				Input.action_release(action)
-			if command.forward > 0:
-				Input.action_press("move_forward",command.forward)
-			if command.side != 0:
-				Input.action_press("move_right" if command.side > 0 else "move_left",absf(command.side))
-			if command.jump:
-				Input.action_press("jump")
-			var motion := InputEventMouseMotion.new()
-			motion.screen_relative = Vector2(-wrapf(command.yaw-player.yaw,-PI,PI)/deg_to_rad(float(player.settings.sensitivity)*float(player.settings.m_yaw)),0)
-			player._unhandled_input(motion)
+		var event_index := 0
+		for tick: int in int(tape.ticks):
+			while event_index < tape.events.size() and float(tape.events[event_index].time) <= float(tick)/128.0:
+				var event: Dictionary = tape.events[event_index]
+				if event.has("action"):
+					if event.pressed:
+						Input.action_press(str(event.action))
+					else:
+						Input.action_release(str(event.action))
+				else:
+					var mouse := InputEventMouseMotion.new()
+					mouse.screen_relative = Vector2(float(event.mouse[0]),float(event.mouse[1]))
+					player._unhandled_input(mouse)
+				event_index += 1
 			player._physics_process(1.0/128)
 			safe = safe and level.kill_bounds.has_point(player.global_position)
 			await physics_frame

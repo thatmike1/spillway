@@ -24,7 +24,7 @@ func run() -> void:
 	player = PLAYER.new()
 	root.add_child(player)
 	player.set_physics_process(false)
-	player.apply_preset("csgo_server")
+	player.apply_preset("csgo_server", {"sensitivity":2.5,"fov":90.0})
 	await physics_frame
 	var results: Array = []
 	for fast: bool in [false,true]:
@@ -91,7 +91,7 @@ func run() -> void:
 				finished = true
 				break
 			await physics_frame
-		var result := {"line":"fast" if fast else "basic","finished":finished,"ticks":tape.size(),"feet":str(player.global_position),"commands":tape,"stages":stages}
+		var result := {"line":"fast" if fast else "basic","finished":finished,"ticks":tape.size(),"feet":str(player.global_position),"commands":tape,"events":events,"stages":stages}
 		DirAccess.make_dir_recursive_absolute(output)
 		var event_file := FileAccess.open(output.path_join(result.line+"-events.json"),FileAccess.WRITE)
 		event_file.store_string(JSON.stringify(events))
@@ -103,7 +103,7 @@ func run() -> void:
 	Input.action_release("jump")
 	DirAccess.make_dir_recursive_absolute(output)
 	var file := FileAccess.open(output.path_join("tapes.json"),FileAccess.WRITE)
-	file.store_string(JSON.stringify({"geometry_hash":level.geometry_hash(),"preset":"server128","results":results}))
+	file.store_string(JSON.stringify({"geometry_hash":level.geometry_hash(),"preset":"server128","look":{"sensitivity":2.5,"fov":90.0},"results":results}))
 	var ok := results.all(func(r: Dictionary) -> bool:return r.finished and r.stages == [0,1,2,3])
 	if expert:
 		ok = ok and results.size() == 2 and results[1].ticks < results[0].ticks

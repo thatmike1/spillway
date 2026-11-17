@@ -27,7 +27,7 @@ func run() -> void:
 	player = PLAYER.new()
 	root.add_child(player)
 	player.set_physics_process(false)
-	player.apply_preset("csgo_server")
+	player.apply_preset("csgo_server", {"sensitivity":2.5,"fov":90.0})
 	await physics_frame
 	var opening: Dictionary = level.style_opportunities[0]
 	var lane: float = opening.center.x
