@@ -72,6 +72,33 @@ class ShotTests(unittest.TestCase):
                 path.write_text(json.dumps(rows))
                 self.assertEqual(rows, shot.read_sequence(path, mode))
 
+    def test_resize_is_integer_bounded_and_separate_from_input(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "input.json"
+            row = {"time": .5, "resize": [1280, 720]}
+            path.write_text(json.dumps([row]))
+            self.assertEqual(shot.read_sequence(path, "tape", (1920, 1080)), [row])
+            for size in ([1921, 720], [1280, 1081], [0, 720], [True, 720],
+                         [1280.0, 720], [1280], [1280, 720, 1], "1280x720"):
+                path.write_text(json.dumps([{**row, "resize": size}]))
+                with self.assertRaises(ValueError):
+                    shot.read_sequence(path, "tape", (1920, 1080))
+            path.write_text(json.dumps([{**row, "key": "Escape", "pressed": True}]))
+            with self.assertRaisesRegex(ValueError, "separate"):
+                shot.read_sequence(path, "tape")
+
+    def test_movie_refuses_resize_before_engine_launch(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "input.json"
+            path.write_text(json.dumps([{"time": 0, "resize": [640, 360]}]))
+            with patch.object(sys, "argv", ["shot.py", "--map", "breakwater", "--tape", str(path),
+                                             "--out", str(Path(folder) / "capture"), "--movie"]), \
+                    patch.object(sys, "stderr"), patch.object(shot.engine, "check_pin") as launch:
+                with self.assertRaises(SystemExit) as stopped:
+                    shot.main()
+                self.assertEqual(stopped.exception.code, 2)
+                launch.assert_not_called()
+
     def test_busy_range_never_starts_a_display(self):
         with patch.object(shot, "answers", return_value=False), patch.object(shot, "busy", return_value=True), \
                 patch.object(shot.subprocess, "Popen") as start:
@@ -155,15 +182,20 @@ func _start() -> void:
 '''
 
 
-def native_contract(output, movie=False, movie_fps=30):
+def native_contract(output, movie=False, movie_fps=30, resize=False):
     output = shot.external(output)
     output.mkdir(parents=True, exist_ok=False)
     tape = output / "input.json"
-    tape.write_text(json.dumps([
+    events = [
         {"time": 0, "action": "move_forward", "pressed": True, "strength": .25},
         {"time": 1 / 128, "action": "move_forward", "pressed": True, "strength": .75},
         {"time": 2 / 128, "action": "move_forward", "pressed": False, "strength": .9},
-    ]))
+    ]
+    if resize:
+        events.extend([{"time": 1 / 128, "resize": [320, 180]},
+                       {"time": 3 / 128, "resize": [640, 360]}])
+        events.sort(key=lambda event: event["time"])
+    tape.write_text(json.dumps(events))
     subprocess.run([sys.executable, "-B", str(shot.engine.PROJECT / "tools/shot.py"),
                     "--map", "breakwater", "--tape", str(tape), "--seconds", str((12 if movie else 6) / 128),
                     "--every", str(1 / 128), "--size", "640x360", "--out", str(output / "native"), *(["--movie", "--movie-fps", str(movie_fps)] if movie else [])], check=True)
@@ -194,7 +226,10 @@ def native_contract(output, movie=False, movie_fps=30):
         raise AssertionError(f"native samples must observe the distinct t0/t1 commands: {ticks}")
     if not ticks:
         raise AssertionError("no native motor observations")
-    (output / "RESULT.json").write_text(json.dumps({"ok": True, "movie": movie, "movie_fps": movie_fps, "exact_positions_and_state_ticks": ticks}) + "\n")
+    if resize and not {(320, 180), (640, 360)}.issubset({tuple(frame["png_size"]) for frame in actual}):
+        raise AssertionError("moving contract did not observe both resized readback dimensions")
+    (output / "RESULT.json").write_text(json.dumps({"ok": True, "movie": movie, "movie_fps": movie_fps,
+        "resize": resize, "exact_positions_and_state_ticks": ticks}) + "\n")
     print("native normal-spawn positions/state match canonical ticks:", ticks)
 
 
@@ -205,7 +240,10 @@ if __name__ == "__main__":
         parser.add_argument("--out", type=Path, required=True)
         parser.add_argument("--movie", action="store_true")
         parser.add_argument("--movie-fps", type=int, choices=(30, 60), default=30)
+        parser.add_argument("--resize", action="store_true")
         args = parser.parse_args()
-        native_contract(args.out, args.movie, args.movie_fps)
+        if args.resize and args.movie:
+            parser.error("resize contract requires PNG mode")
+        native_contract(args.out, args.movie, args.movie_fps, args.resize)
     else:
         unittest.main()
