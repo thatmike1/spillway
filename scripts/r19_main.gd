@@ -39,7 +39,7 @@ func _ready() -> void:
 
 func _build_level() -> void:
 	super._build_level()
-	if (map_id == SURF_LEVEL.MAP_ID or is_experiment_map() or map_entry().has("look_palette")) and level != null:
+	if (map_id == SURF_LEVEL.MAP_ID or is_experiment_map() or map_entry().has("look_palette")) and level != null and not bool(map_entry().get("own_look", false)):
 		look_layer = PRESENTATION.new()
 		level.add_child(look_layer)
 		look_layer.attach(level, str(map_entry().get("look_palette", "practice")))
