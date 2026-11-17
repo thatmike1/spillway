@@ -52,8 +52,8 @@ func recording_metadata(reason: String) -> Dictionary:
 func map_revision_description() -> String:
 	if map_id == "saltglass":
 		return "Older Saltglass ghosts use the low fins and return ramps and cannot race this map revision."
-	if map_id == "tether-yard":
-		return "R19 E ghosts and different rope models/reel preferences cannot race this Tether identity."
+	if map_has_capability("grapple"):
+		return {"tether-yard": "R19 E ghosts and different rope models/reel preferences cannot race this Tether identity."}.get(map_id, "Rope models and reel preferences have separate recording identities.")
 	return super()
 
 func select_map(id: String) -> void:
@@ -156,7 +156,7 @@ func respawn() -> void:
 
 func mechanics() -> Array:
 	var out := super()
-	if map_id == "tether-yard" and is_instance_valid(player) and player.has_method("tether_identity"):
+	if map_has_capability("grapple") and is_instance_valid(player) and player.has_method("tether_identity"):
 		out.append(player.call("tether_identity"))
 	return out
 
@@ -176,7 +176,7 @@ func change_setting(key: String, value: Variant) -> void:
 	if key not in ["tether_model", "tether_auto_reel"]:
 		super(key, value)
 		return
-	if map_id != "tether-yard":
+	if not map_has_capability("grapple"):
 		return
 	var next: Variant = _setting_value(key, value)
 	if settings.get(key) == next:
