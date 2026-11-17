@@ -557,7 +557,12 @@ func _make_pause() -> void:
 	_small(lab_box, "All three start on in the lab. Off means the key does nothing and the approved F2/F5 movement plays unchanged. Records keep each loadout apart.")
 	_sync_lab_switches()
 	_spacer(column)
-	column = pause_pages["Settings"]
+	var settings_page: VBoxContainer = pause_pages["Settings"]
+	var movement_options := VBoxContainer.new()
+	movement_options.name = "MovementOptions"
+	movement_options.add_theme_constant_override("separation", 9)
+	settings_page.add_child(movement_options)
+	column = movement_options
 	_heading(column, "Movement")
 	_small(column, "Switching keeps your position, speed and view.")
 	var presets: Script = game.PRESETS
@@ -581,7 +586,12 @@ func _make_pause() -> void:
 			_preset_button(advanced_box, presets, id)
 	_small(advanced_box, "F1 vanilla (64 Hz) is not in R15; the delivered R14 build keeps it.")
 	_show_advanced(false)
-	_spacer(column)
+	var common_controls := VBoxContainer.new()
+	common_controls.name = "CommonSettings"
+	common_controls.add_theme_constant_override("separation", 9)
+	settings_page.add_child(common_controls)
+	settings_page.move_child(common_controls, 0)
+	column = common_controls
 	_heading(column, "Look and sound")
 	pause_look = _small(column, "", INK)
 	for item: Array in [["Source sensitivity (Source units, m_yaw 0.022)", "source_sensitivity", 0.2, 10.0, 0.05], ["Source FOV (4:3 reference, widened for the screen)", "source_fov", 70.0, 110.0, 1.0],
@@ -624,6 +634,7 @@ func _make_pause() -> void:
 	metric.button_pressed = game.settings.show_ms
 	metric.toggled.connect(func(value: bool) -> void: game.change_setting("show_ms", value))
 	column.add_child(metric)
+	column = settings_page
 	_small(column, "Speed is measured horizontal travel over the last 0.1 s (1 u = 0.0254 m); a crouch moving the body's height never counts as speed. Sync counts air ticks with one of A/D held while the view turns: good when it turns toward the key. No such ticks shows %s. Contact is speed that walls, lips and ramps changed in the air, kept apart from sync. Nothing here rates how efficient a strafe was." % NO_SAMPLES)
 	_spacer(column)
 	_heading(column, "Keys")
@@ -631,6 +642,13 @@ func _make_pause() -> void:
 	show_pause_destination("Maps", false)
 	pause_panel.hide()
 	_layout_pause(get_viewport().get_visible_rect().size)
+
+func _preset_button(parent: Control, presets: Script, id: String) -> void:
+	super(parent, presets, id)
+	var entry: Dictionary = presets.call("entry", id)
+	var description := parent.get_child(parent.get_child_count() - 1) as Label
+	description.name = "PresetDetails_" + id
+	description.text = "%s · %d Hz · autohop · no stamina or takeoff clamp" % [str(entry.air), int(entry.rate)] if id in presets.PRIMARY else str(entry.summary)
 
 func _show_current_map_controls() -> void:
 	show_pause_destination("Practice")

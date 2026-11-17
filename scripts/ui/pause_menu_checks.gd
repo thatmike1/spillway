@@ -18,9 +18,33 @@ func settle() -> void:
 	for i: int in 5:
 		await process_frame
 
+func click(control: Control, scroll: ScrollContainer = null) -> void:
+	await settle()
+	if scroll != null:
+		scroll.ensure_control_visible(control)
+	await settle()
+	var point := control.get_global_transform_with_canvas() * (control.size * 0.5)
+	var motion := InputEventMouseMotion.new()
+	motion.position = point
+	motion.global_position = point
+	root.push_input(motion, true)
+	await process_frame
+	check(root.gui_get_hovered_control() == control, "mouse reaches " + str(control.name))
+	for down: bool in [true, false]:
+		var button := InputEventMouseButton.new()
+		button.position = point
+		button.global_position = point
+		button.button_index = MOUSE_BUTTON_LEFT
+		button.button_mask = MOUSE_BUTTON_MASK_LEFT if down else 0
+		button.pressed = down
+		root.push_input(button, true)
+		await process_frame
+	await settle()
+
 func run() -> void:
 	assert(output.is_absolute_path())
 	DirAccess.make_dir_recursive_absolute(output)
+	root.size = Vector2i(1280, 720)
 	var game: Node = load("res://scenes/r21.tscn").instantiate()
 	game.persist = false
 	game.record_runs = false
@@ -35,6 +59,7 @@ func run() -> void:
 	game.set_paused(true)
 	var hud: Node = game.hud
 	check(hud.pause_pages.keys() == ["Maps", "Practice", "Settings", "Runs"], "four destinations")
+	check(hud.tether_history_text("Arc\nLMB attached\nReleased · coast", "Released · coast") == "Arc\nLMB attached\nRecent: Released · coast", "release history is distinct from current attachment")
 	for key: String in ["source_sensitivity", "source_fov", "r13_sensitivity", "r13_fov", "volume"]:
 		hud.show_pause_destination("Settings")
 		hud._show_advanced(true)
@@ -44,13 +69,14 @@ func run() -> void:
 		slider.value = slider.min_value
 		check(is_equal_approx(float(game.settings[key]), slider.value), "slider applies " + key)
 		check(number.text == hud.slider_value_text(key, slider.value), "slider number " + key)
-		reset.pressed.emit()
+		await click(reset, hud._pause_scroll)
 		check(is_equal_approx(slider.value, float(game.DEFAULT_SETTINGS[key])), "slider reset " + key)
 	var initial_map_count := int(game.map_ids().size())
 	for i: int in 5:
 		var id := "menu-capacity-%d" % i
 		var entry: Dictionary = game.map_entry("breakwater").duplicate(true)
 		entry.name = "Additional map %d with a longer title" % i
+		entry.kind = "course" if i == 0 else "experiment"
 		game.maps.catalog[id] = entry
 		game.maps.order.append(id)
 	hud._build_map_cards()
@@ -60,11 +86,19 @@ func run() -> void:
 		hud._layout()
 		await settle()
 		for destination: String in hud.pause_pages:
-			hud.pause_tabs[destination].pressed.emit()
+			if viewport == Vector2i(1280, 720):
+				await click(hud.pause_tabs[destination])
+			else:
+				hud.pause_tabs[destination].pressed.emit()
 			if destination == "Runs":
 				hud._show_share(true)
 			await settle()
 			check(hud.pause_destination == destination and hud.pause_pages[destination].visible, "navigate " + destination)
+			if destination == "Settings":
+				var viewport_bounds: Rect2 = hud._pause_scroll.get_global_rect()
+				for key: String in ["source_sensitivity", "source_fov", "volume"]:
+					var reset: Control = hud.pause_panel.find_child("Reset_" + key, true, false)
+					check(viewport_bounds.encloses(reset.get_global_rect()), "common adjustment visible on Settings landing " + key)
 			var focusables: Array[Control] = []
 			for node: Node in hud.pause_panel.find_children("*", "Control", true, false):
 				if node is Control and node.is_visible_in_tree() and node.focus_mode == Control.FOCUS_ALL and not (node is BaseButton and node.disabled):
@@ -100,12 +134,32 @@ func run() -> void:
 	check(not "not recorded" in hud.practice_note.text, "practice recording copy agrees")
 	var card: Button = hud.map_buttons["experiment"]
 	check(card.text.to_lower().count("not a course") == 1, "lab classification appears once")
+	for id: String in hud.lab_switches:
+		var toggle: CheckButton = hud.lab_switches[id]
+		toggle.button_pressed = false
+		check(not bool(game.lab_moves().get(id, true)), "lab switch disables " + id)
+		toggle.button_pressed = true
+		check(bool(game.lab_moves().get(id, false)), "lab switch enables " + id)
+	game.select_map("tether-yard")
+	game.set_paused(true)
+	for model: String in hud.tether_models:
+		var button: Button = hud.tether_models[model]
+		if not button.disabled:
+			button.pressed.emit()
+		await settle()
+		check(game.tether_model() == model and game.paused, "rope choice applies while paused " + model)
+	hud.reel_automatic.pressed.emit()
+	check(bool(game.settings.tether_auto_reel) and game.paused, "automatic reel applies while paused")
+	hud.reel_manual.pressed.emit()
+	check(not bool(game.settings.tether_auto_reel) and game.paused, "manual reel applies while paused")
+	game.select_map("breakwater")
 	game.maps.catalog["tether-yard"]["tether_model"] = "elastic-arc"
 	game.select_map("tether-yard")
 	game.set_paused(true)
 	hud.show_pause_destination("Practice")
 	await settle()
 	check(hud.tether_section.is_visible_in_tree(), "rope controls in Practice")
+	check("LMB" in hud.controls.text and hud.controls.text.split("\n").size() <= 2, "grapple teaching stays compact")
 	check(hud.tether_models.size() == 6, "all six rope laws reachable")
 	check(hud.tether_models.values().all(func(button: Button) -> bool: return button.disabled), "fixed-law map locks model selection")
 	check(hud.tether_models["elastic-arc"].button_pressed, "fixed-law map shows effective model")
@@ -125,15 +179,29 @@ func run() -> void:
 		hud.review_button.pressed.emit()
 		await settle()
 		check(hud.review_screen != null and hud.review_screen.is_visible_in_tree() and game.paused, "review opens while game stays paused")
+		var attempt_before_review := int(game.attempts)
+		var restart_key := InputEventKey.new()
+		restart_key.keycode = KEY_R
+		restart_key.physical_keycode = KEY_R
+		restart_key.pressed = true
+		Input.parse_input_event(restart_key)
+		await settle()
+		restart_key = InputEventKey.new()
+		restart_key.keycode = KEY_R
+		restart_key.physical_keycode = KEY_R
+		Input.parse_input_event(restart_key)
+		check(int(game.attempts) == attempt_before_review and game.paused, "review blocks gameplay restart input")
 		var escape := InputEventKey.new()
 		escape.keycode = KEY_ESCAPE
+		escape.physical_keycode = KEY_ESCAPE
 		escape.pressed = true
 		Input.parse_input_event(escape)
 		await settle()
 		escape = InputEventKey.new()
 		escape.keycode = KEY_ESCAPE
+		escape.physical_keycode = KEY_ESCAPE
 		Input.parse_input_event(escape)
-		check(hud.review_screen == null and game.paused and hud.review_button.has_focus(), "Escape returns from review to paused menu with focus")
+		check(hud.review_screen == null and game.paused and hud.review_button.has_focus() and game.is_processing_input(), "Escape returns from review to paused menu with focus")
 	for id: String in game.map_ids():
 		if not bool(game.map_entry(id).get("mail_delivery", false)):
 			continue
@@ -142,11 +210,20 @@ func run() -> void:
 		hud.show_pause_destination("Practice")
 		await settle()
 		check(hud.mail_section.is_visible_in_tree(), "mail controls appear on delivery map")
-		for view: String in ["body", "envelope"]:
-			hud.mail_views[view].pressed.emit()
-			await settle()
-			check(str(game.player.call("mail_view")) == view, "delivery view applies " + view)
-			check(game.paused, "delivery view keeps menu paused")
+		check(is_zero_approx(hud.controls.modulate.a) and is_zero_approx(hud.keys_line.modulate.a), "mail view suppresses generic teaching")
+		for choice: String in hud.mail_groups:
+			var group: Dictionary = hud.mail_groups[choice]
+			if not game.player.has_method(group.getter):
+				continue
+			for value: String in group.buttons:
+				var before_identity: Dictionary = game.motion_identity().duplicate(true)
+				var before_value := str(game.player.call(group.getter))
+				(group.buttons[value] as Button).pressed.emit()
+				await settle()
+				check(str(game.player.call(group.getter)) == value, "delivery choice applies " + choice + "/" + value)
+				check(game.paused, "delivery choice keeps menu paused " + choice)
+				if before_value != value:
+					check(game.motion_identity() != before_identity, "delivery choice separates recording identity " + choice)
 	var ok := checks.all(func(row: Dictionary) -> bool: return row.ok)
 	var file := FileAccess.open(output.path_join("menu-checks.json"), FileAccess.WRITE)
 	file.store_string(JSON.stringify({"ok": ok, "checks": checks}, "\t"))

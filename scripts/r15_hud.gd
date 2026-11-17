@@ -30,7 +30,7 @@ const CARD_GAP := 8
 const MAX_COLUMNS := 4
 const PANEL_MAX_WIDTH := 900.0
 const PANEL_MIN_WIDTH := 460.0
-const KIND_WORDS := {"course": "", "legacy": "R14 map", "lab": "Not a course", "fixture": "FIXTURE"}
+const KIND_WORDS := {"course": "", "legacy": "R14 map", "lab": "Experiment · not a course", "fixture": "FIXTURE"}
 
 var game: Node
 var overlay: Control
@@ -670,7 +670,7 @@ func _build_map_cards() -> void:
 	map_heading.text = "Map  ·  %d playable  (starts at its spawn, keeps your preset)" % ids.size()
 
 static func map_card_text(entry: Dictionary) -> String:
-	var words := str(KIND_WORDS.get(str(entry.get("kind", "")), ""))
+	var words := "Not a course" if str(entry.get("kind", "")) == "lab" else str(KIND_WORDS.get(str(entry.get("kind", "")), ""))
 	var sub := str(entry.get("theme", ""))
 	if not words.is_empty():
 		sub = words if sub.is_empty() else "%s · %s" % [sub, words]
