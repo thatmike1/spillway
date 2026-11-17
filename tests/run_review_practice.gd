@@ -3,6 +3,25 @@ const SUPPORT := preload("res://tests/run_review_test_support.gd")
 var test_output := ""
 const MODEL := preload("res://scripts/recordings/run_review_model.gd")
 const PRACTICE := preload("res://scripts/recordings/run_review_practice.gd")
+class GuardRunner extends Node:
+	var reason := "Commit the pending plan with Enter before spatial review."
+	func run_review_unavailable_reason() -> String:
+		return reason
+class GuardHost extends Node:
+	var player: Node = GuardRunner.new()
+	var paused := true
+	var attempts := 0
+	var calls := 0
+	var identity: Dictionary = {}
+	func _init() -> void:
+		add_child(player)
+	func motion_identity() -> Dictionary:
+		return identity
+	func stage_count() -> int:
+		return 5
+	func practise_stage(_stage: int) -> void:
+		calls += 1
+		attempts += 1
 var failures := 0
 func check(value: bool, why: String) -> void:
 	if not value:
@@ -19,6 +38,18 @@ func run() -> void:
 	check(request.ok and request.stage == 1, "largest real loss starts at checkpoint one")
 	check(is_equal_approx(request.pb_start, 5.7421875) and is_equal_approx(request.pb_end, 12.2734375), "practice uses real best checkpoint clocks")
 	check(not MODEL.practice_request(MODEL.compare(best, best)).ok, "no loss offers no practice action")
+	var guarded := GuardHost.new()
+	guarded.identity = request.identity.duplicate(true)
+	var denied := PRACTICE.start(guarded, request)
+	check(not denied.ok and str(denied.error).contains("pending plan") and guarded.calls == 0 and guarded.attempts == 0 and guarded.paused, "valid best cannot bypass a runner refusal or change an attempt")
+	guarded.identity.map = "plan-yard"
+	guarded.player.set("reason", "")
+	check(PRACTICE.unavailable_reason(guarded).is_empty(), "committed plan can be allowed by its explicit preflight")
+	guarded.player.free()
+	guarded.player = Node.new()
+	guarded.add_child(guarded.player)
+	check(not PRACTICE.unavailable_reason(guarded).is_empty(), "planning family without its preflight fails closed")
+	guarded.free()
 	var host := preload("res://scripts/game.gd").new()
 	host.record_runs = true
 	host.recordings_dir = test_output.path_join("practice-live")

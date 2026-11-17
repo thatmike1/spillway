@@ -51,3 +51,9 @@ Follow view has an explicit Attempt/Personal best camera selector. If the loaded
 At compact window widths the viewer raises its logical body and table type sizes to counter the project canvas scaling. The matching best is marked in the attempt list and identified by finish time and UTC date above the comparison. Incomplete recordings hide follow and practice controls and explain which completed attempt to select.
 
 Recovery routes through Back, then Maps for the course and Settings for the movement preset. Selecting a map preserves the current preset, so both destinations are named when the loaded identity differs.
+
+## Runner preflight
+
+Before adding the viewer, the menu sets `spatial_unavailable_reason` from `run_review_practice.gd.unavailable_reason(game)`. A nonempty reason keeps split/speed analysis available while refusing 3D tracks and practice. The helper independently checks the same reason before changing the attempt.
+
+A runner can expose a read-only `run_review_unavailable_reason() -> String`: empty permits spatial review; a message refuses it in the current phase. Plan Yard uses this for pending survey and envelope modes. Committed normal plans remain eligible under the existing exact identity and clean-PB checks. A Plan Yard runner without that preflight fails closed. No plan is reconstructed, selected or silently reset to a default by the viewer.

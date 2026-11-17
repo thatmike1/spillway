@@ -74,6 +74,15 @@ func run() -> void:
 		var requested: Array[Dictionary] = [{}]
 		screen.practice_requested.connect(func(value: Dictionary) -> void: requested[0] = value)
 		check(not screen.practice_button.disabled, "matching map enables practice action")
+		screen.spatial_unavailable_reason = "Commit the pending plan with Enter before spatial review."
+		screen.attach_map(source, screen.comparison.attempt.identity)
+		check(screen.practice_button.disabled and screen.practice_note.visible and screen.practice_note.text.contains("pending plan"), "runner preflight explains a matching but unavailable practice mode")
+		check(screen.trace.visible and screen.splits.visible and not screen.stage.visible and screen.stage.tracks.is_empty(), "preflight preserves analysis without loading spatial tracks")
+		screen.practice_button.pressed.emit()
+		check(requested[0].is_empty(), "refused preflight emits no practice request")
+		screen.spatial_unavailable_reason = ""
+		screen.attach_map(source, screen.comparison.attempt.identity)
+		check(not screen.practice_button.disabled and screen.stage.visible, "cleared preflight restores matching spatial features")
 		screen.practice_button.pressed.emit()
 		check(requested[0].get("stage") == 1, "practice action requests largest-loss start checkpoint")
 		check(screen.practice_button.text.contains("Checkpoint 1 to Checkpoint 2"), "practice button names its fixed largest-loss target")

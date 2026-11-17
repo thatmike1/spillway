@@ -7,6 +7,7 @@ const LOOK := preload("res://scripts/r18_ui_theme.gd")
 const STAGE := preload("res://scripts/ui/run_review_stage.gd")
 const TRACE := preload("res://scripts/ui/run_review_trace.gd")
 var directory := "user://r16_runs/"
+var spatial_unavailable_reason := ""
 var entries: Array = []
 var comparison: Dictionary = {}
 var attempts: ItemList
@@ -61,7 +62,7 @@ func _ready() -> void:
 	practice_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	practice_button.pressed.connect(func() -> void:
 		var request := MODEL.practice_request(comparison)
-		if request.ok and MODEL.READER.identity_matches(request.identity, _map_identity).is_empty():
+		if request.ok and spatial_unavailable_reason.is_empty() and MODEL.READER.identity_matches(request.identity, _map_identity).is_empty():
 			practice_requested.emit(request))
 	body.add_child(practice_button)
 	practice_note = Label.new()
@@ -140,7 +141,7 @@ func _ready() -> void:
 	follow.toggled.connect(func(enabled: bool) -> void:
 		_follow_mode = enabled
 		_update_view_visibility())
-	if is_instance_valid(_map_source):
+	if is_instance_valid(_map_source) and spatial_unavailable_reason.is_empty():
 		stage.attach_map(_map_source, _map_identity)
 	get_window().size_changed.connect(_apply_readability)
 	_apply_readability()
@@ -251,12 +252,19 @@ func attach_map(source: Node3D, identity: Dictionary) -> void:
 	_map_source = source
 	_map_identity = identity.duplicate(true)
 	if stage != null:
-		stage.attach_map(source, identity)
+		if spatial_unavailable_reason.is_empty():
+			stage.attach_map(source, identity)
 		_load_preview()
 
 func _load_preview() -> void:
-	var why: String = stage.load_pair(comparison)
-	view_note.text = why + " Use Back: Maps selects the map; Settings selects the preset." if not why.is_empty() else ""
+	var why := spatial_unavailable_reason
+	if why.is_empty():
+		why = stage.load_pair(comparison)
+	else:
+		stage.clear()
+	view_note.text = why
+	if not why.is_empty() and spatial_unavailable_reason.is_empty():
+		view_note.text += " Use Back: Maps selects the map; Settings selects the preset."
 	if why.is_empty(): _update_follow_note()
 	_update_view_visibility()
 	_update_practice_action()
@@ -264,13 +272,22 @@ func _load_preview() -> void:
 func _update_practice_action() -> void:
 	var request := MODEL.practice_request(comparison)
 	practice_button.text = "Practise largest loss: " + str(request.label) if request.ok else "Practise largest loss"
-	practice_button.disabled = not request.ok or not MODEL.READER.identity_matches(request.get("identity", {}), _map_identity).is_empty()
-	practice_note.visible = request.ok and practice_button.disabled
-	if practice_note.visible:
+	practice_button.disabled = not request.ok or not spatial_unavailable_reason.is_empty() or not MODEL.READER.identity_matches(request.get("identity", {}), _map_identity).is_empty()
+	practice_note.visible = comparison.get("ok", false) and (not spatial_unavailable_reason.is_empty() or (request.ok and practice_button.disabled))
+	if practice_note.visible and not spatial_unavailable_reason.is_empty():
+		practice_note.text = spatial_unavailable_reason
+	elif practice_note.visible:
 		var preset := str(request.identity.get("preset", ""))
 		preset = {"server128": "F2", "server128_aa1000": "F5"}.get(preset, preset)
 		practice_note.text = "Use Back, then Maps for %s and Settings for %s. Match the recorded layout. Current: %s / %s." % [str(request.identity.get("map", "")).replace("-", " ").capitalize(), preset, str(_map_identity.get("map", "unavailable")).replace("-", " ").capitalize(), {"server128": "F2", "server128_aa1000": "F5"}.get(str(_map_identity.get("preset", "")), str(_map_identity.get("preset", "unavailable")))]
-	practice_button.tooltip_text = "Start a normal practice attempt at %s with the best ghost. Existing recordings stay unchanged." % request.get("label", "") if not practice_button.disabled else (str(request.error) if not request.ok else "Load the matching map, movement preset and layout to practise this segment.")
+	if not spatial_unavailable_reason.is_empty():
+		practice_button.tooltip_text = spatial_unavailable_reason
+	elif not request.ok:
+		practice_button.tooltip_text = str(request.error)
+	elif practice_button.disabled:
+		practice_button.tooltip_text = "Load the matching map, movement preset and layout to practise this segment."
+	else:
+		practice_button.tooltip_text = "Start a normal practice attempt at %s with the best ghost. Existing recordings stay unchanged." % request.label
 
 func _style_data_control(control: Control) -> void:
 	control.add_theme_stylebox_override("panel", LOOK.flat(LOOK.CREAM_DEEP))
@@ -301,7 +318,7 @@ func _update_view_visibility() -> void:
 		follow.set_pressed_no_signal(false)
 	follow.text = "Follow camera" if stage.tracks.size() == 2 else "Follow camera (unavailable)"
 	follow.disabled = not valid
-	view_note.visible = valid and _follow_mode
+	view_note.visible = valid and _follow_mode and spatial_unavailable_reason.is_empty()
 
 func _update_follow_note() -> void:
 	view_note.text = "Following %s. Teal: attempt; rust: personal best. Switch targets if the other ghost is ahead, behind or hidden by scenery." % ("the attempt" if stage.follow_target == 0 else "the personal best")
