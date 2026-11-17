@@ -5,6 +5,7 @@ const SLUICE := preload("res://scripts/maps/sluice_six.gd")
 const BASE := preload("res://scripts/maps/catalog.gd")
 const VIADUCT := preload("res://scripts/maps/viaduct.gd")
 const GANTRY := preload("res://scripts/maps/gantry.gd")
+const FOUNDRY := preload("res://scripts/maps/foundry.gd")
 
 static func make() -> Dictionary:
 	var maps := BASE.make().duplicate(true)
@@ -16,4 +17,6 @@ static func make() -> Dictionary:
 	maps.order.append(MAIL.MAP_ID)
 	maps.catalog[SLUICE.MAP_ID] = SLUICE.MAP_ENTRY.duplicate(true)
 	maps.order.append(SLUICE.MAP_ID)
+	maps.catalog[FOUNDRY.FOUNDRY_ID] = FOUNDRY.FOUNDRY_ENTRY.duplicate(true)
+	maps.order.append(FOUNDRY.FOUNDRY_ID)
 	return maps
