@@ -29,6 +29,7 @@ def main():
         raise RuntimeError("Need 1.2 GB temporary/quota headroom.")
     engine.check_pin()
     subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/movement_oracle.py"), "--self-test"], check=True)
+    subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_engine_lock.py")], check=True)
     subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_run_bundle.py")], check=True)
     subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_shortcut.py")], check=True)
     subprocess.run([sys.executable, "-B", str(engine.PROJECT/"tests/test_shot.py")], check=True)
@@ -47,15 +48,16 @@ def main():
         components.extend(["direction_stack", "through_line_original_maps"])
     report = {"ok": False, "mutations": pure, "components": []}
     try:
-        for name in components:
-            folder = out / name
-            folder.mkdir()
-            print("check " + name, flush=True)
-            result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
-                                 "--fixed-fps", "128", "--script", "res://tests/" + name + ".gd",
-                                 "--", "--out=" + str(folder), "--menu-contract=" + str(verification.FIXTURES / "contract.json")], cwd=source, profile=profile,
-                                log=folder / "engine.log", timeout=300)
-            report["components"].append({"name": name, **result})
+        with engine.locked():
+            for name in components:
+                folder = out / name
+                folder.mkdir()
+                print("check " + name, flush=True)
+                result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
+                                     "--fixed-fps", "128", "--script", "res://tests/" + name + ".gd",
+                                     "--", "--out=" + str(folder), "--menu-contract=" + str(verification.FIXTURES / "contract.json")], cwd=source, profile=profile,
+                                    log=folder / "engine.log", timeout=300)
+                report["components"].append({"name": name, **result})
         if args.slow:
             report["parity"] = verification.run(out / "parity")
         report["ok"] = True
