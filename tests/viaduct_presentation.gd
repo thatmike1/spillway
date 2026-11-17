@@ -22,6 +22,10 @@ func run() -> void:
 	var original_mesh := tether.mesh
 	var original_material := tether.material_override
 	var identity: Dictionary = game.motion_identity()
+	var dam := game.level.get_node("ViaductDam")
+	assert(dam.find_children("*","CollisionObject3D",true,false).is_empty())
+	assert(dam.find_children("*","CollisionShape3D",true,false).is_empty())
+	assert(identity.course_key == "710f5abd3eb4befe")
 	var law: String = game.player.r21_law_sha256()
 	await process_frame
 	await process_frame

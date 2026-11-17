@@ -1,9 +1,11 @@
 extends RefCounted
 ## original procedural concrete with the project's licensed painted sky; visual only, no physics or acquisition writes.
 static func apply(level: Node3D) -> void:
+	preload("res://scripts/art/viaduct_dam.gd").build(level)
 	var concrete := _surface(Color("cfc9b9"),Color("657a7c"),0.85)
 	var incline := _surface(Color("b8c7c0"),Color("617777"),0.85)
 	var basin := _surface(Color("728781"),Color("4d6667"),0.35)
+	var steel := _steel()
 	for node: Node in level.get_children():
 		if node is MeshInstance3D and (node.name.begins_with("Mesh_") or node.name.begins_with("viaduct_pier") or node.name.begins_with("viaduct_crossbeam") or node.name.begins_with("viaduct_foot")):
 			if str(node.name).contains("maintenance_court"):
@@ -12,6 +14,8 @@ static func apply(level: Node3D) -> void:
 				node.material_override = incline
 			else:
 				node.material_override = concrete
+			if node.name.begins_with("viaduct_pier") or node.name.begins_with("viaduct_crossbeam"):
+				node.material_override = steel
 	for node: Node in level.get_children():
 		if node is MeshInstance3D and node.name == "viaduct_house_panel":
 			var cladding := _surface(Color("718b90"),Color("587a82"),0.0)
@@ -24,17 +28,16 @@ static func apply(level: Node3D) -> void:
 	# reuse the project's original redistributable painted sky, not the private moodboard.
 	for node: Node in level.get_children():
 		if node is MeshInstance3D and node.name == "Water":
-			var water := ShaderMaterial.new()
-			water.shader = preload("res://shaders/look/water.gdshader")
-			node.material_override = water
+			node.material_override = preload("res://scripts/art/viaduct_dam.gd").basin_water()
 		if node is WorldEnvironment:
 			var sky := Sky.new()
 			var painted := ShaderMaterial.new()
 			painted.shader = preload("res://shaders/look/sky.gdshader")
-			painted.set_shader_parameter("panorama",preload("res://assets/look/r17/practice-sky.png"))
+			painted.set_shader_parameter("panorama",preload("res://assets/look/r17/overflow-sky.png"))
 			sky.sky_material = painted
 			node.environment.sky = sky
 			node.environment.background_mode = Environment.BG_SKY
+			node.environment.sky_rotation.y = deg_to_rad(28.0)
 			node.environment.ambient_light_energy = 0.30
 			node.environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 			node.environment.tonemap_exposure = 0.92
@@ -42,8 +45,37 @@ static func apply(level: Node3D) -> void:
 			node.light_energy = 0.35
 			node.shadow_enabled = true
 			node.directional_shadow_max_distance = 160.0
+	# inverted hulls outline major solid members; thin rails and water remain quiet.
+	var ink := ShaderMaterial.new()
+	var ink_shader := Shader.new()
+	ink_shader.code = "shader_type spatial; render_mode cull_front,unshaded; void vertex(){VERTEX+=NORMAL*0.035;} void fragment(){ALBEDO=vec3(0.055,0.095,0.105);}"
+	ink.shader = ink_shader
+	for node: Node in level.find_children("*","MeshInstance3D",true,false):
+		if node is MeshInstance3D and node.mesh is BoxMesh and node.material_override != null and node.mesh.get_aabb().size.length() > 2.5 and node.name != "Water" and not str(node.name).begins_with("Art_paint") and not str(node.name).begins_with("RampBearing") and not node.has_meta("viaduct_no_ink"):
+			node.material_override = node.material_override.duplicate()
+			node.material_override.next_pass = ink
 	level.add_child(preload("res://scripts/r17_contours.gd").new().build(level,true))
 	level.add_child(preload("res://scripts/art/viaduct_cable.gd").new())
+
+static func _steel() -> ShaderMaterial:
+	var shader := Shader.new()
+	shader.code = """shader_type spatial;
+render_mode diffuse_toon,specular_disabled;
+uniform sampler2D wear : repeat_enable,filter_linear_mipmap;
+varying vec3 wp;
+void vertex(){wp=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;}
+void fragment(){
+ float n=texture(wear,wp.xy*0.16).r;
+ float edge=1.0-smoothstep(0.015,0.075,min(min(UV.x,1.0-UV.x),min(UV.y,1.0-UV.y)));
+ float chip=smoothstep(0.48,0.72,n)*edge;
+ ALBEDO=mix(vec3(0.32,0.46,0.51)*(0.94+n*0.10),vec3(0.48,0.37,0.26),chip*0.65);
+ ROUGHNESS=0.88; SPECULAR=0.0;
+}
+"""
+	var material := ShaderMaterial.new()
+	material.shader = shader
+	material.set_shader_parameter("wear",preload("res://assets/look/painted-wear.png"))
+	return material
 
 static func box(level: Node3D, at: Vector3, size: Vector3, color: Color) -> void:
 	var node := MeshInstance3D.new()
@@ -60,6 +92,6 @@ static func _surface(top: Color, side: Color, joints: float) -> ShaderMaterial:
 	material.set_shader_parameter("wear",preload("res://assets/look/painted-wear.png"))
 	material.set_shader_parameter("top_color",top)
 	material.set_shader_parameter("side_color",side)
-	material.set_shader_parameter("wear_amount",0.28)
+	material.set_shader_parameter("wear_amount",0.06)
 	material.set_shader_parameter("deck",joints)
 	return material
