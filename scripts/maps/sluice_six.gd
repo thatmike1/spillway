@@ -4,9 +4,9 @@ const GEO := preload("res://scripts/r19_course_geometry.gd")
 const ART := preload("res://scripts/art/sluice_six_art.gd")
 const LEVEL_ID := "r22-sluice-six"
 const LEVEL_NAME := "Sluice Six"
-const LEVEL_VERSION := 2
+const LEVEL_VERSION := 3
 const MAP_ID := "sluice-six"
-const MAP_ENTRY := {"name": LEVEL_NAME, "theme": "Tidal settling decks / pier rhythm / spill tower", "kind":"course", "script":"res://scripts/maps/sluice_six.gd"}
+const MAP_ENTRY := {"name": LEVEL_NAME, "theme": "Tidal settling decks / pier rhythm / spill tower", "kind":"course", "own_look":true, "script":"res://scripts/maps/sluice_six.gd"}
 var level_id := LEVEL_ID
 var level_name := LEVEL_NAME
 var level_version := LEVEL_VERSION
@@ -27,6 +27,7 @@ var prisms: Array[Dictionary] = []
 var jump_gaps: Array[Dictionary] = []
 var routes: Dictionary = {}
 var decks: Array[Dictionary] = []
+var supports: Array[Vector4] = []
 var _built := false
 
 func build() -> void:
@@ -57,8 +58,26 @@ func build() -> void:
 	ART.dress(self)
 
 func _deck(id: String, x: float, width: float, near_z: float, far_z: float, stage: int) -> void:
-	# the piers extend below water, visibly carrying every landing instead of floating slabs.
-	GEO.prism(self,id,GEO.rectangle(x-width/2,x+width/2,far_z,near_z,0),-7,stage,"route")
+	# aprons are quay plinths; each race cap rests on transverse beams and waterline piles.
+	var top := GEO.rectangle(x-width/2,x+width/2,far_z,near_z,0)
+	if id in ["start","tower_court"]:
+		GEO.prism(self,id,top,-7,stage,"route")
+		supports.append(Vector4(x,(near_z+far_z)*0.5,width*0.5,(near_z-far_z)*0.5))
+	else:
+		GEO.prism(self,id,top,-0.5,stage,"route")
+		var columns: Array[float] = []
+		if width < 4.0:
+			columns.append(x)
+		else:
+			columns.append(x-width*0.5+0.9)
+			columns.append(x+width*0.5-0.9)
+		for row: int in 2:
+			var z := near_z-0.85 if row == 0 else far_z+0.85
+			GEO.prism(self,id+"_beam_%d" % row,GEO.rectangle(x-width*0.5+0.2,x+width*0.5-0.2,z-0.5,z+0.5,-0.5),-1.0,-1,"support","support")
+			for col: int in columns.size():
+				var px: float = columns[col]
+				GEO.prism(self,id+"_pile_%d_%d" % [row,col],GEO.rectangle(px-0.4,px+0.4,z-0.4,z+0.4,-0.5),-7,-1,"support","support")
+				supports.append(Vector4(px,z,0.4,0.4))
 	decks.append({"id":id,"x":x,"width":width,"near":near_z,"far":far_z})
 	segment_bounds.append(AABB(Vector3(-20,-2,far_z),Vector3(40,15,near_z-far_z)))
 
