@@ -13,6 +13,7 @@ var _best_identity := ""
 var used_pad := false
 var launch_events: Array[Dictionary] = []
 var planner: Control
+var socket_label: Label3D
 var planning := false
 func _ready() -> void:
 	super()
@@ -32,6 +33,16 @@ func _ready() -> void:
 	envelope = ENVELOPE.new()
 	envelope.runner = self
 	add_child(envelope)
+	socket_label = Label3D.new()
+	socket_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	socket_label.font_size = 32
+	socket_label.pixel_size = 0.012
+	socket_label.modulate = Color("efe8cf")
+	socket_label.outline_modulate = Color("203d45")
+	socket_label.outline_size = 5
+	add_child(socket_label)
+	socket_label.top_level = true
+	socket_label.hide()
 func _input(event: InputEvent) -> void:
 	if bool(get_parent().get("paused")):
 		if planning:
@@ -171,6 +182,13 @@ func run_review_unavailable_reason() -> String:
 func _process(delta: float) -> void:
 	super(delta)
 	sync_ghost_plan()
+	var host := get_parent()
+	var target := r21_acquisition_snapshot()
+	socket_label.visible = not planning and not host.paused and not host.finished and bool(target.ready)
+	if socket_label.visible:
+		var at: Vector3 = target.position
+		socket_label.global_position = at+Vector3.DOWN
+		socket_label.text = "%s · +%dm" % [str(target.name).replace("Socket ","A"),roundi(at.y)]
 	if planner != null and planning:
 		var game := get_parent()
 		planner.visible = not game.paused

@@ -14,7 +14,7 @@ Validation uses the production game host, normal spawn, F2, actual InputEventAct
 
 ## Three executed plans
 
-Geometry revision 7 starts at the western service entrance. The caisson has a +7 m front crown, an open 3 m inspection channel and a +9 m rear crown. Anchor elevations are fixed at +11/+14 m; the overhead survey shows that datum. There are no serpentine corner cuts.
+Geometry revision 7 starts at the western service entrance. The caisson has a +7 m front crown, an open 3 m inspection channel and a +9 m rear crown. Anchor elevations are fixed at +11/+14 m; the overhead survey shows that datum. There are no serpentine corner cuts. While an anchor is ready under aim or attached, a contextual A-number and elevation connect the world ring to its survey socket. The label observes the inherited acquisition snapshot and never changes selection.
 
 | plan / keys | clean | releases +120 ms | upward look limited to 30° | risk |
 | --- | ---: | ---: | ---: | --- |
@@ -72,7 +72,7 @@ Plan Yard declares `teach_until_clock:0.75`; the owner-approved one-line shared-
 
 ## Envelope spitball
 
-This is Mike's explicitly uncertain idea, reduced to one handoff. In the survey, Q enables it; Enter starts the first leg. Reach a deck, release Space so the body stands, and press K. That body waits as a blue ghost while control returns to normal spawn with an envelope. Run the delivery leg, aim at YOUR WAITING BODY and press E. A miss returns the envelope after a short delay. Catch returns control to the first body at its saved position and velocity, facing the finish with level pitch so the next landing is visible. Its rope is detached; carry on to the far quay. R restarts the whole trial. Tab returns to planning. There is no deadline for reaching the waiting body and no speed-matching test.
+This is Mike's explicitly uncertain idea, reduced to one handoff. In the survey, Q enables it; Enter starts the first leg. Reach a deck, release Space so the body stands, and press K. That body waits as a blue ghost while control returns to normal spawn with an envelope. Run the delivery leg, aim at YOUR WAITING BODY and press E. A miss returns the envelope after a short delay. Delivery is automatic on contact; no second key is needed while the envelope flies. Catch returns control to the first body at its saved position and velocity, facing the finish with level pitch so the next landing is visible. Its rope is detached; carry on to the far quay. R restarts the whole trial. Tab returns to planning. There is no deadline for reaching the waiting body and no speed-matching test.
 
 The smallest version accepts standing, uncrouched waiting points. It does not freeze a live airborne rope state or automate the first body's future path. The second body remains as a stationary ochre marker after control switches back. Repeated handoffs are not implemented. A labelled blue recipient, foot ring and folded-paper silhouette distinguish the target from the carried object.
 
