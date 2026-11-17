@@ -40,7 +40,7 @@ def main():
     profile.mkdir()
     engine.run(["--headless", "--editor", "--path", source, "--import"], cwd=source,
                profile=profile, log=out / "import.log")
-    components = ["saltglass_registration", "tether_geometry", "tether_coefficients"]
+    components = ["saltglass_registration", "tether_geometry", "tether_coefficients", "grapple_capability"]
     if args.slow:
         components.extend(["direction_stack", "through_line_original_maps"])
     report = {"ok": False, "mutations": pure, "components": []}
