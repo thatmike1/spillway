@@ -1,6 +1,6 @@
 # Outer Reach
 
-Outer Reach is the outer pump channel beside Sluice Six's estuary works. A transverse tidal-pump portal is its landmark. From the acceleration quay the player sees broad receivers separated by long water gaps, with open sea to the left and the modeled shore to the right. Real cap beams and piles support every receiver. Warm side light, cool water, pale tops and restrained orange lips share the established material language.
+Outer Reach is the outer pump channel beside Sluice Six's estuary works. A transverse tidal-pump portal is its landmark. From the acceleration quay the player sees broad receivers separated by long water gaps, with open sea to the left and the modeled shore to the right. Real cap beams and piles support every receiver. The far shore is one closed, irregular headland with broad unequal shoulders. Warm side light, cool water, pale tops and restrained orange lips share the established material language.
 
 ## Original F2 route
 
