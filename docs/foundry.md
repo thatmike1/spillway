@@ -104,3 +104,26 @@ brief. The current material transform follows the official
 
 Movement fixtures silence only the auxiliary release-cue playback, following the
 existing component-test boundary; native host captures retain the real cue path.
+
+## Sea-gate set piece (Wave 2)
+
+The seaward end now has one raised gate and hoist, supported on two foundations
+beyond the playable court. Its service trolley travels on the upper rail. The
+new node creates meshes only; it supplies no collision, anchors, checkpoints,
+triggers or movement callbacks. Existing route geometry and the Arc runner stay
+unchanged. The first-wave geometry/anchor digest is locked by
+`tests/foundry_scenery.gd`, which also checks collision before/after animation
+and requires that the trolley actually moves. Three native look passes each received a fresh review. The last correction
+enlarges and lights the navigation beacon, warms the large poured wall sections,
+adds a restrained waterline wash, and joins the twin pipe heads to the cooling main.
+These are visual checks; traversal tapes and reviews do not establish enjoyment.
+
+The third look pass deepens the offshore breakwater profile, adds localized salt
+and edge paint loss, and narrows the ordinary drawn rope through a map-local
+mesh clone (restored on map exit). This addresses lane 04's sibling eye-wedge
+report without editing the inherited runner. Collision and actual anchor
+identity/positions still have to remain exact under the scenery fixture.
+
+`tests/foundry_cable.gd` checks render-mesh cloning, reuse and ownership-safe
+restoration on map exit. The ordinary rope is 1.5 mm in radius in Foundry only.
+The inherited rope law, solver and original mesh resource are unchanged.

@@ -1,5 +1,7 @@
 shader_type spatial;
 render_mode cull_back;
+uniform float waterline_y = -6.2;
+uniform vec3 dry_concrete = vec3(0.48, 0.45, 0.38);
 varying vec3 world;
 varying vec3 up_normal;
 float hash(vec2 cell) {
@@ -29,28 +31,30 @@ void fragment() {
     vec3 cap = vec3(0.72, 0.69, 0.59) * (0.92 + slab * 0.12);
     cap *= 1.0 - deck_joint * 0.20;
     vec2 face = abs(up_normal.x) > 0.5 ? world.zy : world.xy;
-    vec2 wall_uv = face / vec2(4.5, 2.5);
-    wall_uv.x += mod(floor(wall_uv.y), 2.0) * 0.5;
-    float wall_joint = joint(wall_uv, vec2(4.5, 2.5));
+    vec2 wall_uv = face / vec2(7.5, 5.0);
+    float wall_joint = joint(wall_uv, vec2(7.5, 5.0));
     float block = hash(floor(wall_uv));
     float tide = smoothstep(-7.0, 1.0, world.y);
-    vec3 side = mix(vec3(0.15, 0.24, 0.24), vec3(0.34, 0.39, 0.36), tide);
+    vec3 side = mix(vec3(0.15, 0.24, 0.24), dry_concrete, tide);
     side *= 0.96 + block * 0.07;
     side *= 1.0 - wall_joint * 0.24;
-    vec2 joint_distance = min(fract(wall_uv), 1.0 - fract(wall_uv)) * vec2(4.5, 2.5);
-    float seam_edge = 1.0 - smoothstep(0.035, 0.16, min(joint_distance.x, joint_distance.y));
+    vec2 joint_distance = min(fract(wall_uv), 1.0 - fract(wall_uv)) * vec2(7.5, 5.0);
+    float seam_edge = 1.0 - smoothstep(0.035, 0.22, min(joint_distance.x, joint_distance.y));
     float broken = weather(face * 5.0);
     float damage = hash(vec2(floor(face.x / 1.7), floor(wall_uv.y)));
     float chipped = seam_edge * smoothstep(0.62, 0.85, damage) * smoothstep(0.43, 0.76, broken);
-    side = mix(side, vec3(0.46, 0.45, 0.38), chipped * 0.42);
-    float course_distance = (1.0 - fract(wall_uv.y)) * 2.5;
+    side = mix(side, vec3(0.53, 0.51, 0.42), chipped * 0.60);
+    float course_distance = (1.0 - fract(wall_uv.y)) * 5.0;
     float stain = hash(vec2(floor(face.x / 0.65), floor(wall_uv.y) + 17.0));
     float runoff = (1.0 - smoothstep(0.04, mix(0.18, 0.9, stain), course_distance))
         * smoothstep(0.80, 0.96, stain) * smoothstep(0.45, 0.8, damage);
     side *= 1.0 - runoff * 0.13;
-    float waterline = (1.0 - smoothstep(-6.2, -4.8, world.y))
+    float waterline = (1.0 - smoothstep(waterline_y, waterline_y + 1.4, world.y))
         * (0.8 + weather(vec2(face.x * 1.2, world.y * 2.0)) * 0.2);
     side *= 1.0 - waterline * 0.18;
+    float salt = 1.0 - smoothstep(0.06, 0.42, abs(world.y - waterline_y - 0.45));
+    salt *= 0.55 + weather(face * vec2(1.5, 3.0)) * 0.45;
+    side = mix(side, vec3(0.53, 0.55, 0.46), salt * 0.32);
     ALBEDO = mix(side, cap, top);
     ROUGHNESS = 0.97;
 }
