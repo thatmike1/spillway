@@ -11,7 +11,7 @@ const FOUNDRY_ANCHORS := [Vector3(0, 29, -8), Vector3(-16, 25, -12), Vector3(0, 
 func _init() -> void:
 	level_id = "r22-foundry"
 	level_name = "Foundry"
-	level_version = 1
+	level_version = 2
 	variant = FOUNDRY_ID
 	spawn = Transform3D(Basis.IDENTITY, Vector3(0, 18.04, 12))
 	finish_title = "Tailrace"
@@ -23,7 +23,9 @@ func build() -> void:
 	if _built:
 		return
 	_built = true
-	GEO.deck(self, "entry", -22, 10, 0, 24, 18, 0)
+	GEO.deck(self, "entry_back", -22, 10, 8, 24, 18, 0)
+	GEO.deck(self, "gallery_apron", -22, -9, 0, 8, 18, 0)
+	GEO.deck(self, "shaft_apron", -3, 10, 0, 8, 18, 0)
 	_ramp("wall_gallery", -22, -10, 0, -24, 18, 12, 0)
 	GEO.deck(self, "rejoin", -22, 10, -36, -20, 12, 1)
 	GEO.deck(self, "tailrace", -10, 10, -78, -50, 2, 2)
@@ -40,11 +42,11 @@ func build() -> void:
 	for i: int in FOUNDRY_ANCHORS.size():
 		_foundry_anchor(i, FOUNDRY_ANCHORS[i])
 	_environment()
-	_sign("entry",Vector3(-6,21,3),"FOUNDRY\nGALLERY LEFT / SHAFT AHEAD",0.009)
-	_sign("fork",Vector3(-16,20,-3),"GALLERY\nCONTINUOUS DESCENT",0.006)
-	_sign("direct",Vector3(6,21,0),"SHAFT\nRELEASE TO CROSS",0.006)
+	_sign("entry",Vector3(0,21,-20),"FOUNDRY",0.008)
+	_sign("fork",Vector3(-16,19,-5),"GALLERY",0.007)
+	_sign("direct",Vector3(6,20,-5),"SHAFT",0.007)
 	_sign("tailrace",Vector3(0,8,-75),"TAILRACE",0.012)
-	routes = {"basic": [spawn.origin,Vector3(-16,18,6),Vector3(-16,12,-28),Vector3(0,12,-30),finish_position],
+	routes = {"basic": [spawn.origin,Vector3(-16,18,6),Vector3(-16,12,-24),Vector3(0,12,-33),finish_position],
 		"advanced": [spawn.origin,Vector3(0,18,0),Vector3(0,12,-28),finish_position]}
 	jump_gaps = [{"label":"shaft", "edge":Vector3(0,18,0),"land":Vector3(0,12,-20),"recovery":"court and wall ramp"},
 		{"label":"descending catch","edge":Vector3(0,12,-36),"land":Vector3(0,2,-50),"recovery":"court and tailrace ramp"}]

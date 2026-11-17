@@ -73,3 +73,18 @@ without a reset. These are scripted acceptance measurements, not a playtest.
 The direct tape holds the shaft ring for 140 ticks, releasing before passing
 beneath it. Earlier releases tested short; later holds tested past the useful
 forward phase. Recovery remains available below either miss.
+
+## Look pass two
+
+The first fresh image-only review identified hidden fork entrances, weak shaft
+depth, and a gallery bend that resembled a dead end. A connected intake opening
+now separates the two apron arms before the crossing; it exposes the lower
+court without moving either route's anchors. The geometry version advances to 2.
+Orange paint follows the current landing lips and gallery boundary, including
+the bend, rather than obsolete greybox coordinates. Wall tidemarks and connected
+pipe headers give the drop scale. The input camera looks down toward surfaces
+after release and along the descent; pitch does not steer the motor's wish yaw.
+The real input routes and deliberate-fall recovery are rerun after this change.
+
+The concrete's normal transform was checked against the official
+[Godot spatial shader reference](https://docs.godotengine.org/en/stable/tutorials/shaders/shader_reference/spatial_shader.html).

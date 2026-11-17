@@ -73,7 +73,8 @@ func walk(at: Vector3, limit: int = 1400) -> bool:
 		var flat := Vector2(player.position.x-at.x,player.position.z-at.z).length()
 		if flat < 1.1:
 			return true
-		await step(Vector3(at.x,player._eye().y,at.z),false,false)
+		var look_y := minf(at.y+1.5,player._eye().y-flat*tan(deg_to_rad(12.0)))
+		await step(Vector3(at.x,look_y,at.z),false,false)
 	return false
 
 func crossing(anchor: Vector3, target: Vector3, hold_ticks: int) -> void:
@@ -82,7 +83,7 @@ func crossing(anchor: Vector3, target: Vector3, hold_ticks: int) -> void:
 	for tick: int in 700:
 		if player.position.z < target.z+1 and player.position.y < target.y+1 and player.position.y > target.y-1:
 			break
-		await step(Vector3(target.x,player._eye().y,target.z-4),false,false)
+		await step(Vector3(target.x,target.y+1.5,target.z-4),false,false)
 		if player.position.y < -6:
 			break
 
@@ -94,8 +95,8 @@ func route(shortcut: bool, hold_ticks: int) -> Dictionary:
 		await crossing(LEVEL.FOUNDRY_ANCHORS[0],Vector3(0,12,-28),hold_ticks)
 	else:
 		await walk(Vector3(-16,18,7))
-		await walk(Vector3(-16,12,-28))
-		await walk(Vector3(0,12,-30))
+		await walk(Vector3(-16,12,-24))
+		await walk(Vector3(0,12,-33))
 	var crossed := player.position.y > 11 and player.position.z < -19 and player.position.z > -37
 	var crossing_ticks := tape.size()
 	if crossed:
