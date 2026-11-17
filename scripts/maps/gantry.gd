@@ -2,6 +2,7 @@ extends Node3D
 ## p / measured front-contact clearance revision; source motor and old course remain frozen.
 
 const ART := preload("res://scripts/art/gantry_dress.gd")
+const DRYDOCK := preload("res://scripts/art/gantry_drydock.gd")
 const GEO := preload("res://scripts/r19_course_geometry.gd")
 const RUNNER := preload("res://scripts/r21_tether_player.gd")
 const LEVEL_ID := "r22-gantry"
@@ -65,6 +66,7 @@ func build() -> void:
 		_anchor(i, ANCHORS[i])
 	_environment()
 	ART.dress(self)
+	DRYDOCK.dress(self)
 	_sign("entry", Vector3(-6, 7, 16), "GANTRY\nHOP / SWING / HOP", 0.008)
 	_sign("dispatch", Vector3(0, 7, -108), "DISPATCH", 0.010)
 	routes = {"basic": [spawn.origin, Vector3(0, 4, -10), Vector3(0, 4, -40), Vector3(0, 4, -58), finish_position]}

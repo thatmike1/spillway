@@ -1,6 +1,6 @@
 # Gantry
 
-Gantry is a tidal crane runway where long concrete aprons feed two flooded transfer slots. One continuous dark portal crane is the landmark, its high crossbeams carrying the orange attachment rings. From spawn the player sees a pale runway ending at the first water slot and the receiving apron through the portal. Concrete piers run down into the water and the crane legs stand on their own side quays. The route alternates room to build hop speed, an Arc transfer, a receiving runway, another Arc transfer and a final dispatch apron.
+Gantry is a tidal drydock assembling a huge floodgate. The raised ribbed caisson and its supported crane form the landmark beside the running line. From spawn, two smaller swing portals frame the open dock and its distant headland. Concrete piers run into the tide, while a connected harbour wall bounds the gate-working quay. The original course alternates hop runways, two Arc transfer slots and a final dispatch apron.
 
 The course uses the existing grapple runner and unchanged Arc law. Motor parity and earned route evidence are recorded by the gantry tests; human enjoyment remains untested.
 
@@ -16,7 +16,9 @@ The source row establishes adjacent support spacing, not one jump per pad or F2 
 
 ## Authored look
 
-`own_look: true` keeps the map's sky and materials instead of the inherited Practice fallback. The concrete shader and its provenance are under `assets/maps/gantry/`; existing project sky, wear and water resources are reused. Receiving aprons carry continuous orange edge paint, while ordinary hop pads remain pale. Cross-bearings connect the pads to the crane quays below the route tops; gantry foot plates make the post connections visible. Those bearings are collision geometry with the structure role, not extra route platforms. The Gantry-only rope stroke copies the runner's visual mesh at a smaller radius and never writes motor settings or force coefficients.
+`scripts/art/gantry_drydock.gd` builds the original gate crane, suspended caisson, harbour wall and continuous distant coast as scenery only. It adds no collision or acquisition nodes.
+
+`own_look: true` keeps the map's sky and materials instead of the inherited Practice fallback. The concrete shader and its provenance are under `assets/maps/gantry/`; existing project sky, wear and water resources are reused. Receiving aprons carry continuous orange edge paint, while ordinary hop pads remain pale. Cross-bearings connect the pads to the crane quays below the route tops; gantry foot plates make the post connections visible. Those bearings are collision geometry with the structure role, not extra route platforms. The Gantry-only rope stroke copies the runner's visual mesh and tapers its radius using camera projection, limiting the stroke to about two pixels and at most the previous 6 mm world radius. Its visual endpoint clips before the camera near plane when the anchor passes behind the view. It never writes the attached anchor, motor settings or force coefficients. `tests/gantry_rope.gd` exercises the real runner's render transform and checks projected end widths plus exact motion-state preservation.
 
 ## Earned hop and swing comparison
 
