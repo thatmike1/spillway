@@ -50,6 +50,26 @@ func run() -> void:
 		check(screen.comparison.get("ok", false), "screen displays real recording pair")
 		check(screen.comparison.attempt.path != screen.comparison.best.path, "two distinct real recordings shown")
 		check(screen.splits.get_root().get_child_count() > 0, "split rows rendered")
+		var follow: CheckButton = screen.find_children("*", "CheckButton", true, false)[0]
+		follow.button_pressed = true
+		check(screen.trace.visible and screen.splits.visible and not screen.stage.visible, "unavailable follow retains usable analysis")
+		check(screen.view_note.visible and not screen.view_note.text.is_empty(), "unavailable follow explains why")
+		var source := Node3D.new()
+		root.add_child(source)
+		screen.attach_map(source, screen.comparison.attempt.identity)
+		check(screen.stage.visible and not screen.trace.visible, "available follow shows stage")
+		var other := MODEL.load_attempt("res://tests/fixtures/original-map-parity/whiteout-crouch/old/runs/golden.r16run")
+		screen.attach_map(source, other.identity)
+		check(screen.trace.visible and screen.splits.visible and not screen.stage.visible, "valid to unavailable restores analysis")
+		screen.select_attempt(selected)
+		check(screen.trace.visible and screen.splits.visible, "selection preserves unavailable fallback")
+		screen.refresh()
+		check(screen.trace.visible and screen.splits.visible, "refresh retains unavailable fallback")
+		while screen.scanning:
+			await process_frame
+		screen.select_attempt(selected)
+		follow.button_pressed = false
+		source.queue_free()
 		for fraction: float in [0.0, 0.2, 0.5, 1.0]:
 			screen.scrubber.value = screen.scrubber.max_value * fraction
 			await process_frame
