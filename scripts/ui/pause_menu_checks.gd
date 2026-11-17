@@ -18,9 +18,33 @@ func settle() -> void:
 	for i: int in 5:
 		await process_frame
 
+func click(control: Control, scroll: ScrollContainer = null) -> void:
+	await settle()
+	if scroll != null:
+		scroll.ensure_control_visible(control)
+	await settle()
+	var point := control.get_global_transform_with_canvas() * (control.size * 0.5)
+	var motion := InputEventMouseMotion.new()
+	motion.position = point
+	motion.global_position = point
+	root.push_input(motion, true)
+	await process_frame
+	check(root.gui_get_hovered_control() == control, "mouse reaches " + str(control.name))
+	for down: bool in [true, false]:
+		var button := InputEventMouseButton.new()
+		button.position = point
+		button.global_position = point
+		button.button_index = MOUSE_BUTTON_LEFT
+		button.button_mask = MOUSE_BUTTON_MASK_LEFT if down else 0
+		button.pressed = down
+		root.push_input(button, true)
+		await process_frame
+	await settle()
+
 func run() -> void:
 	assert(output.is_absolute_path())
 	DirAccess.make_dir_recursive_absolute(output)
+	root.size = Vector2i(1280, 720)
 	var game: Node = load("res://scenes/r21.tscn").instantiate()
 	game.persist = false
 	game.record_runs = false
@@ -45,7 +69,7 @@ func run() -> void:
 		slider.value = slider.min_value
 		check(is_equal_approx(float(game.settings[key]), slider.value), "slider applies " + key)
 		check(number.text == hud.slider_value_text(key, slider.value), "slider number " + key)
-		reset.pressed.emit()
+		await click(reset, hud._pause_scroll)
 		check(is_equal_approx(slider.value, float(game.DEFAULT_SETTINGS[key])), "slider reset " + key)
 	var initial_map_count := int(game.map_ids().size())
 	for i: int in 5:
@@ -62,7 +86,10 @@ func run() -> void:
 		hud._layout()
 		await settle()
 		for destination: String in hud.pause_pages:
-			hud.pause_tabs[destination].pressed.emit()
+			if viewport == Vector2i(1280, 720):
+				await click(hud.pause_tabs[destination])
+			else:
+				hud.pause_tabs[destination].pressed.emit()
 			if destination == "Runs":
 				hud._show_share(true)
 			await settle()
