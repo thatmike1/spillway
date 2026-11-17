@@ -39,4 +39,4 @@ The outside fixture reaches its first receiving landing 1.5234375 s after the fo
 
 ## Verification
 
-`python3 tools/test.py` runs `tests/saltglass_registration.gd`, including actual production registration, map revision separation, original identities and collision/look checks. The slow tier verifies all original maps without differences. Historical surf route/native delivery verifiers and their external receipts remain in Git history and the original build workspace.
+`python3 tools/test.py` runs `tests/saltglass_registration.gd`, including actual production registration, map revision separation, original identities and collision/look checks. The slow tier verifies all original maps without differences. Historical surf route/native delivery verifiers remain in Git history; their delivery receipts are not retained in this repository or required for the current checks.
