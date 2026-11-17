@@ -2,7 +2,12 @@ extends SceneTree
 ## exercise the actual runner's render transform and Gantry's late visual styling.
 const HOST := preload("res://scripts/game.gd")
 
+var output := "/tmp/r22-03-hop-into-swing/rope"
+
 func _initialize() -> void:
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--out="):
+			output = arg.trim_prefix("--out=")
 	run.call_deferred()
 
 func diameter(camera: Camera3D, rope: MeshInstance3D, y: float, radius: float) -> float:
@@ -22,9 +27,9 @@ func run() -> void:
 	game.record_runs = false
 	game.seed_from_r15 = false
 	game.set_window_title = false
-	game.profile_path = "/tmp/r22-03-hop-into-swing/rope-absent.cfg"
-	game.ghosts_directory = "/tmp/r22-03-hop-into-swing/rope-ghosts"
-	game.ghost_share_storage = "/tmp/r22-03-hop-into-swing/rope-selection.cfg"
+	game.profile_path = output.path_join("absent.cfg")
+	game.ghosts_directory = output.path_join("ghosts")
+	game.ghost_share_storage = output.path_join("selection.cfg")
 	root.add_child(game)
 	await process_frame
 	await process_frame

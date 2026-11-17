@@ -3,6 +3,7 @@ extends Node3D
 
 const ART := preload("res://scripts/art/gantry_dress.gd")
 const DRYDOCK := preload("res://scripts/art/gantry_drydock.gd")
+const ARRIVAL := preload("res://scripts/art/gantry_arrival.gd")
 const GEO := preload("res://scripts/r19_course_geometry.gd")
 const RUNNER := preload("res://scripts/r21_tether_player.gd")
 const LEVEL_ID := "r22-gantry"
@@ -67,12 +68,16 @@ func build() -> void:
 	_environment()
 	ART.dress(self)
 	DRYDOCK.dress(self)
-	_sign("entry", Vector3(-6, 7, 16), "GANTRY\nHOP / SWING / HOP", 0.008)
 	_sign("dispatch", Vector3(0, 7, -108), "DISPATCH", 0.010)
+	if variant == MAP_ID:
+		ARRIVAL.build(self, -132, -108, 2)
+		kill_bounds = AABB(Vector3(-90, -5, -145), Vector3(180, 65, 185))
 	routes = {"basic": [spawn.origin, Vector3(0, 4, -10), Vector3(0, 4, -40), Vector3(0, 4, -58), finish_position]}
 	routes["advanced"] = routes.basic
 	for i: int in 2:
 		jump_gaps.append({"label": "gantry-slot-%d" % i, "edge": Vector3(0, 4, DECKS[i][2]), "land": Vector3(0, 4, DECKS[i + 1][3]), "recovery": "restart or checkpoint"})
+	if variant == MAP_ID:
+		ART.ink(self)
 
 func _pad(stage: int, index: int, x0: float, x1: float, far: float, near: float) -> void:
 	GEO.prism(self, "apron_%d_pad_%d" % [stage, index], GEO.rectangle(x0, x1, far, near, 4), -5, stage, "route")
@@ -97,7 +102,8 @@ func _anchor(index: int, at: Vector3) -> void:
 	anchor.add_child(ring)
 	_box("Art_paint_dark_beam_%d" % index, at + Vector3(0, 1.1, 0), Vector3(26, 0.65, 0.7), Color("29464a"))
 	for side: float in [-13.0, 13.0]:
-		_box("Art_paint_dark_post_%d_%s" % [index, side], Vector3(at.x + side, 4.0, at.z), Vector3(0.7, 22.2, 0.7), Color("29464a"))
+		var top := at.y + 1.1
+		_box("Art_paint_dark_post_%d_%s" % [index, side], Vector3(at.x + side, (top + 4.55) * 0.5, at.z), Vector3(0.7, top - 4.55, 0.7), Color("29464a"))
 	var rim := MeshInstance3D.new()
 	rim.name = "Art_anchor_dark_rim"
 	var outline := TorusMesh.new()
@@ -108,6 +114,7 @@ func _anchor(index: int, at: Vector3) -> void:
 	rim.material_override = RUNNER._flat(Color("263d45"))
 	anchor.add_child(rim)
 	_box("Art_anchor_bracket_%d" % index, at + Vector3(0, 1.0, 0), Vector3(1.6, 0.40, 0.20), Color("29464a"))
+	ART.portal_details(self, index, at)
 
 func route_hint(stage: int, _feet: Vector3) -> String:
 	return "Space and air-strafe on the apron. Hold LMB at the next ring; release over the receiving apron." if stage < 2 else "Carry the landing into hops down the dispatch apron."
