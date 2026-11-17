@@ -47,7 +47,7 @@ def main():
         "saltglass_registration", "tether_geometry", "tether_coefficients",
         "grapple_capability", "r22_registration", "host_capabilities",
         "tether_feedback_identity", "tether_feedback_audio", "registry_injection",
-        "style_suspension", "tether_feedback_lens", "saltglass_art", "seaward_registration", "gantry_runner",
+        "style_suspension", "tether_feedback_lens", "saltglass_art", "seaward_registration", "gantry_runner", "gantry_rope",
         "mail_flight", "mail_motor", "mail_courts", "mail_tape", "sluice_six_style",
         "viaduct_presentation", "foundry_routes", "foundry_fork",
         "scripts/ui/pause_menu_checks.gd",
