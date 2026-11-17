@@ -72,7 +72,8 @@ static func compare(attempt: Dictionary, best: Dictionary) -> Dictionary:
 
 ## summary scans validate the digest chain without retaining hundreds of decoded tracks.
 static func begin_scan(directory: String) -> Dictionary:
-	return {"directory": directory, "files": DirAccess.get_files_at(directory), "index": 0, "entries": []}
+	var files := DirAccess.get_files_at(directory) if DirAccess.dir_exists_absolute(directory) else PackedStringArray()
+	return {"directory": directory, "files": files, "index": 0, "entries": []}
 
 static func step_scan(scan: Dictionary, budget_usec: int = 4000) -> bool:
 	var start := Time.get_ticks_usec()
