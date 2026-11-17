@@ -46,14 +46,15 @@ func run() -> void:
 		check(number.text == hud.slider_value_text(key, slider.value), "slider number " + key)
 		reset.pressed.emit()
 		check(is_equal_approx(slider.value, float(game.DEFAULT_SETTINGS[key])), "slider reset " + key)
+	var initial_map_count := int(game.map_ids().size())
 	for i: int in 5:
 		var id := "menu-capacity-%d" % i
 		var entry: Dictionary = game.map_entry("breakwater").duplicate(true)
 		entry.name = "Additional map %d with a longer title" % i
-		game.map_registry.catalog[id] = entry
-		game.map_registry.order.append(id)
+		game.maps.catalog[id] = entry
+		game.maps.order.append(id)
 	hud._build_map_cards()
-	check(hud.map_buttons.size() == game.map_ids().size(), "five additional maps represented")
+	check(hud.map_buttons.size() == initial_map_count + 5 and game.map_ids().size() == initial_map_count + 5, "five additional maps represented")
 	for viewport: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(1280, 720)]:
 		root.size = viewport
 		hud._layout()
@@ -98,8 +99,8 @@ func run() -> void:
 	check(hud.lab_box.is_visible_in_tree(), "lab controls in Practice")
 	check(not "not recorded" in hud.practice_note.text, "practice recording copy agrees")
 	var card: Button = hud.map_buttons["experiment"]
-	check(card.text.count("not a course") == 1, "lab classification appears once")
-	game.map_registry.catalog["tether-yard"]["tether_model"] = "elastic-arc"
+	check(card.text.to_lower().count("not a course") == 1, "lab classification appears once")
+	game.maps.catalog["tether-yard"]["tether_model"] = "elastic-arc"
 	game.select_map("tether-yard")
 	game.set_paused(true)
 	hud.show_pause_destination("Practice")
@@ -110,6 +111,42 @@ func run() -> void:
 	check(hud.tether_models["elastic-arc"].button_pressed, "fixed-law map shows effective model")
 	check(not hud.anchor_assist_switch.disabled, "assist uses effective map law")
 	check(hud.feedback_switches.size() == 7, "all swing feedback toggles represented")
+	if game.settings.has("tether_rope_visual"):
+		var identity: Dictionary = game.motion_identity().duplicate(true)
+		var attempts := int(game.attempts)
+		for key: String in hud.feedback_switches:
+			var toggle: CheckButton = hud.feedback_switches[key]
+			toggle.button_pressed = true
+			check(bool(game.settings.get(key, false)), "feedback toggle applies " + key)
+			toggle.button_pressed = false
+			check(game.motion_identity() == identity and int(game.attempts) == attempts, "feedback keeps attempt and identity " + key)
+	if ResourceLoader.exists("res://scripts/ui/run_review.gd"):
+		hud.show_pause_destination("Runs")
+		hud.review_button.pressed.emit()
+		await settle()
+		check(hud.review_screen != null and hud.review_screen.is_visible_in_tree() and game.paused, "review opens while game stays paused")
+		var escape := InputEventKey.new()
+		escape.keycode = KEY_ESCAPE
+		escape.pressed = true
+		Input.parse_input_event(escape)
+		await settle()
+		escape = InputEventKey.new()
+		escape.keycode = KEY_ESCAPE
+		Input.parse_input_event(escape)
+		check(hud.review_screen == null and game.paused and hud.review_button.has_focus(), "Escape returns from review to paused menu with focus")
+	for id: String in game.map_ids():
+		if not bool(game.map_entry(id).get("mail_delivery", false)):
+			continue
+		game.select_map(id)
+		game.set_paused(true)
+		hud.show_pause_destination("Practice")
+		await settle()
+		check(hud.mail_section.is_visible_in_tree(), "mail controls appear on delivery map")
+		for view: String in ["body", "envelope"]:
+			hud.mail_views[view].pressed.emit()
+			await settle()
+			check(str(game.player.call("mail_view")) == view, "delivery view applies " + view)
+			check(game.paused, "delivery view keeps menu paused")
 	var ok := checks.all(func(row: Dictionary) -> bool: return row.ok)
 	var file := FileAccess.open(output.path_join("menu-checks.json"), FileAccess.WRITE)
 	file.store_string(JSON.stringify({"ok": ok, "checks": checks}, "\t"))

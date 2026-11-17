@@ -1,5 +1,6 @@
 extends "res://scripts/r20_hud.gd"
 ## r21 adds tuning controls and displays the runner's authoritative prospective anchor.
+const RUN_REVIEW := preload("res://scripts/ui/run_review.gd")
 const R21_TUNING_NOTES := {
 	"elastic-soft": "Soft catch · less outward damping; more room to swing.",
 	"elastic-firm": "Firm line · a firmer spring when the line stretches.",
@@ -47,7 +48,6 @@ func attach(main: Node) -> void:
 	review_button = _button(pause_pages["Runs"], "Review local runs", _open_run_review)
 	review_button.name = "ReviewLocalRuns"
 	pause_pages["Runs"].move_child(review_button, 0)
-	review_button.disabled = not ResourceLoader.exists("res://scripts/ui/run_review.gd")
 	review_button.tooltip_text = "Read recorded attempts, compare splits and scrub the speed trace."
 	_pin_pause_header()
 	_refresh_tether()
@@ -107,10 +107,9 @@ func _attach_feedback_preferences() -> void:
 		feedback_switches[key] = toggle
 
 func _open_run_review() -> void:
-	if review_screen != null or not ResourceLoader.exists("res://scripts/ui/run_review.gd"):
+	if review_screen != null:
 		return
-	var screen: Script = load("res://scripts/ui/run_review.gd")
-	review_screen = screen.new()
+	review_screen = RUN_REVIEW.new()
 	if not str(game.session.directory).is_empty():
 		review_screen.set("directory", str(game.session.directory))
 	pause_panel.add_child(review_screen)
