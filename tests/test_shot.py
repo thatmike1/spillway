@@ -182,7 +182,23 @@ func _start() -> void:
 '''
 
 
-def native_contract(output, movie=False, movie_fps=30, resize=False):
+def presentation_probe(harness):
+    ready = "\tready_to_run = true"
+    observation = '"motion": observation,'
+    if harness.count(ready) != 1 or harness.count(observation) != 1:
+        raise AssertionError("presentation probe no longer matches the capture hooks")
+    harness = harness.replace(ready, "\tvar probe := PresentationProbe.new()\n"
+                              "\tprobe.process_priority = 100\n\tmain.add_child(probe)\n" + ready)
+    harness = harness.replace(observation, '"presentation_probe": root.get_meta("presentation_probe", {}), ' + observation)
+    return harness + '''
+class PresentationProbe extends Node:
+\tfunc _process(_delta: float) -> void:
+\t\tvar player: Node = get_parent().get("player")
+\t\tget_tree().root.set_meta("presentation_probe", player.call("get_motion_state").duplicate(true))
+'''
+
+
+def native_contract(output, movie=False, movie_fps=30, resize=False, render_phase=False):
     output = shot.external(output)
     output.mkdir(parents=True, exist_ok=False)
     tape = output / "input.json"
@@ -196,7 +212,12 @@ def native_contract(output, movie=False, movie_fps=30, resize=False):
                        {"time": 3 / 128, "resize": [640, 360]}])
         events.sort(key=lambda event: event["time"])
     tape.write_text(json.dumps(events))
-    subprocess.run([sys.executable, "-B", str(shot.engine.PROJECT / "tools/shot.py"),
+    capture_script = shot.engine.PROJECT / "tools/shot.py"
+    if render_phase:
+        capture_script = output / "phase-capture.py"
+        capture_script.write_text("import sys\nsys.path.insert(0, " + repr(str(shot.engine.PROJECT / "tools")) + ")\n"
+                                  "import shot\nshot.HARNESS = " + repr(presentation_probe(shot.HARNESS)) + "\nshot.main()\n")
+    subprocess.run([sys.executable, "-B", str(capture_script),
                     "--map", "breakwater", "--tape", str(tape), "--seconds", str((12 if movie else 6) / 128),
                     "--every", str(1 / 128), "--size", "640x360", "--out", str(output / "native"), *(["--movie", "--movie-fps", str(movie_fps)] if movie else [])], check=True)
     with tempfile.TemporaryDirectory(prefix="canonical-", dir=output) as temporary:
@@ -218,6 +239,8 @@ def native_contract(output, movie=False, movie_fps=30, resize=False):
         if tick < 1 or tick > len(expected):
             raise AssertionError(f"capture clock outside canonical ticks: {frame['time']}")
         reference = expected[tick - 1]
+        if render_phase and frame["presentation_probe"] != frame["motion"]:
+            raise AssertionError(f"priority100 presentation state is stale at relative tick {tick}")
         if frame["position"] != reference["position"] or frame["motion"] != reference["motion"]:
             (output / "mismatch.json").write_text(json.dumps({"tick": tick, "actual": frame, "expected": reference}, indent=2))
             raise AssertionError(f"native normal-spawn tape diverged at tick {tick}; read {output / 'mismatch.json'}")
@@ -229,7 +252,7 @@ def native_contract(output, movie=False, movie_fps=30, resize=False):
     if resize and not {(320, 180), (640, 360)}.issubset({tuple(frame["png_size"]) for frame in actual}):
         raise AssertionError("moving contract did not observe both resized readback dimensions")
     (output / "RESULT.json").write_text(json.dumps({"ok": True, "movie": movie, "movie_fps": movie_fps,
-        "resize": resize, "exact_positions_and_state_ticks": ticks}) + "\n")
+        "resize": resize, "render_phase": render_phase, "exact_positions_and_state_ticks": ticks}) + "\n")
     print("native normal-spawn positions/state match canonical ticks:", ticks)
 
 
@@ -241,9 +264,10 @@ if __name__ == "__main__":
         parser.add_argument("--movie", action="store_true")
         parser.add_argument("--movie-fps", type=int, choices=(30, 60), default=30)
         parser.add_argument("--resize", action="store_true")
+        parser.add_argument("--render-phase", action="store_true")
         args = parser.parse_args()
         if args.resize and args.movie:
             parser.error("resize contract requires PNG mode")
-        native_contract(args.out, args.movie, args.movie_fps, args.resize)
+        native_contract(args.out, args.movie, args.movie_fps, args.resize, args.render_phase)
     else:
         unittest.main()
