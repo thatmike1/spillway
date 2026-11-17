@@ -46,3 +46,20 @@ Snapshots omit only `tests/fixtures` for frozen recording payloads, alongside ge
 Tape timestamps are zero-based motor time: time0 applies before the first tick, time1/128 before the second. Events dispatch before the tape clock advances. Pressed actions preserve optional numeric `strength` in[0,1] (default1); released actions always use0. The public `restart_run("capture")` establishes normal spawn immediately before route/tape playback, after startup warm-up. Tapes exported for the older age-before-dispatch convention need re-exporting against this contract.
 
 Run `python3 -B tests/test_shot.py --native-contract --out /absolute/new/external/folder` for native PNG-observed positions and complete motor-state comparison against an independent canonical normal-spawn tape with distinct t0/t1 strengths. This integration check uses the shared engine lock and private display; ordinary unit tests remain headless and lightweight.
+
+## Audible offline clips
+
+Add `--movie --seconds 2.9 --size 960x540` to a route/tape command to capture `capture.avi` with the engine's actual PCM audio, plus a demuxed `capture.wav`. The explicit movie mode renders every frame at30FPS by default (`--movie-fps 60` selects60). Physics and zero-based input callbacks stay128Hz. Native F2 canonical checks compare sampled positions/full JSON motor state independently of rendering cadence. Ordinary PNG mode remains on-demand.
+
+Movie mode uses the same pinned editor, shared lock, isolated source/profile and private X display. Godot's MovieMaker writes audio internally with the Dummy driver; it records no microphone/desktop audio and plays no sound through the desktop. Unlike sparse PNG mode, it enables the normal render loop and waits for its frame-post-draw signal rather than forcing extra draws. Clips are limited to10 simulation seconds and1920x1080 to bound software-rendering work. Default duration is3s for movies and12s for PNG-only runs. The AVI includes startup/quit frames; use capture.json's actual container duration, not the tape duration, for video timing. PNG/JSONL timestamps remain the physics clock after normal-spawn restart.
+
+AVI video is MJPEG and its audio is uncompressed PCM; the separate WAV retains the PCM for listening. `ffprobe` checks both video and PCM tracks before success. Godot exits through the normal scripted quit so the movie header is finalized. A failed/timed-out capture is not a valid clip. Neither offline video FPS nor software render speed is a hardware-performance measurement.
+
+The explicit integration checks are:
+
+```sh
+python3 -B tests/test_shot.py --native-contract --movie --out /tmp/r22-playtester/movie-check-30
+python3 -B tests/test_shot.py --native-contract --movie --movie-fps 60 --out /tmp/r22-playtester/movie-check-60
+```
+
+Godot's [Creating movies documentation](https://docs.godotengine.org/en/stable/tutorials/animation/creating_movies.html) documents the AVI/PCM format, fixed-FPS flag and graceful-quit requirement. It does not promise that disabled automatic rendering gives a fresh movie image, so this wrapper deliberately uses a separate full-render movie path.
