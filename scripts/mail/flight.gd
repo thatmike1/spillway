@@ -1,6 +1,6 @@
 extends RefCounted
 ## isolated envelope simulation; body time and global engine time are never changed.
-const VERSION := "mail-flight-1"
+const VERSION := "mail-flight-2"
 const SPEED := 24.0
 const DURATION := 1.6
 const TURN_RATE := 2.8
@@ -41,6 +41,18 @@ func step(dt: float, boxes: Array, blocked: Callable) -> void:
 		if delivered.has(str(box.id)):
 			continue
 		var hit: Variant = (box.bounds as AABB).intersects_segment(previous, position)
+		if box.has("front"):
+			var face := float(box.front)
+			var travel_z := position.z - previous.z
+			if travel_z * face >= 0.0:
+				continue
+			var fraction: float = (box.position.z + face * 0.5 - previous.z) / travel_z
+			if fraction < 0 or fraction > 1:
+				continue
+			var crossing := previous.lerp(position, fraction)
+			if not (box.bounds as AABB).has_point(crossing - Vector3(0, 0, face * 0.0001)):
+				continue
+			hit = crossing
 		if hit != null and previous.distance_to(hit as Vector3) <= wall_distance:
 			delivered[str(box.id)] = true
 			target_id = str(box.id)
