@@ -1,6 +1,7 @@
 extends RefCounted
 ## live additions are separate from the retained r21 catalog contract.
 const MAIL := preload("res://scripts/maps/mail_run.gd")
+const SLUICE := preload("res://scripts/maps/sluice_six.gd")
 const BASE := preload("res://scripts/maps/catalog.gd")
 const VIADUCT := preload("res://scripts/maps/viaduct.gd")
 const GANTRY := preload("res://scripts/maps/gantry.gd")
@@ -13,4 +14,6 @@ static func make() -> Dictionary:
 	maps.order.append(GANTRY.MAP_ID)
 	maps.catalog[MAIL.MAP_ID] = MAIL.MAP_ENTRY.duplicate(true)
 	maps.order.append(MAIL.MAP_ID)
+	maps.catalog[SLUICE.MAP_ID] = SLUICE.MAP_ENTRY.duplicate(true)
+	maps.order.append(SLUICE.MAP_ID)
 	return maps
