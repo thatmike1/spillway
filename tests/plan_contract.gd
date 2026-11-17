@@ -1,6 +1,7 @@
 extends SceneTree
 ## exercise canonical identity and rejected placement using real map and runner instances.
 const MAP := preload("res://scripts/maps/plan_yard.gd")
+const PIECES := preload("res://scripts/plan/pieces.gd")
 const HOST := preload("res://scripts/game.gd")
 const LAYOUT := preload("res://scripts/plan/layout.gd")
 func _initialize() -> void:
@@ -22,6 +23,29 @@ func run() -> void:
 	assert(map.apply_plan([2,5,8]))
 	assert(first != map.geometry_hash())
 	assert(get_nodes_in_group("r15_grapple_anchor").size() == 3)
+	assert(not LAYOUT.valid([INF]))
+	assert(not LAYOUT.valid([NAN]))
+	assert(not map.apply_design([0,3,6],4,-1,3,true,false))
+	assert(not map.apply_design([1,4],4,-1,3,false,false))
+	assert(not map.apply_design([1],-1,0,3,false,true))
+	assert(map.apply_design([3],-1,-1,3,false,false))
+	var single := map.geometry_hash()
+	assert(map.apply_design([3],-1,-1,1,true,true))
+	assert(single == map.geometry_hash())
+	assert(map.apply_design([1,4],4,-1,3,true,false))
+	await physics_frame
+	await physics_frame
+	var lift: Vector3 = PIECES.BLOCKS[4]
+	var ray := PhysicsRayQueryParameters3D.create(lift+Vector3.UP*2,lift-Vector3.UP*2)
+	var hit := map.get_world_3d().direct_space_state.intersect_ray(ray)
+	assert(not hit.is_empty() and str(hit.collider.name) == "PlanLift" and absf(hit.position.y-lift.y) < 0.001)
+	assert(map.apply_design([1,4],-1,7,3,false,true))
+	await physics_frame
+	await physics_frame
+	var pad: Vector3 = PIECES.PADS[7]
+	ray = PhysicsRayQueryParameters3D.create(pad+Vector3.UP*2,pad-Vector3.UP)
+	hit = map.get_world_3d().direct_space_state.intersect_ray(ray)
+	assert(not hit.is_empty() and hit.collider == map.pad_body and absf(hit.position.y-pad.y-0.08) < 0.001)
 	map.free()
 	var game := HOST.new()
 	game.map_id = "plan-yard"

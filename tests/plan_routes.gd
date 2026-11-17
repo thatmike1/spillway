@@ -13,6 +13,8 @@ var ready := false
 var rows: Array = []
 var output := "/tmp/r22-14-anchor-plan/routes"
 var mode := "west"
+var loadout := "anchors"
+var block_contacts := 0
 var last_trial := 2
 var arc_mode := false
 var release_rise_mps := 6.0
@@ -41,6 +43,8 @@ func _initialize() -> void:
 			release_rise_mps = float(arg.trim_prefix("--rise="))
 		if arg == "--arc":
 			arc_mode = true
+		if arg.begins_with("--loadout="):
+			loadout = arg.trim_prefix("--loadout=")
 		if arg.begins_with("--trial="):
 			trial = int(arg.trim_prefix("--trial="))
 			last_trial = trial
@@ -67,13 +71,28 @@ func start() -> void:
 func begin() -> void:
 	mode = ["west", "diagonal", "centre"][trial]
 	var plans := [[0,3,6], [1,4,8], [1,4,7]]
+	if loadout == "one":
+		plans[trial] = [3]
+	elif loadout in ["block","pad"]:
+		plans[trial] = [1,4]
+	if loadout != "anchors":
+		mode = loadout
 	tick = 0
 	if not replay:
 		event({"time":0,"button":1,"pressed":false})
 		event({"time":0,"button":2,"pressed":false})
 		key("Tab")
-		for i: int in LAYOUT.DEFAULT:
-			key(str(i+1))
+		key("Delete")
+		if loadout == "one":
+			key("F8")
+		elif loadout == "block":
+			key("B")
+			key("5")
+			key("A")
+		elif loadout == "pad":
+			key("P")
+			key("8")
+			key("A")
 		for i: int in plans[trial]:
 			key(str(i+1))
 		key("Enter")
@@ -82,6 +101,8 @@ func begin() -> void:
 			if float(row.time) == 0:
 				event(row)
 	assert(game.level.plan == plans[trial])
+	assert(game.level.block_slot == (4 if loadout == "block" else -1))
+	assert(game.level.pad_slot == (7 if loadout == "pad" else -1))
 	if trial < 2:
 		var x := -14.0 if trial == 0 else 14.0
 		points = [Vector3(x,3,13), Vector3(x,3,-49), Vector3(0,3,-49)]
@@ -97,6 +118,7 @@ func begin() -> void:
 	tick = 0
 	attached_ticks = 0
 	max_height = 0
+	block_contacts = 0
 	max_speed = 0
 	landings = []
 	prior_grounded = true
@@ -169,23 +191,25 @@ func _physics_process(_delta: float) -> bool:
 		desired.y = 0
 		var aim := target - (at+Vector3.UP*1.6256) - Vector3(player.velocity.x,0,player.velocity.z)*0.25
 		if arc_mode:
-			var socket: int = game.level.plan[mini(rope_stage,2)]
+			var socket: int = game.level.plan[mini(rope_stage,game.level.plan.size()-1)]
 			var ring: Vector3 = LAYOUT.SOCKETS[socket]
 			desired = Vector3(ring.x-at.x-player.velocity.x*0.8,0,-15)
 			if stage == 0:
 				desired = target-at
 				desired.y = 0
-			if rope_stage >= 3:
-				desired = Vector3(0-at.x,0,-49-at.z)
+			if rope_stage >= game.level.plan.size():
+				desired = Vector3((-14 if loadout == "one" else 0)-at.x,0,-49-at.z)
 				aim = desired + Vector3.DOWN*1.6256
 			else:
 				aim = ring-(at+Vector3.UP*1.6256)
 			aim_age += 1
-			var holding: bool = rope_stage < 3 and aim_age > 5 and at.z < 8
+			var holding: bool = rope_stage < game.level.plan.size() and aim_age > 5 and at.z < 8
 			var release_ready: bool = at.z < ring.z - 1.0 and player.velocity.y > (3.0 if socket == 4 else release_rise_mps)
 			if socket == 4:
 				release_ready = release_ready and at.y > 11
-			if rope_stage == 2:
+				if loadout == "block":
+					release_ready = at.z < -7.5 and at.y > 7.2 and player.velocity.y > 1.5
+			if rope_stage == game.level.plan.size()-1 and socket != 4:
 				release_ready = at.z < ring.z - 3 and at.y > 5.0 and player.velocity.z < -5
 			if holding and pending_release < 0 and release_ready:
 				pending_release = tick + roundi(release_delay*128)
@@ -208,7 +232,7 @@ func _physics_process(_delta: float) -> bool:
 			var right := Vector3(cos(yaw),0,-sin(yaw))
 			desired = desired.normalized()
 			var horizontal := Vector2(player.velocity.x,player.velocity.z)
-			if player.grapple.is_empty() and not player.is_grounded() and horizontal.length() > 0.1 and horizontal.length() < 5:
+			if player.grapple.is_empty() and not player.is_grounded() and horizontal.length() > 0.1 and horizontal.length() < (8.0 if loadout == "block" else 5.0):
 				var a := horizontal.normalized().rotated(PI/2)
 				var b := horizontal.normalized().rotated(-PI/2)
 				var goal := Vector2(desired.x,desired.z)
@@ -220,12 +244,20 @@ func _physics_process(_delta: float) -> bool:
 			action("move_back",maxf(-f,0))
 			action("move_right",maxf(side,0))
 			action("move_left",maxf(-side,0))
-			action("jump",1 if stage > 0 and at.z < 8 else 0)
+			var jump_on: bool = stage > 0 and at.z < 8 and not (loadout == "pad" and at.z < -17 and not player.used_pad)
+			if loadout == "block" and player.is_grounded() and absf(at.y-8) < 0.15 and at.z > -18.8:
+				jump_on = false
+			action("jump",1 if jump_on else 0)
 		else:
 			action("move_forward",1)
 			action("jump",1 if stage == 1 and at.z < -2 and absf(player.velocity.x) < 0.5 else 0)
 	if not player.grapple.is_empty():
 		attached_ticks += 1
+	if loadout == "block" and player.is_grounded():
+		var ray := PhysicsRayQueryParameters3D.create(player.global_position+Vector3.UP*0.05,player.global_position-Vector3.UP*0.1,1,[player.get_rid()])
+		var contact := player.get_world_3d().direct_space_state.intersect_ray(ray)
+		if not contact.is_empty() and str(contact.collider.name) == "PlanLift":
+			block_contacts += 1
 	max_height = maxf(max_height, player.global_position.y)
 	max_speed = maxf(max_speed, player.get_speed())
 	if player.is_grounded() and not prior_grounded:
@@ -234,7 +266,7 @@ func _physics_process(_delta: float) -> bool:
 	tick += 1
 	return false
 func end_trial() -> void:
-	var row := {"plan": game.level.plan, "route": mode, "replay": replay, "finished": game.finished, "clean": game.finish_kind, "ticks": tick, "time": game.elapsed, "attached_ticks": attached_ticks, "max_height": max_height, "max_speed_mps":max_speed, "landings":landings, "arc_mode": arc_mode, "release_rise_mps": release_rise_mps, "release_delay_s":release_delay, "aim_ceiling_deg":aim_ceiling, "position": str(game.player.global_position), "identity": game.motion_identity()}
+	var row := {"plan": game.level.plan, "design":game.level.design(), "loadout":loadout, "block_contacts":block_contacts, "launches":player_launches(), "route": mode, "replay": replay, "finished": game.finished, "clean": game.finish_kind, "ticks": tick, "time": game.elapsed, "attached_ticks": attached_ticks, "max_height": max_height, "max_speed_mps":max_speed, "landings":landings, "arc_mode": arc_mode, "release_rise_mps": release_rise_mps, "release_delay_s":release_delay, "aim_ceiling_deg":aim_ceiling, "position": str(game.player.global_position), "identity": game.motion_identity()}
 	rows.append(row)
 	print(JSON.stringify(row))
 	for id: String in ["move_forward","move_back","move_left","move_right","jump"]:
@@ -257,6 +289,10 @@ func end_trial() -> void:
 			FileAccess.open(output.path_join("routes.json"),FileAccess.WRITE).store_string(JSON.stringify(rows,"\t"))
 			complete = true
 			var ok := rows.all(func(r: Dictionary) -> bool: return r.finished and r.clean == "clean")
+			if loadout == "block":
+				ok = ok and rows.all(func(r: Dictionary) -> bool: return r.block_contacts > 0)
+			if loadout == "pad":
+				ok = ok and rows.all(func(r: Dictionary) -> bool: return r.launches.size() == 1)
 			for i: int in range(0,rows.size(),2):
 				for field: String in ["ticks","time","position","identity","attached_ticks"]:
 					ok = ok and rows[i][field] == rows[i+1][field]
@@ -267,3 +303,6 @@ func schedule_trial() -> void:
 	game.free()
 	game = null
 	start.call_deferred()
+
+func player_launches() -> Array:
+	return game.player.launch_events.duplicate(true)

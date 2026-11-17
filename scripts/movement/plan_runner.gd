@@ -1,6 +1,9 @@
 extends "res://scripts/movement/grapple_player.gd"
 ## isolate planning from the inherited F2 motor and Arc force law.
 const OVERLAY := preload("res://scripts/plan/overlay.gd")
+const PIECES := preload("res://scripts/plan/pieces.gd")
+var used_pad := false
+var launch_events: Array[Dictionary] = []
 var planner: Control
 var planning := false
 func _ready() -> void:
@@ -17,6 +20,15 @@ func _input(event: InputEvent) -> void:
 		var code: int = event.physical_keycode if event.physical_keycode else event.keycode
 		if code == KEY_TAB:
 			open_plan()
+			get_viewport().set_input_as_handled()
+		elif planning and code in [KEY_A,KEY_B,KEY_P]:
+			planner.choose_brush({KEY_A:"anchor",KEY_B:"block",KEY_P:"pad"}[code],event.shift_pressed)
+			get_viewport().set_input_as_handled()
+		elif planning and code == KEY_F8:
+			planner.toggle_budget()
+			get_viewport().set_input_as_handled()
+		elif planning and code == KEY_DELETE:
+			planner.clear_pieces()
 			get_viewport().set_input_as_handled()
 		elif planning and code >= KEY_1 and code <= KEY_9:
 			planner.toggle_socket(code-KEY_1)
@@ -47,4 +59,45 @@ func close_plan() -> void:
 func _physics_process(delta: float) -> void:
 	if planning:
 		return
+	_step_pad()
 	super(delta)
+
+func reset_to(pose: Transform3D) -> void:
+	used_pad = false
+	launch_events.clear()
+	super(pose)
+func _step_pad() -> void:
+	if not input_enabled or used_pad or not is_grounded():
+		return
+	var map: Node = get_parent().get("level")
+	if map == null or map.pad_body == null or not map.pad_bounds.has_point(global_position):
+		return
+	var probe := Vector3.DOWN*float(settings.ground_probe)*U
+	var hit := move_and_collide(probe,true,safe_margin,false,4)
+	if hit == null:
+		var caught := _missed_support(global_position,probe,"probe")
+		if not caught.is_empty():
+			hit = caught.hit
+	if hit == null:
+		return
+	var support := {}
+	for i: int in hit.get_collision_count():
+		if hit.get_collider(i) == map.pad_body and hit.get_normal(i).y >= float(settings.sv_walkable_normal):
+			support = {"body":str(map.pad_body.name),"normal":hit.get_normal(i),"position":hit.get_position(i)}
+	if support.is_empty():
+		return
+	var impulse: Dictionary = PIECES.LAUNCH.response(velocity/U,Vector3.FORWARD,false)
+	if impulse.is_empty():
+		return
+	used_pad = true
+	velocity = (impulse.after_u as Vector3)*U
+	state.grounded = false
+	state.ground_normal = Vector3.ZERO
+	flight = {"takeoff":Vector2(velocity.x,velocity.z).length()/U,"ticks":0,"eligible":0,"good":0,"start_tick":motion_tick+1}
+	launch_events.append({"tick":motion_tick+1,"before_u":impulse.before_u,"after_u":impulse.after_u,"position":global_position,"pad":map.pad_slot,"support":support})
+func get_motion_state() -> Dictionary:
+	var result := super()
+	var host := get_parent()
+	var map: Node = host.get("level") if host != null else null
+	result["plan_yard"] = {"design":map.physical_design() if map != null and map.has_method("physical_design") else {},"pad_used":used_pad,"launches":launch_events.duplicate(true)}
+	return result

@@ -1,44 +1,155 @@
 extends Control
-## the survey drawing makes fixed heights explicit instead of pretending to pick depth.
+## surveyed equipment zones expose height, inventory and experimental options before running.
 const LAYOUT := preload("res://scripts/plan/layout.gd")
+const PIECES := preload("res://scripts/plan/pieces.gd")
 var runner: CharacterBody3D
+var brush := "anchor"
+var notice := ""
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
+func scale_factor() -> float:
+	return minf(10,(size.y-160)/75)
 func point(at: Vector3) -> Vector2:
-	return Vector2(size.x * 0.5 + at.x * 7, size.y * 0.5 + (at.z+17) * 7)
-func _draw() -> void:
-	draw_rect(Rect2(Vector2.ZERO, size), Color("203d45"))
-	var font := ThemeDB.fallback_font
-	draw_string(font, Vector2(30, 42), "PLAN YARD  /  SURVEY", HORIZONTAL_ALIGNMENT_LEFT, -1, 26, Color("efe8cf"))
-	draw_string(font, Vector2(30, 74), "Click or press 1–9. Three anchors maximum. Enter runs. Tab restarts into planning.", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("efe8cf"))
-	for rect: Rect2 in [Rect2(-18, 5, 36, 15), Rect2(-18, -55, 36, 21), Rect2(-18, -34, 7, 39), Rect2(11, -34, 7, 39), Rect2(-5, -18, 10, 10), Rect2(-5, -30, 10, 9)]:
-		draw_rect(Rect2(point(Vector3(rect.position.x, 0, rect.position.y)), rect.size*7), Color("b9b8a5"))
-	var level: Node = runner.get_parent().get("level")
-	for i: int in LAYOUT.SOCKETS.size():
-		var p := point(LAYOUT.SOCKETS[i])
-		draw_circle(p, 13, Color("cd854f") if i in level.plan else Color("6c8f95"))
-		draw_string(font, p+Vector2(17, 5), "%d / %dm" % [i+1, LAYOUT.SOCKETS[i].y], HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("efe8cf"))
-	draw_circle(point(runner.get_parent().get("level").spawn.origin), 6, Color("203d45"))
-	draw_string(font, point(Vector3(-17, 0, 17)), "SPAWN", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("203d45"))
-	draw_string(font, point(Vector3(-17, 0, -47)), "FINISH", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("203d45"))
-	draw_string(font, Vector2(30, size.y-30), "%d / 3 anchors placed. Datum: quays +3m, caisson +7/+9m, sea -4m." % level.plan.size(), HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("efe8cf"))
-func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		for i: int in LAYOUT.SOCKETS.size():
-			if point(LAYOUT.SOCKETS[i]).distance_to(event.position) < 18:
-				toggle_socket(i)
-				accept_event()
-				return
-
-func toggle_socket(index: int) -> void:
-	if index < 0 or index >= LAYOUT.SOCKETS.size():
-		return
-	var level: Node = runner.get_parent().get("level")
-	var next: Array = level.plan.duplicate()
-	if index in next:
-		next.erase(index)
-	elif next.size() < 3:
-		next.append(index)
-	level.apply_plan(next)
+	return Vector2(size.x*0.67+at.x*scale_factor(),size.y*0.5+(at.z+17)*scale_factor())
+func level() -> Node:
+	return runner.get_parent().get("level")
+func choose_brush(kind: String, disable := false) -> void:
+	var map := level()
+	var blocks: bool = map.blocks_enabled
+	var pads: bool = map.pads_enabled
+	var block: int = map.block_slot
+	var pad: int = map.pad_slot
+	if kind == "block":
+		blocks = not disable
+		if disable:
+			block = -1
+	if kind == "pad":
+		pads = not disable
+		if disable:
+			pad = -1
+	map.apply_design(map.plan,block,pad,map.budget,blocks,pads)
+	brush = "anchor" if disable else kind
+	notice = ""
 	queue_redraw()
+func toggle_budget() -> void:
+	var map := level()
+	var limit := 1 if map.budget == 3 else 3
+	var anchors: Array = map.plan.slice(0,limit)
+	map.apply_design(anchors,-1,-1,limit,map.blocks_enabled,map.pads_enabled)
+	notice = "Budget changed; equipment cleared except retained anchors."
+	queue_redraw()
+func clear_pieces() -> void:
+	var map := level()
+	map.apply_design([],-1,-1,map.budget,map.blocks_enabled,map.pads_enabled)
+	notice = "Plan cleared. Choose equipment before running."
+	queue_redraw()
+func toggle_socket(index: int) -> void:
+	var map := level()
+	var anchors: Array = map.plan.duplicate()
+	var block: int = map.block_slot
+	var pad: int = map.pad_slot
+	if brush == "anchor":
+		if index < 0 or index >= LAYOUT.SOCKETS.size():
+			return
+		if index in anchors:
+			anchors.erase(index)
+		else:
+			anchors.append(index)
+	elif brush == "block":
+		if not PIECES.BLOCKS.has(index):
+			notice = "Blocks fit zones 4, 5 and 6."
+			queue_redraw()
+			return
+		block = -1 if block == index else index
+	else:
+		if not PIECES.PADS.has(index):
+			notice = "Pads fit supported decks: zones 4, 5, 6 and 8."
+			queue_redraw()
+			return
+		pad = -1 if pad == index else index
+	var ok: bool = map.apply_design(anchors,block,pad,map.budget,map.blocks_enabled,map.pads_enabled)
+	notice = "" if ok else "Budget full. Remove a piece first."
+	queue_redraw()
+func _draw() -> void:
+	var map := level()
+	var font := ThemeDB.fallback_font
+	var ink := Color("efe8cf")
+	draw_rect(Rect2(Vector2.ZERO,size),Color("203d45"))
+	draw_string(font,Vector2(30,42),"Plan Yard / survey",HORIZONTAL_ALIGNMENT_LEFT,-1,26,ink)
+	draw_string(font,Vector2(30,74),"Choose a plan, then Enter runs. Tab returns here at spawn.",HORIZONTAL_ALIGNMENT_LEFT,-1,18,ink)
+	var names := {"anchor":"A  Rope anchors", "block":"B  Rising block", "pad":"P  Launch pad"}
+	var kinds := ["anchor","block","pad"]
+	for i: int in 3:
+		var kind: String = kinds[i]
+		var y := 135.0+i*46
+		if brush == kind:
+			draw_rect(Rect2(24,y-26,375,38),Color("31555e"))
+		var state := ""
+		if kind == "block":
+			state = "  on" if map.blocks_enabled else "  off"
+		elif kind == "pad":
+			state = "  on" if map.pads_enabled else "  off"
+		draw_string(font,Vector2(34,y),names[kind]+state,HORIZONTAL_ALIGNMENT_LEFT,-1,21,ink)
+	draw_string(font,Vector2(30,275),"F8  Budget: %d piece%s" % [map.budget,"" if map.budget == 1 else "s"],HORIZONTAL_ALIGNMENT_LEFT,-1,21,ink)
+	draw_string(font,Vector2(30,299),"Changing budget removes extra pieces.",HORIZONTAL_ALIGNMENT_LEFT,-1,16,ink)
+	draw_string(font,Vector2(30,340),"Delete  Clear plan",HORIZONTAL_ALIGNMENT_LEFT,-1,18,ink)
+	draw_string(font,Vector2(30,370),"Click a zone or press its number (1–9).",HORIZONTAL_ALIGNMENT_LEFT,-1,17,ink)
+	draw_string(font,Vector2(30,400),"Each item costs one piece.",HORIZONTAL_ALIGNMENT_LEFT,-1,17,ink)
+	draw_string(font,Vector2(30,430),"One block and one pad maximum.",HORIZONTAL_ALIGNMENT_LEFT,-1,17,ink)
+	draw_string(font,Vector2(30,460),"Shift+B / Shift+P turn those options off.",HORIZONTAL_ALIGNMENT_LEFT,-1,17,ink)
+	draw_string(font,Vector2(30,490),"Launch: 300+ u/s toward the far quay.",HORIZONTAL_ALIGNMENT_LEFT,-1,17,ink)
+	for rect: Rect2 in [Rect2(-18,5,36,15),Rect2(-18,-55,36,21),Rect2(-18,-34,7,39),Rect2(11,-34,7,39),Rect2(-5,-18,10,10),Rect2(-5,-30,10,9)]:
+		draw_rect(Rect2(point(Vector3(rect.position.x,0,rect.position.y)),rect.size*scale_factor()),Color("b9b8a5"))
+	for index: int in map.plan:
+		draw_circle(point(LAYOUT.SOCKETS[index]),12,Color("cd854f"))
+	if map.block_slot >= 0:
+		var p := point(PIECES.BLOCKS[map.block_slot])
+		draw_rect(Rect2(p-Vector2.ONE*3.5*scale_factor(),Vector2.ONE*7*scale_factor()),Color("ddd7bd"))
+	if map.pad_slot >= 0:
+		draw_circle(point(PIECES.PADS[map.pad_slot]),13,Color("cd854f"),false,3)
+	var positions := {}
+	if brush == "anchor":
+		for i: int in LAYOUT.SOCKETS.size():
+			positions[i] = LAYOUT.SOCKETS[i]
+	else:
+		positions = PIECES.BLOCKS if brush == "block" else PIECES.PADS
+	for i: int in positions:
+		var at: Vector3 = positions[i]
+		var p := point(at)
+		draw_circle(p,13,Color("6c8f95"),false,2)
+		draw_rect(Rect2(p+Vector2(-29,15),Vector2(58,21)),Color("ddd7bd"))
+		draw_string(font,p+Vector2(-26,30),"%s%d +%dm" % [brush.substr(0,1).to_upper(),i+1,at.y],HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("203d45"))
+	draw_circle(point(map.spawn.origin),6,Color("203d45"))
+	draw_string(font,point(Vector3(-17,0,17)),"SPAWN",HORIZONTAL_ALIGNMENT_LEFT,-1,17,Color("203d45"))
+	draw_string(font,point(Vector3(-17,0,-47)),"FINISH",HORIZONTAL_ALIGNMENT_LEFT,-1,17,Color("203d45"))
+	draw_string(font,Vector2(30,size.y-65),notice,HORIZONTAL_ALIGNMENT_LEFT,-1,17,ink)
+	draw_string(font,Vector2(30,size.y-30),"%d / %d pieces · elevations: quays +3m, caisson +7/+9m, sea -4m" % [PIECES.count(map.plan,map.block_slot,map.pad_slot),map.budget],HORIZONTAL_ALIGNMENT_LEFT,-1,19,ink)
+func _gui_input(event: InputEvent) -> void:
+	if not event is InputEventMouseButton or not event.pressed or event.button_index != MOUSE_BUTTON_LEFT:
+		return
+	for i: int in 3:
+		if Rect2(24,109+i*46,375,38).has_point(event.position):
+			var kind: String = ["anchor","block","pad"][i]
+			choose_brush(kind,brush == kind and kind != "anchor")
+			accept_event()
+			return
+	if Rect2(24,260,375,42).has_point(event.position):
+		toggle_budget()
+		accept_event()
+		return
+	if Rect2(24,312,375,38).has_point(event.position):
+		clear_pieces()
+		accept_event()
+		return
+	var positions := {}
+	if brush == "anchor":
+		for i: int in LAYOUT.SOCKETS.size():
+			positions[i] = LAYOUT.SOCKETS[i]
+	else:
+		positions = PIECES.BLOCKS if brush == "block" else PIECES.PADS
+	for i: int in positions:
+		if point(positions[i]).distance_to(event.position) < 18:
+			toggle_socket(i)
+			accept_event()
+			return
