@@ -7,8 +7,8 @@ const MAP_ID := "plan-yard"
 const MAP_ENTRY := {"name": "Plan Yard", "theme": "Place a line, then run it", "kind": "experiment", "experimental": true, "grapple": true, "tether_model": "elastic-arc", "runner": "res://scripts/movement/plan_runner.gd", "script": "res://scripts/maps/plan_yard.gd", "reticle": true, "instructions": "Tab: plan from above. Click up to three surveyed sockets. Enter: run. LMB: Arc rope, RMB: reel. R: retry the same plan.", "key_hint": " · Tab plans; Enter runs"}
 var level_id := "r22-plan-yard"
 var level_name := "Plan Yard"
-var level_version := 1
-var spawn := Transform3D(Basis.IDENTITY, Vector3(0, 3.04, 13))
+var level_version := 6
+var spawn := Transform3D(Basis.IDENTITY, Vector3(-4, 3.04, 13))
 var finish_title := "Far quay"
 var finish_position := Vector3(0, 3, -48)
 var finish_radius := 3.0
@@ -33,15 +33,19 @@ func build() -> void:
 		return
 	_built = true
 	deck("start", -18, 18, 5, 20, 3)
-	deck("finish", -18, 18, -55, -42, 3)
-	deck("west", -18, -11, -42, 5, 3)
-	deck("east", 11, 18, -42, 5, 3)
-	deck("caisson", -5, 5, -30, -8, 7)
+	deck("finish", -18, 18, -55, -34, 3)
+	deck("west", -18, -11, -34, 5, 3)
+	deck("east", 11, 18, -34, 5, 3)
+	deck("caisson_front", -5, 5, -18, -8, 7)
+	deck("caisson_rear", -5, 5, -30, -21, 9)
+	deck("caisson_foundation", -5, 5, -21, -18, -3)
 	checkpoints.append({"pose": spawn, "title": "Choose your line", "bounds": AABB(Vector3(-18, 2.8, 5), Vector3(36, 3, 15))})
-	for z: float in [1, -17, -35]:
+	for z: float in [1, -11, -25]:
 		box("gantry_beam", Vector3(0, 15, z), Vector3(40, 0.5, 0.6), Color("344e52"))
 		for x: float in [-20, 20]:
 			box("gantry_column", Vector3(x, 4, z), Vector3(0.7, 22, 0.9), Color("344e52"))
+	for x: float in [-12, 0, 12]:
+		box("travelling_rail", Vector3(x,15,-12), Vector3(0.3,0.35,34), Color("344e52"))
 	var env := WorldEnvironment.new()
 	env.environment = Environment.new()
 	env.environment.background_mode = Environment.BG_COLOR

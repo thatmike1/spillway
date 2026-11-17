@@ -18,6 +18,9 @@ func _input(event: InputEvent) -> void:
 		if code == KEY_TAB:
 			open_plan()
 			get_viewport().set_input_as_handled()
+		elif planning and code >= KEY_1 and code <= KEY_9:
+			planner.toggle_socket(code-KEY_1)
+			get_viewport().set_input_as_handled()
 		elif planning and code == KEY_ENTER:
 			close_plan()
 			get_viewport().set_input_as_handled()
@@ -25,7 +28,8 @@ func open_plan() -> void:
 	var game := get_parent()
 	if game.get("level") == null:
 		return
-	game.restart_run("plan_edit")
+	game.restart_run("restart")
+	game.session.boundary("restart", {"phase":"planning"})
 	planning = true
 	block_tether("plan")
 	input_enabled = false
@@ -36,10 +40,10 @@ func close_plan() -> void:
 	planning = false
 	planner.hide()
 	var game := get_parent()
-	game.session.boundary("plan_commit")
+	game.session.boundary("restart", {"phase":"plan_commit"})
 	game.course_geometry = game.level.geometry_hash()
 	game._refresh_records()
-	game.restart_run("plan_commit")
+	game.restart_run("restart")
 func _physics_process(delta: float) -> void:
 	if planning:
 		return
