@@ -11,7 +11,7 @@ const DECK_HEIGHTS := [4.0, 4.0, 4.0]
 const MAP_ID := "gantry"
 const MAP_ENTRY := {"name": LEVEL_NAME, "theme": "Build a hop line; carry it through the crane slots", "kind": "experiment",
 	"experimental": true, "runner": "res://scripts/movement/grapple_player.gd", "script": "res://scripts/maps/gantry.gd",
-	"reticle": true, "grapple": true, "tether_model": "elastic-arc", "key_hint": " · Space hops · LMB swing · RMB reel",
+	"reticle": true, "grapple": true, "own_look": true, "tether_model": "elastic-arc", "key_hint": " · Space hops · LMB swing · RMB reel",
 	"instructions": "Build speed on the pale aprons with Space and air strafing. Hold LMB at a ring across each water slot. RMB reels; release to land and hop again. Arc rope law."}
 const ANCHORS := [Vector3(0, 14, -21), Vector3(0, 14, -69)]
 const HALF_WIDTH := 6.5024
@@ -96,7 +96,16 @@ func _anchor(index: int, at: Vector3) -> void:
 	_box("Art_paint_dark_beam_%d" % index, at + Vector3(0, 1.1, 0), Vector3(26, 0.65, 0.7), Color("29464a"))
 	for side: float in [-13.0, 13.0]:
 		_box("Art_paint_dark_post_%d_%s" % [index, side], Vector3(at.x + side, 4.0, at.z), Vector3(0.7, 22.2, 0.7), Color("29464a"))
-	_sign("anchor_%d" % index, at + Vector3(0, 1.8, 0), "TRANSFER %d\nHOLD LMB" % (index + 1), 0.006)
+	var rim := MeshInstance3D.new()
+	rim.name = "Art_anchor_dark_rim"
+	var outline := TorusMesh.new()
+	outline.inner_radius = 0.82
+	outline.outer_radius = 1.0
+	rim.mesh = outline
+	rim.rotation.x = PI * 0.5
+	rim.material_override = RUNNER._flat(Color("263d45"))
+	anchor.add_child(rim)
+	_box("Art_anchor_bracket_%d" % index, at + Vector3(0, 1.0, 0), Vector3(1.6, 0.40, 0.20), Color("29464a"))
 
 func route_hint(stage: int, _feet: Vector3) -> String:
 	return "Space and air-strafe on the apron. Hold LMB at the next ring; release over the receiving apron." if stage < 2 else "Carry the landing into hops down the dispatch apron."
@@ -133,7 +142,7 @@ func _environment() -> void:
 	sun.light_color = Color("fff0d2")
 	sun.light_energy = 0.7
 	add_child(sun)
-	_box("Water", Vector3(0, -8, -40), Vector3(600, 0.05, 600), Color("789f9c"))
+	_box("Water", Vector3(0, -4.5, -40), Vector3(600, 0.05, 600), Color("789f9c"))
 
 func _box(id: String, at: Vector3, size: Vector3, color: Color) -> void:
 	art_manifest.append([id, _v(at), _v(size), color.to_html()])
