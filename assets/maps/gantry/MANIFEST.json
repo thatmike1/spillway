@@ -12,5 +12,15 @@
     "res://assets/look/cloud-sky.png",
     "res://shaders/look/water.gdshader"
   ],
-  "private_references_included": false
+  "private_references_included": false,
+  "original_scenery": {
+    "source": "res://scripts/art/gantry_drydock.gd",
+    "rights": "original project-authored procedural meshes; no external geometry or images imported",
+    "forms": [
+      "supported gate crane",
+      "suspended ribbed caisson",
+      "connected harbour wall",
+      "continuous distant headland"
+    ]
+  }
 }

@@ -77,17 +77,45 @@ class RopeStroke extends Node:
 
 	func _process(_delta: float) -> void:
 		var host := get_parent().get_parent()
-		if not host.has_method("map_entry") or str(host.get("map_id")) != "gantry":
+		if not host.has_method("map_entry") or str(host.get("map_id")) not in ["gantry", "gantry-chain"]:
 			return
 		var runner: Node = host.get("player")
-		if runner == null or runner.get_instance_id() == styled_instance:
+		if runner == null:
 			return
 		var rope := runner.get_node_or_null("GrappleTether") as MeshInstance3D
 		if rope == null or not rope.mesh is CylinderMesh:
 			return
-		# a map-local copy changes only the visual stroke, never the motor or rope law.
-		var mesh := rope.mesh.duplicate() as CylinderMesh
-		mesh.top_radius = 0.006
-		mesh.bottom_radius = 0.006
-		rope.mesh = mesh
-		styled_instance = runner.get_instance_id()
+		if runner.get_instance_id() != styled_instance:
+			# a map-local copy changes only the visual stroke, never the motor or rope law.
+			rope.mesh = rope.mesh.duplicate()
+			styled_instance = runner.get_instance_id()
+		if not rope.visible:
+			return
+		var camera: Camera3D = runner.get("camera")
+		var hand := rope.global_transform * Vector3(0, -0.5, 0)
+		var end := rope.global_transform * Vector3(0, 0.5, 0)
+		var view := camera.global_transform.affine_inverse()
+		var hand_depth: float = -(view * hand).z
+		var end_depth: float = -(view * end).z
+		var near_depth := camera.near * 1.05
+		if end_depth < near_depth:
+			# clip the visual endpoint before projecting; the attached physics anchor is untouched.
+			end = hand.lerp(end, clampf((hand_depth - near_depth) / (hand_depth - end_depth), 0.0, 1.0))
+			var span := end - hand
+			var up := span.normalized()
+			var side := up.cross(Vector3.FORWARD if absf(up.dot(Vector3.FORWARD)) < 0.95 else Vector3.RIGHT).normalized()
+			rope.global_transform = Transform3D(Basis(side, span, side.cross(up)), (hand + end) * 0.5)
+		var mesh := rope.mesh as CylinderMesh
+		mesh.top_radius = stroke_radius(camera, end, rope.global_basis)
+		mesh.bottom_radius = stroke_radius(camera, hand, rope.global_basis)
+
+	static func stroke_radius(camera: Camera3D, at: Vector3, basis: Basis) -> float:
+		# cap the projected diameter at two pixels and the world radius at the previous six mm.
+		# use the actual cap axes: offscreen near-plane caps also change depth across their width.
+		var probe := 0.00001
+		var pixel_diameter := 0.0
+		for axis: Vector3 in [basis.x, basis.z]:
+			var a := camera.unproject_position(at + axis * probe)
+			var b := camera.unproject_position(at - axis * probe)
+			pixel_diameter = maxf(pixel_diameter, a.distance_to(b))
+		return minf(0.006, 2.0 * probe / maxf(pixel_diameter, 0.000001))
