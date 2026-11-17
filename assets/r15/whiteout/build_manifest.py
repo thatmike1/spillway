@@ -2,8 +2,9 @@
 """p / rebuild MANIFEST.json for the Whiteout Relay kit from the saved poly haven api records.
 
 each shipped file is hashed here and checked against the md5 the api published for it; a
-mismatch stops the build. the api records (info_<id>.json, files_<id>.json) are kept with the
-evidence, under checkpoints/spillway/r15/whiteout/provenance/.
+mismatch stops the build. the original api records (info_<id>.json, files_<id>.json)
+are not retained in the repository. supply saved public api responses with --api;
+this optional provenance rebuild is not required to run, test or export the game.
 
 python3 -I assets/r15/whiteout/build_manifest.py --api DIR
 """

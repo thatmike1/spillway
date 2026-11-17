@@ -9,7 +9,7 @@ const LEVEL_VERSION := 2
 const DECK_HEIGHTS := [4.0, 3.0, 4.0, 2.25]
 const MAP_ID := "tether-yard"
 const MAP_ENTRY := {"name": LEVEL_NAME, "theme": "Hold, swing and release across the transfer yard", "kind": "experiment",
-	"experimental": true, "grapple": true, "runner": "res://scripts/r21_tether_player.gd", "script": "res://scripts/r21_tether_level.gd",
+	"experimental": true, "runner": "res://scripts/r21_tether_player.gd", "script": "res://scripts/r21_tether_level.gd",
 	"reticle": true, "key_hint": " · Hold LMB at a ring; release to coast",
 	"instructions": "EXPERIMENTAL grapple course. Aim at a marked ring, hold LMB to attach, RMB reels, release LMB to coast. Jump into a transfer, then aim at the next ring. Slide and wall jump are off."}
 const ANCHORS := [Vector3(0, 12, -8), Vector3(10, 12, -38), Vector3(-2, 12, -68)]
