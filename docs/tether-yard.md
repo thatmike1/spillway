@@ -56,4 +56,4 @@ The first full-input corrected replay stays exact through tick 370, diverges at 
 
 ## Verification
 
-`python3 tools/test.py` runs `tests/tether_coefficients.gd` and `tests/tether_geometry.gd`: applied coefficients, acquisition, Arc reel floor, render-cadence stress, collision manifests and connected return ramps. The slow tier preserves original-map motion and recordings. Historical earned-route, native and packed delivery receipts remain outside the checkout; the published r21 binaries retain their completed original acceptance.
+`python3 tools/test.py` runs `tests/tether_coefficients.gd` and `tests/tether_geometry.gd`: applied coefficients, acquisition, Arc reel floor, render-cadence stress, collision manifests and connected return ramps. The slow tier preserves original-map motion and recordings. Historical earned-route, native and packed delivery receipts are not retained in this repository or required for the current checks; the published r21 binaries retain their completed original acceptance.

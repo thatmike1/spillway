@@ -6,9 +6,9 @@ mouse turns; R13's bounded W steering is outside this reference.
 
 `tests/movement_oracle.py` imports only the Python standard library. Its equations
 and numerical fixtures are original. No engine or plugin implementation is copied
-into it. Downloaded reference material stays outside Git at:
-
-`/home/thatmike1/foldrunner-build-2026-11-05/checkpoints/spillway/r14/source-reference/`
+into it. [Source metadata](reference/README.md) records the public download URLs,
+SHA-256 hashes and fetch dates. Third-party snapshots are not kept in Git and are
+not required to run the oracle.
 
 ## What the evidence establishes
 
@@ -168,7 +168,8 @@ These are **no-stamina ideal mathematical maxima**, including the AA12 rows. The
 are not vanilla hop-chain maxima. With the oracle's explicitly approximate midpoint
 deadstrafe classification, hop 5 becomes 508.377570 (AA12/64),641.687025 (AA12/128),
 and remains527.730992/703.206940 for AA100. Changing the flight model to the ideal
-impulse changes K to49/97; full results are in the external JSON.
+impulse changes K to49/97; run `python3 tests/movement_oracle.py` to regenerate
+the full predictions as JSON.
 
 For a declared takeoff-only275 clamp with no stamina, constant-F1 recurrence is
 `L_n=sqrt(min(L_(n-1),275)²+K D)`, with first takeoff250. The Python function accepts
@@ -263,10 +264,13 @@ for each speed/budget case, closed-form arc versus repeated optimal ticks,
 closed-form friction versus recurrence, cap/budget discriminators and ballistic/hop
 identities. They test the independent derivation, not the game implementation.
 
-External evidence: `oracle-self-test.txt`, `oracle-predictions.json`, compressed
-source snapshots, `sources.json`, `failures-and-limits.txt`, and `SHA256SUMS`.
-Evidence contains no rendered frames, movies or runtime traces because no game was
-launched. No display/audio/profile was touched and no long-lived process remains.
+The original research produced oracle self-test output, JSON predictions, compressed
+source snapshots, source metadata, a failure log and checksums. Those evidence files
+are not retained in this repository. The [source metadata](reference/README.md)
+preserves download URLs, hashes and fetch dates; the commands above regenerate the
+original oracle's mathematical checks and predictions without those snapshots.
+The research produced no rendered frames, movies or runtime traces because no game
+was launched. No display/audio/profile was touched.
 
 Failed trials: VDC fetches hit Anubis/403; GitHub tracking-history API returned503;
 GitHub HTML reads stalled and were cancelled; several speculative raw paths gave404;

@@ -41,7 +41,7 @@ def main():
     profile.mkdir()
     engine.run(["--headless", "--editor", "--path", source, "--import"], cwd=source,
                profile=profile, log=out / "import.log")
-    components = ["saltglass_registration", "tether_geometry", "tether_coefficients", "grapple_capability", "r22_registration"]
+    components = ["saltglass_registration", "tether_geometry", "tether_coefficients", "grapple_capability", "r22_registration", "host_capabilities", "tether_feedback_identity", "tether_feedback_audio"]
     if args.slow:
         components.extend(["direction_stack", "through_line_original_maps"])
     report = {"ok": False, "mutations": pure, "components": []}
@@ -52,7 +52,7 @@ def main():
             print("check " + name, flush=True)
             result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
                                  "--fixed-fps", "128", "--script", "res://tests/" + name + ".gd",
-                                 "--", "--out=" + str(folder)], cwd=source, profile=profile,
+                                 "--", "--out=" + str(folder), "--menu-contract=" + str(verification.FIXTURES / "contract.json")], cwd=source, profile=profile,
                                 log=folder / "engine.log", timeout=300)
             report["components"].append({"name": name, **result})
         if args.slow:
