@@ -43,6 +43,7 @@ Stable round-numbered aliases preserve resource paths used by recording identiti
 | Overflow / `overflow` | `momentum_overflow_level.gd`; F2/F5 or the advanced R13 comparison runner |
 | Movement Lab / `experiment` | `r15_experiment_level.gd`, `r16_experiment_player.gd`; isolated slide, wall-jump and grapple loadouts |
 | Saltglass / `saltglass` | **`maps/saltglass.gd`**, course player; surf/exits experiment |
+| Saltglass Seaward / `saltglass-seaward` | `maps/saltglass_seaward.gd`, course player; separate visible receiver, original Saltglass unchanged |
 | Tether Yard / `tether-yard` | **`maps/tether_yard.gd`**, **`movement/grapple_player.gd`**; six rope laws and optional anchor acquisition assist |
 | Through Line / `through-line` | `r20_through_level.gd`, `r20_through_player.gd`; movement experiment |
 | Viaduct / `viaduct` | `maps/viaduct.gd`, grapple player; fixed Arc transfers and lower-court returns |
