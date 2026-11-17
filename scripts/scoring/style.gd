@@ -228,7 +228,11 @@ func discontinuity(reason: String) -> void:
 ## record_kind="direction" and are returned only for recording, never added to totals.
 func step(sample: Dictionary, body: CharacterBody3D, level: Node3D = null) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
-	if _sealed or _suspended:
+	if _sealed:
+		return out
+	if _suspended:
+		if not _prev.is_empty():
+			_prev.tick = int(sample.get("tick", 0))
 		return out
 	_body = body
 	_level = level
