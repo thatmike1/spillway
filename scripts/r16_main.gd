@@ -490,6 +490,10 @@ func map_entry(id: String = "") -> Dictionary:
 		return {"id": "fixture", "name": map_name() if key == map_id else "Fixture", "theme": "Labelled test fixture", "kind": "fixture"}
 	return MAPS.entry(maps, key)
 
+## map capabilities apply to the selected catalog entry, not a particular map id.
+func map_has_capability(capability: String) -> bool:
+	return bool(map_entry().get(capability, false))
+
 func map_name() -> String:
 	if map_id == "fixture":
 		var named: Variant = level.get("level_name") if level != null else null
