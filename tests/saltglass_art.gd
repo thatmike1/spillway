@@ -32,9 +32,10 @@ func run() -> void:
 		assert(is_finite(support_y) and absf(bottom - support_y) < 0.03, "paint/pump must meet the actual highest deck: " + str(node.name))
 	var before := solids(level)
 	var look := LOOK.new()
-	root.add_child(look)
+	level.add_child(look)
 	look.attach(level, "practice")
 	assert(look.swaps.size() > 0 and look.world != null)
+	await process_frame
 	for enabled: bool in [true, false, true]:
 		look.set_enabled(enabled)
 		assert(solids(level) == before and level.geometry_hash() == HASH)

@@ -9,6 +9,11 @@ var held := ""
 var output := "/tmp/r22-05/west-tape.json"
 var samples: Array = []
 
+class InputDriver extends Node:
+	var suite: SceneTree
+	func _physics_process(_dt: float) -> void:
+		suite.drive()
+
 func _initialize() -> void:
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
@@ -24,10 +29,15 @@ func start() -> void:
 	game.set_window_title = false
 	root.add_child(game)
 	game.set_paused(false)
+	game.restart_run("capture")
+	var driver := InputDriver.new()
+	driver.suite = self
+	driver.process_physics_priority = -100
+	root.add_child(driver)
 
-func _physics_process(_delta: float) -> bool:
+func drive() -> void:
 	if game == null or done:
-		return false
+		return
 	ticks += 1
 	var runner: Node3D = game.player
 	var p := runner.global_position
@@ -46,16 +56,16 @@ func _physics_process(_delta: float) -> bool:
 		event.screen_relative = event.relative
 		Input.parse_input_event(event)
 		Input.flush_buffered_events()
-		tape.append({"time": ticks / 128.0, "mouse": [dx, 0]})
+		tape.append({"time": (ticks - 1) / 128.0, "mouse": [dx, 0]})
 	if ticks % 64 == 0:
-		samples.append({"time": ticks / 128.0, "position": [p.x, p.y, p.z], "speed": runner.velocity.length()})
+		samples.append({"time": (ticks - 1) / 128.0, "position": [p.x, p.y, p.z], "speed": runner.velocity.length()})
 	if ticks >= 128 * 14 or p.z < -177 or game.respawn_count > 0:
 		done = true
 		FileAccess.open(output, FileAccess.WRITE).store_string(JSON.stringify(tape))
 		FileAccess.open(output + ".samples.json", FileAccess.WRITE).store_string(JSON.stringify(samples))
 		print("saltglass input tape: ", output, " final=", p, " respawns=", game.respawn_count)
 		game.request_quit(0)
-	return false
+	return
 
 func key(action: String, pressed: bool) -> void:
 	var event := InputEventAction.new()
@@ -64,4 +74,4 @@ func key(action: String, pressed: bool) -> void:
 	event.strength = 1.0 if pressed else 0.0
 	Input.parse_input_event(event)
 	Input.flush_buffered_events()
-	tape.append({"time": ticks / 128.0, "action": action, "pressed": pressed})
+	tape.append({"time": (ticks - 1) / 128.0, "action": action, "pressed": pressed})

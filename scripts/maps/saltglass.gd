@@ -75,6 +75,7 @@ func build() -> void:
 	_readable_surfaces()
 	_dressing()
 	_sign("salt_house", Vector3(322, 8, 38), -PI * 0.5, "SALT HOUSE\nFINISH", 0.009)
+	_fixture_look.call_deferred()
 
 func _fin(id: String, pose: Transform3D, stage: int) -> void:
 	# p / 168 m fin; each 21 m prism stays below 32 m in every dimension.
@@ -140,6 +141,8 @@ func _environment() -> void:
 	sun.rotation_degrees = Vector3(-38, -110, 0)
 	sun.light_color = Color("fff0d2")
 	sun.light_energy = 0.7
+	sun.shadow_enabled = true
+	sun.directional_shadow_max_distance = 220.0
 	add_child(sun)
 	var sea := MeshInstance3D.new()
 	sea.name = "SaltglassWater"
@@ -195,7 +198,20 @@ func _dressing() -> void:
 		for p: Vector3 in piece.points.slice(0, 4):
 			centre += p * 0.25
 		var underside := centre.y - 0.8
-		_art_box("pier_" + str(piece.name), Vector3(centre.x, (underside - 9.0) * 0.5, centre.z), Vector3(1.4, underside + 9.0, 2.4), Color("526b6a"))
+		var bounds := AABB(piece.points[0], Vector3.ZERO)
+		for point: Vector3 in piece.points.slice(0, 4):
+			bounds = bounds.expand(point)
+		if minf(bounds.size.x, bounds.size.z) > 8:
+			# paired bents and full bearing beams make each pan a supported process bed.
+			for z_sign: float in [-1, 1]:
+				var z := centre.z + z_sign * bounds.size.z * 0.28
+				_art_box("pan_bearing_%s_%s" % [piece.name, z_sign], Vector3(centre.x, underside - 0.55, z), Vector3(bounds.size.x - 0.4, 1.1, 1.8), Color("657f81"))
+				for x_sign: float in [-1, 1]:
+					var x := centre.x + x_sign * bounds.size.x * 0.28
+					var top := underside - 1.1
+					_art_box("pan_pile_%s_%s_%s" % [piece.name, x_sign, z_sign], Vector3(x, (top - 9.0) * 0.5, z), Vector3(1.8, top + 9.0, 1.8), Color("657f81"))
+		else:
+			_art_box("pier_" + str(piece.name), Vector3(centre.x, (underside - 9.0) * 0.5, centre.z), Vector3(1.4, underside + 9.0, 2.4), Color("657f81"))
 	for z: float in [-10, -52, -94, -136]:
 		_art_box("west_fin_foundation_%s" % z, Vector3(6, -7, z), Vector3(3, 4, 4), Color("526b6a"))
 		_art_box("east_fin_foundation_%s" % z, Vector3(126, -7, -168 - z), Vector3(3, 4, 4), Color("526b6a"))
@@ -212,9 +228,10 @@ func _dressing() -> void:
 	for x: float in [136.8, 142.2]:
 		for z: float in [-202, -196]:
 			_art_box("intake_leg_%s_%s" % [x, z], Vector3(x, 13, z), Vector3(0.9, 44, 0.9), Color("657f81"))
-	_art_box("intake_bearing", Vector3(139.5, 18.75, -199), Vector3(6.6, 0.5, 8), Color("657f81"))
-	_art_cylinder("brine_tank", Vector3(139.5, 27, -199), 2.4, 16, Color("657f81"))
-	_art_box("intake_crown", Vector3(139.5, 35.4, -199), Vector3(6.6, 0.8, 8), Color("b9b3a1"))
+	_art_box("intake_bearing", Vector3(139.5, 22.75, -199), Vector3(7.8, 0.5, 8), Color("657f81"))
+	_art_cylinder("brine_tank", Vector3(139.5, 28, -199), 3.0, 10, Color("657f81"))
+	_art_cylinder("paint_brine_collar", Vector3(139.5, 28, -199), 3.04, 0.35, Color("d9ddcf"))
+	_art_box("intake_crown", Vector3(139.5, 35.4, -199), Vector3(7.8, 0.8, 8), Color("b9b3a1"))
 	for i: int in 5:
 		_art_box("store_louvre_%d" % i, Vector3(217.5, 7.5 + i * 0.55, 54.03), Vector3(4.9, 0.12, 0.1), Color("263d45"))
 	# the loading canopy bears on four columns planted on the finish deck.
@@ -222,10 +239,22 @@ func _dressing() -> void:
 	for x: float in [308.5, 319.5]:
 		for z: float in [54.5, 61.5]:
 			_art_box("house_column_%s_%s" % [x, z], Vector3(x, 6.4, z), Vector3(0.35, 4.8, 0.35), Color("657f81"))
+	# bulk salt sits under the loading canopy, clear of the finish approach.
+	for x: float in [311, 317]:
+		var heap := _art_cylinder("salt_heap_%d" % int(x), Vector3(x, 5.4, 58), 2.4, 2.8, Color("eee7d6"))
+		(heap.mesh as CylinderMesh).top_radius = 0.15
+		(heap.mesh as CylinderMesh).radial_segments = 7
+		heap.name = "SaltglassSalt_%d" % int(x)
+	_sign("store_stencil", Vector3(214.97, 8.8, 49), -PI * 0.5, "SALT\n04", 0.025)
+	(get_node("Sign_store_stencil") as Label3D).modulate = Color("e8dfc9")
+	for foot: Vector3 in [Vector3(210, 5.3, 52.8), Vector3(248, 4.7, 52.8), Vector3(286, 4.1, 52.8), Vector3(312, 4, 52.8)]:
+		_work_lamp("quay_%d" % int(foot.x), foot, 3.8)
+	# this founded harbour beacon sits seaward of the blind corner, not on a fake platform.
+	_work_lamp("seaward_beacon", Vector3(221.5, -9, 57.5), 18.0)
 	for x: float in [306, 320]:
 		_art_box("mooring_pile_%s" % x, Vector3(x, -3, 68), Vector3(0.7, 12, 0.7), Color("586b6b"))
 
-func _art_box(id: String, at: Vector3, dimensions: Vector3, color: Color) -> void:
+func _art_box(id: String, at: Vector3, dimensions: Vector3, color: Color) -> MeshInstance3D:
 	var node := MeshInstance3D.new()
 	node.name = "Art_" + id
 	var mesh := BoxMesh.new()
@@ -237,6 +266,7 @@ func _art_box(id: String, at: Vector3, dimensions: Vector3, color: Color) -> voi
 	material.roughness = 0.95
 	node.material_override = material
 	add_child(node)
+	return node
 
 func _readable_surfaces() -> void:
 	# map-local names keep the shared look swap from erasing slope readability.
@@ -246,6 +276,9 @@ func _readable_surfaces() -> void:
 			material.shader = preload("res://shaders/look/saltglass_surface.gdshader")
 			material.set_shader_parameter("surf", "steel_ramp" in str(node.name))
 			material.set_shader_parameter("crest", node.mesh.get_aabb().end.y)
+			var bounds: AABB = node.mesh.get_aabb()
+			material.set_shader_parameter("pan", "crescent_" in str(node.name) or "salt_step_" in str(node.name))
+			material.set_shader_parameter("pan_bounds", Vector4(bounds.position.x, bounds.position.z, bounds.end.x, bounds.end.z))
 			material.set_shader_parameter("wear", preload("res://assets/look/painted-wear.png"))
 			node.material_override = material
 			node.name = "SaltglassSurface_" + str(node.name)
@@ -259,7 +292,7 @@ func _readable_surfaces() -> void:
 	_art_box("paint_lip_east_land", Vector3(130, 7.012, 5.15), Vector3(36, 0.025, 0.3), Color("d95b30"))
 
 
-func _art_cylinder(id: String, at: Vector3, radius: float, height: float, color: Color) -> void:
+func _art_cylinder(id: String, at: Vector3, radius: float, height: float, color: Color) -> MeshInstance3D:
 	var node := MeshInstance3D.new()
 	node.name = "Art_" + id
 	var mesh := CylinderMesh.new()
@@ -274,3 +307,29 @@ func _art_cylinder(id: String, at: Vector3, radius: float, height: float, color:
 	material.roughness = 0.95
 	node.material_override = material
 	add_child(node)
+	return node
+
+func _work_lamp(id: String, foot: Vector3, height: float) -> void:
+	_art_box("lamp_pole_" + id, foot + Vector3.UP * height * 0.5, Vector3(0.18, height, 0.18), Color("526b75"))
+	_art_box("lamp_arm_" + id, foot + Vector3(0, height - 0.15, -0.65), Vector3(0.18, 0.16, 1.3), Color("526b75"))
+	var head := _art_box("lamp_head_" + id, foot + Vector3(0, height - 0.3, -1.15), Vector3(0.65, 0.22, 0.7), Color("fff0ce"))
+	var material := head.material_override as StandardMaterial3D
+	material.emission_enabled = true
+	material.emission = Color("fff0ce")
+	material.emission_energy_multiplier = 0.25
+
+func _fixture_look() -> void:
+	# keep ordinary hop edges quiet; orange is reserved for low exits and the outside choice.
+	for lip: Node in find_children("JumpLips", "MeshInstance3D", true, false):
+		var material := StandardMaterial3D.new()
+		material.albedo_color = Color("c3c8b9")
+		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		material.cull_mode = BaseMaterial3D.CULL_DISABLED
+		lip.material_override = material
+	for look: Node in find_children("R17Look", "Node3D", true, false):
+		var environment: Environment = look.get("painted_environment")
+		if environment != null and environment.sky != null:
+			var material := ShaderMaterial.new()
+			material.shader = preload("res://shaders/look/saltglass_sky.gdshader")
+			material.set_shader_parameter("panorama", preload("res://assets/look/r17/practice-sky.png"))
+			environment.sky.sky_material = material
