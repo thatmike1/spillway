@@ -249,6 +249,8 @@ func _dressing() -> void:
 		heap.name = "SaltglassSalt_%d" % int(x)
 	_sign("store_stencil", Vector3(214.97, 8.8, 49), -PI * 0.5, "SALT\n04", 0.025)
 	(get_node("Sign_store_stencil") as Label3D).modulate = Color("e8dfc9")
+	_sign("outer_quay", Vector3(214.97, 6.35, 52.0), -PI * 0.5, "OUTER QUAY\nJUMP", 0.01)
+	(get_node("Sign_outer_quay") as Label3D).modulate = Color("e8dfc9")
 	for foot: Vector3 in [Vector3(210, 5.3, 52.8), Vector3(248, 4.7, 52.8), Vector3(286, 4.1, 52.8), Vector3(312, 4, 52.8)]:
 		_work_lamp("quay_%d" % int(foot.x), foot, 3.8)
 	# this founded harbour beacon sits seaward of the blind corner, not on a fake platform.
@@ -285,7 +287,7 @@ func _readable_surfaces() -> void:
 			node.material_override = material
 			node.name = "SaltglassSurface_" + str(node.name)
 	# short edge bands announce takeoff and the tiny receiver in both look modes.
-	_art_box("paint_lip_outside_takeoff", Vector3(210.8, 5.312, 53.82), Vector3(7.5, 0.025, 0.3), Color("d95b30"))
+	_art_box("paint_lip_outside_takeoff", Vector3(212.8, 5.312, 53.82), Vector3(2.2, 0.025, 0.3), Color("d95b30"))
 	_art_box("paint_lip_outside_receiver", Vector3(221.5, 5.012, 53.82), Vector3(3, 0.025, 0.3), Color("d95b30"))
 	_art_box("paint_lip_seaward_receiver", Vector3(221.5, 5.012, 59.82), Vector3(9, 0.025, 0.3), Color("d95b30"))
 	# paint follows the actual seaward store edge around the blind corner, with no fake ledge.
