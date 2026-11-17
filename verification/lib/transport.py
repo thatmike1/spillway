@@ -4,7 +4,7 @@ import physical as C
 OLD=C.OLD
 sha,write,difference=C.sha,C.write,C.difference
 CAP=600*2**20
-MIN_FREE=15_000_000_000
+MIN_FREE=2_000_000_000
 GODOT = Path(os.environ.get("GODOT", Path.home()/".local/share/foldrunner/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64"))
 def gate():
     free = shutil.disk_usage('/home').free

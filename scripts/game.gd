@@ -6,7 +6,7 @@ func _ready() -> void:
 	if map_registry.is_empty():
 		map_registry = R21_MAPS.make()
 	super._ready()
-	if startup_error.is_empty() and map_id == "tether-yard":
+	if startup_error.is_empty() and map_has_capability("grapple"):
 		hud.call("notify", map_revision_description())
 
 func interface_startup_message() -> String:
@@ -23,8 +23,8 @@ func recording_metadata(reason: String) -> Dictionary:
 func map_revision_description() -> String:
 	if map_id == "saltglass":
 		return "Earlier Saltglass ghosts use different exits and cannot race this map revision."
-	if map_id == "tether-yard":
-		return "Earlier Tether Yard ghosts use taller transfer decks or different rope settings and cannot race this revision."
+	if map_has_capability("grapple"):
+		return {"tether-yard": "Earlier Tether Yard ghosts use taller transfer decks or different rope settings and cannot race this revision."}.get(map_id, "Rope models, reel and assist settings have separate recording identities.")
 	return super()
 
 const R21_HUD := preload("res://scripts/r21_hud.gd")
@@ -54,7 +54,7 @@ func change_setting(key: String, value: Variant) -> void:
 	if key != "tether_anchor_assist":
 		super(key, value)
 		return
-	if map_id != "tether-yard" or str(settings.get("tether_model", "classic")) in ["classic", "pendulum"]:
+	if not map_has_capability("grapple") or tether_model() in ["classic", "pendulum"]:
 		return
 	var next := bool(_setting_value(key, value))
 	if bool(settings.get(key, true)) == next:
@@ -75,5 +75,5 @@ func change_setting(key: String, value: Variant) -> void:
 func select_map(id: String) -> void:
 	var prior := map_id
 	super(id)
-	if map_id != prior and map_id == "tether-yard":
+	if map_id != prior and map_has_capability("grapple"):
 		hud.call("notify", map_revision_description())
