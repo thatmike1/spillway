@@ -1,6 +1,7 @@
 extends SceneTree
 
 const STORE = preload("res://scripts/persistence/profile_store.gd")
+const PROBE = preload("res://scripts/persistence/package_probe.gd")
 class FaultStore extends "res://scripts/persistence/profile_store.gd":
 	var deny_write := false
 	var deny_replace := false
@@ -13,7 +14,25 @@ class FaultStore extends "res://scripts/persistence/profile_store.gd":
 	func _replace(source: String, target: String) -> Error:
 		return ERR_FILE_CANT_WRITE if (deny_replace and not target.ends_with(".bak")) or (deny_backup and target.ends_with(".bak")) else super(source, target)
 
+class ProbeGame extends Node:
+	var profile_path := ""
+	var startup_error := ""
+	var settings := {"volume": 1.0}
+	var last_save_ok := true
+	var map_callbacks := 0
+	var harness: Object
+	func map_ids() -> Array:
+		map_callbacks += 1
+		return []
+	func change_setting(key: String, value: Variant) -> void:
+		settings[key] = value
+	func request_quit(code: int) -> void:
+		harness.call("_finish_probe_seed_check", code, map_callbacks)
+
 var failures: Array[String] = []
+var seed_path := ""
+var seed_receipt := ""
+var seed_original := ""
 func check(ok: bool, message: String) -> void:
 	if not ok:
 		failures.append(message)
@@ -85,6 +104,57 @@ func run() -> void:
 	check(store.read_profile(path).error != OK, "unreadable backup is not absent")
 	check(store.write_profile(path, config) != OK, "refuse a new profile while backup status is unknown")
 	store.denied_read_path = ""
+	_start_probe_seed_check()
+
+func _start_probe_seed_check() -> void:
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--r16-profile="):
+			seed_path = arg.trim_prefix("--r16-profile=")
+		elif arg.begins_with("--r22-package-check="):
+			seed_receipt = arg.trim_prefix("--r22-package-check=")
+	var valid_args := seed_path.is_absolute_path() and seed_receipt.is_absolute_path() and seed_path.get_base_dir() == seed_receipt.get_base_dir()
+	check(valid_args, "probe regression requires private fixture paths")
+	if not valid_args:
+		_finish_checks()
+		return
+	var fresh := not FileAccess.file_exists(seed_path) and not FileAccess.file_exists(seed_receipt)
+	check(fresh, "probe regression requires new fixture files")
+	if not fresh:
+		_finish_checks()
+		return
+	seed_original = "[other-map]\nclean_best_ticks=1234567890123\nbroken_value=@@@\n"
+	var file := FileAccess.open(seed_path, FileAccess.WRITE)
+	check(file != null, "private probe fixture created")
+	if file == null:
+		_finish_checks()
+		return
+	file.store_string(seed_original)
+	file.close()
+	var unreadable := ConfigFile.new()
+	check(unreadable.load(seed_path) != OK, "private probe fixture must fail ConfigFile.load")
+	var host := ProbeGame.new()
+	host.profile_path = seed_path
+	host.harness = self
+	get_root().add_child(host)
+	var probe := PROBE.new()
+	probe.output_path = seed_receipt
+	host.add_child(probe)
+
+func _finish_probe_seed_check(code: int, map_callbacks: int) -> void:
+	var preserved := FileAccess.get_file_as_string(seed_path) == seed_original
+	check(code == 1, "probe reports an unreadable seed")
+	check(preserved, "probe preserves unreadable seed bytes")
+	check(map_callbacks == 0, "probe stops before map callbacks after a seed failure")
+	var receipt: Variant = JSON.parse_string(FileAccess.get_file_as_string(seed_receipt))
+	check(receipt is Dictionary and not bool(receipt.get("ok", true)), "probe writes a failed receipt")
+	var report := FileAccess.open(seed_receipt + ".test.json", FileAccess.WRITE)
+	check(report != null, "probe fixture result recorded")
+	if report != null:
+		report.store_string(JSON.stringify({"exit": code, "primary_bytes_preserved": preserved, "map_callbacks": map_callbacks}))
+		report.close()
+	_finish_checks()
+
+func _finish_checks() -> void:
 	Engine.print_error_messages = true
 	for message: String in failures:
 		printerr(message)
