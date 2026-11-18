@@ -4,6 +4,8 @@ const OVERLAY := preload("res://scripts/plan/overlay.gd")
 const STORE := preload("res://scripts/plan/store.gd")
 const READER := preload("res://scripts/r16_run_reader.gd")
 const PIECES := preload("res://scripts/plan/pieces.gd")
+const ENVELOPE := preload("res://scripts/plan/envelope.gd")
+var envelope: Node3D
 var plan_store := STORE.new()
 var best_plan := {}
 var _best_path := ""
@@ -11,6 +13,7 @@ var _best_identity := ""
 var used_pad := false
 var launch_events: Array[Dictionary] = []
 var planner: Control
+var socket_label: Label3D
 var planning := false
 func _ready() -> void:
 	super()
@@ -27,6 +30,19 @@ func _ready() -> void:
 	planner.runner = self
 	layer.add_child(planner)
 	planner.hide()
+	envelope = ENVELOPE.new()
+	envelope.runner = self
+	add_child(envelope)
+	socket_label = Label3D.new()
+	socket_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	socket_label.font_size = 32
+	socket_label.pixel_size = 0.012
+	socket_label.modulate = Color("efe8cf")
+	socket_label.outline_modulate = Color("203d45")
+	socket_label.outline_size = 5
+	add_child(socket_label)
+	socket_label.top_level = true
+	socket_label.hide()
 func _input(event: InputEvent) -> void:
 	if bool(get_parent().get("paused")):
 		if planning:
@@ -55,6 +71,20 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif planning and code == KEY_DELETE:
 			planner.clear_pieces()
+			get_viewport().set_input_as_handled()
+		elif planning and code == KEY_Q:
+			var map: Node = get_parent().get("level")
+			map.envelope_enabled = not map.envelope_enabled
+			map.apply_design(map.plan,map.block_slot,map.pad_slot,map.budget,map.blocks_enabled,map.pads_enabled)
+			envelope.reset()
+			planner.notice = "K leaves your first body waiting. E delivers; you control it again." if map.envelope_enabled else "Envelope off. Ordinary plan times again."
+			planner.queue_redraw()
+			get_viewport().set_input_as_handled()
+		elif not planning and code in [KEY_K,KEY_E] and envelope != null and envelope.active():
+			if code == KEY_K:
+				envelope.park()
+			else:
+				envelope.throw_envelope()
 			get_viewport().set_input_as_handled()
 		elif planning and code >= KEY_1 and code <= KEY_9:
 			planner.toggle_socket(code-KEY_1)
@@ -87,11 +117,15 @@ func _physics_process(delta: float) -> void:
 		return
 	_step_pad()
 	super(delta)
+	if envelope != null:
+		envelope.step(delta)
 
 func reset_to(pose: Transform3D) -> void:
 	used_pad = false
 	launch_events.clear()
 	super(pose)
+	if envelope != null:
+		envelope.reset()
 func _step_pad() -> void:
 	if not input_enabled or used_pad or not is_grounded():
 		return
@@ -126,11 +160,36 @@ func get_motion_state() -> Dictionary:
 	var host := get_parent()
 	var map: Node = host.get("level") if host != null else null
 	result["plan_yard"] = {"design":map.physical_design() if map != null and map.has_method("physical_design") else {},"pad_used":used_pad,"launches":launch_events.duplicate(true)}
+	if envelope != null and envelope.active():
+		result["plan_yard"]["envelope"] = envelope.snapshot()
 	return result
+
+func experiment_status() -> String:
+	var text := super()
+	if notice_left_s > 0 and not release_notice.is_empty():
+		text = text.replace("\n"+release_notice,"\nPrevious line: "+release_notice)
+	return text
+
+func run_review_unavailable_reason() -> String:
+	if planning:
+		return "Resume the survey and commit with Enter before 3D review or segment practice."
+	var host := get_parent()
+	var level: Node = host.get("level") if host != null else null
+	if level != null and level.get("envelope_enabled") == true:
+		return "3D review and segment practice are unavailable in envelope mode. Turn it off in the survey."
+	return ""
 
 func _process(delta: float) -> void:
 	super(delta)
 	sync_ghost_plan()
+	var host := get_parent()
+	var target := r21_acquisition_snapshot()
+	socket_label.visible = not planning and not host.paused and not host.finished and bool(target.ready)
+	if socket_label.visible:
+		var at: Vector3 = target.position
+		socket_label.global_position = at+Vector3.DOWN
+		socket_label.scale = Vector3.ONE*clampf(camera.global_position.distance_to(at)/10.0,0.5,3.5)
+		socket_label.text = "%s · +%dm" % [str(target.name).replace("Socket ","A"),roundi(at.y)]
 	if planner != null and planning:
 		var game := get_parent()
 		planner.visible = not game.paused
@@ -167,12 +226,3 @@ func sync_ghost_plan() -> void:
 			if checked.ok:
 				best_plan = {"version":PIECES.VERSION,"anchors":checked.design.anchors,"block":checked.design.block,"pad":checked.design.pad}
 			return
-
-func run_review_unavailable_reason() -> String:
-	if planning:
-		return "Resume the survey and commit with Enter before 3D review or segment practice."
-	var host := get_parent()
-	var level: Node = host.get("level") if host != null else null
-	if level != null and level.get("envelope_enabled") == true:
-		return "3D review and segment practice are unavailable in envelope mode. Turn it off in the survey."
-	return ""

@@ -14,7 +14,7 @@ Validation uses the production game host, normal spawn, F2, actual InputEventAct
 
 ## Three executed plans
 
-Geometry revision 6 starts at the western service entrance. The caisson has a +7 m front crown, an open 3 m inspection channel and a +9 m rear crown. Anchor elevations are fixed at +11/+14 m; the overhead survey shows that datum. There are no serpentine corner cuts.
+Geometry revision 7 starts at the western service entrance. The caisson has a +7 m front crown, an open 3 m inspection channel and a +9 m rear crown. Anchor elevations are fixed at +11/+14 m; the overhead survey shows that datum. There are no serpentine corner cuts. While an anchor is ready under aim or attached, a contextual A-number and elevation connect the world ring to its survey socket. Its text scales within a restrained range with view distance. The label observes the inherited acquisition snapshot and never changes selection.
 
 | plan / keys | clean | releases +120 ms | upward look limited to 30° | risk |
 | --- | ---: | ---: | ---: | --- |
@@ -26,7 +26,7 @@ All three finish clean from normal spawn. Each tape opens Tab, removes the defau
 
 Reproduce with `python3 tests/plan_check.py --out /tmp/r22-14-anchor-plan/NEW-NAME`; `--safe` checks the original safe-quay baseline, `--trial 0|1|2` selects one plan, and `--delay 0.12` adds a delay to rope releases. Outputs must be new directories outside Git. The wrapper uses the pinned engine and shared lock and removes its imported source/profile after reading the result. Runtime fast checks remain `python3 tools/test.py --out /tmp/r22-14-anchor-plan/NEW-FAST-NAME`.
 
-The delayed-release probe returns nonzero when a plan fails; its JSON and tapes are retained so the failure stays visible. The clean default check must pass every plan and exact replay comparison.
+The final source with envelope mode off repeats these clean, late-release and shallow-aim times exactly, along with all three optional-piece tapes and fresh-host replays. The delayed-release probe returns nonzero when a plan fails; its JSON and tapes are retained so the failure stays visible. The clean default check must pass every plan and exact replay comparison.
 
 ## Optional pieces
 
@@ -69,3 +69,17 @@ Passes 3–5 replace the generic palette with the yard's authored material path,
 The separate centre art-view tape changes vertical mouse input and is not a replacement for the original acceptance tapes. It finishes clean at a displayed 6.75 s. Its sampled positions differ from the original centre execution by up to 0.632 m; after the cable-only refinement the same view tape's 16 sampled positions match the prior view capture exactly. These are sampled native checks, not full-state parity. Caisson collision/render geometry extends to -5 m, below the sea surface at about -3.95 m. A frame's waterline silhouette does not imply a floating collider.
 
 Plan Yard declares `teach_until_clock:0.75`; the owner-approved one-line shared-HUD hook retains the existing 4 s/speed-based fade for other entries. Clean e220 default-state native frames verify authored materials without a look toggle; final teaching-cutoff frames follow the hook. The verbose default exit warning names AudioStreamPlaybackWAV and AudioStreamWAV, not a diagnosed map-mesh leak. Original-map full parity and packed candidate checks remain with the integrator.
+
+## Envelope spitball
+
+This is Mike's explicitly uncertain idea, reduced to one handoff. In the survey, Q enables it; Enter starts the first leg. Reach a deck, release Space so the body stands, and press K. That body waits as a blue ghost while control returns to normal spawn with an envelope. Run the delivery leg, aim at YOUR WAITING BODY and press E. A miss returns the envelope after a short delay. Delivery is automatic on contact; no second key is needed while the envelope flies. Catch returns control to the first body at its saved position and velocity, facing the finish with level pitch so the next landing is visible. Its rope is detached; carry on to the far quay. R restarts the whole trial. Tab returns to planning. There is no deadline for reaching the waiting body and no speed-matching test.
+
+The smallest version accepts standing, uncrouched waiting points. It does not freeze a live airborne rope state or automate the first body's future path. The second body remains as a stationary ochre marker after control switches back. Repeated handoffs are not implemented. A labelled blue recipient, foot ring and folded-paper silhouette distinguish the target from the carried object.
+
+The throw uses current input yaw/pitch and physical eye position, 18 m/s plus one quarter of the carrier's velocity, with 9.8 m/s² gravity. A swept segment must come within 1.6 m of the waiting body's centre with unobstructed line of sight. World collisions and the three-second flight limit permit a retry. All placed pieces remain available to both bodies. The block offers another waiting deck; anchors support both approaches.
+
+Version plan-envelope-3 uses one continuous practice attempt and the inherited clock for the whole job. Both body switches are explicit practice placements in that recording. Mode is off by default, has a separate geometry/mechanics identity and cannot set clean/open/style bests. Q is a temporary experiment switch, separate from the three saved equipment slots. Switching it off restores the ordinary plan identity. Spatial Run Review and segment practice are unavailable during a pending survey or envelope mode; committed normal plans remain eligible under the review helper's exact-identity checks.
+
+Input-only Centre and block handoffs finish and replay exactly with one miss, two throws and zero respawns: 11.6875 s on the rear crown, 13.3671875 s using actual PlanLift support at +8 m. The block is reached earlier (4.6640625 s versus 4.9765625 s), but its detached continuation needs a deliberate walk/jump to the +9 m crown and is slower overall in these different input executions. Independent readers match every recorded motion/input column across fresh-host replay, find two explained placements per trial and a clock that never resets. In-flight/resumed pause, physical R/F resets, post-finish recovery, actual banner/finish text and off-mode identity restoration pass. These checks do not establish human comfort, enjoyment or approval.
+
+Use `python3 tests/plan_check.py --out /tmp/r22-14-anchor-plan/NEW-ENVELOPE-NAME --envelope --persistence` to run the three ordinary anchor tapes, saved/ghost plans and both handoffs through the pinned shared engine wrapper. Generated tapes use integer button indices and action strengths bounded to [0,1], as required by the canonical capture tool.

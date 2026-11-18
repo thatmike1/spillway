@@ -161,6 +161,7 @@ func button(index: int, on: bool) -> void:
 		buttons[index] = on
 		event({"time":tick/128.0,"button":index,"pressed":on})
 func action(id: String, strength: float) -> void:
+	strength = clampf(strength,0.0,1.0)
 	if absf(float(held.get(id,-1))-strength) > 0.005:
 		held[id] = strength
 		event({"time": tick/128.0, "action": id, "pressed": strength > 0, "strength": strength})

@@ -127,6 +127,7 @@ func _draw() -> void:
 	draw_string(font,Vector2(160,534),"F6 Save",HORIZONTAL_ALIGNMENT_LEFT,-1,18,ink)
 	draw_string(font,Vector2(285,534),"F7 Load",HORIZONTAL_ALIGNMENT_LEFT,-1,18,ink)
 	draw_string(font,Vector2(30,490),"Launch: 300+ u/s toward the far quay.",HORIZONTAL_ALIGNMENT_LEFT,-1,17,ink)
+	draw_string(font,Vector2(30,614),"Q  Envelope spitball: " + ("on · practice" if map.envelope_enabled else "off"),HORIZONTAL_ALIGNMENT_LEFT,-1,17,ink)
 	for rect: Rect2 in [Rect2(-18,5,36,15),Rect2(-18,-55,36,21),Rect2(-18,-34,7,39),Rect2(11,-34,7,39),Rect2(-5,-18,10,10),Rect2(-5,-30,10,9)]:
 		draw_rect(Rect2(point(Vector3(rect.position.x,0,rect.position.y)),rect.size*scale_factor()),Color("b9b8a5"))
 	for index: int in map.plan:
@@ -149,7 +150,7 @@ func _draw() -> void:
 		draw_rect(Rect2(p+Vector2(-29,15),Vector2(58,21)),Color("ddd7bd"))
 		draw_string(font,p+Vector2(-26,30),"%s%d +%dm" % [brush.substr(0,1).to_upper(),i+1,at.y],HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("203d45"))
 	var ghost: Dictionary = runner.best_plan
-	if not ghost.is_empty():
+	if not ghost.is_empty() and not map.envelope_enabled:
 		var color := Color("7ec4d0")
 		for index: int in ghost.anchors:
 			draw_circle(point(LAYOUT.SOCKETS[index]),18,color,false,3)
@@ -169,6 +170,15 @@ func _draw() -> void:
 	draw_string(font,Vector2(30,size.y-30),"%d / %d pieces · elevations: quays +3m, caisson +7/+9m, sea -4m" % [PIECES.count(map.plan,map.block_slot,map.pad_slot),map.budget],HORIZONTAL_ALIGNMENT_LEFT,-1,19,ink)
 func _gui_input(event: InputEvent) -> void:
 	if not event is InputEventMouseButton or not event.pressed or event.button_index != MOUSE_BUTTON_LEFT:
+		return
+	if Rect2(24,588,375,36).has_point(event.position):
+		var map := level()
+		map.envelope_enabled = not map.envelope_enabled
+		map.apply_design(map.plan,map.block_slot,map.pad_slot,map.budget,map.blocks_enabled,map.pads_enabled)
+		runner.envelope.reset()
+		notice = "K leaves your first body waiting. E delivers; you control it again." if map.envelope_enabled else "Envelope off. Ordinary plan times again."
+		queue_redraw()
+		accept_event()
 		return
 	for i: int in 3:
 		if Rect2(24,109+i*46,375,38).has_point(event.position):

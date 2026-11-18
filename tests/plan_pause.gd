@@ -64,6 +64,7 @@ func run() -> void:
 	key(KEY_ESCAPE)
 	key(KEY_TAB)
 	assert(game.player.planning and not game.session.attempt_live and game.elapsed == 0)
+	assert(not game.player.run_review_unavailable_reason().is_empty())
 	game.player.planner.toggle_socket(0)
 	var pending_design: Dictionary = game.level.design()
 	key(KEY_ESCAPE)
@@ -79,6 +80,7 @@ func run() -> void:
 	assert(game.player.planning and not game.session.attempt_live and game.elapsed == 0)
 	key(KEY_ENTER)
 	assert(not game.player.planning and not game.player.planner.visible and game.session.attempt_live)
+	assert(game.player.run_review_unavailable_reason().is_empty())
 	key(KEY_ESCAPE)
 	attempts = game.attempts
 	await paused_tab()

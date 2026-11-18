@@ -53,7 +53,7 @@ Stable round-numbered aliases preserve resource paths used by recording identiti
 | Sluice Six / `sluice-six` | `maps/sluice_six.gd`, course player; F2 settling piers, offset caps and spill tower |
 | Outer Reach / `outer-reach` | `maps/outer_reach.gd`, course player; long acceleration quay and sustained F2 air corridors |
 | Foundry / `foundry` | `maps/foundry.gd`, grapple player; continuous gallery, shaft shortcut and descending catch |
-| Plan Yard / `plan-yard` | `maps/plan_yard.gd`, `movement/plan_runner.gd`; place a one/three-piece plan before timing, then run F2 and fixed Arc |
+| Plan Yard / `plan-yard` | `maps/plan_yard.gd`, `movement/plan_runner.gd`; place a one/three-piece plan before timing, then run F2 and fixed Arc; optional one-handoff envelope practice |
 | Shelved: Fall Line / `fall-line` | `r19_fall_line_level.gd`; retained as a catalog dependency, removed from the current menu |
 | Shelved: Line Drive / `line-drive` | `r19_line_drive_level.gd`, `r19_line_drive_player.gd`; retained dependency, removed from the current menu |
 
@@ -61,7 +61,7 @@ Paths in this table are under `scripts/`. `r16_style_opportunities.gd` adds opti
 
 ## Controls and vocabulary
 
-WASD and mouse move/look. Hold Space or use scroll to hop; release W and combine A/D with the same-direction mouse turn to air-strafe. Ctrl/C crouches. R restarts, F practises a checkpoint, Esc opens the menu, G toggles the fastest clean ghost and L compares the look. Movement Lab alone uses Shift for slide and E for grapple. Grapple maps use LMB to attach/hold, RMB to reel and LMB release to coast. Mail Run uses LMB to throw, mouse to steer and RMB to recall; B/V/N change body, view and delivery goal with a fresh identity. The pause menu groups Maps, Practice, Settings and Runs. Runs opens the read-only local attempt review.
+WASD and mouse move/look. Hold Space or use scroll to hop; release W and combine A/D with the same-direction mouse turn to air-strafe. Ctrl/C crouches. R restarts, F practises a checkpoint, Esc opens the menu, G toggles the fastest clean ghost and L compares the look. Movement Lab alone uses Shift for slide and E for grapple. Grapple maps use LMB to attach/hold, RMB to reel and LMB release to coast. Mail Run uses LMB to throw, mouse to steer and RMB to recall; B/V/N change body, view and delivery goal with a fresh identity. Plan Yard uses Tab for its untimed survey and Enter to commit. Q in the survey enables optional envelope practice; K parks a standing body and E throws to it from the delivery leg. See [docs/plan-yard.md](docs/plan-yard.md) for the separate practice identity and controls. The pause menu groups Maps, Practice, Settings and Runs. Runs opens the read-only local attempt review.
 
 - **F2 / server128:** the primary 128 Hz bhop preset, AA 100, autohop, no stamina/takeoff clamp. `server128` is its stable stored ID.
 - **F5:** the same family at AA 1000. **AA** means air acceleration, not a global speed limit. F3/R13 and F4/Quake-inspired are advanced comparisons.

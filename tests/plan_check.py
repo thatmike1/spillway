@@ -18,6 +18,7 @@ def main():
     parser.add_argument("--out", required=True, type=Path)
     parser.add_argument("--only-west", action="store_true")
     parser.add_argument("--persistence", action="store_true")
+    parser.add_argument("--envelope", action="store_true", help="check the opt-in one-handoff practice prototype after normal routes")
     parser.add_argument("--pause-only", action="store_true", help="only check pause routing, without placement/route proof")
     parser.add_argument("--safe", action="store_true", help="check the safe-quay baseline")
     parser.add_argument("--trial", type=int, choices=range(3))
@@ -32,6 +33,8 @@ def main():
         raise ValueError("invalid release delay or aim ceiling")
     if args.persistence and (args.loadout != "anchors" or args.trial not in (None,0) or args.safe):
         parser.error("--persistence needs the normal west tape")
+    if args.envelope and (args.loadout != "anchors" or args.trial is not None or args.only_west or args.safe or args.pause_only):
+        parser.error("--envelope needs all three normal anchor tapes")
     if args.safe and args.loadout != "anchors":
         parser.error("--safe is only the anchor baseline")
     if engine.temporary_headroom() < 1_200_000_000:
@@ -95,6 +98,26 @@ def main():
                                          "--", "--out=" + str(persisted), *(["--readback"] if mode == "readback" else [])],
                                         cwd=source, profile=profile, log=persisted / (mode + ".log"))
                     report["checks"].append({"name": "persistence-" + mode, "ok": True, **result})
+            if args.envelope and not failures:
+                centre = out / "centre-tape.json"
+                if not centre.is_file():
+                    raise ValueError("--envelope needs all three normal anchor tapes")
+                result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
+                                     "--fixed-fps", "128", "--script", "res://tests/plan_envelope.gd",
+                                     "--", "--out=" + str(out / "envelope"), "--centre=" + str(centre)],
+                                    cwd=source, profile=profile, log=out / "plan_envelope.log", timeout=60)
+                report["checks"].append({"name": "envelope", "ok": True, **result})
+                block = out / "envelope-block-route"
+                result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
+                                     "--fixed-fps", "128", "--script", "res://tests/plan_routes.gd",
+                                     "--", "--out=" + str(block), "--arc", "--trial=0", "--loadout=block"],
+                                    cwd=source, profile=profile, log=out / "envelope-block-route.log")
+                report["checks"].append({"name": "envelope-block-baseline", "ok": True, **result})
+                result = engine.run(["--headless", "--audio-driver", "Dummy", "--path", source,
+                                     "--fixed-fps", "128", "--script", "res://tests/plan_envelope.gd",
+                                     "--", "--out=" + str(out / "envelope-block"), "--centre=" + str(block / "block-tape.json"), "--loadout=block"],
+                                    cwd=source, profile=profile, log=out / "plan_envelope_block.log", timeout=60)
+                report["checks"].append({"name": "envelope-block", "ok": True, **result})
             report["ok"] = not failures
     except Exception as error:
         report["error"] = str(error)

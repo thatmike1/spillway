@@ -67,6 +67,7 @@ func run() -> void:
 	probe(false,"committed normal plan becomes available again")
 	var fake_host := ModeHost.new()
 	var mode := ModeLevel.new()
+	var old_level := Node3D.new()
 	fake_host.level = mode
 	var runner := PLAYER.new()
 	fake_host.add_child(runner)
@@ -78,11 +79,14 @@ func run() -> void:
 	runner.planning = false
 	mode.envelope_enabled = false
 	check(runner.run_review_unavailable_reason().is_empty(),"turning envelope flag off restores availability")
+	fake_host.level = old_level
+	check(runner.run_review_unavailable_reason().is_empty(),"old level without an envelope property remains available without script errors")
 	fake_host.free()
 	mode.free()
+	old_level.free()
 	game.request_quit(0)
 	game.free()
 	var ok := checks.all(func(row: Dictionary) -> bool:return row.ok)
-	FileAccess.open(output.path_join("RESULT.json"),FileAccess.WRITE).store_string(JSON.stringify({"ok":ok,"checks":checks,"scope":"actual published-normal Plan host and physical Tab/Enter; envelope flag branch isolated on detached runner, not an envelope gameplay proof"},"\t"))
+	FileAccess.open(output.path_join("RESULT.json"),FileAccess.WRITE).store_string(JSON.stringify({"ok":ok,"checks":checks,"scope":"actual composed normal Plan host and physical Tab/Enter; detached typed mode plus old missing-property compatibility, not an envelope gameplay proof"},"\t"))
 	print("PLAN REVIEW GUARD ",ok," checks=",checks.size())
 	quit(0 if ok else 1)

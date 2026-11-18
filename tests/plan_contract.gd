@@ -4,9 +4,21 @@ const MAP := preload("res://scripts/maps/plan_yard.gd")
 const PIECES := preload("res://scripts/plan/pieces.gd")
 const HOST := preload("res://scripts/game.gd")
 const LAYOUT := preload("res://scripts/plan/layout.gd")
+const PLAN_RUNNER := preload("res://scripts/movement/plan_runner.gd")
+class LegacyHost extends Node:
+	var level: Node
 func _initialize() -> void:
 	run.call_deferred()
 func run() -> void:
+	var legacy := LegacyHost.new()
+	legacy.level = Node3D.new()
+	legacy.add_child(legacy.level)
+	var probe := PLAN_RUNNER.new()
+	legacy.add_child(probe)
+	assert(probe.run_review_unavailable_reason().is_empty())
+	probe.planning = true
+	assert(not probe.run_review_unavailable_reason().is_empty())
+	legacy.free()
 	var map := MAP.new()
 	root.add_child(map)
 	map.build()
