@@ -22,8 +22,8 @@ func check(ok: bool, label: String) -> void:
 func run() -> void:
 	assert(output.is_absolute_path())
 	DirAccess.make_dir_recursive_absolute(output)
-	var best_path := "res://tests/fixtures/original-map-parity/breakwater-basic/old/runs/golden.r16run"
-	var attempt_path := "res://tests/fixtures/original-map-parity/breakwater-return/old/runs/golden.r16run"
+	var best_path := fixture_path("original-map-parity/breakwater-basic/old/runs/golden.r16run")
+	var attempt_path := fixture_path("original-map-parity/breakwater-return/old/runs/golden.r16run")
 	var before := [FileAccess.get_sha256(best_path), FileAccess.get_sha256(attempt_path)]
 	var comparison := MODEL.compare(MODEL.load_attempt(attempt_path), MODEL.load_attempt(best_path))
 	var game: Node = load("res://scripts/game.gd").new()
@@ -86,3 +86,10 @@ func run() -> void:
 	print("review menu checks: ", ok, " count=", checks.size())
 	game.request_quit(0)
 	quit(0 if ok else 1)
+
+func fixture_path(relative: String) -> String:
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--menu-contract="):
+			var contract := arg.trim_prefix("--menu-contract=")
+			return contract.get_base_dir().get_base_dir().path_join(relative)
+	return "res://tests/fixtures/".path_join(relative)

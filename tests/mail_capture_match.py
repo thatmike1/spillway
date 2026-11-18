@@ -21,6 +21,7 @@ def verify(expected_path, frames_path, startup_path):
     assert header and header[1] == startup["course_key"], "startup geometry/identity differs from native proof"
     name = expected_path.name.removesuffix(".expected.json")
     body, view = name.split("-", 1)
+    post_finish = 0
     checked = 0
     worst = 0.0
     for row in frames:
@@ -32,6 +33,11 @@ def verify(expected_path, frames_path, startup_path):
         assert abs(row["time"] * 128 - tick) < 1e-8, "capture is not on the 128 Hz timeline"
         if tick not in expected:
             assert tick > max(expected) and source["observations"][-1]["finished"], "missing native observation"
+            final = source["observations"][-1]
+            assert row["finished"] and row["finish_kind"] == "clean", "post-finish capture lost clean finish"
+            assert mail["delivered"] == final["delivered"], "post-finish delivery state differs"
+            assert mail["active"] == final["active"], "post-finish flight state differs"
+            post_finish += 1
             continue
         native = expected[tick]
         distance = math.dist(native["position"], row["position"])
@@ -45,7 +51,7 @@ def verify(expected_path, frames_path, startup_path):
     last = frames[-1]
     assert last["finished"] and last["finish_kind"] == "clean", "capture does not prove clean completion"
     assert len(last["motion"]["mail"]["delivered"]) == 3, "capture does not prove all deliveries"
-    return {"ok": True, "body": body, "view": view, "matched_samples": checked,
+    return {"ok": True, "body": body, "view": view, "matched_samples": checked, "post_finish_state_samples": post_finish,
             "worst_position_difference_m": worst, "source_course_key": source["course_key"],
             "startup_course_key": startup["course_key"], "finished": True, "deliveries": 3,
             "expected": str(expected_path), "frames": str(frames_path)}

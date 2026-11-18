@@ -21,4 +21,5 @@ const FRAMES := {
 	"saltglass-seaward": preload("res://scripts/ui/map_previews/saltglass-seaward.png"),
 	"plan-yard": preload("res://scripts/ui/map_previews/plan-yard.png"),
 	"outer-reach": preload("res://scripts/ui/map_previews/outer-reach.png"),
+	"mail-roofs": preload("res://scripts/ui/map_previews/mail-roofs.png"),
 }

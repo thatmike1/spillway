@@ -102,7 +102,7 @@ func run() -> void:
 	DirAccess.make_dir_recursive_absolute(output)
 	var library := output.path_join("library")
 	DirAccess.make_dir_recursive_absolute(library)
-	fixture_paths = ["res://tests/fixtures/original-map-parity/breakwater-basic/old/runs/golden.r16run", "res://tests/fixtures/original-map-parity/breakwater-return/old/runs/golden.r16run"]
+	fixture_paths = [fixture_path("original-map-parity/breakwater-basic/old/runs/golden.r16run"), fixture_path("original-map-parity/breakwater-return/old/runs/golden.r16run")]
 	for i: int in fixture_paths.size():
 		fixture_hashes.append(FileAccess.get_sha256(fixture_paths[i]))
 		var file := FileAccess.open(library.path_join("basic.r16run" if i == 0 else "return.r16run"), FileAccess.WRITE)
@@ -216,3 +216,10 @@ func run() -> void:
 	print("PLANNER_MENU: ", ok, " count=", checks.size())
 	game.request_quit(0)
 	quit(0 if ok else 1)
+
+func fixture_path(relative: String) -> String:
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--menu-contract="):
+			var contract := arg.trim_prefix("--menu-contract=")
+			return contract.get_base_dir().get_base_dir().path_join(relative)
+	return "res://tests/fixtures/".path_join(relative)

@@ -282,7 +282,11 @@ func run() -> void:
 				check(game.paused, "delivery choice keeps menu paused " + choice)
 				if choice == "goal":
 					var optional := value == "optional"
-					check(("Mail is optional; reach Dispatch to finish." in hud.map_controls.text) == optional and ("Deliver all three before Dispatch." in hud.map_controls.text) != optional, "delivery instructions match goal " + value)
+					if id == "mail-roofs":
+						check("Required goal: all five slots in any order, then Dispatch." in hud.map_controls.text and "Optional goal: reach Dispatch without mail." in hud.map_controls.text, "Roof instructions qualify both delivery goals " + value)
+						check(game.player.delivery_progress().y == 5 and hud.mail_groups["goal"].buttons["deliver"].text == "Deliver mail (5 required)", "Roof goal retains actual five-slot count " + value)
+					else:
+						check(("Mail is optional; reach Dispatch to finish." in hud.map_controls.text) == optional and ("Deliver all three before Dispatch." in hud.map_controls.text) != optional, "delivery instructions match goal " + value)
 				if before_value != value:
 					check(game.motion_identity() != before_identity, "delivery choice separates recording identity " + choice)
 		for viewport: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(1280, 720)]:
