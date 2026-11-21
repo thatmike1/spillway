@@ -4,14 +4,15 @@ extends RefCounted
 ## obelisks, broken columns and hanging moss strips that were scattered to fill space hide while
 ## L is on, and the low-poly pine groves. nothing here collides.
 
-## tops a touch cooler so full sun no longer clips them; faces a warm weathered sandstone instead
-## of the khaki that read olive in shade.
-const PALETTE := {"top": "e6dccb", "side": "b29a7d"}
+## decks on lane 01's shell-white value for this map (d9d5cb), so full sun no longer clips them;
+## faces a warm weathered sandstone instead of the khaki that read olive in shade. wear is low
+## and streaks carry the weathering: high wear read as camouflage spots on the big walls.
+const PALETTE := {"top": "d9d5cb", "side": "ab9a82"}
 const SURFACES := {
-	"ashlar": {"side_color": "ad9476", "top_color": "d6c8ae", "wear_amount": 0.22},
-	"vault": {"side_color": "94795f", "top_color": "c7b598", "wear_amount": 0.25},
-	"column": {"side_color": "c4b096", "top_color": "ddd1bd", "wear_amount": 0.12},
-	"cliff": {"side_color": "7d6a58", "top_color": "8f8a6a", "wear_amount": 0.3},
+	"ashlar": {"side_color": "a8957c", "top_color": "d2cabb", "wear_amount": 0.06, "streak_amount": 0.18},
+	"vault": {"side_color": "937f69", "top_color": "c6baa6", "wear_amount": 0.06, "streak_amount": 0.18},
+	"column": {"side_color": "bcab95", "top_color": "d4ccbd", "wear_amount": 0.04, "streak_amount": 0.12},
+	"cliff": {"side_color": "7d6f60", "top_color": "8f8a6a", "wear_amount": 0.08, "streak_amount": 0.2},
 }
 ## assets hidden under L on: filler that explains nothing about the place.
 const FILLER := ["statue_columnDamaged", "hanging_moss", "grass_leafs", "plant_bushSmall", "log"]
