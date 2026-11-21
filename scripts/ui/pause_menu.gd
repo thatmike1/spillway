@@ -291,10 +291,35 @@ func _restyle_settings() -> void:
 			details.mouse_filter = Control.MOUSE_FILTER_PASS
 			details.max_lines_visible = 2
 			details.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_plain_notes(page)
 	for node: Node in page.find_children("*", "Label", true, false):
 		var label := node as Label
 		if label.get_theme_font_size("font_size") == 17 and label.text in ["Look and sound", "Movement", "Keys"]:
 			label.add_theme_font_size_override("font_size", UI.TYPE_H2)
+
+## the advanced fold names what it holds, without round numbers.
+func _show_advanced(on: bool) -> void:
+	super(on)
+	if advanced_toggle != null:
+		advanced_toggle.text = "%s  Comparison presets" % ("▾" if on else "▸")
+
+## player-facing wording for notes the older rounds wrote in build history.
+const PLAIN_NOTES := {
+	"F1 vanilla (64 Hz) is not in R15; the delivered R14 build keeps it.": "F1 vanilla (64 Hz) is not in this version.",
+	"Older Breakwater ghosts use the narrower gate and cannot race this revision.": "Breakwater ghosts from older versions cannot race this one."}
+
+func _plain_notes(page: Control) -> void:
+	if page == null:
+		return
+	for node: Node in page.find_children("*", "Label", true, false):
+		var label := node as Label
+		if PLAIN_NOTES.has(label.text):
+			label.text = PLAIN_NOTES[label.text]
+
+func _refresh_share() -> void:
+	super()
+	if share_revision != null and PLAIN_NOTES.has(share_revision.text):
+		share_revision.text = PLAIN_NOTES[share_revision.text]
 
 ## the Runs page in three named parts: your recordings, the racing ghost, sharing and export.
 func _section_runs() -> void:
@@ -338,7 +363,7 @@ func _plain_rope_names() -> void:
 
 ## plain names for the sliders; the Source arithmetic stays in the line under them.
 const PLAIN_SETTING_NAMES := {"source_sensitivity": "Mouse sensitivity (Source scale)", "source_fov": "Field of view (4:3 reference, widened to fit)",
-	"r13_sensitivity": "R13 mouse (F3 only)", "r13_fov": "R13 horizontal field of view (F3 only)", "volume": "Volume"}
+	"r13_sensitivity": "Mouse sensitivity for F3", "r13_fov": "Field of view for F3", "volume": "Volume"}
 
 ## the current map's controls as short lines on a quiet panel, without capitals shouting.
 func _plain_map_controls() -> void:

@@ -219,7 +219,7 @@ func _fill_summary(best: Dictionary) -> void:
 		if float(split.loss) > float(worst.get("loss", 0.0)):
 			worst = split
 	_set_tile("attempt", "%.3f s" % float(last.time), "at " + str(last.label))
-	_set_tile("best", "%.3f s" % float(last.best_time), "set " + plain_dates(MODEL.recorded_time(best.run.header.get("created_unix", 0.0))) + " UTC")
+	_set_tile("best", "%.3f s" % float(last.best_time), "set " + plain_dates(MODEL.recorded_time(best.run.header.get("created_unix", 0.0))))
 	var delta := float(last.delta)
 	_set_tile("delta", "%+.3f s" % delta, "slower" if delta > 0.0005 else ("faster" if delta < -0.0005 else "level"),
 		LOOK.VERMILION_DEEP if delta > 0.0005 else (LOOK.SEA_GLASS_DEEP if delta < -0.0005 else LOOK.INK))
