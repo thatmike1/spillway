@@ -51,7 +51,40 @@ func dress(level: Node3D) -> Node3D:
 			var label_name := str(label.name)
 			if not label_name.begins_with("Sign_") or label_name.begins_with("Sign_WHITEOUT"):
 				_hidden.append(label as Node3D)
-	return _hangar(k)
+	_level = level
+	var root := _hangar(k)
+	root.add_child(_hazard_cover(k))
+	return root
+
+## the dashed hazard band 1.6 to 2.6 m before the chasm lip read as an orange band across the
+## road (critic 19:28): under look c it is covered by deck, drawn a few millimetres over the paint
+## with the saddle deck's own material. the orange chasm lip itself stays.
+var _level: Node3D
+var _cover: MeshInstance3D
+
+func _hazard_cover(k: Dictionary) -> MeshInstance3D:
+	var half: float = k.SADDLE_HALF
+	var end: float = k.SADDLE_END
+	var y := float(k.SADDLE_Y) + 0.010
+	var x0 := -half + 0.4
+	var x1 := half - 0.4
+	var z0 := end + 1.5
+	var z1 := end + 2.7
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var a := Vector3(x0, y, z0)
+	var b := Vector3(x1, y, z0)
+	var c := Vector3(x1, y, z1)
+	var d := Vector3(x0, y, z1)
+	# both windings, so the patch faces up whichever order godot treats as front.
+	for v: Vector3 in [a, b, c, a, c, d, a, c, b, a, d, c]:
+		st.set_normal(Vector3.UP)
+		st.add_vertex(v)
+	_cover = MeshInstance3D.new()
+	_cover.name = "SaddleHazardCover"
+	_cover.mesh = st.commit()
+	_cover.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return _cover
 
 ## columns and beams at these z, from the back wall toward the door.
 const FRAMES := [13.4, 7.5, 1.5, -4.5, -10.5]
@@ -136,6 +169,19 @@ func material(key: String, _node: Node, proposed: Material) -> Material:
 	return proposed
 
 func set_enabled(value: bool) -> void:
+	# the saddle deck's material is the layer's own, applied just before this call.
+	if value and _cover != null and is_instance_valid(_level):
+		var deck := _level.get_node_or_null("Mesh_tread_saddle") as GeometryInstance3D
+		if deck != null and deck.material_override != null:
+			_cover.material_override = deck.material_override
+		elif _cover.material_override == null:
+			var plain := ShaderMaterial.new()
+			plain.shader = load("res://shaders/look/surface.gdshader")
+			plain.set_shader_parameter("wear", load("res://assets/look/painted-wear.png"))
+			plain.set_shader_parameter("top_color", Color(PALETTE.top))
+			plain.set_shader_parameter("side_color", Color(PALETTE.top))
+			plain.set_shader_parameter("deck", 0.35)
+			_cover.material_override = plain
 	for node: Node3D in _hidden:
 		if is_instance_valid(node):
 			node.visible = not value

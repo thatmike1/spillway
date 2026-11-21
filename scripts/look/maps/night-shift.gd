@@ -5,8 +5,10 @@ extends RefCounted
 ## line), and the train, both walls and the passage edges separate without brightening the floor. the cropped station banner and painted figures hide while L is on.
 ## nothing here collides.
 
-## deck on lane 01's announced night value (dedad0): the warmer e1d9c5 went mauve under the roof.
-const PALETTE := {"top": "dedad0", "side": "7d7468"}
+## deck a moonlit concrete a step below lane 01's night value and warm in albedo, so the blue moon
+## lands it on grey: dedad0 glowed blue-white as the brightest surface in the night (critic 19:28),
+## c9c6bd still rendered blue (169,183,212); the warmer e1d9c5 went mauve under the roof.
+const PALETTE := {"top": "cdc2b0", "side": "7d7468"}
 ## authored place signs that stay; any other label under Markings is a painted figure.
 ## wall and roof-steel kinds get material and wear; the art file splits each kind into grid cells
 ## (Mesh_cladding_3_m2), so these match on the kind before the cell.
@@ -14,6 +16,9 @@ const WALLS := {
 	"concrete": {"side_color": "86807a", "wear_amount": 0.08, "streak_amount": 0.3},
 	"cladding": {"side_color": "6f7a7e", "wear_amount": 0.08, "streak_amount": 0.3},
 	"brick": {"side_color": "75625a", "wear_amount": 0.08, "streak_amount": 0.3},
+	# the trackbed slots between and beside the platforms: dark ballast, as the baseline read them,
+	# so the corridor shows its track instead of pale hairlines.
+	"bed": {"top_color": "3b4046", "side_color": "30353a", "wear_amount": 0.04, "deck": 0.0},
 	"formwork": {"side_color": "7f7a70", "wear_amount": 0.08, "streak_amount": 0.3},
 	# the canopy, its beams and columns: cool slate steel, a lit top and a darker side, so the
 	# roof keeps the night mood against the sky instead of a flat mid grey.
@@ -26,6 +31,7 @@ const SIGNS := ["Platform1", "Roundel_w", "Roundel_e", "ThroatSign", "BaysSign",
 
 var _hidden: Array[Node3D] = []
 var _stock: ShaderMaterial
+var _rail: ShaderMaterial
 
 var _cars: Array[MeshInstance3D] = []
 ## each car surface's original override, captured before the layer applies anything.
@@ -60,7 +66,19 @@ func dress(level: Node3D) -> Node3D:
 	return null
 
 ## the shared look builds one material per wall mesh; this sets its kind's colour and wear in place.
-func material(key: String, _node: Node, proposed: Material) -> Material:
+func material(key: String, node: Node, proposed: Material) -> Material:
+	# the kit rails sunk in the floors came through the shared prop shader in the pale deck top and
+	# read as hairlines; dark rail steel puts the track slots back (per surface; node calls are null).
+	if proposed is ShaderMaterial and node != null and "/Rails/" in str(node.get_path()):
+		if _rail == null:
+			_rail = ShaderMaterial.new()
+			_rail.shader = load("res://shaders/look/surface.gdshader")
+			_rail.set_shader_parameter("wear", load("res://assets/look/painted-wear.png"))
+			_rail.set_shader_parameter("top_color", Color("4a4f55"))
+			_rail.set_shader_parameter("side_color", Color("2b2f34"))
+			_rail.set_shader_parameter("wear_amount", 0.04)
+			_rail.set_shader_parameter("deck", 0.0)
+		return _rail
 	if not proposed is ShaderMaterial or not key.begins_with("Mesh_"):
 		return proposed
 	var kind := RegEx.create_from_string("_m?\\d+_m?\\d+$").sub(key.trim_prefix("Mesh_"), "")

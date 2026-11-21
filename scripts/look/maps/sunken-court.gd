@@ -4,15 +4,15 @@ extends RefCounted
 ## obelisks, broken columns and hanging moss strips that were scattered to fill space hide while
 ## L is on, and the low-poly pine groves. nothing here collides.
 
-## decks near lane 01's shell-white (d9d5cb), nudged off green: the cyan fill and fog of this
-## map's light turned d9d5cb into (227,239,218) and the sandstone into olive. full sun no longer clips;
-## faces a warm weathered sandstone instead of the khaki that read olive in shade. wear is low
-## and streaks carry the weathering: high wear read as camouflage spots on the big walls.
-const PALETTE := {"top": "ddd3cc", "side": "b4957e"}
+## decks on lane 01's shell-white d9d5cb (a warm nudge against the old cyan fill read pink once
+## lane 02 moved the fill to blue-grey); faces a warm weathered sandstone instead of the khaki
+## that read olive in shade. wear is low and streaks carry the weathering: high wear read as
+## camouflage spots on the big walls.
+const PALETTE := {"top": "d9d5cb", "side": "b4957e"}
 const SURFACES := {
-	"ashlar": {"side_color": "b0917a", "top_color": "d6cbc2", "wear_amount": 0.06, "streak_amount": 0.18},
-	"vault": {"side_color": "9a7c68", "top_color": "c9b9a9", "wear_amount": 0.06, "streak_amount": 0.18},
-	"column": {"side_color": "c2ab97", "top_color": "d8ccc3", "wear_amount": 0.04, "streak_amount": 0.12},
+	"ashlar": {"side_color": "b0917a", "top_color": "d4cfc6", "wear_amount": 0.06, "streak_amount": 0.18},
+	"vault": {"side_color": "9a7c68", "top_color": "c8c0b4", "wear_amount": 0.06, "streak_amount": 0.18},
+	"column": {"side_color": "c2ab97", "top_color": "d6d0c6", "wear_amount": 0.04, "streak_amount": 0.12},
 	# deck kinds keep the palette top; their faces (under landings) streak instead of chipping.
 	"flag": {"wear_amount": 0.03, "streak_amount": 0.18},
 	"stair": {"wear_amount": 0.03, "streak_amount": 0.18},
@@ -22,6 +22,11 @@ const SURFACES := {
 	"cliff": {"side_color": "7d6f60", "top_color": "8f8a6a", "wear_amount": 0.08, "streak_amount": 0.2},
 }
 ## assets hidden under L on: filler that explains nothing about the place.
+## the castle-kit pieces (gate tower, arches, aqueduct towers) come through the shared prop shader,
+## flat and unweathered beside the streaked walls: same sandstone and streaks as the ashlar.
+const KIT_STONE := {"side_color": "b0917a", "top_color": "d4cfc6", "wear_amount": 0.04, "streak_amount": 0.18}
+var _kit_stone: ShaderMaterial
+
 const FILLER := ["statue_columnDamaged", "hanging_moss", "grass_leafs", "plant_bushSmall", "log"]
 
 var _hidden: Array[Node3D] = []
@@ -52,6 +57,23 @@ func dress(level: Node3D) -> Node3D:
 			if label is Label3D and str(label.name) != "GateSign":
 				_hidden.append(label as Node3D)
 	return null
+
+## per surface of a kit model the shared look proposes its prop material; this answers the castle
+## pieces with the streaked sandstone surface instead. node calls (proposed null) stay null.
+func material(_key: String, _node: Node, proposed: Material) -> Material:
+	if not proposed is ShaderMaterial or (proposed as ShaderMaterial).shader == null:
+		return proposed
+	if not (proposed as ShaderMaterial).shader.resource_path.ends_with("r17_prop.gdshader"):
+		return proposed
+	if _kit_stone == null:
+		_kit_stone = ShaderMaterial.new()
+		_kit_stone.shader = load("res://shaders/look/surface.gdshader")
+		_kit_stone.set_shader_parameter("wear", load("res://assets/look/painted-wear.png"))
+		_kit_stone.set_shader_parameter("deck", 0.0)
+		for parameter: String in KIT_STONE:
+			var value: Variant = KIT_STONE[parameter]
+			_kit_stone.set_shader_parameter(parameter, Color(value) if value is String else value)
+	return _kit_stone
 
 func set_enabled(value: bool) -> void:
 	for node: Node3D in _hidden:
