@@ -14,7 +14,8 @@ extends RefCounted
 ## one game, each map its own hour: warm direct sun against a cool ambient so sun-facing and shaded
 ## faces of the same pale concrete separate, a painted sky with sculpted cumulus whose lit side
 ## follows the sun, and depth fog that fades far structure toward the horizon colour.
-const SKY_SHADER := preload("res://shaders/look/sky.gdshader")
+const SKY_SHADER := preload("res://shaders/look/sky/painted.gdshader")
+const PANORAMA_SHADER := preload("res://shaders/look/sky.gdshader")
 const CLOUDS := "res://assets/look/sky/cloud-atlas.png"
 const WISPS := "res://assets/look/sky/wisp-atlas.png"
 const ROOT := "res://assets/look/r17/"
@@ -22,14 +23,16 @@ const ROOT := "res://assets/look/r17/"
 ## card layouts: [azimuth, bottom elevation, width (negative mirrors), atlas cell], all degrees.
 ## azimuth 0 looks down -Z; each map turns its layout so its big clouds stand over the route.
 const LAYOUTS := {
-	"fair": [[-30, 3, 52, 0], [28, 9, 30, 3], [78, 2, -46, 1], [140, 6, 36, 2], [205, 2, -58, 0], [265, 8, -34, 3], [318, 4, 40, 1]],
-	"towers": [[-22, 1, 44, 0], [24, 4, 58, 1], [92, 2, -48, 2], [160, 3, 40, 0], [215, 1, -62, 1], [290, 5, 46, 2]],
-	"sparse": [[-40, 6, 40, 2], [55, 3, -54, 1], [170, 8, 34, 3], [260, 4, 44, 0]],
-	"banks": [[-45, 0, 70, 1], [20, 2, 64, 1], [90, 0, -72, 1], [160, 1, 66, 2], [230, 0, -70, 1], [300, 2, 62, 2]],
+	"fair": [[-30, 4, 52, 0], [28, 13, 30, 3], [78, 2, 46, 1], [140, 9, 36, 2], [205, 3, 58, 0], [265, 14, 34, 3], [318, 6, 40, 1]],
+	"towers": [[-22, 2, 44, 0], [24, 9, 58, 1], [92, 4, 48, 2], [160, 12, 40, 0], [215, 3, 62, 1], [290, 8, 46, 2]],
+	"sparse": [[-40, 10, 40, 2], [55, 4, 54, 1], [170, 13, 34, 3], [260, 6, 44, 0]],
+	"banks": [[-45, 1, 70, 1], [20, 6, 64, 1], [90, 2, 72, 1], [160, 8, 66, 2], [230, 3, 70, 1], [300, 7, 62, 2]],
 }
+## wisp strips 1 (parallel cirrus streaks) and 2 (broken altocumulus flecks) only: strips 0 and 3
+## curl into ribbons that read as drawn squiggles next to the painted cumulus.
 const WISP_LAYOUTS := {
-	"high": [[-10, 26, 70, 0], [70, 34, -60, 1], [170, 22, 80, 2], [260, 30, -64, 3]],
-	"low": [[0, 14, 80, 1], [120, 12, -90, 2], [240, 16, 76, 0]],
+	"high": [[-10, 28, 70, 1], [70, 36, 60, 2], [170, 24, 80, 1], [260, 32, 64, 2]],
+	"low": [[0, 16, 80, 1], [120, 14, 90, 2], [240, 18, 76, 1]],
 	"none": [],
 }
 
@@ -70,13 +73,13 @@ const SKIES := {
 const MAPS := {
 	# container port at dusk: low apricot sun from the left of the run, towering clouds, cool blue shade.
 	"breakwater": {"sky":"res://assets/look/cloud-sky.png", "paint":"golden", "layout":"towers", "wisp":"high", "cloud_turn":0.0,
-		"sun":"ffe0b4", "sun_energy":0.58, "pitch":-22.0, "yaw":-135.0, "fill":"9cb4d4", "fill_light":"8fb0c8", "fill_energy":0.14, "ambient":0.56, "fog":"b9d1cf", "fog_density":0.0008, "exposure":0.9},
+		"sun":"ffe0b4", "sun_energy":0.5, "pitch":-22.0, "yaw":-135.0, "fill":"9cb4d4", "fill_light":"8fb0c8", "fill_energy":0.14, "ambient":0.5, "fog":"b9d1cf", "fog_density":0.0008, "exposure":0.84},
 	# cold clear winter morning: low pale sun, ivory clouds, blue shade on the snow.
 	"whiteout-relay": {"sky":ROOT+"whiteout-sky.png", "paint":"winter", "layout":"fair", "wisp":"high", "cloud_turn":0.0,
-		"sun":"fff0dc", "sun_energy":0.5, "pitch":-22.0, "yaw":-36.2, "fill":"a3b9da", "fill_energy":0.14, "ambient":0.56, "fog":"d3dee5", "fog_density":0.0012, "exposure":0.88},
+		"sun":"fff0dc", "sun_energy":0.5, "pitch":-22.0, "yaw":-36.2, "fill":"a3b9da", "fill_energy":0.14, "ambient":0.56, "fog":"d3dee5", "fog_density":0.0012, "exposure":0.85},
 	# bright late morning by the sea: high warm sun, white towers, clear blue-grey shade.
 	"sunken-court": {"sky":ROOT+"sunken-sky.png", "paint":"cyan", "layout":"towers", "wisp":"none", "cloud_turn":0.0,
-		"sun":"fff2da", "sun_energy":0.54, "pitch":-52.0, "yaw":35.0, "fill":"9fb3d2", "fill_energy":0.12, "ambient":0.55, "fog":"b4dcd8", "fog_density":0.0011, "exposure":0.88},
+		"sun":"fff2da", "sun_energy":0.54, "pitch":-52.0, "yaw":35.0, "fill":"9fb3d2", "fill_energy":0.12, "ambient":0.55, "fog":"b4dcd8", "fog_density":0.0011, "exposure":0.85},
 	# after rain: slate banks, a thin bright break over the sea, soft sun, high cool ambient.
 	"rainline": {"sky":ROOT+"rainline-sky.png", "paint":"slate", "layout":"banks", "wisp":"low", "cloud_turn":0.0,
 		"sun":"dde3e8", "sun_energy":0.4, "pitch":-48.0, "yaw":-25.0, "fill":"a2b6c8", "fill_energy":0.16, "ambient":0.64, "fog":"9aacb5", "fog_density":0.0016, "exposure":0.95},
@@ -85,49 +88,49 @@ const MAPS := {
 		"sun":"bccaf0", "sun_energy":0.44, "pitch":-42.0, "yaw":40.0, "fill":"7f90bc", "fill_energy":0.14, "ambient":0.62, "fog":"3a4770", "fog_density":0.0014, "exposure":0.95},
 	# clear mid-morning over the yard: fair-weather cumulus all round.
 	"practice": {"sky":ROOT+"practice-sky.png", "paint":"noon", "layout":"fair", "wisp":"high", "cloud_turn":0.0,
-		"sun":"fff1da", "sun_energy":0.56, "pitch":-38.0, "yaw":-110.0, "fill":"a2b8d4", "fill_energy":0.12, "ambient":0.55, "fog":"bcd7da", "fog_density":0.001, "exposure":0.9},
+		"sun":"fff1da", "sun_energy":0.56, "pitch":-38.0, "yaw":-110.0, "fill":"a2b8d4", "fill_energy":0.12, "ambient":0.55, "fog":"bcd7da", "fog_density":0.001, "exposure":0.86},
 	# late afternoon on the dam: warm low sun down the tail race, towering clouds.
 	"overflow": {"sky":ROOT+"overflow-sky.png", "paint":"golden", "layout":"towers", "wisp":"high", "cloud_turn":60.0,
-		"sun":"ffdcb0", "sun_energy":0.58, "pitch":-24.0, "yaw":-120.0, "fill":"9cb4d4", "fill_energy":0.14, "ambient":0.55, "fog":"b9d1cf", "fog_density":0.001, "exposure":0.9},
+		"sun":"ffdcb0", "sun_energy":0.58, "pitch":-24.0, "yaw":-120.0, "fill":"9cb4d4", "fill_energy":0.14, "ambient":0.55, "fog":"b9d1cf", "fog_density":0.001, "exposure":0.86},
 	# the lab: high pearl skylight, soft and even.
 	"experiment": {"sky":ROOT+"lab-sky.png", "paint":"pearl", "layout":"sparse", "wisp":"none", "cloud_turn":0.0,
-		"sun":"fff0d9", "sun_energy":0.6, "pitch":-62.0, "yaw":25.0, "fill":"b2c4d8", "fill_energy":0.12, "ambient":0.58, "fog":"dfe5e5", "fog_density":0.0012, "exposure":0.9},
+		"sun":"fff0d9", "sun_energy":0.6, "pitch":-62.0, "yaw":25.0, "fill":"b2c4d8", "fill_energy":0.12, "ambient":0.58, "fog":"dfe5e5", "fog_density":0.0012, "exposure":0.86},
 	# salt pans at noon: bleached pearl haze, the sea glare carries the scene.
 	"saltglass-seaward": {"sky":ROOT+"practice-sky.png", "paint":"pearl", "layout":"fair", "wisp":"high", "cloud_turn":30.0,
-		"sun":"fff2dc", "sun_energy":0.56, "pitch":-40.0, "yaw":-110.0, "fill":"a2b8d4", "fill_energy":0.12, "ambient":0.56, "fog":"dfe5e5", "fog_density":0.0009, "exposure":0.9},
+		"sun":"fff2dc", "sun_energy":0.56, "pitch":-40.0, "yaw":-110.0, "fill":"a2b8d4", "fill_energy":0.12, "ambient":0.56, "fog":"dfe5e5", "fog_density":0.0009, "exposure":0.86},
 	# transfer yard in full morning: towering cumulus over the rope lines.
 	"tether-yard": {"sky":ROOT+"practice-sky.png", "paint":"noon", "layout":"towers", "wisp":"high", "cloud_turn":20.0,
-		"sun":"fff0d6", "sun_energy":0.56, "pitch":-34.0, "yaw":-120.0, "fill":"a2b8d4", "fill_energy":0.12, "ambient":0.55, "fog":"bcd7da", "fog_density":0.001, "exposure":0.9},
+		"sun":"fff0d6", "sun_energy":0.56, "pitch":-34.0, "yaw":-120.0, "fill":"a2b8d4", "fill_energy":0.12, "ambient":0.55, "fog":"bcd7da", "fog_density":0.001, "exposure":0.86},
 	# first light: a low peach sun across the line, long shadows.
 	"through-line": {"sky":ROOT+"practice-sky.png", "paint":"dawn", "layout":"fair", "wisp":"high", "cloud_turn":0.0,
-		"sun":"ffd8b2", "sun_energy":0.56, "pitch":-16.0, "yaw":-70.0, "fill":"9cafd0", "fill_energy":0.14, "ambient":0.55, "fog":"d8d3cf", "fog_density":0.0011, "exposure":0.9},
+		"sun":"ffd8b2", "sun_energy":0.56, "pitch":-16.0, "yaw":-70.0, "fill":"9cafd0", "fill_energy":0.14, "ambient":0.55, "fog":"d8d3cf", "fog_density":0.0011, "exposure":0.86},
 	# a breezy bright day over the roofs.
 	"mail-run": {"sky":ROOT+"practice-sky.png", "paint":"noon", "layout":"fair", "wisp":"high", "cloud_turn":45.0,
-		"sun":"fff1d8", "sun_energy":0.56, "pitch":-36.0, "yaw":-140.0, "fill":"a2b8d4", "fill_energy":0.12, "ambient":0.55, "fog":"bcd7da", "fog_density":0.001, "exposure":0.9},
+		"sun":"fff1d8", "sun_energy":0.56, "pitch":-36.0, "yaw":-140.0, "fill":"a2b8d4", "fill_energy":0.12, "ambient":0.55, "fog":"bcd7da", "fog_density":0.001, "exposure":0.86},
 	# salt works at noon: deep blue behind the pale pans so slopes and decks read against it.
 	"saltglass": {"sky":ROOT+"practice-sky.png", "paint":"salt", "layout":"sparse", "wisp":"high", "cloud_turn":10.0,
-		"sun":"fff3de", "sun_energy":0.56, "pitch":-40.0, "yaw":-110.0, "fill":"a2b8d4", "fill_energy":0.12, "ambient":0.56, "fog":"d7e4e2", "fog_density":0.0009, "exposure":0.9},
+		"sun":"fff3de", "sun_energy":0.56, "pitch":-40.0, "yaw":-110.0, "fill":"a2b8d4", "fill_energy":0.12, "ambient":0.56, "fog":"d7e4e2", "fog_density":0.0009, "exposure":0.86},
 	# valley dam in the afternoon: side sun along the deck line.
 	"viaduct": {"sky":ROOT+"overflow-sky.png", "paint":"afternoon", "layout":"towers", "wisp":"high", "cloud_turn":28.0,
-		"sun":"fff0d6", "sun_energy":0.56, "pitch":-36.0, "yaw":-110.0, "fill":"a2b8d4", "fill_energy":0.12, "ambient":0.55, "fog":"c3d8d6", "fog_density":0.001, "exposure":0.9},
+		"sun":"fff0d6", "sun_energy":0.56, "pitch":-36.0, "yaw":-110.0, "fill":"a2b8d4", "fill_energy":0.12, "ambient":0.55, "fog":"c3d8d6", "fog_density":0.001, "exposure":0.86},
 	# drydock gantries, mid afternoon.
 	"gantry": {"sky":"res://assets/look/cloud-sky.png", "paint":"afternoon", "layout":"fair", "wisp":"high", "cloud_turn":-20.0,
-		"sun":"fff0d6", "sun_energy":0.56, "pitch":-34.0, "yaw":-110.0, "fill":"a2b8d4", "fill_energy":0.12, "ambient":0.55, "fog":"c3d8d6", "fog_density":0.001, "exposure":0.9},
+		"sun":"fff0d6", "sun_energy":0.56, "pitch":-34.0, "yaw":-110.0, "fill":"a2b8d4", "fill_energy":0.12, "ambient":0.55, "fog":"c3d8d6", "fog_density":0.001, "exposure":0.86},
 	# the longer chain runs into later, warmer light.
 	"gantry-chain": {"sky":"res://assets/look/cloud-sky.png", "paint":"golden", "layout":"fair", "wisp":"high", "cloud_turn":-20.0,
-		"sun":"ffe6c0", "sun_energy":0.56, "pitch":-28.0, "yaw":-110.0, "fill":"9cb4d4", "fill_energy":0.12, "ambient":0.55, "fog":"b9d1cf", "fog_density":0.001, "exposure":0.9},
+		"sun":"ffe6c0", "sun_energy":0.56, "pitch":-28.0, "yaw":-110.0, "fill":"9cb4d4", "fill_energy":0.12, "ambient":0.55, "fog":"b9d1cf", "fog_density":0.001, "exposure":0.86},
 	# tidal estuary, late afternoon; the sun stands behind the runner so the spill-tower court is lit.
 	"sluice-six": {"sky":"res://assets/look/cloud-sky.png", "paint":"golden", "layout":"towers", "wisp":"high", "cloud_turn":150.0,
-		"sun":"ffe4bc", "sun_energy":0.58, "pitch":-38.0, "yaw":20.0, "fill":"9cb4d4", "fill_energy":0.12, "ambient":0.55, "fog":"b9d1cf", "fog_density":0.0009, "exposure":0.9},
+		"sun":"ffe4bc", "sun_energy":0.58, "pitch":-38.0, "yaw":20.0, "fill":"9cb4d4", "fill_energy":0.12, "ambient":0.55, "fog":"b9d1cf", "fog_density":0.0009, "exposure":0.86},
 	# the outer reach at golden hour: broad open sky, long side light over the corridors.
 	"outer-reach": {"sky":"res://assets/look/cloud-sky.png", "paint":"golden", "layout":"towers", "wisp":"high", "cloud_turn":-60.0,
-		"sun":"ffd9a8", "sun_energy":0.6, "pitch":-20.0, "yaw":-120.0, "fill":"9cb4d4", "fill_energy":0.12, "ambient":0.55, "fog":"b9d1cf", "fog_density":0.0008, "exposure":0.9},
+		"sun":"ffd9a8", "sun_energy":0.6, "pitch":-20.0, "yaw":-120.0, "fill":"9cb4d4", "fill_energy":0.12, "ambient":0.55, "fog":"b9d1cf", "fog_density":0.0008, "exposure":0.86},
 	# foundry at dusk: warm low haze around the hall.
 	"foundry": {"sky":ROOT+"practice-sky.png", "paint":"dawn", "layout":"sparse", "wisp":"low", "cloud_turn":30.0,
-		"sun":"ffd4a8", "sun_energy":0.56, "pitch":-26.0, "yaw":-110.0, "fill":"9cafd0", "fill_energy":0.12, "ambient":0.56, "fog":"d8d3cf", "fog_density":0.0011, "exposure":0.9},
+		"sun":"ffd4a8", "sun_energy":0.56, "pitch":-26.0, "yaw":-110.0, "fill":"9cafd0", "fill_energy":0.12, "ambient":0.56, "fog":"d8d3cf", "fog_density":0.0011, "exposure":0.86},
 	# planning yard: a clear even noon so the plan reads; few clouds.
 	"plan-yard": {"sky":"res://assets/look/cloud-sky.png", "paint":"afternoon", "layout":"sparse", "wisp":"high", "cloud_turn":0.0,
-		"sun":"fff2dc", "sun_energy":0.54, "pitch":-40.0, "yaw":-30.0, "fill":"a2b8d4", "fill_energy":0.12, "ambient":0.58, "fog":"c3d8d6", "fog_density":0.0009, "exposure":0.9},
+		"sun":"fff2dc", "sun_energy":0.54, "pitch":-40.0, "yaw":-30.0, "fill":"a2b8d4", "fill_energy":0.12, "ambient":0.58, "fog":"c3d8d6", "fog_density":0.0009, "exposure":0.86},
 }
 
 static func has_map(id: String) -> bool:
@@ -141,7 +144,7 @@ static func entry(id: String) -> Dictionary:
 static func make_sky(id: String, reuse: Sky = null) -> Sky:
 	var values: Dictionary = MAPS[id]
 	var material := ShaderMaterial.new()
-	material.shader = SKY_SHADER
+	material.shader = SKY_SHADER if values.has("paint") else PANORAMA_SHADER
 	material.set_shader_parameter("panorama", load(str(values.sky)))
 	if values.has("paint"):
 		_paint(material, values)
@@ -171,12 +174,21 @@ static func _paint(material: ShaderMaterial, values: Dictionary) -> void:
 	material.set_shader_parameter("cloud_haze", float(paint.haze))
 	var sun_basis := Basis.from_euler(Vector3(deg_to_rad(float(values.pitch)), deg_to_rad(float(values.yaw)), 0))
 	material.set_shader_parameter("sun_dir", sun_basis * Vector3(0, 0, 1))
-	material.set_shader_parameter("drift", deg_to_rad(float(values.get("drift", 0.04))))
 	if ResourceLoader.exists(CLOUDS):
-		material.set_shader_parameter("clouds", load(CLOUDS))
+		var atlas: Texture2D = load(CLOUDS)
+		material.set_shader_parameter("clouds", atlas)
+		# a 4x2 atlas holds a second set of paintings: every other card uses its partner cell.
+		var columns := 4 if atlas.get_width() >= atlas.get_height() * 2 else 2
+		material.set_shader_parameter("cloud_cells", Vector2(columns, 2))
 		var cards := PackedVector4Array()
-		for card: Array in LAYOUTS[str(values.layout)]:
-			cards.append(Vector4(float(card[0]) + float(values.cloud_turn), card[1], card[2], card[3]))
+		var layout: Array = LAYOUTS[str(values.layout)]
+		for i: int in layout.size():
+			var card: Array = layout[i]
+			var cell := int(card[3])
+			if columns == 4 and i % 2 == 1:
+				# row 0 holds the first four paintings in layout order, row 1 the second four.
+				cell += 4
+			cards.append(Vector4(float(card[0]) + float(values.cloud_turn), card[1], card[2], cell))
 		material.set_shader_parameter("card_count", cards.size())
 		cards.resize(8)
 		material.set_shader_parameter("cards", cards)
