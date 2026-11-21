@@ -5,7 +5,8 @@ extends RefCounted
 ## sheds, loose machines and the pines crowding the road hide while L is on. reachable props
 ## (named Prop_*) are never touched: their collision is the level's. nothing here collides.
 
-const PALETTE := {"side": "4f7880"}
+## decks in the pale shell family (the palette's sand top read warmer than any other map).
+const PALETTE := {"top": "e6e2d8", "side": "4f7880"}
 ## plateau dishes and small buildings that repeat the landmark at toy scale.
 const FILLER := ["satelliteDish", "satelliteDish_detailed", "hangar_smallA", "machine_generator", "machine_generatorLarge", "machine_wireless", "supports_high"]
 
