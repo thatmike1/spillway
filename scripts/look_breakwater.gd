@@ -15,6 +15,8 @@ var _lines := SurfaceTool.new()
 var _caps := SurfaceTool.new()
 var _edge_seen := {}
 var line_count := 0
+## original nodes hidden while look c is on (figures painted in the world), shown again with l off.
+var _hidden: Array[Node3D] = []
 
 func attach(level: Node3D) -> void:
 	name = "LookC"
@@ -140,6 +142,9 @@ func set_enabled(value: bool) -> void:
 			lamp.light_color = state.color
 			lamp.light_energy = state.energy
 	ink_mesh.visible = value
+	for node: Node3D in _hidden:
+		if is_instance_valid(node):
+			node.visible = not value
 
 func _structure_ink(level: Node3D) -> void:
 	# p / authored major edges only, no triangle diagonals, grain, door bars or ribs.
@@ -229,8 +234,44 @@ func _dressing(level: Node3D) -> void:
 	var steel := MeshInstance3D.new()
 	steel.name = "CanopyFrame"
 	steel.mesh = st.commit()
-	steel.material_override = _material("Mesh_frame")
+	var soffit := ShaderMaterial.new()
+	soffit.shader = SURFACE
+	soffit.set_shader_parameter("wear", load("res://assets/look/painted-wear.png"))
+	soffit.set_shader_parameter("top_color", Color("8fa3a2"))
+	soffit.set_shader_parameter("side_color", Color("5f7e84"))
+	soffit.set_shader_parameter("wear_amount", 0.12)
+	steel.material_override = soffit
 	add_child(steel)
+	# the breach hazard band read as a dashed route marking: under look c it is covered by deck,
+	# drawn with the runway's own world-space material, a few millimetres over the paint.
+	var mole_w: float = k.MOLE_W
+	var mole_end: float = k.MOLE_END
+	var patch := SurfaceTool.new()
+	patch.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var y := float(k.TRACK_Y) + 0.010
+	var x0 := mole_w + 0.5
+	var x1 := mole_w + 13.3
+	var z0 := mole_end + 1.72
+	var z1 := mole_end + 3.08
+	# both windings, so the patch faces up whichever order godot treats as front.
+	var a := Vector3(x0, y, z0)
+	var b := Vector3(x1, y, z0)
+	var c := Vector3(x1, y, z1)
+	var d := Vector3(x0, y, z1)
+	for v: Vector3 in [a, b, c, a, c, d, a, c, b, a, d, c]:
+		patch.set_normal(Vector3.UP)
+		patch.add_vertex(v)
+	var deck := MeshInstance3D.new()
+	deck.name = "BreachDeck"
+	deck.mesh = patch.commit()
+	deck.material_override = _material("Mesh_pavers")
+	add_child(deck)
+	# distance and gap figures painted on walls and decks are teaching text, not the place.
+	var marks := level.get_node_or_null("Markings")
+	if marks != null:
+		for label: Node in marks.get_children():
+			if label is Label3D and str(label.name) != "TerminalSign":
+				_hidden.append(label as Node3D)
 	# the lantern beam reads as a cold glare in the painted daylight; keep it a warm hint.
 	var beam := level.get_node_or_null("Beam")
 	if beam != null and beam.get_child_count() > 0 and beam.get_child(0) is MeshInstance3D:
@@ -238,7 +279,8 @@ func _dressing(level: Node3D) -> void:
 		var old := fan.material_override as StandardMaterial3D
 		if old != null:
 			var soft := old.duplicate() as StandardMaterial3D
-			soft.albedo_color = Color(1.0, 0.86, 0.66, 0.38)
+			soft.blend_mode = BaseMaterial3D.BLEND_MODE_MIX
+			soft.albedo_color = Color(1.0, 0.88, 0.70, 0.30)
 			swaps.append({"node": fan, "old": old, "new": soft})
 
 func _slab(st: SurfaceTool, lo: Vector3, hi: Vector3) -> void:
