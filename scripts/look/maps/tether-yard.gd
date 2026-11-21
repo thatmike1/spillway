@@ -47,9 +47,15 @@ func dress(level: Node3D) -> Node3D:
 		_box(frame, "carriage", at + Vector3(0, 1.75, 0), Vector3(2.0, 0.5, 1.2), pale)
 		_box(frame, "strap", at + Vector3(0, 1.05, 0), Vector3(0.3, 0.9, 0.26), steel)
 	# every transfer deck stands on paired piers that reach the court floor, inset under the slab.
+	# the live entry is the r19/r20 level (every deck at 4 m); the newer module adds DECK_HEIGHTS.
+	var heights: Variant = []
+	var script := level.get_script() as Script
+	while script != null and heights is Array and (heights as Array).is_empty():
+		heights = script.get_script_constant_map().get("DECK_HEIGHTS", [])
+		script = script.get_base_script()
 	for i: int in level.DECKS.size():
 		var d: Array = level.DECKS[i]
-		var top: float = level.DECK_HEIGHTS[i] - 0.8
+		var top: float = (float(heights[i]) if heights is Array and i < heights.size() else 4.0) - 0.8
 		var height := top - COURT_TOP
 		for x: float in [float(d[0]) + 1.2, float(d[1]) - 1.2]:
 			for z: float in [float(d[2]) + 1.4, float(d[3]) - 1.4]:
