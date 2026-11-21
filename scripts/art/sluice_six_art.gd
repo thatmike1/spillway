@@ -4,8 +4,8 @@ const CONTOURS := preload("res://scripts/r17_contours.gd")
 const SKY_LIGHT := preload("res://scripts/look/sky_light.gd")
 ## original procedural architecture; no imported reference or concept assets.
 ## sluice six's own tones: sea-glass water, quieter deck joints. outer reach keeps the shared defaults.
-const SEA_DEEP := Vector3(0.20,0.45,0.47)
-const SEA_FAR := Vector3(0.42,0.62,0.60)
+const SEA_DEEP := Vector3(0.16,0.37,0.39)
+const SEA_FAR := Vector3(0.34,0.52,0.51)
 const SEAM := Vector2(0.30,0.70)
 ## joints every two paving bays: sparse lines on a quiet slab, not a tile grid.
 const SEAM_SCALE := Vector2(4.876,6.5024)
@@ -39,14 +39,14 @@ static func dress(level: Node3D) -> void:
 	for child: Node in level.get_children():
 		if child is MeshInstance3D:
 			var support := str(child.name).begins_with("Mesh_support_") or str(child.name).begins_with("Mesh_service_")
-			var top_color := Color("b7b7a5") if support else Color("c8c4b8")
+			var top_color := Color("a9a99a") if support else Color("b6b1a4")
 			var side_color := Color("8a9186") if support else Color("73818c")
 			if str(child.name).begins_with("Mesh_deck_pier_"):
 				var index := int(str(child.name).trim_prefix("Mesh_deck_pier_"))
 				if index >= 9:
-					top_color = Color("d4cdbb") if index % 2 == 0 else Color("b4bdbc")
+					top_color = Color("bfb8a7") if index % 2 == 0 else Color("a3aba9")
 					side_color = Color("7a8c96") if index % 2 == 0 else Color("596d7a")
-			child.material_override = MATERIALS.concrete(top_color,side_color,not support,child.get_aabb(),SEAM,SEAM_SCALE)
+			child.material_override = MATERIALS.concrete(top_color,side_color,not support,child.get_aabb(),SEAM,SEAM_SCALE,1.0)
 	_box(level,"tidal_water",Vector3(0,-3,-70),Vector3(350,0.1,450),Color("598a90"))
 	var footprints := PackedVector4Array()
 	for support: Vector4 in level.supports:
@@ -56,7 +56,7 @@ static func dress(level: Node3D) -> void:
 		footprints.append(Vector4(side*7,level.finish_position.z-15,1,5))
 	for bay: Vector2 in [Vector2(8,-22),Vector2(-42,-76),Vector2(-96,-130),Vector2(-144,-166)]:
 		footprints.append(Vector4(19,(bay.x+bay.y)*0.5,4,(bay.x-bay.y)*0.5))
-	level.get_node("tidal_water").material_override = MATERIALS.water(footprints,SEA_DEEP,SEA_FAR)
+	level.get_node("tidal_water").material_override = MATERIALS.water(footprints,SEA_DEEP,SEA_FAR,0.0)
 	# one connected waterworks: banks, section abutments, a service bridge and the spill tower.
 	# submerged bank foundations connect the works; the estuary side stays open to the horizon.
 	for side: int in [-1,1]:
@@ -88,9 +88,9 @@ static func dress(level: Node3D) -> void:
 		var top := 6.8-0.2*i
 		_box(level,"access_step_%d" % i,Vector3(16.15+0.3*i,(top+5.1)*0.5,-52),Vector3(0.3,top-5.1,3),Color("a5a797"),true)
 	var tower_z: float = level.finish_position.z - 15.0
-	_box(level,"tower_body",Vector3(0,16,tower_z),Vector3(12,12,10),Color("708c95"),true)
+	_box(level,"tower_body",Vector3(0,16,tower_z),Vector3(12,12,10),Color("4f6871"),true)
 	for side: int in [-1,1]:
-		_box(level,"tower_leg_%d" % side,Vector3(side*7,10,tower_z),Vector3(2,34,10),Color("81999b"),true)
+		_box(level,"tower_leg_%d" % side,Vector3(side*7,10,tower_z),Vector3(2,34,10),Color("627a80"),true)
 	_box(level,"tower_crown",Vector3(0,27,tower_z),Vector3(16,2,10),Color("c7c8b4"),true)
 	# metal guides show where the raised gate travels, fixed into its concrete piers and crosshead.
 	for side: int in [-1,1]:
@@ -150,15 +150,15 @@ static func dress(level: Node3D) -> void:
 		var x1: float = d.x+d.width*0.5
 		var corners: Array[Vector3] = [Vector3(x0,0.02,d.near),Vector3(x1,0.02,d.near),Vector3(x1,0.02,d.far),Vector3(x0,0.02,d.far)]
 		for i: int in 4:
-			edge_lines.line(corners[i],corners[(i+1)%4],0.009)
-			edge_lines.line(corners[i],Vector3(corners[i].x,-7.0 if d.id in ["start","tower_court"] else -0.5,corners[i].z),0.009)
+			edge_lines.line(corners[i],corners[(i+1)%4],0.005)
+			edge_lines.line(corners[i],Vector3(corners[i].x,-7.0 if d.id in ["start","tower_court"] else -0.5,corners[i].z),0.006)
 	for piece: Dictionary in level.manifest:
 		if piece.role not in ["support","obstacle"]:
 			continue
 		var points: Array = piece.points
 		for i: int in 4:
-			edge_lines.line(points[i],points[(i+1)%4],0.009)
-			edge_lines.line(points[i],points[i+4],0.009)
+			edge_lines.line(points[i],points[(i+1)%4],0.006)
+			edge_lines.line(points[i],points[i+4],0.006)
 	for child: Node in level.get_children():
 		if not child is MeshInstance3D or not child.get_meta("sluice_structural",false):
 			continue
@@ -170,7 +170,7 @@ static func dress(level: Node3D) -> void:
 			for axis: int in 3:
 				var other := i ^ (1 << axis)
 				if other > i:
-					edge_lines.line(points[i],points[other],0.012)
+					edge_lines.line(points[i],points[other],0.008)
 	var ink := MeshInstance3D.new()
 	ink.name = "LandingInk"
 	ink.mesh = edge_lines.lines.commit()
