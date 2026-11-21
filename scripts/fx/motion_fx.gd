@@ -348,8 +348,8 @@ func _update_rings(dt: float) -> void:
 		_ring_age[i] = minf(1.0, _ring_age[i] + dt / 0.75)
 		var age := _ring_age[i]
 		ring.visible = age < 1.0
-		# wide enough that its leading arc reaches the bottom of a level first-person view.
-		var radius := lerpf(1.0, 2.4, 1.0 - pow(1.0 - age, 3.0))
+		# the side arcs sweep out from beside the HUD toward the lower corners.
+		var radius := lerpf(1.4, 3.2, 1.0 - pow(1.0 - age, 3.0))
 		ring.scale = Vector3(radius, 1.0, radius)
 		(ring.material_override as ShaderMaterial).set_shader_parameter("age", age)
 		(ring.material_override as ShaderMaterial).set_shader_parameter("radius_m", radius)
@@ -418,9 +418,12 @@ func _landing(body: Node3D, camera: Camera3D, hardness: float, k: float) -> void
 		normal = Vector3.UP
 	var tangent := normal.cross(Vector3.FORWARD if absf(normal.dot(Vector3.FORWARD)) < 0.9 else Vector3.RIGHT).normalized()
 	var travel: Vector3 = body.get("velocity") if "velocity" in body else Vector3.ZERO
-	# centred a little ahead along the run: a first-person view outruns a ring left at the feet.
-	travel = (travel - normal * travel.dot(normal)) * 0.55
-	ring.global_transform = Transform3D(Basis(tangent, normal, tangent.cross(normal)), body.global_position + travel.limit_length(4.5) + normal * 0.03)
+	# centred ahead of the view and a little along the run, so its side arcs land in the lower
+	# corners of a first-person view; the shader keeps the centre column (HUD, next landing) clear.
+	var look := -camera.global_basis.z
+	look = (look - normal * look.dot(normal)).normalized() * 2.2 if (look - normal * look.dot(normal)).length_squared() > 0.01 else Vector3.ZERO
+	travel = (travel - normal * travel.dot(normal)) * 0.25
+	ring.global_transform = Transform3D(Basis(tangent, normal, tangent.cross(normal)), body.global_position + (look + travel).limit_length(4.0) + normal * 0.03)
 	ring.visible = true
 	_ring_age[_rings.find(ring)] = 0.0
 	(ring.material_override as ShaderMaterial).set_shader_parameter("strength", 0.45 + 0.55 * k)
