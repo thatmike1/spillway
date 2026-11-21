@@ -12,6 +12,7 @@ const COURT_TOP := -5.0
 const PALETTE := {"top": "f6ead0", "side": "6d8388"}
 
 var _labels: Array[Label3D] = []
+var _concrete: ShaderMaterial
 
 func material(key: String, node: GeometryInstance3D, proposed: Material) -> Material:
 	# the shared layer paints every Art_paint mesh cream; the swing rings must stay signal vermilion.
@@ -25,11 +26,21 @@ func material(key: String, node: GeometryInstance3D, proposed: Material) -> Mate
 		var sea := ShaderMaterial.new()
 		sea.shader = preload("res://assets/maps/gantry/water.gdshader")
 		return sea
-	# transfer decks show some wear and value instead of one flat plane at spawn.
-	if key.begins_with("Mesh_deck_transfer") and proposed is ShaderMaterial:
-		(proposed as ShaderMaterial).set_shader_parameter("wear_amount", 0.5)
-		# no joint grid: the only lines on a landing should be its real edges.
-		(proposed as ShaderMaterial).set_shader_parameter("deck", 0.0)
+	# transfer decks share the rope courses' cast concrete: weathered top value, no joint grid,
+	# so the only lines on a landing are its real edges.
+	if key.begins_with("Mesh_deck_transfer"):
+		if _concrete == null:
+			_concrete = ShaderMaterial.new()
+			_concrete.shader = preload("res://assets/maps/gantry/concrete.gdshader")
+			_concrete.set_shader_parameter("top_color", Color("d8cfbb"))
+			_concrete.set_shader_parameter("side_color", Color("6d8388"))
+			_concrete.set_shader_parameter("wear_color", Color("9a9c8c"))
+			_concrete.set_shader_parameter("wear", preload("res://assets/look/painted-wear.png"))
+			_concrete.set_shader_parameter("wear_amount", 0.45)
+			_concrete.set_shader_parameter("deck", 0.0)
+			_concrete.set_shader_parameter("waterline", -8.0)
+			_concrete.set_shader_parameter("weather", 1.0)
+		return _concrete
 	return proposed
 
 func dress(level: Node3D) -> Node3D:
