@@ -37,7 +37,7 @@ static func dress(level: Node3D) -> void:
 		if child is MeshInstance3D:
 			var service: bool = str(child.name).contains("shore_") or str(child.name).contains("control_house") or str(child.name).contains("service_gallery")
 			# decks are shell-white rather than peach under the low warm sun.
-			child.material_override = MATERIALS.concrete(Color("b6bcae") if service else Color("b0ada5"),Color("798f96") if service else Color("6e8590"),not service,child.get_aabb())
+			child.material_override = MATERIALS.concrete(Color("b6bcae") if service else Color("b0ada5"),Color("798f96") if service else Color("7d959c"),not service,child.get_aabb())
 	BASE._box(level,"outer_water",Vector3(-120,-3,-140),Vector3(900,0.1,800),Color("598a90"))
 	var footprints := PackedVector4Array()
 	for support: Vector4 in level.supports:
@@ -123,30 +123,47 @@ static func dress(level: Node3D) -> void:
 		BASE._box(level,"causeway_rail_%s" % rail_z,Vector3(-171.5,2.2,rail_z),Vector3(47,0.10,0.10),Color("465e66"))
 	var contours := CONTOURS.new()
 	var drawn := contours.build(level,false)
-	_single_band_lips(drawn)
+	_single_band_lips(drawn, level)
 	level.add_child(drawn)
 	INK.dress(level)
 
-static func _single_band_lips(root: Node3D) -> void:
-	# a takeoff lip here is one orange band on the deck top; the shared lip's vertical face
-	# sat under the deck's own ink edge and read as a second band at close range.
+static func _single_band_lips(root: Node3D, level: Node3D) -> void:
+	# only the takeoff edge carries orange here: one band on the deck top. the shared lip's
+	# vertical face read as a second band under the deck's ink edge, and the receiving lip of the
+	# next deck read as another band beyond it.
 	var lips := root.get_node_or_null("JumpLips") as MeshInstance3D
 	if lips == null or not lips.mesh is ArrayMesh:
 		return
+	var lands: Array[Vector3] = []
+	for gap: Dictionary in level.get("jump_gaps"):
+		if gap.get("land") is Vector3:
+			lands.append(gap.land)
 	var arrays: Array = (lips.mesh as ArrayMesh).surface_get_arrays(0)
 	var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
 	var top := PackedVector3Array()
 	var up := PackedVector3Array()
-	for i: int in range(0, points.size(), 3):
-		if normals[i].y > 0.5:
-			for k: int in 3:
-				top.append(points[i+k])
-				up.append(Vector3.UP)
+	# each lip is two triangles of top band followed by two of vertical face.
+	for i: int in range(0, points.size() - 5, 6):
+		if normals[i].y < 0.5:
+			continue
+		var a := points[i]
+		var b := points[i+1]
+		var receiving := false
+		for land: Vector3 in lands:
+			var nearest := Geometry3D.get_closest_point_to_segment(land, a, b)
+			if Vector2(nearest.x - land.x, nearest.z - land.z).length() < 0.6 and absf(nearest.y - land.y) < 0.6:
+				receiving = true
+		if receiving:
+			continue
+		for k: int in 6:
+			top.append(points[i+k])
+			up.append(Vector3.UP)
 	var kept := []
 	kept.resize(Mesh.ARRAY_MAX)
 	kept[Mesh.ARRAY_VERTEX] = top
 	kept[Mesh.ARRAY_NORMAL] = up
 	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, kept)
+	if not top.is_empty():
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, kept)
 	lips.mesh = mesh
