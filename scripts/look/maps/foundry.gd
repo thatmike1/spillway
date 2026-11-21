@@ -15,6 +15,8 @@ static func dress(level: Node3D) -> void:
 		concrete.set_shader_parameter("joint_depth", 0.12)
 		concrete.set_shader_parameter("slab_spread", 0.07)
 		concrete.set_shader_parameter("dry_concrete", Vector3(0.40, 0.46, 0.47))
+		# a joint ran straight down the course centre at running gaze; half a slab moves it aside.
+		concrete.set_shader_parameter("deck_shift", Vector2(2.0, 0.0))
 	# the map name floated in mid-air beside the tailrace ring; wall-painted wayfinding stays.
 	var title := level.get_node_or_null("Sign_entry") as Label3D
 	if title != null:
