@@ -49,7 +49,8 @@ void light(){
 const WEAR := preload("res://assets/look/painted-wear.png")
 const UI := preload("res://scripts/r18_ui_theme.gd")
 
-const DECK := Color("d9cfc2")
+## lane 02's noon light and filmic exposure clip a lighter deck to white; this lands shell-white.
+const DECK := Color("b5ada2")
 const PALE := Color("f1ead8")
 const STONE := Color("d9d0bb")
 const SIDE := Color("66868e")
@@ -133,8 +134,13 @@ func set_enabled(value: bool) -> void:
 			state.node.font = UI.font("label") if value else state.font
 			state.node.modulate = INK if value else state.modulate
 
-func _packet(root: Node3D) -> void:
-	# the mail packet lies across the quay head beyond dispatch: where the post is going.
+func _packet(quay: Node3D) -> void:
+	# the mail packet lies across the quay head beyond dispatch: where the post is going. it is
+	# moored off to starboard so the arch opening still shows open sea past the finish.
+	var root := Node3D.new()
+	root.name = "packet"
+	root.position = Vector3(19.0, 0.0, 0.0)
+	quay.add_child(root)
 	var hull := MeshInstance3D.new()
 	hull.name = "packet_hull"
 	hull.mesh = _extrude(PackedVector2Array([Vector2(-14, -6.8), Vector2(10.5, -6.8), Vector2(14.6, 1.7), Vector2(13.4, 1.7), Vector2(-13.2, 1.15), Vector2(-14.4, 1.35)]), 5.2)
