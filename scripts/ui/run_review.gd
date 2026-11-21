@@ -226,7 +226,8 @@ func _fill_summary(best: Dictionary) -> void:
 	if worst.is_empty():
 		_set_tile("loss", "none", "no segment slower than best")
 	else:
-		_set_tile("loss", "%+.3f s" % float(worst.loss), "%s → %s" % [worst.from, worst.label], LOOK.VERMILION_DEEP)
+		_set_tile("loss", "%s → %s" % [worst.from, worst.label], "%+.3f s lost in this segment" % float(worst.loss))
+		(_tiles.loss.value as Label).add_theme_font_size_override("font_size", 20)
 
 func _set_tile(id: String, value: String, note: String, color: Color = LOOK.INK) -> void:
 	var tile: Dictionary = _tiles[id]

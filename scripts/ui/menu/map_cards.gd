@@ -14,9 +14,9 @@ static func _box(fill: Color, edge: bool = false) -> StyleBoxFlat:
 		box.border_width_bottom = UI.EDGE_WIDTH
 	return box
 
-static func dress(button: Button, id: String, place: String, line: String, best: String) -> void:
-	button.text = "%s\n%s" % [place, line]
-	button.tooltip_text = line
+static func dress(button: Button, id: String, place: String, line: String, best: String, note: String = "") -> void:
+	button.text = "%s\n%s" % [place, line if note.is_empty() else note + " · " + line]
+	button.tooltip_text = line if note.is_empty() else note + ". " + line
 	if not button.has_meta("place_card"):
 		button.set_meta("place_card", true)
 		button.autowrap_mode = TextServer.AUTOWRAP_OFF

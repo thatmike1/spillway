@@ -89,6 +89,7 @@ static func layout(card: Control, mark: Label, size: Vector2, frame: Rect2) -> v
 		lip.size = Vector2(72, 4)
 	map.position = Vector2(left, baseline + UI.SPACE_L + 4 + UI.SPACE_M)
 	prompt.position = Vector2(left, map.position.y + map.get_minimum_size().y + UI.SPACE_XL)
-	keys.custom_minimum_size.x = minf(980.0, frame.size.x - 2.0 * (left - frame.position.x))
+	keys.add_theme_font_size_override("font_size", 16 if size.y >= 900.0 else 15)
+	keys.custom_minimum_size.x = minf(1040.0, frame.size.x - 2.0 * (left - frame.position.x))
 	keys.reset_size()
 	keys.position = Vector2(left, size.y - keys.get_minimum_size().y - maxf(28.0, size.y * 0.045))

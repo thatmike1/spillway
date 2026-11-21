@@ -193,9 +193,27 @@ static func menu_theme() -> Theme:
 		theme.set_color("font_focus_color", type, INK)
 		theme.set_color("font_pressed_color", type, CREAM)
 		theme.set_color("font_hover_pressed_color", type, CREAM)
-		theme.set_color("font_disabled_color", type, Color(INK, 0.38))
+		theme.set_color("font_disabled_color", type, Color(INK, 0.55))
 		theme.set_font("font", type, font("label"))
 		theme.set_font_size("font_size", type, 15)
+	# text fields: the pale surface with a thin ink edge; focus takes the vermilion lip.
+	var field := flat(PALE, RADIUS, Vector4(SPACE_M, SPACE_S - 1, SPACE_M, SPACE_S))
+	field.border_color = Color(INK, 0.35)
+	field.set_border_width_all(HAIRLINE)
+	var field_focus := field.duplicate() as StyleBoxFlat
+	field_focus.border_color = EDGE
+	field_focus.border_width_bottom = EDGE_WIDTH
+	var field_quiet := flat(PALE_DEEP, RADIUS, Vector4(SPACE_M, SPACE_S - 1, SPACE_M, SPACE_S))
+	theme.set_stylebox("normal", "LineEdit", field)
+	theme.set_stylebox("focus", "LineEdit", field_focus)
+	theme.set_stylebox("read_only", "LineEdit", field_quiet)
+	theme.set_color("font_color", "LineEdit", INK)
+	theme.set_color("font_placeholder_color", "LineEdit", INK_FAINT)
+	theme.set_color("font_uneditable_color", "LineEdit", INK_SOFT)
+	theme.set_color("caret_color", "LineEdit", INK)
+	theme.set_color("selection_color", "LineEdit", Color(SEA, 0.6))
+	theme.set_font("font", "LineEdit", font("body"))
+	theme.set_font_size("font_size", "LineEdit", 15)
 	theme.set_icon("arrow", "OptionButton", _svg('<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8"><path d="M1 1 L6 7 L11 1 Z" fill="%s"/></svg>' % _hex(INK)))
 	for type: String in ["CheckButton", "CheckBox"]:
 		for state: String in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
