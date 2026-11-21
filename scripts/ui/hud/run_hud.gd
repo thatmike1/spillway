@@ -29,8 +29,8 @@ func attach(main: Node) -> void:
 
 func _style_band() -> void:
 	UI.world_label(speed_label, "numeral", 46, UI.CREAM, 5)
-	UI.world_label(speed_unit, "label", 11, Color(UI.CREAM, 0.78), 2)
-	UI.world_label(speed_metric, "smallnum", 11, Color(UI.CREAM, 0.78), 2)
+	UI.world_label(speed_unit, "label", 12, Color(UI.CREAM, 0.9), 3)
+	UI.world_label(speed_metric, "smallnum", 12, Color(UI.CREAM, 0.9), 3)
 	UI.world_label(clock, "numeral", 24, Color(UI.CREAM, 0.94), 4)
 	UI.world_label(best_line, "small", 12, Color(UI.CREAM, 0.82), 3)
 	UI.world_label(run_line, "small", 11, Color(UI.CREAM, 0.72), 3)
@@ -44,8 +44,8 @@ func _style_band() -> void:
 	_band_shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var gradient := Gradient.new()
 	gradient.set_color(0, Color(UI.INK, 0.0))
-	gradient.set_color(1, Color(UI.INK, 0.34))
-	gradient.add_point(0.45, Color(UI.INK, 0.12))
+	gradient.set_color(1, Color(UI.INK, 0.42))
+	gradient.add_point(0.45, Color(UI.INK, 0.2))
 	var texture := GradientTexture2D.new()
 	texture.gradient = gradient
 	texture.fill_from = Vector2(0.0, 0.0)
@@ -84,6 +84,16 @@ func stage_reached(segment: int, skipped: int) -> void:
 	_split_name.text = title if skipped <= 0 else "%s  ·  %d skipped" % [title, skipped]
 	_split_time = SPLIT_HOLD_S
 
+## toasts are for things the player did. map-revision and recording-identity notes live on the
+## pause sheet's Runs page; the Through Line launch already has its own cream cue.
+func notify(text: String) -> void:
+	if not text.is_empty() and game != null and not telemetry:
+		if text == str(game.call("map_revision_description")):
+			return
+		if text.begins_with("RISE · ") and through_cue != null:
+			return
+	super(text)
+
 func run_started() -> void:
 	super()
 	if _split_name != null:
@@ -113,6 +123,13 @@ func _process(delta: float) -> void:
 	var quiet := 0.0 if telemetry else _run_quiet
 	for node: CanvasItem in [map_title, preset_line, best_line]:
 		node.modulate.a = base * (1.0 - quiet)
+	# an empty state says nothing: no "no clean time yet" line under the clock.
+	if not telemetry and best_line.text.begins_with("no clean time"):
+		best_line.modulate.a = 0.0
+	# experiment maps: one quiet line naming where you are. the runner's own status line already
+	# says the map and that it is experimental, so the separate tag steps aside while it shows.
+	if not telemetry and game.is_experiment_map() and lab_panel.visible and not lab_panel.text.is_empty():
+		lab_tag.visible = false
 	# the ghost/recording line is telemetry, except when it names who you are racing.
 	var racing := run_line.text.begins_with("racing ") or run_line.text.begins_with("PB segment guide")
 	run_line.visible = telemetry or racing
@@ -129,9 +146,10 @@ func _process(delta: float) -> void:
 	if bool(game.finished):
 		split_label.modulate.a = 0.0
 		_split_name.modulate.a = 0.0
-		# the finish card is the one thing to read now; the band steps back behind it.
-		for node: CanvasItem in [speed_label, speed_unit, speed_metric, clock, style_panel, _band_shade]:
-			node.modulate.a *= 0.35
+		# the finish card is the one thing to read now; the band leaves rather than dimming, since
+		# outlined type at partial opacity reads as hollow.
+		for node: CanvasItem in [speed_label, speed_unit, speed_metric, clock, style_panel, _band_shade, crouch_tag]:
+			node.modulate.a = 0.0
 	_layout()
 
 # --- layout -----------------------------------------------------------------------------------
@@ -149,16 +167,17 @@ func _layout() -> void:
 	_band_shade.position = Vector2(0.0, roundf(size.y * BAND.SHADE_TOP))
 	_band_shade.size = Vector2(size.x, size.y - _band_shade.position.y)
 	BAND.place(speed_label, cx, y, 0)
-	BAND.place(speed_unit, cx, y + 15.0, 0)
-	BAND.place(speed_metric, cx, y + 29.0, 0)
+	BAND.place(speed_unit, cx, y + 16.0, 0)
+	BAND.place(speed_metric, cx, y + 31.0, 0)
 	var speed_top := y - BAND.ascent(speed_label)
 	crouch_tag.reset_size()
 	crouch_tag.position = Vector2(roundf(cx - crouch_tag.get_minimum_size().x * 0.5), roundf(speed_top - crouch_tag.get_minimum_size().y - 4.0))
 	BAND.place(clock, left, y, -1)
 	BAND.place(best_line, left, y + 17.0, -1)
 	BAND.place(run_line, left, y + (32.0 if best_line.modulate.a > 0.01 else 17.0), -1)
-	# a split arrives by rising a few pixels into place as it fades in, then simply fades out.
-	var chip_y := y - BAND.ascent(clock) - 12.0 + (1.0 - _arrival(SPLIT_HOLD_S - _split_time)) * ARRIVE_PX
+	# a split arrives under the clock, rising a few pixels into place as it fades in, then fades
+	# out. events sit below the band so nothing reaches up into the floor ahead.
+	var chip_y := y + BAND.EVENT_DROP + (1.0 - _arrival(SPLIT_HOLD_S - _split_time)) * ARRIVE_PX
 	BAND.place(split_label, left, chip_y, -1)
 	BAND.place(_split_name, split_label.position.x - 8.0, chip_y, -1)
 	if finish_card != null and _finish_keys != null:
@@ -183,7 +202,7 @@ func _refresh_anchor_readout() -> void:
 ## the finish as one composed card: where and how, the time large, the delta to best under it,
 ## the splits and style as one table, and the keys for what to do next.
 func _style_finish() -> void:
-	var sheet := UI.flat(Color(UI.CREAM, 0.97), 3, Vector4(30, 22, 30, 22))
+	var sheet := UI.flat(UI.CREAM, 3, Vector4(30, 22, 30, 22))
 	sheet.border_color = UI.EDGE
 	sheet.border_width_left = 5
 	finish_card.add_theme_stylebox_override("panel", sheet)
@@ -253,14 +272,15 @@ func show_finish(is_best: bool, is_open_best: bool) -> void:
 		return
 	var kind := str(game.finish_kind)
 	_finish_kicker.text = "%s  ·  %s" % [str(game.call("map_name")), {"clean": "clean run", "open": "open line"}.get(kind, "practice")]
-	_finish_meta.text = "%s  ·  %d Hz" % [str(game.preset.label), int(game.physics_hz)]
+	_finish_meta.text = ""
+	_finish_meta.hide()
 	for child: Node in _finish_keys.get_children():
 		_finish_keys.remove_child(child)
 		child.queue_free()
 	_key_chip("R", "Run again")
 	_key_chip("F", "Practise %s" % str(game.call("stage_title", int(game.checkpoint_index))))
 	_key_chip("Esc", "Maps")
-	_finish_more.text = "F2 / F5 preset  ·  G ghost"
+	_finish_more.text = "Preset F%d (bests are kept per preset)  ·  F2 / F5 switch  ·  G ghost" % int(game.preset.slot)
 	finish_card.reset_size()
 	finish_panel.size = finish_card.size
 	_layout()
