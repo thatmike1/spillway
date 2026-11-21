@@ -14,6 +14,7 @@ const RING := Color("d2683a")
 
 static func dress(level: Node3D) -> void:
 	_surfaces(level)
+	_caisson(level)
 	_lips(level)
 	for anchor: Node in level.get_children():
 		if anchor is Node3D and str(anchor.name).begins_with("Anchor_"):
@@ -58,6 +59,16 @@ static func _surfaces(level: Node3D) -> void:
 	var bearing := level.get_node_or_null("Mesh_gantry_bearing_bearing_0_-1") as MeshInstance3D
 	if bearing != null and bearing.material_override is StandardMaterial3D:
 		(bearing.material_override as StandardMaterial3D).albedo_color = Color("a19d8b")
+
+static func _caisson(level: Node3D) -> void:
+	# the gate's navy skin behind pale ribs read as a glazed facade; plate and ribs now share one
+	# weathered steel so the caisson reads as a single fabricated load with runoff down its face.
+	var skin := level.get_node_or_null("Art_drydock_gate_skin") as MeshInstance3D
+	if skin == null or not skin.material_override is ShaderMaterial:
+		return
+	var plate := skin.material_override as ShaderMaterial
+	plate.set_shader_parameter("side_color", Color("6f8588"))
+	plate.set_shader_parameter("weather", 1.0)
 
 static func _anchor(level: Node3D, index: int, anchor: Node3D) -> void:
 	# the ring is signal paint: unshaded so it keeps its colour under the beam's shadow.
