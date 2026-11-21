@@ -5,6 +5,18 @@ extends RefCounted
 ## nothing here collides.
 
 const PALETTE := {"top": "e4dbca"}
+## the facades were one navy with the sky: wet brick, concrete and render give the street its
+## materials back and separate the buildings from each other and from the night.
+const SURFACES := {
+	"roof_tar": {"side_color": "74504a", "wear_amount": 0.2},
+	"roof_felt": {"side_color": "6c4b46", "wear_amount": 0.2},
+	"brick": {"side_color": "74504a", "wear_amount": 0.2},
+	"tower": {"side_color": "655a5a", "wear_amount": 0.15},
+	"brick_cap": {"side_color": "74504a", "wear_amount": 0.2},
+	"roof_gravel": {"side_color": "5f6b73", "wear_amount": 0.18},
+	"concrete": {"side_color": "5f6b73", "wear_amount": 0.18},
+	"render": {"side_color": "a39a88", "wear_amount": 0.12},
+}
 const ENAMEL := [Color("efe3c8"), Color("e6b45c")]
 
 var _hidden: Array[Node3D] = []
