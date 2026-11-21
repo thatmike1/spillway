@@ -157,6 +157,16 @@ func _process(delta: float) -> void:
 	split_label.modulate.a = minf(1.0, _split_time * 1.5) * _arrival(SPLIT_HOLD_S - _split_time) * base
 	_split_name.modulate.a = split_label.modulate.a
 	_band_shade.modulate.a = speed_label.modulate.a
+	if bool(game.finished):
+		split_label.modulate.a = 0.0
+		_split_name.modulate.a = 0.0
+		# the finish card is the one thing to read now; the band leaves rather than dimming, since
+		# outlined type at partial opacity reads as hollow.
+		for node: CanvasItem in [speed_label, speed_unit, speed_metric, clock, style_panel, _band_shade, crouch_tag]:
+			node.modulate.a = 0.0
+	_layout()
+	# measured after every opacity above is final, so hidden lines never widen the plate.
+	_plate_target = _plate_bounds()
 	# the plate eases to its new size when an event arrives or leaves instead of jumping.
 	# it snaps when the window changes size, so a resize never leaves it behind.
 	var view := get_viewport().get_visible_rect().size
@@ -168,14 +178,6 @@ func _process(delta: float) -> void:
 	_plate_view = view
 	_band_shade.position = _plate_rect.position.round()
 	_band_shade.size = _plate_rect.size.round()
-	if bool(game.finished):
-		split_label.modulate.a = 0.0
-		_split_name.modulate.a = 0.0
-		# the finish card is the one thing to read now; the band leaves rather than dimming, since
-		# outlined type at partial opacity reads as hollow.
-		for node: CanvasItem in [speed_label, speed_unit, speed_metric, clock, style_panel, _band_shade, crouch_tag]:
-			node.modulate.a = 0.0
-	_layout()
 
 ## the union of what the band is showing right now, grown into a plate.
 func _plate_bounds() -> Rect2:
