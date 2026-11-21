@@ -313,17 +313,28 @@ func _section_runs() -> void:
 
 ## how each rope law feels, in words for the player; the laws themselves are unchanged.
 const ROPE_FEEL := {
-	"classic": "Classic · a springy line that catches you at full length (the original rope).",
-	"pendulum": "Pendulum · a fixed rope that goes taut; no spring, no speed cap.",
-	"elastic": "Elastic · stretchy, with slack and a stronger pull.",
-	"elastic-soft": "Soft catch · stretchy and loose; more room to swing.",
-	"elastic-firm": "Firm line · stretchy but snaps back harder.",
-	"elastic-arc": "Long arc · slower reel; keeps a long swinging line."}
+	"classic": "Classic · springy, catches at full length",
+	"pendulum": "Pendulum · fixed and taut, no spring",
+	"elastic": "Elastic · stretchy, stronger pull",
+	"elastic-soft": "Soft catch · stretchy and loose",
+	"elastic-firm": "Firm line · stretchy, snaps back hard",
+	"elastic-arc": "Long arc · slow reel, long swing"}
+
+## the longer story of each law, kept for the hover tip.
+const ROPE_ABOUT := {
+	"classic": "A springy line that catches you at full length. The original rope.",
+	"pendulum": "A fixed rope that goes taut. No spring and no speed cap.",
+	"elastic": "Stretchy, with slack and a stronger pull.",
+	"elastic-soft": "Stretchy and loose, with more room to swing.",
+	"elastic-firm": "Stretchy, but it snaps back harder.",
+	"elastic-arc": "A slower reel that keeps a long swinging line."}
 
 func _plain_rope_names() -> void:
 	for id: String in tether_models:
 		if ROPE_FEEL.has(id):
-			(tether_models[id] as Button).text = ROPE_FEEL[id]
+			var rope := tether_models[id] as Button
+			rope.text = ROPE_FEEL[id]
+			rope.tooltip_text = ROPE_ABOUT[id]
 
 ## plain names for the sliders; the Source arithmetic stays in the line under them.
 const PLAIN_SETTING_NAMES := {"source_sensitivity": "Mouse sensitivity (Source scale)", "source_fov": "Field of view (4:3 reference, widened to fit)",
