@@ -37,7 +37,12 @@ static func dress(level: Node3D) -> void:
 		if child is MeshInstance3D:
 			var service: bool = str(child.name).contains("shore_") or str(child.name).contains("control_house") or str(child.name).contains("service_gallery")
 			# decks are shell-white rather than peach under the low warm sun.
-			child.material_override = MATERIALS.concrete(Color("b6bcae") if service else Color("b0ada5"),Color("798f96") if service else Color("7d959c"),not service,child.get_aabb())
+			# route decks carry cast-slab joints at a working spacing and lane 07's tide staining.
+			if service:
+				child.material_override = MATERIALS.concrete(Color("b6bcae"),Color("798f96"),false,child.get_aabb())
+			else:
+				child.material_override = MATERIALS.concrete(Color("b0ada5"),Color("7d959c"),true,child.get_aabb(),Vector2(0.34,0.66),Vector2(6.0,9.0),0.9)
+	_deck_stains(level)
 	BASE._box(level,"outer_water",Vector3(-120,-3,-140),Vector3(900,0.1,800),Color("598a90"))
 	var footprints := PackedVector4Array()
 	for support: Vector4 in level.supports:
@@ -76,6 +81,19 @@ static func dress(level: Node3D) -> void:
 	rim.position = Vector3(x,11,z+2.6)
 	rim.material_override = BASE._material(Color("a9b7b4"))
 	level.add_child(rim)
+	# a dark throat behind the blades gives the wheel depth instead of a flat emblem.
+	var throat := MeshInstance3D.new()
+	throat.name = "PumpThroat"
+	var plate := CylinderMesh.new()
+	plate.top_radius = 2.86
+	plate.bottom_radius = 2.86
+	plate.height = 0.06
+	plate.radial_segments = 32
+	throat.mesh = plate
+	throat.rotation.x = PI*0.5
+	throat.position = Vector3(x,11,z+2.54)
+	throat.material_override = BASE._material(Color("22343a"))
+	level.add_child(throat)
 	BASE._box(level,"pump_spindle",Vector3(x,11,z+2.9),Vector3(1.1,1.1,0.5),Color("809a9e"))
 	for i: int in 6:
 		var angle := TAU*i/6.0
@@ -167,3 +185,43 @@ static func _single_band_lips(root: Node3D, level: Node3D) -> void:
 	if not top.is_empty():
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, kept)
 	lips.mesh = mesh
+
+const STAIN_CODE := """shader_type spatial;
+render_mode unshaded, blend_mul, cull_back, shadows_disabled, depth_draw_never;
+uniform sampler2D wear : filter_linear_mipmap_anisotropic, repeat_enable;
+varying vec3 wp;
+void vertex(){ wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz; }
+void fragment(){
+ // small crisp brine stains, multiplied over the deck so its joints and light stay its own.
+ float stain = smoothstep(0.76, 0.79, texture(wear, wp.xz / 5.0 + 0.37).r);
+ ALBEDO = mix(vec3(1.0), vec3(0.93, 0.935, 0.93), stain);
+}
+"""
+
+static func _deck_stains(level: Node3D) -> void:
+	# a stain film sits just above each running deck top; it has no collision and no shadow.
+	var shader := Shader.new()
+	shader.code = STAIN_CODE
+	var film := ShaderMaterial.new()
+	film.shader = shader
+	film.set_shader_parameter("wear", load("res://assets/look/painted-wear.png"))
+	for child: Node in level.get_children():
+		if not child is MeshInstance3D:
+			continue
+		var mesh := child as MeshInstance3D
+		var id := str(mesh.name)
+		if id.contains("shore_") or id.contains("control_house") or id.contains("service_gallery"):
+			continue
+		var box: AABB = mesh.transform * mesh.get_aabb()
+		var top := box.end.y
+		if absf(top) > 0.5 or minf(box.size.x, box.size.z) < 3.0 or box.size.y > 12.0:
+			continue
+		var sheet := MeshInstance3D.new()
+		sheet.name = "deck_stain_" + str(mesh.name)
+		var plane := PlaneMesh.new()
+		plane.size = Vector2(box.size.x, box.size.z)
+		sheet.mesh = plane
+		sheet.position = Vector3(box.get_center().x, top + 0.006, box.get_center().z)
+		sheet.material_override = film
+		sheet.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		level.add_child(sheet)
