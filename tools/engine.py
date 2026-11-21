@@ -56,13 +56,14 @@ def _enter_shared(lease):
     told = False
     while True:
         for index in range(CAPTURE_SLOTS):
-            slot = lease_path(f".slot{index}").open("a")
-            try:
-                fcntl.flock(slot, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            except BlockingIOError:
-                slot.close()
-                continue
-            lease.enter_context(slot)
+            # each stream is owned by a context from the moment it opens; a win moves to the lease.
+            with ExitStack() as attempt:
+                slot = attempt.enter_context(lease_path(f".slot{index}").open("a"))
+                try:
+                    fcntl.flock(slot, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError:
+                    continue
+                lease.enter_context(attempt.pop_all())
             break
         else:
             if not told:
@@ -75,14 +76,15 @@ def _enter_shared(lease):
     while True:
         with lease_path(".gate").open("a") as gate:
             _flock(gate, fcntl.LOCK_SH, "the engine gate (a check or export is running or waiting)")
-            stream = LOCK.open("a")
-            try:
-                fcntl.flock(stream, fcntl.LOCK_SH | fcntl.LOCK_NB)
-            except BlockingIOError:
-                stream.close()
-            else:
-                lease.enter_context(stream)
-                return
+            with ExitStack() as attempt:
+                stream = attempt.enter_context(LOCK.open("a"))
+                try:
+                    fcntl.flock(stream, fcntl.LOCK_SH | fcntl.LOCK_NB)
+                except BlockingIOError:
+                    pass
+                else:
+                    lease.enter_context(attempt.pop_all())
+                    return
         # an exclusive holder that predates the gate: wait outside it, so waiting checks are not held up.
         if not told:
             print("waiting for the engine lock (an exclusive job is running)", file=sys.stderr, flush=True)
