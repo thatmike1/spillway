@@ -305,7 +305,7 @@ func _show_advanced(on: bool) -> void:
 
 ## player-facing wording for notes the older rounds wrote in build history.
 const PLAIN_NOTES := {
-	"F1 vanilla (64 Hz) is not in R15; the delivered R14 build keeps it.": "F1 vanilla (64 Hz) is not in this version.",
+	"F1 vanilla (64 Hz) is not in R15; the delivered R14 build keeps it.": "",
 	"Older Breakwater ghosts use the narrower gate and cannot race this revision.": "Breakwater ghosts from older versions cannot race this one."}
 
 func _plain_notes(page: Control) -> void:
@@ -315,6 +315,7 @@ func _plain_notes(page: Control) -> void:
 		var label := node as Label
 		if PLAIN_NOTES.has(label.text):
 			label.text = PLAIN_NOTES[label.text]
+			label.visible = not label.text.is_empty()
 
 func _refresh_share() -> void:
 	super()
