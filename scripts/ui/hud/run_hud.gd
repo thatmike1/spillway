@@ -32,8 +32,8 @@ func attach(main: Node) -> void:
 
 func _style_band() -> void:
 	UI.world_label(speed_label, "numeral", 46, UI.CREAM, 5)
-	UI.world_label(speed_unit, "label", 12, Color(UI.CREAM, 0.9), 3)
-	UI.world_label(speed_metric, "smallnum", 12, Color(UI.CREAM, 0.9), 3)
+	UI.world_label(speed_unit, "label", 13, Color(UI.CREAM, 0.94), 3)
+	UI.world_label(speed_metric, "smallnum", 13, Color(UI.CREAM, 0.94), 3)
 	UI.world_label(clock, "numeral", 24, Color(UI.CREAM, 0.94), 4)
 	UI.world_label(best_line, "small", 12, Color(UI.CREAM, 0.82), 3)
 	UI.world_label(run_line, "small", 11, Color(UI.CREAM, 0.72), 3)
@@ -51,7 +51,7 @@ func _style_band() -> void:
 	_split_name = Label.new()
 	_split_name.name = "SplitName"
 	_split_name.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UI.world_label(_split_name, "label", 13, Color(UI.CREAM, 0.9), 3)
+	UI.world_label(_split_name, "label", 15, UI.CREAM, 3)
 	overlay.add_child(_split_name)
 	overlay.move_child(_split_name, split_label.get_index())
 	_layout()
@@ -262,7 +262,7 @@ func _layout() -> void:
 	var left := BAND.left_flank(size)
 	BAND.place(speed_label, cx, y, 0)
 	BAND.place(speed_unit, cx, y + 16.0, 0)
-	BAND.place(speed_metric, cx, y + 31.0, 0)
+	BAND.place(speed_metric, cx, y + 32.0, 0)
 	var speed_top := y - BAND.ascent(speed_label)
 	crouch_tag.reset_size()
 	crouch_tag.position = Vector2(roundf(cx - crouch_tag.get_minimum_size().x * 0.5), roundf(speed_top - crouch_tag.get_minimum_size().y - 4.0))
