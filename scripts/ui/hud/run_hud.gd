@@ -83,6 +83,9 @@ func notify(text: String) -> void:
 			return
 		if text.begins_with("RISE · ") and through_cue != null:
 			return
+		# a ghost toggle says what it did; the empty-state tail is not news.
+		if text.begins_with("Ghost ") and "  ·  no clean recorded run" in text:
+			text = text.left(text.find("  ·  "))
 	super(text)
 
 func run_started() -> void:
@@ -126,10 +129,21 @@ func _process(delta: float) -> void:
 	# an empty state says nothing: no "no clean time yet" line under the clock.
 	if not telemetry and best_line.text.begins_with("no clean time"):
 		best_line.modulate.a = 0.0
-	# experiment maps: one quiet line naming where you are. the runner's own status line already
-	# says the map and that it is experimental, so the separate tag steps aside while it shows.
-	if not telemetry and game.is_experiment_map() and lab_panel.visible and not lab_panel.text.is_empty():
-		lab_tag.visible = false
+	# experiment maps: one quiet line naming where you are. the runner's status line (rope model,
+	# armed, the map's own notes) is teaching: it shows with the teaching ticket and steps back with
+	# it, leaving the single map tag. the movement lab keeps its live move panel.
+	if not telemetry and game.is_experiment_map() and not bool(game.call("is_lab")):
+		var teaching := _teach_alpha > 0.01 or not bool(game.get("_started"))
+		if lab_panel.visible and not lab_panel.text.is_empty() and teaching:
+			lab_tag.visible = false
+		else:
+			lab_panel.visible = false
+	# practice says one thing at a time: while its toast is up the tag waits, then takes over.
+	if not practice_tag.text.is_empty() and message.modulate.a > 0.05 and message.text.begins_with("Practice from"):
+		practice_tag.modulate.a = 0.0
+	# the route hint is for finding the way; behind the finish card it is noise.
+	if bool(game.finished):
+		hint.modulate.a = 0.0
 	# the ghost/recording line is telemetry, except when it names who you are racing.
 	var racing := run_line.text.begins_with("racing ") or run_line.text.begins_with("PB segment guide")
 	run_line.visible = telemetry or racing
@@ -193,8 +207,12 @@ func _layout() -> void:
 	if _split_name == null or map_title == null:
 		return
 	var size := get_viewport().get_visible_rect().size
-	if not telemetry and controls.modulate.a > 0.01 and not controls.text.is_empty():
-		hint.position.y = controls.position.y + controls.size.y + 8.0
+	if not telemetry and not controls.text.is_empty():
+		# the preset's two lines stay two lines instead of wrapping into a paragraph.
+		controls.custom_minimum_size.x = minf(UI.text_width(controls), UI.safe_frame(size).size.x * 0.6)
+		controls.reset_size()
+		if controls.modulate.a > 0.01:
+			hint.position.y = controls.position.y + controls.size.y + 8.0
 	var y := BAND.baseline(size)
 	var cx := BAND.centre(size)
 	var left := BAND.left_flank(size)
@@ -313,7 +331,7 @@ func show_finish(is_best: bool, is_open_best: bool) -> void:
 	_key_chip("R", "Run again")
 	_key_chip("F", "Practise %s" % str(game.call("stage_title", int(game.checkpoint_index))))
 	_key_chip("Esc", "Maps")
-	_finish_more.text = "Preset F%d (bests are kept per preset)  ·  F2 / F5 switch  ·  G ghost" % int(game.preset.slot)
+	_finish_more.text = "F2 / F5 switch preset  ·  G ghost"
 	finish_card.reset_size()
 	finish_panel.size = finish_card.size
 	_layout()
