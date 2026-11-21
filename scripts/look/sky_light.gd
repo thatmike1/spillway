@@ -86,9 +86,9 @@ const MAPS := {
 	# after rain: slate banks, a thin bright break over the sea, a weak sun so shadows stay soft, high cool ambient.
 	"rainline": {"sky":ROOT+"rainline-sky.png", "paint":"slate", "layout":"banks", "wisp":"none", "cloud_turn":0.0, "cell_shift":2, "panorama_mix":0.55,
 		"sun":"dde3e8", "sun_energy":0.2, "pitch":-48.0, "yaw":-25.0, "fill":"a6b4c2", "fill_energy":0.16, "ambient":0.66, "fog":"9aacb5", "fog_density":0.001, "exposure":0.76},
-	# moonlit night: a grey-cool moon high to the side, a lavender sky with stars; decks stay brightest without reading as snow.
+	# moonlit night: a cool moon high to the side, a lavender sky with stars; lane 06's deck is warmed against this blue, so it lands grey.
 	"night-shift": {"sky":ROOT+"night-sky.png", "paint":"night", "layout":"sparse", "wisp":"none", "cloud_turn":20.0, "cell_shift":5,
-		"sun":"c4cbe0", "sun_energy":0.36, "pitch":-42.0, "yaw":40.0, "fill":"7c86a0", "fill_energy":0.12, "ambient":0.5, "fog":"3a4770", "fog_density":0.0014, "exposure":0.85},
+		"sun":"bcc8ee", "sun_energy":0.38, "pitch":-42.0, "yaw":40.0, "fill":"7d8cb6", "fill_energy":0.12, "ambient":0.55, "fog":"3a4770", "fog_density":0.0014, "exposure":0.88},
 	# clear mid-morning over the yard: fair-weather cumulus all round.
 	"practice": {"sky":ROOT+"practice-sky.png", "paint":"noon", "layout":"fair", "wisp":"none", "cloud_turn":35.0, "cell_shift":1,
 		"sun":"fff0e2", "sun_energy":0.46, "pitch":-38.0, "yaw":-110.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.48, "fog":"bed4e0", "fog_density":0.0013, "exposure":0.7},
@@ -124,7 +124,7 @@ const MAPS := {
 		"sun":"ffe6c0", "sun_energy":0.56, "pitch":-28.0, "yaw":-110.0, "fill":"98b8d0", "fill_energy":0.12, "ambient":0.55, "fog":"bccfdb", "fog_density":0.0013, "exposure":0.78},
 	# tidal estuary, late afternoon; the sun stands behind the runner so the spill-tower court is lit.
 	"sluice-six": {"sky":"res://assets/look/cloud-sky.png", "paint":"golden", "layout":"towers", "wisp":"none", "cloud_turn":150.0, "cell_shift":6,
-		"sun":"fff0de", "sun_energy":0.54, "pitch":-38.0, "yaw":20.0, "fill":"98b8d0", "fill_energy":0.12, "ambient":0.55, "fog":"bccfdb", "fog_density":0.0012, "exposure":0.78},
+		"sun":"ffead0", "sun_energy":0.54, "pitch":-38.0, "yaw":20.0, "fill":"98b8d0", "fill_energy":0.12, "ambient":0.52, "fog":"bccfdb", "fog_density":0.0012, "exposure":0.72},
 	# the outer reach at golden hour: broad open sky, long side light over the corridors.
 	"outer-reach": {"sky":"res://assets/look/cloud-sky.png", "paint":"golden", "layout":"towers", "wisp":"none", "cloud_turn":-60.0, "cell_shift":2,
 		"sun":"ffd9a8", "sun_energy":0.6, "pitch":-20.0, "yaw":-120.0, "fill":"98b8d0", "fill_energy":0.12, "ambient":0.55, "fog":"bccfdb", "fog_density":0.0011, "exposure":0.78},
@@ -133,7 +133,7 @@ const MAPS := {
 		"sun":"ffd4a8", "sun_energy":0.56, "pitch":-26.0, "yaw":-110.0, "fill":"98b8cc", "fill_energy":0.12, "ambient":0.56, "fog":"d8d3cf", "fog_density":0.0011, "exposure":0.78},
 	# planning yard: a clear even noon so the plan reads; few clouds.
 	"plan-yard": {"sky":"res://assets/look/cloud-sky.png", "paint":"afternoon", "layout":"sparse", "wisp":"none", "cloud_turn":0.0, "cell_shift":1,
-		"sun":"fff0e2", "sun_energy":0.42, "pitch":-40.0, "yaw":-30.0, "fill":"a0bcd2", "fill_energy":0.1, "ambient":0.46, "fog":"bccfdb", "fog_density":0.0012, "exposure":0.64},
+		"sun":"fff0e2", "sun_energy":0.48, "pitch":-40.0, "yaw":-30.0, "fill":"a0bcd2", "fill_energy":0.1, "ambient":0.52, "fog":"bccfdb", "fog_density":0.0012, "exposure":0.72},
 }
 
 static func has_map(id: String) -> bool:
