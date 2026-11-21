@@ -4,7 +4,7 @@ extends RefCounted
 ## recording identity stay exact. new pieces are plain meshes with no collision, outside the
 ## swing corridor (|x| <= 6.5) and above every deck.
 
-const SHELL := Color("d2cfc5")
+const SHELL := Color("c9c3b4")
 const SIDE := Color("62787c")
 const WEAR := Color("9a9c8c")
 const CARRIAGE := Color("e0d6bf")
