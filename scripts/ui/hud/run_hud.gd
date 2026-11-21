@@ -86,6 +86,18 @@ func notify(text: String) -> void:
 		# a ghost toggle says what it did; the empty-state tail is not news.
 		if text.begins_with("Ghost ") and "  ·  no clean recorded run" in text:
 			text = text.left(text.find("  ·  "))
+		# loading a map names it and its preset over the title card, which already names the map;
+		# only a note about what the switch changed (a cancelled preset, the lab's preset) is news.
+		var loaded := "%s  ·  %s" % [str(game.call("map_name")), str(game.preset.get("label", ""))]
+		if text.begins_with(loaded):
+			text = text.trim_prefix(loaded).trim_prefix("  ·  ")
+			if text.is_empty():
+				return
+			text = text.left(1).to_upper() + text.substr(1)
+		# a preset switch says which preset; the physics rate is F9 material.
+		var rate := text.find("  ·  %d Hz" % int(game.get("physics_hz")))
+		if rate > 0 and text.begins_with(str(game.preset.get("label", ""))):
+			text = text.left(rate) + text.substr(rate + ("  ·  %d Hz" % int(game.get("physics_hz"))).length())
 	super(text)
 
 func run_started() -> void:
@@ -104,6 +116,19 @@ static func _arrival(since: float) -> float:
 static func teaching_text(text: String) -> String:
 	var out := text.replace("WASD run · mouse look · ", "").replace(" (or scroll)", "")
 	return out.left(1).to_upper() + out.substr(1) if out != text else out
+
+## an experiment map's instructions in the teaching ticket: its first two sentences, without the
+## "EXPERIMENTAL" lead the map tag already carries. the pause sheet keeps the whole paragraph.
+static func brief_instructions(text: String) -> String:
+	var out := text.strip_edges()
+	for lead: String in ["EXPERIMENTAL · ", "EXPERIMENTAL "]:
+		out = out.trim_prefix(lead)
+	var cut := -1
+	for i: int in 2:
+		cut = out.find(". ", cut + 1)
+		if cut < 0:
+			return out.left(1).to_upper() + out.substr(1)
+	return out.left(1).to_upper() + out.substr(1, cut)
 
 # --- per frame --------------------------------------------------------------------------------
 
@@ -132,7 +157,8 @@ func _process(delta: float) -> void:
 	# experiment maps: one quiet line naming where you are. the runner's status line (rope model,
 	# armed, the map's own notes) is teaching: it shows with the teaching ticket and steps back with
 	# it, leaving the single map tag. the movement lab keeps its live move panel.
-	if not telemetry and game.is_experiment_map() and not bool(game.call("is_lab")):
+	# (is_lab() is also true on experiment maps; the movement lab is the "lab" kind, never "experiment".)
+	if not telemetry and game.is_experiment_map():
 		var teaching := _teach_alpha > 0.01 or not bool(game.get("_started"))
 		if lab_panel.visible and not lab_panel.text.is_empty() and teaching:
 			lab_tag.visible = false
@@ -154,6 +180,12 @@ func _process(delta: float) -> void:
 	if not telemetry:
 		keys_line.modulate.a = 0.0
 		controls.text = teaching_text(controls.text)
+		# on experiment maps the ticket is the map's own instruction, briefly; the preset's bhop
+		# lines are on the title card and the pause sheet.
+		if game.is_experiment_map() and not game.map_has_capability("grapple"):
+			var instructions := str(game.map_entry().get("instructions", ""))
+			if not instructions.is_empty() and controls.text.ends_with(instructions):
+				controls.text = brief_instructions(instructions)
 	split_label.modulate.a = minf(1.0, _split_time * 1.5) * _arrival(SPLIT_HOLD_S - _split_time) * base
 	_split_name.modulate.a = split_label.modulate.a
 	_band_shade.modulate.a = speed_label.modulate.a
@@ -167,14 +199,15 @@ func _process(delta: float) -> void:
 	_layout()
 	# measured after every opacity above is final, so hidden lines never widen the plate.
 	_plate_target = _plate_bounds()
-	# the plate eases to its new size when an event arrives or leaves instead of jumping.
-	# it snaps when the window changes size, so a resize never leaves it behind.
+	# the plate is never smaller than what it holds: it takes an arriving event at once and eases
+	# back in when the event leaves. it snaps when the window changes size.
 	var view := get_viewport().get_visible_rect().size
-	var ease := minf(1.0, delta * 14.0)
+	var ease := minf(1.0, delta * 10.0)
 	if _plate_rect.size == Vector2.ZERO or view != _plate_view:
 		_plate_rect = _plate_target
 	else:
-		_plate_rect = Rect2(_plate_rect.position.lerp(_plate_target.position, ease), _plate_rect.size.lerp(_plate_target.size, ease))
+		var eased := Rect2(_plate_rect.position.lerp(_plate_target.position, ease), _plate_rect.size.lerp(_plate_target.size, ease))
+		_plate_rect = eased.merge(_plate_target)
 	_plate_view = view
 	_band_shade.position = _plate_rect.position.round()
 	_band_shade.size = _plate_rect.size.round()
@@ -356,3 +389,5 @@ func place_runner_status(label: Label) -> void:
 		if tag.visible and not tag.text.is_empty():
 			top = maxf(top, tag.position.y + tag.get_minimum_size().y + 8.0)
 	label.position = Vector2(roundf(right - label.get_minimum_size().x), roundf(top))
+	# the title card owns the opening view; the ticket arrives as the card leaves.
+	label.modulate.a = 1.0 - _title_alpha
