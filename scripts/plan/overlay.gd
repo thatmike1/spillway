@@ -189,26 +189,25 @@ func _draw() -> void:
 		var digit := str(i+1)
 		var width := label.get_string_size(digit,HORIZONTAL_ALIGNMENT_LEFT,-1,16).x
 		draw_string(label,p+Vector2(-width*0.5,6),digit,HORIZONTAL_ALIGNMENT_LEFT,-1,16,PALE if on else INK)
+		# every socket shows its height beside it; chosen pieces carry theirs on a cream ticket.
+		var tag := "%s%d  +%dm" % [brush.substr(0,1).to_upper(),i+1,int(at.y)] if on else "+%dm" % int(at.y)
+		var tag_size := small.get_string_size(tag,HORIZONTAL_ALIGNMENT_LEFT,-1,12)
+		# tags sit above the rail on the socket's outer side; centre ones go right, clear of the
+		# caisson height labels that sit under them.
+		var box := tag_size+Vector2(8,4)
+		var tag_at := p+Vector2(17,-box.y-3)
+		if at.x < -0.5:
+			tag_at = p+Vector2(-17-box.x,-box.y-3)
 		if on:
-			# only chosen pieces carry a height tag, on a small cream ticket so it never sits on a line.
-			var tag := "%s%d  +%dm" % [brush.substr(0,1).to_upper(),i+1,int(at.y)]
-			var tag_size := small.get_string_size(tag,HORIZONTAL_ALIGNMENT_LEFT,-1,12)
-			# tags sit on the outer side of the basin, or under a centre socket, clear of crowns and rails.
-			var box := tag_size+Vector2(8,4)
-			var tag_at := p+Vector2(17,-box.y-3)
-			if at.x < -0.5:
-				tag_at = p+Vector2(-17-box.x,-box.y-3)
-			elif absf(at.x) <= 0.5:
-				tag_at = p+Vector2(-box.x*0.5,16)
 			draw_rect(Rect2(tag_at,box),PALE)
 			draw_rect(Rect2(tag_at,box),INK,false,1.0)
-			draw_string(small,tag_at+Vector2(4,tag_size.y-1),tag,HORIZONTAL_ALIGNMENT_LEFT,-1,12,INK)
+		draw_string(small,tag_at+Vector2(4,tag_size.y-1),tag,HORIZONTAL_ALIGNMENT_LEFT,-1,12,INK if on else INK_SOFT)
 	# the left sheet: same rows and click areas as before, set in the menu's type.
 	draw_rect(Rect2(0,0,420,size.y),PALE)
 	draw_rect(Rect2(420,0,3,size.y),EDGE)
 	draw_string(title,Vector2(30,44),"Plan Yard  survey",HORIZONTAL_ALIGNMENT_LEFT,-1,28,INK)
 	draw_string(body,Vector2(30,74),"Pick sockets, then Enter runs the line.",HORIZONTAL_ALIGNMENT_LEFT,-1,15,INK_SOFT)
-	draw_string(body,Vector2(30,94),"Side sockets hang at +11 m, centre ones at +14 m.",HORIZONTAL_ALIGNMENT_LEFT,-1,13,INK_SOFT)
+	draw_string(body,Vector2(30,94),"Tab restarts here to plan again.",HORIZONTAL_ALIGNMENT_LEFT,-1,13,INK_SOFT)
 	var names := {"anchor":"Rope anchors", "block":"Raised block", "pad":"Launch pad"}
 	var kinds := ["anchor","block","pad"]
 	for i: int in 3:
