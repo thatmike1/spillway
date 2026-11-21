@@ -17,6 +17,7 @@ const ARRIVE_S := 0.18
 const ARRIVE_PX := 9.0
 
 var _split_name: Label
+var _band_shade: TextureRect
 var _run_quiet: float = 0.0
 var _finish_keys: HFlowContainer
 var _finish_more: Label
@@ -34,6 +35,28 @@ func _style_band() -> void:
 	UI.world_label(best_line, "small", 12, Color(UI.CREAM, 0.82), 3)
 	UI.world_label(run_line, "small", 11, Color(UI.CREAM, 0.72), 3)
 	UI.world_label(split_label, "numeral", 22, UI.CREAM, 4)
+	# teaching speaks in one voice: the route hint uses the controls ticket's type.
+	UI.ticket(hint, "body", 14)
+	# a soft ink lower third under the band, like subtitle shading: cream type stays readable on the pale
+	# decks you land on, and on dark walls it all but disappears.
+	_band_shade = TextureRect.new()
+	_band_shade.name = "BandShade"
+	_band_shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var gradient := Gradient.new()
+	gradient.set_color(0, Color(UI.INK, 0.0))
+	gradient.set_color(1, Color(UI.INK, 0.34))
+	gradient.add_point(0.45, Color(UI.INK, 0.12))
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill_from = Vector2(0.0, 0.0)
+	texture.fill_to = Vector2(0.0, 1.0)
+	texture.width = 4
+	texture.height = 128
+	_band_shade.texture = texture
+	_band_shade.stretch_mode = TextureRect.STRETCH_SCALE
+	_band_shade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	overlay.add_child(_band_shade)
+	overlay.move_child(_band_shade, mini(speed_label.get_index(), clock.get_index()))
 	_split_name = Label.new()
 	_split_name.name = "SplitName"
 	_split_name.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -71,6 +94,13 @@ static func _arrival(since: float) -> float:
 	var t := clampf(since / ARRIVE_S, 0.0, 1.0)
 	return 1.0 - (1.0 - t) * (1.0 - t)
 
+## the teaching ticket keeps every instruction the preset gives and drops only what every player
+## already does (run with WASD, look with the mouse) and the scroll alternative, which the pause
+## sheet's Keys page still lists.
+static func teaching_text(text: String) -> String:
+	var out := text.replace("WASD run · mouse look · ", "").replace(" (or scroll)", "")
+	return out.left(1).to_upper() + out.substr(1) if out != text else out
+
 # --- per frame --------------------------------------------------------------------------------
 
 func _process(delta: float) -> void:
@@ -92,13 +122,15 @@ func _process(delta: float) -> void:
 	# card and in the pause sheet's Keys page, so it no longer stacks under them during the run.
 	if not telemetry:
 		keys_line.modulate.a = 0.0
+		controls.text = teaching_text(controls.text)
 	split_label.modulate.a = minf(1.0, _split_time * 1.5) * _arrival(SPLIT_HOLD_S - _split_time) * base
 	_split_name.modulate.a = split_label.modulate.a
+	_band_shade.modulate.a = speed_label.modulate.a
 	if bool(game.finished):
 		split_label.modulate.a = 0.0
 		_split_name.modulate.a = 0.0
 		# the finish card is the one thing to read now; the band steps back behind it.
-		for node: CanvasItem in [speed_label, speed_unit, speed_metric, clock, style_panel]:
+		for node: CanvasItem in [speed_label, speed_unit, speed_metric, clock, style_panel, _band_shade]:
 			node.modulate.a *= 0.35
 	_layout()
 
@@ -114,6 +146,8 @@ func _layout() -> void:
 	var y := BAND.baseline(size)
 	var cx := BAND.centre(size)
 	var left := BAND.left_flank(size)
+	_band_shade.position = Vector2(0.0, roundf(size.y * BAND.SHADE_TOP))
+	_band_shade.size = Vector2(size.x, size.y - _band_shade.position.y)
 	BAND.place(speed_label, cx, y, 0)
 	BAND.place(speed_unit, cx, y + 15.0, 0)
 	BAND.place(speed_metric, cx, y + 29.0, 0)
@@ -132,11 +166,11 @@ func _layout() -> void:
 		finish_panel.size = finish_card.size
 		finish_panel.position = Vector2(roundf(cx - finish_card.size.x * 0.5), roundf(maxf(56.0, size.y * 0.42 - finish_card.size.y * 0.5)))
 
-## the grapple anchor readout leaves the aim point (it sat on the landing zone) and joins the band,
-## above the speed numeral, where the crouch tag would be.
+## the grapple anchor readout leaves the aim point (it sat on the landing zone) and, on maps with
+## their own look, the left edge; on every grapple map it joins the band above the speed numeral.
 func _refresh_anchor_readout() -> void:
 	super()
-	if anchor_readout == null or not anchor_readout.visible or bool(game.map_entry().get("own_look", false)):
+	if anchor_readout == null or not anchor_readout.visible:
 		return
 	var size := get_viewport().get_visible_rect().size
 	var top := BAND.baseline(size) - BAND.ascent(speed_label) - anchor_readout.size.y - 6.0

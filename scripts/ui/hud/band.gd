@@ -11,6 +11,8 @@ const BASELINE := 0.835
 const SPEED_HALF := 62.0
 ## gap between the reserved speed block and each flank.
 const FLANK_GAP := 26.0
+## the soft ink lower third behind the band starts at this share of the height and deepens to the bottom edge.
+const SHADE_TOP := 0.64
 ## the floor for the band on short windows: keep it this far above the bottom edge.
 const BOTTOM_MARGIN := 70.0
 
