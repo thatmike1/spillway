@@ -10,7 +10,7 @@ extends RefCounted
 const SURFACE := preload("res://shaders/look/surface.gdshader")
 const WATER := preload("res://shaders/look/water.gdshader")
 ## shell-white decks instead of the practice palette's khaki.
-const PALETTE := {"top": "efe8d8", "side": "4f6a70"}
+const PALETTE := {"top": "f8f3e6", "side": "4f6a70"}
 ## sea level, 7 m below first run and 10 m below second run.
 const SEA_Y := -3.0
 const FOOT_Y := -8.0
@@ -127,6 +127,9 @@ func _arcs(root: Node3D) -> void:
 		for i: int in points.size() - 1:
 			var a := points[i].lerp(points[i + 1], 0.2)
 			var b := points[i].lerp(points[i + 1], 0.8)
+			# past the channel the arc stops above head height, so no dash crosses a runner's view of the court.
+			if b.z < -47.0 and minf(a.y, b.y) < 7.0 + 2.4:
+				continue
 			var dash := MeshInstance3D.new()
 			dash.name = "ArcDash_%d_%d" % [int(speed), i]
 			var tube := CylinderMesh.new()

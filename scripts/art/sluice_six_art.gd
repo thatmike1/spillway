@@ -1,6 +1,7 @@
 extends RefCounted
 const MATERIALS := preload("res://scripts/art/sluice_six_materials.gd")
 const CONTOURS := preload("res://scripts/r17_contours.gd")
+const SKY_LIGHT := preload("res://scripts/look/sky_light.gd")
 ## original procedural architecture; no imported reference or concept assets.
 ## sluice six's own tones: sea-glass water, quieter deck joints. outer reach keeps the shared defaults.
 const SEA_DEEP := Vector3(0.20,0.45,0.47)
@@ -32,6 +33,9 @@ static func dress(level: Node3D) -> void:
 	sun.directional_shadow_max_distance = 260.0
 	level.add_child(sun)
 	env.sky_rotation = Vector3(0,PI+0.6,0)
+	# lane 02's painted sky and light replace these values when its sluice-six entry exists.
+	if SKY_LIGHT.has_map("sluice-six"):
+		SKY_LIGHT.apply(env,sun,"sluice-six")
 	for child: Node in level.get_children():
 		if child is MeshInstance3D:
 			var support := str(child.name).begins_with("Mesh_support_") or str(child.name).begins_with("Mesh_service_")

@@ -7,7 +7,9 @@ extends RefCounted
 ## housing, trusses stay under the roof and skip the bay where the grapple ropes run.
 
 const SURFACE := preload("res://shaders/look/surface.gdshader")
-const PALETTE := {"top": "e9e3d4", "side": "5b6f73"}
+const PALETTE := {"top": "f7f2e6", "side": "5b6f73"}
+## the hall floor is lit mostly by ambient light (the roof shades the sun), so it starts brighter.
+const SURFACES := {"floor": {"top_color": "fffbf1"}}
 const HALF := 12.0
 const ROOF := 12.0
 const HUB_Z := 10.0
@@ -31,7 +33,7 @@ void fragment(){
  float joint=1.0-min(smoothstep(0.01-aa.x,0.01+aa.x,cell.x),smoothstep(0.01-aa.y,0.01+aa.y,cell.y));
  float band=step(wp.y,band_top);
  vec3 c=mix(upper.rgb,base_band.rgb,band);
- c=mix(c,c*0.86,smoothstep(0.62,0.74,w)*0.6);
+ c=mix(c,c*0.9,smoothstep(0.62,0.74,w)*0.25);
  c*=1.0-joint*0.18;
  float lip=1.0-smoothstep(0.0,0.05,abs(wp.y-band_top));
  c=mix(c,vec3(0.15,0.22,0.24),lip*0.7);
@@ -128,7 +130,7 @@ func _housing_material() -> ShaderMaterial:
 		_housing.set_shader_parameter("wear", load("res://assets/look/painted-wear.png"))
 		_housing.set_shader_parameter("top_color", Color("9fb0b2"))
 		_housing.set_shader_parameter("side_color", Color("587078"))
-		_housing.set_shader_parameter("wear_amount", 0.25)
+		_housing.set_shader_parameter("wear_amount", 0.06)
 		_housing.set_shader_parameter("metal", 1.0)
 	return _housing
 
