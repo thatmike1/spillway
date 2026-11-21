@@ -220,6 +220,11 @@ func _process(delta: float) -> void:
 	super(delta)
 	if _status != null:
 		_status.visible = input_enabled
+		# presentation only: a hud that can place the ticket owns its position and size.
+		var placer: Variant = get_parent().get("hud")
+		if placer != null and placer.has_method("place_runner_status"):
+			placer.call("place_runner_status", _status)
+			return
 		var top := 108.0
 		var hud: Variant = get_parent().get("hud")
 		if hud != null:
