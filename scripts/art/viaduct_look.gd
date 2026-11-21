@@ -45,6 +45,7 @@ static func apply(level: Node3D) -> void:
 			node.light_energy = 0.35
 			node.shadow_enabled = true
 			node.directional_shadow_max_distance = 160.0
+	_sky_light(level, "viaduct")
 	# inverted hulls outline major solid members; thin rails and water remain quiet.
 	var ink := ShaderMaterial.new()
 	var ink_shader := Shader.new()
@@ -56,6 +57,21 @@ static func apply(level: Node3D) -> void:
 			node.material_override.next_pass = ink
 	level.add_child(preload("res://scripts/r17_contours.gd").new().build(level,true))
 	level.add_child(preload("res://scripts/art/viaduct_cable.gd").new())
+
+static func _sky_light(level: Node3D, id: String) -> void:
+	# lane 02 owns these sky and light values; this file only hands over its environment and sun.
+	var sky_light := load("res://scripts/look/sky_light.gd")
+	if sky_light == null or not sky_light.has_map(id):
+		return
+	var env: Environment
+	var sun: DirectionalLight3D
+	for node: Node in level.get_children():
+		if node is WorldEnvironment and env == null:
+			env = (node as WorldEnvironment).environment
+		if node is DirectionalLight3D and sun == null:
+			sun = node
+	if env != null:
+		sky_light.apply(env, sun, id)
 
 static func _steel() -> ShaderMaterial:
 	var shader := Shader.new()
