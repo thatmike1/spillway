@@ -464,6 +464,12 @@ func _open_run_review() -> void:
 		review_screen.set("directory", str(game.session.directory))
 	pause_panel.add_child(review_screen)
 	review_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# the review is a sheet over the paused world, like the menu, not a page that replaces it.
+	var inset := clampf(get_viewport().get_visible_rect().size.x * 0.025, 16.0, 48.0)
+	review_screen.offset_left = inset
+	review_screen.offset_top = inset
+	review_screen.offset_right = -inset
+	review_screen.offset_bottom = -inset
 	if review_screen.has_method("attach_map"):
 		review_screen.call("attach_map", game.level, game.motion_identity())
 	review_screen.closed.connect(_close_run_review)
