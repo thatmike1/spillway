@@ -8,15 +8,15 @@
     "sha256": "80b7f31f57d282ace8018e6536a5cd1c0b45e7d6bd4f4de105bb8210304415f7"
   },
   "sky/cloud-atlas.png": {
-    "bytes": 594901,
-    "sha256": "f936e74f91108045f7b0ec573e0111736b50087ee051ab51434488b1b3132025"
+    "bytes": 1308240,
+    "sha256": "aa3196b8499b7c6da30b9df5cf4001e563965a624c922f517353de489c274452"
   },
   "sky/wisp-atlas.png": {
     "bytes": 436128,
     "sha256": "64791ce87c3165c126e56fb7461b2b2c2ebcd7f0347c81e8fe61f799720751a8"
   },
   "sky/cloud-prompts.md": {
-    "bytes": 6840,
-    "sha256": "36032fb9590dfc6832f0a740153e37dd385dcb7df894660e8b20659ac8d5b694"
+    "bytes": 11806,
+    "sha256": "ef485c8cffef401124abedd8f05ae19ed24e8adb27070b33f4c8361b7290ddc5"
   }
 }
