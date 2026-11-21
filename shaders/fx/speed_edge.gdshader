@@ -26,7 +26,10 @@ void fragment() {
 	// keep the lower centre third (the deck ahead, where landings are read) free of everything.
 	float middle = 1.0 - smoothstep(0.18, 0.30, abs(UV.x - 0.5));
 	float ground_clear = 1.0 - middle * smoothstep(focus.y + 0.02, focus.y + 0.14, UV.y);
-	float band = smoothstep(0.48 - 0.10 * a, 0.86, r) * ground_clear;
+	// lines stay off the decks below the horizon except in a thin strip at the far sides.
+	float deck = smoothstep(focus.y + 0.10, focus.y + 0.22, UV.y) * (1.0 - smoothstep(0.40, 0.46, abs(UV.x - 0.5)));
+	float line_clear = ground_clear * (1.0 - deck);
+	float band = smoothstep(0.48 - 0.10 * a, 0.86, r) * line_clear;
 	const float BINS = 150.0;
 	float cell = angle / 6.2831853 * BINS;
 	float id = floor(cell);
