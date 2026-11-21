@@ -35,7 +35,7 @@ func material(key: String, node: GeometryInstance3D, proposed: Material) -> Mate
 		if _concrete == null:
 			_concrete = ShaderMaterial.new()
 			_concrete.shader = preload("res://assets/maps/gantry/concrete.gdshader")
-			_concrete.set_shader_parameter("top_color", Color("f4f0ea"))
+			_concrete.set_shader_parameter("top_color", Color("f2ece0"))
 			_concrete.set_shader_parameter("side_color", Color("6d8388"))
 			_concrete.set_shader_parameter("wear_color", Color("9a9c8c"))
 			_concrete.set_shader_parameter("wear", preload("res://assets/look/painted-wear.png"))
@@ -43,7 +43,7 @@ func material(key: String, node: GeometryInstance3D, proposed: Material) -> Mate
 			_concrete.set_shader_parameter("deck", 1.0)
 			_concrete.set_shader_parameter("waterline", -8.0)
 			_concrete.set_shader_parameter("weather", 1.0)
-			_concrete.set_shader_parameter("top_gain", 1.2)
+			_concrete.set_shader_parameter("top_gain", 1.1)
 		return _concrete
 	return proposed
 
