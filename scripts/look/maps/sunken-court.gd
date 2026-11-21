@@ -6,9 +6,9 @@ extends RefCounted
 
 ## tops a touch cooler so full sun no longer clips them; faces a warm weathered sandstone instead
 ## of the khaki that read olive in shade.
-const PALETTE := {"top": "e4dccd", "side": "a68b6f"}
+const PALETTE := {"top": "e4dccd", "side": "b08c64"}
 const SURFACES := {
-	"ashlar": {"side_color": "a08467", "top_color": "c9b79c", "wear_amount": 0.22},
+	"ashlar": {"side_color": "ac8862", "top_color": "cdb99a", "wear_amount": 0.22},
 	"vault": {"side_color": "8a6f56", "top_color": "b9a284", "wear_amount": 0.25},
 	"column": {"side_color": "c4b096", "top_color": "ddd1bd", "wear_amount": 0.12},
 	"cliff": {"side_color": "7d6a58", "top_color": "8f8a6a", "wear_amount": 0.3},
@@ -53,6 +53,12 @@ func dress(level: Node3D) -> Node3D:
 			hide = not (p.x > float(s[0]) - 1.0 and p.x < float(s[1]) + 1.0 and p.z > float(s[2]) - 1.0 and p.z < float(s[3]) + 1.0)
 		if hide:
 			_hidden.append(wrapper)
+	# floor lettering (gap widths, instructions) is teaching text, not the place; the gate sign stays.
+	var marks := level.get_node_or_null("Markings")
+	if marks != null:
+		for label: Node in marks.get_children():
+			if label is Label3D and str(label.name) != "GateSign":
+				_hidden.append(label as Node3D)
 	return null
 
 func set_enabled(value: bool) -> void:
