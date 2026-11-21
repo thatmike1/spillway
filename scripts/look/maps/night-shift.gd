@@ -6,13 +6,28 @@ extends RefCounted
 ## nothing here collides.
 
 const PALETTE := {"side": "56646f"}
-const SURFACES := {
-	"RollingStock": {"side_color": "7e4134", "top_color": "d6cdb9", "wear_amount": 0.18},
-}
 ## authored place signs that stay; any other label under Markings is a painted figure.
 const SIGNS := ["Platform1", "Roundel_w", "Roundel_e", "ThroatSign", "BaysSign", "Door1", "Door2", "ShutterSign", "SignalBox", "TerminusSign", "LoopSign"]
 
 var _hidden: Array[Node3D] = []
+var _stock: ShaderMaterial
+
+## the parked cars are kit models under the RollingStock group: one oxide-red body, pale roofs.
+func material(_key: String, node: GeometryInstance3D, proposed: Material) -> Material:
+	var at: Node = node.get_parent()
+	while at != null:
+		if str(at.name) == "RollingStock":
+			if _stock == null:
+				_stock = ShaderMaterial.new()
+				_stock.shader = load("res://shaders/look/surface.gdshader")
+				_stock.set_shader_parameter("wear", load("res://assets/look/painted-wear.png"))
+				_stock.set_shader_parameter("side_color", Color("7e4134"))
+				_stock.set_shader_parameter("top_color", Color("d6cdb9"))
+				_stock.set_shader_parameter("wear_amount", 0.18)
+				_stock.set_shader_parameter("metal", 1.0)
+			return _stock
+		at = at.get_parent()
+	return proposed
 
 func dress(level: Node3D) -> Node3D:
 	var marks := level.get_node_or_null("Markings")
