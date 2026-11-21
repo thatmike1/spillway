@@ -32,8 +32,8 @@ func attach(main: Node) -> void:
 
 func _style_band() -> void:
 	UI.world_label(speed_label, "numeral", 46, UI.CREAM, 5)
-	UI.world_label(speed_unit, "label", 12, Color(UI.CREAM, 0.9), 3)
-	UI.world_label(speed_metric, "smallnum", 12, Color(UI.CREAM, 0.9), 3)
+	UI.world_label(speed_unit, "label", 13, Color(UI.CREAM, 0.94), 3)
+	UI.world_label(speed_metric, "smallnum", 13, Color(UI.CREAM, 0.94), 3)
 	UI.world_label(clock, "numeral", 24, Color(UI.CREAM, 0.94), 4)
 	UI.world_label(best_line, "small", 12, Color(UI.CREAM, 0.82), 3)
 	UI.world_label(run_line, "small", 11, Color(UI.CREAM, 0.72), 3)
@@ -51,7 +51,7 @@ func _style_band() -> void:
 	_split_name = Label.new()
 	_split_name.name = "SplitName"
 	_split_name.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UI.world_label(_split_name, "label", 13, Color(UI.CREAM, 0.9), 3)
+	UI.world_label(_split_name, "label", 15, UI.CREAM, 3)
 	overlay.add_child(_split_name)
 	overlay.move_child(_split_name, split_label.get_index())
 	_layout()
@@ -86,14 +86,20 @@ func notify(text: String) -> void:
 		# a ghost toggle says what it did; the empty-state tail is not news.
 		if text.begins_with("Ghost ") and "  ·  no clean recorded run" in text:
 			text = text.left(text.find("  ·  "))
-		# loading a map names it and its preset over the title card, which already names the map;
-		# only a note about what the switch changed (a cancelled preset, the lab's preset) is news.
-		var loaded := "%s  ·  %s" % [str(game.call("map_name")), str(game.preset.get("label", ""))]
+		# loading a map names it and its preset. the title card already names the map at the first
+		# load, so only a note about what the switch changed (a cancelled preset, the lab's preset)
+		# is news then; a later switch from the maps list says the map's name alone.
+		var map := str(game.call("map_name"))
+		var loaded := "%s  ·  %s" % [map, str(game.preset.get("label", ""))]
 		if text.begins_with(loaded):
-			text = text.trim_prefix(loaded).trim_prefix("  ·  ")
-			if text.is_empty():
-				return
-			text = text.left(1).to_upper() + text.substr(1)
+			text = text.trim_prefix(loaded)
+			if _title_dismissed:
+				text = map + text
+			else:
+				text = text.trim_prefix("  ·  ")
+				if text.is_empty():
+					return
+				text = text.left(1).to_upper() + text.substr(1)
 		# a preset switch says which preset; the physics rate is F9 material.
 		var rate := text.find("  ·  %d Hz" % int(game.get("physics_hz")))
 		if rate > 0 and text.begins_with(str(game.preset.get("label", ""))):
@@ -140,8 +146,11 @@ func _process(delta: float) -> void:
 	_run_quiet = move_toward(_run_quiet, 1.0 if started else 0.0, delta * 2.0)
 	var base := (1.0 - _title_alpha) * (0.0 if bool(game.paused) else 1.0)
 	var quiet := 0.0 if telemetry else _run_quiet
-	for node: CanvasItem in [map_title, preset_line, best_line]:
-		node.modulate.a = base * (1.0 - quiet)
+	best_line.modulate.a = base * (1.0 - quiet)
+	# the map is named by the title card and by the toast on a switch; the preset is on the pause
+	# sheet. the top-left pair stays for F9.
+	for node: CanvasItem in [map_title, preset_line]:
+		node.modulate.a = base if telemetry else 0.0
 	# the practice tag in sentence case, saying where practice started without repeating itself.
 	if practice_tag.text.begins_with("PRACTICE ("):
 		var reason := _reason(str(game.practice_reason))
@@ -228,11 +237,7 @@ func _plate_bounds() -> Rect2:
 	var box := Rect2(speed_label.position, speed_label.get_minimum_size())
 	for node: Control in shown:
 		box = box.merge(Rect2(node.position, node.get_minimum_size()))
-	# symmetric about the speed numeral, so the plate is one steady instrument and only grows
-	# downward when an event arrives.
-	var cx := speed_label.position.x + speed_label.get_minimum_size().x * 0.5
-	var half := maxf(cx - box.position.x, box.end.x - cx)
-	box = Rect2(cx - half, box.position.y, half * 2.0, box.size.y)
+	# it holds exactly what is shown: no empty half mirrored for a style score that is not there.
 	return box.grow_individual(BAND.PLATE_PAD.x, BAND.PLATE_PAD.y, BAND.PLATE_PAD.x, BAND.PLATE_PAD.y)
 
 # --- layout -----------------------------------------------------------------------------------
@@ -253,7 +258,7 @@ func _layout() -> void:
 	var left := BAND.left_flank(size)
 	BAND.place(speed_label, cx, y, 0)
 	BAND.place(speed_unit, cx, y + 16.0, 0)
-	BAND.place(speed_metric, cx, y + 31.0, 0)
+	BAND.place(speed_metric, cx, y + 32.0, 0)
 	var speed_top := y - BAND.ascent(speed_label)
 	crouch_tag.reset_size()
 	crouch_tag.position = Vector2(roundf(cx - crouch_tag.get_minimum_size().x * 0.5), roundf(speed_top - crouch_tag.get_minimum_size().y - 4.0))

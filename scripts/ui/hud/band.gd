@@ -7,18 +7,18 @@ extends RefCounted
 ## (a split, a style callout) arrive just under their own flank and leave.
 
 ## the speed numeral's baseline as a share of the visible height.
-const BASELINE := 0.87
+const BASELINE := 0.89
 ## half the width reserved for the speed numeral, so the flanks never move as digits change.
 const SPEED_HALF := 62.0
 ## gap between the reserved speed block and each flank.
 const FLANK_GAP := 26.0
 ## the ink plate behind the band: its opacity and its padding around what it holds.
-const PLATE_ALPHA := 0.5
-const PLATE_PAD := Vector2(16.0, 8.0)
+const PLATE_ALPHA := 0.34
+const PLATE_PAD := Vector2(14.0, 6.0)
 ## how far below the baseline event rows (a split, a style callout) put their own baseline.
 const EVENT_DROP := 30.0
 ## the floor for the band on short windows: keep it this far above the bottom edge.
-const BOTTOM_MARGIN := 96.0
+const BOTTOM_MARGIN := 80.0
 
 static func baseline(size: Vector2) -> float:
 	return roundf(minf(size.y * BASELINE, size.y - BOTTOM_MARGIN))
