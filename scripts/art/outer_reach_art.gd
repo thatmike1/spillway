@@ -37,7 +37,11 @@ static func dress(level: Node3D) -> void:
 		if child is MeshInstance3D:
 			var service: bool = str(child.name).contains("shore_") or str(child.name).contains("control_house") or str(child.name).contains("service_gallery")
 			# decks are shell-white rather than peach under the low warm sun.
-			child.material_override = MATERIALS.concrete(Color("b6bcae") if service else Color("b0ada5"),Color("798f96") if service else Color("7d959c"),not service,child.get_aabb())
+			# route decks carry cast-slab joints at a working spacing and lane 07's tide staining.
+			if service:
+				child.material_override = MATERIALS.concrete(Color("b6bcae"),Color("798f96"),false,child.get_aabb())
+			else:
+				child.material_override = MATERIALS.concrete(Color("b0ada5"),Color("7d959c"),true,child.get_aabb(),Vector2(0.34,0.66),Vector2(6.0,9.0),0.9)
 	BASE._box(level,"outer_water",Vector3(-120,-3,-140),Vector3(900,0.1,800),Color("598a90"))
 	var footprints := PackedVector4Array()
 	for support: Vector4 in level.supports:
@@ -76,6 +80,19 @@ static func dress(level: Node3D) -> void:
 	rim.position = Vector3(x,11,z+2.6)
 	rim.material_override = BASE._material(Color("a9b7b4"))
 	level.add_child(rim)
+	# a dark throat behind the blades gives the wheel depth instead of a flat emblem.
+	var throat := MeshInstance3D.new()
+	throat.name = "PumpThroat"
+	var plate := CylinderMesh.new()
+	plate.top_radius = 2.86
+	plate.bottom_radius = 2.86
+	plate.height = 0.06
+	plate.radial_segments = 32
+	throat.mesh = plate
+	throat.rotation.x = PI*0.5
+	throat.position = Vector3(x,11,z+2.54)
+	throat.material_override = BASE._material(Color("22343a"))
+	level.add_child(throat)
 	BASE._box(level,"pump_spindle",Vector3(x,11,z+2.9),Vector3(1.1,1.1,0.5),Color("809a9e"))
 	for i: int in 6:
 		var angle := TAU*i/6.0
