@@ -237,11 +237,7 @@ func _plate_bounds() -> Rect2:
 	var box := Rect2(speed_label.position, speed_label.get_minimum_size())
 	for node: Control in shown:
 		box = box.merge(Rect2(node.position, node.get_minimum_size()))
-	# symmetric about the speed numeral, so the plate is one steady instrument and only grows
-	# downward when an event arrives.
-	var cx := speed_label.position.x + speed_label.get_minimum_size().x * 0.5
-	var half := maxf(cx - box.position.x, box.end.x - cx)
-	box = Rect2(cx - half, box.position.y, half * 2.0, box.size.y)
+	# it holds exactly what is shown: no empty half mirrored for a style score that is not there.
 	return box.grow_individual(BAND.PLATE_PAD.x, BAND.PLATE_PAD.y, BAND.PLATE_PAD.x, BAND.PLATE_PAD.y)
 
 # --- layout -----------------------------------------------------------------------------------

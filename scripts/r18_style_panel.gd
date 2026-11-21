@@ -10,6 +10,8 @@ const BAND := preload("res://scripts/ui/hud/band.gd")
 const BAR_W := 96.0
 const LIVE_S := 1.6
 const REST_ALPHA := 0.5
+## how long a callout stays at full strength before its fade.
+const CALLOUT_HOLD_S := 2.1
 var caption: Label
 var direction_label: Label
 var _last_score: int = 0
@@ -97,8 +99,10 @@ func _layout() -> void:
 	var arrive := clampf(_shown_age / 0.18, 0.0, 1.0) if is_finite(_shown_age) else 1.0
 	arrive = 1.0 - (1.0 - arrive) * (1.0 - arrive)
 	callout.position = Vector2(roundf(x - 9.0 - 3.0), roundf(callout_y - BAND.ascent(callout) + (1.0 - arrive) * 9.0))
-	if _shown_age <= HOLD_S:
-		callout.modulate.a = arrive
+	# it holds as long as a split does (2.6 s with its fade), so a callout and a split that land
+	# together leave together; the scoring and which callout wins are untouched.
+	if is_finite(_shown_age):
+		callout.modulate.a = arrive * clampf(1.0 - (_shown_age - CALLOUT_HOLD_S) / FADE_S, 0.0, 1.0)
 	if direction_label != null:
 		direction_label.reset_size()
 		direction_label.position = Vector2(roundf(x), roundf(callout.position.y + callout.get_minimum_size().y + 2.0))
