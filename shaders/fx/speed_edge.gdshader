@@ -12,6 +12,9 @@ uniform float wash = 0.0;             // checkpoint / finish edge wash, 0..1
 uniform vec2 wash_bias = vec2(0.0);   // screen direction the wash leans toward (a rope anchor)
 uniform vec4 frame_color : source_color = vec4(0.85, 0.36, 0.19, 1.0);
 uniform float frame = 0.0;            // thin inset frame line, 0..1
+uniform vec2 catch_at = vec2(0.5, 0.3); // a caught rope anchor, in screen uv
+uniform float catch_t = 1.0;          // 0 at the catch .. 1 done
+uniform float catch_amount = 0.0;
 
 float hash(float n) { return fract(sin(n * 127.1) * 43758.5453); }
 
@@ -51,6 +54,28 @@ void fragment() {
 	float ink_alpha = strength * shade * (1.0 - core) * (0.22 + 0.16 * a);
 	vec4 col = vec4(ink_color.rgb, ink_alpha);
 	col = mix(col, vec4(line_color.rgb, line_alpha), step(ink_alpha, line_alpha));
+	// rope catch: a ring of short strokes drawn in onto the anchor, so the world reads as pulled
+	// toward the rope. distinct from the outward speed lines and the checkpoint frame.
+	if (catch_amount > 0.001) {
+		vec2 dc = px - pixels * catch_at;
+		float rc = length(dc) / length(pixels * 0.5);
+		const float CB = 16.0;
+		float cc = atan(dc.y, dc.x) / 6.2831853 * CB;
+		float cid = floor(cc);
+		float jit = hash(cid + 21.0);
+		float t = clamp(catch_t, 0.0, 1.0);
+		float headc = mix(0.26, 0.05, 1.0 - (1.0 - t) * (1.0 - t)) + 0.03 * jit;
+		float lenc = mix(0.08, 0.02, t);
+		float alongc = smoothstep(headc - 0.004, headc + 0.008, rc) * (1.0 - smoothstep(headc + lenc * 0.5, headc + lenc, rc));
+		float offc = (fract(cc) - 0.5) / CB * 6.2831853 * length(dc);
+		float corec = 1.0 - smoothstep(0.45 * sw, 1.25 * sw, abs(offc));
+		float shadec = 1.0 - smoothstep(0.45 * sw, 1.25 * sw, abs(offc - 1.5 * sw));
+		float sc = alongc * catch_amount * step(0.22, jit) * ground_clear * pow(1.0 - t, 1.2);
+		float c_line = sc * corec * 0.85;
+		float c_ink = sc * shadec * (1.0 - corec) * 0.55;
+		col = mix(col, vec4(ink_color.rgb, c_ink), step(col.a, c_ink));
+		col = mix(col, vec4(line_color.rgb, c_line), step(col.a, c_line));
+	}
 	// moment wash: soft light from the frame edge inward, leaning toward wash_bias.
 	vec2 ndc = (UV - 0.5) * 2.0;
 	float lean = 1.0 + 0.8 * max(dot(normalize(ndc + vec2(0.0001)), wash_bias), 0.0) * length(wash_bias);
