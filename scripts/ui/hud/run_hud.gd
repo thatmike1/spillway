@@ -86,14 +86,20 @@ func notify(text: String) -> void:
 		# a ghost toggle says what it did; the empty-state tail is not news.
 		if text.begins_with("Ghost ") and "  ·  no clean recorded run" in text:
 			text = text.left(text.find("  ·  "))
-		# loading a map names it and its preset over the title card, which already names the map;
-		# only a note about what the switch changed (a cancelled preset, the lab's preset) is news.
-		var loaded := "%s  ·  %s" % [str(game.call("map_name")), str(game.preset.get("label", ""))]
+		# loading a map names it and its preset. the title card already names the map at the first
+		# load, so only a note about what the switch changed (a cancelled preset, the lab's preset)
+		# is news then; a later switch from the maps list says the map's name alone.
+		var map := str(game.call("map_name"))
+		var loaded := "%s  ·  %s" % [map, str(game.preset.get("label", ""))]
 		if text.begins_with(loaded):
-			text = text.trim_prefix(loaded).trim_prefix("  ·  ")
-			if text.is_empty():
-				return
-			text = text.left(1).to_upper() + text.substr(1)
+			text = text.trim_prefix(loaded)
+			if _title_dismissed:
+				text = map + text
+			else:
+				text = text.trim_prefix("  ·  ")
+				if text.is_empty():
+					return
+				text = text.left(1).to_upper() + text.substr(1)
 		# a preset switch says which preset; the physics rate is F9 material.
 		var rate := text.find("  ·  %d Hz" % int(game.get("physics_hz")))
 		if rate > 0 and text.begins_with(str(game.preset.get("label", ""))):
@@ -140,8 +146,11 @@ func _process(delta: float) -> void:
 	_run_quiet = move_toward(_run_quiet, 1.0 if started else 0.0, delta * 2.0)
 	var base := (1.0 - _title_alpha) * (0.0 if bool(game.paused) else 1.0)
 	var quiet := 0.0 if telemetry else _run_quiet
-	for node: CanvasItem in [map_title, preset_line, best_line]:
-		node.modulate.a = base * (1.0 - quiet)
+	best_line.modulate.a = base * (1.0 - quiet)
+	# the map is named by the title card and by the toast on a switch; the preset is on the pause
+	# sheet. the top-left pair stays for F9.
+	for node: CanvasItem in [map_title, preset_line]:
+		node.modulate.a = base if telemetry else 0.0
 	# the practice tag in sentence case, saying where practice started without repeating itself.
 	if practice_tag.text.begins_with("PRACTICE ("):
 		var reason := _reason(str(game.practice_reason))
