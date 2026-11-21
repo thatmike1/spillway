@@ -59,6 +59,7 @@ func attach(level: Node3D) -> void:
 	painted_environment.fog_density = 0.0007
 	painted_environment.fog_sky_affect = 0.0
 	_structure_ink(level)
+	_dressing(level)
 	ink_mesh = MeshInstance3D.new()
 	ink_mesh.name = "StructuralInk"
 	ink_mesh.mesh = _lines.commit()
@@ -108,10 +109,11 @@ func _material(key: String) -> Material:
 		top = Color("829a97")
 		mat.set_shader_parameter("metal", 1.0)
 	elif key in ["Mesh_plaster", "Mesh_hull_white"]:
-		side = Color("d7d5c3")
+		side = Color("e4e0d2")
 	elif key == "Mesh_plaster_red":
-		# p / existing lighthouse identification bands stay muted; route accents remain edges.
-		side = Color("9b544a")
+		# the lighthouse bands are the finish landmark: a clear brick vermilion, deeper than the
+		# route orange so lips stay the brightest accent.
+		side = Color("b4503a")
 		top = side
 	elif key == "Mesh_land":
 		top = Color("829491")
@@ -200,6 +202,70 @@ func _structure_ink(level: Node3D) -> void:
 			var a := TAU*i/16.0
 			var b := TAU*(i+1)/16.0
 			_line(Vector3(head.x+cos(a)*radius,height,head.z+sin(a)*radius),Vector3(head.x+cos(b)*radius,height,head.z+sin(b)*radius),0.012)
+
+## look-only structure: no collision, nothing on or over a traversal path below 5 m.
+func _dressing(level: Node3D) -> void:
+	var k: Dictionary = (level.get_script() as Script).get_script_constant_map()
+	var half: float = k.HALF
+	var cw: float = k.CW
+	var wall_top: float = float(k.GROUND) + 2.0 * float(k.CH)
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# the gate canopy was drawn without an underside and hung 14 m out from the gatehouse with
+	# nothing under its front: give it a soffit and let its edges bear on posts that stand on
+	# the yard-wall container roofs, out of jump reach.
+	var post_x := half + cw * 0.35
+	_slab(st, Vector3(-post_x - 0.3, 4.98, -6.3), Vector3(post_x + 0.3, 5.36, 8.4))
+	for sx: float in [-1.0, 1.0]:
+		for z: float in [-5.9, 1.2]:
+			var lo := Vector3(sx * post_x - 0.17, wall_top, z - 0.17)
+			var hi := Vector3(sx * post_x + 0.17, 4.98, z + 0.17)
+			_slab(st, lo, hi)
+			for corner: Vector2 in [Vector2(lo.x, lo.z), Vector2(hi.x, hi.z)]:
+				_line(Vector3(corner.x, lo.y, corner.y), Vector3(corner.x, hi.y, corner.y), 0.012)
+	for x: float in [-post_x - 0.3, post_x + 0.3]:
+		_line(Vector3(x, 4.98, -6.3), Vector3(x, 4.98, 8.4), 0.012)
+	_line(Vector3(-post_x - 0.3, 4.98, -6.3), Vector3(post_x + 0.3, 4.98, -6.3), 0.012)
+	var steel := MeshInstance3D.new()
+	steel.name = "CanopyFrame"
+	steel.mesh = st.commit()
+	steel.material_override = _material("Mesh_frame")
+	add_child(steel)
+	# the lantern beam reads as a cold glare in the painted daylight; keep it a warm hint.
+	var beam := level.get_node_or_null("Beam")
+	if beam != null and beam.get_child_count() > 0 and beam.get_child(0) is MeshInstance3D:
+		var fan := beam.get_child(0) as MeshInstance3D
+		var old := fan.material_override as StandardMaterial3D
+		if old != null:
+			var soft := old.duplicate() as StandardMaterial3D
+			soft.albedo_color = Color(1.0, 0.86, 0.66, 0.38)
+			swaps.append({"node": fan, "old": old, "new": soft})
+
+func _slab(st: SurfaceTool, lo: Vector3, hi: Vector3) -> void:
+	# a closed box, underside included, with outward flat normals.
+	var faces := [
+		[Vector3.UP, [Vector3(lo.x, hi.y, lo.z), Vector3(hi.x, hi.y, lo.z), Vector3(hi.x, hi.y, hi.z), Vector3(lo.x, hi.y, hi.z)]],
+		[Vector3.DOWN, [Vector3(lo.x, lo.y, lo.z), Vector3(lo.x, lo.y, hi.z), Vector3(hi.x, lo.y, hi.z), Vector3(hi.x, lo.y, lo.z)]],
+		[Vector3.LEFT, [Vector3(lo.x, lo.y, lo.z), Vector3(lo.x, hi.y, lo.z), Vector3(lo.x, hi.y, hi.z), Vector3(lo.x, lo.y, hi.z)]],
+		[Vector3.RIGHT, [Vector3(hi.x, lo.y, lo.z), Vector3(hi.x, lo.y, hi.z), Vector3(hi.x, hi.y, hi.z), Vector3(hi.x, hi.y, lo.z)]],
+		[Vector3.FORWARD, [Vector3(lo.x, lo.y, lo.z), Vector3(hi.x, lo.y, lo.z), Vector3(hi.x, hi.y, lo.z), Vector3(lo.x, hi.y, lo.z)]],
+		[Vector3.BACK, [Vector3(lo.x, lo.y, hi.z), Vector3(lo.x, hi.y, hi.z), Vector3(hi.x, hi.y, hi.z), Vector3(hi.x, lo.y, hi.z)]],
+	]
+	for face: Array in faces:
+		var n: Vector3 = face[0]
+		var q: Array = face[1]
+		for tri: Array in [[q[0], q[1], q[2]], [q[0], q[2], q[3]]]:
+			# godot fronts are clockwise seen from outside.
+			var a: Vector3 = tri[0]
+			var b: Vector3 = tri[1]
+			var c: Vector3 = tri[2]
+			if (b - a).cross(c - a).dot(n) > 0.0:
+				var t := b
+				b = c
+				c = t
+			for v: Vector3 in [a, b, c]:
+				st.set_normal(n)
+				st.add_vertex(v)
 
 func _line(a: Vector3, b: Vector3, radius: float) -> void:
 	if a.distance_squared_to(b) < 0.05:
