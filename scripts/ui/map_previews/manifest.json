@@ -291,16 +291,16 @@
     "id": "plan-yard",
     "name": "Plan Yard",
     "pose": {
-      "pitch": 0.0,
+      "pitch": -6.0,
       "position": [
         -4.0,
-        4.66559982299805,
-        13.0
+        9.66559982299805,
+        16.0
       ],
       "yaw": 0.0
     },
-    "image_sha256": "acc75f0a305354ced59063b4861f772d79c4ee506c97521dee25e4a09fe424aa",
-    "source_commit": "4ab6cb620ecd0847d5f218e92da999ccb5d74f59",
+    "image_sha256": "3cb8dec81ca42938d59dd5e7fe9192604c09463a0278f79ba36b1c358d43c33a",
+    "source_commit": "e71831e202fd28674e038e135e7e1609dd172a78",
     "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
   },
   {

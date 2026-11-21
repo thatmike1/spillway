@@ -275,6 +275,7 @@ func _finish_list() -> void:
 		attempts.add_item(attempt_text(MODEL.attempt_label(entry)))
 		attempts.set_item_tooltip(attempts.item_count - 1, "%s\n%s" % [entry.name, identity.get("preset", "")])
 	message.text = "Pick an attempt to compare it with its matching personal best." if not entries.is_empty() else "No recordings yet. Play an attempt, then return here."
+	_fit_list()
 	if not entries.is_empty():
 		var preferred := 0
 		for i: int in entries.size():
@@ -283,6 +284,14 @@ func _finish_list() -> void:
 				break
 		attempts.select(preferred)
 		select_attempt(preferred)
+
+## a short list sits as tall as its rows; a long one fills the column and scrolls.
+const LIST_ROWS_BEFORE_SCROLL := 12
+
+func _fit_list() -> void:
+	var short := attempts.item_count <= LIST_ROWS_BEFORE_SCROLL
+	attempts.auto_height = short
+	attempts.size_flags_vertical = Control.SIZE_SHRINK_BEGIN if short else Control.SIZE_EXPAND_FILL
 
 func select_attempt(index: int) -> void:
 	attempts.select(index)
