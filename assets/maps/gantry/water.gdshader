@@ -2,12 +2,15 @@ shader_type spatial;
 render_mode unshaded, cull_disabled;
 // original calm dock water; narrow broken reflections replace the broad graphic wave blobs.
 varying vec3 wp;
+// defaults reproduce the dock; a smaller basin seen from close passes a broader, softer swell.
+uniform float swell_scale=1.0;
+uniform float ripple_mix=0.65;
 void vertex(){wp=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;}
 void fragment(){
- vec2 p=wp.xz;
+ vec2 p=wp.xz*swell_scale;
  float ripple=sin(p.y*3.8+p.x*0.32+TIME*0.32)+0.32*sin(p.y*7.1-p.x*0.65-TIME*0.23);
  float fade=1.0-smoothstep(35.0,180.0,distance(wp,CAMERA_POSITION_WORLD));
- vec3 col=mix(vec3(0.22,0.43,0.45),vec3(0.31,0.51,0.50),smoothstep(-0.8,1.1,ripple)*0.65);
+ vec3 col=mix(vec3(0.22,0.43,0.45),vec3(0.31,0.51,0.50),smoothstep(-0.8,1.1,ripple)*ripple_mix);
  float broken=smoothstep(0.0,0.7,sin(p.x*0.24+sin(p.y*0.7)));
  float glint=smoothstep(1.13,1.25,ripple)*broken*fade;
  col=mix(col,vec3(0.64,0.72,0.65),glint*0.28);

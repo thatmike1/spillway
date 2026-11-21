@@ -25,6 +25,9 @@ func material(key: String, node: GeometryInstance3D, proposed: Material) -> Mate
 	if key == "Water":
 		var sea := ShaderMaterial.new()
 		sea.shader = preload("res://assets/maps/gantry/water.gdshader")
+		# seen from a few metres up, the dock's fine ripple bands read as wood grain; broaden and soften them.
+		sea.set_shader_parameter("swell_scale", 0.4)
+		sea.set_shader_parameter("ripple_mix", 0.3)
 		return sea
 	# transfer decks share the rope courses' cast concrete: weathered top value, no joint grid,
 	# so the only lines on a landing are its real edges.
