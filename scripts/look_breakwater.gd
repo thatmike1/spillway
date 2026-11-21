@@ -87,13 +87,13 @@ func attach(level: Node3D) -> void:
 
 func _material(key: String) -> Material:
 	if key.begins_with("Mesh_paint") and key.ends_with("white"):
-		# white paint is the deck's own surface a step lighter, worn like the deck, so the start line
-		# reads as paint in light and shade instead of a flat bar across the view.
+		# white paint is the deck's own colour, only worn harder, so the start line is a trace in the
+		# surface in light and shade instead of a bar or a pale seam across the view.
 		var paint := ShaderMaterial.new()
 		paint.shader = SURFACE
 		paint.set_shader_parameter("wear", load("res://assets/look/painted-wear.png"))
-		paint.set_shader_parameter("top_color", Color("efe9e2"))
-		paint.set_shader_parameter("side_color", Color("efe9e2"))
+		paint.set_shader_parameter("top_color", Color("e0dad2"))
+		paint.set_shader_parameter("side_color", Color("e0dad2"))
 		paint.set_shader_parameter("wear_amount", 0.45)
 		paint.set_shader_parameter("deck", 0.0)
 		return paint
@@ -110,8 +110,8 @@ func _material(key: String) -> Material:
 	mat.shader = SURFACE
 	mat.set_shader_parameter("wear", load("res://assets/look/painted-wear.png"))
 	var side := Color("6b8a8e")
-	# lane 01's shell white e0dad2, nudged off the green the harbour fill puts on it.
-	var top := Color("e4d9d1")
+	# lane 01's shell white (a warm nudge read peach in the gate shade once the light changed).
+	var top := Color("e0dad2")
 	var is_deck := key in ["Mesh_pavers", "Mesh_asphalt", "Mesh_steel_ramp"]
 	if key.begins_with("Containers_"):
 		side = [Color("527b87"), Color("63868b"), Color("759395"), Color("7c9494"), Color("59898b"), Color("8ba09e")][int(key.trim_prefix("Containers_")) % 6]

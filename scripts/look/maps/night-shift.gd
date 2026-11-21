@@ -5,8 +5,9 @@ extends RefCounted
 ## line), and the train, both walls and the passage edges separate without brightening the floor. the cropped station banner and painted figures hide while L is on.
 ## nothing here collides.
 
-## deck on lane 01's announced night value (dedad0): the warmer e1d9c5 went mauve under the roof.
-const PALETTE := {"top": "dedad0", "side": "7d7468"}
+## deck a moonlit concrete a step below lane 01's night value: dedad0 glowed blue-white as the
+## brightest surface in the night (critic 19:28); the warmer e1d9c5 went mauve under the roof.
+const PALETTE := {"top": "c9c6bd", "side": "7d7468"}
 ## authored place signs that stay; any other label under Markings is a painted figure.
 ## wall and roof-steel kinds get material and wear; the art file splits each kind into grid cells
 ## (Mesh_cladding_3_m2), so these match on the kind before the cell.
@@ -14,6 +15,9 @@ const WALLS := {
 	"concrete": {"side_color": "86807a", "wear_amount": 0.08, "streak_amount": 0.3},
 	"cladding": {"side_color": "6f7a7e", "wear_amount": 0.08, "streak_amount": 0.3},
 	"brick": {"side_color": "75625a", "wear_amount": 0.08, "streak_amount": 0.3},
+	# the trackbed slots between and beside the platforms: dark ballast, as the baseline read them,
+	# so the corridor shows its track instead of pale hairlines.
+	"bed": {"top_color": "3b4046", "side_color": "30353a", "wear_amount": 0.04, "deck": 0.0},
 	"formwork": {"side_color": "7f7a70", "wear_amount": 0.08, "streak_amount": 0.3},
 	# the canopy, its beams and columns: cool slate steel, a lit top and a darker side, so the
 	# roof keeps the night mood against the sky instead of a flat mid grey.
