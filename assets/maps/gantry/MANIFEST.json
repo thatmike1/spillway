@@ -4,7 +4,7 @@
       "path": "concrete.gdshader",
       "origin": "original Spillway source using the project's world-space surface and toon-lighting conventions",
       "rights": "project-authored source; no external asset import",
-      "purpose": "joint-edge wear, narrow runoff and a damp lower waterline"
+      "purpose": "joint-edge wear, narrow runoff and a damp lower waterline; optional broad weathering and darker soffits (design 1121)"
     },
     {
       "path": "water.gdshader",

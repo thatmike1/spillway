@@ -30,6 +30,8 @@ var sky_id := ""
 var override: Object
 var dressing: Node3D
 var _sky_light: Script
+var _waters: Array[Dictionary] = []
+var _hidden_labels: Array[Dictionary] = []
 
 func attach(level: Node3D, map_id: String) -> void:
 	name = "R17Look"
@@ -92,12 +94,35 @@ func attach(level: Node3D, map_id: String) -> void:
 	if map_id == "night-shift":
 		for label: Node in level.find_children("*","Label3D",true,false):
 			_label_colors.append({"node":label,"old":label.modulate,"outline":label.outline_modulate})
+	# painted distance figures ("16 m / 630 u") read as debug on a course; the practice yard keeps them.
+	if real_id != "practice":
+		var figures := RegEx.create_from_string("^\\d+ m\\n\\d+ u$")
+		for label: Node in level.find_children("*","Label3D",true,false):
+			if figures.search(str((label as Label3D).text)) != null:
+				_hidden_labels.append({"node":label,"old":label.visible})
 	var contours := CONTOURS.new()
+	for water: Dictionary in _waters:
+		contours.water_floor = maxf(contours.water_floor, float(water.y))
 	add_child(contours.build(level,map_id != "breakwater"))
+	if map_id == "breakwater":
+		var harbour := level.get_node_or_null("Harbour")
+		if harbour is MeshInstance3D:
+			_note_water(harbour)
+		for swap: Dictionary in base.swaps:
+			if swap.new is ShaderMaterial and (swap.new as ShaderMaterial).shader == WATER:
+				(swap.new as ShaderMaterial).set_shader_parameter("value",float(palette.get("water_value",1.0)))
+				(swap.new as ShaderMaterial).set_shader_parameter("noise",load("res://assets/look/painted-wear.png"))
+	var shore := contours.shoreline(level,_waters,Color(palette.get("shore","d3e3d8")).darkened(1.0-float(palette.get("water_value",1.0))))
+	if shore != null:
+		add_child(shore)
 	if override != null and override.has_method("dress"):
-		dressing = override.call("dress",level)
-		if dressing != null:
-			_strip_collision(dressing, override_path)
+		var proposed: Node = override.call("dress",level)
+		if proposed != null and (not proposed is Node3D or _collides(proposed)):
+			# dressing is look-only: anything that could collide rejects the whole dressing before it enters the tree.
+			push_error("r17: look dressing rejected, it may collide or is not a Node3D: "+override_path)
+			proposed.free()
+		elif proposed != null:
+			dressing = proposed
 			dressing.name = "MapDressing"
 			add_child(dressing)
 	report = {"map":map_id,"swaps":swaps.size(),"ink_segments":contours.line_count+(base.line_count if base != null else 0),"jump_lips":contours.lip_count,"sky":palette.sky,"sky_light":sky_id,"override":override != null,"presentation_only":true}
@@ -108,7 +133,7 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 		# these are functional timing, hazard and landing cues, at their inherited widths.
 		if key == "ReadabilityPads":
 			return flat(Color("9b7770"))
-		if key == "ReadabilityNosing" or "yellow" in key or "hazard" in key or "lip" in key or "duck" in key:
+		if key == "ReadabilityNosing" or "yellow" in key or "orange" in key or "hazard" in key or "lip" in key or "duck" in key:
 			return flat(Color("d95b30"))
 		if "dark" in key:
 			return flat(Color("263d45"))
@@ -140,7 +165,10 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 					clone.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
 					clone.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 					copy = clone
-				swaps.append({"node":mesh,"surface":i,"old":prior,"new":copy})
+				if override != null and override.has_method("material"):
+					copy = override.call("material",key,mesh,copy)
+				if copy != null:
+					swaps.append({"node":mesh,"surface":i,"old":prior,"new":copy})
 		return null
 	if old is BaseMaterial3D and old.emission_enabled:
 		if key.begins_with("Mesh_neon"):
@@ -155,6 +183,11 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 	if water_shader or inline_water or key in ["Harbour","Canal","River","Water","PoolWater","Art_Water"] or key.begins_with("Pool_"):
 		var water := ShaderMaterial.new()
 		water.shader = WATER
+		water.set_shader_parameter("value",float(palette.get("water_value",1.0)))
+		water.set_shader_parameter("noise",load("res://assets/look/painted-wear.png"))
+		var pool := key.begins_with("Pool_") or key == "PoolWater"
+		water.set_shader_parameter("shallow",1.0 if pool else 0.0)
+		_note_water(node)
 		return water
 	if not key.begins_with("Mesh_") and not key.begins_with("Art_") and key not in ["SolidMesh","RollingStock","Rails","ReadabilityPads","ReadabilityBars","ReadabilityNosing"]:
 		return null
@@ -178,7 +211,10 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 			interior.set_shader_parameter("base_color",Color(palette.side).lightened(value))
 			_materials[kind] = interior
 		return _materials[kind]
-	var material_key := kind
+	var surfaces: Dictionary = override.get_script().get_script_constant_map().get("SURFACES", {}) if override != null else {}
+	# a full node-name override gets its own cache entry, so Mesh_x and Art_x never share it by accident.
+	var surface_key := key if surfaces.has(key) else (kind if surfaces.has(kind) else "")
+	var material_key := key if surface_key == key else kind
 	if _materials.has(material_key):
 		return _materials[material_key]
 	var top := Color(palette.top)
@@ -192,7 +228,8 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 			top = Color("8fa7b7") if "snow" in kind or kind in ["rock","plateau"] else Color("718d7d")
 			deck = false
 	if not deck and top == Color(palette.top):
-		top = side.lightened(0.25)
+		# tops of non-deck kinds stay in the pale family, a step toward the side, never olive or grey.
+		top = top.lerp(side, 0.22)
 	if key == "SolidMesh":
 		top = Color(palette.top)
 	var material := ShaderMaterial.new()
@@ -200,15 +237,12 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 	material.set_shader_parameter("wear",load("res://assets/look/painted-wear.png"))
 	material.set_shader_parameter("top_color",top)
 	material.set_shader_parameter("side_color",side)
-	material.set_shader_parameter("wear_amount",0.08)
+	material.set_shader_parameter("wear_amount",0.12)
 	material.set_shader_parameter("deck",0.35 if deck else 0.0)
-	var surfaces: Dictionary = override.get_script().get_script_constant_map().get("SURFACES", {}) if override != null else {}
-	for name_key: String in [kind, key]:
-		if surfaces.has(name_key):
-			for parameter: String in surfaces[name_key]:
-				var value: Variant = surfaces[name_key][parameter]
-				material.set_shader_parameter(parameter, Color(value) if value is String else value)
-			break
+	if not surface_key.is_empty():
+		for parameter: String in surfaces[surface_key]:
+			var value: Variant = surfaces[surface_key][parameter]
+			material.set_shader_parameter(parameter, Color(value) if value is String else value)
 	_materials[material_key] = material
 	return material
 
@@ -255,11 +289,30 @@ func set_enabled(value: bool) -> void:
 			state.node.rotation = state.rotation
 			state.node.light_color = state.color
 			state.node.light_energy = state.energy
+	for state: Dictionary in _hidden_labels:
+		if is_instance_valid(state.node):
+			state.node.visible = false if value else state.old
 	for state: Dictionary in _label_colors:
 		state.node.modulate = Color(palette.top) if value else state.old
 		state.node.outline_modulate = Color("172638") if value else state.outline
 	if override != null and override.has_method("set_enabled"):
 		override.call("set_enabled",value)
+
+func _note_water(node: GeometryInstance3D) -> void:
+	if not node is MeshInstance3D:
+		return
+	var mesh: Mesh = (node as MeshInstance3D).mesh
+	var size: Vector2
+	var at: Vector3 = node.position if node.get_parent() == get_parent() else get_parent().to_local(node.global_position)
+	if mesh is PlaneMesh:
+		size = (mesh as PlaneMesh).size
+	elif mesh is BoxMesh:
+		# thin box seas (tether yard): the surface is the box top.
+		size = Vector2((mesh as BoxMesh).size.x, (mesh as BoxMesh).size.z)
+		at.y += (mesh as BoxMesh).size.y*0.5
+	else:
+		return
+	_waters.append({"y":at.y,"rect":Rect2(at.x-size.x*0.5,at.z-size.y*0.5,size.x,size.y)})
 
 func _real_map_id(level: Node3D, fallback: String) -> String:
 	# r19 maps pass a palette alias (saltglass uses practice); the host knows the real id.
@@ -284,7 +337,16 @@ func _load_sky_light(palette_id: String, real_id: String) -> void:
 
 func _paint_environment() -> void:
 	if not sky_id.is_empty():
-		painted_environment = _sky_light.call("environment", old_environment, sky_id)
+		# breakwater already built a Sky; repainting it avoids freeing an undrawn one (a radiance leak at exit).
+		var reuse: Sky = base.painted_environment.sky if base != null and base.painted_environment != null else null
+		var takes_reuse := false
+		for method: Dictionary in _sky_light.get_script_method_list():
+			if method.name == "environment" and (method.args as Array).size() >= 3:
+				takes_reuse = true
+		if takes_reuse:
+			painted_environment = _sky_light.call("environment", old_environment, sky_id, reuse)
+		else:
+			painted_environment = _sky_light.call("environment", old_environment, sky_id)
 		return
 	painted_environment = old_environment.duplicate()
 	var sky := Sky.new()
@@ -306,12 +368,13 @@ func _paint_environment() -> void:
 	painted_environment.fog_density = 0.0012
 	painted_environment.fog_sky_affect = 0.0
 
-func _strip_collision(root: Node, source: String) -> void:
-	# map dressing is look-only: anything that could collide is removed and reported.
-	assert(not root is CollisionObject3D, "r17: look dressing root may not collide: "+source)
-	for node: Node in root.find_children("*","CollisionObject3D",true,false):
-		push_error("r17: look dressing may not collide, removed %s from %s" % [node.name, source])
-		node.get_parent().remove_child(node)
-		node.free()
-	for node: Node in root.find_children("*","CSGShape3D",true,false):
-		(node as CSGShape3D).use_collision = false
+func _collides(root: Node) -> bool:
+	# release-safe: assertions vanish in exported builds, so this is an ordinary branch.
+	var nodes: Array[Node] = [root]
+	nodes.append_array(root.find_children("*","",true,false))
+	for node: Node in nodes:
+		if node is CollisionObject3D or node is CollisionShape3D or node is CollisionPolygon3D or node is GridMap:
+			return true
+		if node is CSGShape3D and (node as CSGShape3D).use_collision:
+			return true
+	return false
