@@ -18,5 +18,7 @@ void light(){
  float band=mix(0.48,0.82,smoothstep(-0.1,0.02,facing));
  band=mix(band,1.0,smoothstep(0.65,0.72,facing));
  DIFFUSE_LIGHT+=ALBEDO*band*ATTENUATION*LIGHT_COLOR/PI;
- DIFFUSE_LIGHT+=ALBEDO*vec3(0.70,0.84,1.0)*0.35*topness*(1.0-ATTENUATION)*step(0.0,facing)*float(LIGHT_IS_DIRECTIONAL)*LIGHT_COLOR/PI;
+ float sun_value=dot(LIGHT_COLOR,vec3(0.2126,0.7152,0.0722));
+ vec3 shade_albedo=mix(ALBEDO,vec3(dot(ALBEDO,vec3(0.2126,0.7152,0.0722))),0.5);
+ DIFFUSE_LIGHT+=shade_albedo*vec3(0.70,0.84,1.0)*0.35*topness*(1.0-ATTENUATION)*step(0.0,facing)*float(LIGHT_IS_DIRECTIONAL)*sun_value/PI;
 }

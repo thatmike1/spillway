@@ -1,6 +1,7 @@
 extends RefCounted
 ## ink follows visible prism unions; immutable collision manifests only locate jump lips.
 const INK := preload("res://shaders/look/ink.gdshader")
+const PALETTES := preload("res://scripts/r17_palettes.gd")
 var lines := SurfaceTool.new()
 var paint := SurfaceTool.new()
 var seen := {}
@@ -110,8 +111,64 @@ func gap_lip(at: Vector3, pieces: Array) -> void:
 		paint.add_vertex(point)
 	lip_count += 1
 
-## an edge where another deck continues at about the same height is a seam, not a takeoff lip.
+var _lip_floors := {}
+
+## the union outline of every flat piece top, per height in millimetres: the real deck boundaries.
+func _floors(pieces: Array) -> Dictionary:
+	if not _lip_floors.is_empty():
+		return _lip_floors
+	for piece: Dictionary in pieces:
+		var top: Array = piece.top
+		var y: float = (top[0] as Vector3).y
+		var polygon := PackedVector2Array()
+		var flat := true
+		for v: Vector3 in top:
+			flat = flat and absf(v.y-y) < 0.001
+			polygon.append(Vector2(v.x, v.z))
+		if not flat:
+			continue
+		if Geometry2D.is_polygon_clockwise(polygon):
+			polygon.reverse()
+		var height := roundi(y*1000.0)
+		if not _lip_floors.has(height):
+			_lip_floors[height] = []
+		for expanded: PackedVector2Array in Geometry2D.offset_polygon(polygon,0.002,Geometry2D.JOIN_MITER):
+			var merged := expanded
+			var polygons: Array = _lip_floors[height]
+			var i := 0
+			while i < polygons.size():
+				var union := Geometry2D.merge_polygons(merged,polygons[i])
+				if union.size() == 1:
+					merged = union[0]
+					polygons.remove_at(i)
+					i = 0
+				else:
+					i += 1
+			polygons.append(merged)
+	return _lip_floors
+
+## an edge where another deck continues at the same height is a seam, not a takeoff lip.
 func seam(a: Vector3, b: Vector3, centre: Vector3, own: Dictionary, pieces: Array) -> bool:
+	var height := roundi(a.y*1000.0)
+	if absf(a.y-b.y) < 0.001 and _floors(pieces).has(height):
+		# flat decks: the edge is a lip only where it lies on the union's outline (overlapping curve
+		# segments would fool a probe beside the edge).
+		var on_outline := 0
+		for along: float in [0.2, 0.5, 0.8]:
+			var point := Vector2(a.lerp(b, along).x, a.lerp(b, along).z)
+			if _near_outline(point, _lip_floors[height]):
+				on_outline += 1
+		return on_outline < 2
+	return _probe_seam(a, b, centre, own, pieces)
+
+static func _near_outline(point: Vector2, polygons: Array) -> bool:
+	for polygon: PackedVector2Array in polygons:
+		for i: int in polygon.size():
+			if Geometry2D.get_closest_point_to_segment(point, polygon[i], polygon[(i+1)%polygon.size()]).distance_to(point) < 0.08:
+				return true
+	return false
+
+func _probe_seam(a: Vector3, b: Vector3, centre: Vector3, own: Dictionary, pieces: Array) -> bool:
 	var mid := (a+b)*0.5
 	var outward := Vector3.UP.cross(b-a).normalized()
 	if outward.dot(centre-mid) > 0:
@@ -126,8 +183,15 @@ func seam(a: Vector3, b: Vector3, centre: Vector3, own: Dictionary, pieces: Arra
 			for v: Vector3 in piece.top:
 				polygon.append(Vector2(v.x, v.z))
 				high = maxf(high, v.y)
-			if absf(high-mid.y) < 0.3 and Geometry2D.is_point_in_polygon(Vector2(probe.x, probe.z), polygon):
+			if absf(high-mid.y) < 0.05 and Geometry2D.is_point_in_polygon(Vector2(probe.x, probe.z), polygon):
 				return true
+	return false
+
+## terrain is not structure: its outer edge at the world's rim would draw ink lines across the sky.
+static func _ground(kind: String) -> bool:
+	for ground: String in PALETTES.GROUND:
+		if kind == ground or kind.begins_with(ground+"_"):
+			return true
 	return false
 
 static func _corner_key(v: Vector2, height: int) -> String:
@@ -148,7 +212,7 @@ func visible_boundaries(level: Node3D) -> void:
 	for prism: Dictionary in prisms:
 		var kind := str(prism.get("kind", ""))
 		var top: Array = prism.get("top", [])
-		if top.size() < 3 or kind.begins_with("paint"):
+		if top.size() < 3 or kind.begins_with("paint") or _ground(kind):
 			continue
 		var y: float = top[0].y
 		var flat := true
@@ -185,7 +249,7 @@ func visible_boundaries(level: Node3D) -> void:
 				for i: int in boundary.size():
 					var a := boundary[i]
 					var b := boundary[(i+1)%boundary.size()]
-					line(Vector3(a.x,height/1000.0+0.009,a.y),Vector3(b.x,height/1000.0+0.009,b.y),0.005)
+					line(Vector3(a.x,height/1000.0+0.009,a.y),Vector3(b.x,height/1000.0+0.009,b.y),0.005,true)
 					# remember convex corners of the union: only those get a vertical stroke.
 					var before := boundary[(i-1+boundary.size())%boundary.size()]
 					var turn := (a-before).cross(b-a)
@@ -209,7 +273,8 @@ func visible_boundaries(level: Node3D) -> void:
 			if top.y-low > 0.7:
 				line(Vector3(top.x,top.y,top.z), Vector3(top.x,low,top.z), 0.005)
 
-func line(a: Vector3, b: Vector3, radius: float) -> void:
+## outline=true marks a deck outline: the ink shader hides it while the camera is below that deck.
+func line(a: Vector3, b: Vector3, radius: float, outline: bool = false) -> void:
 	if a.distance_to(b) < 0.7:
 		return
 	var key := edge_key(a,b)
@@ -230,7 +295,7 @@ func line(a: Vector3, b: Vector3, radius: float) -> void:
 		var picks := [corners[i],corners[i],corners[(i+1)%4],corners[i],corners[(i+1)%4],corners[(i+1)%4]]
 		for k: int in 6:
 			lines.set_normal((picks[k] as Vector3).normalized())
-			lines.set_uv(Vector2((picks[k] as Vector3).length(),0.0))
+			lines.set_uv(Vector2((picks[k] as Vector3).length(),1.0 if outline else 0.0))
 			lines.add_vertex(ends[k]+picks[k])
 
 ## a pale band where structure meets water, at each water plane's height, around every manifest

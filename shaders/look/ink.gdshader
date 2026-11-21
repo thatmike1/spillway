@@ -10,8 +10,10 @@ uniform float fade_near = 28.0;
 uniform float fade_far = 95.0;
 varying vec3 wp;
 varying float coverage;
+varying float above;
 void vertex(){
  coverage=1.0;
+ above=1.0;
  if(UV.x>0.0){
   vec3 centre=VERTEX-NORMAL*UV.x;
   vec3 world_centre=(MODEL_MATRIX*vec4(centre,1.0)).xyz;
@@ -20,11 +22,13 @@ void vertex(){
   float pixel=depth*2.0/(PROJECTION_MATRIX[1][1]*VIEWPORT_SIZE.y);
   float radius=max(UV.x,pixel*min_pixels*0.7071);
   coverage=UV.x/radius;
+  // a deck outline (UV.y = 1) only reads from above; seen from below it would float against the sky.
+  if(UV.y>0.5){above=smoothstep(-0.25,0.15,CAMERA_POSITION_WORLD.y-world_centre.y);}
   VERTEX=centre+NORMAL*radius;
  }
  wp=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;
 }
 void fragment(){
  ALBEDO=ink_color.rgb;
- ALPHA=ink_alpha*mix(0.45,1.0,sqrt(coverage))*(1.0-smoothstep(fade_near,fade_far,distance(wp,CAMERA_POSITION_WORLD)));
+ ALPHA=above*ink_alpha*mix(0.45,1.0,sqrt(coverage))*(1.0-smoothstep(fade_near,fade_far,distance(wp,CAMERA_POSITION_WORLD)));
 }
