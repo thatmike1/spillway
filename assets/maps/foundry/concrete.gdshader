@@ -2,6 +2,10 @@ shader_type spatial;
 render_mode cull_back;
 uniform float waterline_y = -6.2;
 uniform vec3 dry_concrete = vec3(0.48, 0.45, 0.38);
+// design 1121: defaults keep the delivered look; the foundry look file sets shell caps and quieter joints.
+uniform vec3 cap_color = vec3(0.72, 0.69, 0.59);
+uniform float joint_depth = 0.20;
+uniform float slab_spread = 0.12;
 varying vec3 world;
 varying vec3 up_normal;
 float hash(vec2 cell) {
@@ -28,8 +32,8 @@ void fragment() {
     vec2 deck_uv = world.xz / vec2(4.0, 5.0);
     float slab = hash(floor(deck_uv));
     float deck_joint = joint(deck_uv, vec2(4.0, 5.0));
-    vec3 cap = vec3(0.72, 0.69, 0.59) * (0.92 + slab * 0.12);
-    cap *= 1.0 - deck_joint * 0.20;
+    vec3 cap = cap_color * (1.04 - slab_spread + slab * slab_spread);
+    cap *= 1.0 - deck_joint * joint_depth;
     vec2 face = abs(up_normal.x) > 0.5 ? world.zy : world.xy;
     vec2 wall_uv = face / vec2(7.5, 5.0);
     float wall_joint = joint(wall_uv, vec2(7.5, 5.0));

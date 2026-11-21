@@ -3,7 +3,7 @@ extends RefCounted
 static func apply(level: Node3D) -> void:
 	preload("res://scripts/art/viaduct_dam.gd").build(level)
 	var concrete := _surface(Color("cfc9b9"),Color("657a7c"),0.85)
-	var incline := _surface(Color("b8c7c0"),Color("617777"),0.85)
+	var incline := _surface(Color("c3c2b5"),Color("617777"),0.85)
 	var basin := _surface(Color("728781"),Color("4d6667"),0.35)
 	var steel := _steel()
 	for node: Node in level.get_children():
@@ -92,6 +92,6 @@ static func _surface(top: Color, side: Color, joints: float) -> ShaderMaterial:
 	material.set_shader_parameter("wear",preload("res://assets/look/painted-wear.png"))
 	material.set_shader_parameter("top_color",top)
 	material.set_shader_parameter("side_color",side)
-	material.set_shader_parameter("wear_amount",0.06)
+	material.set_shader_parameter("wear_amount",0.16)
 	material.set_shader_parameter("deck",joints)
 	return material

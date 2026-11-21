@@ -4,6 +4,7 @@ const GEO := preload("res://scripts/r19_course_geometry.gd")
 const SURFACE := preload("res://assets/maps/gantry/concrete.gdshader")
 const WATER := preload("res://assets/maps/gantry/water.gdshader")
 const SKY := preload("res://shaders/look/sky.gdshader")
+const LOOK := preload("res://scripts/look/maps/gantry.gd")
 
 static func dress(level: Node3D) -> void:
 	var concrete := ShaderMaterial.new()
@@ -93,6 +94,8 @@ static func ink(level: Node3D) -> void:
 		lips.free()
 	level.add_child(contours)
 	level.art_manifest.append(["gantry_materials", "neutral cream tops, separate architectural stone, blue-green sides, structural ink v4"])
+	# presentation-only pass after the identity inputs above are complete.
+	LOOK.dress(level)
 
 static func portal_details(level: Node3D, index: int, at: Vector3) -> void:
 	# wheel trucks ride the continuous quay rails; the crossbeam carries a lifting carriage.

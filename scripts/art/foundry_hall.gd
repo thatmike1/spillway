@@ -96,6 +96,8 @@ static func dress(level: Node3D) -> void:
 	var cable := CABLE.new()
 	cable.name = "FoundryCable"
 	level.add_child(cable)
+	# presentation-only look pass after every identity input above is complete.
+	preload("res://scripts/look/maps/foundry.gd").dress(level)
 
 static func box(level: Node3D, id: String, at: Vector3, size: Vector3, material: Material) -> void:
 	var half := size*0.5
