@@ -10,6 +10,10 @@ func _ready() -> void:
 	process_priority = 90
 
 func _process(_delta: float) -> void:
+	# the control lettering behind spawn is built after the art pass; the hud carries the same hints.
+	var controls := get_parent().get_node_or_null("Sign_entry") as Label3D
+	if controls != null and controls.visible:
+		controls.visible = false
 	var host := get_parent().get_parent()
 	if host == null or not host.has_method("map_entry"):
 		return

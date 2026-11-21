@@ -9,9 +9,10 @@ const PIER := Color("5b7378")
 const GLASS := Color("22363c")
 const COURT_TOP := -5.0
 ## shell tops and weathered blue-grey sides instead of the shared practice palette's khaki.
-const PALETTE := {"top": "efe9dc", "side": "5b7176"}
+const PALETTE := {"top": "f6ead0", "side": "6d8388"}
 
 var _labels: Array[Label3D] = []
+var _concrete: ShaderMaterial
 
 func material(key: String, node: GeometryInstance3D, proposed: Material) -> Material:
 	# the shared layer paints every Art_paint mesh cream; the swing rings must stay signal vermilion.
@@ -20,9 +21,29 @@ func material(key: String, node: GeometryInstance3D, proposed: Material) -> Mate
 		paint.albedo_color = RING
 		paint.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		return paint
-	# transfer decks show some wear and value instead of one flat plane at spawn.
-	if key.begins_with("Mesh_deck_transfer") and proposed is ShaderMaterial:
-		(proposed as ShaderMaterial).set_shader_parameter("wear_amount", 0.28)
+	# the shared water tiles visibly at this basin's scale; the crane dock's quiet sea does not.
+	if key == "Water":
+		var sea := ShaderMaterial.new()
+		sea.shader = preload("res://assets/maps/gantry/water.gdshader")
+		# seen from a few metres up, the dock's fine ripple bands read as wood grain; broaden and soften them.
+		sea.set_shader_parameter("swell_scale", 0.4)
+		sea.set_shader_parameter("ripple_mix", 0.3)
+		return sea
+	# transfer decks share the rope courses' cast concrete: runoff wear, no joint grid, so the only lines
+	# on a landing are its real edges. tops render well below their albedo under this basin's light, so the top is set near white.
+	if key.begins_with("Mesh_deck_transfer"):
+		if _concrete == null:
+			_concrete = ShaderMaterial.new()
+			_concrete.shader = preload("res://assets/maps/gantry/concrete.gdshader")
+			_concrete.set_shader_parameter("top_color", Color("faf3e2"))
+			_concrete.set_shader_parameter("side_color", Color("6d8388"))
+			_concrete.set_shader_parameter("wear_color", Color("9a9c8c"))
+			_concrete.set_shader_parameter("wear", preload("res://assets/look/painted-wear.png"))
+			_concrete.set_shader_parameter("wear_amount", 0.45)
+			_concrete.set_shader_parameter("deck", 0.0)
+			_concrete.set_shader_parameter("waterline", -8.0)
+			_concrete.set_shader_parameter("weather", 1.0)
+		return _concrete
 	return proposed
 
 func dress(level: Node3D) -> Node3D:
@@ -62,6 +83,20 @@ func dress(level: Node3D) -> Node3D:
 				_box(root, "pier_%d_%s_%s" % [i, x, z], Vector3(x, COURT_TOP + height * 0.5, z), Vector3(1.0, height, 1.2), pier)
 		_box(root, "bearer_%d_far" % i, Vector3((float(d[0]) + float(d[1])) * 0.5, top - 0.3, float(d[2]) + 1.4), Vector3(float(d[1]) - float(d[0]) - 1.6, 0.6, 0.9), pier)
 		_box(root, "bearer_%d_near" % i, Vector3((float(d[0]) + float(d[1])) * 0.5, top - 0.3, float(d[3]) - 1.4), Vector3(float(d[1]) - float(d[0]) - 1.6, 0.6, 0.9), pier)
+	# every receiving deck shows its landing edge in vermilion, on the top and down its near face.
+	var paint := StandardMaterial3D.new()
+	paint.albedo_color = RING
+	paint.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	for i: int in range(1, level.DECKS.size()):
+		var d: Array = level.DECKS[i]
+		var h: float = (float(heights[i]) if heights is Array and i < heights.size() else 4.0)
+		var width := float(d[1]) - float(d[0])
+		var cx := (float(d[0]) + float(d[1])) * 0.5
+		var near := float(d[3])
+		var top_band := _box(root, "receiver_%d" % i, Vector3(cx, h + 0.008, near - 0.25), Vector3(width, 0.014, 0.45), paint)
+		top_band.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var face := _box(root, "receiver_face_%d" % i, Vector3(cx, h - 0.15, near + 0.015), Vector3(width, 0.28, 0.025), paint)
+		face.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# control text leaves the world with L on; the HUD already carries the same hints.
 	_labels.clear()
 	for label: Node in level.find_children("Sign_*", "Label3D", true, false):

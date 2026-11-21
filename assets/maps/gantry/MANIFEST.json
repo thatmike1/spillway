@@ -10,7 +10,7 @@
       "path": "water.gdshader",
       "origin": "original Spillway shader, informed by project water conventions",
       "rights": "project-authored source; no external asset import",
-      "purpose": "quiet narrow broken ripples and distant sky wash"
+      "purpose": "quiet narrow broken ripples and distant sky wash; optional broader, softer swell for small basins (design 1121)"
     },
     {
       "path": "outline.gdshader",
