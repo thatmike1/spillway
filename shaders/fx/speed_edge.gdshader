@@ -61,7 +61,7 @@ void fragment() {
 	float f = frame * lean_frame * ground_clear;
 	float w = max(1.0, pixels.y / 900.0);
 	float frame_core = (1.0 - smoothstep(0.9 * w, 1.7 * w, abs(rim - 18.0 * w))) * f * 0.9;
-	float frame_ink = (1.0 - smoothstep(0.4 * w, 0.9 * w, abs(abs(rim - 18.0 * w) - 2.2 * w))) * f * 0.55;
+	float frame_ink = (1.0 - smoothstep(0.4 * w, 0.9 * w, abs(abs(rim - 18.0 * w) - 2.2 * w))) * f * 0.7;
 	col = mix(col, vec4(ink_color.rgb, frame_ink), step(col.a, frame_ink));
 	col = mix(col, vec4(frame_color.rgb, frame_core), step(col.a, frame_core));
 	COLOR = col;

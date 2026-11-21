@@ -48,6 +48,7 @@ func tape(on: bool) -> Dictionary:
 	var lens_ticks := 0
 	var edge_ticks := 0
 	var mote_ticks := 0
+	var eye_drift := 0
 	var dt := 1.0 / 128.0
 	for tick: int in 640:
 		if on:
@@ -77,6 +78,8 @@ func tape(on: bool) -> Dictionary:
 			changed += 1
 		if fx._lens.current:
 			lens_ticks += 1
+			if fx._lens.global_transform != camera.global_transform:
+				eye_drift += 1
 		if fx._layer.visible:
 			edge_ticks += 1
 		if fx._motes.visible:
@@ -91,7 +94,7 @@ func tape(on: bool) -> Dictionary:
 		fx._process(0.05)
 	var resting: bool = not fx._lens.current and game.player.camera.current
 	game.free()
-	return {"bytes": var_to_bytes(rows), "changed": changed, "lens": lens_ticks, "edge": edge_ticks, "motes": mote_ticks, "resting": resting}
+	return {"bytes": var_to_bytes(rows), "changed": changed, "lens": lens_ticks, "edge": edge_ticks, "motes": mote_ticks, "resting": resting, "eye_drift": eye_drift}
 
 func host_checks() -> void:
 	var game := host("breakwater")
@@ -188,6 +191,7 @@ func run() -> void:
 	check(on.changed == 0 and off.changed == 0, "observer frames never change state inside a tick")
 	check(on.lens > 0 and on.edge > 0 and on.motes > 0, "on tape exercised lens, edge lines and wind flecks")
 	check(off.lens == 0 and off.edge == 0 and off.motes == 0, "off tape drew nothing")
+	check(on.eye_drift == 0, "the presentation camera always sits exactly at the runner's eye")
 	check(on.resting and off.resting, "runner camera current again after the tape")
 	var ok := checks.all(func(row: Dictionary) -> bool: return row.ok)
 	var summary := {"ok": ok, "checks": checks, "bytes_compared": on.bytes.size(), "ticks": 640, "lens_ticks": on.lens, "edge_ticks": on.edge, "mote_ticks": on.motes}
