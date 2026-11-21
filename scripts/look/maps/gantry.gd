@@ -69,6 +69,12 @@ static func _caisson(level: Node3D) -> void:
 	var plate := skin.material_override as ShaderMaterial
 	plate.set_shader_parameter("side_color", Color("6f8588"))
 	plate.set_shader_parameter("weather", 1.0)
+	# frame, ends, ribs and stiffeners take the plate's own material, so the grid reads only by its edges.
+	for node: Node in level.get_children():
+		var id := str(node.name)
+		for part: String in ["gate_frame_", "gate_end_", "gate_rib_", "gate_stiffener_"]:
+			if id.begins_with("Art_drydock_" + part) and node is MeshInstance3D:
+				(node as MeshInstance3D).material_override = plate
 
 static func _anchor(level: Node3D, index: int, anchor: Node3D) -> void:
 	# the ring is signal paint: unshaded so it keeps its colour under the beam's shadow.
