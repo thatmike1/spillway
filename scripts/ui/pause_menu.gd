@@ -373,6 +373,8 @@ func _plain_map_controls() -> void:
 	var lines: Array[String] = []
 	for line: String in map_controls.text.split("\n", false):
 		line = line.strip_edges()
+		if line.begins_with("Movement Lab, EXPERIMENTAL moves"):
+			line = "Movement Lab moves:"
 		if line.begins_with("EXPERIMENTAL "):
 			line = line.trim_prefix("EXPERIMENTAL ")
 			line = line.left(1).to_upper() + line.substr(1)
@@ -668,8 +670,10 @@ func _refresh_pause() -> void:
 	_paint_map_cards()
 	_sync_motion_rows()
 	_refresh_mail()
+	# an experiment shows only its own controls; running and strafing are on the title and under Settings > Keys.
 	if map_controls != null:
-		map_controls.text = str(game.preset.get("controls", "")) + "\n" + lab_controls_text() if game.is_lab() or game.is_experiment_map() else str(game.preset.get("controls", ""))
+		var own := lab_controls_text().strip_edges() if game.is_lab() or game.is_experiment_map() else ""
+		map_controls.text = own if not own.is_empty() and own != "EXPERIMENTAL" else str(game.preset.get("controls", ""))
 	_plain_map_controls()
 
 func _refresh_tether() -> void:
