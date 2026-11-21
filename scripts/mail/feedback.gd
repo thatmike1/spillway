@@ -13,7 +13,8 @@ func _ready() -> void:
 	_trail.top_level = true
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.albedo_color = Color("eee9d1")
+	# an ink thread reads against both the pale quay and the pale sky.
+	material.albedo_color = Color("2c4752")
 	_trail.material_override = material
 	_cue = AudioStreamPlayer.new()
 	_cue.volume_db = -14
