@@ -64,9 +64,10 @@ func dress(level: Node3D) -> Node3D:
 			_box(frame, "foot_%s" % side, Vector3(x, COURT_TOP + 0.3, at.z), Vector3(1.6, 0.6, 1.6), pier)
 			var knee := _box(frame, "knee_%s" % side, Vector3(at.x + side * 0.86, at.y - 0.35, at.z), Vector3(0.26, 3.6, 0.26), steel)
 			knee.rotation.z = signf(side) * PI * 0.25
-		# a pale lifting carriage separates the ring from the dark beam at distance.
-		_box(frame, "carriage", at + Vector3(0, 1.75, 0), Vector3(2.0, 0.5, 1.2), pale)
-		_box(frame, "strap", at + Vector3(0, 1.05, 0), Vector3(0.3, 0.9, 0.26), steel)
+		# a pale lifting carriage wraps the dark beam above the ring, so it reads as a trolley at distance
+		# rather than a lamp sitting on top.
+		_box(frame, "carriage", at + Vector3(0, 1.15, 0), Vector3(2.2, 1.1, 1.0), pale)
+		_box(frame, "strap", at + Vector3(0, 0.42, 0), Vector3(0.3, 0.45, 0.26), steel)
 	# every transfer deck stands on paired piers that reach the court floor, inset under the slab.
 	# the live entry is the r19/r20 level (every deck at 4 m); the newer module adds DECK_HEIGHTS.
 	var heights: Variant = []
