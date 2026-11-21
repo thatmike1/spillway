@@ -1,7 +1,8 @@
 extends RefCounted
 ## the flood barrier curves back into the tower; its buttresses root every span below water.
 const ART := preload("res://scripts/art/sluice_six_art.gd")
-static func dress(level: Node3D) -> void:
+## flat and crest: tidal-flat and barrier-crest tones; outer reach keeps its original pale ones.
+static func dress(level: Node3D, flat: Color = Color("a3a18a"), crest: Color = Color("c3c0ac"), fall: Color = Color("bad5ce"), foam: Color = Color("c7ddd3")) -> void:
 	var centre := Vector3(-8,0,-92)
 	var count := 18
 	for i: int in count:
@@ -16,10 +17,10 @@ static func dress(level: Node3D) -> void:
 		ART._box(wall,"foundation",Vector3(0,-5,0),Vector3(5.4,8,9),Color("596e70"),true)
 		ART._box(wall,"pier",Vector3(-2.4,1,0),Vector3(0.7,10,6),Color("858e86"),true)
 		ART._box(wall,"gate",Vector3(0,0,-1.4),Vector3(4.5,5,0.5),Color("57777b"),true)
-		ART._box(wall,"crest",Vector3(0,5,0),Vector3(5.4,0.8,6),Color("c3c0ac"),true)
+		ART._box(wall,"crest",Vector3(0,5,0),Vector3(5.4,0.8,6),crest,true)
 		ART._box(wall,"lower_apron",Vector3(0,-2.6,4),Vector3(5.4,0.5,10),Color("839c97"),true)
-		ART._box(wall,"fall",Vector3(0,-0.5,1.8),Vector3(4.5,4,0.12),Color("bad5ce"))
-		ART._box(wall,"foam",Vector3(0,-2.87,7),Vector3(4.5,0.02,4),Color("c7ddd3"))
+		ART._box(wall,"fall",Vector3(0,-0.5,1.8),Vector3(4.5,4,0.12),fall)
+		ART._box(wall,"foam",Vector3(0,-2.87,7),Vector3(4.5,0.02,4),foam)
 		for x: float in [-2.4,2.4]:
 			ART._box(wall,"rail_post_%s" % x,Vector3(x,6,2.8),Vector3(0.08,1.2,0.08),Color("3e575a"))
 		ART._box(wall,"rail",Vector3(0,6.6,2.8),Vector3(5.4,0.08,0.08),Color("3e575a"))
@@ -40,10 +41,10 @@ static func dress(level: Node3D) -> void:
 		level.add_child(hill)
 
 	# exposed tidal flats and rising banks frame a water channel that opens into the sea.
-	_tidal_flat(level,"west_tidal_flat",Vector3(-120,-3.05,-105),Vector3(75,0.5,105),Color("a3a18a"))
+	_tidal_flat(level,"west_tidal_flat",Vector3(-120,-3.05,-105),Vector3(75,0.5,105),flat)
 	_landform(level,"west_shingle_bank",Vector3(-132,-4,-120),Vector3(66,7,95),Color("777f70"))
 	_landform(level,"west_marsh",Vector3(-140,-2,-130),Vector3(52,8,85),Color("879078"))
-	_tidal_flat(level,"east_tidal_flat",Vector3(105,-3.05,-165),Vector3(78,0.5,135),Color("a3a18a"))
+	_tidal_flat(level,"east_tidal_flat",Vector3(105,-3.05,-165),Vector3(78,0.5,135),flat)
 	_landform(level,"east_shore",Vector3(110,-5,-170),Vector3(78,15,130),Color("7d8978"))
 	_landform(level,"river_bend_west",Vector3(-95,-5,-265),Vector3(60,22,90),Color("70877e"))
 	_landform(level,"river_bend_east",Vector3(110,-5,-300),Vector3(75,30,100),Color("6e8582"))

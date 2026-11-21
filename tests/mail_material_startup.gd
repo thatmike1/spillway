@@ -39,7 +39,7 @@ func _run() -> void:
 				if valid and map == "mail-roofs":
 					valid = material.shader.code == roof_code and material.get_shader_parameter("roof") == true
 				elif valid:
-					valid = material.get_shader_parameter("top_color") == Color("d6d0bd") and float(material.get_shader_parameter("deck")) == 1.0
+					valid = float(material.get_shader_parameter("deck")) == 1.0 and (not enabled or material.get_shader_parameter("top_color") != null) and (enabled or material.get_shader_parameter("top_color") == Color("d6d0bd"))
 				_check(valid, "%s L=%s owned surface: %s" % [map, enabled, mesh.name])
 		game.request_quit(0)
 		game.free()

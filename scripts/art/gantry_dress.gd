@@ -4,6 +4,7 @@ const GEO := preload("res://scripts/r19_course_geometry.gd")
 const SURFACE := preload("res://assets/maps/gantry/concrete.gdshader")
 const WATER := preload("res://assets/maps/gantry/water.gdshader")
 const SKY := preload("res://shaders/look/sky.gdshader")
+const LOOK := preload("res://scripts/look/maps/gantry.gd")
 
 static func dress(level: Node3D) -> void:
 	var concrete := ShaderMaterial.new()
@@ -70,10 +71,26 @@ static func dress(level: Node3D) -> void:
 		if node is MeshInstance3D and str(node.name).begins_with("Art_paint_orange_receiver"):
 			node.material_override = paint
 
+	_sky_light(level, str(level.variant))
 	var stroke := RopeStroke.new()
 	stroke.name = "GantryRopeStroke"
 	stroke.process_priority = 100
 	level.add_child(stroke)
+
+static func _sky_light(level: Node3D, id: String) -> void:
+	# lane 02 owns these sky and light values; this file only hands over its environment and sun.
+	var sky_light := load("res://scripts/look/sky_light.gd")
+	if sky_light == null or not sky_light.has_map(id):
+		return
+	var env: Environment
+	var sun: DirectionalLight3D
+	for node: Node in level.get_children():
+		if node is WorldEnvironment and env == null:
+			env = (node as WorldEnvironment).environment
+		if node is DirectionalLight3D and sun == null:
+			sun = node
+	if env != null:
+		sky_light.apply(env, sun, id)
 
 static func ink(level: Node3D) -> void:
 	var outline := ShaderMaterial.new()
@@ -93,6 +110,8 @@ static func ink(level: Node3D) -> void:
 		lips.free()
 	level.add_child(contours)
 	level.art_manifest.append(["gantry_materials", "neutral cream tops, separate architectural stone, blue-green sides, structural ink v4"])
+	# presentation-only pass after the identity inputs above are complete.
+	LOOK.dress(level)
 
 static func portal_details(level: Node3D, index: int, at: Vector3) -> void:
 	# wheel trucks ride the continuous quay rails; the crossbeam carries a lifting carriage.

@@ -117,7 +117,7 @@ func run() -> void:
 	var partial_index := -1
 	for i: int in screen.entries.size():
 		var label := screen.attempts.get_item_text(i)
-		check(label.contains("2026-") and label.contains("Z"), "recorded date/time is visible in attempt row")
+		check(RegEx.create_from_string("\\d{1,2} [A-Z][a-z]{2} \\d{2}:\\d{2}").search(label) != null, "recorded date/time is visible in attempt row")
 		var width := screen.attempts.get_theme_font("font").get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
 		check(width <= screen.attempts.size.x - 20, "timestamp row fits on one line")
 		if screen.entries[i].name == "zzz-partial.r16run.part":
