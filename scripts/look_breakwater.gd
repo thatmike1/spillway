@@ -100,7 +100,7 @@ func _material(key: String) -> Material:
 	mat.shader = SURFACE
 	mat.set_shader_parameter("wear", load("res://assets/look/painted-wear.png"))
 	var side := Color("6b8a8e")
-	var top := Color("e2d6cc")
+	var top := Color("e0dad2")
 	var is_deck := key in ["Mesh_pavers", "Mesh_asphalt", "Mesh_steel_ramp"]
 	if key.begins_with("Containers_"):
 		side = [Color("527b87"), Color("63868b"), Color("759395"), Color("7c9494"), Color("59898b"), Color("8ba09e")][int(key.trim_prefix("Containers_")) % 6]
