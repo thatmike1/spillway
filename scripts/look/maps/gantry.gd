@@ -4,7 +4,7 @@ extends RefCounted
 ## recording identity stay exact. new pieces are plain meshes with no collision, outside the
 ## swing corridor (|x| <= 6.5) and above every deck.
 
-const SHELL := Color("cfc7b6")
+const SHELL := Color("cdc8bf")
 const SIDE := Color("62787c")
 const WEAR := Color("9a9c8c")
 const CARRIAGE := Color("e0d6bf")
@@ -56,7 +56,7 @@ static func _surfaces(level: Node3D) -> void:
 		material.set_shader_parameter("wear_amount", 0.45)
 		material.set_shader_parameter("weather", 1.0)
 		# lane 02's lower exposure left the tops grey-green, under lane 01's deck value; lift them only.
-		material.set_shader_parameter("top_gain", 1.05)
+		material.set_shader_parameter("top_gain", 1.03)
 	# the cross-bearings seen between hop planks read as lit steel, not black stripes.
 	var bearing := level.get_node_or_null("Mesh_gantry_bearing_bearing_0_-1") as MeshInstance3D
 	if bearing != null and bearing.material_override is StandardMaterial3D:
@@ -69,10 +69,11 @@ static func _caisson(level: Node3D) -> void:
 	if skin == null or not skin.material_override is ShaderMaterial:
 		return
 	var plate := skin.material_override as ShaderMaterial
-	plate.set_shader_parameter("side_color", Color("819798"))
+	plate.set_shader_parameter("side_color", Color("a9b6b5"))
 	plate.set_shader_parameter("weather", 1.0)
-	# the same weathering family as the aprons: pale edge wear on the plate joints and runoff down the face.
-	plate.set_shader_parameter("wear_color", WEAR)
+	# a lighter plate (this shader renders mid tones far darker than their albedo) with darker runoff and
+	# joint wear, so the gate carries the same weathering as the aprons instead of one flat dark tone.
+	plate.set_shader_parameter("wear_color", Color("5f6c6b"))
 	plate.set_shader_parameter("wear_amount", 0.85)
 	# frame, ends, ribs and stiffeners take the plate's own material, so the grid reads only by its edges.
 	for node: Node in level.get_children():
