@@ -57,6 +57,57 @@ static func apply(level: Node3D) -> void:
 			node.material_override.next_pass = ink
 	level.add_child(preload("res://scripts/r17_contours.gd").new().build(level,true))
 	level.add_child(preload("res://scripts/art/viaduct_cable.gd").new())
+	_deck_wear(level)
+	_takeoff_bands(level)
+
+static func _deck_wear(level: Node3D) -> void:
+	# the pier tops were one blank cream sheet; an overlay adds the crane dock's wear family (sparse crisp
+	# stains, faint mottling) without touching the pinned deck material underneath.
+	var shader := Shader.new()
+	shader.code = """shader_type spatial;
+render_mode blend_mul,unshaded,depth_draw_never,shadows_disabled;
+uniform sampler2D wear : repeat_enable,filter_linear_mipmap;
+varying vec3 wp;
+varying vec3 wn;
+void vertex(){wp=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; wn=normalize(MODEL_NORMAL_MATRIX*NORMAL);}
+void fragment(){
+ float top=smoothstep(0.65,0.92,wn.y);
+ float fade=1.0-smoothstep(25.0,95.0,distance(wp,CAMERA_POSITION_WORLD));
+ float spot=smoothstep(0.70,0.73,texture(wear,wp.xz/vec2(2.7,3.4)).r);
+ float field=smoothstep(0.44,0.58,texture(wear,wp.xz/vec2(9.1,6.7)+vec2(0.37,0.61)).g);
+ float mottle=smoothstep(0.30,0.80,texture(wear,wp.xz/13.0).r);
+ float dark=top*fade*(0.075*spot*field+0.045*mottle);
+ ALBEDO=vec3(1.0-dark,1.0-dark*0.97,1.0-dark*0.88);
+}
+"""
+	var overlay := ShaderMaterial.new()
+	overlay.shader = shader
+	overlay.set_shader_parameter("wear", preload("res://assets/look/painted-wear.png"))
+	for node: Node in level.get_children():
+		var id := str(node.name)
+		if node is MeshInstance3D and id.begins_with("Mesh_deck") and not id.contains("maintenance_court"):
+			(node as MeshInstance3D).material_overlay = overlay
+
+static func _takeoff_bands(level: Node3D) -> void:
+	# the takeoff lip was a hairline at spawn distance; a receiver-deep band behind it reads as the edge.
+	var paint := StandardMaterial3D.new()
+	paint.albedo_color = Color("cf7746")
+	paint.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	for node: Node in level.get_children():
+		var id := str(node.name)
+		if not (node is MeshInstance3D and (id.begins_with("Art_paint_orange_lip_") or id == "Art_paint_upper_lip")):
+			continue
+		var lip := node as MeshInstance3D
+		lip.material_override = paint
+		var band := MeshInstance3D.new()
+		band.name = "Look_takeoff_band_" + id.trim_prefix("Art_paint_")
+		var mesh := BoxMesh.new()
+		mesh.size = Vector3((lip.mesh as BoxMesh).size.x, 0.014, 0.6)
+		band.mesh = mesh
+		band.position = Vector3(lip.position.x, lip.position.y - 0.012, lip.position.z - 0.11 + 0.3)
+		band.material_override = paint
+		band.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		level.add_child(band)
 
 static func _sky_light(level: Node3D, id: String) -> void:
 	# lane 02 owns these sky and light values; this file only hands over its environment and sun.
