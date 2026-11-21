@@ -64,8 +64,8 @@ void fragment() {
    cap = mix(cap, cap * vec3(0.90, 0.91, 0.90), stain * 0.7);
   }
  }
- // look c sits under lane 02's brighter noon light, so its tops are held lower to stay off white.
- cap *= look_c ? 0.72 : 0.80;
+ // look c's lighter tops already sit near white under lane 02's noon light; both share this scale.
+ cap *= 0.80;
  ALBEDO = mix(side, cap, face);
  // ink is part of the face material, not a second crest mesh or a collision lip.
  if (surf) {
