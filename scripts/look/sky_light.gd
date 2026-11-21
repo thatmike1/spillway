@@ -112,7 +112,7 @@ const MAPS := {
 		"sun":"fff0e2", "sun_energy":0.56, "pitch":-40.0, "yaw":-110.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.56, "fog":"d7e4e2", "fog_density":0.0012, "exposure":0.78},
 	# valley dam in the afternoon: side sun along the deck line.
 	"viaduct": {"sky":ROOT+"overflow-sky.png", "paint":"afternoon", "layout":"towers", "wisp":"none", "cloud_turn":28.0, "cell_shift":4,
-		"sun":"fff0e2", "sun_energy":0.56, "pitch":-36.0, "yaw":-110.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.55, "fog":"c3d8d6", "fog_density":0.0013, "exposure":0.78},
+		"sun":"fff0e2", "sun_energy":0.56, "pitch":-36.0, "yaw":-110.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.55, "fog":"bccfdb", "fog_density":0.0013, "exposure":0.72},
 	# drydock gantries, mid afternoon.
 	"gantry": {"sky":"res://assets/look/cloud-sky.png", "paint":"afternoon", "layout":"fair", "wisp":"none", "cloud_turn":-20.0, "cell_shift":0,
 		"sun":"fff0e2", "sun_energy":0.56, "pitch":-34.0, "yaw":-110.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.55, "fog":"c3d8d6", "fog_density":0.0013, "exposure":0.78},
