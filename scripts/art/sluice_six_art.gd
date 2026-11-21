@@ -134,7 +134,7 @@ static func dress(level: Node3D) -> void:
 	inspection.modulate = Color("364e54")
 	inspection.position = Vector3(4.675,3.82,-37.23)
 	level.add_child(inspection)
-	load("res://scripts/art/sluice_six_estuary.gd").dress(level,Color("8b9580"),Color("a9aa99"))
+	load("res://scripts/art/sluice_six_estuary.gd").dress(level,Color("75806c"),Color("a9aa99"))
 	# the established contour builder inks actual visible boundaries and paints only jump lips.
 	var contours := CONTOURS.new()
 	level.add_child(contours.build(level,false))
