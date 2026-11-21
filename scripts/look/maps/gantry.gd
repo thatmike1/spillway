@@ -4,7 +4,7 @@ extends RefCounted
 ## recording identity stay exact. new pieces are plain meshes with no collision, outside the
 ## swing corridor (|x| <= 6.5) and above every deck.
 
-const SHELL := Color("cbc7bc")
+const SHELL := Color("cfc7b6")
 const SIDE := Color("62787c")
 const WEAR := Color("9a9c8c")
 const CARRIAGE := Color("e0d6bf")
@@ -69,7 +69,7 @@ static func _caisson(level: Node3D) -> void:
 	if skin == null or not skin.material_override is ShaderMaterial:
 		return
 	var plate := skin.material_override as ShaderMaterial
-	plate.set_shader_parameter("side_color", Color("72878a"))
+	plate.set_shader_parameter("side_color", Color("819798"))
 	plate.set_shader_parameter("weather", 1.0)
 	# the same weathering family as the aprons: pale edge wear on the plate joints and runoff down the face.
 	plate.set_shader_parameter("wear_color", WEAR)
