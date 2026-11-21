@@ -29,20 +29,21 @@ func material(key: String, node: GeometryInstance3D, proposed: Material) -> Mate
 		sea.set_shader_parameter("swell_scale", 0.4)
 		sea.set_shader_parameter("ripple_mix", 0.3)
 		return sea
-	# transfer decks share the rope courses' cast concrete: runoff wear, no joint grid, so the only lines
-	# on a landing are its real edges. tops render well below their albedo under this basin's light, so the top is set near white.
+	# transfer decks share the rope courses' cast concrete: casting joints off the deck centre, crisp stains,
+	# runoff on the sides. this basin's light leaves tops well below lane 01's deck value, so they get a lift.
 	if key.begins_with("Mesh_deck_transfer"):
 		if _concrete == null:
 			_concrete = ShaderMaterial.new()
 			_concrete.shader = preload("res://assets/maps/gantry/concrete.gdshader")
-			_concrete.set_shader_parameter("top_color", Color("faf3e2"))
+			_concrete.set_shader_parameter("top_color", Color("f4f0ea"))
 			_concrete.set_shader_parameter("side_color", Color("6d8388"))
 			_concrete.set_shader_parameter("wear_color", Color("9a9c8c"))
 			_concrete.set_shader_parameter("wear", preload("res://assets/look/painted-wear.png"))
 			_concrete.set_shader_parameter("wear_amount", 0.45)
-			_concrete.set_shader_parameter("deck", 0.0)
+			_concrete.set_shader_parameter("deck", 1.0)
 			_concrete.set_shader_parameter("waterline", -8.0)
 			_concrete.set_shader_parameter("weather", 1.0)
+			_concrete.set_shader_parameter("top_gain", 1.2)
 		return _concrete
 	return proposed
 
