@@ -6,10 +6,10 @@ extends RefCounted
 
 ## tops a touch cooler so full sun no longer clips them; faces a warm weathered sandstone instead
 ## of the khaki that read olive in shade.
-const PALETTE := {"top": "e6dccb", "side": "c99c6c"}
+const PALETTE := {"top": "e6dccb", "side": "b29a7d"}
 const SURFACES := {
-	"ashlar": {"side_color": "c4966a", "top_color": "d8c6a6", "wear_amount": 0.22},
-	"vault": {"side_color": "a8805a", "top_color": "cbb391", "wear_amount": 0.25},
+	"ashlar": {"side_color": "ad9476", "top_color": "d6c8ae", "wear_amount": 0.22},
+	"vault": {"side_color": "94795f", "top_color": "c7b598", "wear_amount": 0.25},
 	"column": {"side_color": "c4b096", "top_color": "ddd1bd", "wear_amount": 0.12},
 	"cliff": {"side_color": "7d6a58", "top_color": "8f8a6a", "wear_amount": 0.3},
 }
