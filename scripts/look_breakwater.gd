@@ -90,7 +90,9 @@ func _material(key: String) -> Material:
 		var flat := StandardMaterial3D.new()
 		flat.albedo_color = Color("d95b30") if key.ends_with("yellow") else (Color("e0daca") if key.ends_with("white") else Color("213e45"))
 		flat.roughness = 1.0
-		if key.ends_with("yellow") or key.ends_with("white"):
+		# lips stay unshaded orange; white paint takes the deck's light and shade, so the start line
+		# reads as paint on the deck in the gate shadow, not a bright bar across the view.
+		if key.ends_with("yellow"):
 			flat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		flat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 		return flat
@@ -217,10 +219,19 @@ func _dressing(level: Node3D) -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	# the gate canopy was drawn without an underside and hung 14 m out from the gatehouse with
-	# nothing under its front: give it a soffit and let its edges bear on posts that stand on
-	# the yard-wall container roofs, out of jump reach.
+	# nothing under its front: give it a frame (edge beams and open slats, so the sky and the
+	# cranes still read through it at spawn) and let its edges bear on posts that stand on the
+	# yard-wall container roofs, out of jump reach.
 	var post_x := half + cw * 0.35
-	_slab(st, Vector3(-post_x - 0.3, 4.98, -6.3), Vector3(post_x + 0.3, 5.36, 8.4))
+	var ex := post_x + 0.3
+	for sx: float in [-1.0, 1.0]:
+		_slab(st, Vector3(minf(sx * ex, sx * (ex - 0.45)), 4.98, -6.3), Vector3(maxf(sx * ex, sx * (ex - 0.45)), 5.36, 8.4))
+	for z: float in [-6.3, 8.0]:
+		_slab(st, Vector3(-ex, 4.98, z), Vector3(ex, 5.36, z + 0.4))
+	var slat := -5.9 + 1.2
+	while slat < 7.9:
+		_slab(st, Vector3(-ex + 0.45, 5.08, slat - 0.11), Vector3(ex - 0.45, 5.36, slat + 0.11))
+		slat += 1.2
 	for sx: float in [-1.0, 1.0]:
 		for z: float in [-5.9, 1.2]:
 			var lo := Vector3(sx * post_x - 0.17, wall_top, z - 0.17)
@@ -237,9 +248,9 @@ func _dressing(level: Node3D) -> void:
 	var soffit := ShaderMaterial.new()
 	soffit.shader = SURFACE
 	soffit.set_shader_parameter("wear", load("res://assets/look/painted-wear.png"))
-	soffit.set_shader_parameter("top_color", Color("8fa3a2"))
-	soffit.set_shader_parameter("side_color", Color("5f7e84"))
-	soffit.set_shader_parameter("wear_amount", 0.12)
+	soffit.set_shader_parameter("top_color", Color("c3cecb"))
+	soffit.set_shader_parameter("side_color", Color("8ea3a3"))
+	soffit.set_shader_parameter("wear_amount", 0.06)
 	steel.material_override = soffit
 	add_child(steel)
 	# the breach hazard band read as a dashed route marking: under look c it is covered by deck,
