@@ -18,6 +18,8 @@ const SURFACES := {
 	"old": {"top_color": "7b897f", "side_color": "4e6264", "wear_amount": 0.12},
 	"brick": {"top_color": "8f6a5a", "side_color": "8a5f4e", "wear_amount": 0.12},
 	"terrain": {"top_color": "7f977b", "side_color": "6a7f6b", "wear_amount": 0.0},
+	# the pines keep a dark forest green: their upward canopy faces would otherwise take a deck top.
+	"trees": {"top_color": "4f6b55", "side_color": "425d4b", "wear_amount": 0.0, "top_from": 0.95, "top_full": 1.0},
 }
 
 const SEA := preload("res://scripts/art/sluice_six_materials.gd")
