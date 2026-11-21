@@ -76,17 +76,16 @@ def claim_display(claim):
     # concurrent captures each hold a per-number lease for the whole display lifetime, so two
     # of them can never pick the same number between the busy probe and Xvfb startup.
     for n in range(190, 200):
-        stream = engine.lease_path(f".display{n}").open("a")
-        try:
-            fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
-            stream.close()
-            continue
-        if busy(n):
-            stream.close()
-            continue
-        claim.enter_context(stream)
-        return n
+        with ExitStack() as attempt:
+            stream = attempt.enter_context(engine.lease_path(f".display{n}").open("a"))
+            try:
+                fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                continue
+            if busy(n):
+                continue
+            claim.enter_context(attempt.pop_all())
+            return n
     raise RuntimeError("all private displays :190 through :199 are busy")
 
 
@@ -416,10 +415,6 @@ def main():
         options["seconds"] = max(args.seconds, len(options["poses"]) * args.every + 2)
     if args.movie and options["seconds"] > 10:
         parser.error("movie pose sequences must finish within 10 seconds")
-    provenance = subprocess.run(["git", "-C", str(checkout), "rev-parse", "HEAD"],
-                                capture_output=True, text=True, check=True).stdout.strip()
-    dirty = subprocess.run(["git", "-C", str(checkout), "status", "--porcelain"],
-                           capture_output=True, text=True, check=True).stdout.splitlines()
     engine.check_pin()
     signal.signal(signal.SIGTERM, lambda *_: sys_exit())
     output.mkdir(parents=True, exist_ok=False)
@@ -427,6 +422,11 @@ def main():
     # stay exclusive. the lease comes before the source snapshot, so a queued capture holds no
     # scratch on /tmp. nested leases below reuse this shared one.
     with engine.locked(shared=True), tempfile.TemporaryDirectory(prefix="spillway-shot-") as temporary:
+        # provenance is read after the queue wait, right before the snapshot it describes.
+        provenance = subprocess.run(["git", "-C", str(checkout), "rev-parse", "HEAD"],
+                                    capture_output=True, text=True, check=True).stdout.strip()
+        dirty = subprocess.run(["git", "-C", str(checkout), "status", "--porcelain"],
+                               capture_output=True, text=True, check=True).stdout.splitlines()
         scratch = Path(temporary)
         source = scratch / "source"
         shutil.copytree(checkout, source, ignore=snapshot_ignore(checkout))

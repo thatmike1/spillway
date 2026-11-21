@@ -95,9 +95,13 @@ func attach(level: Node3D, map_id: String) -> void:
 	var contours := CONTOURS.new()
 	add_child(contours.build(level,map_id != "breakwater"))
 	if override != null and override.has_method("dress"):
-		dressing = override.call("dress",level)
-		if dressing != null:
-			_strip_collision(dressing, override_path)
+		var proposed: Node = override.call("dress",level)
+		if proposed != null and (not proposed is Node3D or _collides(proposed)):
+			# dressing is look-only: anything that could collide rejects the whole dressing before it enters the tree.
+			push_error("r17: look dressing rejected, it may collide or is not a Node3D: "+override_path)
+			proposed.free()
+		elif proposed != null:
+			dressing = proposed
 			dressing.name = "MapDressing"
 			add_child(dressing)
 	report = {"map":map_id,"swaps":swaps.size(),"ink_segments":contours.line_count+(base.line_count if base != null else 0),"jump_lips":contours.lip_count,"sky":palette.sky,"sky_light":sky_id,"override":override != null,"presentation_only":true}
@@ -140,7 +144,10 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 					clone.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
 					clone.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 					copy = clone
-				swaps.append({"node":mesh,"surface":i,"old":prior,"new":copy})
+				if override != null and override.has_method("material"):
+					copy = override.call("material",key,mesh,copy)
+				if copy != null:
+					swaps.append({"node":mesh,"surface":i,"old":prior,"new":copy})
 		return null
 	if old is BaseMaterial3D and old.emission_enabled:
 		if key.begins_with("Mesh_neon"):
@@ -178,7 +185,10 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 			interior.set_shader_parameter("base_color",Color(palette.side).lightened(value))
 			_materials[kind] = interior
 		return _materials[kind]
-	var material_key := kind
+	var surfaces: Dictionary = override.get_script().get_script_constant_map().get("SURFACES", {}) if override != null else {}
+	# a full node-name override gets its own cache entry, so Mesh_x and Art_x never share it by accident.
+	var surface_key := key if surfaces.has(key) else (kind if surfaces.has(kind) else "")
+	var material_key := key if surface_key == key else kind
 	if _materials.has(material_key):
 		return _materials[material_key]
 	var top := Color(palette.top)
@@ -202,13 +212,10 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 	material.set_shader_parameter("side_color",side)
 	material.set_shader_parameter("wear_amount",0.08)
 	material.set_shader_parameter("deck",0.35 if deck else 0.0)
-	var surfaces: Dictionary = override.get_script().get_script_constant_map().get("SURFACES", {}) if override != null else {}
-	for name_key: String in [kind, key]:
-		if surfaces.has(name_key):
-			for parameter: String in surfaces[name_key]:
-				var value: Variant = surfaces[name_key][parameter]
-				material.set_shader_parameter(parameter, Color(value) if value is String else value)
-			break
+	if not surface_key.is_empty():
+		for parameter: String in surfaces[surface_key]:
+			var value: Variant = surfaces[surface_key][parameter]
+			material.set_shader_parameter(parameter, Color(value) if value is String else value)
 	_materials[material_key] = material
 	return material
 
@@ -284,7 +291,16 @@ func _load_sky_light(palette_id: String, real_id: String) -> void:
 
 func _paint_environment() -> void:
 	if not sky_id.is_empty():
-		painted_environment = _sky_light.call("environment", old_environment, sky_id)
+		# breakwater already built a Sky; repainting it avoids freeing an undrawn one (a radiance leak at exit).
+		var reuse: Sky = base.painted_environment.sky if base != null and base.painted_environment != null else null
+		var takes_reuse := false
+		for method: Dictionary in _sky_light.get_script_method_list():
+			if method.name == "environment" and (method.args as Array).size() >= 3:
+				takes_reuse = true
+		if takes_reuse:
+			painted_environment = _sky_light.call("environment", old_environment, sky_id, reuse)
+		else:
+			painted_environment = _sky_light.call("environment", old_environment, sky_id)
 		return
 	painted_environment = old_environment.duplicate()
 	var sky := Sky.new()
@@ -306,12 +322,13 @@ func _paint_environment() -> void:
 	painted_environment.fog_density = 0.0012
 	painted_environment.fog_sky_affect = 0.0
 
-func _strip_collision(root: Node, source: String) -> void:
-	# map dressing is look-only: anything that could collide is removed and reported.
-	assert(not root is CollisionObject3D, "r17: look dressing root may not collide: "+source)
-	for node: Node in root.find_children("*","CollisionObject3D",true,false):
-		push_error("r17: look dressing may not collide, removed %s from %s" % [node.name, source])
-		node.get_parent().remove_child(node)
-		node.free()
-	for node: Node in root.find_children("*","CSGShape3D",true,false):
-		(node as CSGShape3D).use_collision = false
+func _collides(root: Node) -> bool:
+	# release-safe: assertions vanish in exported builds, so this is an ordinary branch.
+	var nodes: Array[Node] = [root]
+	nodes.append_array(root.find_children("*","",true,false))
+	for node: Node in nodes:
+		if node is CollisionObject3D or node is CollisionShape3D or node is CollisionPolygon3D or node is GridMap:
+			return true
+		if node is CSGShape3D and (node as CSGShape3D).use_collision:
+			return true
+	return false

@@ -26,15 +26,19 @@ extends RefCounted
 const PALETTE := {"top": "ece3d3", "side": "4d6f7d"}
 ## per mesh kind (node name without Mesh_/Art_, or the full node name): surface shader parameters.
 ## strings become colours. see "Surface" below for the parameter names.
+## a full node name (Art_concrete) wins over the kind and gets its own material.
 const SURFACES := {"concrete": {"side_color": "3f5f6b", "wear_amount": 0.3}}
 
 ## called for every mesh the layer visits, with the material it would use (or null to leave it).
-## return that, your own material, or null to keep the original.
+## return that, your own material, or null to keep the original. imported models are asked once per
+## surface with that surface's proposal, then once for the node with null: to restyle a model, answer
+## the per-surface calls and return null for the node call. a returned ShaderMaterial needs its shader.
 func material(key: String, node: GeometryInstance3D, proposed: Material) -> Material:
 	return proposed
 
 ## look-only dressing. it is parented under the look layer, so it shows only with L on.
-## anything that could collide (CollisionObject3D) is removed with an error.
+## a dressing that contains anything able to collide (physics bodies, areas, collision shapes,
+## GridMap, CSG with use_collision) is rejected whole, with an error, in every build.
 func dress(level: Node3D) -> Node3D:
 	return null
 
