@@ -5,6 +5,7 @@ const CONCRETE := preload("res://scripts/art/plan_concrete.gdshader")
 const SKY := preload("res://shaders/look/sky.gdshader")
 const WATER := preload("res://scripts/art/plan_water.gdshader")
 const CONTOURS := preload("res://scripts/r17_contours.gd")
+const SKY_LIGHT := preload("res://scripts/look/sky_light.gd")
 func metal_material(detail := false) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
 	material.shader = STEEL
@@ -27,6 +28,8 @@ func style(root: Node3D) -> void:
 		elif (id.begins_with("gantry_") and id != "gantry_finish_board") or id.begins_with("travelling_") or id.begins_with("hanger") or id.begins_with("rail_joint") or id.begins_with("sign_hanger"):
 			mesh.material_override = joint if id.begins_with("hanger") or id.begins_with("rail_joint") else steel
 func attach(level: Node3D) -> void:
+	var shown: Environment
+	var sun: DirectionalLight3D
 	for node: Node in level.get_children():
 		if node is WorldEnvironment:
 			var sky := Sky.new()
@@ -43,17 +46,22 @@ func attach(level: Node3D) -> void:
 			env.ambient_light_sky_contribution = 0.0
 			env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 			env.tonemap_exposure = 1.0
+			shown = env
 		if node is DirectionalLight3D:
 			node.rotation_degrees = Vector3(-36,-30,0)
 			node.light_color = Color("fff0dd")
 			node.light_energy = 0.42
 			node.shadow_enabled = true
 			node.directional_shadow_max_distance = 100
+			sun = node as DirectionalLight3D
 		if node is MeshInstance3D and str(node.name) == "sea":
 			var material := ShaderMaterial.new()
 			material.shader = WATER
 			material.set_shader_parameter("wear",preload("res://assets/look/painted-wear.png"))
 			node.material_override = material
+	# lane 02's sky and light table owns the hour; it repaints the sky this map already shows.
+	if shown != null and SKY_LIGHT.has_map("plan-yard"):
+		SKY_LIGHT.apply(shown, sun, "plan-yard")
 	level.add_child(CONTOURS.new().build(level))
 	edges(level)
 	for x: float in [-4,4]:

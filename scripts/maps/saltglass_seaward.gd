@@ -327,6 +327,9 @@ func _fixture_look() -> void:
 		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		material.cull_mode = BaseMaterial3D.CULL_DISABLED
 		lip.material_override = material
+	# lane 02's sky table paints this map's sky when it has an entry; the old swap is the fallback.
+	if load("res://scripts/look/sky_light.gd").has_map(MAP_ID):
+		return
 	for look: Node in find_children("R17Look", "Node3D", true, false):
 		var environment: Environment = look.get("painted_environment")
 		if environment != null and environment.sky != null:

@@ -232,7 +232,9 @@ func _draw() -> void:
 	draw_string(label,Vector2(76,340),"Clear plan",HORIZONTAL_ALIGNMENT_LEFT,-1,18,INK)
 	draw_line(Vector2(30,356),Vector2(398,356),RULE,1.0)
 	draw_string(body,Vector2(30,378),"Click a socket or press 1–9 to toggle it.",HORIZONTAL_ALIGNMENT_LEFT,-1,15,INK)
-	draw_string(body,Vector2(30,402),"Budget full: remove a piece first.",HORIZONTAL_ALIGNMENT_LEFT,-1,15,INK)
+	# the rule steps aside while the same warning is live at the foot of the sheet.
+	if notice.is_empty():
+		draw_string(body,Vector2(30,402),"Budget full: remove a piece first.",HORIZONTAL_ALIGNMENT_LEFT,-1,15,INK)
 	draw_string(body,Vector2(30,426),"Every piece costs one; one block, one pad.",HORIZONTAL_ALIGNMENT_LEFT,-1,15,INK)
 	draw_string(body,Vector2(30,450),"Shift+B / Shift+P turn those options off.",HORIZONTAL_ALIGNMENT_LEFT,-1,15,INK)
 	draw_string(body,Vector2(30,474),"Launch pad: 300+ u/s toward the far quay.",HORIZONTAL_ALIGNMENT_LEFT,-1,15,INK)

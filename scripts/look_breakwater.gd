@@ -86,12 +86,22 @@ func attach(level: Node3D) -> void:
 	set_meta("line_count", line_count)
 
 func _material(key: String) -> Material:
+	if key.begins_with("Mesh_paint") and key.ends_with("white"):
+		# white paint is the deck's own surface a step lighter, worn like the deck, so the start line
+		# reads as paint in light and shade instead of a flat bar across the view.
+		var paint := ShaderMaterial.new()
+		paint.shader = SURFACE
+		paint.set_shader_parameter("wear", load("res://assets/look/painted-wear.png"))
+		paint.set_shader_parameter("top_color", Color("efe9e2"))
+		paint.set_shader_parameter("side_color", Color("efe9e2"))
+		paint.set_shader_parameter("wear_amount", 0.45)
+		paint.set_shader_parameter("deck", 0.0)
+		return paint
 	if key.begins_with("Mesh_paint"):
 		var flat := StandardMaterial3D.new()
 		flat.albedo_color = Color("d95b30") if key.ends_with("yellow") else (Color("e0daca") if key.ends_with("white") else Color("213e45"))
 		flat.roughness = 1.0
-		# lips stay unshaded orange; white paint takes the deck's light and shade, so the start line
-		# reads as paint on the deck in the gate shadow, not a bright bar across the view.
+		# lips stay unshaded orange.
 		if key.ends_with("yellow"):
 			flat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		flat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
@@ -100,7 +110,8 @@ func _material(key: String) -> Material:
 	mat.shader = SURFACE
 	mat.set_shader_parameter("wear", load("res://assets/look/painted-wear.png"))
 	var side := Color("6b8a8e")
-	var top := Color("e2d6cc")
+	# lane 01's shell white e0dad2, nudged off the green the harbour fill puts on it.
+	var top := Color("e4d9d1")
 	var is_deck := key in ["Mesh_pavers", "Mesh_asphalt", "Mesh_steel_ramp"]
 	if key.begins_with("Containers_"):
 		side = [Color("527b87"), Color("63868b"), Color("759395"), Color("7c9494"), Color("59898b"), Color("8ba09e")][int(key.trim_prefix("Containers_")) % 6]
