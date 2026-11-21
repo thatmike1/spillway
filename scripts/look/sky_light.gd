@@ -80,12 +80,12 @@ const MAPS := {
 	# bright late morning by the sea: high warm sun, white towers, clear blue-grey shade.
 	"sunken-court": {"sky":ROOT+"sunken-sky.png", "paint":"cyan", "layout":"towers", "wisp":"none", "cloud_turn":0.0, "cell_shift":6,
 		"sun":"fff2da", "sun_energy":0.48, "pitch":-52.0, "yaw":35.0, "fill":"a6b8d8", "fill_energy":0.12, "ambient":0.5, "fog":"bccfdf", "fog_density":0.0011, "exposure":0.77},
-	# after rain: slate banks, a thin bright break over the sea, soft sun, high cool ambient.
+	# after rain: slate banks, a thin bright break over the sea, a weak sun so shadows stay soft, high cool ambient.
 	"rainline": {"sky":ROOT+"rainline-sky.png", "paint":"slate", "layout":"banks", "wisp":"none", "cloud_turn":0.0, "cell_shift":2, "panorama_mix":0.55,
-		"sun":"dde3e8", "sun_energy":0.4, "pitch":-48.0, "yaw":-25.0, "fill":"a2b6c8", "fill_energy":0.16, "ambient":0.56, "fog":"9aacb5", "fog_density":0.001, "exposure":0.82},
-	# moonlit night: a cool moon high to the side, a lavender sky with stars, pale decks still brightest.
+		"sun":"dde3e8", "sun_energy":0.2, "pitch":-48.0, "yaw":-25.0, "fill":"a6b4c2", "fill_energy":0.16, "ambient":0.66, "fog":"9aacb5", "fog_density":0.001, "exposure":0.76},
+	# moonlit night: a grey-cool moon high to the side, a lavender sky with stars; decks stay brightest without reading as snow.
 	"night-shift": {"sky":ROOT+"night-sky.png", "paint":"night", "layout":"sparse", "wisp":"none", "cloud_turn":20.0, "cell_shift":5,
-		"sun":"bccaf0", "sun_energy":0.44, "pitch":-42.0, "yaw":40.0, "fill":"7f90bc", "fill_energy":0.14, "ambient":0.62, "fog":"3a4770", "fog_density":0.0014, "exposure":0.95},
+		"sun":"c4cbe0", "sun_energy":0.36, "pitch":-42.0, "yaw":40.0, "fill":"7c86a0", "fill_energy":0.12, "ambient":0.5, "fog":"3a4770", "fog_density":0.0014, "exposure":0.85},
 	# clear mid-morning over the yard: fair-weather cumulus all round.
 	"practice": {"sky":ROOT+"practice-sky.png", "paint":"noon", "layout":"fair", "wisp":"none", "cloud_turn":35.0, "cell_shift":1,
 		"sun":"fff0e2", "sun_energy":0.56, "pitch":-38.0, "yaw":-110.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.55, "fog":"bed4e0", "fog_density":0.0013, "exposure":0.78},
@@ -94,7 +94,7 @@ const MAPS := {
 		"sun":"ffdcb0", "sun_energy":0.58, "pitch":-24.0, "yaw":-120.0, "fill":"98b8d0", "fill_energy":0.14, "ambient":0.55, "fog":"bccfdb", "fog_density":0.0013, "exposure":0.78},
 	# the lab: high pearl skylight, soft and even.
 	"experiment": {"sky":ROOT+"lab-sky.png", "paint":"pearl", "layout":"sparse", "wisp":"none", "cloud_turn":60.0, "cell_shift":0,
-		"sun":"fff0d9", "sun_energy":0.6, "pitch":-62.0, "yaw":25.0, "fill":"b2c4d8", "fill_energy":0.12, "ambient":0.58, "fog":"dfe5e5", "fog_density":0.0012, "exposure":0.78},
+		"sun":"fff0d9", "sun_energy":0.34, "pitch":-62.0, "yaw":25.0, "fill":"a8b8cc", "fill_energy":0.1, "ambient":0.34, "fog":"dfe5e5", "fog_density":0.0012, "exposure":0.56},
 	# salt pans at noon: bleached pearl haze, the sea glare carries the scene.
 	"saltglass-seaward": {"sky":ROOT+"practice-sky.png", "paint":"pearl", "layout":"fair", "wisp":"none", "cloud_turn":30.0, "cell_shift":3,
 		"sun":"fff0e2", "sun_energy":0.56, "pitch":-40.0, "yaw":-110.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.56, "fog":"dfe5e5", "fog_density":0.0012, "exposure":0.78},
@@ -130,7 +130,7 @@ const MAPS := {
 		"sun":"ffd4a8", "sun_energy":0.56, "pitch":-26.0, "yaw":-110.0, "fill":"98b8cc", "fill_energy":0.12, "ambient":0.56, "fog":"d8d3cf", "fog_density":0.0011, "exposure":0.78},
 	# planning yard: a clear even noon so the plan reads; few clouds.
 	"plan-yard": {"sky":"res://assets/look/cloud-sky.png", "paint":"afternoon", "layout":"sparse", "wisp":"none", "cloud_turn":0.0, "cell_shift":1,
-		"sun":"fff0e2", "sun_energy":0.54, "pitch":-40.0, "yaw":-30.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.58, "fog":"c3d8d6", "fog_density":0.0012, "exposure":0.78},
+		"sun":"fff0e2", "sun_energy":0.42, "pitch":-40.0, "yaw":-30.0, "fill":"a0bcd2", "fill_energy":0.1, "ambient":0.46, "fog":"bccfdb", "fog_density":0.0012, "exposure":0.64},
 }
 
 static func has_map(id: String) -> bool:
