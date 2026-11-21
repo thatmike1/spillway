@@ -123,6 +123,19 @@ func dress(level: Node3D) -> Node3D:
 		_stencil(root, "%02d" % (i + 1), at + Vector3(-2.25 * face, -0.35, 0.115 * face), PI if face < 0 else 0.0, 0.0085, PALE)
 	# post 02 faces away from spawn; its back carries only its number.
 	_stencil(root, "02", Vector3(-12, 4.2, -50.085), 0.0, 0.014, PALE)
+	# house 02 posts from its far side: a painted envelope on the side facing the quay tells the
+	# runner the post goes in round the back, without any instruction lettering.
+	_box(root, "envelope_rim_02", Vector3(-8.992, 4.25, -51.1), Vector3(0.02, 0.92, 1.32), _flat("mouth", INK, true))
+	_box(root, "envelope_plate_02", Vector3(-8.982, 4.25, -51.1), Vector3(0.02, 0.8, 1.2), _flat("panel", Color("e2dac6"), true))
+	for side: float in [-1.0, 1.0]:
+		var flap := MeshInstance3D.new()
+		var line := BoxMesh.new()
+		line.size = Vector3(0.01, 0.05, 0.74)
+		flap.mesh = line
+		flap.position = Vector3(-8.974, 4.45, -51.1 + side * 0.3)
+		flap.rotation.x = deg_to_rad(33.7) * -side
+		flap.material_override = _flat("mouth", INK, true)
+		root.add_child(flap)
 	_stencil(root, "DISPATCH", Vector3(0, 17.0, -122.47), 0.0, 0.013, PALE)
 	_box(root, "arch_cornice", Vector3(0, 18.62, -125), Vector3(19.4, 0.24, 5.4), _surface("cornice", PALE, STONE, 0.12, 0.0))
 	_packet(root)

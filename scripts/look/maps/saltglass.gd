@@ -44,9 +44,10 @@ func dress(level: Node3D) -> Node3D:
 	# the store reads as a building: a loading door on its quay face and a pale cornice on its roof
 	# edge. the store solid occupies x 215..220, z 40..54, y 5.3..11.3; nothing here collides.
 	var root := Node3D.new()
-	_box(root, Vector3(214.96, 6.95, 44.0), Vector3(0.04, 3.3, 3.0), Color("1c2c33"))
-	# a canopy over the door throws a shadow line, so the opening reads as set into the wall.
-	_box(root, Vector3(214.55, 8.75, 44.0), Vector3(0.9, 0.16, 3.6), Color("e3dccb"))
+	# the door stays a few steps darker than the wall, so it belongs to the building and does not
+	# outweigh the orange edge that leads round the store; a wall-toned canopy gives it depth.
+	_box(root, Vector3(214.96, 6.95, 44.0), Vector3(0.04, 3.3, 3.0), Color("314f5a"))
+	_box(root, Vector3(214.55, 8.75, 44.0), Vector3(0.9, 0.16, 3.6), Color("7d969e"))
 	_box(root, Vector3(217.5, 11.42, 47.0), Vector3(5.3, 0.24, 14.3), Color("e3dccb"))
 	return root
 
