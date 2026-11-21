@@ -74,6 +74,7 @@ func attach(main: Node) -> void:
 	pause_panel.add_child(map_preview)
 	_restyle_header()
 	_plain_rope_names()
+	_section_runs()
 	_attach_motion_settings()
 	_restyle_settings()
 	_settle_look_line()
@@ -290,28 +291,79 @@ func _restyle_settings() -> void:
 			details.mouse_filter = Control.MOUSE_FILTER_PASS
 			details.max_lines_visible = 2
 			details.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_plain_notes(page)
 	for node: Node in page.find_children("*", "Label", true, false):
 		var label := node as Label
 		if label.get_theme_font_size("font_size") == 17 and label.text in ["Look and sound", "Movement", "Keys"]:
 			label.add_theme_font_size_override("font_size", UI.TYPE_H2)
 
+## the advanced fold names what it holds, without round numbers.
+func _show_advanced(on: bool) -> void:
+	super(on)
+	if advanced_toggle != null:
+		advanced_toggle.text = "%s  Comparison presets" % ("▾" if on else "▸")
+
+## player-facing wording for notes the older rounds wrote in build history.
+const PLAIN_NOTES := {
+	"F1 vanilla (64 Hz) is not in R15; the delivered R14 build keeps it.": "F1 vanilla (64 Hz) is not in this version.",
+	"Older Breakwater ghosts use the narrower gate and cannot race this revision.": "Breakwater ghosts from older versions cannot race this one."}
+
+func _plain_notes(page: Control) -> void:
+	if page == null:
+		return
+	for node: Node in page.find_children("*", "Label", true, false):
+		var label := node as Label
+		if PLAIN_NOTES.has(label.text):
+			label.text = PLAIN_NOTES[label.text]
+
+func _refresh_share() -> void:
+	super()
+	if share_revision != null and PLAIN_NOTES.has(share_revision.text):
+		share_revision.text = PLAIN_NOTES[share_revision.text]
+
+## the Runs page in three named parts: your recordings, the racing ghost, sharing and export.
+func _section_runs() -> void:
+	var page: Control = pause_pages.get("Runs")
+	if page == null or page.get_node_or_null("RunsHeading_recordings") != null:
+		return
+	for part: Array in [["recordings", "Your recordings", review_button], ["ghost", "Racing ghost", ghost_switch],
+			["share", "Share and export", page.get_node_or_null("GhostSharingToggle")]]:
+		var anchor: Control = part[2]
+		if anchor == null or anchor.get_parent() != page:
+			continue
+		var heading := _heading(page, str(part[1]))
+		heading.name = "RunsHeading_" + str(part[0])
+		heading.add_theme_font_size_override("font_size", UI.TYPE_H2)
+		page.move_child(heading, anchor.get_index())
+
 ## how each rope law feels, in words for the player; the laws themselves are unchanged.
 const ROPE_FEEL := {
-	"classic": "Classic · a springy line that catches you at full length (the original rope).",
-	"pendulum": "Pendulum · a fixed rope that goes taut; no spring, no speed cap.",
-	"elastic": "Elastic · stretchy, with slack and a stronger pull.",
-	"elastic-soft": "Soft catch · stretchy and loose; more room to swing.",
-	"elastic-firm": "Firm line · stretchy but snaps back harder.",
-	"elastic-arc": "Long arc · slower reel; keeps a long swinging line."}
+	"classic": "Classic · springy, catches at full length",
+	"pendulum": "Pendulum · fixed and taut, no spring",
+	"elastic": "Elastic · stretchy, stronger pull",
+	"elastic-soft": "Soft catch · stretchy and loose",
+	"elastic-firm": "Firm line · stretchy, snaps back hard",
+	"elastic-arc": "Long arc · slow reel, long swing"}
+
+## the longer story of each law, kept for the hover tip.
+const ROPE_ABOUT := {
+	"classic": "A springy line that catches you at full length. The original rope.",
+	"pendulum": "A fixed rope that goes taut. No spring and no speed cap.",
+	"elastic": "Stretchy, with slack and a stronger pull.",
+	"elastic-soft": "Stretchy and loose, with more room to swing.",
+	"elastic-firm": "Stretchy, but it snaps back harder.",
+	"elastic-arc": "A slower reel that keeps a long swinging line."}
 
 func _plain_rope_names() -> void:
 	for id: String in tether_models:
 		if ROPE_FEEL.has(id):
-			(tether_models[id] as Button).text = ROPE_FEEL[id]
+			var rope := tether_models[id] as Button
+			rope.text = ROPE_FEEL[id]
+			rope.tooltip_text = ROPE_ABOUT[id]
 
 ## plain names for the sliders; the Source arithmetic stays in the line under them.
 const PLAIN_SETTING_NAMES := {"source_sensitivity": "Mouse sensitivity (Source scale)", "source_fov": "Field of view (4:3 reference, widened to fit)",
-	"r13_sensitivity": "R13 mouse (F3 only)", "r13_fov": "R13 horizontal field of view (F3 only)", "volume": "Volume"}
+	"r13_sensitivity": "Mouse sensitivity for F3", "r13_fov": "Field of view for F3", "volume": "Volume"}
 
 ## the current map's controls as short lines on a quiet panel, without capitals shouting.
 func _plain_map_controls() -> void:
@@ -505,6 +557,7 @@ func _refresh_mail() -> void:
 			var selected := str(game.player.call(group.getter))
 			for value: String in group.buttons:
 				(group.buttons[value] as Button).disabled = selected == value
+	_mark_current_choices()
 
 func _attach_feedback_preferences() -> void:
 	_heading(tether_section, "Swing feedback")
@@ -627,6 +680,38 @@ func _refresh_tether() -> void:
 		(feedback_switches[key] as CheckButton).set_pressed_no_signal(bool(game.settings.get(key, false)))
 	anchor_assist_switch.set_pressed_no_signal(bool(game.settings.get("tether_anchor_assist", true)))
 	anchor_assist_switch.disabled = game.tether_model() in ["classic", "pendulum"]
+	_mark_current_choices()
+
+## a choice that is disabled because it is already the current one reads as chosen (pale-deep
+## with the vermilion lip and ink type), not as greyed out.
+func _mark_current_choices() -> void:
+	if game == null:
+		return
+	var current: Array[Button] = []
+	if reel_manual != null:
+		current.append(reel_automatic if bool(game.settings.get("tether_auto_reel", false)) else reel_manual)
+	if tether_models.has(game.tether_model()):
+		current.append(tether_models[game.tether_model()])
+	for group: Dictionary in mail_groups.values():
+		for button: Button in group.buttons.values():
+			if button.disabled and button.is_visible_in_tree():
+				current.append(button)
+	var buttons: Array = [reel_manual, reel_automatic] + tether_models.values()
+	for group: Dictionary in mail_groups.values():
+		buttons.append_array(group.buttons.values())
+	for button: Variant in buttons:
+		if button == null:
+			continue
+		var choice := button as Button
+		if choice in current:
+			var chosen := UI.flat(UI.PALE_DEEP, UI.RADIUS, Vector4(12, 7, 12, 8))
+			chosen.border_color = UI.VERMILION
+			chosen.border_width_left = UI.EDGE_WIDTH
+			choice.add_theme_stylebox_override("disabled", chosen)
+			choice.add_theme_color_override("font_disabled_color", UI.INK)
+		else:
+			choice.remove_theme_stylebox_override("disabled")
+			choice.remove_theme_color_override("font_disabled_color")
 
 func _process(delta: float) -> void:
 	super(delta)

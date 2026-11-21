@@ -14,6 +14,9 @@ void fragment() {
 	// a soft taper at both ends of the stroke.
 	float tip = 1.0 - smoothstep(0.25, 0.5, abs(UV.x - 0.5));
 	float side = 1.0 - smoothstep(0.15, 0.5, abs(UV.y - 0.5));
+	// nothing in the lower centre third of the screen, where the next landing is read.
+	vec2 screen = FRAGCOORD.xy / VIEWPORT_SIZE;
+	float clear_ = 1.0 - (1.0 - smoothstep(0.18, 0.30, abs(screen.x - 0.5))) * smoothstep(0.48, 0.60, screen.y);
 	ALBEDO = color.rgb;
-	ALPHA = clamp(strength * fade * tip * side, 0.0, 0.85);
+	ALPHA = clamp(strength * fade * tip * side * clear_, 0.0, 0.85);
 }
