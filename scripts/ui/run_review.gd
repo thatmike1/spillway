@@ -32,29 +32,50 @@ var _follow_mode := false
 var _compact := false
 var _readability_ready := false
 var _marked_best := -1
+## the four numbers you want first: attempt, best, the difference and where most time went.
+var summary: HBoxContainer
+var _tiles := {}
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	theme = LOOK.menu_theme()
-	add_theme_stylebox_override("panel", LOOK.flat(LOOK.CREAM, 2, Vector4(24, 18, 24, 18)))
+	var sheet := LOOK.flat(LOOK.PALE, LOOK.RADIUS, Vector4(LOOK.SPACE_XL, LOOK.SPACE_L, LOOK.SPACE_XL, LOOK.SPACE_L))
+	sheet.border_color = LOOK.VERMILION
+	sheet.border_width_bottom = LOOK.EDGE_WIDTH
+	sheet.shadow_color = Color(LOOK.INK, 0.3)
+	sheet.shadow_size = 18
+	add_theme_stylebox_override("panel", sheet)
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var body := VBoxContainer.new()
 	body.add_theme_constant_override("separation", 12)
 	add_child(body)
 	var header := HBoxContainer.new()
 	body.add_child(header)
+	var titles := VBoxContainer.new()
+	titles.add_theme_constant_override("separation", 0)
+	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(titles)
+	var kicker := LOOK.kicker(Label.new())
+	kicker.text = "Runs  ·  local recordings"
+	titles.add_child(kicker)
 	var title := Label.new()
 	title.text = "Review my run"
-	title.add_theme_font_override("font", LOOK.font("title"))
-	title.add_theme_font_size_override("font_size", 30)
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header.add_child(title)
+	LOOK.text(title, "display", LOOK.TYPE_H1)
+	titles.add_child(title)
 	var close := Button.new()
 	close.text = "Back"
 	close.pressed.connect(func() -> void: closed.emit())
 	header.add_child(close)
+	summary = HBoxContainer.new()
+	summary.name = "ReviewSummary"
+	summary.add_theme_constant_override("separation", LOOK.SPACE_S)
+	body.add_child(summary)
+	for id: String in ["attempt", "best", "delta", "loss"]:
+		_tiles[id] = _tile(id)
+	summary.visible = false
 	message = Label.new()
 	message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	LOOK.text(message, "body", LOOK.TYPE_BODY, LOOK.INK_SOFT)
 	body.add_child(message)
 	practice_button = Button.new()
 	practice_button.text = "Practise this segment"
@@ -148,6 +169,75 @@ func _ready() -> void:
 	refresh()
 	close.grab_focus()
 
+const MONTHS := ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+## "2026-11-10 08:38:28.285Z" reads as "10 Nov 08:38"; the list heading says the times are UTC.
+static func plain_dates(text: String) -> String:
+	var pattern := RegEx.create_from_string("(\\d{4})-(\\d{2})-(\\d{2})[ T](\\d{2}):(\\d{2}):\\d{2}(?:\\.\\d+)?Z")
+	var out := text
+	for found: RegExMatch in pattern.search_all(text):
+		var month := clampi(int(found.get_string(2)) - 1, 0, 11)
+		out = out.replace(found.get_string(), "%d %s %s:%s" % [int(found.get_string(3)), MONTHS[month], found.get_string(4), found.get_string(5)])
+	return out
+
+## the attempt line with the map as a name and the date in plain form.
+static func attempt_text(text: String) -> String:
+	var parts := plain_dates(text).split(" / ", true, 1)
+	if parts.size() == 2 and parts[0] != "Best":
+		parts[0] = parts[0].replace("-", " ").capitalize()
+	return " / ".join(parts).replace(" / ", "  ·  ")
+
+func _tile(id: String) -> Dictionary:
+	var box := PanelContainer.new()
+	box.name = "Summary_" + id
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var fill := LOOK.flat(LOOK.PALE_DEEP, LOOK.RADIUS, Vector4(LOOK.SPACE_L, LOOK.SPACE_M - 2, LOOK.SPACE_L, LOOK.SPACE_M))
+	box.add_theme_stylebox_override("panel", fill)
+	summary.add_child(box)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 0)
+	box.add_child(column)
+	var kicker := LOOK.kicker(Label.new())
+	kicker.text = {"attempt": "This attempt", "best": "Personal best", "delta": "Against best", "loss": "Biggest loss"}[id]
+	var value := LOOK.text(Label.new(), "numeral", 30)
+	var note := LOOK.text(Label.new(), "body", LOOK.TYPE_SMALL, LOOK.INK_SOFT)
+	note.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	note.clip_text = true
+	for label: Label in [kicker, value, note]:
+		column.add_child(label)
+	return {"box": box, "fill": fill, "value": value, "note": note}
+
+func _fill_summary(best: Dictionary) -> void:
+	summary.visible = comparison.get("ok", false) and not (comparison.splits as Array).is_empty()
+	# the tiles say what the two summary sentences say; the sentences stay for screen readers and checks.
+	message.visible = not summary.visible
+	if not summary.visible:
+		return
+	var last: Dictionary = comparison.splits.back()
+	var worst: Dictionary = {}
+	for split: Dictionary in comparison.splits:
+		if float(split.loss) > float(worst.get("loss", 0.0)):
+			worst = split
+	_set_tile("attempt", "%.3f s" % float(last.time), "at " + str(last.label))
+	_set_tile("best", "%.3f s" % float(last.best_time), "set " + plain_dates(MODEL.recorded_time(best.run.header.get("created_unix", 0.0))) + " UTC")
+	var delta := float(last.delta)
+	_set_tile("delta", "%+.3f s" % delta, "slower" if delta > 0.0005 else ("faster" if delta < -0.0005 else "level"),
+		LOOK.VERMILION_DEEP if delta > 0.0005 else (LOOK.SEA_GLASS_DEEP if delta < -0.0005 else LOOK.INK))
+	if worst.is_empty():
+		_set_tile("loss", "none", "no segment slower than best")
+	else:
+		_set_tile("loss", "%s → %s" % [worst.from, worst.label], "%+.3f s lost in this segment" % float(worst.loss))
+		(_tiles.loss.value as Label).add_theme_font_size_override("font_size", 20)
+
+func _set_tile(id: String, value: String, note: String, color: Color = LOOK.INK) -> void:
+	var tile: Dictionary = _tiles[id]
+	(tile.value as Label).text = value
+	(tile.value as Label).add_theme_color_override("font_color", color)
+	(tile.note as Label).text = note
+	var fill: StyleBoxFlat = tile.fill
+	fill.border_color = color if color != LOOK.INK else Color(0, 0, 0, 0)
+	fill.border_width_bottom = LOOK.EDGE_WIDTH if color != LOOK.INK else 0
+
 func refresh() -> void:
 	comparison = {}
 	_mark_best()
@@ -162,6 +252,8 @@ func refresh() -> void:
 	trace.series = []
 	trace.queue_redraw()
 	scrubber.editable = false
+	summary.visible = false
+	message.visible = true
 	message.text = "Reading local attempts… You can go back while they load."
 	_scan = MODEL.begin_scan(directory)
 	scanning = true
@@ -180,7 +272,7 @@ func _process(_delta: float) -> void:
 func _finish_list() -> void:
 	for entry: Dictionary in entries:
 		var identity: Dictionary = entry.identity
-		attempts.add_item(MODEL.attempt_label(entry))
+		attempts.add_item(attempt_text(MODEL.attempt_label(entry)))
 		attempts.set_item_tooltip(attempts.item_count - 1, "%s\n%s" % [entry.name, identity.get("preset", "")])
 	message.text = "Pick an attempt to compare it with its matching personal best." if not entries.is_empty() else "No recordings yet. Play an attempt, then return here."
 	if not entries.is_empty():
@@ -208,6 +300,8 @@ func select_attempt(index: int) -> void:
 	trace.queue_redraw()
 	scrubber.editable = false
 	clock.text = ""
+	summary.visible = false
+	message.visible = true
 	var attempt := MODEL.load_attempt(entries[index].path)
 	if not attempt.ok:
 		message.text = attempt.error
@@ -218,8 +312,9 @@ func select_attempt(index: int) -> void:
 		message.text = comparison.error
 		return
 	_mark_best()
-	message.text = "Personal best: %.3f s · %s. Positive time means slower." % [best.duration, MODEL.recorded_time(best.run.header.get("created_unix", 0.0))]
+	message.text = "Personal best: %.3f s · %s UTC. Positive time means slower." % [best.duration, plain_dates(MODEL.recorded_time(best.run.header.get("created_unix", 0.0)))]
 	message.text += "\n" + MODEL.biggest_loss(comparison)
+	_fill_summary(best)
 	_load_preview()
 	var root := splits.create_item()
 	for split: Dictionary in comparison.splits:
@@ -325,12 +420,12 @@ func _update_follow_note() -> void:
 
 func _mark_best() -> void:
 	if _marked_best >= 0 and _marked_best < entries.size() and _marked_best < attempts.item_count:
-		attempts.set_item_text(_marked_best, MODEL.attempt_label(entries[_marked_best]))
+		attempts.set_item_text(_marked_best, attempt_text(MODEL.attempt_label(entries[_marked_best])))
 	_marked_best = -1
 	if not comparison.get("ok", false): return
 	for i: int in entries.size():
 		if entries[i].path == comparison.best.path:
-			attempts.set_item_text(i, MODEL.attempt_label(entries[i]).replace(str(entries[i].identity.get("map", "Unknown map")) + " / ", "Best / "))
+			attempts.set_item_text(i, attempt_text(MODEL.attempt_label(entries[i]).replace(str(entries[i].identity.get("map", "Unknown map")) + " / ", "Best / ")))
 			_marked_best = i
 			break
 

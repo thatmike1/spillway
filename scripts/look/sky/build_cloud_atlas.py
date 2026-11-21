@@ -2,8 +2,8 @@
 
 usage: python3 build_cloud_atlas.py SOURCE_DIR OUT_DIR   (needs pillow and numpy)
 
-cumulus-a.png and cumulus-b.png each hold two clouds (left and right half); wisps.png holds four
-horizontal strips. each cloud is keyed off its #00FF00 ground, its painted value is kept as one
+cumulus-a.png, cumulus-b.png (and cumulus-c.png, cumulus-d.png when present) each hold two clouds
+(left and right half), packed into a 4x2 grid of cells; wisps.png holds four horizontal strips. each cloud is keyed off its #00FF00 ground, its painted value is kept as one
 grey channel (shadow dark, lit side bright) with coverage in alpha, and it is packed bottom-aligned
 into a cell so a card's bottom edge is the cloud's flat base. outputs are grey+alpha PNGs.
 """
@@ -60,16 +60,18 @@ def place(v, a, size, bottom_margin=6, side_margin=8):
 
 def main(source, out):
     source, out = Path(source), Path(out)
-    atlas = Image.new("LA", (CELL[0] * 2, CELL[1] * 2), (0, 0))
+    sheets = [n for n in ["cumulus-a.png", "cumulus-b.png", "cumulus-c.png", "cumulus-d.png"] if (source / n).exists()]
+    columns = 4 if len(sheets) > 2 else 2
+    atlas = Image.new("LA", (CELL[0] * columns, CELL[1] * 2), (0, 0))
     index = 0
-    for name in ["cumulus-a.png", "cumulus-b.png"]:
+    for name in sheets:
         rgb = np.asarray(Image.open(source / name).convert("RGB"))
         value, alpha = key(rgb)
         value = normalise(value, alpha)
         h, w = alpha.shape
         for box in [(0, 0, w // 2, h), (w // 2, 0, w, h)]:
             v, a = crop(value, alpha, box)
-            atlas.paste(place(v, a, CELL), ((index % 2) * CELL[0], (index // 2) * CELL[1]))
+            atlas.paste(place(v, a, CELL), ((index % columns) * CELL[0], (index // columns) * CELL[1]))
             index += 1
     atlas.save(out / "cloud-atlas.png", optimize=True)
     rgb = np.asarray(Image.open(source / "wisps.png").convert("RGB"))

@@ -73,7 +73,9 @@ def main():
                 report["components"].append({"name": name, **result})
         (out / "COMPONENTS.json").write_text(json.dumps({**report, "ok": True}, indent=1) + "\n")
         if args.slow:
-            report["parity"] = verification.run(out / "parity")
+            # one lease for the whole matrix: per-play leases let every queued check cut in between plays.
+            with engine.locked():
+                report["parity"] = verification.run(out / "parity")
             runtime_roots = {"scripts", "assets", "scenes", "shaders", "data"}
             def runtime_files(files):
                 return {name: digest for name, digest in files.items()
