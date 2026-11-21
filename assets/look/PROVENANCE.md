@@ -7,3 +7,7 @@
 The three shaders and structural-ink mesh generator are original code. They preserve the existing collision meshes. The sky is a static panorama and does not require cloud simulation or continuously refreshed radiance maps.
 
 All original R15 assets remain in the portable package for the old-look toggle and other maps, with their existing licences and manifests. Breakwater's Poly Haven kit is CC0; see `assets/r15/breakwater/MANIFEST.json` and its included licence. The original material kit, Kenney assets and runtime have their own bundled notices. This document does not relicense them.
+
+## Painted cloud atlases (design day, 21 November 2026)
+
+`sky/cloud-atlas.png` (four cumulus cards in a 2x2 grid) and `sky/wisp-atlas.png` (four high-cloud strips) are original project assets. Their three source paintings were generated on 21 November 2026 with the image generation tool built into OpenAI's Codex agent, from text prompts only; no input image, private concept art or third-party texture was supplied, and no artist or studio was named. The exact prompts are in `sky/cloud-prompts.md`. The source sheets were exported over flat #00FF00; `scripts/look/sky/build_cloud_atlas.py` keys that ground out, keeps each cloud's painted value as one grey channel with coverage in alpha, and packs the clouds bottom-aligned into the atlases. The source sheets are kept outside the repository. `shaders/look/sky.gdshader` recolours the grey value per map (shadow, mid, lit side, rim) from `scripts/look/sky_light.gd`, so the same paintings serve every map's hour.
