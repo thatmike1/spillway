@@ -23,7 +23,8 @@ void fragment() {
  vec3 side = look_c ? mix(vec3(0.36, 0.48, 0.53), vec3(0.22, 0.32, 0.37), tide) : mix(vec3(0.24, 0.35, 0.41), vec3(0.17, 0.26, 0.31), tide);
  vec3 cap = surf ? vec3(0.81, 0.86, 0.79) : vec3(0.93, 0.88, 0.75);
  if (look_c) {
-  cap = vec3(0.88, 0.87, 0.84);
+  // one warm shell-white family with the salt pans, so quays and pans read as one works.
+  cap = vec3(0.93, 0.90, 0.84);
  }
  if (look_c) {
   // look c: wear runs down from the edges as soft vertical streaks, never round olive spots.
@@ -59,9 +60,9 @@ void fragment() {
   float concrete_joint = 1.0 - min(smoothstep(0.012 - aa_joint.x, 0.012 + aa_joint.x, joint_distance.x), smoothstep(0.012 - aa_joint.y, 0.012 + aa_joint.y, joint_distance.y));
   cap = mix(cap, vec3(0.38, 0.43, 0.41), concrete_joint * (look_c ? 0.30 : 0.10));
   if (look_c) {
-   // uneven brine staining, large and soft, so a broad quay is not one blank plane.
-   float stain = smoothstep(0.45, 0.80, texture(wear, world_position.xz / 23.0 + 0.37).r);
-   cap = mix(cap, cap * vec3(0.90, 0.91, 0.90), stain * 0.7);
+   // sparse brine stains with a crisp edge, so a broad quay is not one blank plane or a fog.
+   float stain = smoothstep(0.76, 0.79, texture(wear, world_position.xz / 5.0 + 0.37).r);
+   cap = mix(cap, cap * vec3(0.94, 0.945, 0.94), stain);
   }
  }
  // look c's lighter tops already sit near white under lane 02's noon light; both share this scale.

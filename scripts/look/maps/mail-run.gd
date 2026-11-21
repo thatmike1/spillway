@@ -27,7 +27,7 @@ void fragment(){
   float aa = max(fwidth(wp.z), 0.004);
   float joint = 1.0 - smoothstep(0.018 - aa, 0.018 + aa, jz);
   float fade = 1.0 - smoothstep(30.0, 90.0, distance(wp, CAMERA_POSITION_WORLD));
-  cap = mix(cap, vec3(0.42, 0.45, 0.43), joint * 0.32 * fade);
+  cap = mix(cap, vec3(0.42, 0.45, 0.43), joint * 0.42 * fade);
  }
  float u = abs(wn.x) > abs(wn.z) ? wp.z : wp.x;
  float drip = texture(wear, vec2(u * 0.23, wp.y * 0.035)).r;
@@ -35,6 +35,15 @@ void fragment(){
  vec3 side = side_color.rgb;
  side = mix(side, side * 0.78, smoothstep(0.58, 0.78, drip) * 0.55 * weather);
  side = mix(side, side * 0.72 + vec3(0.04, 0.035, 0.02), foot * 0.6 * weather);
+ if (joint_spacing > 0.0) {
+  // sparse crisp stains and a long pour joint down the quay, so the deck carries some wear.
+  float stain = smoothstep(0.76, 0.79, texture(wear, wp.xz / 5.0 + 0.37).r);
+  cap = mix(cap, cap * vec3(0.94, 0.945, 0.94), stain);
+  float jx = abs(fract(wp.x / 6.0) - 0.5) * 6.0;
+  float aax = max(fwidth(wp.x), 0.004);
+  float pour = 1.0 - smoothstep(0.014 - aax, 0.014 + aax, jx);
+  cap = mix(cap, vec3(0.42, 0.45, 0.43), pour * 0.22 * (1.0 - smoothstep(30.0, 90.0, distance(wp, CAMERA_POSITION_WORLD))));
+ }
  ALBEDO = mix(side, cap, top);
  ROUGHNESS = 0.95;
  SPECULAR = 0.0;
@@ -108,9 +117,10 @@ func dress(level: Node3D) -> Node3D:
 		var at: Vector3 = POSTS[i]
 		var face := -1.0 if i == 1 else 1.0
 		# one pale panel around the slot, so the ink mouth and orange lip read from the quay.
-		_box(root, "slot_panel_%d" % i, at + Vector3(0, 0.12, 0.13 * face), Vector3(3.2, 3.0, 0.06), _flat("panel", Color("e2dac6"), true))
+		_box(root, "slot_panel_%d" % i, at + Vector3(0, 0.12, 0.13 * face), Vector3(2.9, 3.0, 0.06), _flat("panel", Color("e2dac6"), true))
 		# the post number is painted on the house face instead of floating over the roof.
-		_stencil(root, "%02d" % (i + 1), at + Vector3(-2.4 * face, -0.35, 0.115 * face), PI if face < 0 else 0.0, 0.014, PALE)
+		# the number sits in the wall field left of the panel with clear space on both sides.
+		_stencil(root, "%02d" % (i + 1), at + Vector3(-2.25 * face, -0.35, 0.115 * face), PI if face < 0 else 0.0, 0.0085, PALE)
 	# post 02 faces away from spawn; its back carries only its number.
 	_stencil(root, "02", Vector3(-12, 4.2, -50.085), 0.0, 0.014, PALE)
 	_stencil(root, "DISPATCH", Vector3(0, 17.0, -122.47), 0.0, 0.013, PALE)
