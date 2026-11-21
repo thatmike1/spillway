@@ -209,6 +209,8 @@ func _tile(id: String) -> Dictionary:
 
 func _fill_summary(best: Dictionary) -> void:
 	summary.visible = comparison.get("ok", false) and not (comparison.splits as Array).is_empty()
+	# the tiles say what the two summary sentences say; the sentences stay for screen readers and checks.
+	message.visible = not summary.visible
 	if not summary.visible:
 		return
 	var last: Dictionary = comparison.splits.back()
@@ -250,6 +252,7 @@ func refresh() -> void:
 	trace.queue_redraw()
 	scrubber.editable = false
 	summary.visible = false
+	message.visible = true
 	message.text = "Reading local attempts… You can go back while they load."
 	_scan = MODEL.begin_scan(directory)
 	scanning = true
@@ -297,6 +300,7 @@ func select_attempt(index: int) -> void:
 	scrubber.editable = false
 	clock.text = ""
 	summary.visible = false
+	message.visible = true
 	var attempt := MODEL.load_attempt(entries[index].path)
 	if not attempt.ok:
 		message.text = attempt.error

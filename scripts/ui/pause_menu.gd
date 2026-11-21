@@ -239,6 +239,9 @@ func _restyle_header() -> void:
 
 func _layout_title(size: Vector2, frame: Rect2) -> void:
 	if _title_mark != null and title_card.has_node("ScrimLow"):
+		if game != null:
+			var id := str(game.map_id)
+			(title_card.get_node("TitleMap") as Label).text = "%s  ·  %s" % [str(game.call("map_name")), MAP_PLACES.line(id, game.map_entry(id))]
 		TITLE.layout(title_card, _title_mark, size, frame)
 	else:
 		super(size, frame)
@@ -268,6 +271,14 @@ func _restyle_settings() -> void:
 		reset.add_theme_color_override("font_color", UI.SLATE)
 		reset.add_theme_color_override("font_hover_color", UI.INK)
 		reset.add_theme_color_override("font_focus_color", UI.INK)
+	# comparison presets keep their full description on hover; the sheet shows two lines.
+	for node: Node in page.find_children("PresetDetails_*", "Label", true, false):
+		var details := node as Label
+		if details.get_parent() != null and details.get_parent().name == "AdvancedPresets":
+			details.tooltip_text = details.text
+			details.mouse_filter = Control.MOUSE_FILTER_PASS
+			details.max_lines_visible = 2
+			details.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	for node: Node in page.find_children("*", "Label", true, false):
 		var label := node as Label
 		if label.get_theme_font_size("font_size") == 17 and label.text in ["Look and sound", "Movement", "Keys"]:
@@ -474,7 +485,7 @@ func _open_run_review() -> void:
 	pause_panel.add_child(review_screen)
 	review_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	# the review is a sheet over the paused world, like the menu, not a page that replaces it.
-	var inset := clampf(get_viewport().get_visible_rect().size.x * 0.025, 16.0, 48.0)
+	var inset := clampf(get_viewport().get_visible_rect().size.x * 0.018, 12.0, 40.0)
 	review_screen.offset_left = inset
 	review_screen.offset_top = inset
 	review_screen.offset_right = -inset
