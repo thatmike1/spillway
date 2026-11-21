@@ -32,7 +32,8 @@ static func dress(level: Node3D) -> void:
 	for child: Node in level.get_children():
 		if child is MeshInstance3D:
 			var service: bool = str(child.name).contains("shore_") or str(child.name).contains("control_house") or str(child.name).contains("service_gallery")
-			child.material_override = MATERIALS.concrete(Color("b6bcae") if service else Color("c8c4b8"),Color("798f96") if service else Color("6e8590"),not service,child.get_aabb())
+			# decks are shell-white rather than peach under the low warm sun.
+			child.material_override = MATERIALS.concrete(Color("b6bcae") if service else Color("c9c6c0"),Color("798f96") if service else Color("6e8590"),not service,child.get_aabb())
 	BASE._box(level,"outer_water",Vector3(-120,-3,-140),Vector3(900,0.1,800),Color("598a90"))
 	var footprints := PackedVector4Array()
 	for support: Vector4 in level.supports:
@@ -42,7 +43,8 @@ static func dress(level: Node3D) -> void:
 	COAST.dress(level)
 	for child: Node in level.get_children():
 		if child is MeshInstance3D and str(child.name).contains("quay_curb_"):
-			child.material_override = BASE._material(Color("bd653e"))
+			# the quay curbs are a side edge, not a takeoff: pale stone, leaving orange to the lips.
+			child.material_override = BASE._material(Color("cfc8b8"))
 	BASE._pile_bearings(level)
 	var x: float = level.spawn.origin.x
 	var z: float = level.finish_position.z-8.0
