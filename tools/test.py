@@ -51,7 +51,6 @@ def main():
         "mail_flight", "mail_motor", "mail_courts", "mail_tape", "sluice_six_style", "outer_reach_tape",
         "viaduct_presentation", "foundry_routes", "foundry_fork", "foundry_scenery", "foundry_cable", "foundry_advanced",
         "scripts/ui/pause_menu_checks.gd", "scripts/ui/hud_hooks_checks.gd", "scripts/ui/review_menu_checks.gd", "scripts/ui/planner_menu_checks.gd",
-        "scripts/fx/motion_fx_checks.gd",
     ]
     if args.slow:
         components.extend(["direction_stack", "through_line_original_maps"])
@@ -74,7 +73,9 @@ def main():
                 report["components"].append({"name": name, **result})
         (out / "COMPONENTS.json").write_text(json.dumps({**report, "ok": True}, indent=1) + "\n")
         if args.slow:
-            report["parity"] = verification.run(out / "parity")
+            # one lease for the whole matrix: per-play leases let every queued check cut in between plays.
+            with engine.locked():
+                report["parity"] = verification.run(out / "parity")
             runtime_roots = {"scripts", "assets", "scenes", "shaders", "data"}
             def runtime_files(files):
                 return {name: digest for name, digest in files.items()

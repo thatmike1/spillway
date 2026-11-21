@@ -29,7 +29,7 @@ const PLACES := {
 	"gantry": {"group": "swing", "line": "Crane slot hop lines", "about": "Build a hop line and carry it through the crane slots."},
 	"gantry-chain": {"group": "swing", "line": "Three Arc transfers", "about": "A longer Gantry: the dispatch hops run straight into a third Arc transfer."},
 	"foundry": {"group": "swing", "line": "High gallery or shaft", "about": "Take the high gallery, or commit to the shaft crossing."},
-	"experiment": {"group": "experiment", "line": "Not a course", "about": "Try slide, wall jump and grapple. Records keep each loadout apart."},
+	"experiment": {"group": "experiment", "line": "Slide, wall jump, grapple", "note": "Not a course", "about": "Try slide, wall jump and grapple. Records keep each loadout apart."},
 	"through-line": {"group": "experiment", "line": "Rise through the fork", "about": "Build speed, rise through the fork and land running."},
 	"mail-run": {"group": "experiment", "line": "Steer the post", "about": "Hold the hop. Throw the envelope and steer it to its box."},
 	"plan-yard": {"group": "experiment", "line": "Place a line, run it", "about": "Plan the pieces untimed, then run the line you placed."},
@@ -54,3 +54,7 @@ static func about(id: String, entry: Dictionary) -> String:
 	if PLACES.has(id):
 		return str(PLACES[id].get("about", PLACES[id].line))
 	return line(id, entry)
+
+## words the card carries for screen readers and checks but does not draw (Movement Lab: not a course).
+static func note(id: String) -> String:
+	return str(PLACES.get(id, {}).get("note", ""))

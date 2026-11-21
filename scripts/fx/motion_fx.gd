@@ -231,7 +231,7 @@ func _update_lens(camera: Camera3D, k: float, dt: float) -> void:
 	if absf(_dip) < 0.0004 and absf(_dip_velocity) < 0.002:
 		_dip = 0.0
 		_dip_velocity = 0.0
-	_lens.update(camera, _fov, _dip, preview_ups >= 0.0)
+	_lens.update(camera, _fov, _dip)
 
 static func ease_speed(value: float) -> float:
 	# a gentle start above running pace, nearly linear through the fast band.
