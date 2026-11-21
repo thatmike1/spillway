@@ -93,7 +93,7 @@ func dress(level: Node3D) -> Node3D:
 	for side: float in [-1.0, 1.0]:
 		_block(root, "TowerPier_%d" % int(side), Vector3(side * 24.8, (7.0 + FOOT_Y) * 0.5, -59), Vector3(1.0, 7.0 - FOOT_Y, 2.0), _stone)
 		footprints.append(Vector4(side * 24.8, -59, 0.5, 1.0))
-	sea.material_override = SEA.water(footprints, Vector3(0.30, 0.47, 0.47), Vector3(0.46, 0.59, 0.57), 0.0)
+	sea.material_override = SEA.water(footprints, Vector3(0.30, 0.47, 0.47), Vector3(0.46, 0.59, 0.57), 0.0, 0.07)
 	# the 02 hangs from the dark header between the towers.
 	for x: float in [-1.6, 1.6]:
 		_block(root, "HeaderHanger_%s" % x, Vector3(x, 15.3, -59), Vector3(0.05, 1.3, 0.05), _ink)
