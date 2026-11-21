@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Capture the current game on an explicitly numbered, isolated software X display."""
 import argparse
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
+import fcntl
 import json
 import math
 from pathlib import Path
@@ -60,15 +61,35 @@ def busy(number):
 
 @contextmanager
 def private_display(log, env, size="1280x720"):
-    # caller holds engine.locked for this entire context, including cleanup.
+    # caller holds an engine lease for this entire context, including cleanup.
     before = answers(0)
     desktop_socket = Path("/tmp/.X11-unix/X0")
     if desktop_socket.exists() and not before:
         raise RuntimeError("desktop :0 exists but does not answer; refusing to start")
     desktop_identity = desktop_socket.stat().st_ino if desktop_socket.exists() else None
-    number = next((n for n in range(190, 200) if not busy(n)), None)
-    if number is None:
-        raise RuntimeError("all private displays :190 through :199 are busy")
+    with ExitStack() as claim:
+        number = claim_display(claim)
+        yield from _serve_display(number, log, env, size, before, desktop_socket, desktop_identity)
+
+
+def claim_display(claim):
+    # concurrent captures each hold a per-number lease for the whole display lifetime, so two
+    # of them can never pick the same number between the busy probe and Xvfb startup.
+    for n in range(190, 200):
+        with ExitStack() as attempt:
+            stream = attempt.enter_context(engine.lease_path(f".display{n}").open("a"))
+            try:
+                fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                continue
+            if busy(n):
+                continue
+            claim.enter_context(attempt.pop_all())
+            return n
+    raise RuntimeError("all private displays :190 through :199 are busy")
+
+
+def _serve_display(number, log, env, size, before, desktop_socket, desktop_identity):
     with Path(log).open("w") as stream:
         process = subprocess.Popen(["Xvfb", f":{number}", "-screen", "0", size + "x24",
                                     "-nolisten", "tcp", "-ac", "-noreset"],
@@ -394,14 +415,18 @@ def main():
         options["seconds"] = max(args.seconds, len(options["poses"]) * args.every + 2)
     if args.movie and options["seconds"] > 10:
         parser.error("movie pose sequences must finish within 10 seconds")
-    provenance = subprocess.run(["git", "-C", str(checkout), "rev-parse", "HEAD"],
-                                capture_output=True, text=True, check=True).stdout.strip()
-    dirty = subprocess.run(["git", "-C", str(checkout), "status", "--porcelain"],
-                           capture_output=True, text=True, check=True).stdout.splitlines()
     engine.check_pin()
     signal.signal(signal.SIGTERM, lambda *_: sys_exit())
     output.mkdir(parents=True, exist_ok=False)
-    with tempfile.TemporaryDirectory(prefix="spillway-shot-") as temporary:
+    # captures share the engine with up to engine.CAPTURE_SLOTS - 1 others; checks and exports
+    # stay exclusive. the lease comes before the source snapshot, so a queued capture holds no
+    # scratch on /tmp. nested leases below reuse this shared one.
+    with engine.locked(shared=True), tempfile.TemporaryDirectory(prefix="spillway-shot-") as temporary:
+        # provenance is read after the queue wait, right before the snapshot it describes.
+        provenance = subprocess.run(["git", "-C", str(checkout), "rev-parse", "HEAD"],
+                                    capture_output=True, text=True, check=True).stdout.strip()
+        dirty = subprocess.run(["git", "-C", str(checkout), "status", "--porcelain"],
+                               capture_output=True, text=True, check=True).stdout.splitlines()
         scratch = Path(temporary)
         source = scratch / "source"
         shutil.copytree(checkout, source, ignore=snapshot_ignore(checkout))
@@ -409,19 +434,20 @@ def main():
         (source / "capture-options.json").write_text(json.dumps(options))
         profile = scratch / "profile"
         engine.run(["--headless", "--editor", "--path", source, "--import"], cwd=source,
-                   profile=profile, log=output / "import.log")
+                   profile=profile, log=output / "import.log", timeout=600)
         env = engine.environment(profile)
         env.update(LIBGL_ALWAYS_SOFTWARE="1", GALLIUM_DRIVER="llvmpipe")
-        with engine.locked(), private_display(output / "display.log", env, args.size) as display:
+        with private_display(output / "display.log", env, args.size) as display:
             env["DISPLAY"] = display
             movie_arguments = ["--write-movie", str(output / "capture.avi")] if args.movie else []
             with (output / "engine.log").open("w") as log:
+                # shared captures run slower, so the bound is twice the exclusive one.
                 result = subprocess.run([str(engine.GODOT), *(["--verbose"] if args.verbose else []), "--path", str(source), "--script", "res://capture.gd",
                     "--display-driver", "x11", "--rendering-method", "gl_compatibility", "--audio-driver", "Dummy",
                     "--windowed", "--resolution", args.size, "--position", "0,0", "--fixed-fps", str(args.movie_fps if args.movie else 128), *movie_arguments, "--",
                     "--r16-map=" + args.map, "--no-records", "--no-run-recordings", "--route=" + (args.route or "safe"),
                     "--evidence-dir=" + str(output)], env=env, cwd=source, stdout=log, stderr=subprocess.STDOUT,
-                    timeout=max(180, options["seconds"] * 30))
+                    timeout=max(180, options["seconds"] * 30) * 2)
         log_text = (output / "engine.log").read_text()
         if result.returncode or any(s in log_text for s in ("ERROR:", "SCRIPT ERROR:", "Parse Error")):
             raise RuntimeError(f"capture failed; read {output / 'engine.log'}\n{log_text[-2500:]}")
