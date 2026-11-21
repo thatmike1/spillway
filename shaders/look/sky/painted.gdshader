@@ -128,7 +128,8 @@ void sky() {
 	{
 		float facing = max(dot(dir, normalize(sun_dir)), 0.0);
 		grad += glow_color * glow_strength * pow(facing, glow_size);
-		grad += glow_color * glow_strength * 0.35 * pow(facing, glow_size * 0.15);
+		// a broad warm lift toward the sun, tinted like the band so it never reads as a pale patch.
+		grad = mix(grad, band, glow_strength * 0.3 * pow(facing, glow_size * 0.3));
 		grad = mix(grad, vec3(1.0, 0.97, 0.9), disc_strength * smoothstep(0.9993, 0.9997, facing));
 	}
 
