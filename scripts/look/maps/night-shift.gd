@@ -32,6 +32,7 @@ const SIGNS := ["Platform1", "Roundel_w", "Roundel_e", "ThroatSign", "BaysSign",
 var _hidden: Array[Node3D] = []
 var _stock: ShaderMaterial
 var _rail: ShaderMaterial
+var _loop_sign: Dictionary = {}
 
 var _cars: Array[MeshInstance3D] = []
 ## each car surface's original override, captured before the layer applies anything.
@@ -59,6 +60,11 @@ func dress(level: Node3D) -> Node3D:
 		_stock.set_shader_parameter("metal", 0.0)
 	var marks := level.get_node_or_null("Markings")
 	if marks != null:
+		# the painted loop name stays as a place sign but quieter: it was the loudest thing in the
+		# mid view (critic 20:20).
+		var loop := marks.get_node_or_null("LoopSign") as Label3D
+		if loop != null:
+			_loop_sign = {"node": loop, "old": loop.modulate}
 		for label: Node in marks.get_children():
 			if label is Label3D and not str(label.name) in SIGNS:
 				# includes DepotSign, the banner that crops across the spawn view.
@@ -90,6 +96,8 @@ func material(key: String, node: Node, proposed: Material) -> Material:
 	return proposed
 
 func set_enabled(value: bool) -> void:
+	if not _loop_sign.is_empty() and is_instance_valid(_loop_sign.node):
+		(_loop_sign.node as Label3D).modulate = Color("8e9298") if value else _loop_sign.old
 	var k := 0
 	for car: MeshInstance3D in _cars:
 		for i: int in car.mesh.get_surface_count():

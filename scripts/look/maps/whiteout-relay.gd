@@ -53,23 +53,18 @@ func dress(level: Node3D) -> Node3D:
 				_hidden.append(label as Node3D)
 	_level = level
 	var root := _hangar(k)
-	root.add_child(_hazard_cover(k))
+	root.add_child(_paint_covers(k))
 	return root
 
-## the dashed hazard band 1.6 to 2.6 m before the chasm lip read as an orange band across the
-## road (critic 19:28): under look c it is covered by deck, drawn a few millimetres over the paint
-## with the saddle deck's own material. the orange chasm lip itself stays.
+## orange belongs only on takeoff lips: under look c two painted bands are covered by deck, drawn
+## a few millimetres over the paint with the deck's own material (critic 19:28 and 20:05):
+## - the dashed hazard band 1.6 to 2.6 m before the chasm lip, read as a band across the road;
+## - the side curbs along both edges of the berm road, read as orange running the whole road.
+## the chasm lip and every takeoff lip stay.
 var _level: Node3D
-var _cover: MeshInstance3D
+var _covers: Array[Dictionary] = []
 
-func _hazard_cover(k: Dictionary) -> MeshInstance3D:
-	var half: float = k.SADDLE_HALF
-	var end: float = k.SADDLE_END
-	var y := float(k.SADDLE_Y) + 0.010
-	var x0 := -half + 0.4
-	var x1 := half - 0.4
-	var z0 := end + 1.5
-	var z1 := end + 2.7
+func _strip(x0: float, x1: float, z0: float, z1: float, y: float, deck: String) -> MeshInstance3D:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var a := Vector3(x0, y, z0)
@@ -80,11 +75,36 @@ func _hazard_cover(k: Dictionary) -> MeshInstance3D:
 	for v: Vector3 in [a, b, c, a, c, d, a, c, b, a, d, c]:
 		st.set_normal(Vector3.UP)
 		st.add_vertex(v)
-	_cover = MeshInstance3D.new()
-	_cover.name = "SaddleHazardCover"
-	_cover.mesh = st.commit()
-	_cover.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	return _cover
+	var cover := MeshInstance3D.new()
+	cover.name = "Cover_" + deck
+	cover.mesh = st.commit()
+	cover.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_covers.append({"mesh": cover, "deck": deck})
+	return cover
+
+func _paint_covers(k: Dictionary) -> Node3D:
+	var root := Node3D.new()
+	root.name = "PaintCovers"
+	var half: float = k.SADDLE_HALF
+	var end: float = k.SADDLE_END
+	root.add_child(_strip(-half + 0.4, half - 0.4, end + 1.5, end + 2.7, float(k.SADDLE_Y) + 0.010, "Mesh_tread_saddle"))
+	var road: float = k.ROAD_HALF
+	var z0 := minf(float(k.APRON_END), float(k.ROAD_END))
+	var z1 := maxf(float(k.APRON_END), float(k.ROAD_END))
+	var y := float(k.TRACK_Y) + 0.010
+	# the strips break at each cable trench, so no cover bridges a cut in the road.
+	var cuts: Array[float] = [z0]
+	for t: Array in k.TRENCHES:
+		cuts.append(minf(float(t[0]), float(t[1])))
+		cuts.append(maxf(float(t[0]), float(t[1])))
+	cuts.append(z1)
+	cuts.sort()
+	for i: int in range(0, cuts.size() - 1, 2):
+		for side: float in [-1.0, 1.0]:
+			var outer := side * (road + 0.02)
+			var inner := side * (road - 0.30)
+			root.add_child(_strip(minf(outer, inner), maxf(outer, inner), cuts[i], cuts[i + 1], y, "Mesh_tread_road"))
+	return root
 
 ## columns and beams at these z, from the back wall toward the door.
 const FRAMES := [13.4, 7.5, 1.5, -4.5, -10.5]
@@ -169,19 +189,21 @@ func material(key: String, _node: Node, proposed: Material) -> Material:
 	return proposed
 
 func set_enabled(value: bool) -> void:
-	# the saddle deck's material is the layer's own, applied just before this call.
-	if value and _cover != null and is_instance_valid(_level):
-		var deck := _level.get_node_or_null("Mesh_tread_saddle") as GeometryInstance3D
-		if deck != null and deck.material_override != null:
-			_cover.material_override = deck.material_override
-		elif _cover.material_override == null:
-			var plain := ShaderMaterial.new()
-			plain.shader = load("res://shaders/look/surface.gdshader")
-			plain.set_shader_parameter("wear", load("res://assets/look/painted-wear.png"))
-			plain.set_shader_parameter("top_color", Color(PALETTE.top))
-			plain.set_shader_parameter("side_color", Color(PALETTE.top))
-			plain.set_shader_parameter("deck", 0.35)
-			_cover.material_override = plain
+	# each cover takes its deck's material, the layer's own, applied just before this call.
+	if value and is_instance_valid(_level):
+		for cover: Dictionary in _covers:
+			var mesh := cover.mesh as MeshInstance3D
+			var deck := _level.get_node_or_null(str(cover.deck)) as GeometryInstance3D
+			if deck != null and deck.material_override != null:
+				mesh.material_override = deck.material_override
+			elif mesh.material_override == null:
+				var plain := ShaderMaterial.new()
+				plain.shader = load("res://shaders/look/surface.gdshader")
+				plain.set_shader_parameter("wear", load("res://assets/look/painted-wear.png"))
+				plain.set_shader_parameter("top_color", Color(PALETTE.top))
+				plain.set_shader_parameter("side_color", Color(PALETTE.top))
+				plain.set_shader_parameter("deck", 0.35)
+				mesh.material_override = plain
 	for node: Node3D in _hidden:
 		if is_instance_valid(node):
 			node.visible = not value
