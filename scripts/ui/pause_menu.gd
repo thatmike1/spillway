@@ -99,6 +99,11 @@ func _wire_map_previews() -> void:
 		button.focus_entered.connect(show_view)
 
 func _build_map_cards() -> void:
+	# a catalog change rebuilds every card; r15 and r19 clear their own grids, this clears the swing one.
+	if swing_grid != null and game != null and game.call("map_ids") != _map_ids:
+		for child: Node in swing_grid.get_children():
+			swing_grid.remove_child(child)
+			child.queue_free()
 	super()
 	_arrange_map_groups()
 	_wire_map_previews()
@@ -346,15 +351,19 @@ func _sync_motion_rows() -> void:
 
 ## the sensitivity arithmetic is reference, not the first thing to read: it moves under the sliders.
 func _settle_look_line() -> void:
-	var common := pause_pages["Settings"].get_node_or_null("CommonSettings") if pause_pages.has("Settings") else null
-	if common == null or pause_look == null or pause_look.get_parent() != common:
+	if not pause_pages.has("Settings") or pause_look == null:
+		return
+	var common: Node = (pause_pages["Settings"] as Node).get_node_or_null("CommonSettings")
+	if common == null or pause_look.get_parent() != common:
 		return
 	common.move_child(pause_look, common.get_child_count() - 1)
 	UI.text(pause_look, "body", UI.TYPE_SMALL, UI.INK_SOFT)
 
 ## the world behind map select steps further back so the chosen place reads first.
 func _dim_for(destination: String) -> void:
-	var dim := pause_panel.get_child(0) as ColorRect if pause_panel != null and pause_panel.get_child_count() > 0 else null
+	if pause_panel == null or pause_panel.get_child_count() == 0:
+		return
+	var dim := pause_panel.get_child(0) as ColorRect
 	if dim != null:
 		dim.color = Color(UI.SLATE_DEEP, 0.62 if destination == "Maps" else 0.42)
 
