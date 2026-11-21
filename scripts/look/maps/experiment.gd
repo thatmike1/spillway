@@ -107,6 +107,11 @@ func dress(level: Node3D) -> Node3D:
 			for x: float in [-8.0, -2.5, 2.5, 8.0]:
 				_box(root, "TrussPost_%d_%s" % [int(tz), x], Vector3(x, ROOF - 0.45, tz), Vector3(0.14, 0.8, 0.2), steel)
 		tz -= 10.0
+	# each roof tube gets a dark fitting above it, so it hangs from the roof instead of floating.
+	for child: Node in level.get_children():
+		if child is MeshInstance3D and str(child.name).begins_with("LampTube_"):
+			var at: Vector3 = (child as MeshInstance3D).position
+			_box(root, "LampFitting_" + str(child.name).trim_prefix("LampTube_"), Vector3(at.x, (at.y + 0.05 + ROOF) * 0.5, at.z), Vector3(0.42, ROOF - at.y - 0.05, 5.3), steel)
 	# the hub board becomes a painted place name; key names and unit figures leave the world
 	# (the hud carries them), and l off brings every sign back as it was.
 	_board = level.get_node_or_null("Sign_hub_board") as Label3D
