@@ -4,8 +4,8 @@ const CONTOURS := preload("res://scripts/r17_contours.gd")
 const SKY_LIGHT := preload("res://scripts/look/sky_light.gd")
 ## original procedural architecture; no imported reference or concept assets.
 ## sluice six's own tones: sea-glass water, quieter deck joints. outer reach keeps the shared defaults.
-const SEA_DEEP := Vector3(0.16,0.37,0.39)
-const SEA_FAR := Vector3(0.34,0.52,0.51)
+const SEA_DEEP := Vector3(0.21,0.34,0.35)
+const SEA_FAR := Vector3(0.38,0.49,0.48)
 const SEAM := Vector2(0.30,0.70)
 ## joints every two paving bays: sparse lines on a quiet slab, not a tile grid.
 const SEAM_SCALE := Vector2(4.876,6.5024)
@@ -39,13 +39,13 @@ static func dress(level: Node3D) -> void:
 	for child: Node in level.get_children():
 		if child is MeshInstance3D:
 			var support := str(child.name).begins_with("Mesh_support_") or str(child.name).begins_with("Mesh_service_")
+			# every landing top one pale family; sides and supports clearly darker than any top.
 			var top_color := Color("a9a99a") if support else Color("b6b1a4")
-			var side_color := Color("8a9186") if support else Color("73818c")
+			var side_color := Color("5f6d68") if support else Color("50616b")
 			if str(child.name).begins_with("Mesh_deck_pier_"):
 				var index := int(str(child.name).trim_prefix("Mesh_deck_pier_"))
 				if index >= 9:
-					top_color = Color("bfb8a7") if index % 2 == 0 else Color("a3aba9")
-					side_color = Color("7a8c96") if index % 2 == 0 else Color("596d7a")
+					side_color = Color("566a74") if index % 2 == 0 else Color("475a65")
 			child.material_override = MATERIALS.concrete(top_color,side_color,not support,child.get_aabb(),SEAM,SEAM_SCALE,1.0)
 	_box(level,"tidal_water",Vector3(0,-3,-70),Vector3(350,0.1,450),Color("598a90"))
 	var footprints := PackedVector4Array()
@@ -56,7 +56,7 @@ static func dress(level: Node3D) -> void:
 		footprints.append(Vector4(side*7,level.finish_position.z-15,1,5))
 	for bay: Vector2 in [Vector2(8,-22),Vector2(-42,-76),Vector2(-96,-130),Vector2(-144,-166)]:
 		footprints.append(Vector4(19,(bay.x+bay.y)*0.5,4,(bay.x-bay.y)*0.5))
-	level.get_node("tidal_water").material_override = MATERIALS.water(footprints,SEA_DEEP,SEA_FAR,0.0)
+	level.get_node("tidal_water").material_override = MATERIALS.water(footprints,SEA_DEEP,SEA_FAR,0.0,0.07)
 	# one connected waterworks: banks, section abutments, a service bridge and the spill tower.
 	# submerged bank foundations connect the works; the estuary side stays open to the horizon.
 	for side: int in [-1,1]:
@@ -91,7 +91,7 @@ static func dress(level: Node3D) -> void:
 	_box(level,"tower_body",Vector3(0,16,tower_z),Vector3(12,12,10),Color("4f6871"),true)
 	for side: int in [-1,1]:
 		_box(level,"tower_leg_%d" % side,Vector3(side*7,10,tower_z),Vector3(2,34,10),Color("627a80"),true)
-	_box(level,"tower_crown",Vector3(0,27,tower_z),Vector3(16,2,10),Color("c7c8b4"),true)
+	_box(level,"tower_crown",Vector3(0,27,tower_z),Vector3(16,2,10),Color("a7aa9b"),true)
 	# metal guides show where the raised gate travels, fixed into its concrete piers and crosshead.
 	for side: int in [-1,1]:
 		_box(level,"gate_guide_%d" % side,Vector3(side*5.85,3.5,tower_z+5.12),Vector3(0.16,13,0.22),Color("384b4f"))
@@ -138,7 +138,7 @@ static func dress(level: Node3D) -> void:
 	inspection.modulate = Color("364e54")
 	inspection.position = Vector3(4.675,3.82,-37.23)
 	level.add_child(inspection)
-	load("res://scripts/art/sluice_six_estuary.gd").dress(level,Color("75806c"),Color("a9aa99"))
+	load("res://scripts/art/sluice_six_estuary.gd").dress(level,Color("75806c"),Color("a9aa99"),Color("5f7b78"),Color("88a29b"))
 	# the established contour builder inks actual visible boundaries and paints only jump lips.
 	var contours := CONTOURS.new()
 	level.add_child(contours.build(level,false))
@@ -174,7 +174,7 @@ static func dress(level: Node3D) -> void:
 	var ink := MeshInstance3D.new()
 	ink.name = "LandingInk"
 	ink.mesh = edge_lines.lines.commit()
-	ink.material_override = MATERIALS.ink()
+	ink.material_override = MATERIALS.ink(Vector3(0.16,0.22,0.24),0.7)
 	ink.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	level.add_child(ink)
 	var finish_z: float = level.finish_bounds.end.z

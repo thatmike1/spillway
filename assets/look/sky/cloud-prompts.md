@@ -42,3 +42,39 @@ Hand-painted gouache with warm ivory lit surfaces coming from the upper left and
 
 No green pigment, sky color, sun, ground, sea, birds, text, frames, signature, watermark, or other subjects.
 ```
+
+## cumulus-c.png and cumulus-c-rgba.png
+
+Tool `image_gen.imagegen`. Model undisclosed. Date 2026-11-21. No input image was supplied. The tool was called with `transparent_background: true`.
+
+The RGBA file preserves the original 1536 × 1024 tool output byte for byte. The 1840 × 1024 RGB export clears alpha values below 8/255, composites over flat sRGB `#00FF00`, and adds canvas space between the halves and at the side edges without resampling.
+
+```text
+Paint an original game sky texture sheet, a 3:2 landscape PNG at native 1536 × 1024 or larger, with real transparent RGBA. Exactly two cloud formations viewed from slightly below, one centered in each half. Leave the central 12% of the entire canvas fully transparent from top to bottom and inset every brush mark at least 90 pixels from the frame. Only cloud pigment is visible. Use fully clear alpha in the gaps and around the artwork, including all four corners. No colored background, checkerboard, sky, sun, ground, green pigment, or lettering.
+
+Hand-painted opaque gouache with fine dry-brush texture, restrained and naturalistic. Build a few big, readable rounded lobes with selectively crisp lobe edges and soft brushy interiors. Sunlight from upper left, pale warm ivory peaks and clearly darker cool slate grey-blue shadow planes spreading across roughly the lower-right third of each formation. Give the shadow planes real depth and shape. No outlines, cartoon styling, photographic haze, or airbrush halo.
+
+Make every underside organic and uneven. Give each base a changing height and broken contours, with some rounded pendant lobes, scooped gaps, and a few thin tapered wisps that dissolve into transparency. Absolutely no level cut, straight bottom edge, common baseline, or horizon. Keep wisps close to their own formation.
+
+Left half: a broad anvil-free cumulus congestus, slightly wider than tall, with a high rounded crown displaced slightly to the right of its center, several large sculpted lobes, and a deep, visibly shadowed underside. Shape the underside as an uneven sagging belly with a taper at each end.
+
+Right half: a long, thin ragged procession of about five small fair-weather cumulus puffs, arranged on a shallow downward diagonal from left to right and growing smaller toward the tip. Keep the overall formation very low and narrow, with little torn bridges and gaps between the puffs. Each puff has its own darker underside at a different height.
+```
+
+## cumulus-d.png and cumulus-d-rgba.png
+
+Tool `image_gen.imagegen`. Model undisclosed. Date 2026-11-21. No input image was supplied. The tool was called with `transparent_background: true`.
+
+The RGBA file preserves the original 1536 × 1024 tool output byte for byte. The 1840 × 1024 RGB export clears alpha values below 8/255, composites over flat sRGB `#00FF00`, and adds canvas space between the halves and at the side edges without resampling.
+
+```text
+Paint an original game sky texture sheet, a 3:2 landscape PNG at native 1536 × 1024 or larger, with real transparent RGBA. Exactly two cloud formations viewed from slightly below, one centered in each half. Leave the central 12% of the entire canvas fully transparent from top to bottom and inset every brush mark at least 90 pixels from the frame. Only cloud pigment is visible. Use fully clear alpha in the gaps and around the artwork, including all four corners. No colored background, checkerboard, sky, sun, ground, green pigment, or lettering.
+
+Hand-painted opaque gouache with fine dry-brush texture, restrained and naturalistic. Build a few big, readable rounded lobes with selectively crisp lobe edges and soft brushy interiors. Sunlight from upper left, pale warm ivory peaks and clearly darker cool slate grey-blue shadow planes spreading across roughly the lower-right third of each formation. Give the shadow planes real depth and shape. No outlines, cartoon styling, photographic haze, or airbrush halo.
+
+Make every underside organic and uneven. Give each base a changing height and broken contours, with some rounded pendant lobes, scooped gaps, and a few thin tapered wisps that dissolve into transparency. Absolutely no level cut, straight bottom edge, common baseline, or horizon. Keep wisps close to their own formation.
+
+Left half: a medium rounded, full-bodied cumulus cloud, wider than tall, with an almost hemispherical mass of rounded lobes. The lower contour is lifted into an irregular arch with breaks and a few short torn wisps trailing below it. Keep those wisps close enough to read as part of that cloud.
+
+Right half: a heavy wide cumulus with two tall crowned masses rooted in one deep body. The right crown is clearly taller than the left and a deep saddle separates them. Give each crown several billowing lobes. The underside hangs in a broad irregular arc with a low shadowed lobe under the taller crown, scooped gaps, and thin torn tips. The two crowns should feel substantial and tall, not like a small pair of puffs.
+```

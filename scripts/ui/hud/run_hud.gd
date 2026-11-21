@@ -17,7 +17,10 @@ const ARRIVE_S := 0.18
 const ARRIVE_PX := 9.0
 
 var _split_name: Label
-var _band_shade: TextureRect
+var _band_shade: Panel
+var _plate_target := Rect2()
+var _plate_rect := Rect2()
+var _plate_view := Vector2.ZERO
 var _run_quiet: float = 0.0
 var _finish_keys: HFlowContainer
 var _finish_more: Label
@@ -37,24 +40,12 @@ func _style_band() -> void:
 	UI.world_label(split_label, "numeral", 22, UI.CREAM, 4)
 	# teaching speaks in one voice: the route hint uses the controls ticket's type.
 	UI.ticket(hint, "body", 14)
-	# a soft ink lower third under the band, like subtitle shading: cream type stays readable on the pale
-	# decks you land on, and on dark walls it all but disappears.
-	_band_shade = TextureRect.new()
-	_band_shade.name = "BandShade"
+	# a small translucent ink plate behind the band, sized to what it shows: cream type on the
+	# pale decks you land on read as hollow outlines without it; on dark walls it all but vanishes.
+	_band_shade = Panel.new()
+	_band_shade.name = "BandPlate"
 	_band_shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var gradient := Gradient.new()
-	gradient.set_color(0, Color(UI.INK, 0.0))
-	gradient.set_color(1, Color(UI.INK, 0.42))
-	gradient.add_point(0.45, Color(UI.INK, 0.2))
-	var texture := GradientTexture2D.new()
-	texture.gradient = gradient
-	texture.fill_from = Vector2(0.0, 0.0)
-	texture.fill_to = Vector2(0.0, 1.0)
-	texture.width = 4
-	texture.height = 128
-	_band_shade.texture = texture
-	_band_shade.stretch_mode = TextureRect.STRETCH_SCALE
-	_band_shade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_band_shade.add_theme_stylebox_override("panel", UI.flat(Color(UI.INK, BAND.PLATE_ALPHA), 4, Vector4.ZERO))
 	overlay.add_child(_band_shade)
 	overlay.move_child(_band_shade, mini(speed_label.get_index(), clock.get_index()))
 	_split_name = Label.new()
@@ -92,6 +83,9 @@ func notify(text: String) -> void:
 			return
 		if text.begins_with("RISE · ") and through_cue != null:
 			return
+		# a ghost toggle says what it did; the empty-state tail is not news.
+		if text.begins_with("Ghost ") and "  ·  no clean recorded run" in text:
+			text = text.left(text.find("  ·  "))
 	super(text)
 
 func run_started() -> void:
@@ -123,13 +117,33 @@ func _process(delta: float) -> void:
 	var quiet := 0.0 if telemetry else _run_quiet
 	for node: CanvasItem in [map_title, preset_line, best_line]:
 		node.modulate.a = base * (1.0 - quiet)
+	# the practice tag in sentence case, saying where practice started without repeating itself.
+	if practice_tag.text.begins_with("PRACTICE ("):
+		var reason := _reason(str(game.practice_reason))
+		var head := "Practice"
+		if reason.begins_with("checkpoint practice from "):
+			head = "Practice from " + reason.trim_prefix("checkpoint practice from ")
+		elif reason != "checkpoint practice":
+			head = "Practice (%s)" % reason
+		practice_tag.text = head + " · no best · R for a clean run"
 	# an empty state says nothing: no "no clean time yet" line under the clock.
 	if not telemetry and best_line.text.begins_with("no clean time"):
 		best_line.modulate.a = 0.0
-	# experiment maps: one quiet line naming where you are. the runner's own status line already
-	# says the map and that it is experimental, so the separate tag steps aside while it shows.
-	if not telemetry and game.is_experiment_map() and lab_panel.visible and not lab_panel.text.is_empty():
-		lab_tag.visible = false
+	# experiment maps: one quiet line naming where you are. the runner's status line (rope model,
+	# armed, the map's own notes) is teaching: it shows with the teaching ticket and steps back with
+	# it, leaving the single map tag. the movement lab keeps its live move panel.
+	if not telemetry and game.is_experiment_map() and not bool(game.call("is_lab")):
+		var teaching := _teach_alpha > 0.01 or not bool(game.get("_started"))
+		if lab_panel.visible and not lab_panel.text.is_empty() and teaching:
+			lab_tag.visible = false
+		else:
+			lab_panel.visible = false
+	# practice says one thing at a time: while its toast is up the tag waits, then takes over.
+	if not practice_tag.text.is_empty() and message.modulate.a > 0.05 and message.text.begins_with("Practice from"):
+		practice_tag.modulate.a = 0.0
+	# the route hint is for finding the way; behind the finish card it is noise.
+	if bool(game.finished):
+		hint.modulate.a = 0.0
 	# the ghost/recording line is telemetry, except when it names who you are racing.
 	var racing := run_line.text.begins_with("racing ") or run_line.text.begins_with("PB segment guide")
 	run_line.visible = telemetry or racing
@@ -143,6 +157,17 @@ func _process(delta: float) -> void:
 	split_label.modulate.a = minf(1.0, _split_time * 1.5) * _arrival(SPLIT_HOLD_S - _split_time) * base
 	_split_name.modulate.a = split_label.modulate.a
 	_band_shade.modulate.a = speed_label.modulate.a
+	# the plate eases to its new size when an event arrives or leaves instead of jumping.
+	# it snaps when the window changes size, so a resize never leaves it behind.
+	var view := get_viewport().get_visible_rect().size
+	var ease := minf(1.0, delta * 14.0)
+	if _plate_rect.size == Vector2.ZERO or view != _plate_view:
+		_plate_rect = _plate_target
+	else:
+		_plate_rect = Rect2(_plate_rect.position.lerp(_plate_target.position, ease), _plate_rect.size.lerp(_plate_target.size, ease))
+	_plate_view = view
+	_band_shade.position = _plate_rect.position.round()
+	_band_shade.size = _plate_rect.size.round()
 	if bool(game.finished):
 		split_label.modulate.a = 0.0
 		_split_name.modulate.a = 0.0
@@ -152,6 +177,29 @@ func _process(delta: float) -> void:
 			node.modulate.a = 0.0
 	_layout()
 
+## the union of what the band is showing right now, grown into a plate.
+func _plate_bounds() -> Rect2:
+	var shown: Array[Control] = [speed_label, speed_unit, clock]
+	if not speed_metric.text.is_empty():
+		shown.append(speed_metric)
+	for node: Control in [split_label, _split_name, best_line, run_line]:
+		if node.visible and node.modulate.a > 0.05 and not (node as Label).text.is_empty():
+			shown.append(node)
+	if style_panel != null and style_panel.get("score_label") != null:
+		for key: String in ["score_label", "mult_label", "callout", "direction_label"]:
+			var label: Variant = style_panel.get(key)
+			if label is Label and (label as Label).visible and (label as Label).modulate.a > 0.05 and not (label as Label).text.is_empty():
+				shown.append(label)
+	var box := Rect2(speed_label.position, speed_label.get_minimum_size())
+	for node: Control in shown:
+		box = box.merge(Rect2(node.position, node.get_minimum_size()))
+	# symmetric about the speed numeral, so the plate is one steady instrument and only grows
+	# downward when an event arrives.
+	var cx := speed_label.position.x + speed_label.get_minimum_size().x * 0.5
+	var half := maxf(cx - box.position.x, box.end.x - cx)
+	box = Rect2(cx - half, box.position.y, half * 2.0, box.size.y)
+	return box.grow_individual(BAND.PLATE_PAD.x, BAND.PLATE_PAD.y, BAND.PLATE_PAD.x, BAND.PLATE_PAD.y)
+
 # --- layout -----------------------------------------------------------------------------------
 
 func _layout() -> void:
@@ -159,13 +207,15 @@ func _layout() -> void:
 	if _split_name == null or map_title == null:
 		return
 	var size := get_viewport().get_visible_rect().size
-	if not telemetry and controls.modulate.a > 0.01 and not controls.text.is_empty():
-		hint.position.y = controls.position.y + controls.size.y + 8.0
+	if not telemetry and not controls.text.is_empty():
+		# the preset's two lines stay two lines instead of wrapping into a paragraph.
+		controls.custom_minimum_size.x = minf(UI.text_width(controls), UI.safe_frame(size).size.x * 0.6)
+		controls.reset_size()
+		if controls.modulate.a > 0.01:
+			hint.position.y = controls.position.y + controls.size.y + 8.0
 	var y := BAND.baseline(size)
 	var cx := BAND.centre(size)
 	var left := BAND.left_flank(size)
-	_band_shade.position = Vector2(0.0, roundf(size.y * BAND.SHADE_TOP))
-	_band_shade.size = Vector2(size.x, size.y - _band_shade.position.y)
 	BAND.place(speed_label, cx, y, 0)
 	BAND.place(speed_unit, cx, y + 16.0, 0)
 	BAND.place(speed_metric, cx, y + 31.0, 0)
@@ -180,6 +230,7 @@ func _layout() -> void:
 	var chip_y := y + BAND.EVENT_DROP + (1.0 - _arrival(SPLIT_HOLD_S - _split_time)) * ARRIVE_PX
 	BAND.place(split_label, left, chip_y, -1)
 	BAND.place(_split_name, split_label.position.x - 8.0, chip_y, -1)
+	_plate_target = _plate_bounds()
 	if finish_card != null and _finish_keys != null:
 		finish_card.reset_size()
 		finish_panel.size = finish_card.size
@@ -280,7 +331,7 @@ func show_finish(is_best: bool, is_open_best: bool) -> void:
 	_key_chip("R", "Run again")
 	_key_chip("F", "Practise %s" % str(game.call("stage_title", int(game.checkpoint_index))))
 	_key_chip("Esc", "Maps")
-	_finish_more.text = "Preset F%d (bests are kept per preset)  ·  F2 / F5 switch  ·  G ghost" % int(game.preset.slot)
+	_finish_more.text = "F2 / F5 switch preset  ·  G ghost"
 	finish_card.reset_size()
 	finish_panel.size = finish_card.size
 	_layout()

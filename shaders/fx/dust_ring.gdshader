@@ -18,11 +18,11 @@ void fragment() {
 	// a few short gaps read as dust kicked out, not a drawn circle.
 	float gap = step(0.25, hash(id));
 	float aa = fwidth(r) * 0.75;
-	float ink_w = mix(0.035, 0.018, age);
+	float ink_w = mix(0.016, 0.009, age);
 	float line = (1.0 - smoothstep(ink_w, ink_w + aa, abs(r - edge_r))) * gap;
 	float dust_w = mix(0.22, 0.06, age);
 	float dust = (1.0 - smoothstep(0.0, dust_w, edge_r - r)) * step(r, edge_r) * mix(0.5, 1.0, gap);
 	float life = (1.0 - smoothstep(0.35, 1.0, age)) * strength;
 	ALBEDO = mix(pale.rgb, ink.rgb, step(dust * 0.55, line * 0.8));
-	ALPHA = max(line * 0.8, dust * 0.55) * life;
+	ALPHA = max(line * 0.65, dust * 0.5) * life;
 }
