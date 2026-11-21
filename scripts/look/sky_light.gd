@@ -48,7 +48,7 @@ const SKIES := {
 	"winter": {"zenith":"3c6f9e", "upper":"7ea5c8", "horizon":"d3dee5", "band":"f3e6d6", "band_strength":0.45, "below":"b6c8d6",
 		"glow":"fff0dc", "glow_strength":0.35, "glow_size":9.0, "light":"fffaf2", "mid":"dfe1e8", "shadow":"8d9fbc", "rim":"ffeedd", "contrast":0.95, "haze":0.55},
 	# mediterranean noon: deep cyan above, white towers, warm sand band.
-	"cyan": {"zenith":"145f8f", "upper":"2d93b8", "horizon":"b4dcd8", "band":"f2e4c4", "band_strength":0.35, "below":"95cbc8",
+	"cyan": {"zenith":"175e94", "upper":"3190bf", "horizon":"bad5e0", "band":"f2e4c4", "band_strength":0.35, "below":"95cbc8",
 		"glow":"fff6e2", "glow_strength":0.30, "glow_size":16.0, "light":"fffdf4", "mid":"e6e6df", "shadow":"86a6bb", "rim":"fff6e0", "contrast":1.05, "haze":0.4},
 	# after rain: slate banks with a thin bright break low over the sea.
 	"slate": {"zenith":"2d3e50", "upper":"4a5f72", "horizon":"9aacb5", "band":"d9d8c8", "band_strength":0.45, "below":"6d808c",
@@ -73,13 +73,13 @@ const SKIES := {
 const MAPS := {
 	# container port at dusk: low apricot sun from the left of the run, towering clouds, cool blue shade.
 	"breakwater": {"sky":"res://assets/look/cloud-sky.png", "paint":"golden", "layout":"towers", "wisp":"none", "cloud_turn":0.0, "cell_shift":0,
-		"sun":"fff0da", "sun_energy":0.5, "pitch":-22.0, "yaw":-135.0, "fill":"98b8d0", "fill_light":"8fb0c8", "fill_energy":0.14, "ambient":0.5, "fog":"b9d1cf", "fog_density":0.0011, "exposure":0.76},
+		"sun":"fff0da", "sun_energy":0.5, "pitch":-22.0, "yaw":-135.0, "fill":"98b8d0", "fill_light":"8fb0c8", "fill_energy":0.14, "ambient":0.5, "fog":"bccfdb", "fog_density":0.0011, "exposure":0.76},
 	# cold clear winter morning: low pale sun, ivory clouds, blue shade on the snow.
 	"whiteout-relay": {"sky":ROOT+"whiteout-sky.png", "paint":"winter", "layout":"fair", "wisp":"none", "cloud_turn":-25.0, "cell_shift":3,
 		"sun":"fff0dc", "sun_energy":0.5, "pitch":-22.0, "yaw":-36.2, "fill":"9dbdd0", "fill_energy":0.14, "ambient":0.56, "fog":"d3dee5", "fog_density":0.0012, "exposure":0.77},
 	# bright late morning by the sea: high warm sun, white towers, clear blue-grey shade.
 	"sunken-court": {"sky":ROOT+"sunken-sky.png", "paint":"cyan", "layout":"towers", "wisp":"none", "cloud_turn":0.0, "cell_shift":6,
-		"sun":"fff2da", "sun_energy":0.48, "pitch":-52.0, "yaw":35.0, "fill":"9cbad2", "fill_energy":0.12, "ambient":0.5, "fog":"b4dcd8", "fog_density":0.0011, "exposure":0.77},
+		"sun":"fff2da", "sun_energy":0.48, "pitch":-52.0, "yaw":35.0, "fill":"a6b8d8", "fill_energy":0.12, "ambient":0.5, "fog":"bccfdf", "fog_density":0.0011, "exposure":0.77},
 	# after rain: slate banks, a thin bright break over the sea, soft sun, high cool ambient.
 	"rainline": {"sky":ROOT+"rainline-sky.png", "paint":"slate", "layout":"banks", "wisp":"none", "cloud_turn":0.0, "cell_shift":2, "panorama_mix":0.55,
 		"sun":"dde3e8", "sun_energy":0.4, "pitch":-48.0, "yaw":-25.0, "fill":"a2b6c8", "fill_energy":0.16, "ambient":0.56, "fog":"9aacb5", "fog_density":0.001, "exposure":0.82},
@@ -88,10 +88,10 @@ const MAPS := {
 		"sun":"bccaf0", "sun_energy":0.44, "pitch":-42.0, "yaw":40.0, "fill":"7f90bc", "fill_energy":0.14, "ambient":0.62, "fog":"3a4770", "fog_density":0.0014, "exposure":0.95},
 	# clear mid-morning over the yard: fair-weather cumulus all round.
 	"practice": {"sky":ROOT+"practice-sky.png", "paint":"noon", "layout":"fair", "wisp":"none", "cloud_turn":35.0, "cell_shift":1,
-		"sun":"fff0e2", "sun_energy":0.56, "pitch":-38.0, "yaw":-110.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.55, "fog":"bcd7da", "fog_density":0.0013, "exposure":0.78},
+		"sun":"fff0e2", "sun_energy":0.56, "pitch":-38.0, "yaw":-110.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.55, "fog":"bed4e0", "fog_density":0.0013, "exposure":0.78},
 	# late afternoon on the dam: warm low sun down the tail race, towering clouds.
 	"overflow": {"sky":ROOT+"overflow-sky.png", "paint":"golden", "layout":"towers", "wisp":"none", "cloud_turn":60.0, "cell_shift":4,
-		"sun":"ffdcb0", "sun_energy":0.58, "pitch":-24.0, "yaw":-120.0, "fill":"98b8d0", "fill_energy":0.14, "ambient":0.55, "fog":"b9d1cf", "fog_density":0.0013, "exposure":0.78},
+		"sun":"ffdcb0", "sun_energy":0.58, "pitch":-24.0, "yaw":-120.0, "fill":"98b8d0", "fill_energy":0.14, "ambient":0.55, "fog":"bccfdb", "fog_density":0.0013, "exposure":0.78},
 	# the lab: high pearl skylight, soft and even.
 	"experiment": {"sky":ROOT+"lab-sky.png", "paint":"pearl", "layout":"sparse", "wisp":"none", "cloud_turn":60.0, "cell_shift":0,
 		"sun":"fff0d9", "sun_energy":0.6, "pitch":-62.0, "yaw":25.0, "fill":"b2c4d8", "fill_energy":0.12, "ambient":0.58, "fog":"dfe5e5", "fog_density":0.0012, "exposure":0.78},
@@ -100,31 +100,31 @@ const MAPS := {
 		"sun":"fff0e2", "sun_energy":0.56, "pitch":-40.0, "yaw":-110.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.56, "fog":"dfe5e5", "fog_density":0.0012, "exposure":0.78},
 	# transfer yard in full morning: towering cumulus over the rope lines.
 	"tether-yard": {"sky":ROOT+"practice-sky.png", "paint":"noon", "layout":"sparse", "wisp":"none", "cloud_turn":0.0, "cell_shift":6,
-		"sun":"fff0e2", "sun_energy":0.56, "pitch":-34.0, "yaw":-120.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.55, "fog":"bcd7da", "fog_density":0.0013, "exposure":0.78},
+		"sun":"fff0e2", "sun_energy":0.56, "pitch":-34.0, "yaw":-120.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.55, "fog":"bed4e0", "fog_density":0.0013, "exposure":0.78},
 	# first light: a low peach sun across the line, long shadows.
 	"through-line": {"sky":ROOT+"practice-sky.png", "paint":"dawn", "layout":"fair", "wisp":"none", "cloud_turn":-50.0, "cell_shift":2,
 		"sun":"ffd8b2", "sun_energy":0.56, "pitch":-24.0, "yaw":-70.0, "fill":"98b8cc", "fill_energy":0.14, "ambient":0.6, "fog":"d8d3cf", "fog_density":0.0011, "exposure":0.78},
 	# a breezy bright day over the roofs.
 	"mail-run": {"sky":ROOT+"practice-sky.png", "paint":"noon", "layout":"fair", "wisp":"none", "cloud_turn":100.0, "cell_shift":5,
-		"sun":"fff0e2", "sun_energy":0.46, "pitch":-36.0, "yaw":-140.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.46, "fog":"bcd7da", "fog_density":0.0013, "exposure":0.72},
+		"sun":"fff0e2", "sun_energy":0.46, "pitch":-36.0, "yaw":-140.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.46, "fog":"bed4e0", "fog_density":0.0013, "exposure":0.72},
 	# salt works at noon: deep blue behind the pale pans so slopes and decks read against it.
 	"saltglass": {"sky":ROOT+"practice-sky.png", "paint":"salt", "layout":"sparse", "wisp":"none", "cloud_turn":10.0, "cell_shift":1,
 		"sun":"fff0e2", "sun_energy":0.56, "pitch":-40.0, "yaw":-110.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.56, "fog":"d7e4e2", "fog_density":0.0012, "exposure":0.78},
 	# valley dam in the afternoon: side sun along the deck line.
 	"viaduct": {"sky":ROOT+"overflow-sky.png", "paint":"afternoon", "layout":"towers", "wisp":"none", "cloud_turn":28.0, "cell_shift":4,
-		"sun":"fff0e2", "sun_energy":0.56, "pitch":-36.0, "yaw":-110.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.55, "fog":"c3d8d6", "fog_density":0.0013, "exposure":0.78},
+		"sun":"fff0e2", "sun_energy":0.56, "pitch":-36.0, "yaw":-110.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.55, "fog":"bccfdb", "fog_density":0.0013, "exposure":0.72},
 	# drydock gantries, mid afternoon.
 	"gantry": {"sky":"res://assets/look/cloud-sky.png", "paint":"afternoon", "layout":"fair", "wisp":"none", "cloud_turn":-20.0, "cell_shift":0,
 		"sun":"fff0e2", "sun_energy":0.56, "pitch":-34.0, "yaw":-110.0, "fill":"a0bcd2", "fill_energy":0.12, "ambient":0.55, "fog":"c3d8d6", "fog_density":0.0013, "exposure":0.78},
 	# the longer chain runs into later, warmer light.
 	"gantry-chain": {"sky":"res://assets/look/cloud-sky.png", "paint":"golden", "layout":"fair", "wisp":"none", "cloud_turn":-20.0, "cell_shift":3,
-		"sun":"ffe6c0", "sun_energy":0.56, "pitch":-28.0, "yaw":-110.0, "fill":"98b8d0", "fill_energy":0.12, "ambient":0.55, "fog":"b9d1cf", "fog_density":0.0013, "exposure":0.78},
+		"sun":"ffe6c0", "sun_energy":0.56, "pitch":-28.0, "yaw":-110.0, "fill":"98b8d0", "fill_energy":0.12, "ambient":0.55, "fog":"bccfdb", "fog_density":0.0013, "exposure":0.78},
 	# tidal estuary, late afternoon; the sun stands behind the runner so the spill-tower court is lit.
 	"sluice-six": {"sky":"res://assets/look/cloud-sky.png", "paint":"golden", "layout":"towers", "wisp":"none", "cloud_turn":150.0, "cell_shift":6,
-		"sun":"ffe4bc", "sun_energy":0.58, "pitch":-38.0, "yaw":20.0, "fill":"98b8d0", "fill_energy":0.12, "ambient":0.55, "fog":"b9d1cf", "fog_density":0.0012, "exposure":0.78},
+		"sun":"ffe4bc", "sun_energy":0.58, "pitch":-38.0, "yaw":20.0, "fill":"98b8d0", "fill_energy":0.12, "ambient":0.55, "fog":"bccfdb", "fog_density":0.0012, "exposure":0.78},
 	# the outer reach at golden hour: broad open sky, long side light over the corridors.
 	"outer-reach": {"sky":"res://assets/look/cloud-sky.png", "paint":"golden", "layout":"towers", "wisp":"none", "cloud_turn":-60.0, "cell_shift":2,
-		"sun":"ffd9a8", "sun_energy":0.6, "pitch":-20.0, "yaw":-120.0, "fill":"98b8d0", "fill_energy":0.12, "ambient":0.55, "fog":"b9d1cf", "fog_density":0.0011, "exposure":0.78},
+		"sun":"ffd9a8", "sun_energy":0.6, "pitch":-20.0, "yaw":-120.0, "fill":"98b8d0", "fill_energy":0.12, "ambient":0.55, "fog":"bccfdb", "fog_density":0.0011, "exposure":0.78},
 	# foundry at dusk: warm low haze around the hall.
 	"foundry": {"sky":ROOT+"practice-sky.png", "paint":"dawn", "layout":"sparse", "wisp":"none", "cloud_turn":30.0, "cell_shift":5,
 		"sun":"ffd4a8", "sun_energy":0.56, "pitch":-26.0, "yaw":-110.0, "fill":"98b8cc", "fill_energy":0.12, "ambient":0.56, "fog":"d8d3cf", "fog_density":0.0011, "exposure":0.78},

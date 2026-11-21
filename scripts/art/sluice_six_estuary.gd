@@ -2,7 +2,7 @@ extends RefCounted
 ## the flood barrier curves back into the tower; its buttresses root every span below water.
 const ART := preload("res://scripts/art/sluice_six_art.gd")
 ## flat and crest: tidal-flat and barrier-crest tones; outer reach keeps its original pale ones.
-static func dress(level: Node3D, flat: Color = Color("a3a18a"), crest: Color = Color("c3c0ac")) -> void:
+static func dress(level: Node3D, flat: Color = Color("a3a18a"), crest: Color = Color("c3c0ac"), fall: Color = Color("bad5ce"), foam: Color = Color("c7ddd3")) -> void:
 	var centre := Vector3(-8,0,-92)
 	var count := 18
 	for i: int in count:
@@ -19,8 +19,8 @@ static func dress(level: Node3D, flat: Color = Color("a3a18a"), crest: Color = C
 		ART._box(wall,"gate",Vector3(0,0,-1.4),Vector3(4.5,5,0.5),Color("57777b"),true)
 		ART._box(wall,"crest",Vector3(0,5,0),Vector3(5.4,0.8,6),crest,true)
 		ART._box(wall,"lower_apron",Vector3(0,-2.6,4),Vector3(5.4,0.5,10),Color("839c97"),true)
-		ART._box(wall,"fall",Vector3(0,-0.5,1.8),Vector3(4.5,4,0.12),Color("bad5ce"))
-		ART._box(wall,"foam",Vector3(0,-2.87,7),Vector3(4.5,0.02,4),Color("c7ddd3"))
+		ART._box(wall,"fall",Vector3(0,-0.5,1.8),Vector3(4.5,4,0.12),fall)
+		ART._box(wall,"foam",Vector3(0,-2.87,7),Vector3(4.5,0.02,4),foam)
 		for x: float in [-2.4,2.4]:
 			ART._box(wall,"rail_post_%s" % x,Vector3(x,6,2.8),Vector3(0.08,1.2,0.08),Color("3e575a"))
 		ART._box(wall,"rail",Vector3(0,6.6,2.8),Vector3(5.4,0.08,0.08),Color("3e575a"))

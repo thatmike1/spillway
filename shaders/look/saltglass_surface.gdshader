@@ -23,9 +23,15 @@ void fragment() {
  vec3 side = look_c ? mix(vec3(0.36, 0.48, 0.53), vec3(0.22, 0.32, 0.37), tide) : mix(vec3(0.24, 0.35, 0.41), vec3(0.17, 0.26, 0.31), tide);
  vec3 cap = surf ? vec3(0.81, 0.86, 0.79) : vec3(0.93, 0.88, 0.75);
  if (look_c) {
-  cap = vec3(0.90, 0.87, 0.81);
+  cap = vec3(0.88, 0.87, 0.84);
  }
- side = mix(side, vec3(0.42, 0.43, 0.36), smoothstep(0.60, 0.80, scuff) * 0.24);
+ if (look_c) {
+  // look c: wear runs down from the edges as soft vertical streaks, never round olive spots.
+  float runoff = texture(wear, side_uv / vec2(2.2, 11.0) + 0.21).r;
+  side = mix(side, side * vec3(0.84, 0.88, 0.90), smoothstep(0.50, 0.80, runoff) * 0.55);
+ } else {
+  side = mix(side, vec3(0.42, 0.43, 0.36), smoothstep(0.60, 0.80, scuff) * 0.24);
+ }
  if (surf) {
   if (look_c) {
    // the face reads as a slope: pale at the crest, sea-glass at the wet toe.
@@ -51,9 +57,15 @@ void fragment() {
   vec2 joint_distance = abs(fract(world_position.xz / vec2(8.0, 24.0) + 0.5) - 0.5) * vec2(8.0, 24.0);
   vec2 aa_joint = max(fwidth(world_position.xz), vec2(0.004));
   float concrete_joint = 1.0 - min(smoothstep(0.012 - aa_joint.x, 0.012 + aa_joint.x, joint_distance.x), smoothstep(0.012 - aa_joint.y, 0.012 + aa_joint.y, joint_distance.y));
-  cap = mix(cap, vec3(0.38, 0.43, 0.41), concrete_joint * 0.10);
+  cap = mix(cap, vec3(0.38, 0.43, 0.41), concrete_joint * (look_c ? 0.30 : 0.10));
+  if (look_c) {
+   // uneven brine staining, large and soft, so a broad quay is not one blank plane.
+   float stain = smoothstep(0.45, 0.80, texture(wear, world_position.xz / 23.0 + 0.37).r);
+   cap = mix(cap, cap * vec3(0.90, 0.91, 0.90), stain * 0.7);
+  }
  }
- cap *= look_c ? 0.90 : 0.80;
+ // look c's lighter tops already sit near white under lane 02's noon light; both share this scale.
+ cap *= 0.80;
  ALBEDO = mix(side, cap, face);
  // ink is part of the face material, not a second crest mesh or a collision lip.
  if (surf) {

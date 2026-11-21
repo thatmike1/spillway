@@ -9,15 +9,15 @@ extends RefCounted
 ## blocks, where a hop peaks under 1.5 m; every pier stands outside the training walls.
 
 const SURFACE := preload("res://shaders/look/surface.gdshader")
-const PALETTE := {"top": "e6e4da", "side": "4c6468"}
+const PALETTE := {"top": "dcd9ce", "side": "4c6468"}
 ## run decks a step below the landings, pits and walls weathered and darker than any deck.
 const SURFACES := {
-	"track": {"top_color": "e1ded2"},
-	"landing": {"top_color": "f1efe7"},
+	"track": {"top_color": "cfccbf"},
+	"landing": {"top_color": "d9d6ca"},
 	"catch": {"top_color": "52665f", "side_color": "3d5254"},
 	"return": {"top_color": "8d9a90"},
-	"concrete": {"side_color": "5d7375", "wear_amount": 0.1},
-	"old_concrete": {"side_color": "4a5f60", "wear_amount": 0.12},
+	"concrete": {"side_color": "5d7375", "wear_amount": 0.05},
+	"old_concrete": {"side_color": "4a5f60", "wear_amount": 0.07},
 	"brick": {"top_color": "a9b2a8", "side_color": "6f7f7a", "wear_amount": 0.1},
 }
 ## the pipe: one line at z, from the dam face east to the powerhouse west, centre height and radius.

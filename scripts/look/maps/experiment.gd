@@ -60,8 +60,13 @@ var _wall: ShaderMaterial
 var _housing: ShaderMaterial
 var _board: Label3D
 var _board_state := {}
+var _signs: Array[Label3D] = []
 
 func material(key: String, node: GeometryInstance3D, proposed: Material) -> Material:
+	# imported props (pipes, stacks, machine parts) keep their shapes but leave the violet-blue
+	# kit palette for the same weathered steel as the housings.
+	if node.material_override == null and proposed is BaseMaterial3D:
+		return _housing_material()
 	if key == "Mesh_wall_panel":
 		return _wall_material()
 	if key in ["Mesh_housing", "Mesh_rack_low"]:
@@ -102,17 +107,30 @@ func dress(level: Node3D) -> Node3D:
 			for x: float in [-8.0, -2.5, 2.5, 8.0]:
 				_box(root, "TrussPost_%d_%s" % [int(tz), x], Vector3(x, ROOF - 0.45, tz), Vector3(0.14, 0.8, 0.2), steel)
 		tz -= 10.0
-	# the hub board reads as painted stencil, not a floating caption.
+	# each roof tube gets a dark fitting above it, so it hangs from the roof instead of floating.
+	for child: Node in level.get_children():
+		if child is MeshInstance3D and str(child.name).begins_with("LampTube_"):
+			var at: Vector3 = (child as MeshInstance3D).position
+			_box(root, "LampFitting_" + str(child.name).trim_prefix("LampTube_"), Vector3(at.x, (at.y + 0.05 + ROOF) * 0.5, at.z), Vector3(0.42, ROOF - at.y - 0.05, 5.3), steel)
+	# the hub board becomes a painted place name; key names and unit figures leave the world
+	# (the hud carries them), and l off brings every sign back as it was.
 	_board = level.get_node_or_null("Sign_hub_board") as Label3D
 	if _board != null:
-		_board_state = {"modulate": _board.modulate, "outline": _board.outline_size}
+		_board_state = {"modulate": _board.modulate, "outline": _board.outline_size, "text": _board.text}
+	for child: Node in level.get_children():
+		if child is Label3D and str(child.name).begins_with("Sign_") and child != _board:
+			_signs.append(child)
 	return root
 
 func set_enabled(value: bool) -> void:
+	for label: Label3D in _signs:
+		if is_instance_valid(label):
+			label.visible = not value
 	if not is_instance_valid(_board):
 		return
 	_board.modulate = Color("f1ead8") if value else _board_state.modulate
 	_board.outline_size = 0 if value else int(_board_state.outline)
+	_board.text = "MOVEMENT LAB" if value else str(_board_state.text)
 
 func _wall_material() -> ShaderMaterial:
 	if _wall == null:
@@ -131,7 +149,7 @@ func _housing_material() -> ShaderMaterial:
 		_housing.set_shader_parameter("top_color", Color("9fb0b2"))
 		_housing.set_shader_parameter("side_color", Color("587078"))
 		_housing.set_shader_parameter("wear_amount", 0.06)
-		_housing.set_shader_parameter("metal", 1.0)
+		_housing.set_shader_parameter("metal", 0.0)
 	return _housing
 
 func _box(root: Node3D, id: String, at: Vector3, size: Vector3, material: Material) -> void:

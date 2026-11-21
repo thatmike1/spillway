@@ -29,20 +29,22 @@ func material(key: String, node: GeometryInstance3D, proposed: Material) -> Mate
 		sea.set_shader_parameter("swell_scale", 0.4)
 		sea.set_shader_parameter("ripple_mix", 0.3)
 		return sea
-	# transfer decks share the rope courses' cast concrete: runoff wear, no joint grid, so the only lines
-	# on a landing are its real edges. tops render well below their albedo under this basin's light, so the top is set near white.
+	# transfer decks share the rope courses' cast concrete: casting joints off the deck centre, crisp stains,
+	# runoff on the sides. this basin's light leaves tops well below lane 01's deck value, so they get a lift.
 	if key.begins_with("Mesh_deck_transfer"):
 		if _concrete == null:
 			_concrete = ShaderMaterial.new()
 			_concrete.shader = preload("res://assets/maps/gantry/concrete.gdshader")
-			_concrete.set_shader_parameter("top_color", Color("faf3e2"))
+			_concrete.set_shader_parameter("top_color", Color("f2ece0"))
 			_concrete.set_shader_parameter("side_color", Color("6d8388"))
 			_concrete.set_shader_parameter("wear_color", Color("9a9c8c"))
 			_concrete.set_shader_parameter("wear", preload("res://assets/look/painted-wear.png"))
 			_concrete.set_shader_parameter("wear_amount", 0.45)
-			_concrete.set_shader_parameter("deck", 0.0)
+			_concrete.set_shader_parameter("deck", 1.0)
 			_concrete.set_shader_parameter("waterline", -8.0)
 			_concrete.set_shader_parameter("weather", 1.0)
+			_concrete.set_shader_parameter("top_gain", 1.1)
+			_concrete.set_shader_parameter("joint_shift", Vector2(2.25, 0.0))
 		return _concrete
 	return proposed
 
@@ -64,9 +66,10 @@ func dress(level: Node3D) -> Node3D:
 			_box(frame, "foot_%s" % side, Vector3(x, COURT_TOP + 0.3, at.z), Vector3(1.6, 0.6, 1.6), pier)
 			var knee := _box(frame, "knee_%s" % side, Vector3(at.x + side * 0.86, at.y - 0.35, at.z), Vector3(0.26, 3.6, 0.26), steel)
 			knee.rotation.z = signf(side) * PI * 0.25
-		# a pale lifting carriage separates the ring from the dark beam at distance.
-		_box(frame, "carriage", at + Vector3(0, 1.75, 0), Vector3(2.0, 0.5, 1.2), pale)
-		_box(frame, "strap", at + Vector3(0, 1.05, 0), Vector3(0.3, 0.9, 0.26), steel)
+		# a pale lifting carriage wraps the dark beam above the ring, so it reads as a trolley at distance
+		# rather than a lamp sitting on top.
+		_box(frame, "carriage", at + Vector3(0, 1.15, 0), Vector3(2.2, 1.1, 1.0), pale)
+		_box(frame, "strap", at + Vector3(0, 0.42, 0), Vector3(0.3, 0.45, 0.26), steel)
 	# every transfer deck stands on paired piers that reach the court floor, inset under the slab.
 	# the live entry is the r19/r20 level (every deck at 4 m); the newer module adds DECK_HEIGHTS.
 	var heights: Variant = []
