@@ -54,9 +54,9 @@ void fragment() {
  if(deck) {
   cap=mix(cap,top_color.rgb*seam_floor,seam*seam_strength*nearfade);
   // broad, soft weathering: tide stains and dried salt patches that vary across one slab.
-  float stain=smoothstep(0.55,0.9,grain(wp.xz*0.09+vec2(3.1,7.7))*0.75+grain(wp.xz*0.41)*0.25);
+  float stain=smoothstep(0.42,0.85,grain(wp.xz*0.09+vec2(3.1,7.7))*0.75+grain(wp.xz*0.41)*0.25);
   float salt=smoothstep(0.62,0.95,grain(wp.xz*0.23+vec2(11.0,2.0)));
-  cap=mix(cap,cap*vec3(0.90,0.91,0.88),stain*deck_stain);
+  cap=mix(cap,cap*vec3(0.84,0.86,0.82),stain*deck_stain);
   cap=mix(cap,min(cap*1.04,vec3(1.0)),salt*deck_stain*0.6);
  }
  if(wn.y < -0.65) { side=mix(side_color.rgb,top_color.rgb,0.28); }

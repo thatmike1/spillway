@@ -4,8 +4,8 @@ const CONTOURS := preload("res://scripts/r17_contours.gd")
 const SKY_LIGHT := preload("res://scripts/look/sky_light.gd")
 ## original procedural architecture; no imported reference or concept assets.
 ## sluice six's own tones: sea-glass water, quieter deck joints. outer reach keeps the shared defaults.
-const SEA_DEEP := Vector3(0.16,0.37,0.39)
-const SEA_FAR := Vector3(0.34,0.52,0.51)
+const SEA_DEEP := Vector3(0.21,0.34,0.35)
+const SEA_FAR := Vector3(0.38,0.49,0.48)
 const SEAM := Vector2(0.30,0.70)
 ## joints every two paving bays: sparse lines on a quiet slab, not a tile grid.
 const SEAM_SCALE := Vector2(4.876,6.5024)
@@ -138,7 +138,7 @@ static func dress(level: Node3D) -> void:
 	inspection.modulate = Color("364e54")
 	inspection.position = Vector3(4.675,3.82,-37.23)
 	level.add_child(inspection)
-	load("res://scripts/art/sluice_six_estuary.gd").dress(level,Color("75806c"),Color("a9aa99"))
+	load("res://scripts/art/sluice_six_estuary.gd").dress(level,Color("75806c"),Color("a9aa99"),Color("86a39e"),Color("9fb6af"))
 	# the established contour builder inks actual visible boundaries and paints only jump lips.
 	var contours := CONTOURS.new()
 	level.add_child(contours.build(level,false))
