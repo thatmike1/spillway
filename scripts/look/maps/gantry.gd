@@ -101,17 +101,38 @@ static func _anchor(level: Node3D, index: int, anchor: Node3D) -> void:
 	_cab(level, index, anchor.position)
 
 static func _cab(level: Node3D, index: int, at: Vector3) -> void:
-	# one operator cab hung off the left leg says "working crane"; it hugs the post, outside the corridor.
+	# an operator cab hung off the left leg says "working crane": a cab-sized body with a wrapped window
+	# band, a floor platform with a rail, and a ladder down the leg, so it reads as a room and not a lamp.
+	# everything sits outside the leg (x <= -12.65), far from the swing corridor.
 	var y := at.y - 3.0
 	var root := Node3D.new()
 	root.name = "Look_gantry_cab_%d" % index
-	root.position = Vector3(-14.4, y, at.z)
+	root.position = Vector3(-14.75, y, at.z)
 	level.add_child(root)
-	_piece(root, "body", Vector3.ZERO, Vector3(2.1, 2.3, 2.5), CAB, true)
-	_piece(root, "roof", Vector3(0, 1.22, 0), Vector3(2.35, 0.16, 2.75), GLASS, true)
-	_piece(root, "glazing_front", Vector3(0, 0.35, 1.26), Vector3(1.8, 0.9, 0.03), GLASS, false)
-	_piece(root, "glazing_side", Vector3(-1.06, 0.35, 0), Vector3(0.03, 0.9, 2.1), GLASS, false)
-	_piece(root, "floor_bracket", Vector3(0.55, -1.3, 0), Vector3(1.3, 0.3, 0.5), GLASS, true)
+	_piece(root, "body", Vector3.ZERO, Vector3(2.8, 2.6, 3.2), CAB, true)
+	_piece(root, "roof", Vector3(0, 1.38, 0), Vector3(3.05, 0.16, 3.45), GLASS, true)
+	_piece(root, "glazing_front", Vector3(0, 0.4, 1.61), Vector3(2.5, 1.0, 0.03), GLASS, false)
+	_piece(root, "glazing_back", Vector3(0, 0.4, -1.61), Vector3(2.5, 1.0, 0.03), GLASS, false)
+	_piece(root, "glazing_side", Vector3(-1.41, 0.4, 0), Vector3(0.03, 1.0, 2.9), GLASS, false)
+	_piece(root, "platform", Vector3(0.2, -1.38, 0), Vector3(3.6, 0.16, 4.2), GLASS, true)
+	for z: float in [-2.05, 2.05]:
+		_piece(root, "rail_%s" % z, Vector3(0.2, -0.85, z), Vector3(3.6, 0.07, 0.07), GLASS, false)
+		for x: float in [-1.55, 1.95]:
+			_piece(root, "rail_post_%s_%s" % [z, x], Vector3(x, -1.1, z), Vector3(0.07, 0.55, 0.07), GLASS, false)
+	# a ladder on the leg's near face, from the quay rail up to the cab platform.
+	var foot := 4.65
+	var head := y - 1.46
+	if head > foot + 1.0:
+		var ladder := Node3D.new()
+		ladder.name = "Look_gantry_ladder_%d" % index
+		ladder.position = Vector3(-13.0, 0, at.z + 0.5)
+		level.add_child(ladder)
+		for x: float in [-0.22, 0.22]:
+			_piece(ladder, "stile_%s" % x, Vector3(x, (foot + head) * 0.5, 0), Vector3(0.06, head - foot, 0.06), GLASS, false)
+		var rung := foot + 0.3
+		while rung < head:
+			_piece(ladder, "rung_%s" % rung, Vector3(0, rung, 0), Vector3(0.44, 0.04, 0.04), GLASS, false)
+			rung += 0.45
 
 static func _piece(root: Node3D, id: String, at: Vector3, size: Vector3, color: Color, inked: bool) -> void:
 	var node := MeshInstance3D.new()
