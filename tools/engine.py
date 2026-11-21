@@ -5,7 +5,9 @@ import hashlib
 import os
 from pathlib import Path
 import subprocess
+import sys
 import threading
+import time
 
 PROJECT = Path(__file__).resolve().parents[1]
 VERSION = "4.7.2.stable.official.ed1daf0bf"
@@ -32,15 +34,78 @@ def check_pin():
         raise RuntimeError("Set GODOT to the pinned official Godot 4.7.2 Linux editor.")
 
 
+CAPTURE_SLOTS = 3
+
+
+def lease_path(suffix):
+    # gate, slot and display leases live beside LOCK, so tests that move LOCK move them too.
+    return LOCK.with_name(LOCK.stem + suffix)
+
+
+def _flock(stream, mode, what):
+    try:
+        fcntl.flock(stream, mode | fcntl.LOCK_NB)
+    except BlockingIOError:
+        print(f"waiting for {what}", file=sys.stderr, flush=True)
+        fcntl.flock(stream, mode)
+
+
+def _enter_shared(lease):
+    # a capture takes one of CAPTURE_SLOTS slots, then the lock shared. the gate keeps
+    # exclusive jobs from starving: an exclusive waiter holds it, so new captures queue behind.
+    told = False
+    while True:
+        for index in range(CAPTURE_SLOTS):
+            slot = lease_path(f".slot{index}").open("a")
+            try:
+                fcntl.flock(slot, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                slot.close()
+                continue
+            lease.enter_context(slot)
+            break
+        else:
+            if not told:
+                print(f"waiting for one of {CAPTURE_SLOTS} capture slots", file=sys.stderr, flush=True)
+                told = True
+            time.sleep(.25)
+            continue
+        break
+    told = False
+    while True:
+        with lease_path(".gate").open("a") as gate:
+            _flock(gate, fcntl.LOCK_SH, "the engine gate (a check or export is running or waiting)")
+            stream = LOCK.open("a")
+            try:
+                fcntl.flock(stream, fcntl.LOCK_SH | fcntl.LOCK_NB)
+            except BlockingIOError:
+                stream.close()
+            else:
+                lease.enter_context(stream)
+                return
+        # an exclusive holder that predates the gate: wait outside it, so waiting checks are not held up.
+        if not told:
+            print("waiting for the engine lock (an exclusive job is running)", file=sys.stderr, flush=True)
+            told = True
+        time.sleep(.25)
+
+
 @contextmanager
-def locked():
+def locked(shared=False):
+    """Hold the engine lease. Exclusive by default; shared=True is for private-display captures.
+    A nested lease reuses the outermost one, whatever it asks for."""
     global _lock_depth
     # serialize threads; only the owning thread can reuse the outer file lease.
     with _THREAD_LOCK, ExitStack() as lease:
         if _lock_depth == 0:
-            # all sibling capture and game processes share this exact lock file.
-            stream = lease.enter_context(LOCK.open("a"))
-            fcntl.flock(stream, fcntl.LOCK_EX)
+            if shared:
+                _enter_shared(lease)
+            else:
+                # all sibling capture and game processes share this exact lock file.
+                gate = lease.enter_context(lease_path(".gate").open("a"))
+                _flock(gate, fcntl.LOCK_EX, "the engine gate (another check or export)")
+                stream = lease.enter_context(LOCK.open("a"))
+                _flock(stream, fcntl.LOCK_EX, "running captures to finish")
         _lock_depth += 1
         try:
             yield
