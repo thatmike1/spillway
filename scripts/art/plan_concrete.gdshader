@@ -25,11 +25,12 @@ void fragment() {
  concrete=mix(concrete,vec3(0.73,0.70,0.65),coping);
  float rim=smoothstep(top_y-0.14,top_y-0.12,wp.y);
  concrete=mix(concrete,vec3(0.63,0.28,0.12),rim);
- vec3 top=vec3(0.79,0.75,0.69)*(0.96+texture(wear,wp.xz/15.0).g*0.07);
+ vec3 top=vec3(0.80,0.78,0.74)*(0.96+texture(wear,wp.xz/15.0).g*0.07);
  vec2 cell=abs(fract(wp.xz/vec2(5.0,9.0)+0.5)-0.5)*vec2(5.0,9.0);
  vec2 aa=max(fwidth(wp.xz),vec2(0.004));
  float joint=1.0-min(smoothstep(0.02-aa.x,0.02+aa.x,cell.x),smoothstep(0.02-aa.y,0.02+aa.y,cell.y));
- top=mix(top,vec3(0.26,0.34,0.34),joint*0.45);
+ // joints stay quiet so only real deck edges read as gaps.
+ top=mix(top,vec3(0.26,0.34,0.34),joint*0.2);
  ALBEDO=mix(concrete,top,smoothstep(0.65,0.92,wn.y));
  ROUGHNESS=0.95;
  SPECULAR=0.0;

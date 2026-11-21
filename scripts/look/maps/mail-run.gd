@@ -4,6 +4,48 @@ extends RefCounted
 ## the mail packet moored past it. presentation only: map nodes keep their meshes and collision,
 ## and everything added here sits under the look layer with no collision.
 const SURFACE := preload("res://shaders/look/surface.gdshader")
+const SEA := preload("res://shaders/look/saltglass_water.gdshader")
+## the quay's own surface: sparse transverse joints on pale tops, and weathering that gathers at
+## the foot of a wall and runs down in drips, instead of the shared wear spread evenly over a face.
+const QUAY_CODE := """shader_type spatial;
+render_mode diffuse_toon, specular_disabled;
+uniform vec4 top_color : source_color = vec4(0.85, 0.81, 0.76, 1.0);
+uniform vec4 side_color : source_color = vec4(0.47, 0.60, 0.64, 1.0);
+uniform sampler2D wear : filter_linear_mipmap_anisotropic, repeat_enable;
+uniform float joint_spacing = 0.0;
+uniform float base_y = 2.0;
+uniform float weather = 1.0;
+varying vec3 wp;
+varying vec3 wn;
+void vertex(){ wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz; wn = normalize(MODEL_NORMAL_MATRIX * NORMAL); }
+void fragment(){
+ float top = smoothstep(0.65, 0.92, wn.y);
+ float mottle = texture(wear, wp.xz / 29.0).g;
+ vec3 cap = top_color.rgb * (0.975 + mottle * 0.045);
+ if (joint_spacing > 0.0) {
+  float jz = abs(fract(wp.z / joint_spacing) - 0.5) * joint_spacing;
+  float aa = max(fwidth(wp.z), 0.004);
+  float joint = 1.0 - smoothstep(0.018 - aa, 0.018 + aa, jz);
+  float fade = 1.0 - smoothstep(30.0, 90.0, distance(wp, CAMERA_POSITION_WORLD));
+  cap = mix(cap, vec3(0.42, 0.45, 0.43), joint * 0.32 * fade);
+ }
+ float u = abs(wn.x) > abs(wn.z) ? wp.z : wp.x;
+ float drip = texture(wear, vec2(u * 0.23, wp.y * 0.035)).r;
+ float foot = 1.0 - smoothstep(base_y, base_y + 1.6, wp.y);
+ vec3 side = side_color.rgb;
+ side = mix(side, side * 0.78, smoothstep(0.58, 0.78, drip) * 0.55 * weather);
+ side = mix(side, side * 0.72 + vec3(0.04, 0.035, 0.02), foot * 0.6 * weather);
+ ALBEDO = mix(side, cap, top);
+ ROUGHNESS = 0.95;
+ SPECULAR = 0.0;
+}
+void light(){
+ float facing = dot(NORMAL, LIGHT);
+ float band = mix(0.48, 0.82, smoothstep(-0.1, 0.02, facing));
+ band = mix(band, 1.0, smoothstep(0.65, 0.72, facing));
+ DIFFUSE_LIGHT += ALBEDO * band * ATTENUATION * LIGHT_COLOR / PI;
+}
+"""
 const WEAR := preload("res://assets/look/painted-wear.png")
 const UI := preload("res://scripts/r18_ui_theme.gd")
 
@@ -17,23 +59,32 @@ const EDGE := Color("e15a2b")
 const POSTS := [Vector3(12, 4, -14), Vector3(-12, 4, -52), Vector3(12, 4, -90)]
 
 var _materials := {}
+var _quay_shader: Shader
 var _labels: Array[Dictionary] = []
 var _hidden: Array[Node] = []
 
 func material(key: String, node: GeometryInstance3D, proposed: Material) -> Material:
+	if key == "Water":
+		# a calm sea-glass sea: broad bands, no repeating tile.
+		if not _materials.has("sea"):
+			var sea := ShaderMaterial.new()
+			sea.shader = SEA
+			sea.set_shader_parameter("look_c", true)
+			_materials["sea"] = sea
+		return _materials["sea"]
 	if not key.begins_with("Mail_"):
 		return proposed
 	var id := key.trim_prefix("Mail_")
 	if id.begins_with("quay_"):
-		return _surface("deck", DECK, SIDE, 0.2, 1.0)
+		return _quay("deck", DECK, SIDE, 12.0, 2.0, 1.0)
 	if id.begins_with("seawall"):
-		return _surface("seawall", DECK, SIDE, 0.42, 0.0)
+		return _quay("seawall", DECK, SIDE, 0.0, -4.4, 1.0)
 	if id.begins_with("post_cap") or id.begins_with("post_plinth"):
-		return _surface("cornice", PALE, STONE, 0.12, 0.0)
+		return _quay("cornice", PALE, STONE, 0.0, 2.0, 0.3)
 	if id.begins_with("post_"):
-		return _surface("house", PALE, HOUSE, 0.38, 0.0)
+		return _quay("house", PALE, HOUSE, 0.0, 2.0, 1.0)
 	if id.begins_with("arch_pier") or id == "sorting_arch":
-		return _surface("house", PALE, HOUSE, 0.38, 0.0)
+		return _quay("arch", PALE, HOUSE, 0.0, 2.0, 1.0)
 	if id.begins_with("slot_") or id.begins_with("collection_plate"):
 		# the slot surround is painted, so it stays readable when the face is in shade.
 		return _flat("panel", Color("e2dac6"), true)
@@ -59,9 +110,8 @@ func dress(level: Node3D) -> Node3D:
 		_box(root, "slot_panel_%d" % i, at + Vector3(0, 0.12, 0.13 * face), Vector3(3.2, 3.0, 0.06), _flat("panel", Color("e2dac6"), true))
 		# the post number is painted on the house face instead of floating over the roof.
 		_stencil(root, "%02d" % (i + 1), at + Vector3(-2.4 * face, -0.35, 0.115 * face), PI if face < 0 else 0.0, 0.014, PALE)
-	# post 02 faces away from spawn, so its back says where the slot is.
-	_stencil(root, "02", Vector3(-12, 4.75, -50.085), 0.0, 0.012, PALE)
-	_stencil(root, "SLOT ON THE FAR SIDE", Vector3(-12, 3.35, -50.085), 0.0, 0.0028, PALE)
+	# post 02 faces away from spawn; its back carries only its number.
+	_stencil(root, "02", Vector3(-12, 4.2, -50.085), 0.0, 0.014, PALE)
 	_stencil(root, "DISPATCH", Vector3(0, 17.0, -122.47), 0.0, 0.013, PALE)
 	_box(root, "arch_cornice", Vector3(0, 18.62, -125), Vector3(19.4, 0.24, 5.4), _surface("cornice", PALE, STONE, 0.12, 0.0))
 	_packet(root)
@@ -180,6 +230,23 @@ func _box(root: Node3D, id: String, at: Vector3, size: Vector3, mat: Material) -
 	node.position = at
 	node.material_override = mat
 	root.add_child(node)
+
+func _quay(key: String, top: Color, side: Color, joints: float, base_y: float, weather: float) -> ShaderMaterial:
+	var id := "quay_" + key
+	if not _materials.has(id):
+		if _quay_shader == null:
+			_quay_shader = Shader.new()
+			_quay_shader.code = QUAY_CODE
+		var mat := ShaderMaterial.new()
+		mat.shader = _quay_shader
+		mat.set_shader_parameter("wear", WEAR)
+		mat.set_shader_parameter("top_color", top)
+		mat.set_shader_parameter("side_color", side)
+		mat.set_shader_parameter("joint_spacing", joints)
+		mat.set_shader_parameter("base_y", base_y)
+		mat.set_shader_parameter("weather", weather)
+		_materials[id] = mat
+	return _materials[id]
 
 func _surface(key: String, top: Color, side: Color, wear: float, deck: float) -> ShaderMaterial:
 	if not _materials.has(key):

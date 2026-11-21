@@ -70,17 +70,9 @@ func attach(level: Node3D) -> void:
 	sign.modulate = Color("efe4cc")
 	sign.outline_size = 0
 	level.add_child(sign)
+	# the hanging board names the finish; the floor carries only the threshold line, no lettering.
 	level.box("finish_threshold",Vector3(0,3.025,-46),Vector3(36,0.025,0.8),Color("29434b"))
 
-	var floor_sign := Label3D.new()
-	floor_sign.position = Vector3(0,3.06,-45.2)
-	floor_sign.rotation_degrees.x = -90
-	floor_sign.text = "FINISH"
-	floor_sign.font_size = 96
-	floor_sign.pixel_size = 0.025
-	floor_sign.modulate = Color("29434b")
-	floor_sign.outline_size = 0
-	level.add_child(floor_sign)
 	style(level)
 func edges(level: Node3D) -> void:
 	# orange follows exposed water edges, never a flat quay-to-quay joint.
