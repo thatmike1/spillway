@@ -17,6 +17,11 @@ static func dress(level: Node3D) -> void:
 		concrete.set_shader_parameter("dry_concrete", Vector3(0.40, 0.46, 0.47))
 		# a joint ran straight down the course centre at running gaze; half a slab moves it aside.
 		concrete.set_shader_parameter("deck_shift", Vector2(2.0, 0.0))
+	# the decks share the rope courses' wear family: sparse crisp stains and faint mottling as an overlay.
+	var wear := preload("res://scripts/art/viaduct_look.gd").wear_overlay()
+	for node: Node in level.get_children():
+		if node is MeshInstance3D and str(node.name).begins_with("Mesh_deck"):
+			(node as MeshInstance3D).material_overlay = wear
 	# the map name floated in mid-air beside the tailrace ring; wall-painted wayfinding stays.
 	var title := level.get_node_or_null("Sign_entry") as Label3D
 	if title != null:

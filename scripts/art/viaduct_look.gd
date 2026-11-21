@@ -63,6 +63,14 @@ static func apply(level: Node3D) -> void:
 static func _deck_wear(level: Node3D) -> void:
 	# the pier tops were one blank cream sheet; an overlay adds the crane dock's wear family (sparse crisp
 	# stains, faint mottling) without touching the pinned deck material underneath.
+	var overlay := wear_overlay()
+	for node: Node in level.get_children():
+		var id := str(node.name)
+		if node is MeshInstance3D and id.begins_with("Mesh_deck") and not id.contains("maintenance_court"):
+			(node as MeshInstance3D).material_overlay = overlay
+
+## a multiply overlay for pale deck tops; foundry reuses it so the courses share one wear family.
+static func wear_overlay() -> ShaderMaterial:
 	var shader := Shader.new()
 	shader.code = """shader_type spatial;
 render_mode blend_mul,unshaded,depth_draw_never,shadows_disabled;
@@ -83,10 +91,7 @@ void fragment(){
 	var overlay := ShaderMaterial.new()
 	overlay.shader = shader
 	overlay.set_shader_parameter("wear", preload("res://assets/look/painted-wear.png"))
-	for node: Node in level.get_children():
-		var id := str(node.name)
-		if node is MeshInstance3D and id.begins_with("Mesh_deck") and not id.contains("maintenance_court"):
-			(node as MeshInstance3D).material_overlay = overlay
+	return overlay
 
 static func _takeoff_bands(level: Node3D) -> void:
 	# the takeoff lip was a hairline at spawn distance; a receiver-deep band behind it reads as the edge.

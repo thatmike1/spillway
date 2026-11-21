@@ -44,7 +44,7 @@ func material(key: String, node: GeometryInstance3D, proposed: Material) -> Mate
 			_concrete.set_shader_parameter("waterline", -8.0)
 			_concrete.set_shader_parameter("weather", 1.0)
 			_concrete.set_shader_parameter("top_gain", 1.1)
-			_concrete.set_shader_parameter("joint_shift", Vector2(2.25, 0.0))
+			_concrete.set_shader_parameter("joint_shift", Vector2(3.5, 0.0))
 		return _concrete
 	return proposed
 
