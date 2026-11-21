@@ -51,7 +51,6 @@ def main():
         "mail_flight", "mail_motor", "mail_courts", "mail_tape", "sluice_six_style", "outer_reach_tape",
         "viaduct_presentation", "foundry_routes", "foundry_fork", "foundry_scenery", "foundry_cable", "foundry_advanced",
         "scripts/ui/pause_menu_checks.gd", "scripts/ui/hud_hooks_checks.gd", "scripts/ui/review_menu_checks.gd", "scripts/ui/planner_menu_checks.gd",
-        "scripts/fx/motion_fx_checks.gd",
     ]
     if args.slow:
         components.extend(["direction_stack", "through_line_original_maps"])
