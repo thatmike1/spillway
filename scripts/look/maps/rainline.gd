@@ -11,15 +11,17 @@ const PALETTE := {"top": "cdc8bf", "side": "78736c"}
 ## the facades were one navy with the sky: wet brick, concrete and render give the street its
 ## materials back and separate the buildings from each other and from the night. the art file
 ## splits each kind into grid cells (Mesh_brick_3_-2), so these match on the kind before the cell.
+## roof decks carry joints and broad tonal variation (deck, deck_mottle), so the near roof is not a
+## blank plane (critic 19:28).
 const FACADES := {
-	"roof_tar": {"side_color": "8a6257", "wear_amount": 0.06, "streak_amount": 0.18},
-	"roof_felt": {"side_color": "806057", "wear_amount": 0.06, "streak_amount": 0.18},
+	"roof_tar": {"side_color": "8a6257", "wear_amount": 0.06, "streak_amount": 0.18, "deck": 0.7, "deck_mottle": 0.12},
+	"roof_felt": {"side_color": "806057", "wear_amount": 0.06, "streak_amount": 0.18, "deck": 0.7, "deck_mottle": 0.12},
 	"brick": {"side_color": "8a6257", "wear_amount": 0.06, "streak_amount": 0.18},
 	"brick_cap": {"side_color": "8a6257", "wear_amount": 0.06, "streak_amount": 0.18},
 	"facade_brick": {"side_color": "7f5c50", "top_color": "8d6a5e", "wear_amount": 0.06, "streak_amount": 0.18},
 	"tower": {"side_color": "6f6663", "wear_amount": 0.06, "streak_amount": 0.15},
-	"roof_gravel": {"side_color": "78736c", "wear_amount": 0.06, "streak_amount": 0.15},
-	"concrete": {"side_color": "78736c", "wear_amount": 0.06, "streak_amount": 0.15},
+	"roof_gravel": {"side_color": "78736c", "wear_amount": 0.06, "streak_amount": 0.15, "deck": 0.7, "deck_mottle": 0.12},
+	"concrete": {"side_color": "78736c", "wear_amount": 0.06, "streak_amount": 0.15, "deck": 0.7, "deck_mottle": 0.12},
 	"facade_dark": {"side_color": "5e5c59", "top_color": "6b6966", "wear_amount": 0.06, "streak_amount": 0.15},
 	"render": {"side_color": "a39a88", "wear_amount": 0.05, "streak_amount": 0.12},
 	"facade_render": {"side_color": "948b7a", "top_color": "a39a88", "wear_amount": 0.05, "streak_amount": 0.12},

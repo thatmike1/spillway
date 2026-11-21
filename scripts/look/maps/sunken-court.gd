@@ -13,8 +13,9 @@ const SURFACES := {
 	"ashlar": {"side_color": "b0917a", "top_color": "d4cfc6", "wear_amount": 0.06, "streak_amount": 0.18},
 	"vault": {"side_color": "9a7c68", "top_color": "c8c0b4", "wear_amount": 0.06, "streak_amount": 0.18},
 	"column": {"side_color": "c2ab97", "top_color": "d6d0c6", "wear_amount": 0.04, "streak_amount": 0.12},
-	# deck kinds keep the palette top; their faces (under landings) streak instead of chipping.
-	"flag": {"wear_amount": 0.03, "streak_amount": 0.18},
+	# deck kinds keep the palette top; their faces (under landings) streak instead of chipping, and
+	# the flagged decks show their joints and broad tone instead of a blank plane.
+	"flag": {"wear_amount": 0.03, "streak_amount": 0.18, "deck": 0.8, "deck_mottle": 0.1},
 	"stair": {"wear_amount": 0.03, "streak_amount": 0.18},
 	"architrave": {"wear_amount": 0.03, "streak_amount": 0.18},
 	# the pool floor read as a flat saturated green under the water: a darker sea-glass stone.
