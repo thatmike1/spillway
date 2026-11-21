@@ -64,11 +64,11 @@ Measure the near deck at running height in a 1280x720 capture (crop about x 490-
 
 | Rule | Parameter | Value |
 | --- | --- | --- |
-| Faces blend into the deck treatment between these world normal-y values, so walkable slopes (Saltglass's 56° surf face is 0.555) stay pale | `top_from`, `top_full` | 0.30, 0.50 |
-| Deck colour: per map `top` in `r17_palettes.gd`, near-white and slightly warm, never yellow or clipped | `top_color` | shared-layer palettes: Breakwater e0dad2, Whiteout dcd8d0, Sunken Court d9d5cb, Rainline d9dcd3, Night Shift dedad0, practice dedbd5, Overflow e0dad0, Movement Lab e0dcd3 |
+| Faces blend into the deck treatment between these world normal-y values, so walkable slopes (Saltglass's 56° surf face is 0.555) stay pale. Non-deck kinds (roofs, rocks) keep 0.65, 0.92 so their slopes are not painted as decks; trees and foliage with their own shader are never replaced | `top_from`, `top_full` | decks 0.30, 0.50; other kinds 0.65, 0.92 |
+| Deck colour: per map `top` in `r17_palettes.gd`, near-white and slightly warm, never yellow or clipped | `top_color` | shared-layer palettes: Breakwater e0dad2, Whiteout dcd8d0, Sunken Court d9d5cb, Rainline d9dcd3, Night Shift c9c9c6 (its map override currently sets dedad0), practice dedbd5, Overflow e0dad0, Movement Lab e0dcd3 |
 | Quiet deck: fine grain ±1%, broad mottle | `deck_mottle` | 0.02 |
 | Sparse seams on decks only, an 8 m × 32 m grid offset to x = 4 + 8k so no seam runs down a spawn axis | `deck` | 0.35 shared layer, 1.0 Breakwater pavers |
-| A top in the sun's shadow keeps this share of the lost sun, tinted cool (directional lights only) | `shade_lift`, `shade_tint` | 0.35, (0.70, 0.84, 1.0) |
+| A top in the sun's shadow keeps this share of the lost sun's brightness, tinted cool (directional lights only). Per map with the palette key `shade_lift`: 0.0 on Night Shift, where moon shadows are the only depth cue on a deck | `shade_lift`, `shade_tint` | 0.35, (0.70, 0.84, 1.0) |
 | Side colour: per map `side`, a clearly darker weathered tone (slate teal, grey-green stone, navy at night) | `side_color` | e.g. Breakwater 527b87, Sunken Court 8e948c, Night Shift 3e5671 |
 | Vertical weathering on sides: broad runoff streaks, weaker with distance | `streak_amount` | 0.10 |
 | Paint loss on sides: sparse patches that lift toward a lighter, warmer side colour | `wear_amount`, `chip_color` | 0.12 shared layer; chips mix side × 1.5 with (0.78, 0.71, 0.58) at 35% |
@@ -99,4 +99,4 @@ Measure the near deck at running height in a 1280x720 capture (crop about x 490-
 
 ### What the look layer does not do
 
-Geometry, collision, spawn, checkpoints, anchors, map ids and recordings are never touched. L off restores every original material, environment, light and label exactly. Painted "N m / N u" distance figures are hidden with L on except on the practice yard.
+Geometry, collision, spawn, checkpoints, anchors, map ids and recordings are never touched. L off restores every original material, environment, light and label exactly. Painted "N m / N u" distance figures are hidden with L on, on every map; L off shows them again.

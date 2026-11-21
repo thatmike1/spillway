@@ -177,6 +177,9 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 			lamp.emission_energy_multiplier = 0.35
 			return lamp
 		return null
+	# trees and foliage with their own shader keep it: the surface rule would paint their slopes as decks.
+	if old is ShaderMaterial and old.shader != null and ("tree" in old.shader.resource_path or "foliage" in old.shader.resource_path):
+		return null
 	var water_shader: bool = old is ShaderMaterial and old.shader != null and old.shader.resource_path.ends_with("momentum_overflow_water.gdshader")
 	var inline_water: bool = node is MeshInstance3D and node.mesh is PlaneMesh and old is ShaderMaterial and old.get_shader_parameter("tint") != null
 	if water_shader or inline_water or key in ["Harbour","Canal","River","Water","PoolWater","Art_Water"] or key.begins_with("Pool_"):
@@ -238,6 +241,12 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 	material.set_shader_parameter("side_color",side)
 	material.set_shader_parameter("wear_amount",0.12)
 	material.set_shader_parameter("deck",0.35 if deck else 0.0)
+	# night: the moon's cast shadows are the only depth cue on a deck, so the lift can be turned off per map.
+	material.set_shader_parameter("shade_lift",float(palette.get("shade_lift",0.35)))
+	if not deck:
+		# only walkable kinds keep the deck treatment down to steep slopes; trees, roofs and rocks keep the old 0.65.
+		material.set_shader_parameter("top_from",0.65)
+		material.set_shader_parameter("top_full",0.92)
 	if not surface_key.is_empty():
 		for parameter: String in surfaces[surface_key]:
 			var value: Variant = surfaces[surface_key][parameter]
