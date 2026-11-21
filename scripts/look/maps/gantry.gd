@@ -4,7 +4,7 @@ extends RefCounted
 ## recording identity stay exact. new pieces are plain meshes with no collision, outside the
 ## swing corridor (|x| <= 6.5) and above every deck.
 
-const SHELL := Color("c9c3b4")
+const SHELL := Color("cec5b1")
 const SIDE := Color("62787c")
 const WEAR := Color("9a9c8c")
 const CARRIAGE := Color("e0d6bf")
@@ -55,6 +55,8 @@ static func _surfaces(level: Node3D) -> void:
 		material.set_shader_parameter("wear_color", WEAR)
 		material.set_shader_parameter("wear_amount", 0.45)
 		material.set_shader_parameter("weather", 1.0)
+		# lane 02's lower exposure left the tops grey-green, under lane 01's deck value; lift them only.
+		material.set_shader_parameter("top_gain", 1.1)
 	# the cross-bearings seen between hop planks read as lit steel, not black stripes.
 	var bearing := level.get_node_or_null("Mesh_gantry_bearing_bearing_0_-1") as MeshInstance3D
 	if bearing != null and bearing.material_override is StandardMaterial3D:
