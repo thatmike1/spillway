@@ -3,6 +3,9 @@ extends "res://scripts/r20_hud.gd"
 const MAP_PREVIEW := preload("res://scripts/ui/map_preview.gd")
 const RUN_REVIEW_PRACTICE := preload("res://scripts/recordings/run_review_practice.gd")
 const RUN_REVIEW := preload("res://scripts/ui/run_review.gd")
+const MAP_PLACES := preload("res://scripts/ui/menu/map_places.gd")
+const MAP_CARDS := preload("res://scripts/ui/menu/map_cards.gd")
+const TITLE := preload("res://scripts/ui/menu/title_card.gd")
 const R21_TUNING_NOTES := {
 	"elastic-soft": "Soft catch · less outward damping; more room to swing.",
 	"elastic-firm": "Firm line · a firmer spring when the line stretches.",
@@ -21,6 +24,11 @@ var review_button: Button
 var review_screen: Control
 var review_host_input := true
 var map_controls: Label
+var swing_heading: Label
+var swing_note: Label
+var swing_grid: GridContainer
+var map_bests := {}
+var _group_notes := {}
 
 func attach(main: Node) -> void:
 	super(main)
@@ -62,7 +70,17 @@ func attach(main: Node) -> void:
 	_pin_pause_header()
 	map_preview = MAP_PREVIEW.new()
 	map_preview.name = "MapPreview"
+	map_preview.details = _place_details
 	pause_panel.add_child(map_preview)
+	_restyle_header()
+	_plain_rope_names()
+	_attach_motion_settings()
+	_restyle_settings()
+	_settle_look_line()
+	if title_card != null and _title_mark != null:
+		TITLE.restyle(title_card, _title_mark)
+	_read_map_bests()
+	_arrange_map_groups()
 	_wire_map_previews()
 	map_preview.show_map(str(game.map_id), game.map_entry())
 	map_preview.visible = pause_destination == "Maps"
@@ -82,11 +100,341 @@ func _wire_map_previews() -> void:
 		button.focus_entered.connect(show_view)
 
 func _build_map_cards() -> void:
+	# a catalog change rebuilds every card; r15 and r19 clear their own grids, this clears the swing one.
+	if swing_grid != null and game != null and game.call("map_ids") != _map_ids:
+		for child: Node in swing_grid.get_children():
+			swing_grid.remove_child(child)
+			child.queue_free()
 	super()
+	_arrange_map_groups()
 	_wire_map_previews()
+
+# --- map select: places in three groups --------------------------------------------------------
+
+func _place_details(id: String) -> Dictionary:
+	var best := float(map_bests.get(id, -1.0))
+	return {"group": MAP_PLACES.group(id, game.map_entry(id), _capabilities(id)), "best": "Best  " + _time(best) if best > 0.0 else "",
+		"current": id == str(game.map_id)}
+
+func _capabilities(id: String) -> Dictionary:
+	return game.call("_catalog_capabilities").get(id, {}) if game.has_method("_catalog_capabilities") else {}
+
+## clean bests for every map with the current preset, read from the saved profile without
+## writing it. the current map always shows the host's own best for its exact identity.
+func _read_map_bests() -> void:
+	map_bests.clear()
+	if game == null:
+		return
+	var config := ConfigFile.new()
+	if bool(game.get("persist")) and config.load(str(game.get("profile_path"))) == OK:
+		for section: String in config.get_sections():
+			if not section.begins_with("course_") or str(config.get_value(section, "preset", "")) != str(game.preset_id):
+				continue
+			var best := float(config.get_value(section, "clean_best", -1.0))
+			var id := str(config.get_value(section, "map", ""))
+			if best > 0.0 and (not map_bests.has(id) or best < float(map_bests[id])):
+				map_bests[id] = best
+	map_bests.erase(str(game.map_id))
+	if float(game.best_time) > 0.0:
+		map_bests[str(game.map_id)] = float(game.best_time)
+
+func _arrange_map_groups() -> void:
+	var page: VBoxContainer = pause_pages.get("Maps")
+	if page == null or map_grid == null or experiments_grid == null or game == null:
+		return
+	if swing_grid == null:
+		swing_heading = _heading(page, MAP_PLACES.GROUP_TITLES.swing)
+		swing_heading.name = "SwingHeading"
+		swing_note = _small(page, MAP_PLACES.GROUP_NOTES.swing)
+		swing_note.name = "SwingNote"
+		swing_grid = GridContainer.new()
+		swing_grid.name = "SwingGrid"
+		swing_grid.add_theme_constant_override("h_separation", CARD_GAP)
+		swing_grid.add_theme_constant_override("v_separation", CARD_GAP)
+		page.add_child(swing_grid)
+		_group_notes["bhop"] = _small(page, MAP_PLACES.GROUP_NOTES.bhop)
+		_group_notes["bhop"].name = "BhopNote"
+		for heading: Label in [map_heading, swing_heading, experiments_heading]:
+			heading.add_theme_font_size_override("font_size", UI.TYPE_H2)
+			heading.add_theme_constant_override("line_spacing", 0)
+	var order: Array = [map_note, map_heading, _group_notes.get("bhop"), map_grid, swing_heading, swing_note, swing_grid, experiments_heading, experiments_note, experiments_grid]
+	var index := 0
+	for node: Variant in order:
+		if node != null and (node as Node).get_parent() == page:
+			page.move_child(node, index)
+			index += 1
+	map_heading.text = MAP_PLACES.GROUP_TITLES.bhop
+	experiments_heading.text = MAP_PLACES.GROUP_TITLES.experiment
+	var grids := {"bhop": map_grid, "swing": swing_grid, "experiment": experiments_grid}
+	var counts := {"bhop": 0, "swing": 0, "experiment": 0}
+	for id: String in game.call("map_ids"):
+		if not map_buttons.has(id):
+			continue
+		var button: Button = map_buttons[id]
+		var entry: Dictionary = game.map_entry(id)
+		var group := MAP_PLACES.group(id, entry, _capabilities(id))
+		var grid: GridContainer = grids[group]
+		if button.get_parent() != grid:
+			button.reparent(grid)
+		grid.move_child(button, counts[group])
+		counts[group] += 1
+		var best := float(map_bests.get(id, -1.0))
+		MAP_CARDS.dress(button, id, str(entry.get("name", id)), MAP_PLACES.line(id, entry), _time(best) if best > 0.0 else "", MAP_PLACES.note(id))
+	for group: String in grids:
+		var present: bool = counts[group] > 0
+		(grids[group] as Control).visible = present
+	swing_heading.visible = counts.swing > 0
+	swing_note.visible = counts.swing > 0
+	experiments_heading.visible = counts.experiment > 0
+	experiments_note.visible = counts.experiment > 0
+	swing_grid.columns = map_grid.columns
+	experiments_grid.columns = map_grid.columns
+	# room under the last row so its focus outline is never cut by the scroll edge.
+	var tail := page.get_node_or_null("MapsTail")
+	if tail == null:
+		tail = Control.new()
+		tail.name = "MapsTail"
+		(tail as Control).custom_minimum_size.y = UI.SPACE_L
+		(tail as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
+		page.add_child(tail)
+	page.move_child(tail, page.get_child_count() - 1)
+
+func _refresh_map_note() -> void:
+	if map_note != null:
+		map_note.text = "%d maps. Hover or focus a place to see it; click it or press Enter to start at its spawn with your preset." % map_buttons.size()
+
+func _paint_map_cards() -> void:
+	for id: String in map_buttons:
+		MAP_CARDS.paint(map_buttons[id])
+
+# --- header: actions, then the four destinations as tabs ---------------------------------------
+
+func _restyle_header() -> void:
+	UI.kicker(pause_kicker)
+	var plain := UI.flat(Color(0, 0, 0, 0), UI.RADIUS, Vector4(UI.SPACE_M, UI.SPACE_S, UI.SPACE_M, UI.SPACE_S + 1))
+	plain.border_color = Color(UI.INK, 0.0)
+	plain.border_width_bottom = UI.EDGE_WIDTH
+	var hover := plain.duplicate() as StyleBoxFlat
+	hover.bg_color = UI.INK_WASH
+	var chosen := plain.duplicate() as StyleBoxFlat
+	chosen.border_color = UI.VERMILION
+	for tab: Button in pause_tabs.values():
+		tab.add_theme_font_override("font", UI.font("title"))
+		tab.add_theme_font_size_override("font_size", UI.TYPE_H3)
+		tab.add_theme_stylebox_override("normal", plain)
+		tab.add_theme_stylebox_override("hover", hover)
+		tab.add_theme_stylebox_override("pressed", chosen)
+		tab.add_theme_stylebox_override("hover_pressed", chosen)
+		for key: String in ["font_color", "font_hover_color", "font_focus_color"]:
+			tab.add_theme_color_override(key, UI.INK_SOFT)
+		for key: String in ["font_pressed_color", "font_hover_pressed_color"]:
+			tab.add_theme_color_override(key, UI.INK)
+	var bar := tab_bar()
+	if bar != null and bar.get_parent() != null and bar.get_parent().get_node_or_null("PauseTabRule") == null:
+		var rule := ColorRect.new()
+		rule.name = "PauseTabRule"
+		rule.color = UI.PALE_SHADE
+		rule.custom_minimum_size = Vector2(0, UI.HAIRLINE)
+		rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		bar.get_parent().add_child(rule)
+		bar.get_parent().move_child(rule, bar.get_index() + 1)
+	if current_map_button != null:
+		current_map_button.flat = true
+		current_map_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		current_map_button.add_theme_font_size_override("font_size", UI.TYPE_BODY - 1)
+		current_map_button.add_theme_color_override("font_color", UI.SLATE)
+		current_map_button.add_theme_color_override("font_hover_color", UI.INK)
+		current_map_button.add_theme_color_override("font_focus_color", UI.INK)
+		current_map_button.text = "Current map controls  →"
+
+func _layout_title(size: Vector2, frame: Rect2) -> void:
+	if _title_mark != null and title_card.has_node("ScrimLow"):
+		if game != null:
+			var id := str(game.map_id)
+			(title_card.get_node("TitleMap") as Label).text = "%s  ·  %s" % [str(game.call("map_name")), MAP_PLACES.line(id, game.map_entry(id))]
+		TITLE.layout(title_card, _title_mark, size, frame)
+	else:
+		super(size, frame)
+
+## settings: each slider is one aligned row, its value in ink at a fixed width beside it and a
+## quiet reset after; section names are the larger heading size.
+func _restyle_settings() -> void:
+	var page: Control = pause_pages.get("Settings")
+	if page == null:
+		return
+	for node: Node in page.find_children("Value_*", "Label", true, false):
+		var value := node as Label
+		UI.text(value, "smallnum", UI.TYPE_LABEL, UI.INK)
+		value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		value.custom_minimum_size.x = 58
+		var row := value.get_parent() as HBoxContainer
+		row.add_theme_constant_override("separation", UI.SPACE_M)
+		row.alignment = BoxContainer.ALIGNMENT_BEGIN
+		var caption := row.get_parent().get_child(row.get_index() - 1) as Label
+		if caption != null:
+			UI.text(caption, "label", UI.TYPE_BODY, UI.INK)
+			caption.text = PLAIN_SETTING_NAMES.get(str(value.name).trim_prefix("Value_"), caption.text)
+	for node: Node in page.find_children("Reset_*", "Button", true, false):
+		var reset := node as Button
+		reset.flat = true
+		reset.add_theme_font_override("font", UI.font("label"))
+		reset.add_theme_font_size_override("font_size", UI.TYPE_SMALL + 1)
+		reset.add_theme_color_override("font_color", UI.SLATE)
+		reset.add_theme_color_override("font_hover_color", UI.INK)
+		reset.add_theme_color_override("font_focus_color", UI.INK)
+	# comparison presets keep their full description on hover; the sheet shows two lines.
+	for node: Node in page.find_children("PresetDetails_*", "Label", true, false):
+		var details := node as Label
+		if details.get_parent() != null and details.get_parent().name == "AdvancedPresets":
+			details.tooltip_text = details.text
+			details.mouse_filter = Control.MOUSE_FILTER_PASS
+			details.max_lines_visible = 2
+			details.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	for node: Node in page.find_children("*", "Label", true, false):
+		var label := node as Label
+		if label.get_theme_font_size("font_size") == 17 and label.text in ["Look and sound", "Movement", "Keys"]:
+			label.add_theme_font_size_override("font_size", UI.TYPE_H2)
+
+## how each rope law feels, in words for the player; the laws themselves are unchanged.
+const ROPE_FEEL := {
+	"classic": "Classic · a springy line that catches you at full length (the original rope).",
+	"pendulum": "Pendulum · a fixed rope that goes taut; no spring, no speed cap.",
+	"elastic": "Elastic · stretchy, with slack and a stronger pull.",
+	"elastic-soft": "Soft catch · stretchy and loose; more room to swing.",
+	"elastic-firm": "Firm line · stretchy but snaps back harder.",
+	"elastic-arc": "Long arc · slower reel; keeps a long swinging line."}
+
+func _plain_rope_names() -> void:
+	for id: String in tether_models:
+		if ROPE_FEEL.has(id):
+			(tether_models[id] as Button).text = ROPE_FEEL[id]
+
+## plain names for the sliders; the Source arithmetic stays in the line under them.
+const PLAIN_SETTING_NAMES := {"source_sensitivity": "Mouse sensitivity (Source scale)", "source_fov": "Field of view (4:3 reference, widened to fit)",
+	"r13_sensitivity": "R13 mouse (F3 only)", "r13_fov": "R13 horizontal field of view (F3 only)", "volume": "Volume"}
+
+## the current map's controls as short lines on a quiet panel, without capitals shouting.
+func _plain_map_controls() -> void:
+	if map_controls == null:
+		return
+	var lines: Array[String] = []
+	for line: String in map_controls.text.split("\n", false):
+		line = line.strip_edges()
+		if line.begins_with("EXPERIMENTAL "):
+			line = line.trim_prefix("EXPERIMENTAL ")
+			line = line.left(1).to_upper() + line.substr(1)
+		lines.append(line)
+	map_controls.text = "\n".join(lines)
+	if not map_controls.has_meta("plain"):
+		map_controls.set_meta("plain", true)
+		UI.text(map_controls, "body", UI.TYPE_BODY - 1, UI.INK)
+		map_controls.add_theme_constant_override("line_spacing", 3)
+		var panel := UI.flat(UI.PALE_DEEP, UI.RADIUS, Vector4(UI.SPACE_M + 3, UI.SPACE_S + 2, UI.SPACE_M, UI.SPACE_S + 3))
+		panel.border_color = UI.SLATE
+		panel.border_width_left = UI.EDGE_WIDTH
+		map_controls.add_theme_stylebox_override("normal", panel)
+
+## lane 05's presentation-only motion effects, shown once the host knows their settings.
+const MOTION_SWITCHES := {"motion_fx_fov": "Speed widens the view (up to about +5°)", "motion_fx_streaks": "Edge speed lines",
+	"motion_fx_wind": "Wind flecks", "motion_fx_moments": "Landing, checkpoint and best-time cues"}
+var motion_section: VBoxContainer
+var motion_rows := {}
+
+func _attach_motion_settings() -> void:
+	var page: Control = pause_pages.get("Settings")
+	if page == null or not (game.get("settings") is Dictionary) or not (game.settings as Dictionary).has("motion_fx"):
+		return
+	motion_section = VBoxContainer.new()
+	motion_section.name = "MotionEffects"
+	motion_section.add_theme_constant_override("separation", 9)
+	page.add_child(motion_section)
+	var common := page.get_node_or_null("CommonSettings")
+	page.move_child(motion_section, common.get_index() + 1 if common != null else 0)
+	_heading(motion_section, "Motion effects")
+	_small(motion_section, "Presentation only. These keep the current attempt and recording identity.")
+	var main_switch := CheckButton.new()
+	main_switch.name = "Setting_motion_fx"
+	main_switch.text = "Motion effects"
+	main_switch.button_pressed = bool(game.settings.get("motion_fx", true))
+	main_switch.toggled.connect(func(on: bool) -> void:
+		game.change_setting("motion_fx", on)
+		_sync_motion_rows())
+	motion_section.add_child(main_switch)
+	var caption := Label.new()
+	caption.text = "Intensity"
+	motion_section.add_child(caption)
+	var row := HBoxContainer.new()
+	motion_section.add_child(row)
+	var slider := HSlider.new()
+	slider.name = "Setting_motion_fx_intensity"
+	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slider.min_value = 0.0
+	slider.max_value = 1.0
+	slider.step = 0.1
+	slider.value = float(game.settings.get("motion_fx_intensity", 0.6))
+	slider.focus_mode = Control.FOCUS_ALL
+	row.add_child(slider)
+	var number := _small(row, "%d %%" % roundi(slider.value * 100.0))
+	number.name = "Value_motion_fx_intensity"
+	number.size_flags_horizontal = Control.SIZE_SHRINK_END
+	slider.value_changed.connect(func(value: float) -> void:
+		game.change_setting("motion_fx_intensity", value)
+		number.text = "%d %%" % roundi(value * 100.0))
+	var defaults: Dictionary = load("res://scripts/fx/motion_fx.gd").get("DEFAULTS") if ResourceLoader.exists("res://scripts/fx/motion_fx.gd") else {}
+	var default_value := float(defaults.get("motion_fx_intensity", 0.6))
+	var reset := _button(row, "Reset", func() -> void: slider.value = default_value)
+	reset.name = "Reset_motion_fx_intensity"
+	reset.tooltip_text = "Reset to %d %%" % roundi(default_value * 100.0)
+	motion_rows["motion_fx_intensity"] = slider
+	for key: String in MOTION_SWITCHES:
+		var toggle := CheckButton.new()
+		toggle.name = "Setting_" + key
+		toggle.text = MOTION_SWITCHES[key]
+		toggle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		toggle.button_pressed = bool(game.settings.get(key, true))
+		toggle.toggled.connect(func(on: bool) -> void: game.change_setting(key, on))
+		motion_section.add_child(toggle)
+		motion_rows[key] = toggle
+	_sync_motion_rows()
+
+func _sync_motion_rows() -> void:
+	if motion_section == null:
+		return
+	var on := bool(game.settings.get("motion_fx", true))
+	(motion_section.get_node("Setting_motion_fx") as CheckButton).set_pressed_no_signal(on)
+	for key: String in motion_rows:
+		var control: Control = motion_rows[key]
+		if control is CheckButton:
+			(control as CheckButton).set_pressed_no_signal(bool(game.settings.get(key, true)))
+			(control as CheckButton).disabled = not on
+		elif control is HSlider:
+			(control as HSlider).set_value_no_signal(float(game.settings.get(key, 0.6)))
+			(control as HSlider).editable = on
+
+## the sensitivity arithmetic is reference, not the first thing to read: it moves under the sliders.
+func _settle_look_line() -> void:
+	if not pause_pages.has("Settings") or pause_look == null:
+		return
+	var common: Node = (pause_pages["Settings"] as Node).get_node_or_null("CommonSettings")
+	if common == null or pause_look.get_parent() != common:
+		return
+	common.move_child(pause_look, common.get_child_count() - 1)
+	UI.text(pause_look, "body", UI.TYPE_SMALL, UI.INK_SOFT)
+
+## the world behind map select steps further back so the chosen place reads first.
+func _dim_for(destination: String) -> void:
+	if pause_panel == null or pause_panel.get_child_count() == 0:
+		return
+	var dim := pause_panel.get_child(0) as ColorRect
+	if dim != null:
+		dim.color = Color(UI.SLATE_DEEP, 0.62 if destination == "Maps" else 0.42)
+
+func tab_bar() -> Control:
+	return pause_tabs["Maps"].get_parent() if pause_tabs.has("Maps") else null
 
 func show_pause_destination(destination: String, focus_tab: bool = true) -> void:
 	super(destination, focus_tab)
+	_dim_for(destination)
 	if map_preview != null:
 		map_preview.visible = destination == "Maps"
 		if destination == "Maps":
@@ -187,6 +535,12 @@ func _open_run_review() -> void:
 		review_screen.set("directory", str(game.session.directory))
 	pause_panel.add_child(review_screen)
 	review_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# the review is a sheet over the paused world, like the menu, not a page that replaces it.
+	var inset := clampf(get_viewport().get_visible_rect().size.x * 0.018, 12.0, 40.0)
+	review_screen.offset_left = inset
+	review_screen.offset_top = inset
+	review_screen.offset_right = -inset
+	review_screen.offset_bottom = -inset
 	if review_screen.has_method("attach_map"):
 		review_screen.call("attach_map", game.level, game.motion_identity())
 	review_screen.closed.connect(_close_run_review)
@@ -214,6 +568,10 @@ func _close_run_review() -> void:
 
 func set_paused(value: bool) -> void:
 	super(value)
+	# the title steps away at once when the menu opens, so its letters never show through the sheet.
+	if value and title_card != null:
+		_title_alpha = 0.0
+		title_card.visible = false
 	if value and map_preview != null and pause_destination == "Maps":
 		map_preview.show_map(str(game.map_id), game.map_entry())
 	if not value and review_screen != null:
@@ -249,10 +607,16 @@ func lab_controls_text() -> String:
 	return instructions
 
 func _refresh_pause() -> void:
+	_read_map_bests()
 	super()
+	pause_kicker.text = "Paused  ·  Current map  ·  F%d" % int(game.preset.get("slot", 0)) + ("  ·  Experiment" if bool(game.call("is_lab")) or bool(game.map_entry().get("experimental", false)) else "")
+	_arrange_map_groups()
+	_paint_map_cards()
+	_sync_motion_rows()
 	_refresh_mail()
 	if map_controls != null:
 		map_controls.text = str(game.preset.get("controls", "")) + "\n" + lab_controls_text() if game.is_lab() or game.is_experiment_map() else str(game.preset.get("controls", ""))
+	_plain_map_controls()
 
 func _refresh_tether() -> void:
 	super()

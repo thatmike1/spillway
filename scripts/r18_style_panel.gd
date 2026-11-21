@@ -91,7 +91,7 @@ func _layout() -> void:
 		caption.visible = false
 	shade.position = score_label.position
 	shade.size = Vector2.ZERO
-	var callout_y := y - BAND.ascent(score_label) - 12.0
+	var callout_y := y + BAND.EVENT_DROP
 	callout.reset_size()
 	# a callout arrives like a split: it rises a few pixels into place while it fades in.
 	var arrive := clampf(_shown_age / 0.18, 0.0, 1.0) if is_finite(_shown_age) else 1.0
@@ -101,4 +101,4 @@ func _layout() -> void:
 		callout.modulate.a = arrive
 	if direction_label != null:
 		direction_label.reset_size()
-		direction_label.position = Vector2(roundf(x), roundf(callout.position.y - direction_label.get_minimum_size().y - 4.0))
+		direction_label.position = Vector2(roundf(x), roundf(callout.position.y + callout.get_minimum_size().y + 2.0))

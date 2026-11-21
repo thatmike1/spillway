@@ -19,6 +19,61 @@ const CORAL := Color("f2a483")
 const CORAL_DEEP := Color("a9471f")
 const OUTLINE := Color(0.07, 0.12, 0.15, 0.78)
 
+# --- tokens -------------------------------------------------------------------------------------
+# the names menus and hud should reach for. the colours are the world's own (blend c): the pale
+# deck you land on, the weathered slate sides, sea-glass water, the vermilion lip, thin ink.
+# the older names above stay as aliases so nothing that already uses them changes colour.
+const PALE := CREAM                     ## deck white: sheets, tickets, hud numerals on the world
+const PALE_DEEP := CREAM_DEEP           ## a pressed or inset area on a pale sheet
+const PALE_SHADE := CREAM_SHADE         ## hairlines and wells on a pale sheet
+const SLATE := TEAL                     ## weathered sides: secondary marks, the attempt line
+const SLATE_DEEP := Color("1f4350")     ## the underside: scrims behind type on the world
+const SEA_GLASS := SEA                  ## water: positive states, ahead of best
+const SEA_GLASS_DEEP := SEA_DEEP        ## water in shade: positive text on pale
+const VERMILION := EDGE                 ## edges and lips only: focus, selection, the one thing to see
+const VERMILION_SOFT := CORAL           ## behind-best tint
+const VERMILION_DEEP := CORAL_DEEP      ## behind-best text on pale
+const INK_FAINT := Color(0.094, 0.153, 0.18, 0.38)   ## disabled type, quiet separators
+const INK_WASH := Color(0.094, 0.153, 0.18, 0.07)    ## resting button and card fill on pale
+
+## type scale in pixels at 1080p-class layouts (menus scale nothing; the hud picks its own).
+const TYPE_WORDMARK := 190   ## title only; layouts clamp it to the frame
+const TYPE_DISPLAY := 40     ## a screen's one big name (map name in the preview)
+const TYPE_H1 := 34          ## sheet heading (paused map name)
+const TYPE_H2 := 22          ## section heading on a wide sheet
+const TYPE_H3 := 17          ## group heading inside a page
+const TYPE_LABEL := 15       ## buttons, card names, row labels
+const TYPE_BODY := 14        ## running text
+const TYPE_SMALL := 12       ## notes, kinds, secondary lines
+const TYPE_MICRO := 11       ## kickers in capitals with tracking
+
+## spacing scale; rows and sections use these and nothing in between.
+const SPACE_XS := 4
+const SPACE_S := 8
+const SPACE_M := 12
+const SPACE_L := 18
+const SPACE_XL := 26
+const SPACE_XXL := 40
+
+const RADIUS := 2            ## every box: corners are almost square, like poured concrete
+const EDGE_WIDTH := 3        ## the vermilion lip on selected and primary things
+const HAIRLINE := 1          ## ink rules between rows
+
+## a label in the menu language: ink on pale unless told otherwise, no outline.
+static func text(label: Label, role: String, size: int, color: Color = INK) -> Label:
+	label.add_theme_font_override("font", font(role))
+	label.add_theme_font_size_override("font_size", size)
+	label.add_theme_color_override("font_color", color)
+	label.add_theme_constant_override("outline_size", 0)
+	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0))
+	return label
+
+## a small capitals kicker (map group names, "paused"): tracked, quiet, never orange.
+static func kicker(label: Label, color: Color = INK_SOFT) -> Label:
+	text(label, "kicker", TYPE_MICRO, color)
+	label.uppercase = true
+	return label
+
 static var _fonts: Dictionary = {}
 
 ## one face per role, cached. opsz follows the size it is drawn at; tnum keeps clocks still.
@@ -26,7 +81,7 @@ static func font(role: String) -> FontVariation:
 	if _fonts.has(role):
 		return _fonts[role]
 	var axes := {"display": [96, 800, 100], "numeral": [60, 680, 96], "title": [32, 720, 100], "label": [16, 600, 100],
-		"body": [16, 460, 100], "small": [12, 520, 100], "smallnum": [14, 600, 100]}
+		"body": [16, 460, 100], "small": [12, 520, 100], "smallnum": [14, 600, 100], "kicker": [12, 640, 100]}
 	var v: Array = axes.get(role, axes.body)
 	var ts := TextServerManager.get_primary_interface()
 	var face := FontVariation.new()
@@ -34,6 +89,8 @@ static func font(role: String) -> FontVariation:
 	face.variation_opentype = {ts.name_to_tag("opsz"): v[0], ts.name_to_tag("wght"): v[1], ts.name_to_tag("wdth"): v[2]}
 	if role in ["numeral", "smallnum", "display"]:
 		face.opentype_features = {ts.name_to_tag("tnum"): 1, ts.name_to_tag("lnum"): 1}
+	if role == "kicker":
+		face.spacing_glyph = 1
 	_fonts[role] = face
 	return face
 
@@ -136,9 +193,27 @@ static func menu_theme() -> Theme:
 		theme.set_color("font_focus_color", type, INK)
 		theme.set_color("font_pressed_color", type, CREAM)
 		theme.set_color("font_hover_pressed_color", type, CREAM)
-		theme.set_color("font_disabled_color", type, Color(INK, 0.38))
+		theme.set_color("font_disabled_color", type, Color(INK, 0.55))
 		theme.set_font("font", type, font("label"))
 		theme.set_font_size("font_size", type, 15)
+	# text fields: the pale surface with a thin ink edge; focus takes the vermilion lip.
+	var field := flat(PALE, RADIUS, Vector4(SPACE_M, SPACE_S - 1, SPACE_M, SPACE_S))
+	field.border_color = Color(INK, 0.35)
+	field.set_border_width_all(HAIRLINE)
+	var field_focus := field.duplicate() as StyleBoxFlat
+	field_focus.border_color = EDGE
+	field_focus.border_width_bottom = EDGE_WIDTH
+	var field_quiet := flat(PALE_DEEP, RADIUS, Vector4(SPACE_M, SPACE_S - 1, SPACE_M, SPACE_S))
+	theme.set_stylebox("normal", "LineEdit", field)
+	theme.set_stylebox("focus", "LineEdit", field_focus)
+	theme.set_stylebox("read_only", "LineEdit", field_quiet)
+	theme.set_color("font_color", "LineEdit", INK)
+	theme.set_color("font_placeholder_color", "LineEdit", INK_FAINT)
+	theme.set_color("font_uneditable_color", "LineEdit", INK_SOFT)
+	theme.set_color("caret_color", "LineEdit", INK)
+	theme.set_color("selection_color", "LineEdit", Color(SEA, 0.6))
+	theme.set_font("font", "LineEdit", font("body"))
+	theme.set_font_size("font_size", "LineEdit", 15)
 	theme.set_icon("arrow", "OptionButton", _svg('<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8"><path d="M1 1 L6 7 L11 1 Z" fill="%s"/></svg>' % _hex(INK)))
 	for type: String in ["CheckButton", "CheckBox"]:
 		for state: String in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:

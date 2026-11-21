@@ -193,9 +193,15 @@ func _draw() -> void:
 			# only chosen pieces carry a height tag, on a small cream ticket so it never sits on a line.
 			var tag := "%s%d  +%dm" % [brush.substr(0,1).to_upper(),i+1,int(at.y)]
 			var tag_size := small.get_string_size(tag,HORIZONTAL_ALIGNMENT_LEFT,-1,12)
-			var tag_at := p+Vector2(17,-9)
-			draw_rect(Rect2(tag_at,tag_size+Vector2(8,4)),PALE)
-			draw_rect(Rect2(tag_at,tag_size+Vector2(8,4)),INK,false,1.0)
+			# tags sit on the outer side of the basin, or under a centre socket, clear of crowns and rails.
+			var box := tag_size+Vector2(8,4)
+			var tag_at := p+Vector2(17,-box.y-3)
+			if at.x < -0.5:
+				tag_at = p+Vector2(-17-box.x,-box.y-3)
+			elif absf(at.x) <= 0.5:
+				tag_at = p+Vector2(-box.x*0.5,16)
+			draw_rect(Rect2(tag_at,box),PALE)
+			draw_rect(Rect2(tag_at,box),INK,false,1.0)
 			draw_string(small,tag_at+Vector2(4,tag_size.y-1),tag,HORIZONTAL_ALIGNMENT_LEFT,-1,12,INK)
 	# the left sheet: same rows and click areas as before, set in the menu's type.
 	draw_rect(Rect2(0,0,420,size.y),PALE)
