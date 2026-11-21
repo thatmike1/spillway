@@ -50,7 +50,7 @@ const WEAR := preload("res://assets/look/painted-wear.png")
 const UI := preload("res://scripts/r18_ui_theme.gd")
 
 ## lane 02's noon light and filmic exposure clip a lighter deck to white; this lands shell-white.
-const DECK := Color("b5ada2")
+const DECK := Color("c4bcb0")
 const PALE := Color("f1ead8")
 const STONE := Color("d9d0bb")
 const SIDE := Color("66868e")

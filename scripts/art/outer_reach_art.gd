@@ -37,7 +37,7 @@ static func dress(level: Node3D) -> void:
 		if child is MeshInstance3D:
 			var service: bool = str(child.name).contains("shore_") or str(child.name).contains("control_house") or str(child.name).contains("service_gallery")
 			# decks are shell-white rather than peach under the low warm sun.
-			child.material_override = MATERIALS.concrete(Color("b6bcae") if service else Color("c9c6c0"),Color("798f96") if service else Color("6e8590"),not service,child.get_aabb())
+			child.material_override = MATERIALS.concrete(Color("b6bcae") if service else Color("b0ada5"),Color("798f96") if service else Color("6e8590"),not service,child.get_aabb())
 	BASE._box(level,"outer_water",Vector3(-120,-3,-140),Vector3(900,0.1,800),Color("598a90"))
 	var footprints := PackedVector4Array()
 	for support: Vector4 in level.supports:
