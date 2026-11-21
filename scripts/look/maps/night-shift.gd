@@ -7,13 +7,19 @@ extends RefCounted
 
 const PALETTE := {"side": "7d7468"}
 ## authored place signs that stay; any other label under Markings is a painted figure.
-## wall kinds get material and wear; the art file splits each kind into grid cells
+## wall and roof-steel kinds get material and wear; the art file splits each kind into grid cells
 ## (Mesh_cladding_3_m2), so these match on the kind before the cell.
 const WALLS := {
-	"concrete": {"side_color": "86807a", "wear_amount": 0.3},
-	"cladding": {"side_color": "6f7a7e", "wear_amount": 0.26},
-	"brick": {"side_color": "75625a", "wear_amount": 0.3},
-	"formwork": {"side_color": "7f7a70", "wear_amount": 0.28},
+	"concrete": {"side_color": "86807a", "wear_amount": 0.08, "streak_amount": 0.18},
+	"cladding": {"side_color": "6f7a7e", "wear_amount": 0.08, "streak_amount": 0.18},
+	"brick": {"side_color": "75625a", "wear_amount": 0.08, "streak_amount": 0.18},
+	"formwork": {"side_color": "7f7a70", "wear_amount": 0.08, "streak_amount": 0.18},
+	# the canopy, its beams and columns: cool slate steel, a lit top and a darker side, so the
+	# roof keeps the night mood against the sky instead of a flat mid grey.
+	"girder": {"side_color": "46505d", "top_color": "8794a2", "wear_amount": 0.1},
+	"steel": {"side_color": "505b68", "top_color": "8794a2", "wear_amount": 0.1},
+	"roof": {"side_color": "56606c", "top_color": "7f8b98", "wear_amount": 0.12},
+	"plate": {"side_color": "505b68", "top_color": "8794a2", "wear_amount": 0.1},
 }
 const SIGNS := ["Platform1", "Roundel_w", "Roundel_e", "ThroatSign", "BaysSign", "Door1", "Door2", "ShutterSign", "SignalBox", "TerminusSign", "LoopSign"]
 
