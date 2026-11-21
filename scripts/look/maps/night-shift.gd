@@ -5,7 +5,7 @@ extends RefCounted
 ## brightening the floor. the cropped station banner and painted figures hide while L is on.
 ## nothing here collides.
 
-const PALETTE := {"side": "56646f"}
+const PALETTE := {"side": "7d7468"}
 ## authored place signs that stay; any other label under Markings is a painted figure.
 const SIGNS := ["Platform1", "Roundel_w", "Roundel_e", "ThroatSign", "BaysSign", "Door1", "Door2", "ShutterSign", "SignalBox", "TerminusSign", "LoopSign"]
 
@@ -35,7 +35,7 @@ func dress(level: Node3D) -> Node3D:
 		_stock.set_shader_parameter("side_color", Color("7e4134"))
 		_stock.set_shader_parameter("top_color", Color("d6cdb9"))
 		_stock.set_shader_parameter("wear_amount", 0.18)
-		_stock.set_shader_parameter("metal", 1.0)
+		_stock.set_shader_parameter("metal", 0.0)
 	var marks := level.get_node_or_null("Markings")
 	if marks != null:
 		for label: Node in marks.get_children():
