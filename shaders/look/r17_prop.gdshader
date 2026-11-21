@@ -18,5 +18,5 @@ void light(){
  float band=mix(0.48,0.82,smoothstep(-0.1,0.02,facing));
  band=mix(band,1.0,smoothstep(0.65,0.72,facing));
  DIFFUSE_LIGHT+=ALBEDO*band*ATTENUATION*LIGHT_COLOR/PI;
- DIFFUSE_LIGHT+=ALBEDO*vec3(0.80,0.88,1.0)*0.35*topness*(1.0-ATTENUATION)*step(0.0,facing)*float(LIGHT_IS_DIRECTIONAL)*LIGHT_COLOR/PI;
+ DIFFUSE_LIGHT+=ALBEDO*vec3(0.70,0.84,1.0)*0.35*topness*(1.0-ATTENUATION)*step(0.0,facing)*float(LIGHT_IS_DIRECTIONAL)*LIGHT_COLOR/PI;
 }

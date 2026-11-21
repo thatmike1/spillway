@@ -13,10 +13,10 @@ uniform float top_full = 0.50;
 uniform vec4 chip_color : source_color = vec4(0.78,0.71,0.58,1.0);
 uniform float streak_amount = 0.10;
 uniform float underside = 0.62;
-uniform float deck_mottle = 0.05;
+uniform float deck_mottle = 0.02;
 // tops in shadow stay pale and cool instead of dropping to the side value: the readability rule.
 uniform float shade_lift = 0.35;
-uniform vec4 shade_tint : source_color = vec4(0.80,0.88,1.0,1.0);
+uniform vec4 shade_tint : source_color = vec4(0.70,0.84,1.0,1.0);
 varying vec3 wp;
 varying vec3 wn;
 varying float topness;
