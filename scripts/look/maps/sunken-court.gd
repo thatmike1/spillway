@@ -13,6 +13,12 @@ const SURFACES := {
 	"ashlar": {"side_color": "b0917a", "top_color": "d6cbc2", "wear_amount": 0.06, "streak_amount": 0.18},
 	"vault": {"side_color": "9a7c68", "top_color": "c9b9a9", "wear_amount": 0.06, "streak_amount": 0.18},
 	"column": {"side_color": "c2ab97", "top_color": "d8ccc3", "wear_amount": 0.04, "streak_amount": 0.12},
+	# deck kinds keep the palette top; their faces (under landings) streak instead of chipping.
+	"flag": {"wear_amount": 0.03, "streak_amount": 0.18},
+	"stair": {"wear_amount": 0.03, "streak_amount": 0.18},
+	"architrave": {"wear_amount": 0.03, "streak_amount": 0.18},
+	# the pool floor read as a flat saturated green under the water: a darker sea-glass stone.
+	"pool_floor": {"top_color": "7d9089", "side_color": "6c7d77", "wear_amount": 0.03},
 	"cliff": {"side_color": "7d6f60", "top_color": "8f8a6a", "wear_amount": 0.08, "streak_amount": 0.2},
 }
 ## assets hidden under L on: filler that explains nothing about the place.

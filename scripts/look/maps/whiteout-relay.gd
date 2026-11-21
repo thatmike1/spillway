@@ -10,10 +10,13 @@ extends RefCounted
 
 ## decks in the pale shell family, a step below the shared value: the snow-country sun clipped
 ## e6e2d8 to white on the road. the sand top of the old palette read warmer than any other map.
-const PALETTE := {"top": "d0ccc4", "side": "4f7880"}
+## nudged warm so the road and the hangar floor read as one deck family out of the door.
+const PALETTE := {"top": "d6cdc3", "side": "4f7880"}
 ## the hangar floor sits under warm lamps, out of the sun: a light warm stone so it reads as the
 ## pale deck family indoors instead of mauve-grey. art meshes are named Mesh_<kind>_<region>.
-const FLOORS := {"tread_warm_hangar": {"top_color": "e3dccf"}}
+const FLOORS := {"tread_warm_hangar": {"top_color": "ddd5ca"}}
+## every art face: weathering as tall streaks, not chips (high wear read as camouflage spots).
+const WEATHER := {"wear_amount": 0.04, "streak_amount": 0.18}
 ## plateau dishes and small buildings that repeat the landmark at toy scale.
 const FILLER := ["satelliteDish", "satelliteDish_detailed", "hangar_smallA", "machine_generator", "machine_generatorLarge", "machine_wireless", "supports_high"]
 
@@ -120,9 +123,12 @@ func _box(st: SurfaceTool, lo: Vector3, hi: Vector3) -> void:
 				st.set_normal(n)
 				st.add_vertex(v)
 
-## the shared look builds one material per art mesh; this sets the hangar floor's in place.
+## the shared look builds one material per art mesh; this sets weathering and the hangar floor in place.
 func material(key: String, _node: Node, proposed: Material) -> Material:
 	var kind := key.trim_prefix("Mesh_")
+	if proposed is ShaderMaterial and key.begins_with("Mesh_") and (proposed as ShaderMaterial).get_shader_parameter("wear_amount") != null:
+		for parameter: String in WEATHER:
+			(proposed as ShaderMaterial).set_shader_parameter(parameter, WEATHER[parameter])
 	if proposed is ShaderMaterial and FLOORS.has(kind):
 		for parameter: String in FLOORS[kind]:
 			var value: Variant = FLOORS[kind][parameter]
