@@ -6,6 +6,8 @@ uniform vec3 dry_concrete = vec3(0.48, 0.45, 0.38);
 uniform vec3 cap_color = vec3(0.72, 0.69, 0.59);
 uniform float joint_depth = 0.20;
 uniform float slab_spread = 0.12;
+// moves the deck joint grid, e.g. off the course's centre line.
+uniform vec2 deck_shift = vec2(0.0);
 varying vec3 world;
 varying vec3 up_normal;
 float hash(vec2 cell) {
@@ -29,7 +31,7 @@ void vertex() {
 }
 void fragment() {
     float top = smoothstep(0.5, 0.85, up_normal.y);
-    vec2 deck_uv = world.xz / vec2(4.0, 5.0);
+    vec2 deck_uv = (world.xz + deck_shift) / vec2(4.0, 5.0);
     float slab = hash(floor(deck_uv));
     float deck_joint = joint(deck_uv, vec2(4.0, 5.0));
     vec3 cap = cap_color * (1.04 - slab_spread + slab * slab_spread);

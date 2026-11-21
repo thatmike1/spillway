@@ -94,12 +94,11 @@ func attach(level: Node3D, map_id: String) -> void:
 	if map_id == "night-shift":
 		for label: Node in level.find_children("*","Label3D",true,false):
 			_label_colors.append({"node":label,"old":label.modulate,"outline":label.outline_modulate})
-	# painted distance figures ("16 m / 630 u") read as debug on a course; the practice yard keeps them.
-	if real_id != "practice":
-		var figures := RegEx.create_from_string("^\\d+ m\\n\\d+ u$")
-		for label: Node in level.find_children("*","Label3D",true,false):
-			if figures.search(str((label as Label3D).text)) != null:
-				_hidden_labels.append({"node":label,"old":label.visible})
+	# painted distance figures ("16 m / 630 u") read as debug; L off still shows them.
+	var figures := RegEx.create_from_string("^\\d+ m\\n\\d+ u$")
+	for label: Node in level.find_children("*","Label3D",true,false):
+		if figures.search(str((label as Label3D).text)) != null:
+			_hidden_labels.append({"node":label,"old":label.visible})
 	var contours := CONTOURS.new()
 	for water: Dictionary in _waters:
 		contours.water_floor = maxf(contours.water_floor, float(water.y))
@@ -228,8 +227,8 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 			top = Color("8fa7b7") if "snow" in kind or kind in ["rock","plateau"] else Color("718d7d")
 			deck = false
 	if not deck and top == Color(palette.top):
-		# tops of non-deck kinds stay in the pale family, a step toward the side, never olive or grey.
-		top = top.lerp(side, 0.22)
+		# what you cannot land on stays in the side family: only decks are pale.
+		top = side.lightened(0.25)
 	if key == "SolidMesh":
 		top = Color(palette.top)
 	var material := ShaderMaterial.new()

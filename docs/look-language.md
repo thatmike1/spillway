@@ -53,18 +53,26 @@ Dressing has no collision, stays clear of every swept path and rope line, and ne
 
 One idea carries readability: **what you land on is the palest thing in view, the side under it is clearly darker, the underside darkest.** Everything else serves that.
 
+### Deck value target (every map, shared layer or own look)
+
+Measure the near deck at running height in a 1280x720 capture (crop about x 490-790, y 620-700):
+- **in sun:** shell white, about sRGB (236, 230, 218); stay within roughly ±8 per channel and never above 250 in any channel (clipped) or with blue more than 30 below red (yellow);
+- **in the sun's shadow:** cool and still pale, about (195, 202, 204), always clearly lighter than the side face beside it;
+- **night maps:** the same order of values, cooler overall; the deck stays the palest surface in view.
+
 ### Surface (`shaders/look/surface.gdshader`)
 
 | Rule | Parameter | Value |
 | --- | --- | --- |
 | Faces blend into the deck treatment between these world normal-y values, so walkable slopes (Saltglass's 56° surf face is 0.555) stay pale | `top_from`, `top_full` | 0.30, 0.50 |
-| Deck colour: per map `top` in `r17_palettes.gd`, near-white and slightly warm, never yellow or clipped | `top_color` | e.g. Breakwater e2d6cc, Sunken Court d9d5cb, Night Shift e1d9c5 |
-| Quiet deck: fine grain ±1%, broad mottle | `deck_mottle` | 0.05 |
+| Deck colour: per map `top` in `r17_palettes.gd`, near-white and slightly warm, never yellow or clipped | `top_color` | shared-layer palettes: Breakwater e0dad2, Whiteout dcd8d0, Sunken Court d9d5cb, Rainline d9dcd3, Night Shift dedad0, practice dedbd5, Overflow e0dad0, Movement Lab e0dcd3 |
+| Quiet deck: fine grain ±1%, broad mottle | `deck_mottle` | 0.02 |
 | Sparse seams on decks only, an 8 m × 32 m grid offset to x = 4 + 8k so no seam runs down a spawn axis | `deck` | 0.35 shared layer, 1.0 Breakwater pavers |
-| A top in the sun's shadow keeps this share of the lost sun, tinted cool (directional lights only) | `shade_lift`, `shade_tint` | 0.55, (0.80, 0.88, 1.0) |
+| A top in the sun's shadow keeps this share of the lost sun, tinted cool (directional lights only) | `shade_lift`, `shade_tint` | 0.35, (0.70, 0.84, 1.0) |
 | Side colour: per map `side`, a clearly darker weathered tone (slate teal, grey-green stone, navy at night) | `side_color` | e.g. Breakwater 527b87, Sunken Court 8e948c, Night Shift 3e5671 |
 | Vertical weathering on sides: broad runoff streaks, weaker with distance | `streak_amount` | 0.10 |
-| Paint loss on sides: sparse patches that lift toward a lighter, warmer side colour | `wear_amount`, `chip_color` | 0.18 shared layer; chips mix side × 1.5 with (0.78, 0.71, 0.58) at 35% |
+| Paint loss on sides: sparse patches that lift toward a lighter, warmer side colour | `wear_amount`, `chip_color` | 0.12 shared layer; chips mix side × 1.5 with (0.78, 0.71, 0.58) at 35% |
+| Broad tonal variation on sides, metres across, ±7%, so a large face never reads as one flat tone | `tone` (fixed) | 0.93–1.07 |
 | Undersides (normal-y below −0.25) darken to | `underside` | 0.62 × side |
 | Toon light: shaded side 0.48, lit side 0.82, faces turned to the sun 1.0 | `light()` | unchanged from R17 |
 
@@ -72,13 +80,14 @@ One idea carries readability: **what you land on is the palest thing in view, th
 
 - Lines only on real boundaries: the outline of the union of decks at one height (coplanar pieces merge first, so seams between them never get a line), plus vertical strokes on the union's outer corners from the deck down to the water or the foot of the solid.
 - Colour (0.035, 0.065, 0.070) at alpha 0.78, a 5 mm square tube in the world (`radius` 0.005).
+- A deck outline is drawn only for a camera above that deck (it fades out from 0.15 m above to 0.25 m below); seen from below, an outline would float against the sky. Corner strokes always draw.
 - Far lines never get thinner than `min_pixels` 1.2 px on screen; they lighten instead (alpha × 0.45–1.0 by coverage), so distant geometry has no shimmering dashes. Fade from 28 m to 95 m.
 - No ink on interior grid seams, weathering, ribs or props.
 
 ### Orange
 
 - Colour d95b30, unshaded. Only on the lip where a jump is taken and on its receiver (`jump_gaps` in each level), 0.30 m on the deck plus a 0.14 m face.
-- Never on an edge where another deck continues at the same height (that is a seam, not a lip). Wall copings are cream, not orange.
+- Never on an edge where another deck continues at the same height (that is a seam, not a lip): for flat decks the edge must lie on the outline of the union of all decks at its height. Wall copings are cream, not orange.
 - Paint keys containing yellow, orange, hazard, lip or duck render orange; dark paint 263d45; other paint cream fff5db.
 
 ### Water (`shaders/look/water.gdshader`)

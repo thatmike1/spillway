@@ -4,8 +4,10 @@ extends RefCounted
 ## signs in warm off-white and amber, and painted floor and wall figures hide while L is on.
 ## nothing here collides.
 
-## sides of kinds not listed below (parapets, cappings) join the concrete family, not the navy.
-const PALETTE := {"top": "e4dbca", "side": "78736c"}
+## decks a damp neutral a step darker than the dry-day family (e4dbca read dry and pale under
+## the rain, critic 19:28), still the palest surface; sides of kinds not listed below
+## (parapets, cappings) join the concrete family, not the navy.
+const PALETTE := {"top": "cdc8bf", "side": "78736c"}
 ## the facades were one navy with the sky: wet brick, concrete and render give the street its
 ## materials back and separate the buildings from each other and from the night. the art file
 ## splits each kind into grid cells (Mesh_brick_3_-2), so these match on the kind before the cell.

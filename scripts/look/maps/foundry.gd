@@ -11,10 +11,12 @@ static func dress(level: Node3D) -> void:
 	var deck := level.get_node_or_null("Mesh_deck_entry_back_0_0") as MeshInstance3D
 	if deck != null and deck.material_override is ShaderMaterial:
 		var concrete := deck.material_override as ShaderMaterial
-		concrete.set_shader_parameter("cap_color", Vector3(0.70, 0.685, 0.64))
+		concrete.set_shader_parameter("cap_color", Vector3(0.77, 0.76, 0.735))
 		concrete.set_shader_parameter("joint_depth", 0.12)
 		concrete.set_shader_parameter("slab_spread", 0.07)
 		concrete.set_shader_parameter("dry_concrete", Vector3(0.40, 0.46, 0.47))
+		# a joint ran straight down the course centre at running gaze; half a slab moves it aside.
+		concrete.set_shader_parameter("deck_shift", Vector2(2.0, 0.0))
 	# the map name floated in mid-air beside the tailrace ring; wall-painted wayfinding stays.
 	var title := level.get_node_or_null("Sign_entry") as Label3D
 	if title != null:

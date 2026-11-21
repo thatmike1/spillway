@@ -100,6 +100,20 @@ func dress(level: Node3D) -> Node3D:
 		top_band.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var face := _box(root, "receiver_face_%d" % i, Vector3(cx, h - 0.15, near + 0.015), Vector3(width, 0.28, 0.025), paint)
 		face.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# the dispatch deck lost its floating FINISH text; a pale dispatch portal stands just beyond its far edge
+	# instead, centred on the finish, so the end of the course reads as a place, not a caption.
+	var finish: Variant = level.get("finish_position")
+	if finish is Vector3 and level.DECKS.size() > 0:
+		var last: Array = level.DECKS[level.DECKS.size() - 1]
+		var fz := float(last[2]) - 1.2
+		var fx := (finish as Vector3).x
+		var gate := Node3D.new()
+		gate.name = "DispatchPortal"
+		root.add_child(gate)
+		for side: float in [-5.0, 5.0]:
+			_box(gate, "post_%s" % side, Vector3(fx + side, (COURT_TOP + 9.5) * 0.5, fz), Vector3(0.7, 9.5 - COURT_TOP, 0.7), steel)
+		_box(gate, "lintel", Vector3(fx, 9.9, fz), Vector3(11.4, 1.3, 0.8), pale)
+		_box(gate, "lintel_band", Vector3(fx, 9.35, fz + 0.42), Vector3(11.4, 0.18, 0.04), steel)
 	# control text leaves the world with L on; the HUD already carries the same hints.
 	_labels.clear()
 	for label: Node in level.find_children("Sign_*", "Label3D", true, false):

@@ -40,7 +40,9 @@ void fragment(){
  float wash=texture(wear,wp.xz/17.0).r;
  vec3 cap=top_color.rgb*(0.935+grain*0.065+wash*0.025);
  // weathered tops carry a few crisp-edged stains, not broad soft blotches.
- float stain=smoothstep(0.71,0.74,texture(wear,wp.xz/2.6).r);
+ float stain=smoothstep(0.71,0.74,texture(wear,wp.xz/vec2(2.6,3.3)).r);
+ // a second, coarser field thins the stains out unevenly so they never line up in rows.
+ stain*=smoothstep(0.44,0.58,texture(wear,wp.xz/vec2(9.1,6.7)+vec2(0.37,0.61)).g);
  cap*=1.0-weather*(0.05*stain+0.035*grain);
  cap*=top_gain;
  vec2 joint=abs(mod(wp.xz+vec2(2.25)+joint_shift,vec2(4.5))-vec2(2.25));

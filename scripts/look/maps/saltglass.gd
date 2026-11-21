@@ -16,7 +16,7 @@ var _level: Node3D
 var _stencil: Label3D
 var _stencil_text := ""
 var _lip_old := {}
-var _ink: StandardMaterial3D
+var _lip: StandardMaterial3D
 
 func material(key: String, node: GeometryInstance3D, proposed: Material) -> Material:
 	if key.begins_with("SaltglassSurface_") or key == "SaltglassWater":
@@ -44,8 +44,9 @@ func dress(level: Node3D) -> Node3D:
 	# the store reads as a building: a loading door on its quay face and a pale cornice on its roof
 	# edge. the store solid occupies x 215..220, z 40..54, y 5.3..11.3; nothing here collides.
 	var root := Node3D.new()
-	_box(root, Vector3(214.96, 7.05, 44.0), Vector3(0.04, 3.5, 3.4), Color("e3dccb"))
-	_box(root, Vector3(214.94, 6.95, 44.0), Vector3(0.04, 3.3, 3.0), Color("1c2c33"))
+	_box(root, Vector3(214.96, 6.95, 44.0), Vector3(0.04, 3.3, 3.0), Color("1c2c33"))
+	# a canopy over the door throws a shadow line, so the opening reads as set into the wall.
+	_box(root, Vector3(214.55, 8.75, 44.0), Vector3(0.9, 0.16, 3.6), Color("e3dccb"))
 	_box(root, Vector3(217.5, 11.42, 47.0), Vector3(5.3, 0.24, 14.3), Color("e3dccb"))
 	return root
 
@@ -62,22 +63,22 @@ func _box(root: Node3D, at: Vector3, size: Vector3, color: Color) -> void:
 	root.add_child(node)
 
 func _lips(value: bool) -> void:
-	# with L on, pan and deck lips are a crisp ink edge instead of a pale band; saltglass's own
-	# deferred fixture paints them pale first, so this runs deferred after it.
+	# with L on, takeoff and landing lips carry the shared orange band like every other map;
+	# saltglass's own deferred fixture paints them pale first, so this runs deferred after it.
 	if _level == null or not is_instance_valid(_level):
 		return
-	if _ink == null:
-		_ink = StandardMaterial3D.new()
-		_ink.albedo_color = Color("24383f")
-		_ink.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		_ink.cull_mode = BaseMaterial3D.CULL_DISABLED
+	if _lip == null:
+		_lip = StandardMaterial3D.new()
+		_lip.albedo_color = Color("d95b30")
+		_lip.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		_lip.cull_mode = BaseMaterial3D.CULL_DISABLED
 	for node: Node in _level.find_children("JumpLips", "MeshInstance3D", true, false):
 		var lip := node as MeshInstance3D
 		if value:
 			# remember whatever the map last painted, so L off returns exactly that.
-			if lip.material_override != _ink:
+			if lip.material_override != _lip:
 				_lip_old[lip] = lip.material_override
-			lip.material_override = _ink
+			lip.material_override = _lip
 		elif _lip_old.has(lip):
 			lip.material_override = _lip_old[lip]
 
