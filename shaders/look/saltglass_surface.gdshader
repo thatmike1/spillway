@@ -61,8 +61,8 @@ void fragment() {
   cap = mix(cap, vec3(0.38, 0.43, 0.41), concrete_joint * (look_c ? 0.30 : 0.10));
   if (look_c) {
    // sparse brine stains with a crisp edge, so a broad quay is not one blank plane or a fog.
-   float stain = smoothstep(0.70, 0.73, texture(wear, world_position.xz / 9.0 + 0.37).r);
-   cap = mix(cap, cap * vec3(0.88, 0.89, 0.88), stain);
+   float stain = smoothstep(0.76, 0.79, texture(wear, world_position.xz / 5.0 + 0.37).r);
+   cap = mix(cap, cap * vec3(0.94, 0.945, 0.94), stain);
   }
  }
  // look c's lighter tops already sit near white under lane 02's noon light; both share this scale.

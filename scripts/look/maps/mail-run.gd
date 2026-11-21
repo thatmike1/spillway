@@ -37,8 +37,8 @@ void fragment(){
  side = mix(side, side * 0.72 + vec3(0.04, 0.035, 0.02), foot * 0.6 * weather);
  if (joint_spacing > 0.0) {
   // sparse crisp stains and a long pour joint down the quay, so the deck carries some wear.
-  float stain = smoothstep(0.70, 0.73, texture(wear, wp.xz / 9.0 + 0.37).r);
-  cap = mix(cap, cap * vec3(0.88, 0.89, 0.88), stain);
+  float stain = smoothstep(0.76, 0.79, texture(wear, wp.xz / 5.0 + 0.37).r);
+  cap = mix(cap, cap * vec3(0.94, 0.945, 0.94), stain);
   float jx = abs(fract(wp.x / 6.0) - 0.5) * 6.0;
   float aax = max(fwidth(wp.x), 0.004);
   float pour = 1.0 - smoothstep(0.014 - aax, 0.014 + aax, jx);
