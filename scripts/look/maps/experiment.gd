@@ -8,8 +8,10 @@ extends RefCounted
 
 const SURFACE := preload("res://shaders/look/surface.gdshader")
 const PALETTE := {"top": "f7f2e6", "side": "5b6f73"}
-## the hall floor is lit mostly by ambient light (the roof shades the sun), so it starts brighter.
-const SURFACES := {"floor": {"top_color": "fffbf1"}}
+## the hall floor sits in the roof's shadow, where the shared shader lifts shaded tops toward
+## the sun; a light grey albedo lands it pale without clipping under the hall's light. the
+## mezzanine and dispatch decks (deck_steel) and the start pad are one step lighter.
+const SURFACES := {"floor": {"top_color": "e4e5e0"}, "deck_steel": {"top_color": "ecede8"}}
 const HALF := 12.0
 const ROOF := 12.0
 const HUB_Z := 10.0
@@ -67,6 +69,15 @@ func material(key: String, node: GeometryInstance3D, proposed: Material) -> Mate
 	# kit palette for the same weathered steel as the housings.
 	if node.material_override == null and proposed is BaseMaterial3D:
 		return _housing_material()
+	if key.begins_with("Mesh_paint_white"):
+		# the start pad stays in the floor's family, one step lighter, instead of a cream slab.
+		var pad := ShaderMaterial.new()
+		pad.shader = SURFACE
+		pad.set_shader_parameter("wear", load("res://assets/look/painted-wear.png"))
+		pad.set_shader_parameter("top_color", Color("ecede8"))
+		pad.set_shader_parameter("side_color", Color("587078"))
+		pad.set_shader_parameter("wear_amount", 0.0)
+		return pad
 	if key == "Mesh_wall_panel":
 		return _wall_material()
 	if key in ["Mesh_housing", "Mesh_rack_low"]:

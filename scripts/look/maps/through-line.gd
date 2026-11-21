@@ -1,9 +1,9 @@
 extends RefCounted
 ## through line, look c only: the two runs stand as two monumental plinths in open water, with
 ## the launch channel cut between them, so nothing reads as a slab hanging in a void. the fork
-## and its 250 u/s arc stay orange (the shared layer would paint them cream), the example arcs
-## become thin dashed lines instead of cubes in the sky, instruction text leaves the world (the
-## hud already carries it) and the two remaining signs, 02 and OUTFLOW, hang from structure.
+## posts go dark steel and only flat lips stay orange, the example-arc cubes leave the sky
+## (anything drawn there floats), instruction text leaves the world (the hud already carries
+## it) and the two remaining signs, 02 and OUTFLOW, hang from structure.
 ## no node here collides; plinths stay inset under the real decks and below their undersides,
 ## so no visual ledge appears beside a landing. l off restores every label exactly.
 
@@ -18,8 +18,8 @@ const FOOT_Y := -8.0
 ## how far plinths sit inside each deck's edge, so the deck slab keeps its own lip and shadow line.
 const INSET := 0.5
 const ORANGE := Color("d95b30")
-const CREAM := Color("f4eddc")
 const INK := Color("263d45")
+const STEEL := Color("3b5157")
 const STONE_SIDE := Color("5e777a")
 const STONE_TOP := Color("8fa09c")
 ## the level's own paint colours, used to recognise its pieces (duplicate node names get renamed).
@@ -40,10 +40,15 @@ func material(_key: String, node: GeometryInstance3D, proposed: Material) -> Mat
 	if old == null:
 		return _quieter(proposed)
 	if node is MeshInstance3D and (node as MeshInstance3D).mesh is BoxMesh and ((node as MeshInstance3D).mesh as BoxMesh).size.is_equal_approx(Vector3.ONE * 0.2):
-		# example-arc cubes: hidden with l on, replaced by the dashed lines in dress().
+		# example-arc cubes: hidden with l on; l off brings them back.
 		_dots.append(node)
 		return proposed
 	if old.albedo_color.is_equal_approx(LEVEL_ORANGE):
+		# orange stays on flat painted lips; the fork posts, fins and tower beacons are structure
+		# and go dark weathered steel, so orange still means "jump from here".
+		var box := (node as MeshInstance3D).mesh as BoxMesh if node is MeshInstance3D else null
+		if box != null and box.size.y >= 0.9:
+			return _flat(STEEL)
 		return _flat(ORANGE)
 	if old.albedo_color.is_equal_approx(LEVEL_DARK):
 		return _flat(INK)
@@ -106,7 +111,6 @@ func dress(level: Node3D) -> Node3D:
 	# the finish band's near edge, painted flush on second run.
 	var finish: AABB = level.get("finish_bounds")
 	_block(root, "FinishLine", Vector3(0, 7.006, finish.end.z), Vector3(39.6, 0.012, 0.18), _ink)
-	_arcs(root)
 	for path: String in SIGNS:
 		var label := level.get_node_or_null(path) as Label3D
 		if label != null:
@@ -125,38 +129,6 @@ func set_enabled(value: bool) -> void:
 		label.visible = not value or not str(on[0]).is_empty()
 		label.text = str(on[0]) if value and not str(on[0]).is_empty() else str(entry.text)
 		label.pixel_size = float(on[1]) if value and not str(on[0]).is_empty() else float(entry.pixel)
-
-func _arcs(root: Node3D) -> void:
-	# the level's two example flights (same formula as r20_through_level.gd), drawn as dashes.
-	for speed: float in [250.0, 500.0]:
-		var up := (420.0 + 0.7 * speed) * 0.0254
-		var g := 800.0 * 0.0254
-		var t_land := (up + sqrt(up * up - 2.0 * g * 3.0)) / g
-		var x := -0.7 if speed == 250.0 else 0.7
-		var material := _flat(ORANGE if speed == 250.0 else CREAM)
-		var points: Array[Vector3] = []
-		for i: int in range(1, 19):
-			var t := t_land * float(i) / 18.0
-			points.append(Vector3(x, 4.0 + up * t - 0.5 * g * t * t, -40.0 - speed * 0.0254 * t))
-		for i: int in points.size() - 1:
-			var a := points[i].lerp(points[i + 1], 0.2)
-			var b := points[i].lerp(points[i + 1], 0.8)
-			# past the channel the arc stops above head height, so no dash crosses a runner's view of the court.
-			if b.z < -47.0 and minf(a.y, b.y) < 7.0 + 2.4:
-				continue
-			var dash := MeshInstance3D.new()
-			dash.name = "ArcDash_%d_%d" % [int(speed), i]
-			var tube := CylinderMesh.new()
-			tube.top_radius = 0.045
-			tube.bottom_radius = 0.045
-			tube.height = a.distance_to(b)
-			tube.radial_segments = 6
-			tube.rings = 1
-			dash.mesh = tube
-			dash.material_override = material
-			dash.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			dash.transform = Transform3D(Basis(Quaternion(Vector3.UP, (b - a).normalized())), (a + b) * 0.5)
-			root.add_child(dash)
 
 func _footprint(level: Node3D, run: String) -> AABB:
 	# the union of a run's deck pieces (named <run>_<ix>_<iz>), top face down to its underside.

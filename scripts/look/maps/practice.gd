@@ -9,14 +9,16 @@ extends RefCounted
 ## blocks, where a hop peaks under 1.5 m; every pier stands outside the training walls.
 
 const SURFACE := preload("res://shaders/look/surface.gdshader")
-const PALETTE := {"top": "dcd9ce", "side": "4c6468"}
+const PALETTE := {"top": "d8cfc1", "side": "4c6468"}
 ## run decks a step below the landings, pits and walls weathered and darker than any deck.
+## the dam's 1:1.2 face is steep enough to count as a walkable slope for the shared shader; it
+## stays a weathered side here instead of a second pale deck the size of the sky.
 const SURFACES := {
-	"track": {"top_color": "cfccbf"},
-	"landing": {"top_color": "d9d6ca"},
+	"track": {"top_color": "d4cbbd"},
+	"landing": {"top_color": "ddd4c6"},
 	"catch": {"top_color": "52665f", "side_color": "3d5254"},
 	"return": {"top_color": "8d9a90"},
-	"concrete": {"side_color": "5d7375", "wear_amount": 0.05},
+	"concrete": {"side_color": "5d7375", "wear_amount": 0.05, "top_from": 0.65, "top_full": 0.8},
 	"old_concrete": {"side_color": "4a5f60", "wear_amount": 0.07},
 	"brick": {"top_color": "a9b2a8", "side_color": "6f7f7a", "wear_amount": 0.1},
 }

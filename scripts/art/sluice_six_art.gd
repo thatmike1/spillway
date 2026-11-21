@@ -46,7 +46,7 @@ static func dress(level: Node3D) -> void:
 				var index := int(str(child.name).trim_prefix("Mesh_deck_pier_"))
 				if index >= 9:
 					side_color = Color("566a74") if index % 2 == 0 else Color("475a65")
-			child.material_override = MATERIALS.concrete(top_color,side_color,not support,child.get_aabb(),SEAM,SEAM_SCALE,0.55)
+			child.material_override = MATERIALS.concrete(top_color,side_color,not support,child.get_aabb(),SEAM,SEAM_SCALE,0.55,1.0)
 	_box(level,"tidal_water",Vector3(0,-3,-70),Vector3(350,0.1,450),Color("598a90"))
 	var footprints := PackedVector4Array()
 	for support: Vector4 in level.supports:

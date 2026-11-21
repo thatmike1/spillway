@@ -9,6 +9,8 @@ uniform float seam_strength = 0.48;
 uniform float seam_floor = 0.62;
 uniform vec2 seam_scale = vec2(2.438,3.2512);
 uniform float deck_stain = 0.0;
+// 0 keeps the original hard-edged chips; 1 turns them into soft, lighter runoff-like wear.
+uniform float chip_soft = 0.0;
 uniform vec3 bounds_min;
 uniform vec3 bounds_max;
 varying vec3 wp;
@@ -32,7 +34,9 @@ void fragment() {
  float joint_wear=(1.0-smoothstep(0.025,0.09,min(pd.x,pd.y)))*smoothstep(0.45,0.65,grain(wall*2.5));
  float fracture=grain(wall*4.0)*0.6+grain(wall*13.0)*0.3+grain(wall*41.0)*0.1;
  float chips=(1.0-smoothstep(0.015,0.18,max(edge,0.0)))*smoothstep(0.42,0.55,fracture);
- float wear=max(step(0.25,chips)*0.48,step(0.12,joint_wear)*0.12);
+ float hard=step(0.25,chips);
+ float soft=smoothstep(0.05,0.7,chips)*0.55;
+ float wear=max(mix(hard,soft,chip_soft)*0.48,step(0.12,joint_wear)*0.12*(1.0-chip_soft));
  vec3 side=mix(side_color.rgb,mix(side_color.rgb,vec3(0.74,0.73,0.67),0.55),wear);
  side*=0.985+grain(wall*1.5)*0.015;
  side*=1.0-joint*0.12;
@@ -119,7 +123,7 @@ static var _surface: Shader
 static var _ink: Shader
 static var _water: Shader
 ## seam: deck joint strength and floor, seam_scale: joint spacing in metres; outer reach keeps the defaults.
-static func concrete(top: Color, side: Color, deck: bool = false, bounds: AABB = AABB(), seam: Vector2 = Vector2(0.48,0.62), seam_scale: Vector2 = Vector2(2.438,3.2512), stain: float = 0.0) -> ShaderMaterial:
+static func concrete(top: Color, side: Color, deck: bool = false, bounds: AABB = AABB(), seam: Vector2 = Vector2(0.48,0.62), seam_scale: Vector2 = Vector2(2.438,3.2512), stain: float = 0.0, soft: float = 0.0) -> ShaderMaterial:
 	if _surface == null:
 		_surface = Shader.new()
 		_surface.code = SURFACE
@@ -134,6 +138,7 @@ static func concrete(top: Color, side: Color, deck: bool = false, bounds: AABB =
 	material.set_shader_parameter("seam_floor",seam.y)
 	material.set_shader_parameter("seam_scale",seam_scale)
 	material.set_shader_parameter("deck_stain",stain)
+	material.set_shader_parameter("chip_soft",soft)
 	return material
 ## color and alpha default to outer reach's near-black ink; sluice six passes a softer slate.
 static func ink(color: Vector3 = Vector3(0.035,0.055,0.065), alpha: float = 0.88) -> ShaderMaterial:
