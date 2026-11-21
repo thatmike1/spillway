@@ -13,10 +13,10 @@ uniform float top_full = 0.50;
 uniform vec4 chip_color : source_color = vec4(0.78,0.71,0.58,1.0);
 uniform float streak_amount = 0.10;
 uniform float underside = 0.62;
-uniform float deck_mottle = 0.05;
+uniform float deck_mottle = 0.02;
 // tops in shadow stay pale and cool instead of dropping to the side value: the readability rule.
 uniform float shade_lift = 0.35;
-uniform vec4 shade_tint : source_color = vec4(0.80,0.88,1.0,1.0);
+uniform vec4 shade_tint : source_color = vec4(0.70,0.84,1.0,1.0);
 varying vec3 wp;
 varying vec3 wn;
 varying float topness;
@@ -27,8 +27,9 @@ void fragment(){
  vec2 uv=vec2(along,wp.y);
  float farfade=1.0-smoothstep(22.0,85.0,distance(wp,CAMERA_POSITION_WORLD));
  // localized pale paint loss, larger and calmer than grain.
- float w=texture(wear,uv/vec2(3.0,3.0)).r;
- float chips=smoothstep(0.73,0.78,w)*wear_amount*mix(0.35,1.0,farfade);
+ // paint loss runs down the face like the streaks: tall, soft-edged and faint, never round spots.
+ float w=texture(wear,uv/vec2(2.2,9.0)).r;
+ float chips=smoothstep(0.70,0.84,w)*wear_amount*0.5*mix(0.35,1.0,farfade);
  // broad tonal variation, metres across, so a big face reads as weathered material and never as one flat tone.
  float tone=texture(wear,uv/vec2(11.0,7.0)).g;
  // vertical weathering: runoff streaks stretched down the face, darker toward the foot.
@@ -58,5 +59,8 @@ void light(){
  band=mix(band,1.0,smoothstep(0.65,0.72,facing));
  DIFFUSE_LIGHT+=ALBEDO*band*ATTENUATION*LIGHT_COLOR/PI;
  // a shadowed top keeps part of the sun it lost, cooled: pale decks stay pale in shade.
- DIFFUSE_LIGHT+=ALBEDO*shade_tint.rgb*shade_lift*topness*(1.0-ATTENUATION)*step(0.0,facing)*float(LIGHT_IS_DIRECTIONAL)*LIGHT_COLOR/PI;
+ // the lift takes only the sun's brightness, not its warmth, and greys the deck a little: shade reads cool.
+ float sun_value=dot(LIGHT_COLOR,vec3(0.2126,0.7152,0.0722));
+ vec3 shade_albedo=mix(ALBEDO,vec3(dot(ALBEDO,vec3(0.2126,0.7152,0.0722))),0.5);
+ DIFFUSE_LIGHT+=shade_albedo*shade_tint.rgb*shade_lift*topness*(1.0-ATTENUATION)*step(0.0,facing)*float(LIGHT_IS_DIRECTIONAL)*sun_value/PI;
 }

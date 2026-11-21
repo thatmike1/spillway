@@ -98,4 +98,11 @@ func edges(level: Node3D) -> void:
 		for x: float in [-4.9,4.9]:
 			strips.append([Vector3(x,y,(span[1]+span[2])/2),Vector3(0.18,0.035,span[2]-span[1])])
 	for strip: Array in strips:
-		level.box("water_lip",strip[0],strip[1],Color("d2824c"))
+		level.box("water_lip",strip[0],strip[1],Color("d95b30"))
+	# the lip is the shared unshaded orange, so it does not wash to peach in the noon light.
+	var lip := StandardMaterial3D.new()
+	lip.albedo_color = Color("d95b30")
+	lip.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	for node: Node in level.get_children():
+		if node is MeshInstance3D and str(node.get_meta("plan_art_id", "")) == "water_lip":
+			(node as MeshInstance3D).material_override = lip

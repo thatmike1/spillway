@@ -59,6 +59,8 @@ var _wash_color := PALE
 var _frame := 0.0
 var _frame_color := VERMILION
 var _frame_rate := 1.0
+var _catch_t := 1.0
+var _catch_anchor := Vector3.ZERO
 var _seen := {}
 
 func _ready() -> void:
@@ -170,6 +172,7 @@ func rest() -> void:
 	_burst = 0.0
 	_wash = 0.0
 	_frame = 0.0
+	_catch_t = 1.0
 	_seen = {}
 
 ## the lens lives under the runner camera while active, so it is freed with a replaced runner.
@@ -275,12 +278,19 @@ func _update_edge(k: float, dt: float) -> void:
 	_burst = move_toward(_burst, 0.0, dt * 2.6)
 	_wash = move_toward(_wash, 0.0, dt * 1.6)
 	_frame = move_toward(_frame, 0.0, dt * _frame_rate)
+	_catch_t = minf(1.0, _catch_t + dt / 0.5)
 	var amount := speed01 * k if bool(setting("motion_fx_streaks")) else 0.0
 	var burst := _burst * k if bool(setting("motion_fx_streaks")) else 0.0
 	var moments := bool(setting("motion_fx_moments"))
 	var wash := clampf(_wash, 0.0, 1.0) * (0.4 + 0.6 * k) if moments else 0.0
 	var frame := clampf(_frame, 0.0, 1.0) if moments else 0.0
-	_layer.visible = amount + burst > 0.01 or wash > 0.005 or frame > 0.005
+	var catch_amount := 0.0
+	var catch_at := Vector2(0.5, 0.3)
+	var view := get_viewport().get_camera_3d()
+	if moments and _catch_t < 1.0 and view != null and not view.is_position_behind(_catch_anchor):
+		catch_at = view.unproject_position(_catch_anchor) / get_viewport().get_visible_rect().size
+		catch_amount = 0.5 + 0.5 * k
+	_layer.visible = amount + burst > 0.01 or wash > 0.005 or frame > 0.005 or catch_amount > 0.0
 	if not _layer.visible:
 		return
 	var size := get_viewport().get_visible_rect().size
@@ -294,6 +304,9 @@ func _update_edge(k: float, dt: float) -> void:
 	_edge_material.set_shader_parameter("wash_bias", _wash_bias)
 	_edge_material.set_shader_parameter("frame", frame)
 	_edge_material.set_shader_parameter("frame_color", _frame_color)
+	_edge_material.set_shader_parameter("catch_at", catch_at)
+	_edge_material.set_shader_parameter("catch_t", _catch_t)
+	_edge_material.set_shader_parameter("catch_amount", catch_amount)
 
 func _update_motes(body: Node3D, view: Camera3D, k: float, dt: float) -> void:
 	var strength := 0.0
@@ -336,7 +349,7 @@ func _update_rings(dt: float) -> void:
 		var age := _ring_age[i]
 		ring.visible = age < 1.0
 		# wide enough that its leading arc reaches the bottom of a level first-person view.
-		var radius := lerpf(0.8, 2.8, 1.0 - pow(1.0 - age, 3.0))
+		var radius := lerpf(1.0, 2.4, 1.0 - pow(1.0 - age, 3.0))
 		ring.scale = Vector3(radius, 1.0, radius)
 		(ring.material_override as ShaderMaterial).set_shader_parameter("age", age)
 		(ring.material_override as ShaderMaterial).set_shader_parameter("radius_m", radius)
@@ -380,12 +393,9 @@ func _observe_moments(body: Node3D, camera: Camera3D, k: float, _dt: float) -> v
 			_moment_frame(VERMILION, 1.6, 0.45)
 	if attached and not before.attached:
 		var anchor: Vector3 = (grapple as Dictionary).get("position", camera.global_position - camera.global_basis.z)
-		var bias := Vector2.ZERO
-		if not camera.is_position_behind(anchor):
-			var size := get_viewport().get_visible_rect().size
-			bias = ((camera.unproject_position(anchor) / size - Vector2(0.5, 0.5)) * 2.0).limit_length(1.0)
-		_moment_wash(PALE, 0.55, bias)
-		_moment_frame(PALE, 0.9, 1.8)
+		# a catch has its own cue (strokes drawn in onto the anchor), not the checkpoint frame.
+		_catch_anchor = anchor
+		_catch_t = 0.0
 	elif before.attached and not attached and not bool(body.call("is_grounded") if body.has_method("is_grounded") else true):
 		_burst = maxf(_burst, 0.45)
 
@@ -409,8 +419,8 @@ func _landing(body: Node3D, camera: Camera3D, hardness: float, k: float) -> void
 	var tangent := normal.cross(Vector3.FORWARD if absf(normal.dot(Vector3.FORWARD)) < 0.9 else Vector3.RIGHT).normalized()
 	var travel: Vector3 = body.get("velocity") if "velocity" in body else Vector3.ZERO
 	# centred a little ahead along the run: a first-person view outruns a ring left at the feet.
-	travel = (travel - normal * travel.dot(normal)) * 0.3
-	ring.global_transform = Transform3D(Basis(tangent, normal, tangent.cross(normal)), body.global_position + travel.limit_length(3.0) + normal * 0.03)
+	travel = (travel - normal * travel.dot(normal)) * 0.55
+	ring.global_transform = Transform3D(Basis(tangent, normal, tangent.cross(normal)), body.global_position + travel.limit_length(4.5) + normal * 0.03)
 	ring.visible = true
 	_ring_age[_rings.find(ring)] = 0.0
 	(ring.material_override as ShaderMaterial).set_shader_parameter("strength", 0.45 + 0.55 * k)
