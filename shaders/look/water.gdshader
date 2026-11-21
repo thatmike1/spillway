@@ -18,7 +18,7 @@ void fragment(){
  float chop=texture(noise,p/vec2(13.0,5.5)+vec2(-TIME*0.011,TIME*0.006)).g;
  float wave=broad*0.6+chop*0.4;
  float distance_fade=1.0-smoothstep(40.0,220.0,distance(wp,CAMERA_POSITION_WORLD));
- vec3 col=mix(deep_color.rgb,lit_color.rgb,smoothstep(0.30,0.70,wave));
+ vec3 col=mix(deep_color.rgb,lit_color.rgb,smoothstep(0.40,0.60,wave));
  col=mix(col,lit_color.rgb*1.18,shallow*0.55);
  // sparse glints: elongated across the view like painted strokes.
  col=mix(col,glint_color.rgb,smoothstep(0.70,0.78,chop)*smoothstep(0.45,0.65,broad)*0.55*distance_fade);
