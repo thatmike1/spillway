@@ -30,6 +30,8 @@ var sky_id := ""
 var override: Object
 var dressing: Node3D
 var _sky_light: Script
+var _waters: Array[Dictionary] = []
+var _hidden_labels: Array[Dictionary] = []
 
 func attach(level: Node3D, map_id: String) -> void:
 	name = "R17Look"
@@ -92,8 +94,27 @@ func attach(level: Node3D, map_id: String) -> void:
 	if map_id == "night-shift":
 		for label: Node in level.find_children("*","Label3D",true,false):
 			_label_colors.append({"node":label,"old":label.modulate,"outline":label.outline_modulate})
+	# painted distance figures ("16 m / 630 u") read as debug on a course; the practice yard keeps them.
+	if real_id != "practice":
+		var figures := RegEx.create_from_string("^\\d+ m\\n\\d+ u$")
+		for label: Node in level.find_children("*","Label3D",true,false):
+			if figures.search(str((label as Label3D).text)) != null:
+				_hidden_labels.append({"node":label,"old":label.visible})
 	var contours := CONTOURS.new()
+	for water: Dictionary in _waters:
+		contours.water_floor = maxf(contours.water_floor, float(water.y))
 	add_child(contours.build(level,map_id != "breakwater"))
+	if map_id == "breakwater":
+		var harbour := level.get_node_or_null("Harbour")
+		if harbour is MeshInstance3D:
+			_note_water(harbour)
+		for swap: Dictionary in base.swaps:
+			if swap.new is ShaderMaterial and (swap.new as ShaderMaterial).shader == WATER:
+				(swap.new as ShaderMaterial).set_shader_parameter("value",float(palette.get("water_value",1.0)))
+				(swap.new as ShaderMaterial).set_shader_parameter("noise",load("res://assets/look/painted-wear.png"))
+	var shore := contours.shoreline(level,_waters,Color(palette.get("shore","d3e3d8")).darkened(1.0-float(palette.get("water_value",1.0))))
+	if shore != null:
+		add_child(shore)
 	if override != null and override.has_method("dress"):
 		var proposed: Node = override.call("dress",level)
 		if proposed != null and (not proposed is Node3D or _collides(proposed)):
@@ -112,7 +133,7 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 		# these are functional timing, hazard and landing cues, at their inherited widths.
 		if key == "ReadabilityPads":
 			return flat(Color("9b7770"))
-		if key == "ReadabilityNosing" or "yellow" in key or "hazard" in key or "lip" in key or "duck" in key:
+		if key == "ReadabilityNosing" or "yellow" in key or "orange" in key or "hazard" in key or "lip" in key or "duck" in key:
 			return flat(Color("d95b30"))
 		if "dark" in key:
 			return flat(Color("263d45"))
@@ -162,6 +183,11 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 	if water_shader or inline_water or key in ["Harbour","Canal","River","Water","PoolWater","Art_Water"] or key.begins_with("Pool_"):
 		var water := ShaderMaterial.new()
 		water.shader = WATER
+		water.set_shader_parameter("value",float(palette.get("water_value",1.0)))
+		water.set_shader_parameter("noise",load("res://assets/look/painted-wear.png"))
+		var pool := key.begins_with("Pool_") or key == "PoolWater"
+		water.set_shader_parameter("shallow",1.0 if pool else 0.0)
+		_note_water(node)
 		return water
 	if not key.begins_with("Mesh_") and not key.begins_with("Art_") and key not in ["SolidMesh","RollingStock","Rails","ReadabilityPads","ReadabilityBars","ReadabilityNosing"]:
 		return null
@@ -202,7 +228,8 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 			top = Color("8fa7b7") if "snow" in kind or kind in ["rock","plateau"] else Color("718d7d")
 			deck = false
 	if not deck and top == Color(palette.top):
-		top = side.lightened(0.25)
+		# tops of non-deck kinds stay in the pale family, a step toward the side, never olive or grey.
+		top = top.lerp(side, 0.22)
 	if key == "SolidMesh":
 		top = Color(palette.top)
 	var material := ShaderMaterial.new()
@@ -210,7 +237,7 @@ func material_for(key: String, old: Material, node: GeometryInstance3D) -> Mater
 	material.set_shader_parameter("wear",load("res://assets/look/painted-wear.png"))
 	material.set_shader_parameter("top_color",top)
 	material.set_shader_parameter("side_color",side)
-	material.set_shader_parameter("wear_amount",0.08)
+	material.set_shader_parameter("wear_amount",0.12)
 	material.set_shader_parameter("deck",0.35 if deck else 0.0)
 	if not surface_key.is_empty():
 		for parameter: String in surfaces[surface_key]:
@@ -262,11 +289,30 @@ func set_enabled(value: bool) -> void:
 			state.node.rotation = state.rotation
 			state.node.light_color = state.color
 			state.node.light_energy = state.energy
+	for state: Dictionary in _hidden_labels:
+		if is_instance_valid(state.node):
+			state.node.visible = false if value else state.old
 	for state: Dictionary in _label_colors:
 		state.node.modulate = Color(palette.top) if value else state.old
 		state.node.outline_modulate = Color("172638") if value else state.outline
 	if override != null and override.has_method("set_enabled"):
 		override.call("set_enabled",value)
+
+func _note_water(node: GeometryInstance3D) -> void:
+	if not node is MeshInstance3D:
+		return
+	var mesh: Mesh = (node as MeshInstance3D).mesh
+	var size: Vector2
+	var at: Vector3 = node.position if node.get_parent() == get_parent() else get_parent().to_local(node.global_position)
+	if mesh is PlaneMesh:
+		size = (mesh as PlaneMesh).size
+	elif mesh is BoxMesh:
+		# thin box seas (tether yard): the surface is the box top.
+		size = Vector2((mesh as BoxMesh).size.x, (mesh as BoxMesh).size.z)
+		at.y += (mesh as BoxMesh).size.y*0.5
+	else:
+		return
+	_waters.append({"y":at.y,"rect":Rect2(at.x-size.x*0.5,at.z-size.y*0.5,size.x,size.y)})
 
 func _real_map_id(level: Node3D, fallback: String) -> String:
 	# r19 maps pass a palette alias (saltglass uses practice); the host knows the real id.

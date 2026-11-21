@@ -68,6 +68,8 @@ static func dress(level: Node3D) -> void:
 			env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 			env.tonemap_exposure = 0.95
 
+	_sky_light(level, "foundry")
+
 	# one cooling main joins the existing right-side pipework and wall buttresses.
 	var duct_material := SEA_GATE.painted(Color("476968"),ink)
 	SEA_GATE.block(level,"cooling_main",Vector3(27.3,16.4,-32),Vector3(1.0,1.4,88),duct_material)
@@ -96,6 +98,23 @@ static func dress(level: Node3D) -> void:
 	var cable := CABLE.new()
 	cable.name = "FoundryCable"
 	level.add_child(cable)
+	# presentation-only look pass after every identity input above is complete.
+	preload("res://scripts/look/maps/foundry.gd").dress(level)
+
+static func _sky_light(level: Node3D, id: String) -> void:
+	# lane 02 owns these sky and light values; this file only hands over its environment and sun.
+	var sky_light := load("res://scripts/look/sky_light.gd")
+	if sky_light == null or not sky_light.has_map(id):
+		return
+	var env: Environment
+	var sun: DirectionalLight3D
+	for node: Node in level.get_children():
+		if node is WorldEnvironment and env == null:
+			env = (node as WorldEnvironment).environment
+		if node is DirectionalLight3D and sun == null:
+			sun = node
+	if env != null:
+		sky_light.apply(env, sun, id)
 
 static func box(level: Node3D, id: String, at: Vector3, size: Vector3, material: Material) -> void:
 	var half := size*0.5
