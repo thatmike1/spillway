@@ -13,6 +13,27 @@ import shot
 
 
 class ShotTests(unittest.TestCase):
+    def setUp(self):
+        # display leases live beside the engine lock; keep them private so real captures cannot interfere.
+        folder = tempfile.TemporaryDirectory(prefix="spillway-shot-test-")
+        self.addCleanup(folder.cleanup)
+        lease = patch.object(shot.engine, "LOCK", Path(folder.name) / "private.lock")
+        lease.start()
+        self.addCleanup(lease.stop)
+
+    def test_concurrent_claims_never_share_a_display_number(self):
+        from contextlib import ExitStack
+        with patch.object(shot, "busy", return_value=False), ExitStack() as first, ExitStack() as second:
+            numbers = [shot.claim_display(first), shot.claim_display(second)]
+            self.assertEqual(numbers, [190, 191])
+        with patch.object(shot, "busy", side_effect=lambda n: n == 190), ExitStack() as third:
+            self.assertEqual(shot.claim_display(third), 191, "released lease or busy probe ignored")
+        with patch.object(shot, "busy", return_value=False), ExitStack() as held:
+            for _ in range(10):
+                shot.claim_display(held)
+            with ExitStack() as extra, self.assertRaisesRegex(RuntimeError, "busy"):
+                shot.claim_display(extra)
+
     def test_snapshot_excludes_only_the_frozen_fixture_directory(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
