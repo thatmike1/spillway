@@ -149,7 +149,7 @@ void fragment() {
  // design 1121: weathered blue-grey face with long vertical runoff, so the pale crest and white spills lead.
  float streak=smoothstep(0.48,0.74,texture(wear,face/vec2(2.6,30.0)).g);
  float lift=smoothstep(-8.0,48.0,wp.y);
- vec3 face_col=mix(vec3(0.43,0.50,0.50),vec3(0.55,0.60,0.58),lift)+vec3((grain-0.5)*0.035);
+ vec3 face_col=mix(vec3(0.43,0.49,0.53),vec3(0.57,0.60,0.62),lift)+vec3((grain-0.5)*0.035);
  face_col=mix(face_col,vec3(0.66,0.67,0.62),streak*0.32*lift);
  vec3 col=mix(face_col,vec3(0.30,0.37,0.38),seam*0.22+runoff*waterline*0.5);
  ALBEDO=col; ROUGHNESS=1.0; SPECULAR=0.0;
