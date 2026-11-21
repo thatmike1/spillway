@@ -4,6 +4,9 @@ const TETHER_FEEDBACK := preload("res://scripts/fx/tether_feedback.gd")
 var tether_feedback: Node3D
 var _feedback_rope: GeometryInstance3D
 var _feedback_rope_layers := 1
+## optional speed and moment presentation; it reads the host and runner and never writes them.
+const MOTION_FX := preload("res://scripts/fx/motion_fx.gd")
+var motion_fx: Node
 
 const R21_MAPS := preload("res://scripts/r21_map_catalog.gd")
 const R22_MAPS := preload("res://scripts/maps/r22_catalog.gd")
@@ -14,6 +17,11 @@ func _ready() -> void:
 	if _use_live_catalog:
 		map_registry = R21_MAPS.make()
 	super._ready()
+	if startup_error.is_empty():
+		motion_fx = MOTION_FX.new()
+		motion_fx.name = "MotionFx"
+		add_child(motion_fx)
+		motion_fx.call("attach", self)
 	if startup_error.is_empty() and map_has_capability("grapple"):
 		hud.call("notify", map_revision_description())
 	for arg: String in OS.get_cmdline_user_args():
@@ -54,11 +62,15 @@ func _load_settings() -> void:
 	settings["tether_anchor_assist"] = true
 	for key: String in TETHER_FEEDBACK.KEYS:
 		settings[key] = false
+	for key: String in MOTION_FX.DEFAULTS:
+		settings[key] = MOTION_FX.DEFAULTS[key]
 	super()
 
 func _setting_value(key: String, value: Variant) -> Variant:
 	if key in TETHER_FEEDBACK.KEYS:
 		return bool(value)
+	if key in MOTION_FX.DEFAULTS:
+		return MOTION_FX.clean_setting(key, value)
 	if key == "tether_anchor_assist":
 		return bool(value)
 	if key == "tether_model":
@@ -72,6 +84,15 @@ func _make_runner(entry: Dictionary) -> CharacterBody3D:
 	return runner
 
 func change_setting(key: String, value: Variant) -> void:
+	# motion effects are presentation only: no attempt event, motor or identity change.
+	if key in MOTION_FX.DEFAULTS:
+		settings[key] = _setting_value(key, value)
+		_save()
+		return
+	if key == MOTION_FX.PREVIEW_KEY:
+		if is_instance_valid(motion_fx):
+			motion_fx.call("preview", value)
+		return
 	if key in TETHER_FEEDBACK.KEYS:
 		settings[key] = bool(value)
 		_sync_tether_feedback()

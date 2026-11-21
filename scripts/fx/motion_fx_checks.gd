@@ -37,12 +37,26 @@ func host(map_id: String) -> Node:
 	return game
 
 ## one deterministic tape; returns the serialized motor, camera and identity stream.
-func tape(on: bool) -> Dictionary:
+## stale: no effects, but a plain camera copies the eye after the ghost has read it (the r22
+## slow-tier failure). it must differ from the off tape, proving the fade comparison has teeth.
+func tape(on: bool, stale := false) -> Dictionary:
 	var game := host("breakwater")
 	var fx: Node = game.motion_fx
 	fx.set_process(false)
 	for key: String in FX.DEFAULTS:
 		game.change_setting(key, on if FX.DEFAULTS[key] is bool else 1.0)
+	# a ghost body standing beside the line: its fade reads the rendering camera each frame.
+	var ghost: Node3D = load("res://scripts/recordings/ghost.gd").new()
+	game.add_child(ghost)
+	ghost.set_process(false)
+	ghost.loaded = true
+	ghost.global_position = Vector3(0.5, 0.0, -10.0)
+	var fades := 0
+	var stale_camera := Camera3D.new()
+	if stale:
+		game.add_child(stale_camera)
+	else:
+		stale_camera.free()
 	var rows: Array = []
 	var changed := 0
 	var lens_ticks := 0
@@ -68,12 +82,21 @@ func tape(on: bool) -> Dictionary:
 		game._physics_process(dt)
 		game.player._process(dt)
 		var camera: Camera3D = game.player.camera
-		var before := var_to_bytes([game.player.get_motion_state(), camera.global_transform, camera.fov, game.motion_identity(), game.attempts, game.elapsed, game.checkpoint_index])
+		ghost._apply_fade()
+		if ghost.fade() > 0.0 and ghost.fade() < 1.0:
+			fades += 1
+		var before := var_to_bytes([game.player.get_motion_state(), camera.global_transform, camera.fov, game.motion_identity(), game.attempts, game.elapsed, game.checkpoint_index, ghost.fade(), ghost._body.visible])
 		for frame: int in 2:
 			fx._process(dt * 0.5)
+		if stale and tick > 2:
+			stale_camera.global_transform = camera.global_transform
+			if not stale_camera.current:
+				stale_camera.make_current()
 		if tick == 200 and on:
 			fx._landing(game.player, camera, 1.0, 1.0)
-		var after := var_to_bytes([game.player.get_motion_state(), camera.global_transform, camera.fov, game.motion_identity(), game.attempts, game.elapsed, game.checkpoint_index])
+		# the ghost reads the rendering camera again, as its next _process would.
+		ghost._apply_fade()
+		var after := var_to_bytes([game.player.get_motion_state(), camera.global_transform, camera.fov, game.motion_identity(), game.attempts, game.elapsed, game.checkpoint_index, ghost.fade(), ghost._body.visible])
 		if before != after:
 			changed += 1
 		if fx._lens.current:
@@ -94,7 +117,7 @@ func tape(on: bool) -> Dictionary:
 		fx._process(0.05)
 	var resting: bool = not fx._lens.current and game.player.camera.current
 	game.free()
-	return {"bytes": var_to_bytes(rows), "changed": changed, "lens": lens_ticks, "edge": edge_ticks, "motes": mote_ticks, "resting": resting, "eye_drift": eye_drift}
+	return {"bytes": var_to_bytes(rows), "changed": changed, "lens": lens_ticks, "edge": edge_ticks, "motes": mote_ticks, "resting": resting, "eye_drift": eye_drift, "fades": fades}
 
 func host_checks() -> void:
 	var game := host("breakwater")
@@ -187,11 +210,14 @@ func run() -> void:
 	landing_check()
 	var off := tape(false)
 	var on := tape(true)
-	check(off.bytes == on.bytes, "on/off tapes give byte-identical motor, camera and identity streams")
+	var stale := tape(false, true)
+	check(stale.bytes != off.bytes, "negative control: a camera copied after the ghost read changes the fade stream")
+	check(off.bytes == on.bytes, "on/off tapes give byte-identical motor, camera, identity and ghost fade streams")
 	check(on.changed == 0 and off.changed == 0, "observer frames never change state inside a tick")
 	check(on.lens > 0 and on.edge > 0 and on.motes > 0, "on tape exercised lens, edge lines and wind flecks")
 	check(off.lens == 0 and off.edge == 0 and off.motes == 0, "off tape drew nothing")
 	check(on.eye_drift == 0, "the presentation camera always sits exactly at the runner's eye")
+	check(on.fades > 20, "the tape passed the ghost through its fade band (inside the byte comparison)")
 	check(on.resting and off.resting, "runner camera current again after the tape")
 	var ok := checks.all(func(row: Dictionary) -> bool: return row.ok)
 	var summary := {"ok": ok, "checks": checks, "bytes_compared": on.bytes.size(), "ticks": 640, "lens_ticks": on.lens, "edge_ticks": on.edge, "mote_ticks": on.motes}

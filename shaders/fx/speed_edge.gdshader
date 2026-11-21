@@ -4,6 +4,7 @@ uniform float amount = 0.0;           // 0 rest .. 1 the designed top speed band
 uniform float burst = 0.0;            // short extra density for a takeoff or a rope release
 uniform float clock = 0.0;            // presentation seconds; motion of the lines, not gameplay time
 uniform vec2 pixels = vec2(1920.0, 1080.0);
+uniform vec2 focus = vec2(0.5, 0.46);  // where the runner is heading, in screen uv: lines radiate from it
 uniform vec4 line_color : source_color = vec4(0.91, 0.87, 0.74, 1.0);
 uniform vec4 ink_color : source_color = vec4(0.035, 0.065, 0.070, 1.0);
 uniform vec4 wash_color : source_color = vec4(0.91, 0.87, 0.74, 1.0);
@@ -16,15 +17,15 @@ float hash(float n) { return fract(sin(n * 127.1) * 43758.5453); }
 
 void fragment() {
 	vec2 px = UV * pixels;
-	vec2 centre = pixels * vec2(0.5, 0.46);
+	vec2 centre = pixels * focus;
 	vec2 d = px - centre;
 	// normalise so the screen corners sit near 1.0 at any aspect.
 	float r = length(d) / length(pixels * 0.5);
 	float angle = atan(d.y, d.x);
 	float a = clamp(amount + burst, 0.0, 1.4);
-	// keep the lower centre (the deck ahead, where landings are read) free of lines.
-	float down = dot(normalize(d + vec2(0.0001)), vec2(0.0, 1.0));
-	float ground_clear = 1.0 - smoothstep(0.35, 0.80, down);
+	// keep the lower centre third (the deck ahead, where landings are read) free of everything.
+	float middle = 1.0 - smoothstep(0.18, 0.30, abs(UV.x - 0.5));
+	float ground_clear = 1.0 - middle * smoothstep(focus.y + 0.02, focus.y + 0.14, UV.y);
 	float band = smoothstep(0.48 - 0.10 * a, 0.86, r) * ground_clear;
 	const float BINS = 150.0;
 	float cell = angle / 6.2831853 * BINS;
