@@ -54,6 +54,7 @@ var _dip_velocity := 0.0
 var _burst := 0.0
 var _wash := 0.0
 var _wash_bias := Vector2.ZERO
+var _focus := Vector2(0.5, 0.46)
 var _wash_color := PALE
 var _frame := 0.0
 var _frame_color := VERMILION
@@ -63,9 +64,7 @@ var _seen := {}
 func _ready() -> void:
 	process_priority = 110
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_lens = LENS.new()
-	_lens.name = "MotionLens"
-	add_child(_lens)
+	_lens = _new_lens()
 	_layer = CanvasLayer.new()
 	_layer.name = "MotionEdge"
 	_layer.layer = 1
@@ -154,7 +153,7 @@ func intensity() -> float:
 
 ## everything back to zero: lens released, overlay and world flecks hidden, moments cleared.
 func rest() -> void:
-	if _lens != null:
+	if is_instance_valid(_lens):
 		_lens.reset()
 	if _layer != null:
 		_layer.visible = false
@@ -173,6 +172,17 @@ func rest() -> void:
 	_frame = 0.0
 	_seen = {}
 
+## the lens lives under the runner camera while active, so it is freed with a replaced runner.
+func _new_lens() -> Camera3D:
+	var made: Camera3D = LENS.new()
+	made.name = "MotionLens"
+	return made
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE and is_instance_valid(_lens):
+		_lens.reset()
+		_lens.free()
+
 func runner() -> Node3D:
 	if not is_instance_valid(host):
 		return null
@@ -180,6 +190,8 @@ func runner() -> Node3D:
 	return body if body is Node3D and is_instance_valid(body) and (body as Node3D).is_inside_tree() else null
 
 func _process(delta: float) -> void:
+	if not is_instance_valid(_lens):
+		_lens = _new_lens()
 	var body := runner()
 	var camera: Camera3D = body.get("camera") if body != null else null
 	var k := intensity()
@@ -205,6 +217,7 @@ func _process(delta: float) -> void:
 	_observe_moments(body, camera, k, dt)
 	_update_lens(camera, k, dt)
 	view = get_viewport().get_camera_3d()
+	_update_focus(body, view if view != null else camera, dt)
 	_update_edge(k, dt)
 	_update_motes(body, view if view != null else camera, k, dt)
 	_update_rings(dt)
@@ -237,6 +250,27 @@ static func ease_speed(value: float) -> float:
 	# a gentle start above running pace, nearly linear through the fast band.
 	return value * value * (3.0 - 2.0 * value) * 0.6 + value * 0.4
 
+## the runner's velocity in m/s; a capture preview travels level along the view heading.
+func heading_velocity(body: Node3D, view: Camera3D) -> Vector3:
+	var unit := float(body.get("U")) if "U" in body else 0.0254
+	if preview_ups >= 0.0:
+		var ahead := -view.global_basis.z
+		ahead.y = 0.0
+		return ahead.normalized() * preview_ups * unit if ahead.length_squared() > 0.0001 else Vector3.ZERO
+	return body.get("velocity") if "velocity" in body else Vector3.ZERO
+
+## the screen point the world streams out of: where the runner is heading, not the screen centre.
+func _update_focus(body: Node3D, view: Camera3D, dt: float) -> void:
+	var heading := heading_velocity(body, view)
+	heading.y = 0.0
+	var target := Vector2(0.5, 0.46)
+	if heading.length_squared() > 0.25:
+		var ahead := view.global_position + heading.normalized() * 60.0
+		if not view.is_position_behind(ahead):
+			var size := get_viewport().get_visible_rect().size
+			target = (view.unproject_position(ahead) / size).clamp(Vector2(0.2, 0.2), Vector2(0.8, 0.8))
+	_focus = target if preview_ups >= 0.0 else _focus.lerp(target, 1.0 - exp(-6.0 * dt))
+
 func _update_edge(k: float, dt: float) -> void:
 	_burst = move_toward(_burst, 0.0, dt * 2.6)
 	_wash = move_toward(_wash, 0.0, dt * 1.6)
@@ -251,6 +285,7 @@ func _update_edge(k: float, dt: float) -> void:
 		return
 	var size := get_viewport().get_visible_rect().size
 	_edge_material.set_shader_parameter("pixels", size)
+	_edge_material.set_shader_parameter("focus", _focus)
 	_edge_material.set_shader_parameter("amount", amount)
 	_edge_material.set_shader_parameter("burst", burst)
 	_edge_material.set_shader_parameter("clock", _clock)
@@ -268,10 +303,7 @@ func _update_motes(body: Node3D, view: Camera3D, k: float, dt: float) -> void:
 	if not _motes.visible:
 		return
 	var eye := view.global_position
-	var body_velocity: Vector3 = body.get("velocity") if "velocity" in body else Vector3.ZERO
-	if preview_ups >= 0.0:
-		var unit := float(body.get("U")) if "U" in body else 0.0254
-		body_velocity = -view.global_basis.z * preview_ups * unit
+	var body_velocity := heading_velocity(body, view)
 	var relative := WIND - body_velocity
 	var direction := relative.normalized() if relative.length_squared() > 0.0001 else Vector3.RIGHT
 	var stretch := clampf(relative.length() * 0.035, 0.06, 0.9)
