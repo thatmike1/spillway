@@ -3,16 +3,21 @@ extends RefCounted
 ## next landing usually appears (roughly 52 to 72 % of the height at running speed), so speed is
 ## read in peripheral vision without covering the deck ahead. speed is the centre; time sits on
 ## its left flank and style on its right, both aligned to the speed numeral's baseline. events
-## (a split, a style callout) arrive above their own flank and leave.
+## (a split, a style callout) arrive just under their own flank and leave.
 
 ## the speed numeral's baseline as a share of the visible height.
-const BASELINE := 0.835
+const BASELINE := 0.82
 ## half the width reserved for the speed numeral, so the flanks never move as digits change.
 const SPEED_HALF := 62.0
 ## gap between the reserved speed block and each flank.
 const FLANK_GAP := 26.0
+## the ink plate behind the band: its opacity and its padding around what it holds.
+const PLATE_ALPHA := 0.5
+const PLATE_PAD := Vector2(16.0, 8.0)
+## how far below the baseline event rows (a split, a style callout) put their own baseline.
+const EVENT_DROP := 30.0
 ## the floor for the band on short windows: keep it this far above the bottom edge.
-const BOTTOM_MARGIN := 70.0
+const BOTTOM_MARGIN := 96.0
 
 static func baseline(size: Vector2) -> float:
 	return roundf(minf(size.y * BASELINE, size.y - BOTTOM_MARGIN))

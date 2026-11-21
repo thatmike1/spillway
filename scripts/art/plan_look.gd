@@ -5,6 +5,7 @@ const CONCRETE := preload("res://scripts/art/plan_concrete.gdshader")
 const SKY := preload("res://shaders/look/sky.gdshader")
 const WATER := preload("res://scripts/art/plan_water.gdshader")
 const CONTOURS := preload("res://scripts/r17_contours.gd")
+const SKY_LIGHT := preload("res://scripts/look/sky_light.gd")
 func metal_material(detail := false) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
 	material.shader = STEEL
@@ -27,6 +28,8 @@ func style(root: Node3D) -> void:
 		elif (id.begins_with("gantry_") and id != "gantry_finish_board") or id.begins_with("travelling_") or id.begins_with("hanger") or id.begins_with("rail_joint") or id.begins_with("sign_hanger"):
 			mesh.material_override = joint if id.begins_with("hanger") or id.begins_with("rail_joint") else steel
 func attach(level: Node3D) -> void:
+	var shown: Environment
+	var sun: DirectionalLight3D
 	for node: Node in level.get_children():
 		if node is WorldEnvironment:
 			var sky := Sky.new()
@@ -43,17 +46,22 @@ func attach(level: Node3D) -> void:
 			env.ambient_light_sky_contribution = 0.0
 			env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 			env.tonemap_exposure = 1.0
+			shown = env
 		if node is DirectionalLight3D:
 			node.rotation_degrees = Vector3(-36,-30,0)
 			node.light_color = Color("fff0dd")
 			node.light_energy = 0.42
 			node.shadow_enabled = true
 			node.directional_shadow_max_distance = 100
+			sun = node as DirectionalLight3D
 		if node is MeshInstance3D and str(node.name) == "sea":
 			var material := ShaderMaterial.new()
 			material.shader = WATER
 			material.set_shader_parameter("wear",preload("res://assets/look/painted-wear.png"))
 			node.material_override = material
+	# lane 02's sky and light table owns the hour; it repaints the sky this map already shows.
+	if shown != null and SKY_LIGHT.has_map("plan-yard"):
+		SKY_LIGHT.apply(shown, sun, "plan-yard")
 	level.add_child(CONTOURS.new().build(level))
 	edges(level)
 	for x: float in [-4,4]:
@@ -70,17 +78,9 @@ func attach(level: Node3D) -> void:
 	sign.modulate = Color("efe4cc")
 	sign.outline_size = 0
 	level.add_child(sign)
+	# the hanging board names the finish; the floor carries only the threshold line, no lettering.
 	level.box("finish_threshold",Vector3(0,3.025,-46),Vector3(36,0.025,0.8),Color("29434b"))
 
-	var floor_sign := Label3D.new()
-	floor_sign.position = Vector3(0,3.06,-45.2)
-	floor_sign.rotation_degrees.x = -90
-	floor_sign.text = "FINISH"
-	floor_sign.font_size = 96
-	floor_sign.pixel_size = 0.025
-	floor_sign.modulate = Color("29434b")
-	floor_sign.outline_size = 0
-	level.add_child(floor_sign)
 	style(level)
 func edges(level: Node3D) -> void:
 	# orange follows exposed water edges, never a flat quay-to-quay joint.

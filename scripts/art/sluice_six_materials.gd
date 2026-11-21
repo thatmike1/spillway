@@ -5,6 +5,10 @@ render_mode diffuse_toon, specular_disabled;
 uniform vec4 top_color : source_color;
 uniform vec4 side_color : source_color;
 uniform bool deck = false;
+uniform float seam_strength = 0.48;
+uniform float seam_floor = 0.62;
+uniform vec2 seam_scale = vec2(2.438,3.2512);
+uniform float deck_stain = 0.0;
 uniform vec3 bounds_min;
 uniform vec3 bounds_max;
 varying vec3 wp;
@@ -41,13 +45,20 @@ void fragment() {
  float salt=(1.0-smoothstep(0.03,0.16,abs(wp.y+2.75)))*grain(wall*12.0);
  side=mix(side,vec3(0.55,0.58,0.51),salt*0.25);
  vec3 cap=top_color.rgb*(0.975+grain(wp.xz*0.35)*0.025);
- vec2 scale=vec2(2.438,3.2512);
+ vec2 scale=seam_scale;
  vec2 cell=fract(wp.xz/scale+vec2(0.37,0.19));
  vec2 dist=min(cell,1.0-cell)*scale;
  vec2 aa=max(fwidth(wp.xz),vec2(0.003));
  float seam=1.0-min(smoothstep(0.006-aa.x,0.006+aa.x,dist.x),smoothstep(0.006-aa.y,0.006+aa.y,dist.y));
  float nearfade=1.0-smoothstep(18.0,55.0,distance(wp,CAMERA_POSITION_WORLD));
- if(deck) { cap=mix(cap,top_color.rgb*0.62,seam*0.48*nearfade); }
+ if(deck) {
+  cap=mix(cap,top_color.rgb*seam_floor,seam*seam_strength*nearfade);
+  // broad, soft weathering: tide stains and dried salt patches that vary across one slab.
+  float stain=smoothstep(0.45,0.85,grain(wp.xz*0.22+vec2(3.1,7.7))*0.6+grain(wp.xz*0.9)*0.4);
+  float salt=smoothstep(0.62,0.95,grain(wp.xz*0.23+vec2(11.0,2.0)));
+  cap=mix(cap,cap*vec3(0.90,0.91,0.88),stain*deck_stain);
+  cap=mix(cap,min(cap*1.04,vec3(1.0)),salt*deck_stain*0.6);
+ }
  if(wn.y < -0.65) { side=mix(side_color.rgb,top_color.rgb,0.28); }
  ALBEDO=mix(side,cap,smoothstep(0.65,0.92,wn.y));
  ROUGHNESS=0.98; SPECULAR=0.0;
@@ -55,14 +66,20 @@ void fragment() {
 """
 const INK := """shader_type spatial;
 render_mode unshaded, cull_disabled, shadows_disabled;
+uniform vec3 ink_color = vec3(0.035,0.055,0.065);
+uniform float ink_alpha = 0.88;
 varying vec3 wp;
 void vertex(){wp=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;}
-void fragment(){ALBEDO=vec3(0.035,0.055,0.065);ALPHA=0.88*(1.0-smoothstep(70.0,200.0,distance(wp,CAMERA_POSITION_WORLD)));}
+void fragment(){ALBEDO=ink_color;ALPHA=ink_alpha*(1.0-smoothstep(70.0,200.0,distance(wp,CAMERA_POSITION_WORLD)));}
 """
 const WATER := """shader_type spatial;
 render_mode cull_disabled, specular_disabled;
 uniform vec4 supports[64];
 uniform int support_count = 0;
+uniform vec3 deep_color = vec3(0.16,0.35,0.40);
+uniform vec3 far_color = vec3(0.33,0.52,0.54);
+uniform float glitter_amount = 0.65;
+uniform float ripple_amount = 0.22;
 varying vec3 wp;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float n(vec2 p){vec2 i=floor(p);vec2 f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
@@ -74,7 +91,7 @@ void fragment(){
  float ripple=smoothstep(0.96,0.995,ridge)*broken;
  float nearfade=1.0-smoothstep(35.0,180.0,distance(wp,CAMERA_POSITION_WORLD));
  float horizon=pow(1.0-max(dot(normalize(CAMERA_POSITION_WORLD-wp),vec3(0,1,0)),0.0),4.0);
- vec3 water=mix(vec3(0.16,0.35,0.40),vec3(0.33,0.52,0.54),horizon);
+ vec3 water=mix(deep_color,far_color,horizon);
  water+=(n(p*0.18)-0.5)*0.025;
  float contact=0.0;
  float foam=0.0;
@@ -91,17 +108,18 @@ void fragment(){
  vec3 reflected=reflect(-normalize(vec3(-0.556,0.242,-0.795)),vec3(0,1,0));
  float sun_path=pow(max(dot(view_dir,reflected),0.0),64.0);
  float glitter=sun_path*smoothstep(0.65,0.86,n(p*vec2(5.0,1.4)+vec2(TIME*0.12,0)));
- vec3 base=mix(water,glint,ripple*0.22*nearfade);
+ vec3 base=mix(water,glint,ripple*ripple_amount*nearfade);
  base=mix(base,vec3(0.68,0.75,0.66),foam*(0.35+0.35*n(p*4.0+TIME*0.15)));
  ALBEDO=base*1.15;
- EMISSION=base*0.08+vec3(0.75,0.53,0.26)*glitter*0.65*(1.0-contact);
+ EMISSION=base*0.08+vec3(0.75,0.53,0.26)*glitter*glitter_amount*(1.0-contact);
  ROUGHNESS=0.55; SPECULAR=0.0;
 }
 """
 static var _surface: Shader
 static var _ink: Shader
 static var _water: Shader
-static func concrete(top: Color, side: Color, deck: bool = false, bounds: AABB = AABB()) -> ShaderMaterial:
+## seam: deck joint strength and floor, seam_scale: joint spacing in metres; outer reach keeps the defaults.
+static func concrete(top: Color, side: Color, deck: bool = false, bounds: AABB = AABB(), seam: Vector2 = Vector2(0.48,0.62), seam_scale: Vector2 = Vector2(2.438,3.2512), stain: float = 0.0) -> ShaderMaterial:
 	if _surface == null:
 		_surface = Shader.new()
 		_surface.code = SURFACE
@@ -112,15 +130,23 @@ static func concrete(top: Color, side: Color, deck: bool = false, bounds: AABB =
 	material.set_shader_parameter("deck",deck)
 	material.set_shader_parameter("bounds_min",bounds.position)
 	material.set_shader_parameter("bounds_max",bounds.end)
+	material.set_shader_parameter("seam_strength",seam.x)
+	material.set_shader_parameter("seam_floor",seam.y)
+	material.set_shader_parameter("seam_scale",seam_scale)
+	material.set_shader_parameter("deck_stain",stain)
 	return material
-static func ink() -> ShaderMaterial:
+## color and alpha default to outer reach's near-black ink; sluice six passes a softer slate.
+static func ink(color: Vector3 = Vector3(0.035,0.055,0.065), alpha: float = 0.88) -> ShaderMaterial:
 	if _ink == null:
 		_ink = Shader.new()
 		_ink.code = INK
 	var material := ShaderMaterial.new()
 	material.shader = _ink
+	material.set_shader_parameter("ink_color",color)
+	material.set_shader_parameter("ink_alpha",alpha)
 	return material
-static func water(footprints: PackedVector4Array) -> ShaderMaterial:
+## deep and far: the water's near and grazing tones; the defaults are outer reach's tuned sea.
+static func water(footprints: PackedVector4Array, deep: Vector3 = Vector3(0.16,0.35,0.40), far: Vector3 = Vector3(0.33,0.52,0.54), glitter: float = 0.65, ripple: float = 0.22) -> ShaderMaterial:
 	if _water == null:
 		_water = Shader.new()
 		_water.code = WATER
@@ -131,4 +157,8 @@ static func water(footprints: PackedVector4Array) -> ShaderMaterial:
 	padded.resize(64)
 	material.set_shader_parameter("supports",padded)
 	material.set_shader_parameter("support_count",count)
+	material.set_shader_parameter("deep_color",deep)
+	material.set_shader_parameter("far_color",far)
+	material.set_shader_parameter("glitter_amount",glitter)
+	material.set_shader_parameter("ripple_amount",ripple)
 	return material

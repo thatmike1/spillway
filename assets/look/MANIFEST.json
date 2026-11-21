@@ -6,5 +6,17 @@
   "painted-wear.png": {
     "bytes": 130740,
     "sha256": "80b7f31f57d282ace8018e6536a5cd1c0b45e7d6bd4f4de105bb8210304415f7"
+  },
+  "sky/cloud-atlas.png": {
+    "bytes": 1308240,
+    "sha256": "aa3196b8499b7c6da30b9df5cf4001e563965a624c922f517353de489c274452"
+  },
+  "sky/wisp-atlas.png": {
+    "bytes": 436128,
+    "sha256": "64791ce87c3165c126e56fb7461b2b2c2ebcd7f0347c81e8fe61f799720751a8"
+  },
+  "sky/cloud-prompts.md": {
+    "bytes": 11806,
+    "sha256": "ef485c8cffef401124abedd8f05ae19ed24e8adb27070b33f4c8361b7290ddc5"
   }
 }

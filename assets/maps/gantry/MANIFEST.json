@@ -4,13 +4,13 @@
       "path": "concrete.gdshader",
       "origin": "original Spillway source using the project's world-space surface and toon-lighting conventions",
       "rights": "project-authored source; no external asset import",
-      "purpose": "joint-edge wear, narrow runoff and a damp lower waterline"
+      "purpose": "joint-edge wear, narrow runoff and a damp lower waterline; optional weathering with crisp deck stains and darker soffits, a top lift and a joint-grid shift (design 1121)"
     },
     {
       "path": "water.gdshader",
       "origin": "original Spillway shader, informed by project water conventions",
       "rights": "project-authored source; no external asset import",
-      "purpose": "quiet narrow broken ripples and distant sky wash"
+      "purpose": "quiet narrow broken ripples and distant sky wash; optional broader, softer swell for small basins (design 1121)"
     },
     {
       "path": "outline.gdshader",
