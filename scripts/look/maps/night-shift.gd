@@ -5,9 +5,10 @@ extends RefCounted
 ## line), and the train, both walls and the passage edges separate without brightening the floor. the cropped station banner and painted figures hide while L is on.
 ## nothing here collides.
 
-## deck a moonlit concrete a step below lane 01's night value: dedad0 glowed blue-white as the
-## brightest surface in the night (critic 19:28); the warmer e1d9c5 went mauve under the roof.
-const PALETTE := {"top": "c9c6bd", "side": "7d7468"}
+## deck a moonlit concrete a step below lane 01's night value and warm in albedo, so the blue moon
+## lands it on grey: dedad0 glowed blue-white as the brightest surface in the night (critic 19:28),
+## c9c6bd still rendered blue (169,183,212); the warmer e1d9c5 went mauve under the roof.
+const PALETTE := {"top": "cdc2b0", "side": "7d7468"}
 ## authored place signs that stay; any other label under Markings is a painted figure.
 ## wall and roof-steel kinds get material and wear; the art file splits each kind into grid cells
 ## (Mesh_cladding_3_m2), so these match on the kind before the cell.
