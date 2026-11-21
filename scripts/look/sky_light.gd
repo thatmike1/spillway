@@ -79,7 +79,7 @@ const MAPS := {
 		"sun":"fff0da", "sun_energy":0.42, "pitch":-22.0, "yaw":-135.0, "fill":"98b8d0", "fill_light":"8fb0c8", "fill_energy":0.14, "ambient":0.5, "fog":"bccfdb", "fog_density":0.0011, "exposure":0.76},
 	# cold clear winter morning: low pale sun, ivory clouds, blue shade on the snow.
 	"whiteout-relay": {"sky":ROOT+"whiteout-sky.png", "paint":"winter", "layout":"fair", "wisp":"none", "cloud_turn":-25.0, "cell_shift":3,
-		"sun":"fff0dc", "sun_energy":0.5, "pitch":-22.0, "yaw":-36.2, "fill":"9dbdd0", "fill_energy":0.14, "ambient":0.56, "fog":"d3dee5", "fog_density":0.0012, "exposure":0.77},
+		"sun":"fbf4ea", "sun_energy":0.5, "pitch":-22.0, "yaw":-36.2, "fill":"9dbdd0", "fill_energy":0.14, "ambient":0.56, "fog":"d3dee5", "fog_density":0.0012, "exposure":0.77},
 	# bright late morning by the sea: high warm sun, white towers, clear blue-grey shade.
 	"sunken-court": {"sky":ROOT+"sunken-sky.png", "paint":"cyan", "layout":"towers", "wisp":"none", "cloud_turn":0.0, "cell_shift":6,
 		"sun":"fff2da", "sun_energy":0.48, "pitch":-52.0, "yaw":35.0, "fill":"a6b8d8", "fill_energy":0.12, "ambient":0.5, "fog":"bccfdf", "fog_density":0.0011, "exposure":0.77},
@@ -124,7 +124,7 @@ const MAPS := {
 		"sun":"ffe6c0", "sun_energy":0.56, "pitch":-28.0, "yaw":-110.0, "fill":"98b8d0", "fill_energy":0.12, "ambient":0.55, "fog":"bccfdb", "fog_density":0.0013, "exposure":0.78},
 	# tidal estuary, late afternoon; the sun stands behind the runner so the spill-tower court is lit.
 	"sluice-six": {"sky":"res://assets/look/cloud-sky.png", "paint":"golden", "layout":"towers", "wisp":"none", "cloud_turn":150.0, "cell_shift":6,
-		"sun":"ffe4bc", "sun_energy":0.58, "pitch":-38.0, "yaw":20.0, "fill":"98b8d0", "fill_energy":0.12, "ambient":0.55, "fog":"bccfdb", "fog_density":0.0012, "exposure":0.78},
+		"sun":"fff0de", "sun_energy":0.54, "pitch":-38.0, "yaw":20.0, "fill":"98b8d0", "fill_energy":0.12, "ambient":0.55, "fog":"bccfdb", "fog_density":0.0012, "exposure":0.78},
 	# the outer reach at golden hour: broad open sky, long side light over the corridors.
 	"outer-reach": {"sky":"res://assets/look/cloud-sky.png", "paint":"golden", "layout":"towers", "wisp":"none", "cloud_turn":-60.0, "cell_shift":2,
 		"sun":"ffd9a8", "sun_energy":0.6, "pitch":-20.0, "yaw":-120.0, "fill":"98b8d0", "fill_energy":0.12, "ambient":0.55, "fog":"bccfdb", "fog_density":0.0011, "exposure":0.78},
