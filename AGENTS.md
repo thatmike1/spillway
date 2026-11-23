@@ -10,4 +10,4 @@ Only original work or third-party assets with recorded redistribution rights bel
 
 Keep current architecture/format docs under `docs/`, round briefs/results under `history/rounds/rNN/`, and frozen verification dependencies under `verification/`. Historical test executors observe gameplay; they are not the implementation to edit. `scripts/game.gd`, the named movement/maps/recordings/scoring/UI modules and their live inherited hosts are gameplay.
 
-Release builds go out as GitHub releases on this private repository. Use tag, platform ZIPs and SHA256SUMS; verify downloaded asset hashes after upload. Do not rebuild and silently replace bytes of an existing release. The original `r21` release points to preserved source provenance while its binaries retain their original pre-extraction build identity.
+Release builds go out as GitHub releases on this repository. Use tag, platform ZIPs and SHA256SUMS; verify downloaded asset hashes after upload. Do not rebuild and silently replace bytes of an existing release. The original `r21` release points to preserved source provenance while its binaries retain their original pre-extraction build identity.

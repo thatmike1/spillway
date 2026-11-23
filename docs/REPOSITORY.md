@@ -1,6 +1,6 @@
 # Repository origin and private references
 
-This private repository preserves the Foldrunner/Spillway project history extracted from `ccChat-general` at source commit `dee210165b6f169b2433b3043712c5855c37d3b6`. The project is the repository root. Old source commit IDs in historical material refer to that source repository; they are not hashes in the rewritten history.
+This repository preserves the Foldrunner/Spillway project history extracted from `ccChat-general` at source commit `dee210165b6f169b2433b3043712c5855c37d3b6`. The project is the repository root. Old source commit IDs in historical material refer to that source repository; they are not hashes in the rewritten history.
 
 Before the first push, every reachable commit tree and every unique blob was checked. Four retired reconstruction-note paths were stripped from all history: `docs/CONTRACT.md`, `docs/FEEL-CONTRACT.md`, `docs/FEEL-RESULTS.md`, `docs/VERIFICATION.md`. They describe the superseded reconstruction's derived movement and camera contracts or their measured results. No current Spillway runtime file was removed by this privacy pass.
 
